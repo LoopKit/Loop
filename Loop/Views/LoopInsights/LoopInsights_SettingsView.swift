@@ -1101,6 +1101,21 @@ struct LoopInsights_SettingsView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
+
+                Divider()
+
+                NavigationLink {
+                    DataLayer_ConsentView()
+                } label: {
+                    HStack {
+                        Image(systemName: "arrow.up.doc")
+                            .foregroundColor(.accentColor)
+                        Text(NSLocalizedString("Data Sharing", comment: "DataLayer consent view navigation"))
+                    }
+                }
+                Text(NSLocalizedString("Control how your health data is shared with healthcare providers and optionally contributed to diabetes research.", comment: "DataLayer consent description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
         }
     }

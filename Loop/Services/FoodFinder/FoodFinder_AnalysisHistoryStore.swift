@@ -21,6 +21,7 @@ import Foundation
 
 extension Notification.Name {
     static let foodFinderMealLogged = Notification.Name("com.loopkit.Loop.foodFinderMealLogged")
+    static let foodFinderMealAnalyzed = Notification.Name("com.loopkit.Loop.foodFinderMealAnalyzed")
 }
 
 // MARK: - MealDataProvider Protocol
@@ -54,6 +55,23 @@ enum FoodFinder_AnalysisHistoryStore {
         #if DEBUG
         print("FoodFinder: Recorded analysis history — total: \(records.count)")
         #endif
+
+        // Notify DataLayer (separate module — uses notification decoupling)
+        var mealInfo: [String: Any] = [
+            "analysisType": record.analysisType.rawValue,
+            "foodName": record.name,
+            "carbsGrams": record.carbsGrams,
+            "absorptionTimeHours": record.absorptionTime / 3600,
+            "itemCount": record.analysisResult?.totalFoodPortions ?? 1
+        ]
+        if let v = record.originalAICarbs { mealInfo["originalAICarbs"] = v }
+        if let v = record.aiConfidencePercent { mealInfo["aiConfidencePercent"] = v }
+        if let v = record.analysisResult?.totalProtein { mealInfo["proteinGrams"] = v }
+        if let v = record.analysisResult?.totalFat { mealInfo["fatGrams"] = v }
+        if let v = record.analysisResult?.totalFiber { mealInfo["fiberGrams"] = v }
+        if let v = record.analysisResult?.totalCalories { mealInfo["calories"] = v }
+        if let v = record.locationName { mealInfo["locationName"] = v }
+        NotificationCenter.default.post(name: .foodFinderMealAnalyzed, object: nil, userInfo: mealInfo)
     }
 
     // MARK: - Meal Confirmation
@@ -75,6 +93,22 @@ enum FoodFinder_AnalysisHistoryStore {
         #if DEBUG
         print("FoodFinder: Confirmed meal → archived to MealArchive: \(record.name)")
         #endif
+
+        // Notify DataLayer for meal confirmation (piggybacks on existing .foodFinderMealLogged)
+        // DataLayer_Coordinator observes .foodFinderMealLogged and reads these extra keys
+        // Note: the .foodFinderMealLogged post above already happened — post a dedicated one
+        var confirmInfo: [String: Any] = [
+            "mealEventID": record.id,
+            "finalCarbsGrams": record.carbsGrams
+        ]
+        if let delta = record.originalAICarbs.map({ record.carbsGrams - $0 }) {
+            confirmInfo["carbDeltaFromAI"] = delta
+        }
+        NotificationCenter.default.post(
+            name: Notification.Name("com.loopkit.Loop.foodFinderMealConfirmedForDataLayer"),
+            object: nil,
+            userInfo: confirmInfo
+        )
     }
 
     // MARK: - Load (filtered by retention)

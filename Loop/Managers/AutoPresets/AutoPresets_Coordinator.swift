@@ -13,6 +13,21 @@ import Foundation
 import LoopKit
 import os.log
 
+// MARK: - DataLayer Notifications
+//
+// Posted when AutoPresets activates/deactivates a preset.
+// DataLayer_Coordinator observes these to record events without
+// direct coupling between modules.
+//
+// userInfo keys:
+//   "activityType" — String (AutoPresetsActivityType.rawValue)
+//   "presetName"   — String
+
+extension Notification.Name {
+    static let autoPresetsPresetActivated = Notification.Name("com.loopkit.Loop.autoPresetsPresetActivated")
+    static let autoPresetsPresetDeactivated = Notification.Name("com.loopkit.Loop.autoPresetsPresetDeactivated")
+}
+
 // MARK: - AutoPresets Coordinator
 
 /// Main entry point for AutoPresets feature
@@ -240,6 +255,13 @@ public class AutoPresets_Coordinator: ObservableObject {
         delegate?.autoPresets(self, shouldActivatePreset: preset)
         logEvent(.presetActivated, activity: activity, presetName: preset.name)
 
+        // Notify DataLayer (separate module — uses notification decoupling)
+        NotificationCenter.default.post(
+            name: .autoPresetsPresetActivated,
+            object: nil,
+            userInfo: ["activityType": activity.rawValue, "presetName": preset.name]
+        )
+
         os_log(
             "Activated preset '%{public}@' for %{public}@",
             log: log,
@@ -265,6 +287,13 @@ public class AutoPresets_Coordinator: ObservableObject {
         activatedPresetId = nil
         delegate?.autoPresets(self, shouldDeactivatePreset: preset)
         logEvent(.presetDeactivated, activity: activity, presetName: preset.name)
+
+        // Notify DataLayer (separate module — uses notification decoupling)
+        NotificationCenter.default.post(
+            name: .autoPresetsPresetDeactivated,
+            object: nil,
+            userInfo: ["activityType": activity.rawValue, "presetName": preset.name]
+        )
 
         os_log(
             "Deactivated preset '%{public}@' for %{public}@",

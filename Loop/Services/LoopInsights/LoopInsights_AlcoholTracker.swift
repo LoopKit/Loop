@@ -11,6 +11,21 @@
 import Foundation
 import Combine
 
+// MARK: - DataLayer Notification
+//
+// Posted when alcohol is logged. DataLayer_Coordinator observes this
+// to record events without direct coupling between modules.
+//
+// userInfo keys:
+//   "standardDrinks" — Double
+//   "source"         — String
+//   "currentLevel"   — Double
+//   "hypoRiskLevel"  — String
+
+extension Notification.Name {
+    static let loopInsightsAlcoholLogged = Notification.Name("com.loopkit.Loop.loopInsightsAlcoholLogged")
+}
+
 /// Tracks alcohol intake with linear metabolism model and delayed hypoglycemia risk.
 /// Entries are persisted to UserDefaults. Uses ~1 standard drink/hour linear metabolism.
 /// No HealthKit integration — all entries are manual.
@@ -49,6 +64,19 @@ final class LoopInsights_AlcoholTracker: ObservableObject {
         entries.append(entry)
         entries.sort { $0.timestamp > $1.timestamp }
         saveEntries()
+
+        // Notify DataLayer (separate module — uses notification decoupling)
+        let state = currentState(at: timestamp)
+        NotificationCenter.default.post(
+            name: .loopInsightsAlcoholLogged,
+            object: nil,
+            userInfo: [
+                "standardDrinks": standardDrinks,
+                "source": source,
+                "currentLevel": state.currentAlcoholLevel,
+                "hypoRiskLevel": state.hypoRiskLevel.rawValue
+            ]
+        )
     }
 
     /// Remove an entry

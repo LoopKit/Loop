@@ -8,6 +8,23 @@
 
 import Foundation
 
+// MARK: - DataLayer Notification
+//
+// Posted when an AI suggestion lifecycle event occurs. DataLayer_Coordinator
+// observes this to record events without direct coupling between modules.
+//
+// userInfo keys:
+//   "action"            — String: "generated", "applied", "dismissed", "reverted"
+//   "settingType"       — String (LoopInsightsSettingType.rawValue)
+//   "timeBlockCount"    — Int
+//   "confidenceLevel"   — String (LoopInsightsConfidence.rawValue)
+//   "applyMode"         — String? (LoopInsightsApplyMode.rawValue, only for "applied")
+//   "analysisPeriodDays" — Int
+
+extension Notification.Name {
+    static let loopInsightsSuggestionEvent = Notification.Name("com.loopkit.Loop.loopInsightsSuggestionEvent")
+}
+
 /// Persists suggestion history to UserDefaults as JSON.
 /// All suggestions (pending, applied, dismissed, auto-applied) are stored here
 /// so users can review their full history of AI recommendations.
@@ -55,6 +72,10 @@ final class LoopInsights_SuggestionStore: ObservableObject {
         let record = LoopInsightsSuggestionRecord(suggestion: suggestion)
         records.append(record)
         saveRecords()
+
+        // Notify DataLayer (separate module — uses notification decoupling)
+        postSuggestionNotification(action: "generated", suggestion: suggestion, applyMode: nil)
+
         return record
     }
 
@@ -71,6 +92,9 @@ final class LoopInsights_SuggestionStore: ObservableObject {
         guard let index = records.firstIndex(where: { $0.id == recordID }) else { return }
         records[index].markApplied(mode: mode, snapshotBefore: snapshotBefore, snapshotAfter: snapshotAfter)
         saveRecords()
+
+        // Notify DataLayer
+        postSuggestionNotification(action: "applied", suggestion: records[index].suggestion, applyMode: mode.rawValue)
     }
 
     /// Mark a record as dismissed
@@ -78,6 +102,9 @@ final class LoopInsights_SuggestionStore: ObservableObject {
         guard let index = records.firstIndex(where: { $0.id == recordID }) else { return }
         records[index].markDismissed()
         saveRecords()
+
+        // Notify DataLayer
+        postSuggestionNotification(action: "dismissed", suggestion: records[index].suggestion, applyMode: nil)
     }
 
     /// Mark a record as reverted (settings restored to pre-apply state)
@@ -85,6 +112,9 @@ final class LoopInsights_SuggestionStore: ObservableObject {
         guard let index = records.firstIndex(where: { $0.id == recordID }) else { return }
         records[index].markReverted()
         saveRecords()
+
+        // Notify DataLayer
+        postSuggestionNotification(action: "reverted", suggestion: records[index].suggestion, applyMode: nil)
     }
 
     /// Dismiss all pending records
@@ -130,5 +160,25 @@ final class LoopInsights_SuggestionStore: ObservableObject {
         } catch {
             LoopInsights_FeatureFlags.log.error("Failed to encode suggestion history: \(error)")
         }
+    }
+
+    // MARK: - DataLayer Notification Helper
+
+    private func postSuggestionNotification(action: String, suggestion: LoopInsightsSuggestion, applyMode: String?) {
+        var userInfo: [String: Any] = [
+            "action": action,
+            "settingType": suggestion.settingType.rawValue,
+            "timeBlockCount": suggestion.timeBlocks.count,
+            "confidenceLevel": suggestion.confidence.rawValue,
+            "analysisPeriodDays": LoopInsights_FeatureFlags.analysisPeriod.rawValue
+        ]
+        if let mode = applyMode {
+            userInfo["applyMode"] = mode
+        }
+        NotificationCenter.default.post(
+            name: .loopInsightsSuggestionEvent,
+            object: nil,
+            userInfo: userInfo
+        )
     }
 }

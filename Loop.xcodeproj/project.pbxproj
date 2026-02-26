@@ -670,6 +670,15 @@
 		F7E94EFA4B82F187D834868F /* LoopInsights_MealInsightsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05DC3A641F2F36C6A51953D6 /* LoopInsights_MealInsightsViewModel.swift */; };
 		51EC8EBDEEE397F2B10ABFBF /* LoopInsights_MealDebriefCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4705B24EF9A41FF18208064E /* LoopInsights_MealDebriefCard.swift */; };
 		3624042E98291A5724E97ACD /* LoopInsights_PreMealAdvisorCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6840708C1AB09AB159E796 /* LoopInsights_PreMealAdvisorCard.swift */; };
+		5FEC69C34A13D8837BD0C8A3 /* DataLayer_EventModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5D16036CC5FB132B421D99 /* DataLayer_EventModels.swift */; };
+		CAEF1835890DA321090A01EB /* DataLayer_ConsentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F16B9E42C3474FAC4D4770BA /* DataLayer_ConsentModels.swift */; };
+		A2AB902F5649F9DA67EB948E /* DataLayer_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F1460AED5AE78305D348FA /* DataLayer_FeatureFlags.swift */; };
+		BF73673705C44313988398E2 /* DataLayer_SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B1BFDE7BB9565B68D92CBD7 /* DataLayer_SecureStorage.swift */; };
+		C6019A74B4887B80959544CC /* DataLayer_ConsentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92D8E2A658DF75AA05207135 /* DataLayer_ConsentManager.swift */; };
+		6ECAC528492683854868FEC0 /* DataLayer_EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599C3D1975E1EB62BF74303A /* DataLayer_EventStore.swift */; };
+		229116C6C12262BA844C9186 /* DataLayer_EventCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBB91977B69B42B9747CF46 /* DataLayer_EventCollector.swift */; };
+		3E3858A7EEB0F5077BECB6E7 /* DataLayer_Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BFDF71A68291C031B8A998D /* DataLayer_Coordinator.swift */; };
+		05382A77AD01D66964EB058D /* DataLayer_ConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9152B858C0D9CC712575DF8A /* DataLayer_ConsentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1573,6 +1582,15 @@
 		05DC3A641F2F36C6A51953D6 /* LoopInsights_MealInsightsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealInsightsViewModel.swift; sourceTree = "<group>"; };
 		4705B24EF9A41FF18208064E /* LoopInsights_MealDebriefCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealDebriefCard.swift; sourceTree = "<group>"; };
 		3E6840708C1AB09AB159E796 /* LoopInsights_PreMealAdvisorCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_PreMealAdvisorCard.swift; sourceTree = "<group>"; };
+		FB5D16036CC5FB132B421D99 /* DataLayer_EventModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_EventModels.swift; sourceTree = "<group>"; };
+		F16B9E42C3474FAC4D4770BA /* DataLayer_ConsentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ConsentModels.swift; sourceTree = "<group>"; };
+		98F1460AED5AE78305D348FA /* DataLayer_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_FeatureFlags.swift; sourceTree = "<group>"; };
+		6B1BFDE7BB9565B68D92CBD7 /* DataLayer_SecureStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_SecureStorage.swift; sourceTree = "<group>"; };
+		92D8E2A658DF75AA05207135 /* DataLayer_ConsentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ConsentManager.swift; sourceTree = "<group>"; };
+		599C3D1975E1EB62BF74303A /* DataLayer_EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_EventStore.swift; sourceTree = "<group>"; };
+		AFBB91977B69B42B9747CF46 /* DataLayer_EventCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_EventCollector.swift; sourceTree = "<group>"; };
+		0BFDF71A68291C031B8A998D /* DataLayer_Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_Coordinator.swift; sourceTree = "<group>"; };
+		9152B858C0D9CC712575DF8A /* DataLayer_ConsentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ConsentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1864,6 +1882,7 @@
 		43757D131C06F26C00910CB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				88FF5891FAC906739EFCB88C /* DataLayer */,
 
 				137AA12EFF968E58FEC07BF3 /* AutoPresets */,				DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */,
 				B4E2022F2661063E009421B5 /* AutomaticDosingStatus.swift */,
@@ -2175,6 +2194,7 @@
 		43F5C2CF1B92A2ED003EB13D /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				22541532EB046DE031BBBEAB /* DataLayer */,
 
 				E018293E3B1A901519B37E05 /* AutoPresets */,				1452F4AA2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift */,
 				B4001CED28CBBC82002FB414 /* AlertManagementView.swift */,
@@ -2219,6 +2239,7 @@
 		43F5C2E41B93C5D4003EB13D /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				803F89EF157DE0C769EF451C /* DataLayer */,
 				7B0AE0D9D2D919C6882C0799 /* AutoPresets */,
 				B42D124228D371C400E43D22 /* AlertMuter.swift */,
 				1D6B1B6626866D89009AC446 /* AlertPermissionsChecker.swift */,
@@ -2975,6 +2996,7 @@
 		30A7BA28AD6B99C005058D2B /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				FA99A984636914457578DB52 /* DataLayer */,
 				E2B183EAECD6393B2AE7F724 /* LoopInsights */,
 				3007854D1E2C462A43BB49EA /* FoodFinder */,
 			);
@@ -3024,6 +3046,7 @@
 		64E225E5D16AAC4F29EDC1FA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				F985DAB1BC800E9E1F418639 /* DataLayer */,
 				D039CC9018413633A20943E1 /* LoopInsights */,
 				8C92ACBE693772D89D0718B8 /* FoodFinder */,
 			);
@@ -3081,6 +3104,50 @@
 				050C078CB7ED1CC29B82B708 /* FoodFinder */,
 			);
 			path = Documentation;
+			sourceTree = "<group>";
+		};
+		88FF5891FAC906739EFCB88C /* DataLayer */ = {
+			isa = PBXGroup;
+			children = (
+				F16B9E42C3474FAC4D4770BA /* DataLayer_ConsentModels.swift */,
+				FB5D16036CC5FB132B421D99 /* DataLayer_EventModels.swift */,
+			);
+			path = DataLayer;
+			sourceTree = "<group>";
+		};
+		F985DAB1BC800E9E1F418639 /* DataLayer */ = {
+			isa = PBXGroup;
+			children = (
+				98F1460AED5AE78305D348FA /* DataLayer_FeatureFlags.swift */,
+			);
+			path = DataLayer;
+			sourceTree = "<group>";
+		};
+		FA99A984636914457578DB52 /* DataLayer */ = {
+			isa = PBXGroup;
+			children = (
+				92D8E2A658DF75AA05207135 /* DataLayer_ConsentManager.swift */,
+				AFBB91977B69B42B9747CF46 /* DataLayer_EventCollector.swift */,
+				599C3D1975E1EB62BF74303A /* DataLayer_EventStore.swift */,
+				6B1BFDE7BB9565B68D92CBD7 /* DataLayer_SecureStorage.swift */,
+			);
+			path = DataLayer;
+			sourceTree = "<group>";
+		};
+		803F89EF157DE0C769EF451C /* DataLayer */ = {
+			isa = PBXGroup;
+			children = (
+				0BFDF71A68291C031B8A998D /* DataLayer_Coordinator.swift */,
+			);
+			path = DataLayer;
+			sourceTree = "<group>";
+		};
+		22541532EB046DE031BBBEAB /* DataLayer */ = {
+			isa = PBXGroup;
+			children = (
+				9152B858C0D9CC712575DF8A /* DataLayer_ConsentView.swift */,
+			);
+			path = DataLayer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -3801,6 +3868,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C6019A74B4887B80959544CC /* DataLayer_ConsentManager.swift in Sources */,
+				CAEF1835890DA321090A01EB /* DataLayer_ConsentModels.swift in Sources */,
+				05382A77AD01D66964EB058D /* DataLayer_ConsentView.swift in Sources */,
+				3E3858A7EEB0F5077BECB6E7 /* DataLayer_Coordinator.swift in Sources */,
+				229116C6C12262BA844C9186 /* DataLayer_EventCollector.swift in Sources */,
+				5FEC69C34A13D8837BD0C8A3 /* DataLayer_EventModels.swift in Sources */,
+				6ECAC528492683854868FEC0 /* DataLayer_EventStore.swift in Sources */,
+				A2AB902F5649F9DA67EB948E /* DataLayer_FeatureFlags.swift in Sources */,
+				BF73673705C44313988398E2 /* DataLayer_SecureStorage.swift in Sources */,
 
 				B9D78BD57F35DBCFEC65530D /* AutoPresets_Coordinator.swift in Sources */,
 				BACF15F57C2B75D78B797778 /* AutoPresets_Delegate.swift in Sources */,

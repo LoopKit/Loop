@@ -9,6 +9,20 @@
 import Foundation
 import HealthKit
 
+// MARK: - DataLayer Notification
+//
+// Posted when caffeine is logged. DataLayer_Coordinator observes this
+// to record events without direct coupling between modules.
+//
+// userInfo keys:
+//   "milligrams"    — Double
+//   "source"        — String
+//   "currentLevelMg" — Double
+
+extension Notification.Name {
+    static let loopInsightsCaffeineLogged = Notification.Name("com.loopkit.Loop.loopInsightsCaffeineLogged")
+}
+
 /// Tracks caffeine intake with half-life decay model and provides prompt context.
 /// Entries are persisted to UserDefaults. Uses a 5.7-hour half-life for caffeine metabolism.
 /// Also reads dietary caffeine from HealthKit and merges with manual entries.
@@ -75,6 +89,14 @@ final class LoopInsights_CaffeineTracker: ObservableObject {
         manual.append(entry)
         saveManualEntries(manual)
         rebuildMergedEntries()
+
+        // Notify DataLayer (separate module — uses notification decoupling)
+        let state = currentState(at: timestamp)
+        NotificationCenter.default.post(
+            name: .loopInsightsCaffeineLogged,
+            object: nil,
+            userInfo: ["milligrams": milligrams, "source": source, "currentLevelMg": state.currentLevelMg]
+        )
     }
 
     /// Remove an entry (only manual entries can be removed)
