@@ -96,7 +96,12 @@ final class LoopInsights_DataAggregator {
                     bolusPercentage: resolvedInsulinStats.bolusPercentage,
                     hourlyBasalAverages: resolvedInsulinStats.hourlyBasalAverages,
                     correctionBolusCount: resolvedInsulinStats.correctionBolusCount,
-                    negativeBasalStats: negBasal
+                    negativeBasalStats: negBasal,
+                    dailyBreakdown: resolvedInsulinStats.dailyBreakdown,
+                    tddMin: resolvedInsulinStats.tddMin,
+                    tddMax: resolvedInsulinStats.tddMax,
+                    tddVariabilityCV: resolvedInsulinStats.tddVariabilityCV,
+                    tddWeekOverWeekChange: resolvedInsulinStats.tddWeekOverWeekChange
                 )
                 LoopInsights_FeatureFlags.log.debug("Phase 5: Negative basal stats computed — \(negBasal.suspensionCount) suspensions")
             } catch {
@@ -159,12 +164,14 @@ final class LoopInsights_DataAggregator {
         } ?? []
 
         let insulinTypeName = settings.insulinType?.title
+        let insulinDiaHours = settings.defaultRapidActingModel.map { $0.actionDuration / 3600.0 }
 
         return LoopInsightsTherapySnapshot(
             basalRateItems: basalItems,
             insulinSensitivityItems: isfItems,
             carbRatioItems: crItems,
             insulinTypeName: insulinTypeName,
+            insulinDiaHours: insulinDiaHours,
             capturedAt: Date()
         )
     }
@@ -201,22 +208,23 @@ final class LoopInsights_DataAggregator {
     /// P3: Accepts pre-fetched Loop samples to avoid duplicate fetching.
     /// Still supplements with HealthKit data for longer periods when HK has more samples.
     private func computeGlucoseStats(loopSamples: [StoredGlucoseSample], start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.GlucoseStats {
-        // Supplement with HealthKit data for longer periods or when Loop stores have gaps
-        if let hkManager = healthKitManager {
-            do {
-                let hkGlucose = try await hkManager.fetchGlucoseSamples(start: start, end: end)
-                if hkGlucose.count > loopSamples.count {
-                    LoopInsights_FeatureFlags.log.debug("HealthKit glucose: \(hkGlucose.count) samples vs Loop store \(loopSamples.count) — using HealthKit data")
-                    let hkValues = hkGlucose.map { (date: $0.date, mgdl: $0.mgdl) }
-                    self.lastGlucoseForAGP = hkValues
-                    return computeGlucoseStatsFromValues(
-                        values: hkValues,
-                        start: start, end: end
-                    )
-                }
-            } catch {
-                LoopInsights_FeatureFlags.log.error("HealthKit glucose fetch error (continuing with Loop store data): \(error)")
+        // Supplement with HealthKit data when Loop's Core Data cache has gaps.
+        // Always attempt HK supplementation — Core Data cache is short-lived (~1 hour)
+        // so most historical data lives in HealthKit.
+        let hkManager = healthKitManager ?? LoopInsights_HealthKitManager()
+        do {
+            let hkGlucose = try await hkManager.fetchGlucoseSamples(start: start, end: end)
+            if hkGlucose.count > loopSamples.count {
+                LoopInsights_FeatureFlags.log.debug("HealthKit glucose: \(hkGlucose.count) samples vs Loop store \(loopSamples.count) — using HealthKit data")
+                let hkValues = hkGlucose.map { (date: $0.date, mgdl: $0.mgdl) }
+                self.lastGlucoseForAGP = hkValues
+                return computeGlucoseStatsFromValues(
+                    values: hkValues,
+                    start: start, end: end
+                )
             }
+        } catch {
+            LoopInsights_FeatureFlags.log.error("HealthKit glucose fetch error (continuing with Loop store data): \(error)")
         }
 
         guard !loopSamples.isEmpty else {
@@ -329,17 +337,16 @@ final class LoopInsights_DataAggregator {
 
     /// P3: Accepts pre-fetched Loop doses to avoid duplicate fetching.
     private func computeInsulinStats(loopDoses: [DoseEntry], start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.InsulinStats {
-        // Supplement with HealthKit insulin delivery for longer periods
-        if let hkManager = healthKitManager {
-            do {
-                let hkInsulin = try await hkManager.fetchInsulinDelivery(start: start, end: end)
-                if hkInsulin.count > loopDoses.count {
-                    LoopInsights_FeatureFlags.log.debug("HealthKit insulin: \(hkInsulin.count) entries vs Loop store \(loopDoses.count) — using HealthKit data")
-                    return computeInsulinStatsFromHK(hkInsulin, start: start, end: end)
-                }
-            } catch {
-                LoopInsights_FeatureFlags.log.error("HealthKit insulin fetch error (continuing with Loop store data): \(error)")
+        // Supplement with HealthKit insulin delivery — Core Data cache is short-lived
+        let hkManager = healthKitManager ?? LoopInsights_HealthKitManager()
+        do {
+            let hkInsulin = try await hkManager.fetchInsulinDelivery(start: start, end: end)
+            if hkInsulin.count > loopDoses.count {
+                LoopInsights_FeatureFlags.log.debug("HealthKit insulin: \(hkInsulin.count) entries vs Loop store \(loopDoses.count) — using HealthKit data")
+                return computeInsulinStatsFromHK(hkInsulin, start: start, end: end)
             }
+        } catch {
+            LoopInsights_FeatureFlags.log.error("HealthKit insulin fetch error (continuing with Loop store data): \(error)")
         }
 
         let dayCount = max(1, end.timeIntervalSince(start) / (24 * 60 * 60))
@@ -383,13 +390,36 @@ final class LoopInsights_DataAggregator {
             values.reduce(0, +) / Double(values.count)
         }
 
+        // Daily TDD breakdown
+        var dailyBasal: [Date: Double] = [:]
+        var dailyBolus: [Date: Double] = [:]
+        for dose in loopDoses {
+            let units = dose.deliveredUnits ?? dose.programmedUnits
+            let dayStart = calendar.startOfDay(for: dose.startDate)
+            switch dose.type {
+            case .basal, .tempBasal, .suspend:
+                dailyBasal[dayStart, default: 0] += units
+            case .bolus:
+                dailyBolus[dayStart, default: 0] += units
+            default: break
+            }
+        }
+        let (breakdown, tddMin, tddMax, tddCV, weekChange) = Self.computeTDDMetrics(
+            dailyBasal: dailyBasal, dailyBolus: dailyBolus, start: start, end: end
+        )
+
         return LoopInsightsAggregatedStats.InsulinStats(
             totalDailyDose: tdd,
             basalPercentage: basalPercent,
             bolusPercentage: bolusPercent,
             hourlyBasalAverages: hourlyBasalAverages,
             correctionBolusCount: correctionCount,
-            negativeBasalStats: nil
+            negativeBasalStats: nil,
+            dailyBreakdown: breakdown,
+            tddMin: tddMin,
+            tddMax: tddMax,
+            tddVariabilityCV: tddCV,
+            tddWeekOverWeekChange: weekChange
         )
     }
 
@@ -425,31 +455,116 @@ final class LoopInsights_DataAggregator {
         let bolusPercent = totalInsulin > 0 ? (totalBolus / totalInsulin) * 100 : 50
         let hourlyBasalAverages = hourlyBasalBuckets.mapValues { $0.reduce(0, +) / Double($0.count) }
 
+        // Daily TDD breakdown
+        var dailyBasalMap: [Date: Double] = [:]
+        var dailyBolusMap: [Date: Double] = [:]
+        for delivery in deliveries {
+            let dayStart = calendar.startOfDay(for: delivery.date)
+            if delivery.purpose == .basal {
+                dailyBasalMap[dayStart, default: 0] += delivery.units
+            } else {
+                dailyBolusMap[dayStart, default: 0] += delivery.units
+            }
+        }
+        let (breakdown, tddMin, tddMax, tddCV, weekChange) = Self.computeTDDMetrics(
+            dailyBasal: dailyBasalMap, dailyBolus: dailyBolusMap, start: start, end: end
+        )
+
         return LoopInsightsAggregatedStats.InsulinStats(
             totalDailyDose: tdd,
             basalPercentage: basalPercent,
             bolusPercentage: bolusPercent,
             hourlyBasalAverages: hourlyBasalAverages,
             correctionBolusCount: correctionCount,
-            negativeBasalStats: nil
+            negativeBasalStats: nil,
+            dailyBreakdown: breakdown,
+            tddMin: tddMin,
+            tddMax: tddMax,
+            tddVariabilityCV: tddCV,
+            tddWeekOverWeekChange: weekChange
         )
+    }
+
+    // MARK: - TDI Metrics
+
+    /// Shared helper to compute daily TDD breakdown, min/max, CV, and week-over-week change
+    private static func computeTDDMetrics(
+        dailyBasal: [Date: Double],
+        dailyBolus: [Date: Double],
+        start: Date,
+        end: Date
+    ) -> (
+        breakdown: [LoopInsightsAggregatedStats.DailyInsulinBreakdown],
+        tddMin: Double,
+        tddMax: Double,
+        tddCV: Double,
+        weekChange: Double?
+    ) {
+        let allDays = Set(dailyBasal.keys).union(dailyBolus.keys).sorted()
+        var breakdown: [LoopInsightsAggregatedStats.DailyInsulinBreakdown] = []
+
+        for day in allDays {
+            let basal = dailyBasal[day] ?? 0
+            let bolus = dailyBolus[day] ?? 0
+            breakdown.append(LoopInsightsAggregatedStats.DailyInsulinBreakdown(
+                date: day,
+                totalDailyDose: basal + bolus,
+                basalUnits: basal,
+                bolusUnits: bolus
+            ))
+        }
+
+        let tddValues = breakdown.map(\.totalDailyDose)
+        let tddMin = tddValues.min() ?? 0
+        let tddMax = tddValues.max() ?? 0
+
+        // Coefficient of variation
+        let tddCV: Double
+        if tddValues.count > 1 {
+            let mean = tddValues.reduce(0, +) / Double(tddValues.count)
+            if mean > 0 {
+                let variance = tddValues.map { ($0 - mean) * ($0 - mean) }.reduce(0, +) / Double(tddValues.count)
+                tddCV = (variance.squareRoot() / mean) * 100
+            } else {
+                tddCV = 0
+            }
+        } else {
+            tddCV = 0
+        }
+
+        // Week-over-week change (requires ≥14 days)
+        let weekChange: Double?
+        if breakdown.count >= 14 {
+            let recent7 = breakdown.suffix(7).map(\.totalDailyDose)
+            let prior7 = breakdown.dropLast(7).suffix(7).map(\.totalDailyDose)
+            let recentAvg = recent7.reduce(0, +) / Double(recent7.count)
+            let priorAvg = prior7.reduce(0, +) / Double(prior7.count)
+            if priorAvg > 0 {
+                weekChange = ((recentAvg - priorAvg) / priorAvg) * 100
+            } else {
+                weekChange = nil
+            }
+        } else {
+            weekChange = nil
+        }
+
+        return (breakdown, tddMin, tddMax, tddCV, weekChange)
     }
 
     // MARK: - Carb Stats
 
     /// P3: Accepts pre-fetched Loop carb entries to avoid duplicate fetching.
     private func computeCarbStats(loopEntries: [StoredCarbEntry], start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.CarbStats {
-        // Supplement with HealthKit carb data for longer periods
-        if let hkManager = healthKitManager {
-            do {
-                let hkCarbs = try await hkManager.fetchCarbEntries(start: start, end: end)
-                if hkCarbs.count > loopEntries.count {
-                    LoopInsights_FeatureFlags.log.debug("HealthKit carbs: \(hkCarbs.count) entries vs Loop store \(loopEntries.count) — using HealthKit data")
-                    return computeCarbStatsFromHK(hkCarbs, start: start, end: end)
-                }
-            } catch {
-                LoopInsights_FeatureFlags.log.error("HealthKit carbs fetch error (continuing with Loop store data): \(error)")
+        // Supplement with HealthKit carb data — Core Data cache is short-lived
+        let hkManager = healthKitManager ?? LoopInsights_HealthKitManager()
+        do {
+            let hkCarbs = try await hkManager.fetchCarbEntries(start: start, end: end)
+            if hkCarbs.count > loopEntries.count {
+                LoopInsights_FeatureFlags.log.debug("HealthKit carbs: \(hkCarbs.count) entries vs Loop store \(loopEntries.count) — using HealthKit data")
+                return computeCarbStatsFromHK(hkCarbs, start: start, end: end)
             }
+        } catch {
+            LoopInsights_FeatureFlags.log.error("HealthKit carbs fetch error (continuing with Loop store data): \(error)")
         }
 
         let dayCount = max(1, end.timeIntervalSince(start) / (24 * 60 * 60))

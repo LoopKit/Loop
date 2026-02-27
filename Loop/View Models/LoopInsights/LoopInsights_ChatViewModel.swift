@@ -336,6 +336,13 @@ final class LoopInsights_ChatViewModel: ObservableObject {
             for item in snapshot.insulinSensitivityItems {
                 context += "  \(formatTime(item.startTime)): \(String(format: "%.0f", item.value)) mg/dL per U\n"
             }
+
+            if let insulinType = snapshot.insulinTypeName {
+                context += "Insulin Type: \(insulinType)\n"
+                if let diaHours = snapshot.insulinDiaHours {
+                    context += "Duration of Insulin Action (DIA): \(String(format: "%.1f", diaHours)) hours\n"
+                }
+            }
         }
 
         if let stats = stats {
@@ -348,11 +355,21 @@ final class LoopInsights_ChatViewModel: ObservableObject {
             context += "  Coefficient of Variation: \(String(format: "%.1f", stats.glucoseStats.coefficientOfVariation))%\n"
             context += "  Standard Deviation: \(String(format: "%.1f", stats.glucoseStats.standardDeviation)) mg/dL\n"
 
+            let tdi = stats.insulinStats.totalDailyDose
             context += "\nINSULIN STATISTICS:\n"
-            context += "  Total Daily Dose: \(String(format: "%.1f", stats.insulinStats.totalDailyDose)) U/day\n"
+            context += "  Total Daily Insulin (TDI): \(String(format: "%.1f", tdi)) U/day\n"
+            context += "  TDI Range: \(String(format: "%.1f", stats.insulinStats.tddMin))–\(String(format: "%.1f", stats.insulinStats.tddMax)) U/day\n"
+            context += "  TDI Variability (CV): \(String(format: "%.0f", stats.insulinStats.tddVariabilityCV))%\n"
+            if let weekChange = stats.insulinStats.tddWeekOverWeekChange {
+                context += "  TDI Week-over-Week: \(weekChange >= 0 ? "+" : "")\(String(format: "%.0f", weekChange))%\n"
+            }
             context += "  Basal %: \(String(format: "%.0f", stats.insulinStats.basalPercentage))%\n"
             context += "  Bolus %: \(String(format: "%.0f", stats.insulinStats.bolusPercentage))%\n"
             context += "  Correction Boluses: \(stats.insulinStats.correctionBolusCount)\n"
+            if tdi > 0 {
+                context += "  TDI-Derived ISF (Rule of 1800): \(String(format: "%.0f", 1800.0 / tdi)) mg/dL per U\n"
+                context += "  TDI-Derived CR (Rule of 500): \(String(format: "%.0f", 500.0 / tdi)) g/U\n"
+            }
 
             context += "\nCARB STATISTICS:\n"
             context += "  Average Daily Carbs: \(String(format: "%.0f", stats.carbStats.averageDailyCarbs)) g/day\n"

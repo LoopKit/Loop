@@ -107,9 +107,14 @@ final class LoopInsights_AIAnalysis {
            >7/day is a red flag that settings need work.
         3. BASAL/BOLUS RATIO: In well-tuned AID, expect roughly 40-60% basal. <30% basal almost \
            always means basal rate is too low. >70% basal may mean basal is too high.
-        4. GLUCOSE TRENDS: Look at the slope of hourly averages. A consistent rise over 3+ hours \
+        4. TDI VALIDATION — Cross-check settings using Total Daily Insulin: \
+           Expected ISF ≈ 1800/TDI (Walsh 2010). Expected CR ≈ 500/TDI (Davidson 2008). \
+           Basal should be 30-50% of TDI (Elbarbary 2018). Deviations >25% from these estimates warrant investigation \
+           but only if the glucose data also shows a problem. TDI variability CV >25% = unstable needs, be cautious. \
+           TDI week-over-week change >15% = shifting requirements. These are cross-checks, not targets.
+        5. GLUCOSE TRENDS: Look at the slope of hourly averages. A consistent rise over 3+ hours \
            during fasting = basal too low. A consistent drop = basal too high.
-        5. HIGH TIR DOES NOT MEAN PERFECT SETTINGS: If TIR is 90% but the algorithm is issuing 10 \
+        6. HIGH TIR DOES NOT MEAN PERFECT SETTINGS: If TIR is 90% but the algorithm is issuing 10 \
            corrections/day to achieve that, the settings are suboptimal — the algorithm is doing \
            heavy lifting to compensate for ineffective settings. Better settings = same TIR with fewer corrections.
 
@@ -228,19 +233,19 @@ final class LoopInsights_AIAnalysis {
           On an empty stomach, drinking alcohol can also cause short term hypoglycemia. Alcohol is a toxin, \
           so the body 'spends' extra glucose energy to process the toxin out. With no onboard glucose the user may go low. \
 
-        INSULIN TYPE CONTEXT — When insulin type data is provided:
-        - RAPID-ACTING (Novolog/Humalog/Apidra): Onset ~15 min, peak activity ~75 min, duration ~6 hrs. \
-          Standard absorption profile. Post-meal glucose should begin dropping within 60-90 min of bolus. \
-          Pre-bolusing 15-20 min before meals is effective. Corrections take 2-3 hrs to fully resolve.
-        - ULTRA-RAPID (Fiasp/Lyumjev): Onset ~2-5 min, peak activity ~55 min, duration ~6 hrs. \
-          Faster onset and earlier peak means: \
-          Post-meal spikes should be smaller — if spike is still large, CR is more likely the issue (not timing). \
-          Corrections resolve faster (~1.5-2 hrs) — if glucose stays high after correction, ISF is likely too high. \
-          Less tail stacking risk — basal adjustments can be slightly more aggressive per time block. \
-          Pre-bolusing is less critical — a large spike despite on-time bolusing strongly suggests weak CR.
-        - Use insulin type to distinguish TIMING issues from DOSING issues. A Novolog user with post-meal \
-          spikes that resolve by hour 3 may need more pre-bolus time, not a CR change. A Fiasp user with \
-          the same pattern likely needs a CR adjustment since Fiasp should already be active.
+        INSULIN TYPE & DIA — Duration of Insulin Action defines the IOB calculation window:
+        - RAPID-ACTING (Novolog/Humalog/Apidra): Onset ~15 min, peak ~75 min, DIA ~6 hrs. \
+          Pre-bolusing 15-20 min is effective. Corrections take 2-3 hrs to fully resolve.
+        - ULTRA-RAPID (Fiasp/Lyumjev): Onset ~2-5 min, peak ~55 min, DIA ~6 hrs. \
+          Large spikes despite on-time bolusing strongly suggests weak CR (not timing). \
+          Corrections resolve in ~1.5-2 hrs — if glucose stays high after correction, ISF is likely too high.
+        - INHALED (Afrezza): Onset ~2 min, peak ~29 min, DIA ~5 hrs.
+        - DIA TOO SHORT → Loop underestimates IOB → insulin stacking → lows (look for rollercoaster pattern). \
+          DIA TOO LONG → Loop overestimates IOB → withholds corrections → persistent highs. \
+          Physiological DIA for rapid-acting is 5-7 hrs. If patterns suggest stacking or timidity, \
+          flag DIA in your overall_assessment (not in time_blocks suggestions).
+        - Use insulin type to distinguish TIMING vs DOSING issues. Novolog spikes that resolve by hour 3 = \
+          pre-bolus timing issue. Fiasp spikes = likely CR issue since Fiasp should already be active.
 
         RESPONSE FORMAT:
         Respond with valid JSON in this exact structure:
@@ -323,8 +328,12 @@ final class LoopInsights_AIAnalysis {
         }
 
         if let insulinType = settings.insulinTypeName {
-            prompt += "\n### Insulin Type\n"
+            prompt += "\n### Insulin Type & DIA\n"
             prompt += "- Currently using: \(insulinType)\n"
+            if let diaHours = settings.insulinDiaHours {
+                prompt += "- Duration of Insulin Action (DIA): \(String(format: "%.1f", diaHours)) hours\n"
+                prompt += "- IOB window: All bolus and basal insulin effects are modeled within this \(String(format: "%.1f", diaHours))-hour window\n"
+            }
         }
 
         prompt += "\n"
@@ -349,25 +358,29 @@ final class LoopInsights_AIAnalysis {
         }
 
         // Insulin stats
+        let tdi = stats.insulinStats.totalDailyDose
         prompt += "\n## Insulin Statistics\n"
-        prompt += "- Total Daily Dose: \(String(format: "%.1f", stats.insulinStats.totalDailyDose)) U/day\n"
+        prompt += "- TDI: \(String(format: "%.1f", tdi)) U/day (range: \(String(format: "%.1f", stats.insulinStats.tddMin))–\(String(format: "%.1f", stats.insulinStats.tddMax)), CV: \(String(format: "%.0f", stats.insulinStats.tddVariabilityCV))%)\n"
+        if let weekChange = stats.insulinStats.tddWeekOverWeekChange {
+            prompt += "- TDI Week-over-Week: \(weekChange >= 0 ? "+" : "")\(String(format: "%.0f", weekChange))%\n"
+        }
         prompt += "- Basal: \(String(format: "%.0f", stats.insulinStats.basalPercentage))% / Bolus: \(String(format: "%.0f", stats.insulinStats.bolusPercentage))%\n"
         prompt += "- Correction Boluses: \(stats.insulinStats.correctionBolusCount) in period\n"
 
-        // Computed: corrections per day and basal/bolus assessment
+        // TDI-derived cross-checks
+        if tdi > 0 {
+            let expectedISF = 1800.0 / tdi
+            let expectedCR = 500.0 / tdi
+            let avgISF = settings.insulinSensitivityItems.map(\.value).reduce(0, +) / max(1, Double(settings.insulinSensitivityItems.count))
+            let avgCR = settings.carbRatioItems.map(\.value).reduce(0, +) / max(1, Double(settings.carbRatioItems.count))
+            let isfDev = avgISF > 0 ? ((avgISF - expectedISF) / expectedISF) * 100 : 0
+            let crDev = avgCR > 0 ? ((avgCR - expectedCR) / expectedCR) * 100 : 0
+            prompt += "- TDI cross-check: Expected ISF=\(String(format: "%.0f", expectedISF)) (actual \(String(format: "%+.0f", isfDev))%), Expected CR=\(String(format: "%.0f", expectedCR)) (actual \(String(format: "%+.0f", crDev))%)\n"
+        }
+
         let days = max(1, stats.period.rawValue)
         let correctionsPerDay = Double(stats.insulinStats.correctionBolusCount) / Double(days)
-        prompt += "- Corrections per Day: \(String(format: "%.1f", correctionsPerDay))\n"
-        if correctionsPerDay > 5 {
-            prompt += "  ** RED FLAG: >5 corrections/day means the AID algorithm is heavily compensating for suboptimal settings **\n"
-        } else if correctionsPerDay > 3 {
-            prompt += "  ** ELEVATED: >3 corrections/day suggests the algorithm is working harder than ideal **\n"
-        }
-        if stats.insulinStats.basalPercentage < 30 {
-            prompt += "  ** RED FLAG: Basal is only \(String(format: "%.0f", stats.insulinStats.basalPercentage))% of TDD — strongly suggests basal rate is too low **\n"
-        } else if stats.insulinStats.basalPercentage < 40 {
-            prompt += "  ** NOTE: Basal is \(String(format: "%.0f", stats.insulinStats.basalPercentage))% of TDD — lower than the ideal 40-60% range **\n"
-        }
+        prompt += "- Corrections/Day: \(String(format: "%.1f", correctionsPerDay))\n"
 
         // Carb stats
         prompt += "\n## Carbohydrate Statistics\n"

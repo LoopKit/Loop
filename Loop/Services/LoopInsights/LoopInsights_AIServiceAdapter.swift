@@ -30,7 +30,11 @@ final class LoopInsights_AIServiceAdapter {
 
     /// Send a prompt to the configured AI provider and return the text response.
     func sendPrompt(_ systemPrompt: String, userPrompt: String) async throws -> String {
-        let config = LoopInsights_FeatureFlags.aiConfiguration.withKeychainAPIKey()
+        var config = LoopInsights_FeatureFlags.aiConfiguration.withKeychainAPIKey()
+
+        // Cap completion tokens — analysis JSON responses are typically <1500 tokens.
+        // Prevents context_length_exceeded on smaller models (e.g. 8K context).
+        config.maxTokens = min(config.maxTokens, 2048)
 
         guard !config.apiKey.isEmpty else {
             throw LoopInsightsError.noAPIKeyConfigured

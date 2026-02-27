@@ -501,7 +501,7 @@ struct LoopInsightsAIProviderConfiguration: Codable, Equatable {
         requestFormat: LoopInsightsRequestFormat = .openAICompatible,
         apiKeyHeader: String? = nil,
         apiKeyPrefix: String? = nil,
-        maxTokens: Int = 4096,
+        maxTokens: Int = 2048,
         temperature: Double = 0.0,
         apiVersion: String? = nil,
         organizationID: String? = nil,
@@ -725,6 +725,7 @@ struct LoopInsightsTherapySnapshot: Codable {
     let insulinSensitivityItems: [LoopInsightsScheduleItem]
     let carbRatioItems: [LoopInsightsScheduleItem]
     let insulinTypeName: String?
+    let insulinDiaHours: Double?  // Duration of Insulin Action in hours (from insulin model)
     let capturedAt: Date
 
     struct LoopInsightsScheduleItem: Codable, Identifiable {
@@ -770,6 +771,13 @@ struct LoopInsightsAggregatedStats: Codable {
         var timeAboveRange: Double { timeHigh + timeVeryHigh }
     }
 
+    struct DailyInsulinBreakdown: Codable {
+        let date: Date
+        let totalDailyDose: Double            // total units delivered that day
+        let basalUnits: Double
+        let bolusUnits: Double
+    }
+
     struct InsulinStats: Codable {
         let totalDailyDose: Double            // Average total units/day
         let basalPercentage: Double           // percentage of TDD from basal
@@ -777,6 +785,13 @@ struct LoopInsightsAggregatedStats: Codable {
         let hourlyBasalAverages: [Int: Double] // hour → average basal rate delivered
         let correctionBolusCount: Int         // number of correction boluses in period
         let negativeBasalStats: LoopInsightsNegativeBasalStats?  // Phase 5: suspension/sub-basal stats
+
+        // TDI tracking
+        let dailyBreakdown: [DailyInsulinBreakdown]  // per-day TDD for trending
+        let tddMin: Double                   // minimum single-day TDD in period
+        let tddMax: Double                   // maximum single-day TDD in period
+        let tddVariabilityCV: Double         // coefficient of variation of daily TDD (%)
+        let tddWeekOverWeekChange: Double?   // % change comparing recent 7d vs prior 7d (nil if <14 days)
     }
 
     struct CarbStats: Codable {

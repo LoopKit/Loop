@@ -1086,6 +1086,30 @@
         }
       }
     },
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Privacy - Microphone Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "FoodFinder uses the microphone for voice-powered food logging."
+          }
+        }
+      }
+    },
+    "NSMotionUsageDescription" : {
+      "comment" : "Privacy - Motion Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "AutoPresets uses motion data to detect activity changes and automatically activate presets."
+          }
+        }
+      }
+    },
     "NSSiriUsageDescription" : {
       "comment" : "Privacy - Siri Usage Description",
       "extractionState" : "extracted_with_value",
@@ -1178,6 +1202,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loop 使用 Siri，让你可以通过语音来启动预设。"
+          }
+        }
+      }
+    },
+    "NSSpeechRecognitionUsageDescription" : {
+      "comment" : "Privacy - Speech Recognition Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "FoodFinder uses speech recognition to log meals by voice."
           }
         }
       }

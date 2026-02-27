@@ -277,7 +277,7 @@ struct DataLayer_ConsentView: View {
                 .frame(maxWidth: .infinity, alignment: .center)
             }
 
-            Text(NSLocalizedString("Permanently deletes all collected data from this device, revokes all consent, and disables Data Sharing.", comment: "DataLayer delete description"))
+            Text(NSLocalizedString("Permanently deletes all collected data from this device, revokes all consent, and disables Data Sharing.", comment: "DataLayer delete description - this will not disable use of other LoopInsights features."))
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
