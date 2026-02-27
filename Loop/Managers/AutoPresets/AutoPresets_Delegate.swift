@@ -26,4 +26,8 @@ public protocol AutoPresets_Delegate: AnyObject {
 
     /// Returns the currently active override, if any
     func autoPresetsCurrentOverride(_ coordinator: AutoPresets_Coordinator) -> TemporaryScheduleOverride?
+
+    /// Called when AutoPresets wants to create a new preset (e.g. from AI Advisor)
+    func autoPresets(_ coordinator: AutoPresets_Coordinator,
+                     shouldCreatePreset preset: TemporaryScheduleOverridePreset)
 }

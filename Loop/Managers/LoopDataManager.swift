@@ -2654,4 +2654,13 @@ extension LoopDataManager: AutoPresets_Delegate {
     func autoPresetsCurrentOverride(_ coordinator: AutoPresets_Coordinator) -> TemporaryScheduleOverride? {
         settings.scheduleOverride
     }
+
+    func autoPresets(_ coordinator: AutoPresets_Coordinator,
+                     shouldCreatePreset preset: TemporaryScheduleOverridePreset) {
+        logger.default("AutoPresets creating AI-recommended preset: %{public}@", preset.name)
+
+        mutateSettings { settings in
+            settings.overridePresets.append(preset)
+        }
+    }
 }

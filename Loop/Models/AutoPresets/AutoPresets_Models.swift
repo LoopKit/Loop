@@ -40,6 +40,7 @@ public enum AutoPresetsLogEvent: String, Codable {
     case featureDisabled
     case presetActivated
     case presetDeactivated
+    case presetCreatedByAI
 
     public var iconName: String {
         switch self {
@@ -47,6 +48,7 @@ public enum AutoPresetsLogEvent: String, Codable {
         case .featureDisabled: return "power.circle"
         case .presetActivated: return "play.circle.fill"
         case .presetDeactivated: return "stop.circle.fill"
+        case .presetCreatedByAI: return "wand.and.stars"
         }
     }
 
@@ -56,6 +58,7 @@ public enum AutoPresetsLogEvent: String, Codable {
         case .featureDisabled: return "Feature Disabled"
         case .presetActivated: return "Preset Activated"
         case .presetDeactivated: return "Preset Deactivated"
+        case .presetCreatedByAI: return "AI Preset Created"
         }
     }
 }
@@ -110,6 +113,9 @@ public struct AutoPresetsSettings: Codable, Equatable {
     /// Whether debug logging is enabled
     public var debugLoggingEnabled: Bool
 
+    /// Whether AI preset recommendations are enabled
+    public var aiRecommendationsEnabled: Bool
+
     /// Recent activity log entries
     public var recentActivityLog: [AutoPresetsLogEntry]
 
@@ -121,6 +127,7 @@ public struct AutoPresetsSettings: Codable, Equatable {
         continuousActivityTime: TimeInterval = 30,
         requireHighConfidence: Bool = false,
         debugLoggingEnabled: Bool = false,
+        aiRecommendationsEnabled: Bool = false,
         recentActivityLog: [AutoPresetsLogEntry] = []
     ) {
         self.isEnabled = isEnabled
@@ -130,6 +137,7 @@ public struct AutoPresetsSettings: Codable, Equatable {
         self.continuousActivityTime = continuousActivityTime
         self.requireHighConfidence = requireHighConfidence
         self.debugLoggingEnabled = debugLoggingEnabled
+        self.aiRecommendationsEnabled = aiRecommendationsEnabled
         self.recentActivityLog = recentActivityLog
     }
 
@@ -145,6 +153,7 @@ public struct AutoPresetsSettings: Codable, Equatable {
         stopInterval = (try? container.decode(TimeInterval.self, forKey: .stopInterval)) ?? 300
         requireHighConfidence = (try? container.decode(Bool.self, forKey: .requireHighConfidence)) ?? false
         debugLoggingEnabled = (try? container.decode(Bool.self, forKey: .debugLoggingEnabled)) ?? false
+        aiRecommendationsEnabled = (try? container.decode(Bool.self, forKey: .aiRecommendationsEnabled)) ?? false
         recentActivityLog = (try? container.decode([AutoPresetsLogEntry].self, forKey: .recentActivityLog)) ?? []
 
         // Try new key first, fall back to legacy key
@@ -165,6 +174,7 @@ public struct AutoPresetsSettings: Codable, Equatable {
         case continuousActivityTime
         case requireHighConfidence
         case debugLoggingEnabled
+        case aiRecommendationsEnabled
         case recentActivityLog
         // Legacy keys for backward compatibility
         case legacyContinuousActivityWindow = "continuousActivityWindow"
@@ -179,6 +189,7 @@ public struct AutoPresetsSettings: Codable, Equatable {
         try container.encode(continuousActivityTime, forKey: .continuousActivityTime)
         try container.encode(requireHighConfidence, forKey: .requireHighConfidence)
         try container.encode(debugLoggingEnabled, forKey: .debugLoggingEnabled)
+        try container.encode(aiRecommendationsEnabled, forKey: .aiRecommendationsEnabled)
         try container.encode(recentActivityLog, forKey: .recentActivityLog)
     }
 

@@ -298,7 +298,7 @@ extension SettingsView {
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
             }
 
-            NavigationLink(destination: AutoPresets_SettingsView()) {
+            NavigationLink(destination: AutoPresets_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores)) {
                 LargeButton(
                     action: {},
                     includeArrow: false,

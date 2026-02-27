@@ -16,6 +16,9 @@
 		FFF05E4789A2D06526EB0A24 /* AutoPresets_SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177A32DF2F91D26776BF2C7F /* AutoPresets_SettingsView.swift */; };
 		232E357E321361C66498FEEA /* AutoPresets_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D90E77F7FA3F7557C52EA5B /* AutoPresets_Models.swift */; };
 		13992ED79F79937110B6BFCD /* AutoPresets_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 593F5B3264F8383861CE3027 /* AutoPresets_FeatureFlags.swift */; };
+		D3DC05925EB2139171B3AADE /* AutoPresets_RecommendationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459EFB26025611ED5044134D /* AutoPresets_RecommendationModels.swift */; };
+		D5A1F1AD6DF7DF6C1860DD90 /* AutoPresets_AIAdvisor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62520B3DF755819815919570 /* AutoPresets_AIAdvisor.swift */; };
+		434FC457EF768053CC71A514 /* AutoPresets_AIRecommendationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A92563E71BB3873233772CCE /* AutoPresets_AIRecommendationView.swift */; };
 		1419606428D9550400BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
@@ -858,6 +861,9 @@
 		177A32DF2F91D26776BF2C7F /* AutoPresets_SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_SettingsView.swift; sourceTree = "<group>"; };
 		2D90E77F7FA3F7557C52EA5B /* AutoPresets_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Models.swift; sourceTree = "<group>"; };
 		593F5B3264F8383861CE3027 /* AutoPresets_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_FeatureFlags.swift; sourceTree = "<group>"; };
+		459EFB26025611ED5044134D /* AutoPresets_RecommendationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_RecommendationModels.swift; sourceTree = "<group>"; };
+		62520B3DF755819815919570 /* AutoPresets_AIAdvisor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_AIAdvisor.swift; sourceTree = "<group>"; };
+		A92563E71BB3873233772CCE /* AutoPresets_AIRecommendationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_AIRecommendationView.swift; sourceTree = "<group>"; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
 		1452F4A82A851C9400F8B9E4 /* AddEditFavoriteFoodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditFavoriteFoodViewModel.swift; sourceTree = "<group>"; };
@@ -1718,6 +1724,7 @@
 			isa = PBXGroup;
 			children = (
 				177A32DF2F91D26776BF2C7F /* AutoPresets_SettingsView.swift */,
+				A92563E71BB3873233772CCE /* AutoPresets_AIRecommendationView.swift */,
 			);
 			path = AutoPresets;
 			sourceTree = "<group>";
@@ -1726,6 +1733,7 @@
 			isa = PBXGroup;
 			children = (
 				2D90E77F7FA3F7557C52EA5B /* AutoPresets_Models.swift */,
+				459EFB26025611ED5044134D /* AutoPresets_RecommendationModels.swift */,
 			);
 			path = AutoPresets;
 			sourceTree = "<group>";
@@ -2993,12 +3001,21 @@
 			path = FoodFinder;
 			sourceTree = "<group>";
 		};
+		42D4BD4553794977DD2CEC62 /* AutoPresets */ = {
+			isa = PBXGroup;
+			children = (
+				62520B3DF755819815919570 /* AutoPresets_AIAdvisor.swift */,
+			);
+			path = AutoPresets;
+			sourceTree = "<group>";
+		};
 		30A7BA28AD6B99C005058D2B /* Services */ = {
 			isa = PBXGroup;
 			children = (
 				FA99A984636914457578DB52 /* DataLayer */,
 				E2B183EAECD6393B2AE7F724 /* LoopInsights */,
 				3007854D1E2C462A43BB49EA /* FoodFinder */,
+				42D4BD4553794977DD2CEC62 /* AutoPresets */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -3885,7 +3902,11 @@
 				0556C20E91536D540ED3D91E /* AutoPresets_ActivityDetectionManager.swift in Sources */,
 				FFF05E4789A2D06526EB0A24 /* AutoPresets_SettingsView.swift in Sources */,
 				232E357E321361C66498FEEA /* AutoPresets_Models.swift in Sources */,
-				13992ED79F79937110B6BFCD /* AutoPresets_FeatureFlags.swift in Sources */,				C17824A51E1AD4D100D9D25C /* ManualBolusRecommendation.swift in Sources */,
+				13992ED79F79937110B6BFCD /* AutoPresets_FeatureFlags.swift in Sources */,
+				D3DC05925EB2139171B3AADE /* AutoPresets_RecommendationModels.swift in Sources */,
+				D5A1F1AD6DF7DF6C1860DD90 /* AutoPresets_AIAdvisor.swift in Sources */,
+				434FC457EF768053CC71A514 /* AutoPresets_AIRecommendationView.swift in Sources */,
+				C17824A51E1AD4D100D9D25C /* ManualBolusRecommendation.swift in Sources */,
 				897A5A9624C2175B00C4E71D /* BolusEntryView.swift in Sources */,
 				4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */,
 				A9A056B324B93C62007CF06D /* CriticalEventLogExportView.swift in Sources */,

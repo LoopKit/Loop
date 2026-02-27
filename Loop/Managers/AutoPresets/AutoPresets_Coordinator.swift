@@ -158,6 +158,12 @@ public class AutoPresets_Coordinator: ObservableObject {
         delegate?.autoPresetsCurrentOverride(self)
     }
 
+    /// Create a new preset in Loop's settings (used by AI Advisor)
+    public func createPreset(_ preset: TemporaryScheduleOverridePreset) {
+        delegate?.autoPresets(self, shouldCreatePreset: preset)
+        logEvent(.presetCreatedByAI, presetName: preset.name)
+    }
+
     /// Start monitoring (if configured properly)
     public func startIfConfigured() {
         // Prevent starting if already monitoring

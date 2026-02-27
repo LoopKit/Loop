@@ -21,6 +21,19 @@ struct AutoPresets_SettingsView: View {
     @State private var showingDebugLogs = false
     @State private var debugLogsCopied = false
     @State private var debugLogsCleared = false
+    @State private var showingAIAdvisor = false
+    @Environment(\.openURL) private var openURL
+
+    // AI config state
+    @State private var aiBaseURL: String = ""
+    @State private var aiModel: String = ""
+    @State private var aiAPIKeyText: String = ""
+    @State private var showAIAPIKey = false
+    @State private var aiTestResult: AIConfigTestResult?
+    @State private var aiIsTesting = false
+
+    /// Optional provider for LoopInsights data stores (nil when LoopInsights is not available)
+    var dataStoresProvider: (() -> Any?)? = nil
 
     var body: some View {
         List {
@@ -29,7 +42,9 @@ struct AutoPresets_SettingsView: View {
             if coordinator.isEnabled {
                 activityTypeSections
                 detectionSettingsSection
-                activityLogSection
+                if dataStoresProvider != nil {
+                    aiAdvisorSection
+                }
                 debugLogsSection
             }
         }
@@ -42,6 +57,17 @@ struct AutoPresets_SettingsView: View {
         }
         .sheet(isPresented: $showingDebugLogs) {
             AutoPresets_DebugLogsView(isPresented: $showingDebugLogs)
+        }
+        .sheet(isPresented: $showingAIAdvisor) {
+            if let coordinator = buildLoopInsightsCoordinator() {
+                AutoPresets_AIRecommendationView(coordinator: coordinator)
+            }
+        }
+        .onAppear {
+            let config = LoopInsights_FeatureFlags.aiConfiguration
+            aiBaseURL = config.baseURL
+            aiModel = config.model
+            aiAPIKeyText = LoopInsights_SecureStorage.loadAPIKey() ?? ""
         }
     }
 
@@ -85,6 +111,218 @@ struct AutoPresets_SettingsView: View {
         }
     }
 
+    // MARK: - AI Advisor Section
+
+    private var aiAdvisorSection: some View {
+        Section {
+            Toggle(isOn: Binding(
+                get: { coordinator.settings.aiRecommendationsEnabled },
+                set: { value in
+                    coordinator.updateSettings { $0.aiRecommendationsEnabled = value }
+                }
+            )) {
+                VStack(alignment: .leading) {
+                    Text("Enable AI Preset Recommendations")
+                        .font(.headline)
+                    Text("Analyze your patterns and suggest new presets using AI.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            if coordinator.settings.aiRecommendationsEnabled {
+                aiConfigSection
+
+                Button {
+                    showingAIAdvisor = true
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "wand.and.stars")
+                            .font(.title3)
+                            .foregroundColor(Color(red: 76/255, green: 175/255, blue: 80/255))
+                            .frame(width: 28)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("AI Preset Advisor")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            Text("Analyze patterns and discover new presets")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .buttonStyle(PlainButtonStyle())
+                .disabled(aiAPIKeyText.isEmpty || aiBaseURL.isEmpty)
+                .opacity((aiAPIKeyText.isEmpty || aiBaseURL.isEmpty) ? 0.5 : 1.0)
+            }
+        }
+    }
+
+    // MARK: - AI Config Section
+
+    @ViewBuilder
+    private var aiConfigSection: some View {
+        // Provider links
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Get an API key from a provider:")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            HStack(spacing: 12) {
+                aiProviderLink("OpenAI", url: "https://platform.openai.com/api-keys", color: .green)
+                aiProviderLink("Anthropic", url: "https://console.anthropic.com/settings/keys", color: .orange)
+                aiProviderLink("Gemini", url: "https://aistudio.google.com/apikey", color: .blue)
+                aiProviderLink("Grok", url: "https://console.x.ai", color: .red)
+            }
+        }
+
+        // Base URL
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Base URL")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            HStack(spacing: 8) {
+                TextField("e.g. https://api.openai.com/v1", text: $aiBaseURL)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
+                    .keyboardType(.URL)
+                    .onChange(of: aiBaseURL) { _ in
+                        aiTestResult = nil
+                        saveAIConfiguration()
+                    }
+                if !aiBaseURL.isEmpty {
+                    Button(action: { aiBaseURL = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+
+        // API Key
+        VStack(alignment: .leading, spacing: 4) {
+            Text("API Key")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            HStack(spacing: 8) {
+                Group {
+                    if showAIAPIKey {
+                        TextField("Enter your API key", text: $aiAPIKeyText)
+                    } else {
+                        SecureField("Enter your API key", text: $aiAPIKeyText)
+                    }
+                }
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
+                .disableAutocorrection(true)
+                .onChange(of: aiAPIKeyText) { newValue in
+                    saveAIAPIKey(newValue)
+                    aiTestResult = nil
+                }
+                Button(action: { showAIAPIKey.toggle() }) {
+                    Image(systemName: showAIAPIKey ? "eye.slash" : "eye")
+                        .foregroundColor(.blue)
+                }
+                .buttonStyle(.plain)
+                if !aiAPIKeyText.isEmpty {
+                    Button(action: { aiAPIKeyText = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            if !aiAPIKeyText.isEmpty {
+                Text("Stored securely in Keychain")
+                    .font(.caption2)
+                    .foregroundColor(.green)
+            }
+        }
+
+        // Model
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Model")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            HStack(spacing: 8) {
+                TextField("e.g. gpt-4o, claude-sonnet-4-5-20250514", text: $aiModel)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
+                    .onChange(of: aiModel) { _ in
+                        aiTestResult = nil
+                        saveAIConfiguration()
+                    }
+                if !aiModel.isEmpty {
+                    Button(action: { aiModel = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+
+        // Test Connection
+        VStack(spacing: 8) {
+            Button(action: testAIConnection) {
+                HStack(spacing: 6) {
+                    if aiIsTesting {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .scaleEffect(0.8)
+                        Text("Testing...")
+                    } else {
+                        Image(systemName: "checkmark.shield")
+                        Text("Test Connection")
+                    }
+                }
+                .font(.body.weight(.medium))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(Color(.systemGray5))
+                .cornerRadius(10)
+            }
+            .disabled(aiIsTesting || aiAPIKeyText.isEmpty || aiBaseURL.isEmpty)
+            .opacity((aiIsTesting || aiAPIKeyText.isEmpty || aiBaseURL.isEmpty) ? 0.5 : 1.0)
+            .buttonStyle(.plain)
+
+            if let result = aiTestResult {
+                switch result {
+                case .success:
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        Text("Connected")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                    }
+                case .failure(let message):
+                    HStack(alignment: .top, spacing: 4) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.red)
+                        Text(message)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
+
+        Text("This configuration is shared with LoopInsights. Changes here apply to both features.")
+            .font(.caption2)
+            .foregroundColor(.secondary)
+    }
+
     // MARK: - Activity Type Sections
 
     private var activityTypeSections: some View {
@@ -102,7 +340,7 @@ struct AutoPresets_SettingsView: View {
     private func activityTypeRow(for activityType: AutoPresetsActivityType) -> some View {
         HStack {
             Image(systemName: activityType.systemImageName)
-                .foregroundColor(coordinator.settings.supportedActivityTypes.contains(activityType) ? .blue : .secondary)
+                .foregroundColor(coordinator.settings.supportedActivityTypes.contains(activityType) ? Color(red: 76/255, green: 175/255, blue: 80/255) : .secondary)
                 .frame(width: 24)
 
             VStack(alignment: .leading) {
@@ -141,7 +379,7 @@ struct AutoPresets_SettingsView: View {
                         Spacer()
                         if coordinator.settings.presetId(for: activityType) == preset.id {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.blue)
+                                .foregroundColor(Color(red: 76/255, green: 175/255, blue: 80/255))
                         } else {
                             Image(systemName: "circle")
                                 .foregroundColor(.secondary)
@@ -229,29 +467,6 @@ struct AutoPresets_SettingsView: View {
         }
     }
 
-    // MARK: - Activity Log Section
-
-    @ViewBuilder
-    private var activityLogSection: some View {
-        if !coordinator.settings.recentActivityLog.isEmpty {
-            Section("Recent Activity (last 20 events)") {
-                ForEach(coordinator.settings.recentActivityLog) { logEntry in
-                    activityLogRow(for: logEntry)
-                }
-
-                Button(role: .destructive) {
-                    coordinator.clearActivityLog()
-                } label: {
-                    HStack {
-                        Spacer()
-                        Text("Clear Logs")
-                        Spacer()
-                    }
-                }
-            }
-        }
-    }
-
     // MARK: - Debug Logs Section
 
     private var debugLogsSection: some View {
@@ -316,52 +531,6 @@ struct AutoPresets_SettingsView: View {
         }
     }
 
-    private func activityLogRow(for logEntry: AutoPresetsLogEntry) -> some View {
-        HStack {
-            Image(systemName: logEntry.event.iconName)
-                .foregroundColor(colorForEvent(logEntry.event))
-                .frame(width: 24)
-
-            VStack(alignment: .leading) {
-                HStack {
-                    Text(logEntry.event.displayName)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                    if let activityType = logEntry.activityType {
-                        Text("(\(activityType.displayName))")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                if let presetName = logEntry.presetName {
-                    Text(presetName)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-
-                if logEntry.event == .presetDeactivated,
-                   let activationEntry = findMatchingActivationEntry(for: logEntry)
-                {
-                    let duration = logEntry.date.timeIntervalSince(activationEntry.date)
-                    Text("Duration: \(formatDuration(duration))")
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                }
-            }
-
-            Spacer()
-
-            VStack(alignment: .trailing) {
-                Text(Self.relativeDateFormatter.string(for: logEntry.date) ?? "")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Text(Self.timeFormatter.string(from: logEntry.date))
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-        }
-    }
-
     // MARK: - Helper Methods
 
     private func activityToggleBinding(for activityType: AutoPresetsActivityType) -> Binding<Bool> {
@@ -404,34 +573,6 @@ struct AutoPresets_SettingsView: View {
         }
     }
 
-    private func colorForEvent(_ event: AutoPresetsLogEvent) -> Color {
-        switch event {
-        case .presetActivated: return .blue
-        case .presetDeactivated: return .blue
-        case .featureEnabled: return .green
-        case .featureDisabled: return .orange
-        }
-    }
-
-    private func findMatchingActivationEntry(for deactivationEntry: AutoPresetsLogEntry) -> AutoPresetsLogEntry? {
-        guard deactivationEntry.event == .presetDeactivated else { return nil }
-
-        return coordinator.settings.recentActivityLog.first { entry in
-            entry.event == .presetActivated &&
-                entry.activityType == deactivationEntry.activityType &&
-                entry.presetName == deactivationEntry.presetName &&
-                entry.date < deactivationEntry.date
-        }
-    }
-
-    private func formatDuration(_ duration: TimeInterval) -> String {
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.hour, .minute, .second]
-        formatter.unitsStyle = .abbreviated
-        formatter.maximumUnitCount = 2
-        return formatter.string(from: duration) ?? "\(Int(duration))s"
-    }
-
     private func showErrorAlert(_ message: String) {
         errorMessage = message
         showingErrorAlert = true
@@ -465,19 +606,102 @@ struct AutoPresets_SettingsView: View {
         }
     }
 
-    // MARK: - Formatters
+    // MARK: - LoopInsights Coordinator Builder
 
-    private static var relativeDateFormatter: RelativeDateTimeFormatter = {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.dateTimeStyle = .named
-        return formatter
-    }()
+    /// Build a LoopInsights_Coordinator from the type-erased data stores tuple.
+    /// Same pattern as LoopInsights_SettingsView uses internally.
+    private func buildLoopInsightsCoordinator() -> LoopInsights_Coordinator? {
+        // Try test data first (developer mode)
+        if let testCoordinator = LoopInsights_Coordinator.withTestDataIfAvailable() {
+            return testCoordinator
+        }
+        // Real data stores from Loop (cast from type-erased tuple)
+        guard let any = dataStoresProvider?(),
+              let stores = any as? (GlucoseStoreProtocol, DoseStoreProtocol, CarbStoreProtocol, LatestStoredSettingsProvider, LoopInsightsSettingsWriter)
+        else {
+            return nil
+        }
+        return LoopInsights_Coordinator(
+            glucoseStore: stores.0,
+            doseStore: stores.1,
+            carbStore: stores.2,
+            settingsProvider: stores.3,
+            settingsWriter: stores.4
+        )
+    }
 
-    private static var timeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter
-    }()
+    // MARK: - AI Config Helpers
+
+    private func aiProviderLink(_ name: String, url: String, color: Color) -> some View {
+        Button(action: { if let u = URL(string: url) { openURL(u) } }) {
+            Text(name)
+                .font(.caption)
+                .foregroundColor(color)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func saveAIConfiguration() {
+        let format = LoopInsightsRequestFormat.detect(from: aiBaseURL)
+        var config = LoopInsights_FeatureFlags.aiConfiguration
+        config.baseURL = aiBaseURL
+        config.model = aiModel
+        config.endpointPath = format.defaultEndpoint
+        config.requestFormat = format
+        config.apiKeyHeader = format.defaultAPIKeyHeader
+        config.apiKeyPrefix = format.defaultAPIKeyPrefix
+        LoopInsights_FeatureFlags.aiConfiguration = config
+    }
+
+    private func saveAIAPIKey(_ key: String) {
+        if key.isEmpty {
+            LoopInsights_SecureStorage.deleteAPIKey()
+        } else {
+            do {
+                try LoopInsights_SecureStorage.saveAPIKey(key)
+            } catch {
+                LoopInsights_FeatureFlags.log.error("Failed to save API key: \(error)")
+            }
+        }
+        saveAIConfiguration()
+    }
+
+    private func testAIConnection() {
+        guard !aiBaseURL.isEmpty, !aiAPIKeyText.isEmpty else { return }
+
+        aiIsTesting = true
+        aiTestResult = nil
+
+        do {
+            try LoopInsights_SecureStorage.saveAPIKey(aiAPIKeyText)
+        } catch {
+            LoopInsights_FeatureFlags.log.error("Failed to save API key for test: \(error)")
+        }
+        saveAIConfiguration()
+
+        Task {
+            do {
+                let success = try await LoopInsights_AIServiceAdapter.shared.testConnection()
+                await MainActor.run {
+                    aiTestResult = success ? .success : .failure("Unknown error")
+                    aiIsTesting = false
+                }
+            } catch {
+                await MainActor.run {
+                    aiTestResult = .failure(error.localizedDescription)
+                    aiIsTesting = false
+                }
+            }
+        }
+    }
+
+}
+
+// MARK: - AI Config Test Result
+
+private enum AIConfigTestResult {
+    case success
+    case failure(String)
 }
 
 // MARK: - Debug Logs View
