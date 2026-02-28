@@ -618,6 +618,8 @@
 		18A56885FD960F7E45AE2C39 /* FoodFinder_VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CAFD38F7A4EC9387C0AE70 /* FoodFinder_VoiceService.swift */; };
 		1DE82D03265EF6137462130B /* FoodFinder_AnalysisRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C2BA990A7B46B833530A0B /* FoodFinder_AnalysisRecord.swift */; };
 		866893504B18A74A8FDC1E72 /* FoodFinder_AnalysisHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B876633FB950693D1C798869 /* FoodFinder_AnalysisHistoryStore.swift */; };
+		5360E9F21CABAFD28DB505EB /* FoodFinder_CarbTrackingDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */; };
+		2A1B8D3286E1ED96FB2ED124 /* FoodFinder_CarbTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80940A6E390B157E04B9D2D /* FoodFinder_CarbTrackingService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1469,6 +1471,8 @@
 		16CAFD38F7A4EC9387C0AE70 /* FoodFinder_VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_VoiceService.swift; sourceTree = "<group>"; };
 		63C2BA990A7B46B833530A0B /* FoodFinder_AnalysisRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AnalysisRecord.swift; sourceTree = "<group>"; };
 		B876633FB950693D1C798869 /* FoodFinder_AnalysisHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AnalysisHistoryStore.swift; sourceTree = "<group>"; };
+		E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingDashboard.swift; sourceTree = "<group>"; };
+		F80940A6E390B157E04B9D2D /* FoodFinder_CarbTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2731,6 +2735,7 @@
 			isa = PBXGroup;
 			children = (
 				04BA0B00F58C59F64EEE46FF /* FoodFinder_AICameraView.swift */,
+				E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */,
 				94FAA6B5BFCA71FA1330CF5D /* FoodFinder_EntryPoint.swift */,
 				406DF1A9DEBA5BEB8D2815A1 /* FoodFinder_FavoritesHelpers.swift */,
 				F62E1AC96EEC1636891E430C /* FoodFinder_ScannerView.swift */,
@@ -2765,6 +2770,7 @@
 				0AB00FF448F43B860CCD3B02 /* FoodFinder_ImageDownloader.swift */,
 				6CDF09B9DFA98A7C6DFE74B0 /* FoodFinder_ImageStore.swift */,
 				014D680D2641CBA8BD370562 /* FoodFinder_LocationService.swift */,
+				F80940A6E390B157E04B9D2D /* FoodFinder_CarbTrackingService.swift */,
 				EDF37556B4222F9A8C4DE71F /* FoodFinder_OpenFoodFactsService.swift */,
 				B6240EC27B0D884EAED8B69B /* FoodFinder_ScannerService.swift */,
 				6C5428F178A79D0F8CCCB924 /* FoodFinder_SearchRouter.swift */,
@@ -3774,6 +3780,8 @@
 				18A56885FD960F7E45AE2C39 /* FoodFinder_VoiceService.swift in Sources */,
 				1DE82D03265EF6137462130B /* FoodFinder_AnalysisRecord.swift in Sources */,
 				866893504B18A74A8FDC1E72 /* FoodFinder_AnalysisHistoryStore.swift in Sources */,
+				5360E9F21CABAFD28DB505EB /* FoodFinder_CarbTrackingDashboard.swift in Sources */,
+				2A1B8D3286E1ED96FB2ED124 /* FoodFinder_CarbTrackingService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

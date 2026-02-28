@@ -28,6 +28,12 @@ enum FoodFinder_FeatureFlags {
         get { UserDefaults.standard.bool(forKey: Keys.locationTaggingEnabled) }
         set { UserDefaults.standard.set(newValue, forKey: Keys.locationTaggingEnabled) }
     }
+
+    /// Carb tracking — daily/weekly/monthly totals with historical comparison.
+    static var carbTrackingEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: Keys.carbTrackingEnabled) }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.carbTrackingEnabled) }
+    }
 }
 
 // MARK: - UserDefaults Keys
@@ -59,6 +65,9 @@ extension FoodFinder_FeatureFlags {
 
         // Location tagging
         static let locationTaggingEnabled            = "com.loopkit.Loop.locationTaggingEnabled"
+
+        // Carb tracking
+        static let carbTrackingEnabled               = "com.loopkit.Loop.carbTrackingEnabled"
 
         // Migration tracking
         static let byoMigrationComplete             = "com.loopkit.Loop.byoMigrationComplete"
@@ -154,6 +163,13 @@ extension UserDefaults {
     var foodFinder_locationTaggingEnabled: Bool {
         get { bool(forKey: FoodFinder_FeatureFlags.Keys.locationTaggingEnabled) }
         set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.locationTaggingEnabled) }
+    }
+
+    // MARK: Carb Tracking
+
+    var foodFinder_carbTrackingEnabled: Bool {
+        get { bool(forKey: FoodFinder_FeatureFlags.Keys.carbTrackingEnabled) }
+        set { set(newValue, forKey: FoodFinder_FeatureFlags.Keys.carbTrackingEnabled) }
     }
 
     // MARK: Analysis History

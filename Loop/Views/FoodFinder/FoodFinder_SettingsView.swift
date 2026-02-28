@@ -19,6 +19,7 @@ struct AISettingsView: View {
     @AppStorage("com.loopkit.Loop.foodSearchEnabled") private var foodSearchEnabled: Bool = false
     @AppStorage("com.loopkit.Loop.advancedDosingRecommendationsEnabled") private var advancedDosingRecommendationsEnabled: Bool = false
     @AppStorage("com.loopkit.Loop.locationTaggingEnabled") private var locationTaggingEnabled: Bool = false
+    @AppStorage("com.loopkit.Loop.carbTrackingEnabled") private var carbTrackingEnabled: Bool = false
     @AppStorage("com.loopkit.Loop.analysisHistoryRetentionDays") private var retentionDays: Int = 7
 
     // AI configuration (non-secret settings)
@@ -145,6 +146,24 @@ extension AISettingsView {
                     Text("Tag meals with where you ate. Helps the AI identify restaurant menu items for more accurate carb estimates. Location data stays on your device.")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                    Divider()
+                    Toggle("Carb Tracking", isOn: $carbTrackingEnabled)
+                    Text("Track daily carb totals with weekly comparisons and historical trends. Shows a summary card when logging carbs.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    if carbTrackingEnabled {
+                        NavigationLink {
+                            FoodFinder_CarbTrackingDashboard()
+                                .navigationTitle("Carb Tracking")
+                                .navigationBarTitleDisplayMode(.inline)
+                        } label: {
+                            HStack {
+                                Image(systemName: "chart.bar.fill")
+                                    .foregroundColor(Color(red: 107/255, green: 47/255, blue: 160/255))
+                                Text("View Carb Dashboard")
+                            }
+                        }
+                    }
                 }
             }
         }

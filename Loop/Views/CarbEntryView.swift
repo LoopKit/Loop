@@ -77,6 +77,11 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
             ScrollView {
                 warningsCard
 
+                if isNewEntry, FoodFinder_FeatureFlags.carbTrackingEnabled {
+                    FoodFinder_CarbTrackingCard(service: FoodFinder_CarbTrackingService.shared)
+                        .padding(.top, 8)
+                }
+
                 mainCard
                     .padding(.top, 8)
 
