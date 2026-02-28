@@ -1092,7 +1092,13 @@ class ConfigurableAIService: ObservableObject {
 
         telemetryCallback?("🤖 Connecting to \(config.name)...")
 
-        let prompt = getAnalysisPrompt() + FoodFinder_LocationService.shared.locationContextForPrompt()
+        var prompt = getAnalysisPrompt() + FoodFinder_LocationService.shared.locationContextForPrompt()
+        if FoodFinder_FeatureFlags.carbTrackingEnabled,
+           let snap = FoodFinder_CarbTrackingService.shared.snapshot {
+            prompt += "\n\n[User Context: Today so far \(Int(snap.todayCarbs))g from \(snap.todayMealCount) meals"
+            if let weekAvg = snap.weeklyAverage { prompt += ", 7-day avg \(Int(weekAvg))g/day" }
+            prompt += "]"
+        }
         let result = try await AIServiceManager.shared.analyzeFoodImagePreencoded(
             base64: pre.base64,
             using: config,

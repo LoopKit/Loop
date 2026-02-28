@@ -104,6 +104,10 @@ final class CarbEntryViewModel: ObservableObject {
         observeLoopUpdates()
         loadAnalysisHistory()
         observeAnalysisHistoryIndexChange()
+
+        if FoodFinder_FeatureFlags.carbTrackingEnabled {
+            Task { await FoodFinder_CarbTrackingService.shared.fetchSnapshot() }
+        }
     }
     
     /// Initalizer for when`CarbEntryView` has an entry to edit

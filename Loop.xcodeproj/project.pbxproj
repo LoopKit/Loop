@@ -682,6 +682,8 @@
 		229116C6C12262BA844C9186 /* DataLayer_EventCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBB91977B69B42B9747CF46 /* DataLayer_EventCollector.swift */; };
 		3E3858A7EEB0F5077BECB6E7 /* DataLayer_Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BFDF71A68291C031B8A998D /* DataLayer_Coordinator.swift */; };
 		05382A77AD01D66964EB058D /* DataLayer_ConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9152B858C0D9CC712575DF8A /* DataLayer_ConsentView.swift */; };
+		5360E9F21CABAFD28DB505EB /* FoodFinder_CarbTrackingDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */; };
+		2A1B8D3286E1ED96FB2ED124 /* FoodFinder_CarbTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80940A6E390B157E04B9D2D /* FoodFinder_CarbTrackingService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1597,6 +1599,8 @@
 		AFBB91977B69B42B9747CF46 /* DataLayer_EventCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_EventCollector.swift; sourceTree = "<group>"; };
 		0BFDF71A68291C031B8A998D /* DataLayer_Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_Coordinator.swift; sourceTree = "<group>"; };
 		9152B858C0D9CC712575DF8A /* DataLayer_ConsentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ConsentView.swift; sourceTree = "<group>"; };
+		E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingDashboard.swift; sourceTree = "<group>"; };
+		F80940A6E390B157E04B9D2D /* FoodFinder_CarbTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2959,6 +2963,7 @@
 			isa = PBXGroup;
 			children = (
 				04BA0B00F58C59F64EEE46FF /* FoodFinder_AICameraView.swift */,
+				E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */,
 				94FAA6B5BFCA71FA1330CF5D /* FoodFinder_EntryPoint.swift */,
 				406DF1A9DEBA5BEB8D2815A1 /* FoodFinder_FavoritesHelpers.swift */,
 				F62E1AC96EEC1636891E430C /* FoodFinder_ScannerView.swift */,
@@ -2993,6 +2998,7 @@
 				0AB00FF448F43B860CCD3B02 /* FoodFinder_ImageDownloader.swift */,
 				6CDF09B9DFA98A7C6DFE74B0 /* FoodFinder_ImageStore.swift */,
 				014D680D2641CBA8BD370562 /* FoodFinder_LocationService.swift */,
+				F80940A6E390B157E04B9D2D /* FoodFinder_CarbTrackingService.swift */,
 				EDF37556B4222F9A8C4DE71F /* FoodFinder_OpenFoodFactsService.swift */,
 				B6240EC27B0D884EAED8B69B /* FoodFinder_ScannerService.swift */,
 				6C5428F178A79D0F8CCCB924 /* FoodFinder_SearchRouter.swift */,
@@ -4166,13 +4172,15 @@
 				08484BF38BCF05D6013FC659 /* LoopInsights_AlcoholTracker.swift in Sources */,
 				5750459159D6F9324C3CC23F /* LoopInsights_AlcoholLogView.swift in Sources */,
 				C43D60BE7EB18127C94178B9 /* LoopInsights_VoiceService.swift in Sources */,
-			
 				4D5A45BFBF1E29BF94FE5A64 /* LoopInsights_MealDebriefModels.swift in Sources */,
 				02B780D9C1D4C4BBAAF1D24A /* LoopInsights_MealDebriefService.swift in Sources */,
 				C68FC1015924729C6AE278BC /* LoopInsights_PreMealAdvisorService.swift in Sources */,
 				F7E94EFA4B82F187D834868F /* LoopInsights_MealInsightsViewModel.swift in Sources */,
 				51EC8EBDEEE397F2B10ABFBF /* LoopInsights_MealDebriefCard.swift in Sources */,
-				3624042E98291A5724E97ACD /* LoopInsights_PreMealAdvisorCard.swift in Sources */,);
+				3624042E98291A5724E97ACD /* LoopInsights_PreMealAdvisorCard.swift in Sources */,
+				5360E9F21CABAFD28DB505EB /* FoodFinder_CarbTrackingDashboard.swift in Sources */,
+				2A1B8D3286E1ED96FB2ED124 /* FoodFinder_CarbTrackingService.swift in Sources */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		43A9437A1B926B7B0051FA24 /* Sources */ = {
