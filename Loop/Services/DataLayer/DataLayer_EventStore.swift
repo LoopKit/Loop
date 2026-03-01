@@ -135,7 +135,12 @@ final class DataLayer_EventStore {
     private func pendingUploadBatchSync(limit: Int) -> [DataLayer_Event] {
         guard let db = db else { return [] }
 
-        let sql = "SELECT * FROM events WHERE uploadStatus = 'pending' ORDER BY createdAt ASC LIMIT ?"
+        let sql = """
+            SELECT * FROM events
+            WHERE uploadStatus = 'pending'
+               OR (uploadStatus = 'failed' AND uploadAttempts < 10)
+            ORDER BY createdAt ASC LIMIT ?
+            """
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return [] }
         defer { sqlite3_finalize(stmt) }

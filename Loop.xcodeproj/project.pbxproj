@@ -685,6 +685,7 @@
 		229116C6C12262BA844C9186 /* DataLayer_EventCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBB91977B69B42B9747CF46 /* DataLayer_EventCollector.swift */; };
 		3E3858A7EEB0F5077BECB6E7 /* DataLayer_Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BFDF71A68291C031B8A998D /* DataLayer_Coordinator.swift */; };
 		05382A77AD01D66964EB058D /* DataLayer_ConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9152B858C0D9CC712575DF8A /* DataLayer_ConsentView.swift */; };
+		1679AFDC18BEB2F35891BE2A /* DataLayer_SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF928A3BBC39B1F2311D7218 /* DataLayer_SyncService.swift */; };
 		5360E9F21CABAFD28DB505EB /* FoodFinder_CarbTrackingDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */; };
 		2A1B8D3286E1ED96FB2ED124 /* FoodFinder_CarbTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80940A6E390B157E04B9D2D /* FoodFinder_CarbTrackingService.swift */; };
 /* End PBXBuildFile section */
@@ -1605,6 +1606,7 @@
 		AFBB91977B69B42B9747CF46 /* DataLayer_EventCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_EventCollector.swift; sourceTree = "<group>"; };
 		0BFDF71A68291C031B8A998D /* DataLayer_Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_Coordinator.swift; sourceTree = "<group>"; };
 		9152B858C0D9CC712575DF8A /* DataLayer_ConsentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ConsentView.swift; sourceTree = "<group>"; };
+		BF928A3BBC39B1F2311D7218 /* DataLayer_SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_SyncService.swift; sourceTree = "<group>"; };
 		E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingDashboard.swift; sourceTree = "<group>"; };
 		F80940A6E390B157E04B9D2D /* FoodFinder_CarbTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -3163,6 +3165,7 @@
 				AFBB91977B69B42B9747CF46 /* DataLayer_EventCollector.swift */,
 				599C3D1975E1EB62BF74303A /* DataLayer_EventStore.swift */,
 				6B1BFDE7BB9565B68D92CBD7 /* DataLayer_SecureStorage.swift */,
+				BF928A3BBC39B1F2311D7218 /* DataLayer_SyncService.swift */,
 			);
 			path = DataLayer;
 			sourceTree = "<group>";
@@ -3910,6 +3913,7 @@
 				6ECAC528492683854868FEC0 /* DataLayer_EventStore.swift in Sources */,
 				A2AB902F5649F9DA67EB948E /* DataLayer_FeatureFlags.swift in Sources */,
 				BF73673705C44313988398E2 /* DataLayer_SecureStorage.swift in Sources */,
+				1679AFDC18BEB2F35891BE2A /* DataLayer_SyncService.swift in Sources */,
 
 				B9D78BD57F35DBCFEC65530D /* AutoPresets_Coordinator.swift in Sources */,
 				BACF15F57C2B75D78B797778 /* AutoPresets_Delegate.swift in Sources */,

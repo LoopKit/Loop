@@ -23,6 +23,8 @@ struct DataLayer_FeatureFlags {
         static let isEnabled = "DataLayer_isEnabled"
         static let researchEnabled = "DataLayer_researchEnabled"
         static let retentionDays = "DataLayer_retentionDays"
+        static let ingestEndpoint = "DataLayer_ingestEndpoint"
+        static let ingestAPIKey = "DataLayer_ingestAPIKey"
     }
 
     private static let defaults = UserDefaults.standard
@@ -53,5 +55,23 @@ struct DataLayer_FeatureFlags {
             return value > 0 ? value : 90
         }
         set { defaults.set(newValue, forKey: Keys.retentionDays) }
+    }
+
+    // MARK: - Ingest Endpoint
+
+    /// Cloud Run ingest URL. Nil = no uploads (open-source default).
+    /// Set in your fork's FeatureFlags or via build-time configuration.
+    static var ingestEndpointURL: URL? {
+        get {
+            guard let str = defaults.string(forKey: Keys.ingestEndpoint) else { return nil }
+            return URL(string: str)
+        }
+        set { defaults.set(newValue?.absoluteString, forKey: Keys.ingestEndpoint) }
+    }
+
+    /// API key for the ingest endpoint. Nil = no auth header sent.
+    static var ingestAPIKey: String? {
+        get { defaults.string(forKey: Keys.ingestAPIKey) }
+        set { defaults.set(newValue, forKey: Keys.ingestAPIKey) }
     }
 }

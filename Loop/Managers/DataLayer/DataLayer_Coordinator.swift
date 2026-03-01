@@ -42,6 +42,7 @@ final class DataLayer_Coordinator: ObservableObject {
 
         collector.startSession()
         startPolling()
+        DataLayer_SyncService.shared.start()
 
         DataLayer_FeatureFlags.log.info("DataLayer started — \(self.consent.grantedCount) categories consented")
     }
@@ -49,6 +50,7 @@ final class DataLayer_Coordinator: ObservableObject {
     /// Call when app enters background.
     func stop() {
         stopPolling()
+        DataLayer_SyncService.shared.stop()
         collector.endSession()
     }
 
@@ -57,6 +59,9 @@ final class DataLayer_Coordinator: ObservableObject {
     /// Delete all local DataLayer data and revoke all consent.
     /// Called from the "Delete All My Data" button in the consent view.
     func deleteAllData() {
+        // Stop uploads
+        DataLayer_SyncService.shared.stop()
+
         // Revoke all consent
         consent.revokeAll()
 
