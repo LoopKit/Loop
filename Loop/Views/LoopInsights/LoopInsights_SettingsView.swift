@@ -9,6 +9,7 @@
 import SwiftUI
 import Combine
 import LoopKit
+import WebKit
 
 /// LoopInsights settings and configuration view.
 /// Accessible from Loop's main SettingsView via NavigationLink.
@@ -70,6 +71,19 @@ struct LoopInsights_SettingsView: View {
     @State private var isTestingNightscout = false
     @State private var nightscoutTestResult: TestResult?
 
+    // MyFitnessPal
+    @State private var mfpImportEnabled = LoopInsights_FeatureFlags.mfpImportEnabled
+    @State private var mfpConnected = LoopInsights_SecureStorage.hasMFPAuth
+    @State private var showMFPLogin = false
+    @State private var isMFPSyncing = false
+    @State private var mfpSyncResult: MFPSyncResult?
+    @State private var mfpError: String?
+
+    private enum MFPSyncResult {
+        case success(LoopInsights_MFPSyncSummary)
+        case failure(String)
+    }
+
     // Developer mode unlock
     @State private var developerTapCount = 0
     @State private var showDeveloperUnlocked = false
@@ -118,9 +132,6 @@ struct LoopInsights_SettingsView: View {
                 analysisOptionsSection
                 biometricsSection
                 phase5FeaturesSection
-                if nightscoutImportEnabled {
-                    nightscoutSection
-                }
                 personalitySection
                 backgroundMonitoringSection
                 dataSection
@@ -146,6 +157,8 @@ struct LoopInsights_SettingsView: View {
             caffeineTrackingEnabled = LoopInsights_FeatureFlags.caffeineTrackingEnabled
             alcoholTrackingEnabled = LoopInsights_FeatureFlags.alcoholTrackingEnabled
             nightscoutImportEnabled = LoopInsights_FeatureFlags.nightscoutImportEnabled
+            mfpImportEnabled = LoopInsights_FeatureFlags.mfpImportEnabled
+            mfpConnected = LoopInsights_SecureStorage.hasMFPAuth
             agpChartEnabled = LoopInsights_FeatureFlags.agpChartEnabled
             cgmBackfillDetectionEnabled = LoopInsights_FeatureFlags.cgmBackfillDetectionEnabled
             tightRangeUpperBound = LoopInsights_FeatureFlags.tightRangeUpperBound
@@ -190,6 +203,33 @@ struct LoopInsights_SettingsView: View {
                             }
                         }
                     }
+            }
+        }
+        .sheet(isPresented: $showMFPLogin) {
+            NavigationView {
+                LoopInsights_MFPLoginWebView(
+                    onAuthSuccess: { auth in
+                        do {
+                            try LoopInsights_SecureStorage.saveMFPAuth(auth)
+                            mfpConnected = true
+                            mfpError = nil
+                        } catch {
+                            mfpError = "Failed to save credentials: \(error.localizedDescription)"
+                        }
+                        showMFPLogin = false
+                    },
+                    onError: { errorMessage in
+                        mfpError = errorMessage
+                        showMFPLogin = false
+                    }
+                )
+                .navigationTitle("MyFitnessPal Login")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") { showMFPLogin = false }
+                    }
+                }
             }
         }
     }
@@ -1135,6 +1175,106 @@ struct LoopInsights_SettingsView: View {
 
                 Divider()
 
+                Toggle(NSLocalizedString("MyFitnessPal Import", comment: "LoopInsights MFP toggle"), isOn: $mfpImportEnabled)
+                    .onChange(of: mfpImportEnabled) { newValue in
+                        LoopInsights_FeatureFlags.mfpImportEnabled = newValue
+                    }
+                Text(NSLocalizedString("Import meals from your MyFitnessPal diary. Imported meals appear in Meal Insights and Ask LoopInsights.", comment: "LoopInsights MFP description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                if mfpImportEnabled {
+                    if mfpConnected {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                            Text("Connected to MyFitnessPal")
+                                .font(.caption).foregroundColor(.green)
+                        }
+                        HStack(spacing: 12) {
+                            Button(action: syncMFPNow) {
+                                HStack(spacing: 4) {
+                                    if isMFPSyncing {
+                                        ProgressView().progressViewStyle(.circular).scaleEffect(0.7)
+                                    } else {
+                                        Image(systemName: "arrow.triangle.2.circlepath")
+                                    }
+                                    Text(isMFPSyncing ? "Syncing..." : "Sync Now")
+                                }
+                                .font(.caption.weight(.medium))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.green)
+                                .cornerRadius(8)
+                            }
+                            .disabled(isMFPSyncing)
+                            .opacity(isMFPSyncing ? 0.5 : 1.0)
+                            .buttonStyle(.plain)
+
+                            Button(action: disconnectMFP) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "xmark.circle")
+                                    Text("Disconnect")
+                                }
+                                .font(.caption.weight(.medium))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.red)
+                                .cornerRadius(8)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    } else {
+                        Button(action: { showMFPLogin = true }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "link")
+                                Text("Connect to MyFitnessPal")
+                            }
+                            .font(.body.weight(.medium))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                        }
+                        .buttonStyle(.plain)
+                        Text("Signs in via MyFitnessPal's website. Your credentials are never stored by Loop.")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    if let result = mfpSyncResult {
+                        switch result {
+                        case .success(let summary):
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                                Text(summary.displayString)
+                                    .font(.caption).foregroundColor(.green)
+                            }
+                        case .failure(let message):
+                            HStack(alignment: .top, spacing: 4) {
+                                Image(systemName: "xmark.circle.fill").foregroundColor(.red)
+                                Text(message).font(.caption).foregroundColor(.red)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                    }
+                    if let error = mfpError {
+                        HStack(alignment: .top, spacing: 4) {
+                            Image(systemName: "xmark.circle.fill").foregroundColor(.red)
+                            Text(error).font(.caption).foregroundColor(.red)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    if let lastSync = LoopInsights_FeatureFlags.mfpLastSyncDate {
+                        let formatter = RelativeDateTimeFormatter()
+                        Text("Last synced \(formatter.localizedString(for: lastSync, relativeTo: Date()))")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Divider()
+
                 Toggle(NSLocalizedString("Nightscout Import", comment: "LoopInsights nightscout toggle"), isOn: $nightscoutImportEnabled)
                     .onChange(of: nightscoutImportEnabled) { newValue in
                         LoopInsights_FeatureFlags.nightscoutImportEnabled = newValue
@@ -1142,6 +1282,76 @@ struct LoopInsights_SettingsView: View {
                 Text(NSLocalizedString("Import glucose and treatment data from a Nightscout server as a supplemental data source.", comment: "LoopInsights nightscout description"))
                     .font(.caption)
                     .foregroundColor(.secondary)
+                if nightscoutImportEnabled {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Site URL").font(.caption).foregroundColor(.secondary)
+                        TextField("https://your-site.herokuapp.com", text: $nightscoutConfig.siteURL)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .autocapitalization(.none)
+                            .disableAutocorrection(true)
+                            .keyboardType(.URL)
+                            .onChange(of: nightscoutConfig.siteURL) { _ in
+                                nightscoutConfig.isConnected = false
+                                nightscoutTestResult = nil
+                                nightscoutConfig.save()
+                            }
+                    }
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("API Secret").font(.caption).foregroundColor(.secondary)
+                        SecureField("Your API secret", text: $nightscoutConfig.apiSecret)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .autocapitalization(.none)
+                            .disableAutocorrection(true)
+                            .onChange(of: nightscoutConfig.apiSecret) { _ in
+                                nightscoutConfig.isConnected = false
+                                nightscoutTestResult = nil
+                                nightscoutConfig.save()
+                            }
+                    }
+                    Button(action: testNightscoutConnection) {
+                        HStack(spacing: 6) {
+                            if isTestingNightscout {
+                                ProgressView().progressViewStyle(.circular).scaleEffect(0.8).tint(.black)
+                                Text("Testing...")
+                            } else {
+                                Image(systemName: "checkmark.shield")
+                                Text("Test Connection")
+                            }
+                        }
+                        .font(.body.weight(.medium))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.white)
+                        .cornerRadius(10)
+                    }
+                    .disabled(isTestingNightscout || nightscoutConfig.siteURL.isEmpty)
+                    .opacity((isTestingNightscout || nightscoutConfig.siteURL.isEmpty) ? 0.5 : 1.0)
+                    .buttonStyle(.plain)
+                    if let result = nightscoutTestResult {
+                        switch result {
+                        case .success:
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                                Text("Connected to Nightscout").font(.caption).foregroundColor(.green)
+                            }
+                        case .failure(let message):
+                            HStack(alignment: .top, spacing: 4) {
+                                Image(systemName: "xmark.circle.fill").foregroundColor(.red)
+                                Text(message).font(.caption).foregroundColor(.red)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        case .warning(let message):
+                            HStack(alignment: .top, spacing: 4) {
+                                Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.orange)
+                                Text(message).font(.caption).foregroundColor(.orange)
+                            }
+                        }
+                    }
+                    Text("Nightscout data is used as supplemental context for AI analysis. Your existing Loop data stores remain the primary source.")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
 
                 if foodResponseEnabled {
                     Divider()
@@ -1154,114 +1364,6 @@ struct LoopInsights_SettingsView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-            }
-        }
-    }
-
-    // MARK: - Nightscout Configuration
-
-    private var nightscoutSection: some View {
-        Section {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 6) {
-                    Image(systemName: "cloud.fill")
-                        .foregroundColor(.accentColor)
-                    Text(NSLocalizedString("NIGHTSCOUT", comment: "LoopInsights Nightscout header"))
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
-                        .textCase(.uppercase)
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(NSLocalizedString("Site URL", comment: "LoopInsights Nightscout URL label"))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    TextField("https://your-site.herokuapp.com", text: $nightscoutConfig.siteURL)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
-                        .keyboardType(.URL)
-                        .onChange(of: nightscoutConfig.siteURL) { _ in
-                            nightscoutConfig.isConnected = false
-                            nightscoutTestResult = nil
-                            nightscoutConfig.save()
-                        }
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(NSLocalizedString("API Secret", comment: "LoopInsights Nightscout API secret label"))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    SecureField(NSLocalizedString("Your API secret", comment: "LoopInsights Nightscout secret placeholder"), text: $nightscoutConfig.apiSecret)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
-                        .onChange(of: nightscoutConfig.apiSecret) { _ in
-                            nightscoutConfig.isConnected = false
-                            nightscoutTestResult = nil
-                            nightscoutConfig.save()
-                        }
-                }
-
-                // Test Connection
-                Button(action: testNightscoutConnection) {
-                    HStack(spacing: 6) {
-                        if isTestingNightscout {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                                .scaleEffect(0.8)
-                                .tint(.black)
-                            Text(NSLocalizedString("Testing...", comment: "LoopInsights testing nightscout"))
-                        } else {
-                            Image(systemName: "checkmark.shield")
-                            Text(NSLocalizedString("Test Connection", comment: "LoopInsights test nightscout button"))
-                        }
-                    }
-                    .font(.body.weight(.medium))
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(Color.white)
-                    .cornerRadius(10)
-                }
-                .disabled(isTestingNightscout || nightscoutConfig.siteURL.isEmpty)
-                .opacity((isTestingNightscout || nightscoutConfig.siteURL.isEmpty) ? 0.5 : 1.0)
-                .buttonStyle(.plain)
-
-                if let result = nightscoutTestResult {
-                    switch result {
-                    case .success:
-                        HStack(spacing: 4) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                            Text(NSLocalizedString("Connected to Nightscout", comment: "LoopInsights nightscout connected"))
-                                .font(.caption)
-                                .foregroundColor(.green)
-                        }
-                    case .failure(let message):
-                        HStack(alignment: .top, spacing: 4) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.red)
-                            Text(message)
-                                .font(.caption)
-                                .foregroundColor(.red)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    case .warning(let message):
-                        HStack(alignment: .top, spacing: 4) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
-                            Text(message)
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                        }
-                    }
-                }
-
-                Text(NSLocalizedString("Nightscout data is used as supplemental context for AI analysis. Your existing Loop data stores remain the primary source.", comment: "LoopInsights nightscout note"))
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
             }
         }
     }
@@ -1289,6 +1391,41 @@ struct LoopInsights_SettingsView: View {
                 }
             }
         }
+    }
+
+    private func syncMFPNow() {
+        isMFPSyncing = true
+        mfpSyncResult = nil
+        mfpError = nil
+        Task {
+            do {
+                let lastSync = LoopInsights_FeatureFlags.mfpLastSyncDate
+                let summary = try await LoopInsights_MFPImporter.syncDiary(since: lastSync)
+                await MainActor.run {
+                    isMFPSyncing = false
+                    mfpSyncResult = .success(summary)
+                }
+            } catch {
+                await MainActor.run {
+                    isMFPSyncing = false
+                    if let mfpErr = error as? LoopInsights_MFPImporter.MFPError {
+                        switch mfpErr {
+                        case .sessionExpired, .notConnected:
+                            mfpConnected = false
+                        default: break
+                        }
+                    }
+                    mfpSyncResult = .failure(error.localizedDescription)
+                }
+            }
+        }
+    }
+
+    private func disconnectMFP() {
+        LoopInsights_MFPImporter.disconnect()
+        mfpConnected = false
+        mfpSyncResult = nil
+        mfpError = nil
     }
 
     // MARK: - Helpers
@@ -1469,6 +1606,91 @@ private struct LoopInsights_TestDashboardWrapper: View {
         }
         .onAppear {
             container.initializeIfNeeded(dataStoresProvider: dataStoresProvider)
+        }
+    }
+}
+
+// MARK: - MFP Login WebView
+
+/// Presents MyFitnessPal's login page in a WKWebView. After the user authenticates,
+/// extracts a bearer token via JavaScript and returns it through the callback.
+/// The user's credentials are handled entirely by MFP's website — Loop never sees them.
+private struct LoopInsights_MFPLoginWebView: UIViewRepresentable {
+    let onAuthSuccess: (LoopInsights_MFPAuthData) -> Void
+    let onError: (String) -> Void
+
+    func makeUIView(context: Context) -> WKWebView {
+        let config = WKWebViewConfiguration()
+        let contentController = WKUserContentController()
+        contentController.add(context.coordinator, name: "authResult")
+        config.userContentController = contentController
+
+        let webView = WKWebView(frame: .zero, configuration: config)
+        webView.navigationDelegate = context.coordinator
+
+        if let url = URL(string: "https://www.myfitnesspal.com/account/login") {
+            webView.load(URLRequest(url: url))
+        }
+
+        return webView
+    }
+
+    func updateUIView(_ webView: WKWebView, context: Context) {}
+
+    static func dismantleUIView(_ webView: WKWebView, coordinator: Coordinator) {
+        webView.configuration.userContentController.removeScriptMessageHandler(forName: "authResult")
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onAuthSuccess: onAuthSuccess, onError: onError)
+    }
+
+    class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
+        let onAuthSuccess: (LoopInsights_MFPAuthData) -> Void
+        let onError: (String) -> Void
+        private var hasExchangedToken = false
+
+        init(onAuthSuccess: @escaping (LoopInsights_MFPAuthData) -> Void,
+             onError: @escaping (String) -> Void) {
+            self.onAuthSuccess = onAuthSuccess
+            self.onError = onError
+        }
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            guard !hasExchangedToken else { return }
+            guard let url = webView.url,
+                  url.host?.contains("myfitnesspal.com") == true,
+                  !url.path.contains("/account/login"),
+                  !url.path.contains("/api/auth/") else { return }
+
+            // User has navigated away from login — attempt token exchange
+            hasExchangedToken = true
+            webView.evaluateJavaScript("""
+                fetch('/user/auth_token?refresh=true')
+                    .then(function(r) { return r.text(); })
+                    .then(function(t) { window.webkit.messageHandlers.authResult.postMessage(t); })
+                    .catch(function(e) { window.webkit.messageHandlers.authResult.postMessage('ERROR:' + e.message); })
+            """)
+        }
+
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            if !hasExchangedToken {
+                onError("Navigation failed: \(error.localizedDescription)")
+            }
+        }
+
+        func userContentController(_ userContentController: WKUserContentController,
+                                    didReceive message: WKScriptMessage) {
+            guard message.name == "authResult",
+                  let body = message.body as? String else { return }
+
+            if body.hasPrefix("ERROR:") {
+                onError("Token exchange failed: \(String(body.dropFirst(6)))")
+            } else if let auth = LoopInsights_MFPImporter.parseAuthResponse(body) {
+                onAuthSuccess(auth)
+            } else {
+                onError("Could not authenticate with MyFitnessPal. Please try again.")
+            }
         }
     }
 }

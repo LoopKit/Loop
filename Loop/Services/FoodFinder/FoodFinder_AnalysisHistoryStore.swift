@@ -223,16 +223,19 @@ enum MealArchive {
             .sorted { $0.date > $1.date }
     }
 
-    /// Load the complete archive (all time), deduplicating by date+carbs proximity.
-    /// Keeps the first record in each cluster (which has the earliest write and
-    /// typically the most complete data). This collapses duplicates that were
-    /// created before the write-side guard was added.
+    /// Load the complete archive (all time), deduplicating in two passes:
+    /// 1. Same-source dedup: date ±5min + carbs ±1g (collapses write-side duplicates).
+    /// 2. Cross-source priority dedup: date ±2h + carbs ±5g across different sources.
+    ///    Keeps the highest-priority source per the data primacy order:
+    ///    Loop > FoodFinder (image/dictation/barcode) > External (mfpImport).
     static func loadAll() -> [FoodFinder_AnalysisRecord] {
         guard FileManager.default.fileExists(atPath: archiveURL.path) else { return [] }
         guard let data = try? Data(contentsOf: archiveURL) else { return [] }
         let raw = (try? JSONDecoder().decode([FoodFinder_AnalysisRecord].self, from: data)) ?? []
+
+        // Pass 1: same-source dedup (tight window)
         var seen: [(date: Date, carbs: Double)] = []
-        return raw.filter { record in
+        let pass1 = raw.filter { record in
             let isDup = seen.contains { existing in
                 abs(existing.date.timeIntervalSince(record.date)) < 300 &&
                 abs(existing.carbs - record.carbsGrams) < 1
@@ -240,6 +243,41 @@ enum MealArchive {
             guard !isDup else { return false }
             seen.append((record.date, record.carbsGrams))
             return true
+        }
+
+        // Pass 2: cross-source priority dedup (wider window)
+        // When entries from different sources overlap (±2h, ±5g carbs),
+        // keep the higher-priority source only.
+        var result: [FoodFinder_AnalysisRecord] = []
+        for record in pass1 {
+            let dominated = result.contains { existing in
+                existing.analysisType != record.analysisType &&
+                abs(existing.date.timeIntervalSince(record.date)) < 7200 &&
+                abs(existing.carbsGrams - record.carbsGrams) < 5 &&
+                sourcePriority(existing.analysisType) >= sourcePriority(record.analysisType)
+            }
+            guard !dominated else { continue }
+
+            // Also remove any existing lower-priority entry this record supersedes
+            result.removeAll { existing in
+                existing.analysisType != record.analysisType &&
+                abs(existing.date.timeIntervalSince(record.date)) < 7200 &&
+                abs(existing.carbsGrams - record.carbsGrams) < 5 &&
+                sourcePriority(existing.analysisType) < sourcePriority(record.analysisType)
+            }
+            result.append(record)
+        }
+
+        return result
+    }
+
+    /// Data primacy: Loop > FoodFinder (image/dictation/barcode) > External (mfpImport).
+    private static func sourcePriority(_ type: FoodFinder_AnalysisRecord.AnalysisType) -> Int {
+        switch type {
+        case .image:      return 3
+        case .dictation:  return 2
+        case .barcode:    return 1
+        case .mfpImport:  return 0
         }
     }
 

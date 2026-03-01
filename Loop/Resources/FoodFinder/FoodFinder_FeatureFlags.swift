@@ -34,6 +34,7 @@ enum FoodFinder_FeatureFlags {
         get { UserDefaults.standard.bool(forKey: Keys.carbTrackingEnabled) }
         set { UserDefaults.standard.set(newValue, forKey: Keys.carbTrackingEnabled) }
     }
+
 }
 
 // MARK: - UserDefaults Keys

@@ -53,5 +53,6 @@ struct FoodFinder_AnalysisRecord: Codable, Identifiable, Equatable {
         case image
         case dictation
         case barcode
+        case mfpImport
     }
 }

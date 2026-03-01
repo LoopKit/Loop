@@ -43,6 +43,8 @@ struct LoopInsights_FeatureFlags {
         static let preMealAdvisorEnabled = "LoopInsights_preMealAdvisorEnabled"
         static let cgmBackfillDetectionEnabled = "LoopInsights_cgmBackfillDetectionEnabled"
         static let tightRangeUpperBound = "LoopInsights_tightRangeUpperBound"
+        static let mfpImportEnabled = "LoopInsights_mfpImportEnabled"
+        static let mfpLastSyncDate = "LoopInsights_mfpLastSyncDate"
     }
 
     private static let defaults = UserDefaults.standard
@@ -244,6 +246,18 @@ struct LoopInsights_FeatureFlags {
     static var nightscoutImportEnabled: Bool {
         get { defaults.bool(forKey: Keys.nightscoutImportEnabled) }
         set { defaults.set(newValue, forKey: Keys.nightscoutImportEnabled) }
+    }
+
+    /// Enables MyFitnessPal diary import — pulls meals and exercise from MFP via authenticated API.
+    static var mfpImportEnabled: Bool {
+        get { defaults.bool(forKey: Keys.mfpImportEnabled) }
+        set { defaults.set(newValue, forKey: Keys.mfpImportEnabled) }
+    }
+
+    /// Last successful MFP sync date.
+    static var mfpLastSyncDate: Date? {
+        get { defaults.object(forKey: Keys.mfpLastSyncDate) as? Date }
+        set { defaults.set(newValue, forKey: Keys.mfpLastSyncDate) }
     }
 
     /// Enables the Ambulatory Glucose Profile chart on the dashboard.

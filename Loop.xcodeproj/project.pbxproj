@@ -664,6 +664,8 @@
 		18A56885FD960F7E45AE2C39 /* FoodFinder_VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CAFD38F7A4EC9387C0AE70 /* FoodFinder_VoiceService.swift */; };
 		1DE82D03265EF6137462130B /* FoodFinder_AnalysisRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C2BA990A7B46B833530A0B /* FoodFinder_AnalysisRecord.swift */; };
 		866893504B18A74A8FDC1E72 /* FoodFinder_AnalysisHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B876633FB950693D1C798869 /* FoodFinder_AnalysisHistoryStore.swift */; };
+		5A82D3A36743BDDD025F93CF /* LoopInsights_MFPModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B39C40C1C0CE37E61270034 /* LoopInsights_MFPModels.swift */; };
+		C3044449D094E01128700305 /* LoopInsights_MFPImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C0F4AADBE0A552B197D29DD /* LoopInsights_MFPImporter.swift */; };
 		08484BF38BCF05D6013FC659 /* LoopInsights_AlcoholTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB2DBFF0339A59DE50B5E79 /* LoopInsights_AlcoholTracker.swift */; };
 		5750459159D6F9324C3CC23F /* LoopInsights_AlcoholLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A1F607877F41965FF710D61 /* LoopInsights_AlcoholLogView.swift */; };
 		C43D60BE7EB18127C94178B9 /* LoopInsights_VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90281DB9786B60AE9388CF4 /* LoopInsights_VoiceService.swift */; };
@@ -1582,6 +1584,8 @@
 		16CAFD38F7A4EC9387C0AE70 /* FoodFinder_VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_VoiceService.swift; sourceTree = "<group>"; };
 		63C2BA990A7B46B833530A0B /* FoodFinder_AnalysisRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AnalysisRecord.swift; sourceTree = "<group>"; };
 		B876633FB950693D1C798869 /* FoodFinder_AnalysisHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AnalysisHistoryStore.swift; sourceTree = "<group>"; };
+		4B39C40C1C0CE37E61270034 /* LoopInsights_MFPModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MFPModels.swift; sourceTree = "<group>"; };
+		6C0F4AADBE0A552B197D29DD /* LoopInsights_MFPImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MFPImporter.swift; sourceTree = "<group>"; };
 		BAB2DBFF0339A59DE50B5E79 /* LoopInsights_AlcoholTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AlcoholTracker.swift; sourceTree = "<group>"; };
 		6A1F607877F41965FF710D61 /* LoopInsights_AlcoholLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AlcoholLogView.swift; sourceTree = "<group>"; };
 		C90281DB9786B60AE9388CF4 /* LoopInsights_VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_VoiceService.swift; sourceTree = "<group>"; };
@@ -2926,7 +2930,9 @@
 				20EB0E3DF88A1303EA105423 /* LoopInsights_SuggestionRecord.swift */,
 				112AA1E5DF9955A367071297 /* LoopInsights_Phase5Models.swift */,
 			
-				7D4A2E67CD7E5A4EDFC30932 /* LoopInsights_MealDebriefModels.swift */,);
+				7D4A2E67CD7E5A4EDFC30932 /* LoopInsights_MealDebriefModels.swift */,
+				4B39C40C1C0CE37E61270034 /* LoopInsights_MFPModels.swift */,
+			);
 			path = LoopInsights;
 			sourceTree = "<group>";
 		};
@@ -3049,6 +3055,7 @@
 				0820F7B0E9F04165D7455FF5 /* LoopInsights_BackfillDetector.swift */,
 				98D9E86D766B4072B4FF2C64 /* LoopInsights_MealDebriefService.swift */,
 				4BF2D36066BDBA09E965A0F0 /* LoopInsights_PreMealAdvisorService.swift */,
+				6C0F4AADBE0A552B197D29DD /* LoopInsights_MFPImporter.swift */,
 			);
 			path = LoopInsights;
 			sourceTree = "<group>";
@@ -4172,6 +4179,8 @@
 				18A56885FD960F7E45AE2C39 /* FoodFinder_VoiceService.swift in Sources */,
 				1DE82D03265EF6137462130B /* FoodFinder_AnalysisRecord.swift in Sources */,
 				866893504B18A74A8FDC1E72 /* FoodFinder_AnalysisHistoryStore.swift in Sources */,
+				5A82D3A36743BDDD025F93CF /* LoopInsights_MFPModels.swift in Sources */,
+				C3044449D094E01128700305 /* LoopInsights_MFPImporter.swift in Sources */,
 				08484BF38BCF05D6013FC659 /* LoopInsights_AlcoholTracker.swift in Sources */,
 				5750459159D6F9324C3CC23F /* LoopInsights_AlcoholLogView.swift in Sources */,
 				C43D60BE7EB18127C94178B9 /* LoopInsights_VoiceService.swift in Sources */,

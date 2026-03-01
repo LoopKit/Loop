@@ -278,10 +278,26 @@ final class LoopInsights_Coordinator: ObservableObject {
             if !menstrualCtx.isEmpty { context.append(menstrualCtx) }
         }
 
-        // Nightscout supplemental data
+        // Nightscout supplemental data (deduplicated against Loop + FoodFinder)
         if LoopInsights_FeatureFlags.nightscoutImportEnabled {
-            let nsCtx = await buildNightscoutPromptContext(start: start, end: end)
+            // Resolve carbs for dedup if not already loaded
+            var dedupCarbs = carbEntries
+            if dedupCarbs == nil, let bridge = dataProviderBridge {
+                dedupCarbs = try? await bridge.getCarbEntries(start: start, end: end)
+            }
+            let archiveMealsForDedup = MealArchive.meals(from: start, to: end)
+            let nsCtx = await buildNightscoutPromptContext(
+                start: start, end: end,
+                loopCarbEntries: dedupCarbs ?? [],
+                archiveMeals: archiveMealsForDedup
+            )
             if !nsCtx.isEmpty { context.append(nsCtx) }
+        }
+
+        // MFP exercise data
+        if LoopInsights_FeatureFlags.mfpImportEnabled {
+            let exerciseCtx = Self.buildMFPExercisePromptContext(start: start, end: end)
+            if !exerciseCtx.isEmpty { context.append(exerciseCtx) }
         }
 
         guard !context.isEmpty else { return nil }
@@ -431,7 +447,16 @@ final class LoopInsights_Coordinator: ObservableObject {
 
     /// Build prompt context from Nightscout data. Uses a 5-minute cache to
     /// avoid hammering the server on every chat message.
-    private func buildNightscoutPromptContext(start: Date, end: Date) async -> String {
+    ///
+    /// Deduplication: Nightscout carbs/boluses are filtered against Loop's
+    /// CarbStore entries and FoodFinder's MealArchive to avoid double-counting
+    /// meals that appear in multiple data sources.
+    private func buildNightscoutPromptContext(
+        start: Date,
+        end: Date,
+        loopCarbEntries: [StoredCarbEntry],
+        archiveMeals: [FoodFinder_AnalysisRecord]
+    ) async -> String {
         let config = LoopInsightsNightscoutConfig.load()
         guard config.isConnected, !config.siteURL.isEmpty else { return "" }
 
@@ -475,16 +500,31 @@ final class LoopInsights_Coordinator: ObservableObject {
             }
         }
 
-        // Recent treatments
+        // Recent treatments — deduplicated against Loop CarbStore + FoodFinder MealArchive
         let recentCarbs = result.carbEntries
             .filter { $0.date >= twelveHoursAgo }
             .sorted { $0.date > $1.date }
 
-        if !recentCarbs.isEmpty {
+        // Filter out Nightscout carbs that already exist in Loop's CarbStore (±5min, ±2g)
+        // or FoodFinder's MealArchive (±5min, ±5g). Loop and FoodFinder are higher-priority
+        // data sources, so we suppress the Nightscout duplicate.
+        let dedupedCarbs = recentCarbs.filter { nsEntry in
+            let matchesLoop = loopCarbEntries.contains { loopEntry in
+                abs(loopEntry.startDate.timeIntervalSince(nsEntry.date)) < 300 &&
+                abs(loopEntry.quantity.doubleValue(for: .gram()) - nsEntry.grams) < 2
+            }
+            let matchesArchive = archiveMeals.contains { meal in
+                abs(meal.date.timeIntervalSince(nsEntry.date)) < 300 &&
+                abs(meal.carbsGrams - nsEntry.grams) < 5
+            }
+            return !matchesLoop && !matchesArchive
+        }
+
+        if !dedupedCarbs.isEmpty {
             let formatter = DateFormatter()
             formatter.timeStyle = .short
             lines.append("  Recent Meals (Nightscout):")
-            for entry in recentCarbs.prefix(10) {
+            for entry in dedupedCarbs.prefix(10) {
                 var line = "    \(formatter.string(from: entry.date)): \(String(format: "%.0f", entry.grams))g carbs"
                 if let foodType = entry.foodType { line += " (\(foodType))" }
                 lines.append(line)
@@ -503,6 +543,41 @@ final class LoopInsights_Coordinator: ObservableObject {
                 lines.append("    \(formatter.string(from: bolus.date)): \(String(format: "%.1f", bolus.units)) U")
             }
         }
+
+        return lines.joined(separator: "\n")
+    }
+
+    // MARK: - MFP Exercise Context
+
+    /// Build prompt context from MFP exercise entries within the analysis period.
+    private static func buildMFPExercisePromptContext(start: Date, end: Date) -> String {
+        let exercises = LoopInsights_MFPImporter.loadExercises(since: start)
+            .filter { $0.date <= end }
+            .sorted { $0.date > $1.date }
+        guard !exercises.isEmpty else { return "" }
+
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+
+        var lines: [String] = ["MFP EXERCISE DATA (\(exercises.count) entries):"]
+        for entry in exercises.prefix(20) {
+            var line = "  \(formatter.string(from: entry.date)): \(entry.name)"
+            if entry.durationMinutes > 0 {
+                line += " (\(String(format: "%.0f", entry.durationMinutes)) min"
+                if entry.caloriesBurned > 0 { line += ", \(String(format: "%.0f", entry.caloriesBurned)) cal" }
+                line += ")"
+            } else if entry.caloriesBurned > 0 {
+                line += " (\(String(format: "%.0f", entry.caloriesBurned)) cal)"
+            }
+            lines.append(line)
+        }
+
+        // Summary stats
+        let totalCal = exercises.reduce(0.0) { $0 + $1.caloriesBurned }
+        let totalMin = exercises.reduce(0.0) { $0 + $1.durationMinutes }
+        let days = max(1, Int(end.timeIntervalSince(start) / 86400))
+        lines.append("  Period totals: \(String(format: "%.0f", totalCal)) cal burned, \(String(format: "%.0f", totalMin)) min, avg \(String(format: "%.0f", totalCal / Double(days))) cal/day")
 
         return lines.joined(separator: "\n")
     }
