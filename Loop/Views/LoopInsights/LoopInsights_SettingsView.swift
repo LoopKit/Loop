@@ -60,6 +60,7 @@ struct LoopInsights_SettingsView: View {
     @State private var alcoholTrackingEnabled = LoopInsights_FeatureFlags.alcoholTrackingEnabled
     @State private var nightscoutImportEnabled = LoopInsights_FeatureFlags.nightscoutImportEnabled
     @State private var agpChartEnabled = LoopInsights_FeatureFlags.agpChartEnabled
+    @State private var cgmBackfillDetectionEnabled = LoopInsights_FeatureFlags.cgmBackfillDetectionEnabled
 
     // Nightscout
     @State private var nightscoutConfig = LoopInsightsNightscoutConfig.load()
@@ -143,6 +144,7 @@ struct LoopInsights_SettingsView: View {
             alcoholTrackingEnabled = LoopInsights_FeatureFlags.alcoholTrackingEnabled
             nightscoutImportEnabled = LoopInsights_FeatureFlags.nightscoutImportEnabled
             agpChartEnabled = LoopInsights_FeatureFlags.agpChartEnabled
+            cgmBackfillDetectionEnabled = LoopInsights_FeatureFlags.cgmBackfillDetectionEnabled
             nightscoutConfig = LoopInsightsNightscoutConfig.load()
             apiKeyText = LoopInsights_SecureStorage.loadAPIKey() ?? ""
 
@@ -1062,11 +1064,36 @@ struct LoopInsights_SettingsView: View {
 
                 Divider()
 
+                Toggle(NSLocalizedString("CGM Signal Quality", comment: "LoopInsights CGM backfill toggle"), isOn: $cgmBackfillDetectionEnabled)
+                    .onChange(of: cgmBackfillDetectionEnabled) { newValue in
+                        LoopInsights_FeatureFlags.cgmBackfillDetectionEnabled = newValue
+                    }
+                Text(NSLocalizedString("Shows a banner when your CGM reconnects after a signal gap. Also tracks signal quality over time on the dashboard. Informational only — does not affect dosing.", comment: "LoopInsights CGM backfill description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
                 Toggle(NSLocalizedString("Circadian Analysis", comment: "LoopInsights circadian toggle"), isOn: $circadianEnabled)
                     .onChange(of: circadianEnabled) { newValue in
                         LoopInsights_FeatureFlags.circadianEnabled = newValue
                     }
                 Text(NSLocalizedString("Enables circadian glucose profiling, dawn phenomenon detection, negative basal awareness, and HRV-based stress scoring. Enriches AI analysis with sleep/wake patterns.", comment: "LoopInsights circadian description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
+                NavigationLink {
+                    DataLayer_ConsentView()
+                } label: {
+                    HStack {
+                        Image(systemName: "arrow.up.doc")
+                            .foregroundColor(.accentColor)
+                        Text(NSLocalizedString("Data Sharing", comment: "DataLayer consent view navigation"))
+                    }
+                }
+                Text(NSLocalizedString("Control how your health data is shared with healthcare providers and optionally contributed to diabetes research.", comment: "DataLayer consent description"))
                     .font(.caption)
                     .foregroundColor(.secondary)
 
@@ -1101,21 +1128,6 @@ struct LoopInsights_SettingsView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-
-                Divider()
-
-                NavigationLink {
-                    DataLayer_ConsentView()
-                } label: {
-                    HStack {
-                        Image(systemName: "arrow.up.doc")
-                            .foregroundColor(.accentColor)
-                        Text(NSLocalizedString("Data Sharing", comment: "DataLayer consent view navigation"))
-                    }
-                }
-                Text(NSLocalizedString("Control how your health data is shared with healthcare providers and optionally contributed to diabetes research.", comment: "DataLayer consent description"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
         }
     }

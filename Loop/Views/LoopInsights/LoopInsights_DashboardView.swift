@@ -1006,6 +1006,10 @@ struct LoopInsights_DashboardView: View {
                 }
             }
 
+            if LoopInsights_FeatureFlags.cgmBackfillDetectionEnabled {
+                cgmSignalQualityCard
+            }
+
             Button(action: { showingGoals = true }) {
                 HStack {
                     Image(systemName: "target")
@@ -1071,6 +1075,66 @@ struct LoopInsights_DashboardView: View {
             }
         }
     }
+
+    // MARK: - CGM Signal Quality Card
+
+    @ViewBuilder
+    private var cgmSignalQualityCard: some View {
+        let period = viewModel.analysisPeriod.rawValue
+        let summary = LoopInsights_BackfillDetector.shared.buildSummary(days: period)
+        if summary.totalEvents > 0 {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 6) {
+                    Image(systemName: "antenna.radiowaves.left.and.right")
+                        .foregroundColor(.orange)
+                    Text(NSLocalizedString("CGM Signal Quality", comment: "LoopInsights CGM signal quality card title"))
+                        .font(.subheadline.weight(.semibold))
+                }
+
+                Text(String(
+                    format: NSLocalizedString("%d signal gap(s) in the last %d days", comment: "LoopInsights CGM gap count"),
+                    summary.totalEvents, period
+                ))
+                .font(.caption)
+                .foregroundColor(.primary)
+
+                if let longestEvent = summary.longestGapEvent {
+                    HStack(spacing: 4) {
+                        Text(NSLocalizedString("Longest:", comment: "LoopInsights CGM longest gap label"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(String(
+                            format: NSLocalizedString("%d min (%@)", comment: "LoopInsights CGM longest gap value"),
+                            summary.longestGapMinutes,
+                            Self.shortDateFormatter.string(from: longestEvent.detectedAt)
+                        ))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    }
+                }
+
+                HStack(spacing: 4) {
+                    Text(String(format: "%.1f%%", summary.realTimeCoveragePercent))
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(summary.realTimeCoveragePercent >= 95 ? .green : .orange)
+                    Text(NSLocalizedString("real-time coverage", comment: "LoopInsights CGM coverage label"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Text(NSLocalizedString("During gaps, readings may be estimated by your sensor.", comment: "LoopInsights CGM gap disclaimer"))
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
+    private static let shortDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE h:mm a"
+        return formatter
+    }()
 
     // MARK: - Developer Mode
 

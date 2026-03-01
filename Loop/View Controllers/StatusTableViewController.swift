@@ -54,6 +54,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
         tableView.register(AlertPermissionsDisabledWarningCell.self, forCellReuseIdentifier: AlertPermissionsDisabledWarningCell.className)
         tableView.register(MuteAlertsWarningCell.self, forCellReuseIdentifier: MuteAlertsWarningCell.className)
+        tableView.register(CGMSignalGapWarningCell.self, forCellReuseIdentifier: CGMSignalGapWarningCell.className)
 
         if FeatureFlags.predictedGlucoseChartClampEnabled {
             statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBoundClamped
@@ -131,6 +132,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 self.refreshContext.update(with: .status)
                 self.reloadData(animated: true)
             }
+            .store(in: &cancellables)
+
+        LoopInsights_BackfillDetector.shared.$recentGapEvent
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates(by: { $0?.id == $1?.id })
+            .sink { [weak self] _ in self?.updateBannerRow(animated: true) }
             .store(in: &cancellables)
 
         if let gestureRecognizer = charts.gestureRecognizer {
@@ -750,7 +757,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private var shouldShowBannerWarning: Bool {
-        alertPermissionsChecker.showWarning || alertMuter.configuration.shouldMute
+        alertPermissionsChecker.showWarning ||
+        alertMuter.configuration.shouldMute ||
+        (LoopInsights_FeatureFlags.cgmBackfillDetectionEnabled &&
+         LoopInsights_BackfillDetector.shared.recentGapEvent != nil)
     }
 
     private func updateBannerRow(animated: Bool) {
@@ -972,17 +982,68 @@ final class StatusTableViewController: LoopChartsTableViewController {
             contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 13, trailing: 0)
         }
     }
-    
+
+    private class CGMSignalGapWarningCell: UITableViewCell {
+        var gapEvent: LoopInsightsBackfillEvent?
+
+        override func updateConfiguration(using state: UICellConfigurationState) {
+            super.updateConfiguration(using: state)
+
+            let adjustViewForNarrowDisplay = bounds.width < 350
+
+            var contentConfig = defaultContentConfiguration().updated(for: state)
+            let titleImageAttachment = NSTextAttachment()
+            titleImageAttachment.image = UIImage(systemName: "antenna.radiowaves.left.and.right")?.withTintColor(.white)
+            let title = NSMutableAttributedString(string: NSLocalizedString(" CGM Signal Gap Detected", comment: "Warning text for CGM signal gap detection"))
+            let titleWithImage = NSMutableAttributedString(attachment: titleImageAttachment)
+            titleWithImage.append(title)
+            contentConfig.attributedText = titleWithImage
+            contentConfig.textProperties.color = .white
+            contentConfig.textProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 16 : 18, weight: .bold)
+            contentConfig.textProperties.adjustsFontSizeToFitWidth = true
+
+            if let event = gapEvent {
+                contentConfig.secondaryText = String(
+                    format: NSLocalizedString("Your sensor filled in %d min of readings. These may be estimated.", comment: "Secondary text for CGM signal gap warning (minutes)"),
+                    event.gapDurationMinutes
+                )
+            } else {
+                contentConfig.secondaryText = NSLocalizedString("Your sensor reconnected and filled in readings. These may be estimated.", comment: "Secondary text for CGM signal gap warning (generic)")
+            }
+            contentConfig.secondaryTextProperties.color = .white
+            contentConfig.secondaryTextProperties.font = .systemFont(ofSize: adjustViewForNarrowDisplay ? 13 : 15)
+            contentConfiguration = contentConfig
+
+            var backgroundConfig = backgroundConfiguration?.updated(for: state)
+            backgroundConfig?.backgroundColor = .warning
+            backgroundConfiguration = backgroundConfig
+            backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10)
+            backgroundConfiguration?.cornerRadius = 10
+
+            let dismissIndicator = UIImage(systemName: "xmark.circle")?.withTintColor(.white)
+            let imageView = UIImageView(image: dismissIndicator)
+            imageView.tintColor = .white
+            imageView.frame.size = CGSize(width: 24, height: 24)
+            accessoryView = imageView
+
+            contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 13, trailing: 0)
+        }
+    }
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch Section(rawValue: indexPath.section)! {
         case .alertWarning:
             if alertPermissionsChecker.showWarning {
                 let cell = tableView.dequeueReusableCell(withIdentifier: AlertPermissionsDisabledWarningCell.className, for: indexPath) as! AlertPermissionsDisabledWarningCell
                 return cell
-            } else {
+            } else if alertMuter.configuration.shouldMute {
                 let cell = tableView.dequeueReusableCell(withIdentifier: MuteAlertsWarningCell.className, for: indexPath) as! MuteAlertsWarningCell
                 cell.formattedAlertMuteEndTime = alertMuter.formattedEndTime
                 cell.selectionStyle = .none
+                return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: CGMSignalGapWarningCell.className, for: indexPath) as! CGMSignalGapWarningCell
+                cell.gapEvent = LoopInsights_BackfillDetector.shared.recentGapEvent
                 return cell
             }
         case .hud:
@@ -1209,9 +1270,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if alertPermissionsChecker.showWarning {
                 tableView.deselectRow(at: indexPath, animated: true)
                 AlertPermissionsChecker.gotoSettings()
-            } else {
+            } else if alertMuter.configuration.shouldMute {
                 tableView.deselectRow(at: indexPath, animated: true)
                 presentUnmuteAlertConfirmation()
+            } else {
+                tableView.deselectRow(at: indexPath, animated: true)
+                LoopInsights_BackfillDetector.shared.dismissBanner()
             }
         case .hud:
             break

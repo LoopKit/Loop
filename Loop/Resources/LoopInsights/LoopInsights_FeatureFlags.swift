@@ -41,6 +41,7 @@ struct LoopInsights_FeatureFlags {
         static let agpChartEnabled = "LoopInsights_agpChartEnabled"
         static let mealDebriefEnabled = "LoopInsights_mealDebriefEnabled"
         static let preMealAdvisorEnabled = "LoopInsights_preMealAdvisorEnabled"
+        static let cgmBackfillDetectionEnabled = "LoopInsights_cgmBackfillDetectionEnabled"
     }
 
     private static let defaults = UserDefaults.standard
@@ -264,6 +265,14 @@ struct LoopInsights_FeatureFlags {
     static var preMealAdvisorEnabled: Bool {
         get { defaults.bool(forKey: Keys.preMealAdvisorEnabled) }
         set { defaults.set(newValue, forKey: Keys.preMealAdvisorEnabled) }
+    }
+
+    /// Enables CGM backfill detection — shows a home screen banner when a CGM signal
+    /// gap is detected and tracks signal quality over time on the dashboard.
+    /// Informational only — does not affect dosing. Defaults to false.
+    static var cgmBackfillDetectionEnabled: Bool {
+        get { defaults.bool(forKey: Keys.cgmBackfillDetectionEnabled) }
+        set { defaults.set(newValue, forKey: Keys.cgmBackfillDetectionEnabled) }
     }
 
     // MARK: - AI Configuration

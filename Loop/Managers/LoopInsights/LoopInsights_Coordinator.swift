@@ -240,6 +240,14 @@ final class LoopInsights_Coordinator: ObservableObject {
             if !alcoholCtx.isEmpty { context.append(alcoholCtx) }
         }
 
+        // CGM backfill / signal quality context
+        if LoopInsights_FeatureFlags.cgmBackfillDetectionEnabled {
+            let backfillCtx = LoopInsights_BackfillDetector.shared.buildBackfillPromptContext(
+                days: stats.period.rawValue
+            )
+            if !backfillCtx.isEmpty { context.append(backfillCtx) }
+        }
+
         // Meal debrief context (recent AI debriefs for Loopy)
         if LoopInsights_FeatureFlags.mealDebriefEnabled {
             let debriefCtx = Self.buildMealDebriefPromptContext()
