@@ -282,7 +282,7 @@ struct LoopInsights_DashboardView: View {
                     .font(.subheadline)
                     .fontWeight(.medium)
                 if items.count == 1 {
-                    Text("\(String(format: "%.1f", items[0].value)) \(unit)")
+                    Text("\(String(format: "%.2f", items[0].value)) \(unit)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 } else {
@@ -443,7 +443,7 @@ struct LoopInsights_DashboardView: View {
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                 Spacer()
-                                Text(String(format: "%.1f → %.1f", block.currentValue, block.proposedValue))
+                                Text(String(format: "%.2f → %.2f", block.currentValue, block.proposedValue))
                                     .font(.caption.weight(.medium))
                                     .foregroundColor(.green)
                                 Text(String(format: "(%+.0f%%)", block.changePercent))
@@ -513,7 +513,7 @@ struct LoopInsights_DashboardView: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Spacer()
-                        Text("\(String(format: "%.1f", block.currentValue)) → \(String(format: "%.1f", block.proposedValue))")
+                        Text("\(String(format: "%.2f", block.currentValue)) → \(String(format: "%.2f", block.proposedValue))")
                             .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(block.proposedValue > block.currentValue ? .orange : .blue)
@@ -1304,7 +1304,7 @@ struct LoopInsights_PreFillEditorView: View {
                                 Text(NSLocalizedString("Current", comment: "LoopInsights pre-fill current label"))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
-                                Text(String(format: "%.1f", block.currentValue))
+                                Text(String(format: "%.2f", block.currentValue))
                                     .font(.body.weight(.medium))
                             }
 

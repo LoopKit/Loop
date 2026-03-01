@@ -309,7 +309,7 @@ struct LoopInsights_SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
                     Image(systemName: "sparkles")
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
                     Text(NSLocalizedString("AI CONFIGURATION", comment: "LoopInsights AI config header"))
                         .font(.caption)
                         .fontWeight(.semibold)
@@ -611,7 +611,7 @@ struct LoopInsights_SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
                     Image(systemName: "slider.horizontal.3")
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
                     Text(NSLocalizedString("ANALYSIS OPTIONS", comment: "LoopInsights analysis options header"))
                         .font(.caption)
                         .fontWeight(.semibold)
@@ -734,7 +734,7 @@ struct LoopInsights_SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
                     Image(systemName: "heart.text.square")
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
                     Text(NSLocalizedString("BIOMETRICS", comment: "LoopInsights biometrics header"))
                         .font(.caption)
                         .fontWeight(.semibold)
@@ -853,7 +853,7 @@ struct LoopInsights_SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
                     Image(systemName: "theatermasks")
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
                     Text(NSLocalizedString("AI PERSONALITY", comment: "LoopInsights AI personality header"))
                         .font(.caption)
                         .fontWeight(.semibold)
@@ -885,7 +885,7 @@ struct LoopInsights_SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
                     Image(systemName: "bell.badge")
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
                     Text(NSLocalizedString("BACKGROUND MONITORING", comment: "LoopInsights background monitoring header"))
                         .font(.caption)
                         .fontWeight(.semibold)
@@ -920,7 +920,7 @@ struct LoopInsights_SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
                     Image(systemName: "clock.arrow.circlepath")
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
                     Text(NSLocalizedString("SUGGESTION HISTORY", comment: "LoopInsights history header"))
                         .font(.caption)
                         .fontWeight(.semibold)
@@ -1074,7 +1074,7 @@ struct LoopInsights_SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
                     Image(systemName: "sparkle")
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
                     Text(NSLocalizedString("ADVANCED FEATURES", comment: "LoopInsights Phase 5 features header"))
                         .font(.caption)
                         .fontWeight(.semibold)

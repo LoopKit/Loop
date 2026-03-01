@@ -93,7 +93,7 @@ struct LoopInsights_SuggestionDetailView: View {
                             Text(NSLocalizedString("Current", comment: "LoopInsights current value label"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                            Text(String(format: "%.1f %@", block.currentValue, record.suggestion.settingType.unitDescription))
+                            Text(String(format: "%.2f %@", block.currentValue, record.suggestion.settingType.unitDescription))
                                 .font(.body)
                                 .fontWeight(.medium)
                         }
@@ -109,7 +109,7 @@ struct LoopInsights_SuggestionDetailView: View {
                             Text(NSLocalizedString("Proposed", comment: "LoopInsights proposed value label"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                            Text(String(format: "%.1f %@", block.proposedValue, record.suggestion.settingType.unitDescription))
+                            Text(String(format: "%.2f %@", block.proposedValue, record.suggestion.settingType.unitDescription))
                                 .font(.body)
                                 .fontWeight(.bold)
                                 .foregroundColor(proposedValueColor(for: block))

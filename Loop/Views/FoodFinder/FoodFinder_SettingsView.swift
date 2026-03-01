@@ -176,7 +176,7 @@ extension AISettingsView {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 6) {
                     Image(systemName: "sparkles")
-                        .foregroundColor(.purple)
+                        .foregroundColor(Color(red: 107/255, green: 47/255, blue: 160/255))
                     Text("AI CONFIGURATION")
                         .font(.caption)
                         .fontWeight(.semibold)
