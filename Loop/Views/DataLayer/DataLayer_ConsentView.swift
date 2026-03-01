@@ -19,6 +19,10 @@ struct DataLayer_ConsentView: View {
     @State private var isEnabled = DataLayer_FeatureFlags.isEnabled
     @State private var researchEnabled = DataLayer_FeatureFlags.researchEnabled
     @State private var showDeleteConfirmation = false
+    @State private var selectedShareDays = 14
+    @State private var isGeneratingShare = false
+    @State private var shareError: String?
+    @State private var justCopiedToken: String?
 
     var body: some View {
         Form {
@@ -193,7 +197,7 @@ struct DataLayer_ConsentView: View {
         }
     }
 
-    // MARK: - Provider Sharing (placeholder for Phase 5)
+    // MARK: - Provider Sharing
 
     private var providerSharingSection: some View {
         Section {
@@ -212,13 +216,146 @@ struct DataLayer_ConsentView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                HStack(spacing: 6) {
-                    Image(systemName: "clock.badge.checkmark")
-                        .foregroundColor(.secondary)
-                    Text(NSLocalizedString("Coming soon — provider sharing will be available in a future update.", comment: "DataLayer provider coming soon"))
+                if DataLayer_FeatureFlags.shareEndpointURL != nil {
+                    // Time range picker
+                    Picker(NSLocalizedString("Time Range", comment: "DataLayer share time range"), selection: $selectedShareDays) {
+                        Text("7 days").tag(7)
+                        Text("14 days").tag(14)
+                        Text("30 days").tag(30)
+                    }
+                    .pickerStyle(.segmented)
+
+                    // Generate button
+                    Button {
+                        generateShare()
+                    } label: {
+                        HStack {
+                            if isGeneratingShare {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "link.badge.plus")
+                            }
+                            Text(isGeneratingShare
+                                 ? NSLocalizedString("Generating...", comment: "DataLayer share generating")
+                                 : NSLocalizedString("Generate Share Link", comment: "DataLayer share button"))
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.green)
+                    .disabled(isGeneratingShare || !consentManager.hasAnyConsent)
+
+                    if let error = shareError {
+                        HStack(spacing: 4) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                            Text(error)
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
+                    }
+
+                    // Active share links
+                    let activeLinks = DataLayer_FeatureFlags.activeShares.filter { !$0.isExpired }
+                    if !activeLinks.isEmpty {
+                        Divider()
+                        Text(NSLocalizedString("Active Share Links", comment: "DataLayer active shares header"))
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.secondary)
+
+                        ForEach(activeLinks) { link in
+                            shareLinkRow(link)
+                        }
+                    }
+                } else {
+                    HStack(spacing: 6) {
+                        Image(systemName: "clock.badge.checkmark")
+                            .foregroundColor(.secondary)
+                        Text(NSLocalizedString("Provider sharing requires a share endpoint to be configured.", comment: "DataLayer share not configured"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .italic()
+                    }
+                }
+            }
+        }
+    }
+
+    private func shareLinkRow(_ link: DataLayer_ShareLink) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(link.daysCovered)-day report")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    Text("\(link.categoryCount) categories")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                        .italic()
+                }
+                Spacer()
+                Text(link.expiresAt, style: .relative)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+
+            HStack(spacing: 8) {
+                Button {
+                    UIPasteboard.general.string = link.url
+                    justCopiedToken = link.token
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        if justCopiedToken == link.token { justCopiedToken = nil }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: justCopiedToken == link.token ? "checkmark" : "doc.on.doc")
+                        Text(justCopiedToken == link.token
+                             ? NSLocalizedString("Copied", comment: "DataLayer link copied")
+                             : NSLocalizedString("Copy Link", comment: "DataLayer copy link"))
+                    }
+                    .font(.caption)
+                }
+                .buttonStyle(.bordered)
+                .tint(.blue)
+
+                Button(role: .destructive) {
+                    DataLayer_Coordinator.shared.revokeShareLink(token: link.token) { _ in
+                        DispatchQueue.main.async {
+                            // Triggers re-render since activeShares changed
+                            shareError = nil
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "trash")
+                        Text(NSLocalizedString("Revoke", comment: "DataLayer revoke link"))
+                    }
+                    .font(.caption)
+                }
+                .buttonStyle(.bordered)
+                .tint(.red)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func generateShare() {
+        isGeneratingShare = true
+        shareError = nil
+
+        DataLayer_Coordinator.shared.generateShareLink(days: selectedShareDays) { result in
+            DispatchQueue.main.async {
+                isGeneratingShare = false
+                switch result {
+                case .success(let link):
+                    UIPasteboard.general.string = link.url
+                    justCopiedToken = link.token
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        if justCopiedToken == link.token { justCopiedToken = nil }
+                    }
+                case .failure(let error):
+                    shareError = error.localizedDescription
                 }
             }
         }

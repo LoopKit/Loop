@@ -174,6 +174,24 @@ final class DataLayer_EventStore {
         return 0
     }
 
+    /// Get all events within a date range.
+    func events(from start: Date, to end: Date) -> [DataLayer_Event] {
+        return queue.sync { eventsInRangeSync(from: start, to: end) }
+    }
+
+    private func eventsInRangeSync(from start: Date, to end: Date) -> [DataLayer_Event] {
+        guard let db = db else { return [] }
+
+        let sql = "SELECT * FROM events WHERE timestamp >= ? AND timestamp <= ? ORDER BY timestamp ASC"
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return [] }
+        defer { sqlite3_finalize(stmt) }
+
+        sqlite3_bind_double(stmt, 1, start.timeIntervalSince1970)
+        sqlite3_bind_double(stmt, 2, end.timeIntervalSince1970)
+        return readEvents(from: stmt)
+    }
+
     // MARK: - Update Status
 
     /// Mark events as uploaded.

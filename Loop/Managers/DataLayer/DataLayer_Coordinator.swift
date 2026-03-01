@@ -369,6 +369,141 @@ final class DataLayer_Coordinator: ObservableObject {
         }
     }
 
+    // MARK: - Provider Sharing
+
+    /// Generate a time-scoped share link. Posts events to the share endpoint, returns the URL.
+    func generateShareLink(days: Int, completion: @escaping (Result<DataLayer_ShareLink, Error>) -> Void) {
+        guard let endpoint = DataLayer_FeatureFlags.shareEndpointURL else {
+            completion(.failure(ShareError.noEndpoint))
+            return
+        }
+
+        let end = Date()
+        let start = end.addingTimeInterval(-Double(days) * 86400)
+        let events = collector.eventStore.events(from: start, to: end)
+
+        guard !events.isEmpty else {
+            completion(.failure(ShareError.noData))
+            return
+        }
+
+        // Filter to consented categories only
+        let consentedEvents = events.filter { consent.isGranted(for: $0.eventType.consentCategory) }
+        guard !consentedEvents.isEmpty else {
+            completion(.failure(ShareError.noData))
+            return
+        }
+
+        // Convert to upload format
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let uploadEvents: [[String: Any]] = consentedEvents.compactMap { event in
+            guard let payload = try? JSONSerialization.jsonObject(with: event.payload, options: []) as? [String: Any] else { return nil }
+            return [
+                "id": event.id.uuidString,
+                "deviceID": event.deviceID,
+                "eventType": event.eventType.rawValue,
+                "timestamp": ISO8601DateFormatter().string(from: event.timestamp),
+                "appVersion": event.appVersion,
+                "payload": payload
+            ]
+        }
+
+        let categories = Set(consentedEvents.map { $0.eventType.consentCategory })
+
+        let body: [String: Any] = [
+            "action": "create",
+            "days": days,
+            "events": uploadEvents,
+            "categories": categories.map { $0.rawValue },
+            "deviceID": DataLayer_SecureStorage.anonymizedDeviceID
+        ]
+
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: body, options: []) else {
+            completion(.failure(ShareError.encodingFailed))
+            return
+        }
+
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let apiKey = DataLayer_FeatureFlags.ingestAPIKey {
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        }
+        request.httpBody = jsonData
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let url = json["url"] as? String,
+                  let token = json["token"] as? String else {
+                let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+                completion(.failure(ShareError.serverError(statusCode)))
+                return
+            }
+
+            let link = DataLayer_ShareLink(
+                token: token,
+                url: url,
+                createdAt: Date(),
+                expiresAt: end.addingTimeInterval(Double(days) * 86400),
+                daysCovered: days,
+                categoryCount: categories.count
+            )
+
+            DataLayer_FeatureFlags.addShare(link)
+            completion(.success(link))
+        }.resume()
+    }
+
+    /// Revoke an active share link.
+    func revokeShareLink(token: String, completion: @escaping (Bool) -> Void) {
+        guard let endpoint = DataLayer_FeatureFlags.shareEndpointURL else {
+            DataLayer_FeatureFlags.removeShare(token: token)
+            completion(true)
+            return
+        }
+
+        let body: [String: Any] = ["action": "revoke", "token": token]
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: body, options: []) else {
+            completion(false)
+            return
+        }
+
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let apiKey = DataLayer_FeatureFlags.ingestAPIKey {
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        }
+        request.httpBody = jsonData
+
+        URLSession.shared.dataTask(with: request) { _, _, _ in
+            DataLayer_FeatureFlags.removeShare(token: token)
+            completion(true)
+        }.resume()
+    }
+
+    private enum ShareError: LocalizedError {
+        case noEndpoint
+        case noData
+        case encodingFailed
+        case serverError(Int)
+
+        var errorDescription: String? {
+            switch self {
+            case .noEndpoint: return "Share endpoint not configured"
+            case .noData: return "No data available for the selected time range"
+            case .encodingFailed: return "Failed to prepare share data"
+            case .serverError(let code): return "Server error (\(code))"
+            }
+        }
+    }
+
     // MARK: - Debug
 
     /// Total number of events in the local store.

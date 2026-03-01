@@ -25,6 +25,8 @@ struct DataLayer_FeatureFlags {
         static let retentionDays = "DataLayer_retentionDays"
         static let ingestEndpoint = "DataLayer_ingestEndpoint"
         static let ingestAPIKey = "DataLayer_ingestAPIKey"
+        static let shareEndpoint = "DataLayer_shareEndpoint"
+        static let activeShares = "DataLayer_activeShares"
     }
 
     private static let defaults = UserDefaults.standard
@@ -74,4 +76,53 @@ struct DataLayer_FeatureFlags {
         get { defaults.string(forKey: Keys.ingestAPIKey) }
         set { defaults.set(newValue, forKey: Keys.ingestAPIKey) }
     }
+
+    // MARK: - Provider Sharing
+
+    /// Cloud Run share endpoint URL. Nil = sharing disabled.
+    static var shareEndpointURL: URL? {
+        get {
+            guard let str = defaults.string(forKey: Keys.shareEndpoint) else { return nil }
+            return URL(string: str)
+        }
+        set { defaults.set(newValue?.absoluteString, forKey: Keys.shareEndpoint) }
+    }
+
+    /// Persisted list of active share links.
+    static var activeShares: [DataLayer_ShareLink] {
+        get {
+            guard let data = defaults.data(forKey: Keys.activeShares) else { return [] }
+            return (try? JSONDecoder().decode([DataLayer_ShareLink].self, from: data)) ?? []
+        }
+        set {
+            defaults.set(try? JSONEncoder().encode(newValue), forKey: Keys.activeShares)
+        }
+    }
+
+    /// Add a share link to the persisted list.
+    static func addShare(_ link: DataLayer_ShareLink) {
+        var shares = activeShares
+        shares.append(link)
+        activeShares = shares
+    }
+
+    /// Remove a share link by token.
+    static func removeShare(token: String) {
+        activeShares = activeShares.filter { $0.token != token }
+    }
+}
+
+// MARK: - Share Link Model
+
+/// Represents an active provider share link.
+struct DataLayer_ShareLink: Codable, Identifiable {
+    let token: String
+    let url: String
+    let createdAt: Date
+    let expiresAt: Date
+    let daysCovered: Int
+    let categoryCount: Int
+
+    var id: String { token }
+    var isExpired: Bool { Date() > expiresAt }
 }
