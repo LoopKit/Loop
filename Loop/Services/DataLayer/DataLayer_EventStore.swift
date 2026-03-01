@@ -192,6 +192,94 @@ final class DataLayer_EventStore {
         return readEvents(from: stmt)
     }
 
+    /// Event counts grouped by event type.
+    func eventCountsByType() -> [(String, Int)] {
+        return queue.sync { eventCountsByTypeSync() }
+    }
+
+    private func eventCountsByTypeSync() -> [(String, Int)] {
+        guard let db = db else { return [] }
+
+        let sql = "SELECT eventType, COUNT(*) FROM events GROUP BY eventType ORDER BY COUNT(*) DESC"
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return [] }
+        defer { sqlite3_finalize(stmt) }
+
+        var results: [(String, Int)] = []
+        while sqlite3_step(stmt) == SQLITE_ROW {
+            guard let typeStr = sqlite3_column_text(stmt, 0).map({ String(cString: $0) }) else { continue }
+            let count = Int(sqlite3_column_int(stmt, 1))
+            results.append((typeStr, count))
+        }
+        return results
+    }
+
+    /// Event counts grouped by upload status.
+    func uploadStatusCounts() -> [(String, Int)] {
+        return queue.sync { uploadStatusCountsSync() }
+    }
+
+    private func uploadStatusCountsSync() -> [(String, Int)] {
+        guard let db = db else { return [] }
+
+        let sql = "SELECT uploadStatus, COUNT(*) FROM events GROUP BY uploadStatus ORDER BY COUNT(*) DESC"
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return [] }
+        defer { sqlite3_finalize(stmt) }
+
+        var results: [(String, Int)] = []
+        while sqlite3_step(stmt) == SQLITE_ROW {
+            guard let status = sqlite3_column_text(stmt, 0).map({ String(cString: $0) }) else { continue }
+            let count = Int(sqlite3_column_int(stmt, 1))
+            results.append((status, count))
+        }
+        return results
+    }
+
+    /// Daily event counts for the last N days.
+    func dailyEventCounts(days: Int = 14) -> [(String, Int)] {
+        return queue.sync { dailyEventCountsSync(days: days) }
+    }
+
+    private func dailyEventCountsSync(days: Int) -> [(String, Int)] {
+        guard let db = db else { return [] }
+
+        let cutoff = Date().addingTimeInterval(-Double(days) * 86400).timeIntervalSince1970
+        let sql = """
+            SELECT date(timestamp, 'unixepoch', 'localtime') AS day, COUNT(*)
+            FROM events WHERE timestamp >= \(cutoff)
+            GROUP BY day ORDER BY day ASC
+            """
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return [] }
+        defer { sqlite3_finalize(stmt) }
+
+        var results: [(String, Int)] = []
+        while sqlite3_step(stmt) == SQLITE_ROW {
+            guard let day = sqlite3_column_text(stmt, 0).map({ String(cString: $0) }) else { continue }
+            let count = Int(sqlite3_column_int(stmt, 1))
+            results.append((day, count))
+        }
+        return results
+    }
+
+    /// Most recent events.
+    func recentEvents(limit: Int = 25) -> [DataLayer_Event] {
+        return queue.sync { recentEventsSync(limit: limit) }
+    }
+
+    private func recentEventsSync(limit: Int) -> [DataLayer_Event] {
+        guard let db = db else { return [] }
+
+        let sql = "SELECT * FROM events ORDER BY timestamp DESC LIMIT ?"
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return [] }
+        defer { sqlite3_finalize(stmt) }
+
+        sqlite3_bind_int(stmt, 1, Int32(limit))
+        return readEvents(from: stmt)
+    }
+
     // MARK: - Update Status
 
     /// Mark events as uploaded.

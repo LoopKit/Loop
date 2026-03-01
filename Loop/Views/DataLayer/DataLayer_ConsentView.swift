@@ -23,6 +23,9 @@ struct DataLayer_ConsentView: View {
     @State private var isGeneratingShare = false
     @State private var shareError: String?
     @State private var justCopiedToken: String?
+    @State private var ingestEndpoint = DataLayer_FeatureFlags.ingestEndpointURL?.absoluteString ?? ""
+    @State private var shareEndpoint = DataLayer_FeatureFlags.shareEndpointURL?.absoluteString ?? ""
+    @State private var apiKey = DataLayer_FeatureFlags.ingestAPIKey ?? ""
 
     var body: some View {
         Form {
@@ -32,6 +35,8 @@ struct DataLayer_ConsentView: View {
                 categoryTogglesSection
                 researchSection
                 providerSharingSection
+                dashboardSection
+                configurationSection
                 statsSection
                 deleteSection
             }
@@ -356,6 +361,94 @@ struct DataLayer_ConsentView: View {
                     }
                 case .failure(let error):
                     shareError = error.localizedDescription
+                }
+            }
+        }
+    }
+
+    // MARK: - Dashboard Link
+
+    private var dashboardSection: some View {
+        Section {
+            NavigationLink(destination: DataLayer_DashboardView()) {
+                HStack(spacing: 10) {
+                    Image(systemName: "chart.xyaxis.line")
+                        .foregroundColor(.blue)
+                        .frame(width: 20)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(NSLocalizedString("Data Dashboard", comment: "DataLayer dashboard link"))
+                            .font(.subheadline)
+                        Text(NSLocalizedString("View recorded events, trends, and upload status", comment: "DataLayer dashboard description"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Configuration
+
+    private var configurationSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    Image(systemName: "gearshape.fill")
+                        .foregroundColor(.gray)
+                    Text(NSLocalizedString("ENDPOINT CONFIGURATION", comment: "DataLayer config header"))
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Ingest Endpoint")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("https://...", text: $ingestEndpoint)
+                        .font(.caption)
+                        .textFieldStyle(.roundedBorder)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .onChange(of: ingestEndpoint) { newValue in
+                            DataLayer_FeatureFlags.ingestEndpointURL = newValue.isEmpty ? nil : URL(string: newValue)
+                        }
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Share Endpoint")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextField("https://...", text: $shareEndpoint)
+                        .font(.caption)
+                        .textFieldStyle(.roundedBorder)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .onChange(of: shareEndpoint) { newValue in
+                            DataLayer_FeatureFlags.shareEndpointURL = newValue.isEmpty ? nil : URL(string: newValue)
+                        }
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("API Key")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    SecureField("Paste API key", text: $apiKey)
+                        .font(.caption)
+                        .textFieldStyle(.roundedBorder)
+                        .onChange(of: apiKey) { newValue in
+                            DataLayer_FeatureFlags.ingestAPIKey = newValue.isEmpty ? nil : newValue
+                        }
+                }
+
+                if !ingestEndpoint.isEmpty && !apiKey.isEmpty {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        Text(NSLocalizedString("Endpoint configured — uploads will sync every 15 minutes", comment: "DataLayer config ready"))
+                            .font(.caption)
+                            .foregroundColor(.green)
+                    }
                 }
             }
         }
