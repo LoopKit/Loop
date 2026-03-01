@@ -286,23 +286,17 @@ struct LoopInsights_SettingsView: View {
                     }
 
                     Button(action: { showTestDashboard = true }) {
-                        HStack(spacing: 10) {
+                        HStack {
                             Image(systemName: "chart.line.uptrend.xyaxis")
-                                .font(.title3)
-                            Text(NSLocalizedString("Open Dashboard", comment: "LoopInsights open dashboard button"))
-                                .fontWeight(.semibold)
+                                .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
+                            Text(NSLocalizedString("View LoopInsights Dashboard", comment: "LoopInsights open dashboard button"))
                             Spacer()
-                            Image(systemName: "arrow.right")
-                                .font(.subheadline.weight(.semibold))
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundColor(Color(.tertiaryLabel))
                         }
-                        .foregroundColor(.white)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 16)
-                        .background(Color.green)
-                        .cornerRadius(10)
                     }
                     .buttonStyle(.plain)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 }
             }
         }

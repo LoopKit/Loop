@@ -246,8 +246,16 @@ struct FoodFinder_CarbTrackingDashboard: View {
                 }
                 .chartYAxisLabel("grams")
                 .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: max(dailySummaries.count / 7, 1))) { _ in
-                        AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                    let stride: Int = {
+                        switch selectedPeriod {
+                        case .week: return 1
+                        case .twoWeeks: return 2
+                        case .month: return 5
+                        case .threeMonths: return 14
+                        }
+                    }()
+                    AxisMarks(values: .stride(by: .day, count: stride)) { _ in
+                        AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
                         AxisGridLine()
                     }
                 }
@@ -341,7 +349,9 @@ struct FoodFinder_CarbTrackingDashboard: View {
                     HStack(spacing: 8) {
                         Text(pattern.dayName)
                             .font(.caption)
-                            .frame(width: 32, alignment: .leading)
+                            .lineLimit(1)
+                            .fixedSize()
+                            .frame(width: 36, alignment: .leading)
                         GeometryReader { geo in
                             let width = maxDayOfWeekCarbs > 0
                                 ? CGFloat(pattern.averageCarbs / maxDayOfWeekCarbs) * geo.size.width
@@ -360,7 +370,9 @@ struct FoodFinder_CarbTrackingDashboard: View {
                         Text("\(Int(pattern.averageCarbs))g")
                             .font(.caption)
                             .foregroundColor(.secondary)
-                            .frame(width: 35, alignment: .trailing)
+                            .lineLimit(1)
+                            .fixedSize()
+                            .frame(width: 42, alignment: .trailing)
                     }
                     .padding(.horizontal)
                 }
