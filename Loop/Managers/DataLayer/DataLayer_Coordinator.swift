@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import LoopKit
 
 /// Main coordinator for the DataLayer health data sharing platform.
 /// Singleton pattern following LoopInsights_Coordinator.
@@ -23,6 +24,13 @@ final class DataLayer_Coordinator: ObservableObject {
     private let consent = DataLayer_ConsentManager.shared
     private var pollTimer: Timer?
     private static let pollInterval: TimeInterval = 300 // 5 minutes
+
+    /// Type-erased store references: (GlucoseStoreProtocol, DoseStoreProtocol, CarbStoreProtocol)
+    /// Set once from StatusTableViewController when Settings is first opened.
+    private var glucoseStore: AnyObject?
+    private var doseStore: AnyObject?
+    private var carbStore: AnyObject?
+    private var lastPollDate: Date?
 
     // MARK: - Initialization
 
@@ -78,10 +86,20 @@ final class DataLayer_Coordinator: ObservableObject {
         DataLayer_FeatureFlags.log.info("All DataLayer data deleted")
     }
 
+    // MARK: - Store Configuration
+
+    /// Configure store references for polling. Called once from StatusTableViewController.
+    /// Uses the same store objects that LoopInsights uses — no extra LoopKit integration.
+    func configureStores(glucose: AnyObject, dose: AnyObject, carb: AnyObject) {
+        self.glucoseStore = glucose
+        self.doseStore = dose
+        self.carbStore = carb
+        DataLayer_FeatureFlags.log.info("DataLayer stores configured for polling")
+    }
+
     // MARK: - Polling
 
     /// Start the 5-minute polling timer for glucose/insulin/carb store data.
-    /// Actual store polling will be wired in Phase 2+ when store references are available.
     private func startPolling() {
         stopPolling()
         pollTimer = Timer.scheduledTimer(withTimeInterval: Self.pollInterval, repeats: true) { [weak self] _ in
@@ -95,13 +113,95 @@ final class DataLayer_Coordinator: ObservableObject {
     }
 
     /// Poll Loop data stores for new glucose, insulin, and carb data.
-    /// Store references will be wired the same way LoopInsights_Coordinator does it —
-    /// via the type-erased tuple from StatusTableViewController.
+    /// Queries since last poll (or last 5 minutes on first run). Silently no-ops if stores aren't configured.
     private func pollStores() {
         guard DataLayer_FeatureFlags.isEnabled else { return }
-        // Phase 3+: Poll glucose/insulin/carb stores and emit batch events
-        // For now, this is a no-op placeholder. Feature hooks in Phase 2 handle
-        // FoodFinder, LoopInsights, and AutoPresets events.
+        guard glucoseStore != nil || doseStore != nil || carbStore != nil else { return }
+
+        let end = Date()
+        let start = lastPollDate ?? end.addingTimeInterval(-Self.pollInterval)
+        lastPollDate = end
+
+        pollGlucose(start: start, end: end)
+        pollInsulin(start: start, end: end)
+        pollCarbs(start: start, end: end)
+    }
+
+    // MARK: - Glucose Polling
+
+    private func pollGlucose(start: Date, end: Date) {
+        guard consent.isGranted(for: .glucose) else { return }
+        guard let store = glucoseStore as? GlucoseStoreProtocol else { return }
+
+        store.getGlucoseSamples(start: start, end: end) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let samples) where !samples.isEmpty:
+                let readings = samples.map { sample in
+                    DataLayer_GlucoseSamplePayload.GlucoseReading(
+                        timestamp: sample.startDate,
+                        mgdl: sample.quantity.doubleValue(for: .milligramsPerDeciliter),
+                        trend: sample.trend?.symbol
+                    )
+                }
+                self.collector.record(type: .glucoseSample, payload: DataLayer_GlucoseSamplePayload(readings: readings))
+            default:
+                break
+            }
+        }
+    }
+
+    // MARK: - Insulin Polling
+
+    private func pollInsulin(start: Date, end: Date) {
+        guard consent.isGranted(for: .insulin) else { return }
+        guard let store = doseStore as? DoseStoreProtocol else { return }
+
+        store.getNormalizedDoseEntries(start: start, end: end) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let entries) where !entries.isEmpty:
+                let deliveries = entries.map { entry in
+                    DataLayer_InsulinDeliveryPayload.Delivery(
+                        startDate: entry.startDate,
+                        endDate: entry.endDate,
+                        units: entry.deliveredUnits ?? entry.programmedUnits,
+                        type: entry.type.pumpEventType.rawValue,
+                        isAutomatic: entry.automatic ?? false
+                    )
+                }
+                self.collector.record(type: .insulinDelivery, payload: DataLayer_InsulinDeliveryPayload(deliveries: deliveries))
+            default:
+                break
+            }
+        }
+    }
+
+    // MARK: - Carb Polling
+
+    private func pollCarbs(start: Date, end: Date) {
+        guard consent.isGranted(for: .carbsAndMeals) else { return }
+        guard let store = carbStore as? CarbStoreProtocol else { return }
+        // CarbStoreProtocol doesn't expose getCarbEntries; cast to concrete CarbStore
+        guard let concreteStore = store as? CarbStore else { return }
+
+        concreteStore.getCarbEntries(start: start, end: end) { [weak self] (result: CarbStoreResult<[StoredCarbEntry]>) in
+            guard let self = self else { return }
+            switch result {
+            case .success(let entries) where !entries.isEmpty:
+                let carbEntries = entries.map { entry in
+                    DataLayer_CarbEntryPayload.Entry(
+                        date: entry.startDate,
+                        grams: entry.quantity.doubleValue(for: .gram()),
+                        absorptionTimeMinutes: entry.absorptionTime.map { $0 / 60.0 },
+                        foodType: entry.foodType
+                    )
+                }
+                self.collector.record(type: .carbEntry, payload: DataLayer_CarbEntryPayload(entries: carbEntries))
+            default:
+                break
+            }
+        }
     }
 
     // MARK: - Feature Notification Observers

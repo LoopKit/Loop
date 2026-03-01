@@ -65,6 +65,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         registerPumpManager()
         registerCGMManager()
 
+        DataLayer_Coordinator.shared.configureStores(glucose: deviceManager.glucoseStore, dose: deviceManager.doseStore, carb: deviceManager.carbStore)
+
         let notificationCenter = NotificationCenter.default
 
         notificationObservers += [
