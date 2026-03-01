@@ -84,6 +84,7 @@ class LoopAppManager: NSObject {
     private(set) var testingScenariosManager: TestingScenariosManager?
     private var resetLoopManager: ResetLoopManager!
     private var deeplinkManager: DeeplinkManager!
+    private var loopInsightsCoordinator: LoopInsights_Coordinator?
 
     private var overrideHistory = UserDefaults.appGroup?.overrideHistory ?? TemporaryScheduleOverrideHistory.init()
 
@@ -268,7 +269,28 @@ class LoopAppManager: NSObject {
             .assign(to: \.automaticDosingStatus.automaticDosingEnabled, on: self)
             .store(in: &cancellables)
 
+        startLoopInsightsMonitorIfNeeded()
+
         state = state.next
+    }
+
+    private func startLoopInsightsMonitorIfNeeded() {
+        guard LoopInsights_FeatureFlags.isEnabled,
+              LoopInsights_FeatureFlags.backgroundMonitorEnabled else {
+            return
+        }
+
+        let coordinator = LoopInsights_Coordinator(
+            glucoseStore: deviceDataManager.glucoseStore,
+            doseStore: deviceDataManager.doseStore,
+            carbStore: deviceDataManager.carbStore,
+            settingsProvider: settingsManager,
+            settingsWriter: { [weak self] mutate in
+                self?.deviceDataManager.loopManager.mutateSettings(mutate)
+            }
+        )
+        coordinator.startBackgroundMonitoring()
+        loopInsightsCoordinator = coordinator
     }
 
     private func launchOnboarding() {

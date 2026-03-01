@@ -59,6 +59,8 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
             return
         }
 
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
+
         loopCompletedObserver = NotificationCenter.default.addObserver(
             forName: .LoopCompleted,
             object: nil,
@@ -225,6 +227,12 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
     }
 
     private func deliverPushNotification(suggestions: [LoopInsightsSuggestion]) async {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        guard settings.authorizationStatus == .authorized else {
+            LoopInsights_FeatureFlags.log.warning("Notifications not authorized — skipping push")
+            return
+        }
+
         let notification = UNMutableNotificationContent()
         notification.title = NSLocalizedString("LoopInsights", comment: "LoopInsights notification title")
 

@@ -49,6 +49,13 @@ extension NotificationManager {
             options: .customDismissAction
         ))
 
+        categories.append(UNNotificationCategory(
+            identifier: LoopInsights_BackgroundMonitor.notificationCategoryID,
+            actions: [],
+            intentIdentifiers: [],
+            options: []
+        ))
+
         return Set(categories)
     }
 
