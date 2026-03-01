@@ -515,4 +515,9 @@ final class DataLayer_Coordinator: ObservableObject {
     func eventCount(for type: DataLayer_EventType) -> Int {
         return collector.eventStore.eventCount(type: type)
     }
+
+    /// Query events of a specific type within a date range (for report generation).
+    func events(from start: Date, to end: Date, type: DataLayer_EventType) -> [DataLayer_Event] {
+        return collector.eventStore.events(from: start, to: end, type: type)
+    }
 }

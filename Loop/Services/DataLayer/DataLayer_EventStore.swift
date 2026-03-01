@@ -192,6 +192,25 @@ final class DataLayer_EventStore {
         return readEvents(from: stmt)
     }
 
+    /// Get events of a specific type within a date range. Uses idx_events_type_time index.
+    func events(from start: Date, to end: Date, type: DataLayer_EventType) -> [DataLayer_Event] {
+        return queue.sync { eventsInRangeByTypeSync(from: start, to: end, type: type) }
+    }
+
+    private func eventsInRangeByTypeSync(from start: Date, to end: Date, type: DataLayer_EventType) -> [DataLayer_Event] {
+        guard let db = db else { return [] }
+
+        let sql = "SELECT * FROM events WHERE eventType = ? AND timestamp >= ? AND timestamp <= ? ORDER BY timestamp ASC"
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return [] }
+        defer { sqlite3_finalize(stmt) }
+
+        sqlite3_bind_text(stmt, 1, type.rawValue, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+        sqlite3_bind_double(stmt, 2, start.timeIntervalSince1970)
+        sqlite3_bind_double(stmt, 3, end.timeIntervalSince1970)
+        return readEvents(from: stmt)
+    }
+
     /// Event counts grouped by event type.
     func eventCountsByType() -> [(String, Int)] {
         return queue.sync { eventCountsByTypeSync() }

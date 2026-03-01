@@ -687,6 +687,8 @@
 		05382A77AD01D66964EB058D /* DataLayer_ConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9152B858C0D9CC712575DF8A /* DataLayer_ConsentView.swift */; };
 		22A525CF11112DDAB46F4C63 /* DataLayer_DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 515929B4E87CC8B0D055B031 /* DataLayer_DashboardView.swift */; };
 		1679AFDC18BEB2F35891BE2A /* DataLayer_SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF928A3BBC39B1F2311D7218 /* DataLayer_SyncService.swift */; };
+		1157344EC3F14901AEBB6F48 /* DataLayer_ReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F81B363AA989976F1D72FEB2 /* DataLayer_ReportGenerator.swift */; };
+		88758BD943F7CA66483B2D1A /* DataLayer_ProviderProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E728EC69CA322D1D5B8B423C /* DataLayer_ProviderProtocol.swift */; };
 		5360E9F21CABAFD28DB505EB /* FoodFinder_CarbTrackingDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */; };
 		2A1B8D3286E1ED96FB2ED124 /* FoodFinder_CarbTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80940A6E390B157E04B9D2D /* FoodFinder_CarbTrackingService.swift */; };
 /* End PBXBuildFile section */
@@ -1609,6 +1611,8 @@
 		9152B858C0D9CC712575DF8A /* DataLayer_ConsentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ConsentView.swift; sourceTree = "<group>"; };
 		515929B4E87CC8B0D055B031 /* DataLayer_DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_DashboardView.swift; sourceTree = "<group>"; };
 		BF928A3BBC39B1F2311D7218 /* DataLayer_SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_SyncService.swift; sourceTree = "<group>"; };
+		F81B363AA989976F1D72FEB2 /* DataLayer_ReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ReportGenerator.swift; sourceTree = "<group>"; };
+		E728EC69CA322D1D5B8B423C /* DataLayer_ProviderProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ProviderProtocol.swift; sourceTree = "<group>"; };
 		E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingDashboard.swift; sourceTree = "<group>"; };
 		F80940A6E390B157E04B9D2D /* FoodFinder_CarbTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -3168,6 +3172,8 @@
 				599C3D1975E1EB62BF74303A /* DataLayer_EventStore.swift */,
 				6B1BFDE7BB9565B68D92CBD7 /* DataLayer_SecureStorage.swift */,
 				BF928A3BBC39B1F2311D7218 /* DataLayer_SyncService.swift */,
+				F81B363AA989976F1D72FEB2 /* DataLayer_ReportGenerator.swift */,
+				E728EC69CA322D1D5B8B423C /* DataLayer_ProviderProtocol.swift */,
 			);
 			path = DataLayer;
 			sourceTree = "<group>";
@@ -3918,6 +3924,8 @@
 				A2AB902F5649F9DA67EB948E /* DataLayer_FeatureFlags.swift in Sources */,
 				BF73673705C44313988398E2 /* DataLayer_SecureStorage.swift in Sources */,
 				1679AFDC18BEB2F35891BE2A /* DataLayer_SyncService.swift in Sources */,
+				1157344EC3F14901AEBB6F48 /* DataLayer_ReportGenerator.swift in Sources */,
+				88758BD943F7CA66483B2D1A /* DataLayer_ProviderProtocol.swift in Sources */,
 
 				B9D78BD57F35DBCFEC65530D /* AutoPresets_Coordinator.swift in Sources */,
 				BACF15F57C2B75D78B797778 /* AutoPresets_Delegate.swift in Sources */,

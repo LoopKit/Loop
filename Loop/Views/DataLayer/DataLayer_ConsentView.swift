@@ -23,6 +23,11 @@ struct DataLayer_ConsentView: View {
     @State private var isGeneratingShare = false
     @State private var shareError: String?
     @State private var justCopiedToken: String?
+    @State private var selectedShareMethod = 0      // 0=PDF, 1=Provider, 2=Link
+    @State private var selectedPDFDays = 14
+    @State private var isGeneratingPDF = false
+    @State private var showingShareSheet = false
+    @State private var pdfURL: URL?
     @State private var ingestEndpoint = DataLayer_FeatureFlags.ingestEndpointURL?.absoluteString ?? ""
     @State private var shareEndpoint = DataLayer_FeatureFlags.shareEndpointURL?.absoluteString ?? ""
     @State private var apiKey = DataLayer_FeatureFlags.ingestAPIKey ?? ""
@@ -217,72 +222,208 @@ struct DataLayer_ConsentView: View {
                         .textCase(.uppercase)
                 }
 
-                Text(NSLocalizedString("Generate a time-scoped link to share your data with a healthcare provider. They'll see a read-only dashboard with your glucose, insulin, meals, and other enabled categories.", comment: "DataLayer provider description"))
+                Picker("", selection: $selectedShareMethod) {
+                    Text("PDF Report").tag(0)
+                    Text("Provider Portal").tag(1)
+                    Text("Share Link").tag(2)
+                }
+                .pickerStyle(.segmented)
+
+                switch selectedShareMethod {
+                case 0:
+                    pdfReportTab
+                case 1:
+                    providerPortalTab
+                default:
+                    shareLinkTab
+                }
+            }
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            if let url = pdfURL {
+                LoopInsights_ActivityViewRepresentable(activityItems: [url])
+            }
+        }
+    }
+
+    // MARK: - PDF Report Tab
+
+    private var pdfReportTab: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(NSLocalizedString("Generate a downloadable report. Share via email, AirDrop, or print.", comment: "DataLayer PDF description"))
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(NSLocalizedString("Time Range", comment: "DataLayer PDF time range"))
                     .font(.caption)
                     .foregroundColor(.secondary)
+                Picker("", selection: $selectedPDFDays) {
+                    Text("3d").tag(3)
+                    Text("7d").tag(7)
+                    Text("14d").tag(14)
+                    Text("30d").tag(30)
+                    Text("90d").tag(90)
+                }
+                .pickerStyle(.segmented)
+            }
 
-                if DataLayer_FeatureFlags.shareEndpointURL != nil {
-                    // Time range picker
-                    Picker(NSLocalizedString("Time Range", comment: "DataLayer share time range"), selection: $selectedShareDays) {
-                        Text("7 days").tag(7)
-                        Text("14 days").tag(14)
-                        Text("30 days").tag(30)
+            let consentedLabels = consentedCategoryLabels
+            if !consentedLabels.isEmpty {
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.shield.fill")
+                        .foregroundColor(.green)
+                        .font(.caption)
+                    Text("Included: \(consentedLabels)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Button {
+                generatePDFReport()
+            } label: {
+                HStack {
+                    if isGeneratingPDF {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    } else {
+                        Image(systemName: "doc.richtext")
                     }
-                    .pickerStyle(.segmented)
+                    Text(isGeneratingPDF
+                         ? NSLocalizedString("Generating...", comment: "DataLayer PDF generating")
+                         : NSLocalizedString("Generate PDF Report", comment: "DataLayer PDF button"))
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.green)
+            .disabled(isGeneratingPDF || !consentManager.hasAnyConsent)
 
-                    // Generate button
-                    Button {
-                        generateShare()
-                    } label: {
-                        HStack {
-                            if isGeneratingShare {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                            } else {
-                                Image(systemName: "link.badge.plus")
-                            }
-                            Text(isGeneratingShare
-                                 ? NSLocalizedString("Generating...", comment: "DataLayer share generating")
-                                 : NSLocalizedString("Generate Share Link", comment: "DataLayer share button"))
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.green)
-                    .disabled(isGeneratingShare || !consentManager.hasAnyConsent)
+            if let error = shareError {
+                HStack(spacing: 4) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+                    Text(error)
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                }
+            }
+        }
+    }
 
-                    if let error = shareError {
-                        HStack(spacing: 4) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
-                            Text(error)
+    // MARK: - Provider Portal Tab
+
+    private var providerPortalTab: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if DataLayer_ProviderRegistry.shared.hasProviders {
+                ForEach(0..<DataLayer_ProviderRegistry.shared.providers.count, id: \.self) { index in
+                    let provider = DataLayer_ProviderRegistry.shared.providers[index]
+                    HStack(spacing: 10) {
+                        Image(systemName: provider.iconName)
+                            .foregroundColor(.blue)
+                            .frame(width: 20)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(provider.displayName)
+                                .font(.subheadline)
+                            Text(provider.isConfigured
+                                 ? NSLocalizedString("Connected", comment: "DataLayer provider connected")
+                                 : NSLocalizedString("Not configured", comment: "DataLayer provider not configured"))
                                 .font(.caption)
-                                .foregroundColor(.orange)
+                                .foregroundColor(provider.isConfigured ? .green : .secondary)
+                        }
+                        Spacer()
+                        if !provider.isConfigured {
+                            Button(NSLocalizedString("Setup", comment: "DataLayer provider setup")) {}
+                                .buttonStyle(.bordered)
+                                .font(.caption)
                         }
                     }
-
-                    // Active share links
-                    let activeLinks = DataLayer_FeatureFlags.activeShares.filter { !$0.isExpired }
-                    if !activeLinks.isEmpty {
-                        Divider()
-                        Text(NSLocalizedString("Active Share Links", comment: "DataLayer active shares header"))
+                }
+            } else {
+                HStack(spacing: 8) {
+                    Image(systemName: "building.2.crop.circle")
+                        .foregroundColor(.secondary)
+                        .font(.title3)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(NSLocalizedString("Digital Provider Integration", comment: "DataLayer portal title"))
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Text(NSLocalizedString("Direct uploads to healthcare provider portals coming soon. Use PDF Report or Share Link in the meantime.", comment: "DataLayer portal coming soon"))
                             .font(.caption)
-                            .fontWeight(.semibold)
                             .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+    }
 
-                        ForEach(activeLinks) { link in
-                            shareLinkRow(link)
+    // MARK: - Share Link Tab
+
+    private var shareLinkTab: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(NSLocalizedString("Generate a time-scoped link to share your data with a healthcare provider. They'll see a read-only dashboard with your glucose, insulin, meals, and other enabled categories.", comment: "DataLayer provider description"))
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            if DataLayer_FeatureFlags.shareEndpointURL != nil {
+                Picker(NSLocalizedString("Time Range", comment: "DataLayer share time range"), selection: $selectedShareDays) {
+                    Text("7 days").tag(7)
+                    Text("14 days").tag(14)
+                    Text("30 days").tag(30)
+                }
+                .pickerStyle(.segmented)
+
+                Button {
+                    generateShare()
+                } label: {
+                    HStack {
+                        if isGeneratingShare {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        } else {
+                            Image(systemName: "link.badge.plus")
                         }
+                        Text(isGeneratingShare
+                             ? NSLocalizedString("Generating...", comment: "DataLayer share generating")
+                             : NSLocalizedString("Generate Share Link", comment: "DataLayer share button"))
                     }
-                } else {
-                    HStack(spacing: 6) {
-                        Image(systemName: "clock.badge.checkmark")
-                            .foregroundColor(.secondary)
-                        Text(NSLocalizedString("Provider sharing requires a share endpoint to be configured.", comment: "DataLayer share not configured"))
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .disabled(isGeneratingShare || !consentManager.hasAnyConsent)
+
+                if let error = shareError {
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text(error)
                             .font(.caption)
-                            .foregroundColor(.secondary)
-                            .italic()
+                            .foregroundColor(.orange)
                     }
+                }
+
+                let activeLinks = DataLayer_FeatureFlags.activeShares.filter { !$0.isExpired }
+                if !activeLinks.isEmpty {
+                    Divider()
+                    Text(NSLocalizedString("Active Share Links", comment: "DataLayer active shares header"))
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+
+                    ForEach(activeLinks) { link in
+                        shareLinkRow(link)
+                    }
+                }
+            } else {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock.badge.checkmark")
+                        .foregroundColor(.secondary)
+                    Text(NSLocalizedString("Share links require a share endpoint to be configured.", comment: "DataLayer share not configured"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .italic()
                 }
             }
         }
@@ -345,6 +486,33 @@ struct DataLayer_ConsentView: View {
         .padding(.vertical, 4)
     }
 
+    private var consentedCategoryLabels: String {
+        let labels = DataLayer_ConsentCategory.allCases
+            .filter { consentManager.isGranted(for: $0) }
+            .map { $0.displayName }
+        return labels.joined(separator: ", ")
+    }
+
+    private func generatePDFReport() {
+        isGeneratingPDF = true
+        shareError = nil
+
+        Task {
+            if let url = await DataLayer_ReportGenerator.generateReport(days: selectedPDFDays) {
+                await MainActor.run {
+                    pdfURL = url
+                    isGeneratingPDF = false
+                    showingShareSheet = true
+                }
+            } else {
+                await MainActor.run {
+                    isGeneratingPDF = false
+                    shareError = NSLocalizedString("Failed to generate PDF report.", comment: "DataLayer PDF error")
+                }
+            }
+        }
+    }
+
     private func generateShare() {
         isGeneratingShare = true
         shareError = nil
@@ -395,11 +563,15 @@ struct DataLayer_ConsentView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "gearshape.fill")
                         .foregroundColor(.gray)
-                    Text(NSLocalizedString("ENDPOINT CONFIGURATION", comment: "DataLayer config header"))
+                    Text(NSLocalizedString("BACKEND CONFIGURATION", comment: "DataLayer config header"))
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundColor(.secondary)
                 }
+
+                Text(NSLocalizedString("These settings connect to the cloud backend that powers Research Contribution uploads and Share Link generation. They are not related to PDF Reports or the Provider Portal.", comment: "DataLayer config description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Ingest Endpoint")
