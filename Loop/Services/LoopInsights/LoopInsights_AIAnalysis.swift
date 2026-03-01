@@ -344,6 +344,7 @@ final class LoopInsights_AIAnalysis {
         prompt += "- Standard Deviation: \(String(format: "%.0f", stats.glucoseStats.standardDeviation)) mg/dL\n"
         prompt += "- Coefficient of Variation: \(String(format: "%.1f", stats.glucoseStats.coefficientOfVariation))%\n"
         prompt += "- Time in Range (70-180): \(String(format: "%.1f", stats.glucoseStats.timeInRange))%\n"
+        prompt += "- Time in Tight Range (70-\(stats.glucoseStats.tightRangeUpperBound)): \(String(format: "%.1f", stats.glucoseStats.timeInTightRange))%\n"
         prompt += "- Time Below Range (<70): \(String(format: "%.1f", stats.glucoseStats.timeBelowRange))%\n"
         prompt += "- Time Above Range (>180): \(String(format: "%.1f", stats.glucoseStats.timeAboveRange))%\n"
         prompt += "- GMI (est. A1C): \(String(format: "%.1f", stats.glucoseStats.gmi))%\n"

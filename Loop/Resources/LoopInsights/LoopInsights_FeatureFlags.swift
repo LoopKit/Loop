@@ -42,6 +42,7 @@ struct LoopInsights_FeatureFlags {
         static let mealDebriefEnabled = "LoopInsights_mealDebriefEnabled"
         static let preMealAdvisorEnabled = "LoopInsights_preMealAdvisorEnabled"
         static let cgmBackfillDetectionEnabled = "LoopInsights_cgmBackfillDetectionEnabled"
+        static let tightRangeUpperBound = "LoopInsights_tightRangeUpperBound"
     }
 
     private static let defaults = UserDefaults.standard
@@ -273,6 +274,17 @@ struct LoopInsights_FeatureFlags {
     static var cgmBackfillDetectionEnabled: Bool {
         get { defaults.bool(forKey: Keys.cgmBackfillDetectionEnabled) }
         set { defaults.set(newValue, forKey: Keys.cgmBackfillDetectionEnabled) }
+    }
+
+    /// Upper bound for Time in Tight Range (TITR) calculation.
+    /// Default 140 mg/dL per 2019 International Consensus on TIR.
+    /// User-configurable: 120–160 mg/dL in steps of 5.
+    static var tightRangeUpperBound: Int {
+        get {
+            let val = defaults.integer(forKey: Keys.tightRangeUpperBound)
+            return val == 0 ? 140 : val
+        }
+        set { defaults.set(newValue, forKey: Keys.tightRangeUpperBound) }
     }
 
     // MARK: - AI Configuration

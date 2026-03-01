@@ -241,16 +241,23 @@ final class LoopInsights_DataAggregator {
         let cv = (stdDev / average) * 100
 
         // P2: Single-pass 5-zone TIR counting (replaces 5 separate .filter() passes)
+        let tightUpper = LoopInsights_FeatureFlags.tightRangeUpperBound
         var veryHighCount = 0, highCount = 0, inRangeCount = 0, lowCount = 0, veryLowCount = 0
+        var tightRangeCount = 0
         for value in glucoseValues {
             if value > 250 { veryHighCount += 1 }
             else if value > 180 { highCount += 1 }
             else if value >= 70 { inRangeCount += 1 }
             else if value >= 54 { lowCount += 1 }
             else { veryLowCount += 1 }
+            // TITR counted independently of 5-zone model
+            if value >= 70 && value <= Double(tightUpper) {
+                tightRangeCount += 1
+            }
         }
 
         let tir = (Double(inRangeCount) / count) * 100
+        let titr = (Double(tightRangeCount) / count) * 100
         let tvh = (Double(veryHighCount) / count) * 100
         let th = (Double(highCount) / count) * 100
         let tl = (Double(lowCount) / count) * 100
@@ -274,6 +281,8 @@ final class LoopInsights_DataAggregator {
             standardDeviation: stdDev,
             coefficientOfVariation: cv,
             timeInRange: tir,
+            timeInTightRange: titr,
+            tightRangeUpperBound: tightUpper,
             timeVeryHigh: tvh,
             timeHigh: th,
             timeLow: tl,
@@ -295,15 +304,22 @@ final class LoopInsights_DataAggregator {
         let cv = (stdDev / average) * 100
 
         // P2: Single-pass 5-zone TIR counting
+        let tightUpper = LoopInsights_FeatureFlags.tightRangeUpperBound
         var veryHighCount = 0, highCount = 0, inRangeCount = 0, lowCount = 0, veryLowCount = 0
+        var tightRangeCount = 0
         for value in glucoseValues {
             if value > 250 { veryHighCount += 1 }
             else if value > 180 { highCount += 1 }
             else if value >= 70 { inRangeCount += 1 }
             else if value >= 54 { lowCount += 1 }
             else { veryLowCount += 1 }
+            // TITR counted independently of 5-zone model
+            if value >= 70 && value <= Double(tightUpper) {
+                tightRangeCount += 1
+            }
         }
         let tir = (Double(inRangeCount) / count) * 100
+        let titr = (Double(tightRangeCount) / count) * 100
         let tvh = (Double(veryHighCount) / count) * 100
         let th = (Double(highCount) / count) * 100
         let tl = (Double(lowCount) / count) * 100
@@ -323,6 +339,8 @@ final class LoopInsights_DataAggregator {
             standardDeviation: stdDev,
             coefficientOfVariation: cv,
             timeInRange: tir,
+            timeInTightRange: titr,
+            tightRangeUpperBound: tightUpper,
             timeVeryHigh: tvh,
             timeHigh: th,
             timeLow: tl,

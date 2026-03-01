@@ -86,6 +86,7 @@ final class LoopInsights_ReportGenerator {
             <h2>Glucose</h2>
             <table>
                 <tr><td>Time in Range (70-180)</td><td>\(String(format: "%.1f%%", stats.glucoseStats.timeInRange))</td></tr>
+                <tr><td>Time in Tight Range (70-\(stats.glucoseStats.tightRangeUpperBound))</td><td>\(String(format: "%.1f%%", stats.glucoseStats.timeInTightRange))</td></tr>
                 <tr><td>Average Glucose</td><td>\(String(format: "%.0f mg/dL", stats.glucoseStats.averageGlucose))</td></tr>
                 <tr><td>GMI (est. A1C)</td><td>\(String(format: "%.1f%%", stats.glucoseStats.gmi))</td></tr>
                 <tr><td>Coefficient of Variation</td><td>\(String(format: "%.1f%%", stats.glucoseStats.coefficientOfVariation))</td></tr>

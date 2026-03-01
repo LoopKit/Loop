@@ -51,6 +51,9 @@ struct LoopInsights_SettingsView: View {
     @StateObject private var healthKitManager = LoopInsights_HealthKitManager()
     @State private var isRequestingBiometricAuth = false
 
+    // Tight Range
+    @State private var tightRangeUpperBound = LoopInsights_FeatureFlags.tightRangeUpperBound
+
     // Phase 5 flags
     @State private var circadianEnabled = LoopInsights_FeatureFlags.circadianEnabled
     @State private var foodResponseEnabled = LoopInsights_FeatureFlags.foodResponseEnabled
@@ -145,6 +148,7 @@ struct LoopInsights_SettingsView: View {
             nightscoutImportEnabled = LoopInsights_FeatureFlags.nightscoutImportEnabled
             agpChartEnabled = LoopInsights_FeatureFlags.agpChartEnabled
             cgmBackfillDetectionEnabled = LoopInsights_FeatureFlags.cgmBackfillDetectionEnabled
+            tightRangeUpperBound = LoopInsights_FeatureFlags.tightRangeUpperBound
             nightscoutConfig = LoopInsightsNightscoutConfig.load()
             apiKeyText = LoopInsights_SecureStorage.loadAPIKey() ?? ""
 
@@ -623,6 +627,28 @@ struct LoopInsights_SettingsView: View {
                 }
 
                 Text(NSLocalizedString("Rolling lookback period for automated AI-based suggestions and Ask Loopy Chatbot - how far back do you want LoopInsights to look when analyzing your glucose, insulin, and carb data?", comment: "LoopInsights Loopy analysis period description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Divider()
+
+                // Tight Range Upper Bound
+                Stepper(value: $tightRangeUpperBound, in: 120...160, step: 5) {
+                    HStack {
+                        Text(NSLocalizedString("Tight Range Upper Bound", comment: "LoopInsights tight range stepper label"))
+                            .font(.subheadline)
+                        Spacer()
+                        Text("\(tightRangeUpperBound) mg/dL")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.accentColor)
+                    }
+                }
+                .onChange(of: tightRangeUpperBound) { newValue in
+                    LoopInsights_FeatureFlags.tightRangeUpperBound = newValue
+                }
+
+                Text(NSLocalizedString("Upper limit for Time in Tight Range (TITR). Standard is 140 mg/dL per international consensus.", comment: "LoopInsights tight range description"))
                     .font(.caption)
                     .foregroundColor(.secondary)
 

@@ -349,6 +349,7 @@ final class LoopInsights_ChatViewModel: ObservableObject {
             context += "\nRECENT GLUCOSE STATISTICS (\(stats.period.displayName)):\n"
             context += "  Average Glucose: \(String(format: "%.0f", stats.glucoseStats.averageGlucose)) mg/dL\n"
             context += "  Time in Range (70-180): \(String(format: "%.1f", stats.glucoseStats.timeInRange))%\n"
+            context += "  Time in Tight Range (70-\(stats.glucoseStats.tightRangeUpperBound)): \(String(format: "%.1f", stats.glucoseStats.timeInTightRange))%\n"
             context += "  Time Below Range (<70): \(String(format: "%.1f", stats.glucoseStats.timeBelowRange))%\n"
             context += "  Time Above Range (>180): \(String(format: "%.1f", stats.glucoseStats.timeAboveRange))%\n"
             context += "  GMI (est. A1C): \(String(format: "%.1f", stats.glucoseStats.gmi))%\n"

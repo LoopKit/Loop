@@ -307,6 +307,7 @@ struct LoopInsights_TrendsInsightsView: View {
                         icon: "drop.fill",
                         rows: [
                             (NSLocalizedString("Time in Range (70-180)", comment: ""), String(format: "%.1f%%", stats.glucoseStats.timeInRange)),
+                            (String(format: NSLocalizedString("Time in Tight Range (70-%d)", comment: ""), stats.glucoseStats.tightRangeUpperBound), String(format: "%.1f%%", stats.glucoseStats.timeInTightRange)),
                             (NSLocalizedString("Below Range (<70)", comment: ""), String(format: "%.1f%%", stats.glucoseStats.timeBelowRange)),
                             (NSLocalizedString("Above Range (>180)", comment: ""), String(format: "%.1f%%", stats.glucoseStats.timeAboveRange)),
                             (NSLocalizedString("Average Glucose", comment: ""), String(format: "%.0f mg/dL", stats.glucoseStats.averageGlucose)),

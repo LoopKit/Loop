@@ -757,6 +757,8 @@ struct LoopInsightsAggregatedStats: Codable {
         let standardDeviation: Double         // mg/dL
         let coefficientOfVariation: Double    // percentage
         let timeInRange: Double               // percentage (70-180 mg/dL)
+        let timeInTightRange: Double          // percentage (70-tightRangeUpperBound mg/dL)
+        let tightRangeUpperBound: Int         // configured upper bound for tight range
         let timeVeryHigh: Double              // percentage (>250 mg/dL)
         let timeHigh: Double                  // percentage (181-250 mg/dL)
         let timeLow: Double                   // percentage (54-69 mg/dL)

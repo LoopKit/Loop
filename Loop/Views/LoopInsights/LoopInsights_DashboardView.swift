@@ -795,6 +795,7 @@ struct LoopInsights_DashboardView: View {
     private static let clarityVeryHigh = Color(red: 193/255, green: 79/255, blue: 12/255)   // #C14F0C — Very High
     private static let clarityHigh = Color(red: 240/255, green: 202/255, blue: 76/255)      // #F0CA4C — High
     private static let clarityGreen = Color(red: 116/255, green: 165/255, blue: 46/255)     // #74A52E — In Range
+    private static let clarityTight = Color(red: 46/255, green: 139/255, blue: 130/255)     // #2E8B82 — Tight Range (teal)
     private static let clarityLow = Color(red: 211/255, green: 98/255, blue: 101/255)       // #D36265 — Low
     private static let clarityVeryLow = Color(red: 127/255, green: 3/255, blue: 2/255)      // #7F0302 — Very Low
 
@@ -806,15 +807,16 @@ struct LoopInsights_DashboardView: View {
             Divider()
 
             HStack(alignment: .center, spacing: 14) {
-                // Stacked color bar — wide like Clarity
+                // Stacked color bar — standard 5-zone Dexcom/Clarity layout
                 tirStackedBar(glucoseStats: g)
                     .frame(width: 65)
 
-                // Percentage labels — lighter text
+                // Percentage labels — standard 5-zone layout
                 VStack(alignment: .leading, spacing: 5) {
                     tirLabelRow(percent: g.timeVeryHigh, label: NSLocalizedString("Very High", comment: "LoopInsights TIR very high"), isBold: false)
                     tirLabelRow(percent: g.timeHigh, label: NSLocalizedString("High", comment: "LoopInsights TIR high"), isBold: false)
                     tirLabelRow(percent: g.timeInRange, label: NSLocalizedString("In Range", comment: "LoopInsights TIR in range"), isBold: true)
+                    tirLabelRow(percent: g.timeInTightRange, label: NSLocalizedString("Tight", comment: "LoopInsights TITR tight label"), isBold: true, color: Self.clarityTight)
                     tirLabelRow(percent: g.timeLow, label: NSLocalizedString("Low", comment: "LoopInsights TIR low"), isBold: false)
                     tirLabelRow(percent: g.timeVeryLow, label: NSLocalizedString("Very Low", comment: "LoopInsights TIR very low"), isBold: false)
                 }
@@ -822,13 +824,23 @@ struct LoopInsights_DashboardView: View {
 
             Divider()
 
-            HStack(spacing: 0) {
-                Text(NSLocalizedString("Target Range: ", comment: "LoopInsights TIR target label"))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.primary)
-                Text(NSLocalizedString("70–180 mg/dL", comment: "LoopInsights TIR target value"))
-                    .font(.subheadline)
-                    .foregroundColor(.primary)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 0) {
+                    Text(NSLocalizedString("Target Range: ", comment: "LoopInsights TIR target label"))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.primary)
+                    Text(NSLocalizedString("70–180 mg/dL", comment: "LoopInsights TIR target value"))
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                }
+                HStack(spacing: 0) {
+                    Text(NSLocalizedString("Tight Range: ", comment: "LoopInsights TITR target label"))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(Self.clarityTight)
+                    Text(String(format: NSLocalizedString("70–%d mg/dL", comment: "LoopInsights TITR target value"), g.tightRangeUpperBound))
+                        .font(.subheadline)
+                        .foregroundColor(Self.clarityTight)
+                }
             }
         }
         .padding(.vertical, 4)
@@ -856,17 +868,18 @@ struct LoopInsights_DashboardView: View {
         .frame(height: 130)
     }
 
-    private func tirLabelRow(percent: Double, label: String, isBold: Bool) -> some View {
-        HStack(spacing: 4) {
+    private func tirLabelRow(percent: Double, label: String, isBold: Bool, color: Color? = nil) -> some View {
+        let foreground = color ?? (isBold ? Color.primary : Color(.secondaryLabel))
+        return HStack(spacing: 4) {
             Text(String(format: "%.0f%%", percent))
                 .font(.subheadline)
                 .fontWeight(isBold ? .bold : .regular)
-                .foregroundColor(isBold ? .primary : Color(.secondaryLabel))
+                .foregroundColor(foreground)
                 .fixedSize(horizontal: true, vertical: false)
             Text(label)
                 .font(.subheadline)
                 .fontWeight(isBold ? .bold : .regular)
-                .foregroundColor(isBold ? .primary : Color(.secondaryLabel))
+                .foregroundColor(foreground)
         }
     }
 
