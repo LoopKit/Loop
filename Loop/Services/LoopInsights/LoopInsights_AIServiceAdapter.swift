@@ -64,9 +64,10 @@ final class LoopInsights_AIServiceAdapter {
             throw LoopInsightsError.noAPIKeyConfigured
         }
 
-        // Use minimal tokens to minimize cost
+        // Use minimal tokens to minimize cost.
+        // Thinking models (Gemini 2.5 Pro) need headroom for internal reasoning tokens.
         var testConfig = config
-        testConfig.maxTokens = 10
+        testConfig.maxTokens = 128
 
         let request = try buildRequest(config: testConfig, systemPrompt: "You are a test.", userPrompt: "Reply with exactly: OK")
 
@@ -208,6 +209,17 @@ final class LoopInsights_AIServiceAdapter {
         systemPrompt: String,
         userPrompt: String
     ) throws -> Data {
+        // Thinking models (Gemini 2.5 Pro) use internal reasoning tokens that count
+        // against maxOutputTokens. Set a separate thinking budget so actual response
+        // tokens aren't starved. Non-thinking models ignore this field.
+        var generationConfig: [String: Any] = [
+            "temperature": config.temperature,
+            "maxOutputTokens": config.maxTokens,
+            "thinkingConfig": [
+                "thinkingBudget": 1024
+            ]
+        ]
+
         let body: [String: Any] = [
             "system_instruction": [
                 "parts": [["text": systemPrompt]]
@@ -218,10 +230,7 @@ final class LoopInsights_AIServiceAdapter {
                     "parts": [["text": userPrompt]]
                 ]
             ],
-            "generationConfig": [
-                "temperature": config.temperature,
-                "maxOutputTokens": config.maxTokens
-            ]
+            "generationConfig": generationConfig
         ]
         return try JSONSerialization.data(withJSONObject: body)
     }

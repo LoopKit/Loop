@@ -138,9 +138,10 @@ final class AIServiceManager {
 
     func testConnection(to configuration: AIProviderConfiguration) async -> TestConnectionResult {
         do {
-            // Use a minimal config: max_tokens=1 to minimize cost and avoid quota issues
+            // Use minimal tokens. Thinking models (Gemini 2.5 Pro) need headroom
+            // for internal reasoning tokens, so 1 is too low.
             var testConfig = configuration
-            testConfig.maxTokens = 1
+            testConfig.maxTokens = 128
             testConfig.temperature = 0
 
             let testPrompt = "Say hi"
@@ -395,7 +396,10 @@ final class AIServiceManager {
                 "maxOutputTokens": config.maxTokens,
                 "temperature": config.temperature,
                 "topP": 0.95,
-                "topK": 8
+                "topK": 8,
+                "thinkingConfig": [
+                    "thinkingBudget": 1024
+                ]
             ]
         ]
 
