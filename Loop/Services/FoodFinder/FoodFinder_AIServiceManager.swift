@@ -388,19 +388,25 @@ final class AIServiceManager {
             ])
         }
 
+        // Only include thinkingConfig for models that support it (Gemini 2.5+).
+        // Non-thinking models (e.g. gemini-2.0-flash) reject the field.
+        var generationConfig: [String: Any] = [
+            "maxOutputTokens": config.maxTokens,
+            "temperature": config.temperature,
+            "topP": 0.95,
+            "topK": 8
+        ]
+
+        let modelLower = config.model.lowercased()
+        if modelLower.contains("2.5") || modelLower.contains("thinking") {
+            generationConfig["thinkingConfig"] = ["thinkingBudget": 1024]
+        }
+
         let body: [String: Any] = [
             "contents": [
                 ["parts": parts]
             ],
-            "generationConfig": [
-                "maxOutputTokens": config.maxTokens,
-                "temperature": config.temperature,
-                "topP": 0.95,
-                "topK": 8,
-                "thinkingConfig": [
-                    "thinkingBudget": 1024
-                ]
-            ]
+            "generationConfig": generationConfig
         ]
 
         return try JSONSerialization.data(withJSONObject: body)
