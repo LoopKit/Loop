@@ -375,7 +375,12 @@ class AutoPresets_ActivityDetectionManager {
                 return (self._totalSteps, self._stepThresholdReachedTime, self._lastStepChangeTime, self._detectedActivityType, self._lastClassifierTime)
             }
 
-            let additionalSteps = currentSteps - stepsAtThreshold
+            // If currentSteps < stepsAtThreshold, the pedometer restarted mid-timer
+            // (stale batch from old session inflated stepsAtThreshold). In that case,
+            // all current steps are from the new session and count as additional.
+            let additionalSteps = currentSteps >= stepsAtThreshold
+                ? currentSteps - stepsAtThreshold
+                : currentSteps
 
             let minAdditionalSteps = max(15, Int(elapsed / 60.0 * 30.0))
 
