@@ -45,6 +45,7 @@ struct AutoPresets_SettingsView: View {
                 if dataStoresProvider != nil {
                     aiAdvisorSection
                 }
+                activityLogSection
                 debugLogsSection
             }
         }
@@ -467,6 +468,29 @@ struct AutoPresets_SettingsView: View {
         }
     }
 
+    // MARK: - Activity Log Section
+
+    @ViewBuilder
+    private var activityLogSection: some View {
+        if !coordinator.settings.recentActivityLog.isEmpty {
+            Section("Recent Activity (last 20 events)") {
+                ForEach(coordinator.settings.recentActivityLog) { logEntry in
+                    activityLogRow(for: logEntry)
+                }
+
+                Button(role: .destructive) {
+                    coordinator.clearActivityLog()
+                } label: {
+                    HStack {
+                        Spacer()
+                        Text("Clear Logs")
+                        Spacer()
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: - Debug Logs Section
 
     private var debugLogsSection: some View {
@@ -573,6 +597,80 @@ struct AutoPresets_SettingsView: View {
         }
     }
 
+    private func activityLogRow(for logEntry: AutoPresetsLogEntry) -> some View {
+        HStack {
+            Image(systemName: logEntry.event.iconName)
+                .foregroundColor(colorForEvent(logEntry.event))
+                .frame(width: 24)
+
+            VStack(alignment: .leading) {
+                HStack {
+                    Text(logEntry.event.displayName)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    if let activityType = logEntry.activityType {
+                        Text("(\(activityType.displayName))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                if let presetName = logEntry.presetName {
+                    Text(presetName)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                if logEntry.event == .presetDeactivated,
+                   let activationEntry = findMatchingActivationEntry(for: logEntry)
+                {
+                    let duration = logEntry.date.timeIntervalSince(activationEntry.date)
+                    Text("Duration: \(formatDuration(duration))")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                }
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing) {
+                Text(Self.relativeDateFormatter.string(for: logEntry.date) ?? "")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text(Self.timeFormatter.string(from: logEntry.date))
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    private func colorForEvent(_ event: AutoPresetsLogEvent) -> Color {
+        switch event {
+        case .presetActivated: return .blue
+        case .presetDeactivated: return .blue
+        case .featureEnabled: return .green
+        case .featureDisabled: return .orange
+        }
+    }
+
+    private func findMatchingActivationEntry(for deactivationEntry: AutoPresetsLogEntry) -> AutoPresetsLogEntry? {
+        guard deactivationEntry.event == .presetDeactivated else { return nil }
+
+        return coordinator.settings.recentActivityLog.first { entry in
+            entry.event == .presetActivated &&
+                entry.activityType == deactivationEntry.activityType &&
+                entry.presetName == deactivationEntry.presetName &&
+                entry.date < deactivationEntry.date
+        }
+    }
+
+    private func formatDuration(_ duration: TimeInterval) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.unitsStyle = .abbreviated
+        formatter.maximumUnitCount = 2
+        return formatter.string(from: duration) ?? "\(Int(duration))s"
+    }
+
     private func showErrorAlert(_ message: String) {
         errorMessage = message
         showingErrorAlert = true
@@ -605,6 +703,20 @@ struct AutoPresets_SettingsView: View {
             return "\(minutes) min"
         }
     }
+
+    // MARK: - Formatters
+
+    private static var relativeDateFormatter: RelativeDateTimeFormatter = {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.dateTimeStyle = .named
+        return formatter
+    }()
+
+    private static var timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter
+    }()
 
     // MARK: - LoopInsights Coordinator Builder
 
