@@ -582,7 +582,7 @@ final class LoopInsights_AIAnalysis {
                     startTime: startSeconds,
                     endTime: endSeconds,
                     currentValue: currentValue,
-                    proposedValue: proposedValue
+                    proposedValue: settingType.roundedToIncrement(proposedValue)
                 )
             }
 

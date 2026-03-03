@@ -57,6 +57,24 @@ enum LoopInsightsSettingType: String, Codable, CaseIterable, Identifiable {
         case .basalRate: return "drop.fill"
         }
     }
+
+    /// Snaps a value to the nearest valid Loop therapy setting increment.
+    func roundedToIncrement(_ value: Double) -> Double {
+        switch self {
+        case .carbRatio:          return (value * 10).rounded() / 10   // 0.1 increments
+        case .basalRate:          return (value * 20).rounded() / 20   // 0.05 increments
+        case .insulinSensitivity: return value.rounded()               // whole numbers
+        }
+    }
+
+    /// Format string appropriate for this setting type's display increment.
+    var valueFormatString: String {
+        switch self {
+        case .carbRatio:          return "%.1f"
+        case .basalRate:          return "%.2f"
+        case .insulinSensitivity: return "%.0f"
+        }
+    }
 }
 
 // MARK: - Setting Analysis Status
