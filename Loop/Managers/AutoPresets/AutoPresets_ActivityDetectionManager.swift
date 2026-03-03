@@ -407,7 +407,13 @@ class AutoPresets_ActivityDetectionManager {
                 classifierConfirmed = true
             }
 
-            if additionalSteps >= minAdditionalSteps && stepIsRecent && classifierConfirmed {
+            // Two paths to confirmation:
+            // 1. Strong pedometer evidence: steps are recent AND enough additional steps accumulated
+            // 2. Classifier shortcut: CoreMotion confirmed the activity at high confidence (even with fewer steps)
+            let pedometerSufficient = stepIsRecent && additionalSteps >= minAdditionalSteps
+            let classifierBoost = stepIsRecent && classifierConfirmed && additionalSteps >= 15
+
+            if pedometerSufficient || classifierBoost {
                 let activityType = classifierType ?? activity
 
                 os_log(
@@ -432,8 +438,6 @@ class AutoPresets_ActivityDetectionManager {
                 let reason: String
                 if !stepIsRecent {
                     reason = "user stopped walking before timer fired"
-                } else if !classifierConfirmed {
-                    reason = "CoreMotion classifier did not confirm activity at high confidence"
                 } else {
                     reason = "only \(additionalSteps) additional steps (need >= \(minAdditionalSteps))"
                 }
