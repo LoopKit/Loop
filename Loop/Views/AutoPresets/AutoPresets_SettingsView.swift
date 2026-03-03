@@ -649,6 +649,7 @@ struct AutoPresets_SettingsView: View {
         case .presetDeactivated: return .blue
         case .featureEnabled: return .green
         case .featureDisabled: return .orange
+        case .presetCreatedByAI: return Color(red: 76/255, green: 175/255, blue: 80/255)
         }
     }
 
