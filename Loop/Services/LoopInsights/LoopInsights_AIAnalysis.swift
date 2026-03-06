@@ -29,16 +29,24 @@ final class LoopInsights_AIAnalysis {
 
     // MARK: - Public API
 
+    /// Data bundle for a past applied suggestion that needs outcome evaluation
+    struct SuggestionWithOutcomeData {
+        let record: LoopInsightsSuggestionRecord
+        let postChangeGlucoseStats: [Int: Double]  // hour → average glucose after the change
+        let daysSinceApplied: Int
+    }
+
     /// Perform AI analysis for a specific setting type
     func analyze(
         settingType: LoopInsightsSettingType,
         currentSettings: LoopInsightsTherapySnapshot,
         stats: LoopInsightsAggregatedStats,
         recentChanges: [LoopInsightsSuggestionRecord] = [],
-        supplementalContext: String? = nil
+        supplementalContext: String? = nil,
+        pastAppliedWithOutcomes: [SuggestionWithOutcomeData] = []
     ) async throws -> LoopInsightsAnalysisResponse {
         let systemPrompt = buildSystemPrompt(supplementalContext: supplementalContext)
-        let userPrompt = buildUserPrompt(settingType: settingType, settings: currentSettings, stats: stats, recentChanges: recentChanges, supplementalContext: supplementalContext)
+        let userPrompt = buildUserPrompt(settingType: settingType, settings: currentSettings, stats: stats, recentChanges: recentChanges, supplementalContext: supplementalContext, pastAppliedWithOutcomes: pastAppliedWithOutcomes)
 
         let timestamp = Date()
         let rawResponse = try await serviceAdapter.sendPrompt(systemPrompt, userPrompt: userPrompt)
@@ -102,19 +110,22 @@ final class LoopInsights_AIAnalysis {
         1. TIME-OF-DAY PATTERNS: Compare hourly averages across the day. Different periods may need \
            different settings. Common periods: overnight (12AM-6AM), morning (6AM-10AM), midday \
            (10AM-2PM), afternoon (2PM-6PM), evening (6PM-10PM), late night (10PM-12AM).
-        2. AID ALGORITHM WORKLOAD: High correction bolus count means the algorithm is fighting the \
-           settings. Calculate corrections per day (count / days in period). >5/day is elevated, \
-           >7/day is a red flag that settings need work.
-        3. BASAL/BOLUS RATIO: In well-tuned AID, expect roughly 40-60% basal. <30% basal almost \
-           always means basal rate is too low. >70% basal may mean basal is too high.
+        2. AID ALGORITHM ACTIVITY: Correction bolus count is additional context, not a diagnosis on its own. \
+           AID systems are DESIGNED to issue corrections — that is their core function. A high correction \
+           count only matters if paired with poor glucose outcomes (high variability, low TIR, frequent \
+           lows/highs). Corrections with good TIR and low variability mean the system is working well.
+        3. BASAL/BOLUS RATIO: This varies widely between individuals and is influenced by diet, activity, \
+           insulin type, and physiology. There is no single "correct" ratio. Use it as one contextual data \
+           point alongside glucose outcomes, not as a standalone diagnostic. A 30/70 split with excellent \
+           TIR and no lows is perfectly fine for that person.
         4. GLUCOSE TRENDS: Look at the slope of hourly averages. A consistent rise over 3+ hours \
-           during fasting = basal too low. A consistent drop = basal too high.
-        5. HIGH TIR DOES NOT MEAN PERFECT SETTINGS: If TIR is 90% but the algorithm is issuing 10 \
-           corrections/day to achieve that, the settings are suboptimal — the algorithm is doing \
-           heavy lifting to compensate for ineffective settings. Better settings = same TIR with fewer corrections.
+           during fasting may suggest basal is too low. A consistent drop may suggest basal is too high.
+        5. OUTCOMES MATTER MOST: The primary question is always: are glucose outcomes good? If TIR is \
+           high, time below range is low, and variability is acceptable, the settings are working — even \
+           if the algorithm is active. Only recommend changes when glucose OUTCOMES clearly need improvement.
 
         CROSS-SETTING INTERACTIONS — You are given all three settings for context:
-        - The CR is the user's "front-end" tool for meals. Thier ISF and BR are the "back-end" tools the system uses \
+        - The CR is the user's "front-end" tool for meals. Their ISF and BR are the "back-end" tools the system uses \
           to keep the user stable between meals.
         - BR and ISF are tightly coupled: if basal is too low, the algorithm compensates with \
           frequent corrections using ISF. Changing ISF without considering BR can mask the real problem.
@@ -135,9 +146,10 @@ final class LoopInsights_AIAnalysis {
         3. The proposed change would meaningfully improve outcomes based on the data.
         4. The change does not increase hypoglycemia risk.
 
-        IMPORTANT: Good TIR (>80%) with high algorithm workload (many corrections, skewed basal/bolus \
-        ratio) STILL warrants setting changes. The goal is good TIR with REASONABLE algorithm intervention. \
-        Only skip recommendations when TIR is good AND corrections are low AND basal/bolus is balanced.
+        IMPORTANT: If glucose outcomes are good (TIR >80%, time below range <4%, CV <36%), respect that \
+        the current settings are working for THIS person. AID systems are meant to actively manage delivery — \
+        corrections and basal adjustments are features, not failures. Only recommend changes when glucose \
+        outcomes clearly need improvement, not because the algorithm is active.
 
         SAFETY RULES:
         1. Never suggest CR or ISF changes larger than 20% from current values in a single step. \
@@ -242,9 +254,40 @@ final class LoopInsights_AIAnalysis {
           spikes that resolve by hour 3 may need more pre-bolus time, not a CR change. A Fiasp user with \
           the same pattern likely needs a CR adjustment since Fiasp should already be active.
 
+        SUCCESS CRITERIA — Every suggestion MUST include success_criteria:
+        For each suggestion, define specific, measurable criteria the user should watch for to know \
+        if the change worked. Use actual numbers from THEIR data — not generic targets. Include:
+        1. expected_outcomes: 2-4 concrete statements like "Overnight average glucose should drop from \
+           145 mg/dL to below 130 mg/dL" or "Time below range should stay under 3%".
+        2. evaluation_days: How many days to wait before judging (3-7 days, longer for basal changes).
+        3. revert_warnings: 1-3 danger signals that mean the change should be reverted immediately, \
+           e.g. "More than 2 lows below 60 mg/dL in a single night" or "Time below range exceeds 6%".
+        4. metric_targets: Key metrics with target ranges, e.g. {"overnight_avg": "<130 mg/dL", \
+           "time_below_range": "<4%"}.
+
+        PAST SUGGESTION EVALUATION — When previously applied suggestions are listed in the user prompt:
+        Before making ANY new recommendations, evaluate each past applied suggestion against its \
+        success criteria using the post-change glucose data provided. For each past suggestion:
+        1. If evaluation_days have NOT elapsed since it was applied, return verdict "insufficient_data" \
+           and recommend the user wait before making further changes to that setting.
+        2. If evaluation_days HAVE elapsed, compare actual outcomes to the success criteria. Count how \
+           many criteria were met. Return a verdict: "success" (all met), "partial" (some met), \
+           "no_improvement" (none met), or "worsened" (metrics got worse).
+        3. Include reasoning explaining what the data shows about the change's effect.
+        4. If a previous change worsened outcomes, recommend reverting before making new suggestions.
+        Return evaluations in "past_suggestion_evaluations" keyed by the suggestion's record_id.
+
         RESPONSE FORMAT:
         Respond with valid JSON in this exact structure:
         {
+            "past_suggestion_evaluations": {
+                "record-uuid-here": {
+                    "criteria_met": 2,
+                    "criteria_total": 3,
+                    "verdict": "partial",
+                    "reasoning": "Overnight average dropped from 145 to 132 mg/dL (met), but time below range increased to 5% (not met)."
+                }
+            },
             "suggestions": [
                 {
                     "time_blocks": [
@@ -256,15 +299,30 @@ final class LoopInsights_AIAnalysis {
                         }
                     ],
                     "reasoning": "Specific data-backed explanation citing exact numbers that justify this change",
-                    "confidence": "low|medium|high"
+                    "confidence": "low|medium|high",
+                    "success_criteria": {
+                        "expected_outcomes": [
+                            "Overnight average glucose should drop from 145 to below 130 mg/dL",
+                            "Time below range should remain under 4%"
+                        ],
+                        "evaluation_days": 5,
+                        "revert_warnings": [
+                            "More than 2 readings below 60 mg/dL overnight"
+                        ],
+                        "metric_targets": {
+                            "overnight_avg": "<130 mg/dL",
+                            "time_below_range": "<4%"
+                        }
+                    }
                 }
             ],
             "overall_assessment": "Factual summary including: algorithm workload assessment, time-of-day pattern summary, and what the basal/bolus ratio tells us",
             "next_recommended_focus": "carb_ratio|insulin_sensitivity|basal_rate|null"
         }
 
-        If NO changes are warranted, return: { "suggestions": [], "overall_assessment": "...", "next_recommended_focus": null }
+        If NO changes are warranted, return: { "suggestions": [], "past_suggestion_evaluations": {}, "overall_assessment": "...", "next_recommended_focus": null }
         Only return empty suggestions when TIR is good AND algorithm workload is low AND no time-of-day patterns exist.
+        If there are no past suggestions to evaluate, return "past_suggestion_evaluations": {}.
 
         Time blocks use seconds since midnight (0 = 12:00 AM, 21600 = 6:00 AM, 43200 = 12:00 PM, etc.)
         Combine all time blocks for the same setting type into a single suggestion. Do NOT return separate suggestions for the same setting — use multiple time_blocks within one suggestion.
@@ -278,9 +336,51 @@ final class LoopInsights_AIAnalysis {
         settings: LoopInsightsTherapySnapshot,
         stats: LoopInsightsAggregatedStats,
         recentChanges: [LoopInsightsSuggestionRecord] = [],
-        supplementalContext: String? = nil
+        supplementalContext: String? = nil,
+        pastAppliedWithOutcomes: [SuggestionWithOutcomeData] = []
     ) -> String {
         var prompt = "Evaluate whether my \(settingType.displayName) settings need adjustment.\n\n"
+
+        // Include past applied suggestions that need outcome evaluation
+        let relevantOutcomes = pastAppliedWithOutcomes.filter {
+            $0.record.suggestion.settingType == settingType
+        }
+        if !relevantOutcomes.isEmpty {
+            prompt += "## Previously Applied Suggestions — EVALUATE THESE FIRST\n"
+            prompt += "Before making new recommendations, evaluate each of these past changes against their success criteria.\n\n"
+            for outcome in relevantOutcomes {
+                let record = outcome.record
+                prompt += "### Record ID: \(record.id.uuidString)\n"
+                prompt += "- Applied \(outcome.daysSinceApplied) day\(outcome.daysSinceApplied == 1 ? "" : "s") ago\n"
+                prompt += "- Change: "
+                for block in record.suggestion.timeBlocks {
+                    prompt += "\(formatTime(block.startTime))–\(formatTime(block.endTime)): \(String(format: "%.1f", block.currentValue)) → \(String(format: "%.1f", block.proposedValue)). "
+                }
+                prompt += "\n"
+
+                if let criteria = record.suggestion.successCriteria {
+                    prompt += "- Evaluation window: \(criteria.evaluationDays) days\n"
+                    prompt += "- Success criteria:\n"
+                    for (i, expected) in criteria.expectedOutcomes.enumerated() {
+                        prompt += "  \(i + 1). \(expected)\n"
+                    }
+                    if !criteria.revertWarnings.isEmpty {
+                        prompt += "- Revert warnings: \(criteria.revertWarnings.joined(separator: "; "))\n"
+                    }
+                }
+
+                // Include post-change glucose stats for the hours affected by this change
+                if !outcome.postChangeGlucoseStats.isEmpty {
+                    prompt += "- Post-change hourly glucose averages:\n"
+                    for hour in outcome.postChangeGlucoseStats.keys.sorted() {
+                        if let avg = outcome.postChangeGlucoseStats[hour] {
+                            prompt += "  \(String(format: "%02d", hour)):00: \(String(format: "%.0f", avg)) mg/dL\n"
+                        }
+                    }
+                }
+                prompt += "\n"
+            }
+        }
 
         // Include recent LoopInsights-applied changes so the AI knows data predates current settings
         let relevantChanges = recentChanges.filter {
@@ -354,20 +454,10 @@ final class LoopInsights_AIAnalysis {
         prompt += "- Basal: \(String(format: "%.0f", stats.insulinStats.basalPercentage))% / Bolus: \(String(format: "%.0f", stats.insulinStats.bolusPercentage))%\n"
         prompt += "- Correction Boluses: \(stats.insulinStats.correctionBolusCount) in period\n"
 
-        // Computed: corrections per day and basal/bolus assessment
+        // Computed: corrections per day (context, not a diagnosis)
         let days = max(1, stats.period.rawValue)
         let correctionsPerDay = Double(stats.insulinStats.correctionBolusCount) / Double(days)
         prompt += "- Corrections per Day: \(String(format: "%.1f", correctionsPerDay))\n"
-        if correctionsPerDay > 5 {
-            prompt += "  ** RED FLAG: >5 corrections/day means the AID algorithm is heavily compensating for suboptimal settings **\n"
-        } else if correctionsPerDay > 3 {
-            prompt += "  ** ELEVATED: >3 corrections/day suggests the algorithm is working harder than ideal **\n"
-        }
-        if stats.insulinStats.basalPercentage < 30 {
-            prompt += "  ** RED FLAG: Basal is only \(String(format: "%.0f", stats.insulinStats.basalPercentage))% of TDD — strongly suggests basal rate is too low **\n"
-        } else if stats.insulinStats.basalPercentage < 40 {
-            prompt += "  ** NOTE: Basal is \(String(format: "%.0f", stats.insulinStats.basalPercentage))% of TDD — lower than the ideal 40-60% range **\n"
-        }
 
         // Carb stats
         prompt += "\n## Carbohydrate Statistics\n"
@@ -627,6 +717,23 @@ final class LoopInsights_AIAnalysis {
 
             guard !validatedBlocks.isEmpty else { continue }
 
+            // Parse success criteria if present
+            var successCriteria: LoopInsightsSuccessCriteria? = nil
+            if let criteriaJSON = suggestionJSON["success_criteria"] as? [String: Any] {
+                let expectedOutcomes = criteriaJSON["expected_outcomes"] as? [String] ?? []
+                let evaluationDays = criteriaJSON["evaluation_days"] as? Int ?? 5
+                let revertWarnings = criteriaJSON["revert_warnings"] as? [String] ?? []
+                let metricTargets = criteriaJSON["metric_targets"] as? [String: String] ?? [:]
+                if !expectedOutcomes.isEmpty {
+                    successCriteria = LoopInsightsSuccessCriteria(
+                        expectedOutcomes: expectedOutcomes,
+                        evaluationDays: evaluationDays,
+                        revertWarnings: revertWarnings,
+                        metricTargets: metricTargets
+                    )
+                }
+            }
+
             let suggestion = LoopInsightsSuggestion(
                 id: UUID(),
                 settingType: settingType,
@@ -634,7 +741,8 @@ final class LoopInsights_AIAnalysis {
                 reasoning: reasoning,
                 confidence: confidence,
                 analysisPeriod: period,
-                createdAt: Date()
+                createdAt: Date(),
+                successCriteria: successCriteria
             )
             suggestions.append(suggestion)
         }
@@ -650,11 +758,33 @@ final class LoopInsights_AIAnalysis {
             nextFocus = LoopInsightsSettingType(rawValue: nextRaw)
         }
 
+        // Parse past suggestion evaluations
+        var pastEvaluations: [String: LoopInsightsOutcomeEvaluation] = [:]
+        if let evalsJSON = json["past_suggestion_evaluations"] as? [String: [String: Any]] {
+            for (recordID, evalData) in evalsJSON {
+                guard let verdictRaw = evalData["verdict"] as? String,
+                      let verdict = LoopInsightsOutcomeEvaluation.Verdict(rawValue: verdictRaw) else {
+                    continue
+                }
+                let criteriaMet = evalData["criteria_met"] as? Int ?? 0
+                let criteriaTotal = evalData["criteria_total"] as? Int ?? 0
+                let reasoning = evalData["reasoning"] as? String ?? ""
+                pastEvaluations[recordID] = LoopInsightsOutcomeEvaluation(
+                    evaluatedAt: Date(),
+                    criteriaMetCount: criteriaMet,
+                    criteriaTotalCount: criteriaTotal,
+                    verdict: verdict,
+                    reasoning: reasoning
+                )
+            }
+        }
+
         return LoopInsightsAnalysisResponse(
             suggestions: merged,
             overallAssessment: overallAssessment,
             nextRecommendedFocus: nextFocus,
-            rawResponse: rawResponse
+            rawResponse: rawResponse,
+            pastEvaluations: pastEvaluations
         )
     }
 
@@ -674,6 +804,9 @@ final class LoopInsights_AIAnalysis {
         let highestConfidence = suggestions.map { $0.confidence }.max() ?? .low
         let combinedReasoning = suggestions.map { $0.reasoning }.joined(separator: " ")
 
+        // Use the first suggestion's success criteria (all share same setting type)
+        let mergedCriteria = suggestions.first(where: { $0.successCriteria != nil })?.successCriteria
+
         let merged = LoopInsightsSuggestion(
             id: UUID(),
             settingType: settingType,
@@ -681,7 +814,8 @@ final class LoopInsights_AIAnalysis {
             reasoning: combinedReasoning,
             confidence: highestConfidence,
             analysisPeriod: period,
-            createdAt: Date()
+            createdAt: Date(),
+            successCriteria: mergedCriteria
         )
         return [merged]
     }

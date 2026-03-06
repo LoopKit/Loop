@@ -80,6 +80,13 @@ final class LoopInsights_SuggestionStore: ObservableObject {
         saveRecords()
     }
 
+    /// Set the outcome evaluation for an applied suggestion
+    func setOutcomeEvaluation(recordID: UUID, evaluation: LoopInsightsOutcomeEvaluation) {
+        guard let index = records.firstIndex(where: { $0.id == recordID }) else { return }
+        records[index].outcomeEvaluation = evaluation
+        saveRecords()
+    }
+
     /// Mark a record as reverted (settings restored to pre-apply state)
     func markReverted(recordID: UUID) {
         guard let index = records.firstIndex(where: { $0.id == recordID }) else { return }

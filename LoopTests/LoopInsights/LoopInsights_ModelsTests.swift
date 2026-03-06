@@ -249,7 +249,8 @@ final class LoopInsights_ModelsTests: XCTestCase {
             reasoning: "Test reasoning",
             confidence: .medium,
             analysisPeriod: .fourteenDays,
-            createdAt: Date()
+            createdAt: Date(),
+            successCriteria: nil
         )
     }
 }

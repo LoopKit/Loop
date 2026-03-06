@@ -108,6 +108,22 @@ API key is stored in iOS Keychain and shared with FoodFinder (same Keychain entr
 2. **ISF** — adjust second (affects correction doses)
 3. **Basal Rate** — adjust last (affects entire 24-hour profile)
 
+## Data Sharing (DataLayer)
+
+LoopInsights includes an optional **DataLayer** module that can collect and share anonymized health data for research and provider sharing. **On first launch, data collection is enabled by default** with all categories (glucose, insulin, carbs, biometrics, AI behavioral, substances, activity) opted in.
+
+**No data is uploaded unless an ingest endpoint is configured.** The open-source default has no endpoint set, so data stays on-device only. If you or your fork configures an ingest endpoint, data will be transmitted.
+
+**To review or disable data sharing:**
+
+1. Open **Settings > LoopInsights**
+2. Tap **Data Sharing**
+3. Turn off the **Enable Data Sharing** master toggle to disable all collection, OR
+4. Toggle individual categories on/off for granular control
+5. Turn off **Contribute to Research** to stop research uploads while keeping provider sharing
+
+All data is stored locally with a 90-day retention policy and can be deleted at any time from the Data Sharing screen.
+
 ## Safety
 
 - Suggestions are capped at 20% change from current values
