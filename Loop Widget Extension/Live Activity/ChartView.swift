@@ -23,6 +23,16 @@ struct ChartView: View {
     private static let colorBelowRange = Color.red
     private static let colorAboveRange = Color.orange
 
+    // Infer chartable increment from yAxisMarks: mmol/L values are always below 40, mg/dL above 54.
+    private var chartableIncrement: Double { (yAxisMarks.max() ?? 100) < 40 ? 1.0/25.0 : 1.0 }
+
+    // When min == max the rectangle has zero height and is invisible. Mirror the main app's
+    // doubleRangeWithMinimumIncrement logic by expanding by one chartable increment each side.
+    private func adjustedRange(min minValue: Double, max maxValue: Double) -> (min: Double, max: Double) {
+        guard (maxValue - minValue) < .ulpOfOne else { return (minValue, maxValue) }
+        return (minValue - chartableIncrement, maxValue + chartableIncrement)
+    }
+
     init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?, yAxisMarks: [Double]) {
         self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, useLimits: useLimits, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = ChartValues.convert(
@@ -91,22 +101,24 @@ struct ChartView: View {
         ZStack(alignment: Alignment(horizontal: .trailing, vertical: .top)){
             Chart {
                 if let preset = self.preset, predicatedData.count > 0, preset.endDate > Date.now.addingTimeInterval(.hours(-6)) {
+                    let (presetMin, presetMax) = adjustedRange(min: preset.minValue, max: preset.maxValue)
                     RectangleMark(
                         xStart: .value("Start", preset.startDate),
                         xEnd: .value("End", preset.endDate),
-                        yStart: .value("Preset override", preset.minValue),
-                        yEnd: .value("Preset override", preset.maxValue)
+                        yStart: .value("Preset override", presetMin),
+                        yEnd: .value("Preset override", presetMax)
                     )
                     .foregroundStyle(.primary)
                     .opacity(0.6)
                 }
                 
                 ForEach(glucoseRanges) { item in
+                    let (rangeMin, rangeMax) = adjustedRange(min: item.minValue, max: item.maxValue)
                     RectangleMark(
                         xStart: .value("Start", item.startDate),
                         xEnd: .value("End", item.endDate),
-                        yStart: .value("Glucose range", item.minValue),
-                        yEnd: .value("Glucose range", item.maxValue)
+                        yStart: .value("Glucose range", rangeMin),
+                        yEnd: .value("Glucose range", rangeMax)
                     )
                     .foregroundStyle(.primary)
                     .opacity(0.3)
