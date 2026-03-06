@@ -138,8 +138,7 @@ final class AIServiceManager {
 
     func testConnection(to configuration: AIProviderConfiguration) async -> TestConnectionResult {
         do {
-            // Use minimal tokens. Thinking models (Gemini 2.5 Pro) need headroom
-            // for internal reasoning tokens, so 1 is too low.
+            // Use minimal tokens for a lightweight connectivity check
             var testConfig = configuration
             testConfig.maxTokens = 128
             testConfig.temperature = 0
@@ -388,26 +387,17 @@ final class AIServiceManager {
             ])
         }
 
-        let generationConfig: [String: Any] = [
-            "maxOutputTokens": config.maxTokens,
-            "temperature": config.temperature,
-            "topP": 0.95,
-            "topK": 8
-        ]
-
-        // thinkingConfig is a TOP-LEVEL field, NOT inside generationConfig.
-        // Nesting it inside generationConfig causes "Unknown name" errors.
-        var body: [String: Any] = [
+        let body: [String: Any] = [
             "contents": [
                 ["parts": parts]
             ],
-            "generationConfig": generationConfig
+            "generationConfig": [
+                "maxOutputTokens": config.maxTokens,
+                "temperature": config.temperature,
+                "topP": 0.95,
+                "topK": 8
+            ]
         ]
-
-        let modelLower = config.model.lowercased()
-        if modelLower.contains("2.5") || modelLower.contains("thinking") {
-            body["thinkingConfig"] = ["thinkingBudget": 1024]
-        }
 
         return try JSONSerialization.data(withJSONObject: body)
     }

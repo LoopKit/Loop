@@ -209,19 +209,6 @@ final class LoopInsights_AIServiceAdapter {
         systemPrompt: String,
         userPrompt: String
     ) throws -> Data {
-        // Thinking models (Gemini 2.5+) use internal reasoning tokens that count
-        // against maxOutputTokens. Only include thinkingConfig for models that
-        // support it — non-thinking models (e.g. gemini-2.0-flash) reject it.
-        var generationConfig: [String: Any] = [
-            "temperature": config.temperature,
-            "maxOutputTokens": config.maxTokens
-        ]
-
-        let modelLower = config.model.lowercased()
-        if modelLower.contains("2.5") || modelLower.contains("thinking") {
-            generationConfig["thinkingConfig"] = ["thinkingBudget": 1024]
-        }
-
         let body: [String: Any] = [
             "system_instruction": [
                 "parts": [["text": systemPrompt]]
@@ -232,7 +219,10 @@ final class LoopInsights_AIServiceAdapter {
                     "parts": [["text": userPrompt]]
                 ]
             ],
-            "generationConfig": generationConfig
+            "generationConfig": [
+                "temperature": config.temperature,
+                "maxOutputTokens": config.maxTokens
+            ]
         ]
         return try JSONSerialization.data(withJSONObject: body)
     }
