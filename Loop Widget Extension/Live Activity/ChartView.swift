@@ -141,9 +141,9 @@ struct ChartView: View {
                 }
             }
             .chartForegroundStyleScale([
-                "Good": colorInRange,
-                "High": colorAboveRange,
-                "Low": colorBelowRange,
+                "Good": Self.colorInRange,
+                "High": Self.colorAboveRange,
+                "Low": Self.colorBelowRange,
                 "Default": Color("glucose")
             ])
             .chartPlotStyle { plotContent in
