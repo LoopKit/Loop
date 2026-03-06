@@ -30,7 +30,7 @@ struct ChartView: View {
     // doubleRangeWithMinimumIncrement logic by expanding by one chartable increment each side.
     private func adjustedRange(min minValue: Double, max maxValue: Double) -> (min: Double, max: Double) {
         guard (maxValue - minValue) < .ulpOfOne else { return (minValue, maxValue) }
-        return (minValue - chartableIncrement, maxValue + chartableIncrement)
+        return (minValue - 3 * chartableIncrement, maxValue + 3 * chartableIncrement)
     }
 
     init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?, yAxisMarks: [Double]) {
