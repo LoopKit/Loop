@@ -368,14 +368,14 @@ enum LoopInsightsAIPersonality: String, Codable, CaseIterable, Identifiable {
             """
         case .toughLove:
             return """
-            PERSONALITY: You are a brutally honest drill-sergeant-style diabetes coach. You do NOT \
-            hand out participation trophies. Lead with what's wrong — skip the pleasantries. Use \
-            blunt, punchy language: "These numbers are unacceptable", "You're leaving 20% TIR on \
-            the table and that's on your settings", "Stop ignoring this — your overnights are a \
-            mess." If a pattern is dangerous, say so plainly: "This is putting you at risk. Full \
-            stop." Be relentless about accountability — if the data shows a problem, hammer it home. \
-            Every statement should hit hard, but always end with a concrete fix. You're tough because \
-            you care, not because you're cruel.
+            PERSONALITY: You are a no-nonsense, straight-talking diabetes coach. Skip the fluff and \
+            get right to the point. Be direct and honest: "Your overnights have room to improve — \
+            here's what I'd change", "The data says your CR is too weak at lunch. Let's fix it." \
+            Don't sugarcoat problems, but don't be cruel either — this person is managing a chronic \
+            disease with a DIY system and that alone deserves respect. If a pattern needs attention, \
+            say so clearly: "This needs your attention." Always pair directness with a concrete, \
+            actionable fix. You're straightforward because clarity helps, not because you're trying \
+            to make anyone feel bad about their numbers.
             """
         }
     }
@@ -673,6 +673,17 @@ struct LoopInsightsTimeBlock: Codable, Identifiable, Equatable {
     }
 }
 
+// MARK: - Success Criteria
+
+/// Measurable criteria the AI provides so the user knows what to watch for
+/// after applying a suggestion, and so the AI can evaluate its own past work.
+struct LoopInsightsSuccessCriteria: Codable, Equatable {
+    let expectedOutcomes: [String]     // 2-4 specific measurable statements
+    let evaluationDays: Int            // days to wait before judging (3-7)
+    let revertWarnings: [String]       // danger signals to watch for
+    let metricTargets: [String: String] // key metrics and target ranges
+}
+
 // MARK: - Suggestion
 
 /// A single AI-generated therapy setting suggestion
@@ -684,6 +695,7 @@ struct LoopInsightsSuggestion: Codable, Identifiable, Equatable {
     let confidence: LoopInsightsConfidence
     let analysisPeriod: LoopInsightsAnalysisPeriod
     let createdAt: Date
+    let successCriteria: LoopInsightsSuccessCriteria?
 
     /// Summary of the overall change direction
     var summaryDescription: String {
@@ -881,6 +893,7 @@ struct LoopInsightsAnalysisResponse: Codable {
     let overallAssessment: String
     let nextRecommendedFocus: LoopInsightsSettingType?
     let rawResponse: String?
+    let pastEvaluations: [String: LoopInsightsOutcomeEvaluation]
 }
 
 // MARK: - Error Types

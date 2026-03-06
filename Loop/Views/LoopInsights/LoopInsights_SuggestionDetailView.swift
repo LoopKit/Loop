@@ -23,6 +23,12 @@ struct LoopInsights_SuggestionDetailView: View {
         List {
             headerSection
             reasoningSection
+            if record.suggestion.successCriteria != nil {
+                successCriteriaSection
+            }
+            if record.outcomeEvaluation != nil {
+                outcomeEvaluationSection
+            }
             if record.suggestion.hasGuardrailWarning {
                 guardrailWarningSection
             }
@@ -135,6 +141,112 @@ struct LoopInsights_SuggestionDetailView: View {
             Text(record.suggestion.reasoning)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+        }
+    }
+
+    // MARK: - Success Criteria
+
+    private var successCriteriaSection: some View {
+        Section(header: Text(NSLocalizedString("What to Watch For", comment: "LoopInsights success criteria header"))) {
+            if let criteria = record.suggestion.successCriteria {
+                // Evaluation timeline
+                HStack(spacing: 6) {
+                    Image(systemName: "calendar.badge.clock")
+                        .foregroundColor(.blue)
+                    Text(String(
+                        format: NSLocalizedString("Evaluate after %d days", comment: "LoopInsights evaluation timeline"),
+                        criteria.evaluationDays
+                    ))
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                }
+                .padding(.vertical, 2)
+
+                // Expected outcomes
+                ForEach(criteria.expectedOutcomes, id: \.self) { outcome in
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "target")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                            .padding(.top, 2)
+                        Text(outcome)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                // Metric targets
+                if !criteria.metricTargets.isEmpty {
+                    ForEach(Array(criteria.metricTargets.sorted(by: { $0.key < $1.key })), id: \.key) { metric, target in
+                        HStack {
+                            Text(metric.replacingOccurrences(of: "_", with: " ").capitalized)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(target)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+                    }
+                }
+
+                // Revert warnings
+                if !criteria.revertWarnings.isEmpty {
+                    ForEach(criteria.revertWarnings, id: \.self) { warning in
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .foregroundColor(.orange)
+                                .font(.caption)
+                                .padding(.top, 2)
+                            Text(warning)
+                                .font(.subheadline)
+                                .foregroundColor(.orange)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Outcome Evaluation
+
+    private var outcomeEvaluationSection: some View {
+        Section(header: Text(NSLocalizedString("Outcome", comment: "LoopInsights outcome evaluation header"))) {
+            if let evaluation = record.outcomeEvaluation {
+                // Verdict badge
+                HStack(spacing: 8) {
+                    Image(systemName: evaluation.verdict.systemImage)
+                        .foregroundColor(evaluation.verdict.color)
+                        .font(.title3)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(evaluation.verdict.displayName)
+                            .font(.subheadline)
+                            .fontWeight(.bold)
+                            .foregroundColor(evaluation.verdict.color)
+                        if evaluation.criteriaTotalCount > 0 {
+                            Text(String(
+                                format: NSLocalizedString("%d of %d criteria met", comment: "LoopInsights criteria met count"),
+                                evaluation.criteriaMetCount,
+                                evaluation.criteriaTotalCount
+                            ))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        }
+                    }
+                    Spacer()
+                    Text(Self.dateFormatter.string(from: evaluation.evaluatedAt))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 2)
+
+                // AI reasoning
+                if !evaluation.reasoning.isEmpty {
+                    Text(evaluation.reasoning)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
         }
     }
 

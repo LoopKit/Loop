@@ -154,13 +154,18 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
                 // Run AI analysis (include recent changes so AI knows data predates current settings)
                 let recentChanges = self.recentlyAppliedRecords()
+                let pastOutcomes = self.buildPastSuggestionOutcomes(stats: stats)
                 let response = try await coordinator.aiAnalysis.analyze(
                     settingType: focusSettingType,
                     currentSettings: snapshot,
                     stats: stats,
                     recentChanges: recentChanges,
-                    supplementalContext: supplementalContext
+                    supplementalContext: supplementalContext,
+                    pastAppliedWithOutcomes: pastOutcomes
                 )
+
+                // Apply outcome evaluations from the AI back to the store
+                self.applyReturnedEvaluations(response.pastEvaluations)
 
                 // Show patterns, score, and AI results together after analysis completes
                 self.detectedPatterns = Self.detectPatterns(from: stats)
@@ -241,14 +246,19 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
                 // Analyze each setting type in tuning order: CR → ISF → BR
                 let recentChanges = self.recentlyAppliedRecords()
+                let pastOutcomes = self.buildPastSuggestionOutcomes(stats: stats)
                 for settingType in LoopInsightsSettingType.allCases {
                     let response = try await coordinator.aiAnalysis.analyze(
                         settingType: settingType,
                         currentSettings: snapshot,
                         stats: stats,
                         recentChanges: recentChanges,
-                        supplementalContext: supplementalContext
+                        supplementalContext: supplementalContext,
+                        pastAppliedWithOutcomes: pastOutcomes
                     )
+
+                    // Apply outcome evaluations from the AI back to the store
+                    self.applyReturnedEvaluations(response.pastEvaluations)
 
                     self.overallAssessment = response.overallAssessment
                     self.analyzedSettingTypes.insert(settingType)
@@ -388,7 +398,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             reasoning: record.suggestion.reasoning,
             confidence: record.suggestion.confidence,
             analysisPeriod: record.suggestion.analysisPeriod,
-            createdAt: record.suggestion.createdAt
+            createdAt: record.suggestion.createdAt,
+            successCriteria: record.suggestion.successCriteria
         )
 
         coordinator.applyTherapyChanges(suggestion: editedSuggestion)
@@ -512,6 +523,63 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             }
         }
         return result
+    }
+
+    /// Build outcome data for past applied suggestions that need evaluation.
+    /// Limited to the 3 most recent unevaluated applied suggestions within 30 days.
+    /// Only includes hourly glucose averages for hours affected by each change.
+    private func buildPastSuggestionOutcomes(stats: LoopInsightsAggregatedStats) -> [LoopInsights_AIAnalysis.SuggestionWithOutcomeData] {
+        let cutoff = Date().addingTimeInterval(-30 * 24 * 3600)
+        let now = Date()
+
+        // Find applied records with success criteria, not yet evaluated, within 30 days
+        let candidates = coordinator.suggestionStore.allRecords.filter { record in
+            guard (record.status == .applied || record.status == .autoApplied),
+                  record.outcomeEvaluation == nil,
+                  record.suggestion.successCriteria != nil,
+                  (record.resolvedAt ?? record.createdAt) > cutoff else {
+                return false
+            }
+            return true
+        }
+        .sorted { ($0.resolvedAt ?? $0.createdAt) > ($1.resolvedAt ?? $1.createdAt) }
+        .prefix(3) // Limit to 3 most recent to control token budget
+
+        return candidates.map { record in
+            let appliedDate = record.resolvedAt ?? record.createdAt
+            let daysSince = max(1, Int(now.timeIntervalSince(appliedDate) / (24 * 3600)))
+
+            // Only include hourly glucose for hours affected by this change's time blocks
+            var relevantHours: Set<Int> = []
+            for block in record.suggestion.timeBlocks {
+                let startHour = Int(block.startTime) / 3600
+                let endHour = Int(block.endTime) / 3600
+                for h in startHour..<endHour {
+                    relevantHours.insert(h % 24)
+                }
+            }
+
+            var postChangeStats: [Int: Double] = [:]
+            for hour in relevantHours {
+                if let avg = stats.glucoseStats.hourlyAverages[hour] {
+                    postChangeStats[hour] = avg
+                }
+            }
+
+            return LoopInsights_AIAnalysis.SuggestionWithOutcomeData(
+                record: record,
+                postChangeGlucoseStats: postChangeStats,
+                daysSinceApplied: daysSince
+            )
+        }
+    }
+
+    /// Apply outcome evaluations returned by the AI to the suggestion store
+    private func applyReturnedEvaluations(_ evaluations: [String: LoopInsightsOutcomeEvaluation]) {
+        for (recordIDString, evaluation) in evaluations {
+            guard let recordID = UUID(uuidString: recordIDString) else { continue }
+            coordinator.suggestionStore.setOutcomeEvaluation(recordID: recordID, evaluation: evaluation)
+        }
     }
 
     // MARK: - Private

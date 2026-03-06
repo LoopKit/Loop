@@ -7,6 +7,61 @@
 //
 
 import Foundation
+import SwiftUI
+
+// MARK: - Outcome Evaluation
+
+/// The AI's evaluation of whether a previously applied suggestion achieved its success criteria
+struct LoopInsightsOutcomeEvaluation: Codable, Equatable {
+    let evaluatedAt: Date
+    let criteriaMetCount: Int
+    let criteriaTotalCount: Int
+    let verdict: Verdict
+    let reasoning: String
+
+    enum Verdict: String, Codable, Equatable {
+        case success
+        case partial
+        case noImprovement
+        case worsened
+        case insufficientData
+
+        var displayName: String {
+            switch self {
+            case .success:
+                return NSLocalizedString("Success", comment: "LoopInsights outcome: change worked")
+            case .partial:
+                return NSLocalizedString("Partial", comment: "LoopInsights outcome: some improvement")
+            case .noImprovement:
+                return NSLocalizedString("No Improvement", comment: "LoopInsights outcome: no change")
+            case .worsened:
+                return NSLocalizedString("Worsened", comment: "LoopInsights outcome: got worse")
+            case .insufficientData:
+                return NSLocalizedString("Too Early", comment: "LoopInsights outcome: not enough data yet")
+            }
+        }
+
+        var systemImage: String {
+            switch self {
+            case .success: return "checkmark.seal.fill"
+            case .partial: return "checkmark.circle"
+            case .noImprovement: return "minus.circle"
+            case .worsened: return "exclamationmark.triangle.fill"
+            case .insufficientData: return "clock.badge.questionmark"
+            }
+        }
+
+        var color: Color {
+            switch self {
+            case .success: return .green
+            case .partial: return .blue
+            case .noImprovement: return .orange
+            case .worsened: return .red
+            case .insufficientData: return .gray
+            }
+        }
+    }
+}
 
 // MARK: - Suggestion Status
 
@@ -70,6 +125,7 @@ struct LoopInsightsSuggestionRecord: Codable, Identifiable, Equatable {
     var applyMode: LoopInsightsApplyMode?
     var settingsSnapshotBefore: LoopInsightsTherapySnapshot?
     var settingsSnapshotAfter: LoopInsightsTherapySnapshot?
+    var outcomeEvaluation: LoopInsightsOutcomeEvaluation?
 
     init(suggestion: LoopInsightsSuggestion) {
         self.id = UUID()
@@ -80,6 +136,7 @@ struct LoopInsightsSuggestionRecord: Codable, Identifiable, Equatable {
         self.applyMode = nil
         self.settingsSnapshotBefore = nil
         self.settingsSnapshotAfter = nil
+        self.outcomeEvaluation = nil
     }
 
     mutating func markApplied(mode: LoopInsightsApplyMode, snapshotBefore: LoopInsightsTherapySnapshot?, snapshotAfter: LoopInsightsTherapySnapshot?) {
