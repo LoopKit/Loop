@@ -18,7 +18,11 @@ struct ChartView: View {
     private let preset: Preset?
     private let yAxisMarks: [Double]
     private let colorGradient: LinearGradient
-    
+
+    private static let colorInRange = Color.green
+    private static let colorBelowRange = Color.red
+    private static let colorAboveRange = Color.orange
+
     init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?, yAxisMarks: [Double]) {
         self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, useLimits: useLimits, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = ChartValues.convert(
@@ -29,7 +33,7 @@ struct ChartView: View {
             lowerLimit: lowerLimit,
             upperLimit: upperLimit
         )
-        self.colorGradient = ChartView.getGradient(useLimits: useLimits, lowerLimit: lowerLimit, upperLimit: upperLimit, highestValue: yAxisMarks.max() ?? 1)
+        self.colorGradient = ChartView.getGradient(useLimits: useLimits, lowerLimit: lowerLimit, upperLimit: upperLimit, lowestValue: predicatedGlucose.min() ?? 1, highestValue: predicatedGlucose.max() ?? 1)
         self.preset = preset
         self.glucoseRanges = glucoseRanges
         self.yAxisMarks = yAxisMarks
@@ -41,22 +45,40 @@ struct ChartView: View {
         self.preset = preset
         self.glucoseRanges = glucoseRanges
         self.yAxisMarks = yAxisMarks
-        self.colorGradient = ChartView.getGradient(useLimits: useLimits, lowerLimit: lowerLimit, upperLimit: upperLimit, highestValue: yAxisMarks.max() ?? 1)
+        self.colorGradient = LinearGradient(colors: [], startPoint: .bottom, endPoint: .top)
     }
 
-    private static func getGradient(useLimits: Bool, lowerLimit: Double, upperLimit: Double, highestValue: Double) -> LinearGradient {
+    private static func getGradient(useLimits: Bool, lowerLimit: Double, upperLimit: Double, lowestValue: Double, highestValue: Double) -> LinearGradient {
+    
         var stops: [Gradient.Stop] = [Gradient.Stop(color: Color("glucose"), location: 0)]
         if useLimits {
-            let lowerStop = lowerLimit / highestValue
-            let upperStop = upperLimit / highestValue
-            stops = [
-                Gradient.Stop(color: .red, location: 0),
-                Gradient.Stop(color: .red, location: lowerStop - 0.01),
-                Gradient.Stop(color: .green, location: lowerStop),
-                Gradient.Stop(color: .green, location: upperStop),
-                Gradient.Stop(color: .orange, location: upperStop + 0.01),
-                Gradient.Stop(color: .orange, location: 600), // Just use the mg/dl limit for the most upper value
-            ]
+            // For applying a color gradient to line data, the range of the plotted
+            // data maps to the space 0 to 1 for setting gradient stops, so normalize:
+            // Normalize the transition points to 0-1 space of the plotted range:
+            let lowerStop = (lowerLimit - lowestValue) / (highestValue - lowestValue)
+            let upperStop = (upperLimit - lowestValue) / (highestValue - lowestValue)
+            // Build up a set of stops, only using those in the 0-1 range:
+            stops = []
+            var stopColor: Color
+            // Get the color for glucose at the minimum of the line:
+            if lowestValue < lowerLimit {
+                stopColor = colorBelowRange
+            } else if lowestValue < upperLimit {
+                stopColor = colorInRange
+            } else {
+                stopColor = colorAboveRange
+            }
+            stops.append(Gradient.Stop(color: stopColor, location: 0))
+            // Add the transition stops if they are in the visible range:
+            if lowerStop > 0, lowerStop < 1 {
+                stops.append(Gradient.Stop(color: colorBelowRange, location: lowerStop))
+                stops.append(Gradient.Stop(color: colorInRange, location: lowerStop + 0.01))
+            }
+            if upperStop > 0, upperStop < 1 {
+                stops.append(Gradient.Stop(color: colorInRange, location: upperStop))
+                stops.append(Gradient.Stop(color: colorAboveRange, location: upperStop + 0.01))
+            }
+            
         }
         return LinearGradient(
             gradient: Gradient(stops: stops),
@@ -107,9 +129,9 @@ struct ChartView: View {
                 }
             }
             .chartForegroundStyleScale([
-                "Good": .green,
-                "High": .orange,
-                "Low": .red,
+                "Good": colorInRange,
+                "High": colorAboveRange,
+                "Low": colorBelowRange,
                 "Default": Color("glucose")
             ])
             .chartPlotStyle { plotContent in
