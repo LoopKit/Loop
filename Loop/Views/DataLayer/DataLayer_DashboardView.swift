@@ -97,7 +97,9 @@ struct DataLayer_DashboardView: View {
                             Text(shortDate(day))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                                .frame(width: 45, alignment: .trailing)
+                                .lineLimit(1)
+                                .fixedSize()
+                                .frame(minWidth: 45, alignment: .trailing)
 
                             GeometryReader { geo in
                                 RoundedRectangle(cornerRadius: 3)

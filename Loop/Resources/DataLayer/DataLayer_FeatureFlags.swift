@@ -30,6 +30,18 @@ struct DataLayer_FeatureFlags {
     }
 
     private static let defaults = UserDefaults.standard
+    private static let defaultsInitializedKey = "DataLayer_defaultsInitialized"
+
+    /// On first launch, enable data sharing, research, and all consent categories by default.
+    static func registerDefaultsIfNeeded() {
+        guard !defaults.bool(forKey: defaultsInitializedKey) else { return }
+        defaults.set(true, forKey: defaultsInitializedKey)
+        isEnabled = true
+        researchEnabled = true
+        for category in DataLayer_ConsentCategory.allCases {
+            DataLayer_ConsentManager.shared.setConsent(for: category, granted: true)
+        }
+    }
 
     // MARK: - Master Toggle
 

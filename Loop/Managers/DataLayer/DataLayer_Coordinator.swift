@@ -35,6 +35,7 @@ final class DataLayer_Coordinator: ObservableObject {
     // MARK: - Initialization
 
     private init() {
+        DataLayer_FeatureFlags.registerDefaultsIfNeeded()
         observeFeatureNotifications()
         DataLayer_FeatureFlags.log.info("DataLayer_Coordinator initialized")
     }
