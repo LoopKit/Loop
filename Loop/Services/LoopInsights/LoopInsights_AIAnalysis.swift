@@ -668,7 +668,10 @@ final class LoopInsights_AIAnalysis {
 
         // Parse suggestions
         guard let suggestionsArray = json["suggestions"] as? [[String: Any]] else {
-            throw LoopInsightsError.parseError("Missing 'suggestions' array in response")
+            let keys = json.keys.sorted().joined(separator: ", ")
+            let rawLen = rawResponse.count
+            let jsonLen = jsonString.count
+            throw LoopInsightsError.parseError("Missing 'suggestions' array. Keys found: [\(keys)]. Raw response: \(rawLen) chars, extracted JSON: \(jsonLen) chars. First 300: \(jsonString.prefix(300))")
         }
 
         var suggestions: [LoopInsightsSuggestion] = []
