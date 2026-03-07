@@ -497,9 +497,7 @@ struct LoopInsights_DashboardView: View {
     private func modelRow(_ name: String, detail: String) -> some View {
         HStack {
             Text(name)
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .fontDesign(.monospaced)
+                .font(.system(.subheadline, design: .monospaced).weight(.medium))
             Spacer()
             Text(detail)
                 .font(.caption)
