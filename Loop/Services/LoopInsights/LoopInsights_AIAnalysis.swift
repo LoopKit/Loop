@@ -666,12 +666,16 @@ final class LoopInsights_AIAnalysis {
             json = repaired
         }
 
+        // Detect empty responses from thinking models (all output tokens used for thinking, no actual content)
+        if json.keys.contains("candidates") || json.keys.contains("usageMetadata") {
+            // We're looking at the API envelope, not the AI-generated content.
+            // This happens when the model produces only thinking tokens and no response.
+            throw LoopInsightsError.aiProviderError("The AI model returned an empty response. This typically happens with \"thinking\" models (e.g. Gemini 2.5) that use all output tokens for internal reasoning. Try switching to a non-thinking model like gemini-2.0-flash, gpt-4o, or claude-sonnet-4-5.")
+        }
+
         // Parse suggestions
         guard let suggestionsArray = json["suggestions"] as? [[String: Any]] else {
-            let keys = json.keys.sorted().joined(separator: ", ")
-            let rawLen = rawResponse.count
-            let jsonLen = jsonString.count
-            throw LoopInsightsError.parseError("Missing 'suggestions' array. Keys found: [\(keys)]. Raw response: \(rawLen) chars, extracted JSON: \(jsonLen) chars. First 300: \(jsonString.prefix(300))")
+            throw LoopInsightsError.parseError("Missing 'suggestions' array in response")
         }
 
         var suggestions: [LoopInsightsSuggestion] = []
