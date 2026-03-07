@@ -30,7 +30,11 @@ final class LoopInsights_AIServiceAdapter {
 
     /// Send a prompt to the configured AI provider and return the text response.
     func sendPrompt(_ systemPrompt: String, userPrompt: String) async throws -> String {
-        let config = LoopInsights_FeatureFlags.aiConfiguration.withKeychainAPIKey()
+        var config = LoopInsights_FeatureFlags.aiConfiguration.withKeychainAPIKey()
+
+        // Cap output tokens to 8192 — enough for thinking overhead (~6K) plus the
+        // JSON response (~1.5K), but not so high that thinking models burn 60K+ tokens.
+        config.maxTokens = min(config.maxTokens, 8192)
 
         guard !config.apiKey.isEmpty else {
             throw LoopInsightsError.noAPIKeyConfigured

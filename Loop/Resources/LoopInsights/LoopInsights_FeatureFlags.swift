@@ -312,10 +312,10 @@ struct LoopInsights_FeatureFlags {
             }
             // Always enforce temperature=0 for deterministic analysis
             config.temperature = 0.0
-            // Enforce minimum maxTokens — older saved configs may have 2048 which
-            // truncates responses now that success criteria fields are included
-            if config.maxTokens < 65536 {
-                config.maxTokens = 65536
+            // Enforce minimum maxTokens — older saved configs may have low values
+            // that truncate responses (especially with thinking models)
+            if config.maxTokens < 8192 {
+                config.maxTokens = 8192
             }
             return config
         }

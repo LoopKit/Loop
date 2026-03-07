@@ -519,7 +519,7 @@ struct LoopInsightsAIProviderConfiguration: Codable, Equatable {
         requestFormat: LoopInsightsRequestFormat = .openAICompatible,
         apiKeyHeader: String? = nil,
         apiKeyPrefix: String? = nil,
-        maxTokens: Int = 65536,
+        maxTokens: Int = 8192,
         temperature: Double = 0.0,
         apiVersion: String? = nil,
         organizationID: String? = nil,
