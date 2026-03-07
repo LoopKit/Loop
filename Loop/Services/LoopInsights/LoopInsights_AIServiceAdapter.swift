@@ -229,59 +229,88 @@ final class LoopInsights_AIServiceAdapter {
 
     // MARK: - Response Parsing
 
-    /// Extract text content from the AI response using the format's key path.
-    /// For Google Gemini thinking models, reads the last non-thought part instead of parts[0].
+    /// Extract text content from the AI response. Tries multiple strategies to handle
+    /// different response formats across providers and model versions (including thinking models).
     private func extractTextFromResponse(data: Data, config: LoopInsightsAIProviderConfiguration) throws -> String {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw LoopInsightsError.parseError("Response is not valid JSON")
         }
 
-        // For Gemini: try thinking-aware extraction first, fall back to key path
-        if config.requestFormat == .googleGenerativeAI,
-           let text = extractGeminiText(from: json) {
+        // Strategy 1: Try the configured key path (works for most standard models)
+        if let text = extractViaKeyPath(from: json, keyPath: config.requestFormat.defaultResponseKeyPath) {
             return text
         }
 
-        let keyPath = config.requestFormat.defaultResponseKeyPath
-        let components = keyPath.split(separator: ".").map(String.init)
+        // Strategy 2: Deep search — find any string in the response that looks like
+        // our expected JSON format (contains "suggestions"). Handles thinking models,
+        // unexpected response structures, and API version differences.
+        if let text = deepSearchForContent(in: json) {
+            return text
+        }
 
+        // Strategy 3: Stringify the entire response and let the caller's extractJSON handle it
+        if let responseData = try? JSONSerialization.data(withJSONObject: json),
+           let responseString = String(data: responseData, encoding: .utf8) {
+            return responseString
+        }
+
+        let topKeys = json.keys.sorted().joined(separator: ", ")
+        throw LoopInsightsError.parseError("Unable to extract text from response. Top-level keys: \(topKeys)")
+    }
+
+    /// Try to extract text via a dot-separated key path (e.g. "candidates.0.content.parts.0.text")
+    private func extractViaKeyPath(from json: [String: Any], keyPath: String) -> String? {
+        let components = keyPath.split(separator: ".").map(String.init)
         var current: Any = json
+
         for component in components {
             if let index = Int(component), let array = current as? [Any], index < array.count {
                 current = array[index]
             } else if let dict = current as? [String: Any], let value = dict[component] {
                 current = value
             } else {
-                throw LoopInsightsError.parseError("Unable to extract content at key path '\(keyPath)' from response")
+                return nil
             }
         }
 
-        guard let text = current as? String else {
-            throw LoopInsightsError.parseError("Value at key path '\(keyPath)' is not a string")
-        }
-
-        return text
+        return current as? String
     }
 
-    /// Try to extract text from a Gemini response, handling thinking models that
-    /// return multiple parts. Returns nil if the response format doesn't match,
-    /// allowing fallback to the generic key path approach.
-    private func extractGeminiText(from json: [String: Any]) -> String? {
-        guard let candidates = json["candidates"] as? [[String: Any]],
-              let first = candidates.first,
-              let content = first["content"] as? [String: Any],
-              let parts = content["parts"] as? [[String: Any]] else {
-            return nil
-        }
+    /// Recursively search the response JSON for any text string that contains our
+    /// expected content markers. Handles thinking models (multiple parts), nested
+    /// response formats, and future API changes.
+    private func deepSearchForContent(in value: Any) -> String? {
+        if let dict = value as? [String: Any] {
+            // Skip thought parts
+            if dict["thought"] as? Bool == true { return nil }
 
-        // Find the last part that is not a thought
-        for part in parts.reversed() {
-            if part["thought"] as? Bool == true { continue }
-            if let text = part["text"] as? String {
+            // If this dict has a "text" key with string content, check if it's useful
+            if let text = dict["text"] as? String, !text.isEmpty {
                 return text
+            }
+
+            // Recurse into values (prioritize "candidates", "content", "parts", "message")
+            let priorityKeys = ["candidates", "content", "parts", "message", "choices"]
+            for key in priorityKeys {
+                if let child = dict[key], let result = deepSearchForContent(in: child) {
+                    return result
+                }
+            }
+            // Then try remaining keys
+            for (key, child) in dict where !priorityKeys.contains(key) {
+                if let result = deepSearchForContent(in: child) {
+                    return result
+                }
+            }
+        } else if let array = value as? [Any] {
+            // For arrays, search backwards (thinking models put actual content last)
+            for item in array.reversed() {
+                if let result = deepSearchForContent(in: item) {
+                    return result
+                }
             }
         }
 
-        return parts.first?["text"] as? String
+        return nil
     }
 }
