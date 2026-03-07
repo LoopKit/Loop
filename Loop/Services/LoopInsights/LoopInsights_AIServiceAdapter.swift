@@ -236,10 +236,10 @@ final class LoopInsights_AIServiceAdapter {
             throw LoopInsightsError.parseError("Response is not valid JSON")
         }
 
-        // Google Gemini thinking models return thinking in parts[0] and the actual
-        // response in subsequent parts. Extract the last non-thought text part.
-        if config.requestFormat == .googleGenerativeAI {
-            return try extractGeminiText(from: json)
+        // For Gemini: try thinking-aware extraction first, fall back to key path
+        if config.requestFormat == .googleGenerativeAI,
+           let text = extractGeminiText(from: json) {
+            return text
         }
 
         let keyPath = config.requestFormat.defaultResponseKeyPath
@@ -263,17 +263,18 @@ final class LoopInsights_AIServiceAdapter {
         return text
     }
 
-    /// Extract text from a Gemini response, handling thinking models that return
-    /// multiple parts (thought parts + actual response part).
-    private func extractGeminiText(from json: [String: Any]) throws -> String {
+    /// Try to extract text from a Gemini response, handling thinking models that
+    /// return multiple parts. Returns nil if the response format doesn't match,
+    /// allowing fallback to the generic key path approach.
+    private func extractGeminiText(from json: [String: Any]) -> String? {
         guard let candidates = json["candidates"] as? [[String: Any]],
               let first = candidates.first,
               let content = first["content"] as? [String: Any],
               let parts = content["parts"] as? [[String: Any]] else {
-            throw LoopInsightsError.parseError("Unable to extract Gemini response parts")
+            return nil
         }
 
-        // Find the last part that is not a thought (thinking models put thoughts first)
+        // Find the last part that is not a thought
         for part in parts.reversed() {
             if part["thought"] as? Bool == true { continue }
             if let text = part["text"] as? String {
@@ -281,11 +282,6 @@ final class LoopInsights_AIServiceAdapter {
             }
         }
 
-        // Fallback: just read the first part's text
-        if let text = parts.first?["text"] as? String {
-            return text
-        }
-
-        throw LoopInsightsError.parseError("No text content found in Gemini response parts")
+        return parts.first?["text"] as? String
     }
 }
