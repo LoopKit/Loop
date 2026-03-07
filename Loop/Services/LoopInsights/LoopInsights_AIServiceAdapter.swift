@@ -222,6 +222,12 @@ final class LoopInsights_AIServiceAdapter {
             "generationConfig": [
                 "temperature": config.temperature,
                 "maxOutputTokens": config.maxTokens
+            ],
+            // Disable thinking for Gemini 2.5+ models — thinking consumes output
+            // tokens and we only need structured JSON, not chain-of-thought reasoning.
+            // Non-thinking models ignore this field.
+            "thinkingConfig": [
+                "thinkingBudget": 0
             ]
         ]
         return try JSONSerialization.data(withJSONObject: body)
