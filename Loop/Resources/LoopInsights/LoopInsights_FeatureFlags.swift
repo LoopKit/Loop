@@ -314,8 +314,8 @@ struct LoopInsights_FeatureFlags {
             config.temperature = 0.0
             // Enforce minimum maxTokens — older saved configs may have 2048 which
             // truncates responses now that success criteria fields are included
-            if config.maxTokens < 16384 {
-                config.maxTokens = 16384
+            if config.maxTokens < 65536 {
+                config.maxTokens = 65536
             }
             return config
         }

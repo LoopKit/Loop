@@ -276,41 +276,47 @@ final class LoopInsights_AIServiceAdapter {
         return current as? String
     }
 
-    /// Recursively search the response JSON for any text string that contains our
-    /// expected content markers. Handles thinking models (multiple parts), nested
-    /// response formats, and future API changes.
+    /// Recursively search the response JSON for text content. Collects all non-thought
+    /// text strings and returns the best one (preferring JSON-like content, then longest).
     private func deepSearchForContent(in value: Any) -> String? {
+        var candidates: [String] = []
+        collectTextStrings(from: value, into: &candidates)
+
+        // Prefer text that looks like our expected JSON response
+        if let jsonCandidate = candidates.first(where: { $0.contains("suggestions") || $0.contains("{") }) {
+            return jsonCandidate
+        }
+
+        // Otherwise return the longest text (most likely the actual response)
+        return candidates.max(by: { $0.count < $1.count })
+    }
+
+    /// Collect all non-thought text strings from the response tree.
+    private func collectTextStrings(from value: Any, into results: inout [String]) {
         if let dict = value as? [String: Any] {
             // Skip thought parts
-            if dict["thought"] as? Bool == true { return nil }
+            if dict["thought"] as? Bool == true { return }
 
-            // If this dict has a "text" key with string content, check if it's useful
+            // Collect text from this dict
             if let text = dict["text"] as? String, !text.isEmpty {
-                return text
+                results.append(text)
             }
 
-            // Recurse into values (prioritize "candidates", "content", "parts", "message")
+            // Recurse into values (prioritize content-bearing keys)
             let priorityKeys = ["candidates", "content", "parts", "message", "choices"]
             for key in priorityKeys {
-                if let child = dict[key], let result = deepSearchForContent(in: child) {
-                    return result
+                if let child = dict[key] {
+                    collectTextStrings(from: child, into: &results)
                 }
             }
             // Then try remaining keys
             for (key, child) in dict where !priorityKeys.contains(key) {
-                if let result = deepSearchForContent(in: child) {
-                    return result
-                }
+                collectTextStrings(from: child, into: &results)
             }
         } else if let array = value as? [Any] {
-            // For arrays, search backwards (thinking models put actual content last)
-            for item in array.reversed() {
-                if let result = deepSearchForContent(in: item) {
-                    return result
-                }
+            for item in array {
+                collectTextStrings(from: item, into: &results)
             }
         }
-
-        return nil
     }
 }
