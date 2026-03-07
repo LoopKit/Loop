@@ -60,9 +60,10 @@ final class LoopInsights_AIServiceAdapter {
             throw LoopInsightsError.noAPIKeyConfigured
         }
 
-        // Use minimal tokens to minimize cost
+        // Use minimal tokens to minimize cost.
+        // Thinking models (Gemini 2.5 Pro) need headroom for internal reasoning tokens.
         var testConfig = config
-        testConfig.maxTokens = 10
+        testConfig.maxTokens = 128
 
         let request = try buildRequest(config: testConfig, systemPrompt: "You are a test.", userPrompt: "Reply with exactly: OK")
 
@@ -224,30 +225,140 @@ final class LoopInsights_AIServiceAdapter {
 
     // MARK: - Response Parsing
 
-    /// Extract text content from the AI response using the format's key path.
+    /// Extract text content from the AI response. Tries multiple strategies to handle
+    /// different response formats across providers and model versions (including thinking models).
     private func extractTextFromResponse(data: Data, config: LoopInsightsAIProviderConfiguration) throws -> String {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw LoopInsightsError.parseError("Response is not valid JSON")
         }
 
-        let keyPath = config.requestFormat.defaultResponseKeyPath
-        let components = keyPath.split(separator: ".").map(String.init)
+        // Gemini thinking models: extract non-thought content first.
+        // Thinking models put chain-of-thought in parts[0] with thought:true flag,
+        // and the actual response in subsequent parts. The default key path
+        // (parts.0.text) would return thinking text instead of the real response.
+        if config.requestFormat == .googleGenerativeAI || json.keys.contains("candidates") {
+            if let text = extractGeminiNonThoughtText(from: json) {
+                return text
+            }
+            // No non-thought text found — if thinking tokens were consumed,
+            // the model used its entire output budget on thinking.
+            if hasThinkingTokens(json) {
+                throw LoopInsightsError.emptyThinkingResponse
+            }
+        }
 
+        // Strategy 1: Try the configured key path (works for most standard models)
+        if let text = extractViaKeyPath(from: json, keyPath: config.requestFormat.defaultResponseKeyPath) {
+            return text
+        }
+
+        // Strategy 2: Deep search — find any string in the response that looks like
+        // our expected JSON format (contains "suggestions"). Handles thinking models,
+        // unexpected response structures, and API version differences.
+        if let text = deepSearchForContent(in: json) {
+            return text
+        }
+
+        // Strategy 3: Stringify the entire response and let the caller's extractJSON handle it
+        if let responseData = try? JSONSerialization.data(withJSONObject: json),
+           let responseString = String(data: responseData, encoding: .utf8) {
+            return responseString
+        }
+
+        let topKeys = json.keys.sorted().joined(separator: ", ")
+        throw LoopInsightsError.parseError("Unable to extract text from response. Top-level keys: \(topKeys)")
+    }
+
+    /// Try to extract text via a dot-separated key path (e.g. "candidates.0.content.parts.0.text")
+    private func extractViaKeyPath(from json: [String: Any], keyPath: String) -> String? {
+        let components = keyPath.split(separator: ".").map(String.init)
         var current: Any = json
+
         for component in components {
             if let index = Int(component), let array = current as? [Any], index < array.count {
                 current = array[index]
             } else if let dict = current as? [String: Any], let value = dict[component] {
                 current = value
             } else {
-                throw LoopInsightsError.parseError("Unable to extract content at key path '\(keyPath)' from response")
+                return nil
             }
         }
 
-        guard let text = current as? String else {
-            throw LoopInsightsError.parseError("Value at key path '\(keyPath)' is not a string")
+        return current as? String
+    }
+
+    /// Recursively search the response JSON for text content. Collects all non-thought
+    /// text strings and returns the best one (preferring JSON-like content, then longest).
+    private func deepSearchForContent(in value: Any) -> String? {
+        var candidates: [String] = []
+        collectTextStrings(from: value, into: &candidates)
+
+        // Prefer text that looks like our expected JSON response
+        if let jsonCandidate = candidates.first(where: { $0.contains("suggestions") || $0.contains("{") }) {
+            return jsonCandidate
         }
 
-        return text
+        // Otherwise return the longest text (most likely the actual response)
+        return candidates.max(by: { $0.count < $1.count })
+    }
+
+    /// For Google Gemini thinking models: extract the last non-thought text from parts.
+    /// Thinking models put chain-of-thought reasoning in early parts (with thought:true)
+    /// and the actual response in later parts. Returns nil if no non-thought text exists.
+    private func extractGeminiNonThoughtText(from json: [String: Any]) -> String? {
+        guard let candidates = json["candidates"] as? [[String: Any]],
+              let firstCandidate = candidates.first,
+              let content = firstCandidate["content"] as? [String: Any],
+              let parts = content["parts"] as? [[String: Any]] else {
+            return nil
+        }
+
+        // Find the last part that is NOT a thought part
+        for part in parts.reversed() {
+            if part["thought"] as? Bool == true { continue }
+            if let text = part["text"] as? String, !text.isEmpty {
+                return text
+            }
+        }
+
+        return nil
+    }
+
+    /// Check if the API response contains thinking token metadata (Gemini thinking models).
+    private func hasThinkingTokens(_ json: [String: Any]) -> Bool {
+        guard let usageMetadata = json["usageMetadata"] as? [String: Any],
+              let thoughts = usageMetadata["thoughtsTokenCount"] as? Int else {
+            return false
+        }
+        return thoughts > 0
+    }
+
+    /// Collect all non-thought text strings from the response tree.
+    private func collectTextStrings(from value: Any, into results: inout [String]) {
+        if let dict = value as? [String: Any] {
+            // Skip thought parts
+            if dict["thought"] as? Bool == true { return }
+
+            // Collect text from this dict
+            if let text = dict["text"] as? String, !text.isEmpty {
+                results.append(text)
+            }
+
+            // Recurse into values (prioritize content-bearing keys)
+            let priorityKeys = ["candidates", "content", "parts", "message", "choices"]
+            for key in priorityKeys {
+                if let child = dict[key] {
+                    collectTextStrings(from: child, into: &results)
+                }
+            }
+            // Then try remaining keys
+            for (key, child) in dict where !priorityKeys.contains(key) {
+                collectTextStrings(from: child, into: &results)
+            }
+        } else if let array = value as? [Any] {
+            for item in array {
+                collectTextStrings(from: item, into: &results)
+            }
+        }
     }
 }
