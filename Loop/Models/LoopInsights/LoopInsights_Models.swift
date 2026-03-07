@@ -519,7 +519,7 @@ struct LoopInsightsAIProviderConfiguration: Codable, Equatable {
         requestFormat: LoopInsightsRequestFormat = .openAICompatible,
         apiKeyHeader: String? = nil,
         apiKeyPrefix: String? = nil,
-        maxTokens: Int = 4096,
+        maxTokens: Int = 8192,
         temperature: Double = 0.0,
         apiVersion: String? = nil,
         organizationID: String? = nil,
@@ -755,6 +755,7 @@ struct LoopInsightsTherapySnapshot: Codable {
     let insulinSensitivityItems: [LoopInsightsScheduleItem]
     let carbRatioItems: [LoopInsightsScheduleItem]
     let insulinTypeName: String?
+    let insulinDiaHours: Double?  // Duration of Insulin Action in hours (from insulin model)
     let capturedAt: Date
 
     struct LoopInsightsScheduleItem: Codable, Identifiable {
@@ -786,6 +787,8 @@ struct LoopInsightsAggregatedStats: Codable {
         let standardDeviation: Double         // mg/dL
         let coefficientOfVariation: Double    // percentage
         let timeInRange: Double               // percentage (70-180 mg/dL)
+        let timeInTightRange: Double          // percentage (70-tightRangeUpperBound mg/dL)
+        let tightRangeUpperBound: Int         // configured upper bound for tight range
         let timeVeryHigh: Double              // percentage (>250 mg/dL)
         let timeHigh: Double                  // percentage (181-250 mg/dL)
         let timeLow: Double                   // percentage (54-69 mg/dL)
@@ -800,6 +803,13 @@ struct LoopInsightsAggregatedStats: Codable {
         var timeAboveRange: Double { timeHigh + timeVeryHigh }
     }
 
+    struct DailyInsulinBreakdown: Codable {
+        let date: Date
+        let totalDailyDose: Double            // total units delivered that day
+        let basalUnits: Double
+        let bolusUnits: Double
+    }
+
     struct InsulinStats: Codable {
         let totalDailyDose: Double            // Average total units/day
         let basalPercentage: Double           // percentage of TDD from basal
@@ -807,6 +817,13 @@ struct LoopInsightsAggregatedStats: Codable {
         let hourlyBasalAverages: [Int: Double] // hour → average basal rate delivered
         let correctionBolusCount: Int         // number of correction boluses in period
         let negativeBasalStats: LoopInsightsNegativeBasalStats?  // Phase 5: suspension/sub-basal stats
+
+        // TDI tracking
+        let dailyBreakdown: [DailyInsulinBreakdown]  // per-day TDD for trending
+        let tddMin: Double                   // minimum single-day TDD in period
+        let tddMax: Double                   // maximum single-day TDD in period
+        let tddVariabilityCV: Double         // coefficient of variation of daily TDD (%)
+        let tddWeekOverWeekChange: Double?   // % change comparing recent 7d vs prior 7d (nil if <14 days)
     }
 
     struct CarbStats: Codable {
@@ -889,6 +906,7 @@ enum LoopInsightsError: Error, LocalizedError {
     case insufficientData(String)
     case settingsWriteError(String)
     case keychainError(String)
+    case emptyThinkingResponse
 
     var errorDescription: String? {
         switch self {
@@ -906,6 +924,8 @@ enum LoopInsightsError: Error, LocalizedError {
             return String(format: NSLocalizedString("Failed to apply settings: %@", comment: "LoopInsights error: settings write"), message)
         case .keychainError(let message):
             return String(format: NSLocalizedString("Keychain Error: %@", comment: "LoopInsights error: keychain"), message)
+        case .emptyThinkingResponse:
+            return NSLocalizedString("The AI model returned an empty response. This typically happens with \"thinking\" models that use all output tokens for internal reasoning instead of generating a response.", comment: "LoopInsights error: empty thinking response")
         }
     }
 }

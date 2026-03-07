@@ -41,6 +41,10 @@ struct LoopInsights_FeatureFlags {
         static let agpChartEnabled = "LoopInsights_agpChartEnabled"
         static let mealDebriefEnabled = "LoopInsights_mealDebriefEnabled"
         static let preMealAdvisorEnabled = "LoopInsights_preMealAdvisorEnabled"
+        static let cgmBackfillDetectionEnabled = "LoopInsights_cgmBackfillDetectionEnabled"
+        static let tightRangeUpperBound = "LoopInsights_tightRangeUpperBound"
+        static let mfpImportEnabled = "LoopInsights_mfpImportEnabled"
+        static let mfpLastSyncDate = "LoopInsights_mfpLastSyncDate"
     }
 
     private static let defaults = UserDefaults.standard
@@ -244,6 +248,18 @@ struct LoopInsights_FeatureFlags {
         set { defaults.set(newValue, forKey: Keys.nightscoutImportEnabled) }
     }
 
+    /// Enables MyFitnessPal diary import — pulls meals and exercise from MFP via authenticated API.
+    static var mfpImportEnabled: Bool {
+        get { defaults.bool(forKey: Keys.mfpImportEnabled) }
+        set { defaults.set(newValue, forKey: Keys.mfpImportEnabled) }
+    }
+
+    /// Last successful MFP sync date.
+    static var mfpLastSyncDate: Date? {
+        get { defaults.object(forKey: Keys.mfpLastSyncDate) as? Date }
+        set { defaults.set(newValue, forKey: Keys.mfpLastSyncDate) }
+    }
+
     /// Enables the Ambulatory Glucose Profile chart on the dashboard.
     static var agpChartEnabled: Bool {
         get { defaults.bool(forKey: Keys.agpChartEnabled) }
@@ -266,6 +282,25 @@ struct LoopInsights_FeatureFlags {
         set { defaults.set(newValue, forKey: Keys.preMealAdvisorEnabled) }
     }
 
+    /// Enables CGM backfill detection — shows a home screen banner when a CGM signal
+    /// gap is detected and tracks signal quality over time on the dashboard.
+    /// Informational only — does not affect dosing. Defaults to false.
+    static var cgmBackfillDetectionEnabled: Bool {
+        get { defaults.bool(forKey: Keys.cgmBackfillDetectionEnabled) }
+        set { defaults.set(newValue, forKey: Keys.cgmBackfillDetectionEnabled) }
+    }
+
+    /// Upper bound for Time in Tight Range (TITR) calculation.
+    /// Default 140 mg/dL per 2019 International Consensus on TIR.
+    /// User-configurable: 120–160 mg/dL in steps of 5.
+    static var tightRangeUpperBound: Int {
+        get {
+            let val = defaults.integer(forKey: Keys.tightRangeUpperBound)
+            return val == 0 ? 140 : val
+        }
+        set { defaults.set(newValue, forKey: Keys.tightRangeUpperBound) }
+    }
+
     // MARK: - AI Configuration
 
     /// User-configurable AI provider configuration. Persisted to UserDefaults (excluding API key).
@@ -277,6 +312,11 @@ struct LoopInsights_FeatureFlags {
             }
             // Always enforce temperature=0 for deterministic analysis
             config.temperature = 0.0
+            // Enforce minimum maxTokens — older saved configs may have low values
+            // that truncate responses (especially with thinking models)
+            if config.maxTokens < 8192 {
+                config.maxTokens = 8192
+            }
             return config
         }
         set {
