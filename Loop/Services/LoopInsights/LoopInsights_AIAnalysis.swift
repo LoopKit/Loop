@@ -645,14 +645,25 @@ final class LoopInsights_AIAnalysis {
 
     private func parseResponse(rawResponse: String, settingType: LoopInsightsSettingType, period: LoopInsightsAnalysisPeriod) throws -> LoopInsightsAnalysisResponse {
         // Extract JSON from the response (AI might wrap it in markdown code blocks)
-        let jsonString = extractJSON(from: rawResponse)
+        var jsonString = extractJSON(from: rawResponse)
 
         guard let data = jsonString.data(using: .utf8) else {
             throw LoopInsightsError.parseError("Unable to convert response to data")
         }
 
-        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw LoopInsightsError.parseError("Response is not valid JSON: \(rawResponse.prefix(200))")
+        // Try parsing as-is first; if that fails, attempt to repair truncated JSON
+        var json: [String: Any]
+        if let parsed = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            json = parsed
+        } else {
+            // Thinking models (e.g. Gemini 2.5) consume output tokens for thinking,
+            // which can truncate the JSON response. Try to repair by closing unclosed brackets.
+            jsonString = repairTruncatedJSON(jsonString)
+            guard let repairedData = jsonString.data(using: .utf8),
+                  let repaired = try? JSONSerialization.jsonObject(with: repairedData) as? [String: Any] else {
+                throw LoopInsightsError.parseError("Response is not valid JSON: \(rawResponse.prefix(200))")
+            }
+            json = repaired
         }
 
         // Parse suggestions
@@ -851,6 +862,44 @@ final class LoopInsights_AIAnalysis {
         }
 
         return text
+    }
+
+    /// Attempts to repair truncated JSON by closing unclosed braces, brackets, and strings.
+    /// Thinking models (e.g. Gemini 2.5) consume output tokens for thinking, which can
+    /// cause the JSON response to be cut off mid-structure.
+    private func repairTruncatedJSON(_ json: String) -> String {
+        var result = json
+
+        // Strip trailing incomplete key-value pair after the last comma
+        if let lastComma = result.lastIndex(of: ",") {
+            let afterComma = result[result.index(after: lastComma)...].trimmingCharacters(in: .whitespacesAndNewlines)
+            if !afterComma.hasSuffix("}") && !afterComma.hasSuffix("]") && !afterComma.isEmpty {
+                result = String(result[...lastComma])
+                result = String(result.dropLast()) // remove the trailing comma
+            }
+        }
+
+        // Count open vs close braces/brackets
+        var openBraces = 0
+        var openBrackets = 0
+        var inString = false
+        var prevChar: Character = " "
+        for ch in result {
+            if ch == "\"" && prevChar != "\\" { inString.toggle() }
+            if !inString {
+                if ch == "{" { openBraces += 1 }
+                else if ch == "}" { openBraces -= 1 }
+                else if ch == "[" { openBrackets += 1 }
+                else if ch == "]" { openBrackets -= 1 }
+            }
+            prevChar = ch
+        }
+
+        if inString { result += "\"" }
+        for _ in 0..<max(0, openBrackets) { result += "]" }
+        for _ in 0..<max(0, openBraces) { result += "}" }
+
+        return result
     }
 
     private func formatTime(_ seconds: TimeInterval) -> String {
