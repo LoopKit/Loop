@@ -30,11 +30,7 @@ final class LoopInsights_AIServiceAdapter {
 
     /// Send a prompt to the configured AI provider and return the text response.
     func sendPrompt(_ systemPrompt: String, userPrompt: String) async throws -> String {
-        var config = LoopInsights_FeatureFlags.aiConfiguration.withKeychainAPIKey()
-
-        // Cap completion tokens — analysis JSON responses are typically <1500 tokens.
-        // Prevents context_length_exceeded on smaller models (e.g. 8K context).
-        config.maxTokens = min(config.maxTokens, 2048)
+        let config = LoopInsights_FeatureFlags.aiConfiguration.withKeychainAPIKey()
 
         guard !config.apiKey.isEmpty else {
             throw LoopInsightsError.noAPIKeyConfigured
@@ -236,6 +232,21 @@ final class LoopInsights_AIServiceAdapter {
             throw LoopInsightsError.parseError("Response is not valid JSON")
         }
 
+        // Gemini thinking models: extract non-thought content first.
+        // Thinking models put chain-of-thought in parts[0] with thought:true flag,
+        // and the actual response in subsequent parts. The default key path
+        // (parts.0.text) would return thinking text instead of the real response.
+        if config.requestFormat == .googleGenerativeAI || json.keys.contains("candidates") {
+            if let text = extractGeminiNonThoughtText(from: json) {
+                return text
+            }
+            // No non-thought text found — if thinking tokens were consumed,
+            // the model used its entire output budget on thinking.
+            if hasThinkingTokens(json) {
+                throw LoopInsightsError.emptyThinkingResponse
+            }
+        }
+
         // Strategy 1: Try the configured key path (works for most standard models)
         if let text = extractViaKeyPath(from: json, keyPath: config.requestFormat.defaultResponseKeyPath) {
             return text
@@ -289,6 +300,37 @@ final class LoopInsights_AIServiceAdapter {
 
         // Otherwise return the longest text (most likely the actual response)
         return candidates.max(by: { $0.count < $1.count })
+    }
+
+    /// For Google Gemini thinking models: extract the last non-thought text from parts.
+    /// Thinking models put chain-of-thought reasoning in early parts (with thought:true)
+    /// and the actual response in later parts. Returns nil if no non-thought text exists.
+    private func extractGeminiNonThoughtText(from json: [String: Any]) -> String? {
+        guard let candidates = json["candidates"] as? [[String: Any]],
+              let firstCandidate = candidates.first,
+              let content = firstCandidate["content"] as? [String: Any],
+              let parts = content["parts"] as? [[String: Any]] else {
+            return nil
+        }
+
+        // Find the last part that is NOT a thought part
+        for part in parts.reversed() {
+            if part["thought"] as? Bool == true { continue }
+            if let text = part["text"] as? String, !text.isEmpty {
+                return text
+            }
+        }
+
+        return nil
+    }
+
+    /// Check if the API response contains thinking token metadata (Gemini thinking models).
+    private func hasThinkingTokens(_ json: [String: Any]) -> Bool {
+        guard let usageMetadata = json["usageMetadata"] as? [String: Any],
+              let thoughts = usageMetadata["thoughtsTokenCount"] as? Int else {
+            return false
+        }
+        return thoughts > 0
     }
 
     /// Collect all non-thought text strings from the response tree.
