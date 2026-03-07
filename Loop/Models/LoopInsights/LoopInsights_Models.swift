@@ -906,6 +906,7 @@ enum LoopInsightsError: Error, LocalizedError {
     case insufficientData(String)
     case settingsWriteError(String)
     case keychainError(String)
+    case emptyThinkingResponse
 
     var errorDescription: String? {
         switch self {
@@ -923,6 +924,8 @@ enum LoopInsightsError: Error, LocalizedError {
             return String(format: NSLocalizedString("Failed to apply settings: %@", comment: "LoopInsights error: settings write"), message)
         case .keychainError(let message):
             return String(format: NSLocalizedString("Keychain Error: %@", comment: "LoopInsights error: keychain"), message)
+        case .emptyThinkingResponse:
+            return NSLocalizedString("The AI model returned an empty response. This typically happens with \"thinking\" models that use all output tokens for internal reasoning instead of generating a response.", comment: "LoopInsights error: empty thinking response")
         }
     }
 }

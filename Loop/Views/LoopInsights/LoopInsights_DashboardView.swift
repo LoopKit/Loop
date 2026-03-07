@@ -34,6 +34,7 @@ struct LoopInsights_DashboardView: View {
     @State private var showingAlcoholLog = false
     @State private var selectedRecord: LoopInsightsSuggestionRecord?
     @State private var developerTapCount = 0
+    @State private var showingSupportedModels = false
 
     // Manual Bindings — required because viewModel is not @ObservedObject
     private var analysisPeriodBinding: Binding<LoopInsightsAnalysisPeriod> {
@@ -179,6 +180,9 @@ struct LoopInsights_DashboardView: View {
             NavigationView {
                 LoopInsights_AlcoholLogView(tracker: viewModel.coordinator.alcoholTracker)
             }
+        }
+        .sheet(isPresented: $showingSupportedModels) {
+            supportedModelsView
         }
         .overlay(alignment: .top) {
             if let monitor = viewModel.backgroundMonitor,
@@ -413,10 +417,93 @@ struct LoopInsights_DashboardView: View {
             }
 
             if let error = viewModel.analysisError {
-                Text(error.localizedDescription)
-                    .font(.caption)
-                    .foregroundColor(.red)
+                if case .emptyThinkingResponse = error {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(error.localizedDescription)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                        Button(action: { showingSupportedModels = true }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "info.circle")
+                                Text(NSLocalizedString("View Supported Models", comment: "LoopInsights supported models button"))
+                            }
+                            .font(.caption)
+                            .foregroundColor(.accentColor)
+                        }
+                    }
+                } else {
+                    Text(error.localizedDescription)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
             }
+        }
+    }
+
+    // MARK: - Supported Models
+
+    private var supportedModelsView: some View {
+        NavigationView {
+            List {
+                Section(header: Text("As of March 2026")) {
+                    Text("The following models are confirmed to work with LoopInsights. \"Thinking\" models (e.g. Gemini 2.5) are not supported because they consume output tokens for internal reasoning and may return empty responses.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Section(header: Text("OpenAI")) {
+                    modelRow("gpt-4o", detail: "Recommended — best quality")
+                    modelRow("gpt-4o-mini", detail: "Faster, lower cost")
+                    modelRow("gpt-4.1", detail: "Latest flagship")
+                    modelRow("gpt-4.1-mini", detail: "Latest, lower cost")
+                    modelRow("gpt-4.1-nano", detail: "Cheapest")
+                }
+
+                Section(header: Text("Anthropic")) {
+                    modelRow("claude-sonnet-4-5", detail: "Recommended — excellent at structured output")
+                    modelRow("claude-sonnet-4-6", detail: "Latest")
+                    modelRow("claude-haiku-3-5", detail: "Fast, lower cost")
+                }
+
+                Section(header: Text("Google Gemini")) {
+                    modelRow("gemini-2.0-flash", detail: "Recommended — fast, reliable")
+                    modelRow("gemini-2.0-flash-lite", detail: "Cheapest")
+                    modelRow("gemini-1.5-flash", detail: "Older, stable")
+                    modelRow("gemini-1.5-pro", detail: "Older, higher quality")
+                }
+
+                Section(header: Text("Not Supported")) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "xmark.circle")
+                            .foregroundColor(.red)
+                        Text("gemini-2.5-flash, gemini-2.5-pro, and any other \"thinking\" models")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .navigationTitle("Supported AI Models")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(NSLocalizedString("Done", comment: "Done button")) {
+                        showingSupportedModels = false
+                    }
+                }
+            }
+        }
+    }
+
+    private func modelRow(_ name: String, detail: String) -> some View {
+        HStack {
+            Text(name)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .fontDesign(.monospaced)
+            Spacer()
+            Text(detail)
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
     }
 

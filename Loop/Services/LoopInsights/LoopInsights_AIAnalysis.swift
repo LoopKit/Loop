@@ -670,7 +670,7 @@ final class LoopInsights_AIAnalysis {
         if json.keys.contains("candidates") || json.keys.contains("usageMetadata") {
             // We're looking at the API envelope, not the AI-generated content.
             // This happens when the model produces only thinking tokens and no response.
-            throw LoopInsightsError.aiProviderError("The AI model returned an empty response. This typically happens with \"thinking\" models (e.g. Gemini 2.5) that use all output tokens for internal reasoning. Try switching to a non-thinking model like gemini-2.0-flash, or switch to an entirely new AI provider such as OpenAI (gpt-4o) or Anthropic (claude-sonnet-4-5).")
+            throw LoopInsightsError.emptyThinkingResponse
         }
 
         // Parse suggestions
