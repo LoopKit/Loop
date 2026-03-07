@@ -505,6 +505,14 @@ final class AIServiceManager {
     }
 
     private func extractTextContent(from json: [String: Any], keyPath: String) throws -> String {
+        // Gemini thinking models return thinking in parts[0] and the actual response
+        // in subsequent parts. Handle this before the generic key path traversal.
+        if keyPath.contains("candidates") && keyPath.contains("parts") {
+            if let text = extractGeminiText(from: json) {
+                return text
+            }
+        }
+
         let keys = keyPath.components(separatedBy: ".")
         var current: Any? = json
 
@@ -542,6 +550,27 @@ final class AIServiceManager {
         print("🤖 [PARSE] FAILED: Final value is not String or content array, got \(type(of: current as Any)): \(String(describing: current).prefix(200))")
         #endif
         throw AIFoodAnalysisError.invalidResponseFormat
+    }
+
+    /// Extract text from a Gemini response, handling thinking models that return
+    /// multiple parts (thought parts + actual response part).
+    private func extractGeminiText(from json: [String: Any]) -> String? {
+        guard let candidates = json["candidates"] as? [[String: Any]],
+              let first = candidates.first,
+              let content = first["content"] as? [String: Any],
+              let parts = content["parts"] as? [[String: Any]] else {
+            return nil
+        }
+
+        // Find the last part that is not a thought
+        for part in parts.reversed() {
+            if part["thought"] as? Bool == true { continue }
+            if let text = part["text"] as? String {
+                return text
+            }
+        }
+
+        return parts.first?["text"] as? String
     }
 
     /// Attempts to repair truncated JSON by closing unclosed braces, brackets, and strings.
