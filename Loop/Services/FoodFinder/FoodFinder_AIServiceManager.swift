@@ -396,11 +396,6 @@ final class AIServiceManager {
                 "temperature": config.temperature,
                 "topP": 0.95,
                 "topK": 8
-            ],
-            // Disable thinking for Gemini 2.5+ models — we need structured JSON,
-            // not chain-of-thought. Non-thinking models ignore this field.
-            "thinkingConfig": [
-                "thinkingBudget": 0
             ]
         ]
 
