@@ -18,8 +18,8 @@ class OpenFoodFactsService {
     // MARK: - Properties
     
     private let session: URLSession
-    // Use the primary .org domain for stable API responses
-    private let baseURL = "https://world.openfoodfacts.org"
+    // Use the .net domain — .org returns 503 as of March 2026
+    private let baseURL = "https://world.openfoodfacts.net"
     private let userAgent = "Loop-iOS-Diabetes-App/1.0"
     private let log = OSLog(category: "OpenFoodFactsService")
     
@@ -303,7 +303,7 @@ class MockURLProtocol: URLProtocol {
         
         let data = try! JSONEncoder().encode(response)
         let httpResponse = HTTPURLResponse(
-            url: URL(string: "https://world.openfoodfacts.org/cgi/search.pl")!,
+            url: URL(string: "https://world.openfoodfacts.net/cgi/search.pl")!,
             statusCode: 200,
             httpVersion: nil,
             headerFields: ["Content-Type": "application/json"]
@@ -322,7 +322,7 @@ class MockURLProtocol: URLProtocol {
         
         let data = try! JSONEncoder().encode(response)
         let httpResponse = HTTPURLResponse(
-            url: URL(string: "https://world.openfoodfacts.org/api/v0/product/1234567890123.json")!,
+            url: URL(string: "https://world.openfoodfacts.net/api/v0/product/1234567890123.json")!,
             statusCode: 200,
             httpVersion: nil,
             headerFields: ["Content-Type": "application/json"]
