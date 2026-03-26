@@ -516,8 +516,8 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             #endif
             let rawProducts = try await performTextSearch(query: query)
 
-            // Sort results by relevance so the most obvious match appears first
-            let products = sortByRelevance(rawProducts, query: trimmedQuery)
+            // Sort results by relevance and return the top 15 most relevant
+            let products = Array(sortByRelevance(rawProducts, query: trimmedQuery).prefix(15))
 
             // Cache the sorted results for future use
             searchCache[trimmedQuery] = CachedSearchResult(results: products, timestamp: Date())
@@ -1116,49 +1116,121 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         }
     }
 
+    // Categories that indicate whole/fresh foods — these should rank high for generic queries
+    private static let wholeFoodCategories: Set<String> = [
+        "fruits", "vegetables", "fresh", "raw", "legumes", "nuts", "seeds",
+        "meats", "poultry", "fish", "seafood", "eggs", "dairy", "milk",
+        "cereals", "grains", "rice", "bread", "pasta", "cheese", "yogurt",
+        "plant-based-foods", "fresh-foods", "fruits-and-vegetables",
+        "tropical-fruits", "berries", "citrus", "en:fruits",
+        "en:vegetables", "en:fresh-foods", "en:bananas", "en:apples",
+        "en:berries", "en:tropical-fruits", "en:citrus-fruits",
+        "en:nuts", "en:legumes", "en:cereals-and-potatoes",
+        "en:meats", "en:fishes", "en:eggs", "en:cheeses",
+        "en:breads", "en:rice", "en:pastas"
+    ]
+
+    // Categories that indicate highly processed/flavored products — penalize for generic queries
+    private static let processedCategories: Set<String> = [
+        "snacks", "bars", "chips", "cookies", "biscuits", "candy",
+        "beverages", "sodas", "juices", "smoothies", "desserts",
+        "supplements", "meal-replacements", "sweet-snacks",
+        "breakfast-cereals", "sauces", "condiments", "spreads",
+        "en:snacks", "en:sweet-snacks", "en:bars", "en:chips",
+        "en:biscuits", "en:beverages", "en:desserts",
+        "en:breakfast-cereals", "en:sauces-and-condiments",
+        "en:meal-replacements", "en:dietary-supplements"
+    ]
+
     private func relevanceScore(for product: OpenFoodFactsProduct, query: String) -> Int {
         let name = product.displayName.lowercased()
         let nameWords = name.split(separator: " ")
             .map { String($0).trimmingCharacters(in: .punctuationCharacters) }
+        let queryWords = query.split(separator: " ").map { String($0) }
+        let isSingleWordQuery = queryWords.count == 1
         var score = 0
 
-        // Exact match (e.g. "banana" == "banana")
-        if name == query { score += 10000 }
+        // --- Tier 1: Name purity (is the product name essentially the query?) ---
+        // These are mutually exclusive — take the highest tier hit
 
-        // Name starts with query word then comma/space (e.g. "banana, raw" or "banana chips")
-        if name.hasPrefix(query + ",") || name.hasPrefix(query + " ") { score += 5000 }
+        let strippedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let isExact = strippedName == query
+        let isPlural = strippedName == query + "s" || strippedName + "s" == query
+            || strippedName == query + "es" || strippedName + "es" == query
 
-        // Name starts with query
-        if name.hasPrefix(query) { score += 4000 }
+        if isExact {
+            // "banana" == "banana" — perfect
+            score += 20000
+        } else if isPlural {
+            // "bananas" for query "banana" — essentially perfect
+            score += 19000
+        } else if nameWords.count <= 2 && (name.hasPrefix(query + ",") || name.hasPrefix(query + " ")) {
+            // "banana, raw" or "banana fresh" — 1–2 words, query-first
+            score += 16000
+        } else if nameWords.count <= 2 && nameWords.first.map({ $0 == query || $0 == query + "s" || $0 + "s" == query }) == true {
+            // "loose banana" or "organic bananas" — 2 words, query is there
+            score += 14000
+        } else if name.hasPrefix(query + " ") || name.hasPrefix(query + ",") {
+            // "banana chips", "banana chocolate cake" — query-first but more words
+            let extraWords = nameWords.count - queryWords.count
+            score += 10000 - (extraWords * 500)
+        } else if let first = nameWords.first, first.hasPrefix(query) {
+            // First word starts with query: "bananas foster"
+            score += 8000
+        } else if nameWords.contains(query) || nameWords.contains(query + "s") {
+            // Query appears as a word somewhere: "dried bananas"
+            score += 6000
+        } else if name.contains(query) {
+            // Query is a substring: "strawberry-banana"
+            score += 2000
+        }
 
-        // First word of name matches query (e.g. "bananas" for "banana")
-        if let first = nameWords.first, first.hasPrefix(query) { score += 3000 }
-
-        // Query appears as a standalone word anywhere in the name
-        if nameWords.contains(query) { score += 2000 }
-
-        // Prefer shorter, simpler product names (generic foods have fewer words)
+        // --- Tier 2: Name simplicity (generic foods have short, simple names) ---
         let wordCount = nameWords.count
-        if wordCount == 1 { score += 500 }
-        else if wordCount == 2 { score += 400 }
-        else if wordCount <= 4 { score += 200 }
-        else { score -= wordCount * 20 }
+        if wordCount == 1 { score += 2000 }
+        else if wordCount == 2 { score += 1500 }
+        else if wordCount <= 3 { score += 800 }
+        else { score -= wordCount * 100 }
 
-        // Penalize products where the query only matches as a substring of another word
-        // e.g. "BANANA" inside "Yogurt Bnine BANANA" is fine but
-        // rank lower if the product is clearly a different food category
-        let queryWords = query.split(separator: " ").map { String($0) }
-        if queryWords.count == 1 {
-            // Single-word query: penalize if name has many extra words
-            let extraWords = wordCount - 1
-            score -= extraWords * 30
+        // --- Tier 3: Category-based scoring (crucial for generic queries) ---
+        if isSingleWordQuery {
+            let cats = (product.categories ?? "").lowercased()
+            let catTokens = cats.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+
+            var hasWholeFood = false
+            var hasProcessed = false
+
+            for cat in catTokens {
+                if Self.wholeFoodCategories.contains(where: { cat.contains($0) }) {
+                    hasWholeFood = true
+                }
+                if Self.processedCategories.contains(where: { cat.contains($0) }) {
+                    hasProcessed = true
+                }
+            }
+
+            if hasWholeFood && !hasProcessed { score += 4000 }
+            else if hasWholeFood { score += 1500 }
+            if hasProcessed && !hasWholeFood { score -= 3000 }
+
+            // Penalize branded products for generic single-word queries
+            if let brands = product.brands, !brands.isEmpty {
+                let brandLower = brands.lowercased()
+                if !brandLower.contains(query) {
+                    score -= 800
+                }
+            }
+
+            // Penalize names where the query is clearly a flavoring, not the main food
+            // e.g. "Yogurt Banana", "Chocolate Banana Cake"
+            if let firstWord = nameWords.first, firstWord != query
+                && !firstWord.hasPrefix(query) && !(firstWord + "s" == query) {
+                score -= 2000
+            }
         }
 
-        // Penalize branded products for simple single-word queries
-        if queryWords.count == 1, let brands = product.brands,
-           !brands.isEmpty, brands.lowercased() != name {
-            score -= 100
-        }
+        // --- Tier 4: Nutritional completeness ---
+        if product.nutriments.carbohydrates > 0 { score += 300 }
 
         return score
     }

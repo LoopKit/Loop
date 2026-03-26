@@ -35,25 +35,28 @@ class FoodSearchRouter {
 
         log.info("🔍 Routing text search '%{public}@' to provider: %{public}@", query, provider.rawValue)
 
+        // Fetch extra candidates so client-side relevance sorting has more to work with
+        let fetchSize = 50
+
         switch provider {
         case .openFoodFacts:
-            return try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
+            return try await openFoodFactsService.searchProducts(query: query, pageSize: fetchSize)
 
         case .usdaFoodData:
             do {
-                return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
+                return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: fetchSize)
             } catch {
                 log.error("❌ USDA search failed: %{public}@ — falling back to OpenFoodFacts", error.localizedDescription)
-                return try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
+                return try await openFoodFactsService.searchProducts(query: query, pageSize: fetchSize)
             }
 
         case .aiProvider:
             // AI providers are not used for text search; use USDA with OFF fallback
             log.info("ℹ️ AI provider not used for text search; using USDA with OFF fallback")
             do {
-                return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: 15)
+                return try await USDAFoodDataService.shared.searchProducts(query: query, pageSize: fetchSize)
             } catch {
-                return try await openFoodFactsService.searchProducts(query: query, pageSize: 15)
+                return try await openFoodFactsService.searchProducts(query: query, pageSize: fetchSize)
             }
         }
     }
