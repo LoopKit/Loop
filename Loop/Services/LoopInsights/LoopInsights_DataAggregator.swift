@@ -71,11 +71,17 @@ final class LoopInsights_DataAggregator {
         }
 
         // Compute stats from pre-fetched data (each may still supplement with HK data)
+        // NOTE: computeGlucoseStats returns AGP data alongside stats to avoid writing to
+        // self.lastGlucoseForAGP from a concurrent async let context (data race crash).
         async let glucoseStatsTask = computeGlucoseStats(loopSamples: glucoseSamples, start: startDate, end: endDate)
         async let insulinStatsTask = computeInsulinStats(loopDoses: doseEntries, start: startDate, end: endDate)
         async let carbStatsTask = computeCarbStats(loopEntries: carbEntries, start: startDate, end: endDate)
 
-        let resolvedGlucoseStats = try await glucoseStatsTask
+        let glucoseResult = try await glucoseStatsTask
+        let resolvedGlucoseStats = glucoseResult.stats
+        if let agpData = glucoseResult.agpData {
+            self.lastGlucoseForAGP = agpData
+        }
         var resolvedInsulinStats = try await insulinStatsTask
         let resolvedCarbStats = try await carbStatsTask
 
@@ -205,9 +211,17 @@ final class LoopInsights_DataAggregator {
 
     // MARK: - Glucose Stats
 
+    /// Result type for computeGlucoseStats — returns stats + optional AGP data upgrade.
+    /// Using a struct avoids writing to `self` from concurrent async let contexts (data race).
+    private struct GlucoseStatsResult {
+        let stats: LoopInsightsAggregatedStats.GlucoseStats
+        /// Non-nil when HealthKit had more samples than Loop store — caller should update lastGlucoseForAGP.
+        let agpData: [(date: Date, mgdl: Double)]?
+    }
+
     /// P3: Accepts pre-fetched Loop samples to avoid duplicate fetching.
     /// Still supplements with HealthKit data for longer periods when HK has more samples.
-    private func computeGlucoseStats(loopSamples: [StoredGlucoseSample], start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.GlucoseStats {
+    private func computeGlucoseStats(loopSamples: [StoredGlucoseSample], start: Date, end: Date) async throws -> GlucoseStatsResult {
         // Supplement with HealthKit data when Loop's Core Data cache has gaps.
         // Always attempt HK supplementation — Core Data cache is short-lived (~1 hour)
         // so most historical data lives in HealthKit.
@@ -217,11 +231,11 @@ final class LoopInsights_DataAggregator {
             if hkGlucose.count > loopSamples.count {
                 LoopInsights_FeatureFlags.log.debug("HealthKit glucose: \(hkGlucose.count) samples vs Loop store \(loopSamples.count) — using HealthKit data")
                 let hkValues = hkGlucose.map { (date: $0.date, mgdl: $0.mgdl) }
-                self.lastGlucoseForAGP = hkValues
-                return computeGlucoseStatsFromValues(
+                let stats = computeGlucoseStatsFromValues(
                     values: hkValues,
                     start: start, end: end
                 )
+                return GlucoseStatsResult(stats: stats, agpData: hkValues)
             }
         } catch {
             LoopInsights_FeatureFlags.log.error("HealthKit glucose fetch error (continuing with Loop store data): \(error)")
@@ -276,20 +290,23 @@ final class LoopInsights_DataAggregator {
             values.reduce(0, +) / Double(values.count)
         }
 
-        return LoopInsightsAggregatedStats.GlucoseStats(
-            averageGlucose: average,
-            standardDeviation: stdDev,
-            coefficientOfVariation: cv,
-            timeInRange: tir,
-            timeInTightRange: titr,
-            tightRangeUpperBound: tightUpper,
-            timeVeryHigh: tvh,
-            timeHigh: th,
-            timeLow: tl,
-            timeVeryLow: tvl,
-            gmi: gmi,
-            sampleCount: glucoseValues.count,
-            hourlyAverages: hourlyAverages
+        return GlucoseStatsResult(
+            stats: LoopInsightsAggregatedStats.GlucoseStats(
+                averageGlucose: average,
+                standardDeviation: stdDev,
+                coefficientOfVariation: cv,
+                timeInRange: tir,
+                timeInTightRange: titr,
+                tightRangeUpperBound: tightUpper,
+                timeVeryHigh: tvh,
+                timeHigh: th,
+                timeLow: tl,
+                timeVeryLow: tvl,
+                gmi: gmi,
+                sampleCount: glucoseValues.count,
+                hourlyAverages: hourlyAverages
+            ),
+            agpData: nil
         )
     }
 
