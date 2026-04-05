@@ -58,6 +58,8 @@ class AutoPresets_ActivityDetectionManager {
     private var _totalSteps: Int = 0
     private var _lastStepChangeTime: Date?
     private var _lastClassifierTime: Date?
+    /// Incremented on every pedometer reset to discard stale callbacks from old subscriptions
+    private var _pedometerGeneration: UInt64 = 0
 
     private var isMonitoring: Bool {
         get { stateQueue.sync { _isMonitoring } }
@@ -178,17 +180,23 @@ class AutoPresets_ActivityDetectionManager {
 
     private func startPedometerUpdates() {
         let startDate = Date()
-        stateQueue.sync {
+        let generation = stateQueue.sync { () -> UInt64 in
+            _pedometerGeneration += 1
             _pedometerStartTime = startDate
             _totalSteps = 0
             _stepThresholdReachedTime = nil
             _lastStepChangeTime = nil
+            return _pedometerGeneration
         }
 
         fileLog.log("Pedometer started from: \(startDate)")
 
         pedometer.startUpdates(from: startDate) { [weak self] pedometerData, error in
             guard let self = self, self.isMonitoring else { return }
+
+            // Discard stale callbacks from a previous pedometer subscription
+            let currentGen = self.stateQueue.sync { self._pedometerGeneration }
+            guard generation == currentGen else { return }
 
             if let error = error {
                 os_log("Pedometer error: %{public}@", log: self.log, type: .error, error.localizedDescription)
@@ -384,14 +392,16 @@ class AutoPresets_ActivityDetectionManager {
 
             let minAdditionalSteps = max(15, Int(elapsed / 60.0 * 30.0))
 
-            let timerDelay = max(0, elapsed - timerInterval)
-            let stepRecencyLimit: TimeInterval = 30 + timerDelay
+            // Fixed recency window: steps must have changed within the last 60s.
+            // Timer delays from iOS backgrounding should NOT extend the window —
+            // a delayed timer means less certainty, not more.
+            let stepRecencyLimit: TimeInterval = 60
             let now = Date()
             let stepIsRecent: Bool
             if let lastStep = lastStepTime {
                 let sinceLast = now.timeIntervalSince(lastStep)
                 stepIsRecent = sinceLast <= stepRecencyLimit
-                self.fileLog.log("Recency check: last step change \(String(format: "%.1f", sinceLast))s ago (limit: \(String(format: "%.0f", stepRecencyLimit))s = 30s base + \(String(format: "%.0f", timerDelay))s timer delay) → \(stepIsRecent ? "PASS" : "FAIL")")
+                self.fileLog.log("Recency check: last step change \(String(format: "%.1f", sinceLast))s ago (limit: \(String(format: "%.0f", stepRecencyLimit))s) → \(stepIsRecent ? "PASS" : "FAIL")")
             } else {
                 stepIsRecent = false
                 self.fileLog.log("Recency check: no step changes recorded → FAIL")
