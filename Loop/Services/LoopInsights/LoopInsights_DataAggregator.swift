@@ -70,20 +70,20 @@ final class LoopInsights_DataAggregator {
             (date: $0.startDate, mgdl: $0.quantity.doubleValue(for: .milligramsPerDeciliter))
         }
 
-        // Compute stats from pre-fetched data (each may still supplement with HK data)
-        // NOTE: computeGlucoseStats returns AGP data alongside stats to avoid writing to
-        // self.lastGlucoseForAGP from a concurrent async let context (data race crash).
-        async let glucoseStatsTask = computeGlucoseStats(loopSamples: glucoseSamples, start: startDate, end: endDate)
-        async let insulinStatsTask = computeInsulinStats(loopDoses: doseEntries, start: startDate, end: endDate)
-        async let carbStatsTask = computeCarbStats(loopEntries: carbEntries, start: startDate, end: endDate)
+        // Compute stats sequentially — each method supplements with HealthKit data via
+        // a shared manager. Running these concurrently via async let caused a malloc crash
+        // ("freed pointer was not the last allocation") because each concurrent task created
+        // its own HKHealthStore, and 3+ simultaneous HealthKit queries on large datasets
+        // (3000+ samples) triggers heap corruption on real devices.
+        let resolvedHKManager = healthKitManager ?? LoopInsights_HealthKitManager()
 
-        let glucoseResult = try await glucoseStatsTask
+        let glucoseResult = try await computeGlucoseStats(loopSamples: glucoseSamples, start: startDate, end: endDate, hkManager: resolvedHKManager)
         let resolvedGlucoseStats = glucoseResult.stats
         if let agpData = glucoseResult.agpData {
             self.lastGlucoseForAGP = agpData
         }
-        var resolvedInsulinStats = try await insulinStatsTask
-        let resolvedCarbStats = try await carbStatsTask
+        var resolvedInsulinStats = try await computeInsulinStats(loopDoses: doseEntries, start: startDate, end: endDate, hkManager: resolvedHKManager)
+        let resolvedCarbStats = try await computeCarbStats(loopEntries: carbEntries, start: startDate, end: endDate, hkManager: resolvedHKManager)
 
         // Phase 5: Compute negative basal stats if circadian flag is enabled
         // P3: Reuses pre-fetched doses and glucose — no duplicate fetches
@@ -221,11 +221,10 @@ final class LoopInsights_DataAggregator {
 
     /// P3: Accepts pre-fetched Loop samples to avoid duplicate fetching.
     /// Still supplements with HealthKit data for longer periods when HK has more samples.
-    private func computeGlucoseStats(loopSamples: [StoredGlucoseSample], start: Date, end: Date) async throws -> GlucoseStatsResult {
+    private func computeGlucoseStats(loopSamples: [StoredGlucoseSample], start: Date, end: Date, hkManager: LoopInsights_HealthKitManager) async throws -> GlucoseStatsResult {
         // Supplement with HealthKit data when Loop's Core Data cache has gaps.
         // Always attempt HK supplementation — Core Data cache is short-lived (~1 hour)
         // so most historical data lives in HealthKit.
-        let hkManager = healthKitManager ?? LoopInsights_HealthKitManager()
         do {
             let hkGlucose = try await hkManager.fetchGlucoseSamples(start: start, end: end)
             if hkGlucose.count > loopSamples.count {
@@ -371,9 +370,8 @@ final class LoopInsights_DataAggregator {
     // MARK: - Insulin Stats
 
     /// P3: Accepts pre-fetched Loop doses to avoid duplicate fetching.
-    private func computeInsulinStats(loopDoses: [DoseEntry], start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.InsulinStats {
+    private func computeInsulinStats(loopDoses: [DoseEntry], start: Date, end: Date, hkManager: LoopInsights_HealthKitManager) async throws -> LoopInsightsAggregatedStats.InsulinStats {
         // Supplement with HealthKit insulin delivery — Core Data cache is short-lived
-        let hkManager = healthKitManager ?? LoopInsights_HealthKitManager()
         do {
             let hkInsulin = try await hkManager.fetchInsulinDelivery(start: start, end: end)
             if hkInsulin.count > loopDoses.count {
@@ -589,9 +587,8 @@ final class LoopInsights_DataAggregator {
     // MARK: - Carb Stats
 
     /// P3: Accepts pre-fetched Loop carb entries to avoid duplicate fetching.
-    private func computeCarbStats(loopEntries: [StoredCarbEntry], start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.CarbStats {
+    private func computeCarbStats(loopEntries: [StoredCarbEntry], start: Date, end: Date, hkManager: LoopInsights_HealthKitManager) async throws -> LoopInsightsAggregatedStats.CarbStats {
         // Supplement with HealthKit carb data — Core Data cache is short-lived
-        let hkManager = healthKitManager ?? LoopInsights_HealthKitManager()
         do {
             let hkCarbs = try await hkManager.fetchCarbEntries(start: start, end: end)
             if hkCarbs.count > loopEntries.count {
