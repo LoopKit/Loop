@@ -901,7 +901,7 @@ struct LoopInsights_DashboardView: View {
                     tirLabelRow(percent: g.timeVeryHigh, label: NSLocalizedString("Very High", comment: "LoopInsights TIR very high"), isBold: false)
                     tirLabelRow(percent: g.timeHigh, label: NSLocalizedString("High", comment: "LoopInsights TIR high"), isBold: false)
                     tirLabelRow(percent: g.timeInRange, label: NSLocalizedString("In Range", comment: "LoopInsights TIR in range"), isBold: true)
-                    tirLabelRow(percent: g.timeInTightRange, label: NSLocalizedString("Tight", comment: "LoopInsights TITR tight label"), isBold: true, color: Self.clarityTight)
+                    tirLabelRow(percent: g.timeInTightRange, label: NSLocalizedString("In Tight Range", comment: "LoopInsights TITR tight label"), isBold: true, color: Self.clarityTight)
                     tirLabelRow(percent: g.timeLow, label: NSLocalizedString("Low", comment: "LoopInsights TIR low"), isBold: false)
                     tirLabelRow(percent: g.timeVeryLow, label: NSLocalizedString("Very Low", comment: "LoopInsights TIR very low"), isBold: false)
                 }
