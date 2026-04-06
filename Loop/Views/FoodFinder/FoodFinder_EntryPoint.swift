@@ -476,10 +476,14 @@ extension FoodFinder_EntryPoint {
                 Text("Package Serving Size: \(selectedFood.servingSizeDisplay)")
                     .font(.subheadline)
                     .foregroundColor(.primary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             } else {
                 Text(selectedFood.servingSizeDisplay)
                     .font(.subheadline)
                     .foregroundColor(.primary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.vertical, 16)
