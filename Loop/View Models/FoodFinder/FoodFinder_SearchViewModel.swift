@@ -298,7 +298,7 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         }
 
         // Determine food type from the AI result (truncate to fit RowEmojiTextField maxLength)
-        let maxFoodTypeLength = 50
+        let maxFoodTypeLength = 25
         let foodType: String = {
             let names = included.map { $0.name }
             let raw: String
@@ -857,7 +857,7 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         downloadProductThumbnail(for: product)
 
         // Populate food type (truncate to 20 chars to fit RowEmojiTextField maxLength)
-        let maxFoodTypeLength = 50
+        let maxFoodTypeLength = 25
         let foodType: String
         if product.displayName.count > maxFoodTypeLength {
             let truncatedName = String(product.displayName.prefix(maxFoodTypeLength - 1)) + "…"
@@ -989,7 +989,7 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         #endif
 
         // Determine food type from the selected product
-        let maxFoodTypeLength = 50
+        let maxFoodTypeLength = 25
         let foodType: String
         if selectedFood.displayName.count > maxFoodTypeLength {
             foodType = String(selectedFood.displayName.prefix(maxFoodTypeLength - 1)) + "…"
@@ -1387,7 +1387,7 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         lastAIAnalysisResult = currentResult
 
         // Determine food type (truncate to fit RowEmojiTextField maxLength)
-        let maxFoodTypeLength = 50
+        let maxFoodTypeLength = 25
         let foodNames = currentResult.foodItemsDetailed.map { $0.name }
         let foodType: String
         let rawFoodType: String

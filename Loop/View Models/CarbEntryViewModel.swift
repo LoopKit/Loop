@@ -277,6 +277,12 @@ final class CarbEntryViewModel: ObservableObject {
         analysisHistory = FoodFinder_AnalysisHistoryStore.loadRecords(retentionDays: days)
     }
 
+    func clearAnalysisHistory() {
+        FoodFinder_AnalysisHistoryStore.clearAll()
+        analysisHistory = []
+        selectedAnalysisHistoryIndex = -1
+    }
+
     private func observeAnalysisHistoryIndexChange() {
         $selectedAnalysisHistoryIndex
             .receive(on: RunLoop.main)

@@ -22611,6 +22611,9 @@
     "In Range" : {
       "comment" : "LoopInsights TIR in range"
     },
+    "In Tight Range" : {
+      "comment" : "LoopInsights TITR tight label"
+    },
     "In-App Banner" : {
       "comment" : "LoopInsights notification style: banner"
     },
@@ -39215,6 +39218,9 @@
     "These settings connect to the cloud backend that powers Research Contribution uploads and Share Link generation. They are not related to PDF Reports or the Provider Portal." : {
       "comment" : "DataLayer config description"
     },
+    "Things to watch out for" : {
+      "comment" : "LoopInsights revert warnings subheader"
+    },
     "Thinking..." : {
       "comment" : "LoopInsights chat: AI thinking"
     },
@@ -39304,9 +39310,6 @@
     },
     "This will restore your therapy settings to the values they had before this suggestion was applied." : {
       "comment" : "LoopInsights revert confirmation message"
-    },
-    "Tight" : {
-      "comment" : "LoopInsights TITR tight label"
     },
     "Tight Range Upper Bound" : {
       "comment" : "LoopInsights tight range stepper label"

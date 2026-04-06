@@ -49,6 +49,8 @@ enum FoodFinder_AnalysisHistoryStore {
     /// user commits to eating by continuing to the bolus screen.
     static func record(_ record: FoodFinder_AnalysisRecord) {
         var records = allRecords()
+        // Replace existing record with the same name to avoid duplicates
+        records.removeAll { $0.name == record.name }
         records.append(record)
         save(records)
         pendingRecord = record
@@ -148,6 +150,22 @@ enum FoodFinder_AnalysisHistoryStore {
             print("FoodFinder: Pruned \(expired.count) expired analysis records, \(keep.count) remain")
             #endif
         }
+    }
+
+    // MARK: - Clear All
+
+    /// Remove all analysis history records and their thumbnails.
+    static func clearAll() {
+        let records = allRecords()
+        for record in records {
+            if let thumbID = record.thumbnailID {
+                FavoriteFoodImageStore.deleteThumbnail(id: thumbID)
+            }
+        }
+        save([])
+        #if DEBUG
+        print("FoodFinder: Cleared all \(records.count) analysis history records")
+        #endif
     }
 
     // MARK: - Private Helpers

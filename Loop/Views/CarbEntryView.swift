@@ -74,34 +74,39 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
             Color(.systemGroupedBackground)
                 .edgesIgnoringSafeArea(.all)
             
-            ScrollView {
-                warningsCard
+            GeometryReader { scrollGeo in
+                ScrollView {
+                    VStack(spacing: 0) {
+                        warningsCard
 
-                if isNewEntry, FoodFinder_FeatureFlags.carbTrackingEnabled {
-                    FoodFinder_CarbTrackingCard(service: FoodFinder_CarbTrackingService.shared)
-                        .padding(.top, 8)
+                        if isNewEntry, FoodFinder_FeatureFlags.carbTrackingEnabled {
+                            FoodFinder_CarbTrackingCard(service: FoodFinder_CarbTrackingService.shared)
+                                .padding(.top, 8)
+                        }
+
+                        mainCard
+                            .padding(.top, 8)
+
+                        continueActionButton
+
+                        if isNewEntry, UserDefaults.standard.foodFinderEnabled, !viewModel.analysisHistory.isEmpty {
+                            analysisHistoryCard
+                        }
+
+                        if isNewEntry, FeatureFlags.allowExperimentalFeatures {
+                            favoriteFoodsCard
+                        }
+
+                        let isBolusViewActive = Binding(get: { viewModel.bolusViewModel != nil }, set: { _, _ in viewModel.bolusViewModel = nil })
+                        NavigationLink(destination: bolusView, isActive: isBolusViewActive) {
+                            EmptyView()
+                        }
+                        .frame(width: 0, height: 0)
+                        .opacity(0)
+                        .accessibility(hidden: true)
+                    }
+                    .frame(width: scrollGeo.size.width)
                 }
-
-                mainCard
-                    .padding(.top, 8)
-
-                continueActionButton
-
-                if isNewEntry, UserDefaults.standard.foodFinderEnabled, !viewModel.analysisHistory.isEmpty {
-                    analysisHistoryCard
-                }
-
-                if isNewEntry, FeatureFlags.allowExperimentalFeatures {
-                    favoriteFoodsCard
-                }
-                
-                let isBolusViewActive = Binding(get: { viewModel.bolusViewModel != nil }, set: { _, _ in viewModel.bolusViewModel = nil })
-                NavigationLink(destination: bolusView, isActive: isBolusViewActive) {
-                    EmptyView()
-                }
-                .frame(width: 0, height: 0)
-                .opacity(0)
-                .accessibility(hidden: true)
             }
         }
         .alert(item: $viewModel.alert, content: alert(for:))
@@ -251,15 +256,38 @@ extension CarbEntryView {
 extension CarbEntryView {
     private var analysisHistoryCard: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("RECENT AI ANALYSES")
-                .font(.footnote)
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 26)
+            HStack {
+                Text("RECENT AI ANALYSES")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+
+                Button(action: {
+                    viewModel.clearAnalysisHistory()
+                }) {
+                    Image(systemName: "trash")
+                        .font(.footnote)
+                        .foregroundColor(.red)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 26)
 
             VStack(spacing: 10) {
                 VStack {
                     HStack {
                         Text("Choose Recent:")
+                            .foregroundColor(.accentColor)
+                            .onTapGesture {
+                                withAnimation {
+                                    if expandedRow == .analysisHistorySelection {
+                                        expandedRow = nil
+                                    } else {
+                                        expandedRow = .analysisHistorySelection
+                                    }
+                                }
+                            }
 
                         analysisHistorySelectedLabel(viewModel.selectedAnalysisHistoryIndex)
                             .frame(maxWidth: .infinity, alignment: .trailing)
@@ -275,15 +303,6 @@ extension CarbEntryView {
                         .pickerStyle(.wheel)
                         .frame(maxWidth: .infinity)
                         .clipped()
-                    }
-                }
-                .onTapGesture {
-                    withAnimation {
-                        if expandedRow == .analysisHistorySelection {
-                            expandedRow = nil
-                        } else {
-                            expandedRow = .analysisHistorySelection
-                        }
                     }
                 }
             }
@@ -324,9 +343,31 @@ extension CarbEntryView {
                     .truncationMode(.tail)
                     .minimumScaleFactor(0.8)
             }
+        } else if let lastRecord = viewModel.analysisHistory.first {
+            if let thumbID = lastRecord.thumbnailID,
+               let uiImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
+                HStack(spacing: 4) {
+                    Text(truncatedName(lastRecord.name))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .minimumScaleFactor(0.8)
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 20, height: 20)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
+            } else {
+                Text(truncatedName("\(lastRecord.name) \(lastRecord.foodType)"))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .minimumScaleFactor(0.8)
+            }
         } else {
             Text(String(localized: "None", comment: "Indicates no analysis history record is selected"))
-                .foregroundColor(.accentColor)
+                .foregroundColor(.secondary)
                 .minimumScaleFactor(0.8)
         }
     }
@@ -366,6 +407,7 @@ extension CarbEntryView {
                 .font(.footnote)
                 .foregroundColor(.secondary)
                 .padding(.horizontal, 26)
+                .padding(.top, 8)
             
             VStack(spacing: 10) {
                 if !viewModel.favoriteFoods.isEmpty {

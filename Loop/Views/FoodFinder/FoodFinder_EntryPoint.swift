@@ -477,13 +477,12 @@ extension FoodFinder_EntryPoint {
                     .font(.subheadline)
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
             } else {
                 Text(selectedFood.servingSizeDisplay)
                     .font(.subheadline)
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(5)
             }
         }
         .padding(.vertical, 16)
@@ -550,7 +549,7 @@ extension FoodFinder_EntryPoint {
                         let calorieTarget = max(balancedTargets?.calories ?? max(caloriesAmount, 1), 1)
                         NutritionCircle(
                             value: caloriesAmount,
-                            unit: "cal",
+                            unit: "",
                             label: "Calories",
                             color: Color(red: 0.5, green: 0.8, blue: 0.4),
                             maxValue: calorieTarget
