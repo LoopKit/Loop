@@ -192,6 +192,12 @@ struct LoopInsights_SuggestionDetailView: View {
 
                 // Revert warnings
                 if !criteria.revertWarnings.isEmpty {
+                    Text(NSLocalizedString("Things to watch out for", comment: "LoopInsights revert warnings subheader"))
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.orange)
+                        .padding(.top, 8)
+
                     ForEach(criteria.revertWarnings, id: \.self) { warning in
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "exclamationmark.triangle")
