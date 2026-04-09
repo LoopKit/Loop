@@ -220,7 +220,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     // MARK: - State
 
-    // This reflects whether the application is active 
+    // This reflects whether the application is active
     override var active: Bool {
         didSet {
             hudView?.loopCompletionHUD.assertTimer(active)
@@ -416,7 +416,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         var glucoseSamples: [StoredGlucoseSample]?
         var predictedGlucoseValues: [GlucoseValue]?
         var iobValues: [InsulinValue]?
-        var currentIOBValue: Double?
+        var partialIobValue: Double?
         var doseEntries: [DoseEntry]?
         var totalDelivery: Double?
         var cobValues: [CarbValue]?
@@ -503,6 +503,19 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 reloadGroup.leave()
             }
 
+            /*reloadGroup.enter()
+            deviceManager.doseStore.insulinOnBoard(at: Date(), basalDosingEnd: Date()) { result in
+                switch result {
+                case .failure(let error):
+                    self.log.error("DoseStore failed to get insulin on board value: %{public}@", String(describing: error))
+                    retryContext.update(with: .insulin)
+                    partialIobValue = nil
+                case .success(let partialIob):
+                    partialIobValue = partialIob.value
+                }
+                reloadGroup.leave()
+            }*/
+            
             reloadGroup.enter()
             deviceManager.doseStore.getNormalizedDoseEntries(start: startDate, end: nil) { (result) -> Void in
                 switch result {
@@ -544,14 +557,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
             workoutMode = deviceManager.loopManager.settings.nonPreMealOverrideEnabled()
         }
 
+
         deviceManager.doseStore.insulinOnBoard(at: Date(), basalDosingEnd: Date()) { (result) -> Void in
             switch result {
             case .failure(let error):
-                self.log.error("DoseStore failed to get current insulin on board value: %{public}@", String(describing: error))
+                self.log.error("DoseStore failed to get insulin on board value: %{public}@", String(describing: error))
                 retryContext.update(with: .insulin)
-                currentIOBValue = nil
-            case .success(let currentIOB):
-                currentIOBValue = currentIOB.value
+                partialIobValue = nil
+            case .success(let partialIob):
+                partialIobValue = partialIob.value
             }
         }
         
@@ -567,12 +581,30 @@ final class StatusTableViewController: LoopChartsTableViewController {
             } else {
                 self.statusCharts.setPredictedGlucoseValues([])
             }
-            if !FeatureFlags.predictedGlucoseChartClampEnabled,
+            /*if !FeatureFlags.predictedGlucoseChartClampEnabled,
                 let lastPoint = self.statusCharts.glucose.predictedGlucosePoints.last?.y
             {
                 self.eventualGlucoseDescription = String(describing: lastPoint)
             } else {
                 // if the predicted glucose values are clamped, the eventually glucose description should not be displayed, since it may not align with what is being charted.
+                self.eventualGlucoseDescription = nil
+            }*/
+            if !FeatureFlags.predictedGlucoseChartClampEnabled {
+                let targetDate = Date().addingTimeInterval(3 * 60 * 60)
+                if let pointAt3h = self.statusCharts.glucose.predictedGlucosePoints.min(by: {
+                    guard
+                        let date0 = ($0.x as? ChartAxisValueDate)?.date,
+                        let date1 = ($1.x as? ChartAxisValueDate)?.date
+                    else {
+                        return false
+                    }
+                    return abs(date0.timeIntervalSince(targetDate)) < abs(date1.timeIntervalSince(targetDate))
+                }) {
+                    self.eventualGlucoseDescription = String(describing: pointAt3h.y)
+                } else {
+                    self.eventualGlucoseDescription = nil
+                }
+            } else {
                 self.eventualGlucoseDescription = nil
             }
             if currentContext.contains(.targets) {
@@ -591,9 +623,32 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 charts.setIOBValues(iobValues)
             }
 
-            // Current IOB
-            if let currentIOBValue = currentIOBValue {
-                self.currentIOBDescription = String(format: "%.2f U", currentIOBValue)
+            // Show the larger of the value either before or after the current date
+            if let maxValue = charts.iob.iobPoints.allElementsAdjacent(to: Date()).max(by: {
+                return $0.y.scalar < $1.y.scalar
+            }) {
+                //self.currentIOBDescription = String(describing: maxValue.y)
+                let partialInsulin = maxValue.y.scalar - 0.6
+                /*if (partialInsulin > 0) {
+                    self.currentIOBDescription = "0.6 + \(String(format: "%.2f", partialInsulin)) U"
+                } else {
+                    self.currentIOBDescription = "\(String(format: "%.2f", maxValue.y.scalar )) + 0.0 U"
+                }*/
+
+                /*if (partialInsulin > 0) {
+                    self.currentIOBDescription = "0.6+\(String(format: "%.2f", partialInsulin))  →  \(String(format: "%.2f", maxValue.y.scalar )) U"
+                } else {
+                    self.currentIOBDescription = "\(String(format: "%.2f", maxValue.y.scalar ))+0.0  →  \(String(format: "%.2f", maxValue.y.scalar )) U"
+                }*/
+
+                
+                if (partialIobValue != nil) {
+                    self.currentIOBDescription = "\(String(format: "%.2f", partialIobValue!))   →  \(String(format: "%.2f", maxValue.y.scalar)) U"
+                } else {
+                    self.currentIOBDescription = "?  →  \(String(format: "%.2f", maxValue.y.scalar)) U"
+
+                }
+                
             } else {
                 self.currentIOBDescription = nil
             }
@@ -1154,7 +1209,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
                 if let eventualGlucose = eventualGlucoseDescription {
-                    cell.setSubtitleLabel(label: String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose))
+                    // @ 3h // Eventually
+                    cell.setSubtitleLabel(label: String(format: NSLocalizedString("@ 3h: %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose))
                 } else {
                     cell.setSubtitleLabel(label: nil)
                 }

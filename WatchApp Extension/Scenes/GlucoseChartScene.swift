@@ -83,7 +83,7 @@ private extension SKSpriteNode {
 class GlucoseChartScene: SKScene {
     let logger = Logger(category: "GlucoseChartScene")
 
-    var textInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5) {
+    var textInsets = UIEdgeInsets(top: 5, left: 5, bottom: 0, right: 5) {
         didSet {
             setNeedsUpdate()
         }

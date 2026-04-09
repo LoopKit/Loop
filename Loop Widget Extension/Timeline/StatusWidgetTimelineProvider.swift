@@ -150,8 +150,11 @@ class StatusWidgetTimelineProvider: TimelineProvider {
 
             let predictedGlucose = context.predictedGlucose?.samples
 
-            let eventualGlucose = predictedGlucose?.last
-
+            let threeHoursFromNow = Date().addingTimeInterval(3 * 60 * 60)
+            let eventualGlucose = predictedGlucose?.min(by: {
+                abs($0.startDate.timeIntervalSince(threeHoursFromNow)) < abs($1.startDate.timeIntervalSince(threeHoursFromNow))
+            })
+            
             let updateDate = Date()
 
             let entry = StatusWidgetTimelimeEntry(

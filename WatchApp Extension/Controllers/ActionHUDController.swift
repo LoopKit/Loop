@@ -43,9 +43,9 @@ final class ActionHUDController: HUDInterfaceController {
 
         // Update the override button description based on the feature flag; this cannot be done earlier than `-willActivate` (e.g. didSet on the IBOutlet is too soon)
         if FeatureFlags.sensitivityOverridesEnabled {
-            overrideButtonLabel?.setText(NSLocalizedString("Preset", comment: "The text for the Watch button for enabling a custom preset"))
+            overrideButtonLabel?.setText(NSLocalizedString("", comment: "The text for the Watch button for enabling a custom preset"))
         } else {
-            overrideButtonLabel?.setText(NSLocalizedString("Workout", comment: "The text for the Watch button for enabling workout mode"))
+            overrideButtonLabel?.setText(NSLocalizedString("", comment: "The text for the Watch button for enabling workout mode"))
         }
 
         let userActivity = NSUserActivity.forViewLoopStatus()

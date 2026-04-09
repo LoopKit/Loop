@@ -29,7 +29,7 @@ struct PumpView: View {
                     let glucoseFormatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
                     if let glucoseString = glucoseFormatter.string(from: eventualGlucose.quantity.doubleValue(for: eventualGlucose.unit)) {
                         VStack {
-                            Text("Eventual")
+                            Text("@ 3h:")
                                 .font(.footnote)
                                 .foregroundColor(entry.contextIsStale ? Color(UIColor.systemGray3) : Color(UIColor.secondaryLabel))
                             

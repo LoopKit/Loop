@@ -25,7 +25,35 @@ final class NotificationController: WKUserNotificationInterfaceController {
         super.didDeactivate()
     }
 
-    override func didReceive(_ notification: UNNotification, withCompletion completionHandler: @escaping (WKUserNotificationInterfaceType) -> Void) {
+    override func didReceive(
+        _ notification: UNNotification,
+        withCompletion completionHandler: @escaping (WKUserNotificationInterfaceType) -> Void
+    ) {
+        let body = notification.request.content.body
+        
+        WKInterfaceDevice.current().play(.directionDown)
+        print("WATCH: didReceive notification")
+
+        // Very minimal band detection based on notification body
+        if body.contains("Glucose:") {
+            let components = body.split(separator: " ")
+            if components.count >= 2,
+               let glucose = Double(components[1]) {
+
+                switch glucose {
+                case ..<100:
+                    WKInterfaceDevice.current().play(.failure)   // strong
+                case 100..<200:
+                    WKInterfaceDevice.current().play(.click)     // subtle
+                default:
+                    WKInterfaceDevice.current().play(.success)   // noticeable
+                }
+            } else {
+                // Fallback haptic if parsing fails
+                WKInterfaceDevice.current().play(.click)
+            }
+        }
+
         completionHandler(.default)
     }
 

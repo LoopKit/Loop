@@ -96,11 +96,16 @@ extension CLKComplicationTemplate {
         
         let timeText: CLKTextProvider
         
-        if let loopLastRunDate = loopLastRunDate {
+        /*if let loopLastRunDate = loopLastRunDate {
             timeText = CLKRelativeDateTextProvider(date: loopLastRunDate, style: .natural, units: [.minute, .hour, .day])
         } else {
             timeText = CLKTextProvider(format: "")
-        }
+        }*/
+        timeText = CLKRelativeDateTextProvider(
+            date: glucoseDate,
+            style: .natural,
+            units: [.minute, .hour, .day]
+        )
         timeText.tintColor = tintColor
 
         let timeFormatter = DateFormatter()

@@ -13,6 +13,8 @@ import LoopKitUI
 import LoopUI
 import UIKit
 import os.log
+import SwiftCharts
+
 
 
 private extension RefreshContext {
@@ -142,8 +144,23 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
                 self.glucoseChart.setAlternatePredictedGlucoseValues([])
             }
 
-            if let lastPoint = self.glucoseChart.alternatePredictedGlucosePoints?.last?.y {
-                self.eventualGlucoseDescription = String(describing: lastPoint)
+            /*if let lastPoint = self.glucoseChart.alternatePredictedGlucosePoints?.last?.y {
+                self.eventualGlucoseDescription = String(describing: lastPoint)*/
+            if let points = self.glucoseChart.alternatePredictedGlucosePoints {
+                let targetDate = Date().addingTimeInterval(3 * 60 * 60)
+                if let pointAt3h = points.min(by: {
+                    guard
+                        let date0 = ($0.x as? ChartAxisValueDate)?.date,
+                        let date1 = ($1.x as? ChartAxisValueDate)?.date
+                    else {
+                        return false
+                    }
+                    return abs(date0.timeIntervalSince(targetDate)) < abs(date1.timeIntervalSince(targetDate))
+                }) {
+                    self.eventualGlucoseDescription = String(describing: pointAt3h.y)
+                } else {
+                    self.eventualGlucoseDescription = nil
+                }
             } else {
                 self.eventualGlucoseDescription = nil
             }
@@ -243,7 +260,8 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         }
 
         if let eventualGlucose = eventualGlucoseDescription {
-            cell.setTitleLabelText(label: String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose))
+            // @ 3h // Eventually
+            cell.setTitleLabelText(label: String(format: NSLocalizedString("@ 3h: %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose))
         } else {
             cell.setTitleLabelText(label: SettingsTableViewCell.NoValueString)
         }

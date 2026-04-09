@@ -81,14 +81,14 @@ final class ComplicationChartManager {
         let glucoseRange = data.chartableGlucoseRange(from: spannedInterval)
         let scaler = GlucoseChartScaler(size: size, dateInterval: spannedInterval, glucoseRange: glucoseRange, unit: unit)
 
-        let drawingSteps = [drawTargetRange, drawOverridesIfNeeded, drawHistoricalGlucose, drawPredictedGlucose, drawGlucoseLabels]
+        let drawingSteps = [drawTargetRange, drawOverridesIfNeeded, drawHistoricalGlucose, drawPredictedGlucose, drawGlucoseLabels, drawWarningArea, drawDangerArea]
         drawingSteps.forEach { drawIn in drawIn(context, scaler) }
     }
 
     private func drawGlucoseLabels(in context: CGContext, using scaler: GlucoseChartScaler) {
         let formatter = NumberFormatter.glucoseFormatter(for: unit)
         drawGlucoseLabelText(formatter.string(from: scaler.glucoseMax)!, position: .high, scaler: scaler)
-        drawGlucoseLabelText(formatter.string(from: scaler.glucoseMin)!, position: .low, scaler: scaler)
+        // drawGlucoseLabelText(formatter.string(from: scaler.glucoseMin)!, position: .low, scaler: scaler)
     }
 
     private func drawGlucoseLabelText(_ text: String, position: GlucoseLabelPosition, scaler: GlucoseChartScaler) {
@@ -115,6 +115,18 @@ final class ComplicationChartManager {
             let rangeRect = scaler.rect(for: range, unit: unit)
             context.fill(rangeRect)
         }
+    }
+
+    private func drawWarningArea(in context: CGContext, using scaler: GlucoseChartScaler) {
+        context.setFillColor(CGColor(red: 1.0, green: 0.64, blue: 0.0, alpha: 0.4))
+        let customHorizontalRect = scaler.customHorizontalRect(min:70, max:80, unit: unit)
+        context.fill(customHorizontalRect)
+    }
+
+    private func drawDangerArea(in context: CGContext, using scaler: GlucoseChartScaler) {
+        context.setFillColor(CGColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 0.4))
+        let customHorizontalRect = scaler.customHorizontalRect(min:50, max:70, unit: unit)
+        context.fill(customHorizontalRect)
     }
 
     private func drawOverridesIfNeeded(in context: CGContext, using scaler: GlucoseChartScaler) {

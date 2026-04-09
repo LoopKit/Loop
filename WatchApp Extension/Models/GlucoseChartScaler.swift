@@ -76,6 +76,22 @@ struct GlucoseChartScaler {
             return CGRect(origin: bottomLeft, size: size).alignedToScreenScale(screenScale)
         }
     }
+
+    // Custom horizontal rect
+    func customHorizontalRect(
+        min: CGFloat,
+        max: CGFloat,
+        unit: HKUnit,
+        minHeight: CGFloat = 2,
+        alignedToScreenScale screenScale: CGFloat = WKInterfaceDevice.current().screenScale
+    ) -> CGRect {
+        let topLeft = point(dates.start, min)
+        let bottomRight = point(dates.end, max)
+        let size = CGSize(width: bottomRight.x - topLeft.x, height: bottomRight.y - topLeft.y)
+        return CGRect(origin: topLeft, size: size).alignedToScreenScale(screenScale)
+
+    }
+
 }
 
 extension GlucoseChartScaler {

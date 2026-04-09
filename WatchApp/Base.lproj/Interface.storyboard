@@ -18,7 +18,7 @@
         <!--Loop-->
         <scene sceneID="gQv-2Z-iCt">
             <objects>
-                <controller identifier="ActionHUDController" title="Loop" contentMode="scaleAspectFit" spacing="7" id="rNf-Mh-tID" customClass="ActionHUDController" customModule="WatchApp_Extension">
+                <controller identifier="ActionHUDController" contentMode="scaleAspectFit" spacing="7" id="rNf-Mh-tID" customClass="ActionHUDController" customModule="WatchApp_Extension">
                     <items>
                         <group width="1" alignment="left" id="1wc-65-vel">
                             <items>
@@ -55,7 +55,7 @@
                                         <group width="0.5" alignment="left" layout="vertical" id="wJu-fl-xhv">
                                             <items>
                                                 <button alignment="center" id="5iF-jW-tC8" userLabel="Carbs Button">
-                                                    <group key="contentGroup" width="60" height="60" alignment="left" radius="30" id="C7f-Mo-eUU" userLabel="Carbs Button Background">
+                                                    <group key="contentGroup" width="50" height="50" alignment="left" radius="25" id="C7f-Mo-eUU" userLabel="Carbs Button Background">
                                                         <items>
                                                             <imageView alignment="center" verticalAlignment="center" image="carbs" contentMode="center" id="4aO-ao-Sp9">
                                                                 <color key="tintColor" name="carbs"/>
@@ -69,7 +69,7 @@
                                                         <action selector="addCarbs" destination="rNf-Mh-tID" id="Hpn-qU-IW9"/>
                                                     </connections>
                                                 </button>
-                                                <label alignment="center" text="Carbs" id="hln-CI-MRP">
+                                                <label alignment="center" text="" id="hln-CI-MRP">
                                                     <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                                 </label>
                                             </items>
@@ -77,7 +77,7 @@
                                         <group width="0.5" alignment="left" layout="vertical" id="rGH-c2-O6g">
                                             <items>
                                                 <button alignment="center" id="jea-z6-U9e" userLabel="Bolus Button">
-                                                    <group key="contentGroup" width="60" height="60" alignment="left" radius="30" id="RpD-Vg-Uef" userLabel="Bolus Button Background">
+                                                    <group key="contentGroup" width="50" height="50" alignment="left" radius="25" id="RpD-Vg-Uef" userLabel="Bolus Button Background">
                                                         <items>
                                                             <imageView alignment="center" verticalAlignment="center" image="bolus" contentMode="center" id="RKB-f5-XWX">
                                                                 <color key="tintColor" name="insulin"/>
@@ -91,7 +91,7 @@
                                                         <action selector="setBolus" destination="rNf-Mh-tID" id="Zvf-la-3Mc"/>
                                                     </connections>
                                                 </button>
-                                                <label alignment="center" text="Bolus" id="smL-Rc-IZh">
+                                                <label alignment="center" text="" id="smL-Rc-IZh">
                                                     <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                                 </label>
                                             </items>
@@ -103,7 +103,7 @@
                                         <group width="0.5" alignment="left" layout="vertical" id="bDp-3o-Kis">
                                             <items>
                                                 <button alignment="center" id="jY0-1m-ful">
-                                                    <group key="contentGroup" width="60" height="60" alignment="left" radius="30" id="mBB-jG-wHy">
+                                                    <group key="contentGroup" width="50" height="50" alignment="left" radius="25" id="mBB-jG-wHy">
                                                         <items>
                                                             <imageView alignment="center" verticalAlignment="center" image="pre-meal" contentMode="center" id="Asx-tm-mEg">
                                                                 <color key="tintColor" name="carbs"/>
@@ -117,7 +117,7 @@
                                                         <action selector="togglePreMealMode" destination="rNf-Mh-tID" id="p9f-dP-MI2"/>
                                                     </connections>
                                                 </button>
-                                                <label alignment="center" text="Pre-Meal" id="f5G-bS-9pd">
+                                                <label alignment="center" text="" id="f5G-bS-9pd">
                                                     <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                                 </label>
                                             </items>
@@ -125,7 +125,7 @@
                                         <group width="0.5" alignment="left" layout="vertical" id="OV0-aG-nPE">
                                             <items>
                                                 <button alignment="center" id="dYe-c2-Sfm">
-                                                    <group key="contentGroup" width="60" height="60" alignment="left" radius="30" id="HCn-yQ-9kV">
+                                                    <group key="contentGroup" width="50" height="50" alignment="left" radius="25" id="HCn-yQ-9kV">
                                                         <items>
                                                             <imageView alignment="center" verticalAlignment="center" image="workout" contentMode="center" id="8OJ-hd-8Va">
                                                                 <color key="tintColor" name="workout"/>
@@ -139,7 +139,7 @@
                                                         <action selector="toggleOverride" destination="rNf-Mh-tID" id="pMD-b9-FoF"/>
                                                     </connections>
                                                 </button>
-                                                <label alignment="center" text="Override" id="nC0-X3-oFJ">
+                                                <label alignment="center" text="" id="nC0-X3-oFJ">
                                                     <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                                 </label>
                                             </items>
@@ -177,7 +177,7 @@
         <!--Loop-->
         <scene sceneID="3Z2-ZE-636">
             <objects>
-                <controller identifier="ChartHUDController" title="Loop" spacing="7" alwaysBounce="YES" id="v5b-sO-bb8" customClass="ChartHUDController" customModule="WatchApp_Extension">
+                <controller identifier="ChartHUDController" spacing="7" alwaysBounce="YES" id="v5b-sO-bb8" customClass="ChartHUDController" customModule="WatchApp_Extension">
                     <items>
                         <group width="1" alignment="left" id="z0r-4k-Z7h">
                             <items>
