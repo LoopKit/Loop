@@ -206,11 +206,25 @@ final class LoopInsights_ChatViewModel: ObservableObject {
         voiceService.stopSpeaking()
     }
 
-    /// Clear the conversation and start fresh
+    /// Clear the conversation and start fresh.
+    /// Saves the current session before wiping it so the user can review it later.
     func clearConversation() {
+        saveSessionIfNeeded()
         voiceService.stopSpeaking()
         session.clear()
         errorMessage = nil
+    }
+
+    /// Persist the current session to history if it contains at least one AI reply.
+    /// Called on clear and on chat sheet dismiss.
+    func saveSessionIfNeeded() {
+        guard !messages.isEmpty else { return }
+        let transcript = LoopInsightsChatTranscript(
+            id: UUID(),
+            startedAt: messages.first?.timestamp ?? Date(),
+            messages: messages
+        )
+        LoopInsights_ChatHistoryStore.append(transcript)
     }
 
     // MARK: - Chat Prompt Building
