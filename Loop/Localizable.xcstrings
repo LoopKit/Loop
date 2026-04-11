@@ -3344,6 +3344,9 @@
         }
       }
     },
+    "%d messages": {
+      "comment": "LoopInsights chat history: message count"
+    },
     "%d min (%@)": {
       "comment": "LoopInsights CGM longest gap value",
       "localizations": {
@@ -12979,13 +12982,16 @@
       "comment": "LoopInsights circadian toggle"
     },
     "Clear All": {
-      "comment": "LoopInsights clear all button\nLoopInsights clear all confirm"
+      "comment": "LoopInsights chat history: clear all button\nLoopInsights clear all button\nLoopInsights clear all confirm"
     },
     "Clear All Entries": {
       "comment": "LoopInsights clear all alcohol entries\nLoopInsights clear all caffeine entries"
     },
     "Clear All Entries?": {
       "comment": "LoopInsights clear all alcohol alert title\nLoopInsights clear all caffeine alert title"
+    },
+    "Clear all past conversations?": {
+      "comment": "LoopInsights chat history: delete all title"
     },
     "Clear Debug Logs": {
       "comment": "A button label that clears the debug logs.",
@@ -14472,6 +14478,9 @@
     },
     "Control how your health data is shared with healthcare providers and optionally contributed to diabetes research.": {
       "comment": "DataLayer consent description"
+    },
+    "Conversations are saved automatically when you close Ask Loopy.": {
+      "comment": "LoopInsights chat history: empty subtitle"
     },
     "Copied": {
       "comment": "DataLayer link copied"
@@ -29538,6 +29547,9 @@
     "No Recommended Changes": {
       "comment": "LoopInsights no changes title"
     },
+    "No saved conversations yet": {
+      "comment": "LoopInsights chat history: empty title"
+    },
     "No suggestions yet": {
       "comment": "LoopInsights empty history title"
     },
@@ -30897,6 +30909,9 @@
     },
     "Partial": {
       "comment": "LoopInsights outcome: some improvement"
+    },
+    "Past Conversations": {
+      "comment": "LoopInsights chat history title"
     },
     "Paste API key": {
       "comment": "A placeholder text for a secure field where a user can paste their API key.",

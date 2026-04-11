@@ -16,6 +16,7 @@ struct LoopInsights_ChatView: View {
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isInputFocused: Bool
     @State private var previousInputText = ""
+    @State private var showingHistory = false
 
     var body: some View {
         ZStack {
@@ -71,10 +72,16 @@ struct LoopInsights_ChatView: View {
         }
         .onDisappear {
             viewModel.stopSpeaking()
+            viewModel.saveSessionIfNeeded()
             let appearance = UINavigationBarAppearance()
             appearance.configureWithDefaultBackground()
             UINavigationBar.appearance().standardAppearance = appearance
             UINavigationBar.appearance().scrollEdgeAppearance = nil
+        }
+        .sheet(isPresented: $showingHistory) {
+            NavigationView {
+                LoopInsights_ChatHistoryView()
+            }
         }
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -89,11 +96,18 @@ struct LoopInsights_ChatView: View {
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                if !viewModel.messages.isEmpty {
-                    Button(action: { viewModel.clearConversation() }) {
-                        Image(systemName: "trash")
+                HStack(spacing: 14) {
+                    Button(action: { showingHistory = true }) {
+                        Image(systemName: "clock.arrow.circlepath")
                             .font(.caption)
                             .foregroundColor(.white.opacity(0.7))
+                    }
+                    if !viewModel.messages.isEmpty {
+                        Button(action: { viewModel.clearConversation() }) {
+                            Image(systemName: "trash")
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.7))
+                        }
                     }
                 }
             }

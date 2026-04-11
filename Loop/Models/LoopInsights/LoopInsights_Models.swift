@@ -1013,14 +1013,14 @@ struct LoopInsightsDebugLog: Identifiable {
 // MARK: - Chat Message
 
 /// A single message in a LoopInsights chat conversation
-struct LoopInsightsChatMessage: Identifiable {
+struct LoopInsightsChatMessage: Identifiable, Codable {
     let id: UUID
     let role: Role
     let content: String
     let timestamp: Date
     let voiceInitiated: Bool
 
-    enum Role: String {
+    enum Role: String, Codable {
         case user
         case assistant
         case system
@@ -1035,10 +1035,30 @@ struct LoopInsightsChatMessage: Identifiable {
     }
 }
 
+// MARK: - Chat Transcript
+
+/// A saved record of a complete Ask Loopy conversation, persisted for later review.
+struct LoopInsightsChatTranscript: Identifiable, Codable {
+    let id: UUID
+    let startedAt: Date
+    let messages: [LoopInsightsChatMessage]
+
+    /// First user message, truncated to 100 chars — used as the list row preview.
+    var preview: String {
+        let first = messages.first(where: { $0.role == .user })?.content ?? ""
+        return first.count > 100 ? String(first.prefix(100)) + "…" : first
+    }
+
+    /// Number of visible (non-system) messages in the conversation.
+    var visibleMessageCount: Int {
+        messages.filter { $0.role != .system }.count
+    }
+}
+
 // MARK: - Chat Session
 
-/// Manages an in-memory chat session. Conversations are not persisted
-/// across app launches — the AI always starts fresh with current data context.
+/// Manages an in-memory chat session. Conversations are saved automatically
+/// when the chat sheet is dismissed via LoopInsights_ChatHistoryStore.
 final class LoopInsightsChatSession: ObservableObject {
     @Published private(set) var messages: [LoopInsightsChatMessage] = []
     let sessionStarted: Date
