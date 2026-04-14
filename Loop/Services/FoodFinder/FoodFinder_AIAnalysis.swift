@@ -1081,9 +1081,11 @@ class ConfigurableAIService: ObservableObject {
         }
         telemetryCallback?(String(format: "🗜️ Encoded ≈ %.0f KB", Double(pre.bytes) / 1024.0))
 
-        // Cache key based on provider config
+        // Cache key based on provider config + current location so a location-aware
+        // analysis is never served from a cache entry that had no location context.
         let advFlag = UserDefaults.standard.advancedDosingRecommendationsEnabled ? "adv" : "std"
-        let cacheKey = [config.name, config.model, config.baseURL, advFlag].joined(separator: "|")
+        let locKey = FoodFinder_LocationService.shared.locationName ?? "noloc"
+        let cacheKey = [config.name, config.model, config.baseURL, advFlag, locKey].joined(separator: "|")
 
         if let cached = imageAnalysisCache.getCachedResult(forPreencoded: pre, providerKey: cacheKey) {
             telemetryCallback?("⚡ Using cached analysis result")

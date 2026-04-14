@@ -87,9 +87,14 @@ final class FoodFinder_LocationService: NSObject, ObservableObject, CLLocationMa
 
         return """
 
-        LOCATION CONTEXT: The user is currently at or near "\(name)".
-        If you can identify specific menu items from this restaurant or establishment, use known nutrition facts from their published menu data for more accurate carbohydrate and macro estimates.
-        Mention the restaurant name in your response if it's relevant to the analysis.
+        LOCATION CONTEXT: The user's phone detects they are currently at or near "\(name)".
+        If this is a restaurant or food establishment, use their published menu nutrition data \
+        for more accurate carbohydrate and macro estimates instead of generic USDA values.
+        IMPORTANT: You MUST begin your "diabetes_considerations" field with this exact location note \
+        (always include it, even if the food doesn't match the restaurant's menu): \
+        "📍 Location detected: \(name). Nutrition estimates use \(name)'s published menu data where applicable. \
+        If you're somewhere else, retake the photo for a fresh analysis." \
+        Then add a single blank line and continue with your normal diabetes guidance.
         """
     }
 
