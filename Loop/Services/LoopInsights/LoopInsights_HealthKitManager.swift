@@ -198,25 +198,53 @@ final class LoopInsights_HealthKitManager: ObservableObject {
     private func fetchStepStats(start: Date, end: Date) async throws -> LoopInsightsAggregatedStats.StepStats? {
         guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else { return nil }
 
-        let samples = try await querySamples(type: stepType, start: start, end: end)
-        guard !samples.isEmpty else { return nil }
-
+        // Use HKStatisticsCollectionQuery with .cumulativeSum so HealthKit deduplicates
+        // overlapping sources (iPhone + Apple Watch) the same way the Health app does.
+        // Raw HKSampleQuery returns samples from every source without deduplication,
+        // which inflates step counts when multiple devices are recording simultaneously.
         let calendar = Calendar.current
         let countUnit = HKUnit.count()
+        let anchorDate = calendar.startOfDay(for: start)
+        let daily = DateComponents(day: 1)
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
+
+        let statistics: [HKStatistics] = try await withCheckedThrowingContinuation { continuation in
+            let query = HKStatisticsCollectionQuery(
+                quantityType: stepType,
+                quantitySamplePredicate: predicate,
+                options: .cumulativeSum,
+                anchorDate: anchorDate,
+                intervalComponents: daily
+            )
+            query.initialResultsHandler = { _, results, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: results?.statistics() ?? [])
+                }
+            }
+            healthStore.execute(query)
+        }
 
         var dailyTotals: [String: Double] = [:]
+        for stat in statistics {
+            guard let sum = stat.sumQuantity()?.doubleValue(for: countUnit), sum > 0 else { continue }
+            dailyTotals[Self.dayKey(for: stat.startDate, calendar: calendar)] = sum
+        }
+        guard !dailyTotals.isEmpty else { return nil }
+
+        let avgDaily = dailyTotals.values.reduce(0, +) / Double(dailyTotals.count)
+
+        // Query 2: Raw samples for hourly distribution (relative pattern only).
+        // Double-counting bias from multiple sources is uniform across all hours so it
+        // doesn't distort the shape — peak hour and glucose correlation remain valid.
+        let rawSamples = try await querySamples(type: stepType, start: start, end: end)
         var hourlyBuckets: [Int: [Double]] = [:]
-
-        for sample in samples {
+        for sample in rawSamples {
             let count = sample.quantity.doubleValue(for: countUnit)
-            let dayKey = Self.dayKey(for: sample.startDate, calendar: calendar)
-            dailyTotals[dayKey, default: 0] += count
-
             let hour = calendar.component(.hour, from: sample.startDate)
             hourlyBuckets[hour, default: []].append(count)
         }
-
-        let avgDaily = dailyTotals.isEmpty ? 0 : dailyTotals.values.reduce(0, +) / Double(dailyTotals.count)
         let hourlyAvgs = hourlyBuckets.mapValues { $0.reduce(0, +) / Double($0.count) }
 
         return LoopInsightsAggregatedStats.StepStats(
