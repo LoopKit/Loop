@@ -87,10 +87,10 @@ final class LoopInsights_AIAnalysis {
           ⚠️ HIGHEST RISK SETTING — basal delivers insulin 24/7, including overnight when the user \
           is asleep. A basal rate set too high can cause severe nocturnal hypoglycemia. Always err on \
           the side of under-adjustment. \
-          KEY SIGNAL: If the AID algorithm is constantly delivering corrections (high correction bolus \
-          count) or if fasting glucose drifts up/down consistently, basal is likely wrong. \
-          A basal/bolus split far from 50/50 is a strong signal — high bolus % (>60%) with many \
-          corrections usually means basal is too low and the algorithm is compensating with corrections.
+          KEY SIGNAL: If fasting glucose drifts up/down consistently, basal is likely wrong. \
+          A basal/bolus split skewed heavily toward bolus (>60%) with poor glucose outcomes \
+          may suggest basal is too low. Correction activity alone is not a problem — \
+          the algorithm issuing corrections is normal AID behavior.
         - INSULIN SENSITIVITY FACTOR (ISF): Controls how much 1 unit of insulin lowers glucose. \
           Analyze correction effectiveness — are corrections bringing glucose back to target? \
           KEY SIGNAL: If glucose stays high for hours after meals/corrections (hourly averages >150 \
@@ -100,7 +100,7 @@ final class LoopInsights_AIAnalysis {
           Analyze post-meal glucose behavior. KEY SIGNAL: If glucose spikes >50 mg/dL after meals \
           (compare pre-meal hour to 1-2 hours post-meal in hourly averages), CR may be too high \
           (not enough insulin per carb). If glucose drops after meals, CR may be too low. \
-        While the CR doesn't change the ISF, a wrong CR will force the other settings to work harder: \
+        While the CR doesn't change the ISF, a wrong CR shifts work to other settings: \
         If CR is too weak at meals: The user won't get enough insulin for the meal. \
         The system will see the resulting rise and trigger auto-corrections (using the ISF) or increased basal \
         to fix the mistake. If CR is too aggressive: The user will drop low after eating. \
@@ -127,8 +127,8 @@ final class LoopInsights_AIAnalysis {
         CROSS-SETTING INTERACTIONS — You are given all three settings for context:
         - The CR is the user's "front-end" tool for meals. Their ISF and BR are the "back-end" tools the system uses \
           to keep the user stable between meals.
-        - BR and ISF are tightly coupled: if basal is too low, the algorithm compensates with \
-          frequent corrections using ISF. Changing ISF without considering BR can mask the real problem.
+        - BR and ISF are tightly coupled: if basal is too low, the system relies more on \
+          corrections via ISF. Changing ISF without considering BR can mask the real problem.
         - CR and ISF interact at meals: CR determines the meal bolus, ISF determines corrections. \
           If post-meal highs are followed by effective corrections, the issue is CR (not enough up front), \
           not ISF. If corrections aren't bringing glucose down, the issue is ISF.
@@ -316,12 +316,12 @@ final class LoopInsights_AIAnalysis {
                     }
                 }
             ],
-            "overall_assessment": "Factual summary including: algorithm workload assessment, time-of-day pattern summary, and what the basal/bolus ratio tells us",
+            "overall_assessment": "Factual summary including: time-of-day pattern summary, glucose outcome trends, and what the basal/bolus ratio tells us",
             "next_recommended_focus": "carb_ratio|insulin_sensitivity|basal_rate|null"
         }
 
         If NO changes are warranted, return: { "suggestions": [], "past_suggestion_evaluations": {}, "overall_assessment": "...", "next_recommended_focus": null }
-        Only return empty suggestions when TIR is good AND algorithm workload is low AND no time-of-day patterns exist.
+        Only return empty suggestions when TIR is good AND glucose outcomes are stable AND no time-of-day patterns exist.
         If there are no past suggestions to evaluate, return "past_suggestion_evaluations": {}.
 
         Time blocks use seconds since midnight (0 = 12:00 AM, 21600 = 6:00 AM, 43200 = 12:00 PM, etc.)
@@ -623,7 +623,7 @@ final class LoopInsights_AIAnalysis {
         }
 
         prompt += "\nAnalyze this data focusing specifically on \(settingType.displayName). "
-        prompt += "Use the time-of-day analysis and algorithm workload metrics to identify actionable patterns. "
+        prompt += "Use the time-of-day analysis and glucose outcome metrics to identify actionable patterns. "
         prompt += "If supplemental context is provided above, incorporate it into your reasoning. "
         prompt += "If the data clearly supports adjustments, propose them. If not, return empty suggestions. "
 

@@ -203,7 +203,7 @@ final class LoopInsights_AdvancedAnalyzers {
             ctx += "- Heaviest suspension hours: \(topHours.joined(separator: ", "))\n"
         }
         if stats.suspensionPercentage > 10 {
-            ctx += "** HIGH SUSPENSION RATE: Algorithm is frequently cutting insulin — basal may be too high **\n"
+            ctx += "** HIGH SUSPENSION RATE: Frequent insulin suspensions — basal may be too high **\n"
         }
         if stats.overcorrectionEvents > 3 {
             ctx += "** OVERCORRECTION PATTERN: Suspensions followed by rebound highs suggest settings oscillation **\n"

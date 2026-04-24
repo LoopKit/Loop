@@ -236,8 +236,12 @@ final class LoopInsights_HealthKitManager: ObservableObject {
         let avgDaily = dailyTotals.values.reduce(0, +) / Double(dailyTotals.count)
 
         // Query 2: Raw samples for hourly distribution (relative pattern only).
-        // Double-counting bias from multiple sources is uniform across all hours so it
-        // doesn't distort the shape — peak hour and glucose correlation remain valid.
+        // Raw samples are used here because HKStatisticsCollectionQuery only returns
+        // daily-interval sums, not per-sample timestamps needed for hour-of-day bucketing.
+        // Multi-source bias is NOT perfectly uniform (Watch samples are denser during activity,
+        // CoreMotion/iPhone samples are more evenly spread), but the directional shape is
+        // accurate enough for peak-hour detection and glucose correlation use cases.
+        // A future improvement would use hourly HKStatisticsCollectionQuery intervals here too.
         let rawSamples = try await querySamples(type: stepType, start: start, end: end)
         var hourlyBuckets: [Int: [Double]] = [:]
         for sample in rawSamples {
