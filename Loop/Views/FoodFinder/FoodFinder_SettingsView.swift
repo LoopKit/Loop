@@ -18,7 +18,7 @@ struct AISettingsView: View {
     // Feature toggles
     @AppStorage("com.loopkit.Loop.foodSearchEnabled") private var foodSearchEnabled: Bool = false
     @AppStorage("com.loopkit.Loop.advancedDosingRecommendationsEnabled") private var advancedDosingRecommendationsEnabled: Bool = false
-    @AppStorage("com.loopkit.Loop.locationTaggingEnabled") private var locationTaggingEnabled: Bool = false
+    @AppStorage("com.loopkit.Loop.locationTaggingEnabled") private var locationTaggingEnabled: Bool = true
     @AppStorage("com.loopkit.Loop.carbTrackingEnabled") private var carbTrackingEnabled: Bool = false
     @AppStorage("com.loopkit.Loop.analysisHistoryRetentionDays") private var retentionDays: Int = 7
 

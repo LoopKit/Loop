@@ -194,6 +194,7 @@ struct FoodFinder_EntryPoint: View {
             }
         }
         .onAppear {
+            FoodFinder_FeatureFlags.registerDefaults()
             FoodFinder_FeatureFlags.migrateToByoIfNeeded()
             isFoodSearchEnabled = UserDefaults.standard.foodFinderEnabled
             loadFavoriteFoods()

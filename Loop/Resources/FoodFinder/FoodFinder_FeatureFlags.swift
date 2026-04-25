@@ -17,6 +17,14 @@ import LoopKit
 /// Central on/off switch for the entire FoodFinder feature.
 /// Loop host files check `FoodFinder_FeatureFlags.isEnabled` to gate UI insertion.
 enum FoodFinder_FeatureFlags {
+
+    /// Register default values — location tagging defaults ON.
+    static func registerDefaults() {
+        UserDefaults.standard.register(defaults: [
+            Keys.locationTaggingEnabled: true
+        ])
+    }
+
     /// Master toggle — persisted in UserDefaults.
     static var isEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: Keys.foodSearchEnabled) }
@@ -24,6 +32,7 @@ enum FoodFinder_FeatureFlags {
     }
 
     /// Location tagging — captures venue-level GPS when FoodFinder opens.
+    /// Defaults to ON via registerDefaults().
     static var locationTaggingEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: Keys.locationTaggingEnabled) }
         set { UserDefaults.standard.set(newValue, forKey: Keys.locationTaggingEnabled) }

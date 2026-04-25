@@ -32,6 +32,8 @@ final class FoodFinder_LocationService: NSObject, ObservableObject, CLLocationMa
     @Published private(set) var latitude: Double?
     @Published private(set) var longitude: Double?
     @Published private(set) var locationName: String?
+    @Published private(set) var cityName: String?
+    @Published private(set) var countryName: String?
     @Published private(set) var isResolving: Bool = false
 
     // MARK: - Private
@@ -74,28 +76,61 @@ final class FoodFinder_LocationService: NSObject, ObservableObject, CLLocationMa
         latitude = nil
         longitude = nil
         locationName = nil
+        cityName = nil
+        countryName = nil
         isResolving = false
     }
 
     /// Returns a prompt snippet with restaurant/location context for the AI,
     /// or an empty string if no location is available.
     func locationContextForPrompt() -> String {
-        guard FoodFinder_FeatureFlags.locationTaggingEnabled,
-              let name = locationName, !name.isEmpty else {
-            return ""
+        guard FoodFinder_FeatureFlags.locationTaggingEnabled else { return "" }
+
+        // Build region string (e.g. "Athens, Greece") even if venue name is missing
+        var regionParts: [String] = []
+        if let city = cityName, !city.isEmpty { regionParts.append(city) }
+        if let country = countryName, !country.isEmpty { regionParts.append(country) }
+        let region = regionParts.isEmpty ? nil : regionParts.joined(separator: ", ")
+
+        let venueName = (locationName?.isEmpty == false) ? locationName : nil
+
+        // Need at least one piece of location info
+        guard venueName != nil || region != nil else { return "" }
+
+        var ctx = "\n\nLOCATION CONTEXT:\n"
+
+        if let venue = venueName, let reg = region {
+            ctx += "The user's GPS places them at or near \"\(venue)\" in \(reg).\n"
+        } else if let venue = venueName {
+            ctx += "The user's GPS places them at or near \"\(venue)\".\n"
+        } else if let reg = region {
+            ctx += "The user's GPS places them in \(reg).\n"
         }
 
-        return """
-
-        LOCATION CONTEXT: The user's phone detects they are currently at or near "\(name)".
-        If this is a restaurant or food establishment, use their published menu nutrition data \
-        for more accurate carbohydrate and macro estimates instead of generic USDA values.
-        IMPORTANT: You MUST begin your "diabetes_considerations" field with this exact location note \
-        (always include it, even if the food doesn't match the restaurant's menu): \
-        "📍 Location detected: \(name). Nutrition estimates use \(name)'s published menu data where applicable. \
-        If you're somewhere else, retake the photo for a fresh analysis." \
-        Then add a single blank line and continue with your normal diabetes guidance.
+        ctx += """
+        Use this location to improve your analysis:
+        1. REGIONAL CUISINE: Identify the food using local/regional dish names and preparation styles \
+        typical of this area. A pastry in Athens is more likely tiropita or bougatsa than a generic phyllo roll.
+        2. RESTAURANT MATCH: If the GPS venue name matches a known restaurant, reference their menu \
+        for more accurate nutrition data instead of generic USDA values.
+        3. CROSS-REFERENCE: Also look for restaurant names, logos, or branding visible in the image \
+        (on napkins, plates, menus, receipts, signage). If you find a name that matches or confirms \
+        the GPS location, use that restaurant's known menu items for identification and nutrition.
+        4. LOCATION NOTE: Begin your "diabetes_considerations" field with a brief location line, e.g.: \
+        "📍 \(buildLocationLabel()). " \
+        Then continue with your normal diabetes guidance.
         """
+
+        return ctx
+    }
+
+    /// Builds a compact label like "Ciel, Athens, Greece" or "Athens, Greece".
+    private func buildLocationLabel() -> String {
+        var parts: [String] = []
+        if let name = locationName, !name.isEmpty { parts.append(name) }
+        if let city = cityName, !city.isEmpty, city != locationName { parts.append(city) }
+        if let country = countryName, !country.isEmpty { parts.append(country) }
+        return parts.isEmpty ? "Unknown" : parts.joined(separator: ", ")
     }
 
     // MARK: - Private Helpers
@@ -121,8 +156,10 @@ final class FoodFinder_LocationService: NSObject, ObservableObject, CLLocationMa
                         ?? placemark.areasOfInterest?.first
                         ?? placemark.thoroughfare
                     self.locationName = name
+                    self.cityName = placemark.locality
+                    self.countryName = placemark.country
                     #if DEBUG
-                    print("📍 FoodFinder Location: \(name ?? "unknown") (\(self.latitude ?? 0), \(self.longitude ?? 0))")
+                    print("📍 FoodFinder Location: \(name ?? "unknown"), \(placemark.locality ?? "?"), \(placemark.country ?? "?") (\(self.latitude ?? 0), \(self.longitude ?? 0))")
                     #endif
                 }
                 self.isResolving = false

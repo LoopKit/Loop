@@ -17,7 +17,9 @@ struct AICameraView: View {
     let onCancel: () -> Void
 
     @State private var capturedImage: UIImage?
+    @State private var imageForAnalysis: UIImage?
     @State private var showingImagePicker = false
+    @State private var showingCropView = false
     @State private var isAnalyzing = false
     @State private var analysisError: String?
     @State private var showingErrorAlert = false
@@ -100,18 +102,16 @@ struct AICameraView: View {
                         .padding(.bottom, 30)
                     }
 
-                } else {
-                    // Show captured image and auto-start analysis
+                } else if let finalImage = imageForAnalysis {
+                    // Show final image (cropped or full) and auto-start analysis
                     VStack(spacing: 20) {
-                        // Captured image
-                        Image(uiImage: capturedImage!)
+                        Image(uiImage: finalImage)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(maxHeight: 300)
                             .cornerRadius(12)
                             .padding(.horizontal)
 
-                        // Analysis in progress (auto-started)
                         VStack(spacing: 16) {
                             ProgressView()
                                 .scaleEffect(1.2)
@@ -124,7 +124,6 @@ struct AICameraView: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
 
-                            // Telemetry window
                             if showTelemetry && !telemetryLogs.isEmpty {
                                 TelemetryWindow(logs: telemetryLogs)
                                     .transition(.opacity.combined(with: .scale))
@@ -136,11 +135,21 @@ struct AICameraView: View {
                     }
                     .padding(.top)
                     .onAppear {
-                        // Auto-start analysis when image appears
                         if !isAnalyzing && analysisError == nil {
                             analyzeImage()
                         }
                     }
+                } else {
+                    // Crop step — shown after image capture, before analysis
+                    FoodFinder_ImageCropView(
+                        image: capturedImage!,
+                        onCrop: { croppedImage in
+                            imageForAnalysis = croppedImage
+                        },
+                        onSkip: { originalImage in
+                            imageForAnalysis = originalImage
+                        }
+                    )
                 }
             }
             .navigationTitle("AI Food Analysis")
@@ -171,6 +180,7 @@ struct AICameraView: View {
                 }
                 Button("Retake Photo") {
                     capturedImage = nil
+                    imageForAnalysis = nil
                     analysisError = nil
                 }
                 Button("Cancel", role: .cancel) {
@@ -191,6 +201,7 @@ struct AICameraView: View {
                 }
                 Button("Retake Photo") {
                     capturedImage = nil
+                    imageForAnalysis = nil
                     analysisError = nil
                 }
                 Button("Cancel", role: .cancel) {
@@ -204,6 +215,7 @@ struct AICameraView: View {
                 }
                 Button("Retake Photo") {
                     capturedImage = nil
+                    imageForAnalysis = nil
                     analysisError = nil
                 }
                 if analysisError?.contains("404") == true || analysisError?.contains("service error") == true {
@@ -229,7 +241,7 @@ struct AICameraView: View {
     }
 
     private func analyzeImage() {
-        guard let image = capturedImage else { return }
+        guard let image = imageForAnalysis else { return }
 
         // Check if AI service is configured
         let aiService = ConfigurableAIService.shared
