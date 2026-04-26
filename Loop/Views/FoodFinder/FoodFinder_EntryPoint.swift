@@ -1695,9 +1695,9 @@ struct ServingsDisplayRow: View {
                 HStack(spacing: 8) {
                     // Decrease button
                     Button(action: {
-                        // Step down by 0.25 (quarter serving)
-                        let quarters = (servings * 4).rounded()
-                        let newValue = max(0.0, (quarters - 1) / 4.0)
+                        // Step down by 0.5 (half serving)
+                        let halves = (servings * 2).rounded()
+                        let newValue = max(0.0, (halves - 1) / 2.0)
                         servings = newValue
                     }) {
                         Image(systemName: "minus.circle.fill")
@@ -1714,9 +1714,9 @@ struct ServingsDisplayRow: View {
 
                     // Increase button
                     Button(action: {
-                        // Step up by 0.25 (quarter serving)
-                        let quarters = (servings * 4).rounded()
-                        let newValue = min(10.0, (quarters + 1) / 4.0)
+                        // Step up by 0.5 (half serving)
+                        let halves = (servings * 2).rounded()
+                        let newValue = min(10.0, (halves + 1) / 2.0)
                         servings = newValue
                     }) {
                         Image(systemName: "plus.circle.fill")

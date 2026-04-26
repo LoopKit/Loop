@@ -144,7 +144,7 @@ struct AIProviderConfiguration: Identifiable, Codable, Equatable {
         apiKeyHeader: String? = nil,
         apiKeyPrefix: String? = nil,
         maxTokens: Int = 2500,
-        temperature: Double = 0.0,
+        temperature: Double = 0.05,
         apiVersion: String? = nil,
         organizationID: String? = nil,
         apiKey: String = ""
