@@ -72,6 +72,7 @@ struct FoodFinder_EntryPoint: View {
     @State private var isFoodSearchEnabled: Bool
     @State private var showAbsorptionReasoning = false
     @State private var isAdvancedAnalysisExpanded = false
+    @State private var isDescriptionExpanded = false
     @State private var expandedRow: Row?
 
     /// Favorite foods loaded from UserDefaults for quick-favorite toggling.
@@ -428,16 +429,16 @@ extension FoodFinder_EntryPoint {
                     )
             }
 
-            // Product name with favorite heart (centered as a unit)
+            // Product name with optional restaurant + favorite heart
             ZStack {
-                // Centered content
                 HStack(spacing: 8) {
-                    Text(shortenedTitle(selectedFood.displayName))
+                    Text(foodTitleWithLocation(selectedFood))
                         .font(.headline)
                         .fontWeight(.medium)
                         .foregroundColor(.primary)
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .truncationMode(.tail)
+                        .multilineTextAlignment(.center)
                     Button(action: {
                         if !isQuickFavorited(selectedFood) {
                             showingFavoriteSheet = true
@@ -450,7 +451,6 @@ extension FoodFinder_EntryPoint {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
 
-                // Invisible spacers to balance left/right so ZStack centers correctly
                 HStack {
                     Color.clear.frame(width: 1)
                     Spacer()
@@ -458,33 +458,8 @@ extension FoodFinder_EntryPoint {
                 }
             }
 
-            // Serving size — replace "CANNOT DETERMINE" with the actual USDA standard serving size
-            if selectedFood.servingSizeDisplay.uppercased().contains("CANNOT DETERMINE") {
-                let usdaSize = searchVM.lastAIAnalysisResult?.foodItemsDetailed.first?.usdaServingSize?.trimmingCharacters(in: .whitespacesAndNewlines)
-                if let usda = usdaSize, !usda.isEmpty {
-                    Text("USDA standard serving: \(usda). Adjust servings as needed.")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                } else {
-                    let foodName = shortenedTitle(selectedFood.displayName)
-                    Text("Based on a standard serving of \(foodName). Adjust servings as needed.")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-            } else if selectedFood.dataSource == .barcodeScan {
-                Text("Package Serving Size: \(selectedFood.servingSizeDisplay)")
-                    .font(.subheadline)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.center)
-            } else {
-                Text(selectedFood.servingSizeDisplay)
-                    .font(.subheadline)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(5)
-            }
+            // Description — truncated at ~140 chars with expand/collapse
+            descriptionSection(for: selectedFood)
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 8)
@@ -1408,6 +1383,67 @@ extension FoodFinder_EntryPoint {
 // MARK: - Helper Functions
 
 extension FoodFinder_EntryPoint {
+
+    /// Builds the food title, appending " - Restaurant Name" when geo-locate identifies a venue.
+    private func foodTitleWithLocation(_ product: OpenFoodFactsProduct) -> String {
+        let title = shortenedTitle(product.displayName)
+        guard product.dataSource == .aiAnalysis,
+              FoodFinder_FeatureFlags.locationTaggingEnabled,
+              let venue = FoodFinder_LocationService.shared.locationName,
+              !venue.isEmpty else {
+            return title
+        }
+        return "\(title) - \(venue)"
+    }
+
+    /// Description section with ~140 char truncation and expand/collapse.
+    @ViewBuilder
+    private func descriptionSection(for selectedFood: OpenFoodFactsProduct) -> some View {
+        let descText: String = {
+            if selectedFood.servingSizeDisplay.uppercased().contains("CANNOT DETERMINE") {
+                let usdaSize = searchVM.lastAIAnalysisResult?.foodItemsDetailed.first?.usdaServingSize?.trimmingCharacters(in: .whitespacesAndNewlines)
+                if let usda = usdaSize, !usda.isEmpty {
+                    return "USDA standard serving: \(usda). Adjust servings as needed."
+                } else {
+                    let foodName = shortenedTitle(selectedFood.displayName)
+                    return "Based on a standard serving of \(foodName). Adjust servings as needed."
+                }
+            } else if selectedFood.dataSource == .barcodeScan {
+                return "Package Serving Size: \(selectedFood.servingSizeDisplay)"
+            } else {
+                return selectedFood.servingSizeDisplay
+            }
+        }()
+
+        let needsTruncation = descText.count > 140
+
+        VStack(spacing: 4) {
+            if isDescriptionExpanded || !needsTruncation {
+                Text(descText)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            } else {
+                Text(String(descText.prefix(140)) + "...")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+
+            if needsTruncation {
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isDescriptionExpanded.toggle()
+                    }
+                }) {
+                    Text(isDescriptionExpanded ? "Show Less" : "Show More")
+                        .font(.caption)
+                        .foregroundColor(.accentColor)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
 
     /// Shortens food title to first 2-3 key words for less repetitive display
     private func shortenedTitle(_ fullTitle: String) -> String {
