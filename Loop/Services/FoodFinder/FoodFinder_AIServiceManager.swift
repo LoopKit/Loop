@@ -668,7 +668,7 @@ final class AIServiceManager {
             diabetesConsiderations: json["diabetes_considerations"] as? String,
             visualAssessmentDetails: json["visual_assessment_details"] as? String,
             notes: json["notes"] as? String,
-            originalServings: totalServings ?? 1.0,
+            originalServings: 1.0,
             fatProteinUnits: json["fat_protein_units"] as? String,
             netCarbsAdjustment: json["net_carbs_adjustment"] as? String,
             insulinTimingRecommendations: json["insulin_timing_recommendations"] as? String,

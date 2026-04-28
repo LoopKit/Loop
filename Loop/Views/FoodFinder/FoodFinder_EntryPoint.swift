@@ -1087,41 +1087,11 @@ extension FoodFinder_EntryPoint {
         // Use existing food selection workflow
         searchVM.selectFoodProduct(aiProduct)
 
-        // Calculate final servings value once to avoid multiple onChange triggers per frame
-        var finalServings: Double = 1.0
-        if enrichedResult.servings > 0 && enrichedResult.servings < 0.95 {
-            if enrichedResult.servingSizeDescription.localizedCaseInsensitiveContains("medium") {
-                finalServings = enrichedResult.servings
-            }
-        } else if enrichedResult.servings >= 0.95 {
-            finalServings = enrichedResult.servings
-        }
-
-        // Soft clamp for obvious slice-based overestimates
-        if enrichedResult.servingSizeDescription.localizedCaseInsensitiveContains("medium") {
-            let portionText = (enrichedResult.analysisNotes ?? enrichedResult.servingSizeDescription).lowercased()
-            if portionText.contains("slice") || portionText.contains("slices") {
-                if let match = portionText.range(of: "\\b(1|2|3|4)\\b", options: .regularExpression) {
-                    let count = Int(portionText[match]) ?? 0
-                    var cap: Double = 0
-                    switch count {
-                    case 1: cap = 0.25
-                    case 2: cap = 0.35
-                    case 3, 4: cap = 0.50
-                    default: break
-                    }
-                    if cap > 0 && finalServings > cap {
-                        #if DEBUG
-                        print("Applying slice-based soft cap: AI=\(finalServings) -> cap=\(cap) for \(count) slice(s)")
-                        #endif
-                        finalServings = cap
-                    }
-                }
-            }
-        }
-
-        // Single assignment — avoids multiple onChange triggers per frame
-        searchVM.numberOfServings = finalServings
+        // AI analysis represents one complete meal/plate as photographed.
+        // The servings stepper means "how many of this plate are you eating"
+        // and should always start at 1.0. The AI's per-item USDA serving
+        // multipliers are already baked into the item-level nutrition values.
+        searchVM.numberOfServings = 1.0
 
         // Set dynamic absorption time from AI analysis
         if let absorptionHours = enrichedResult.absorptionTimeHours,
@@ -1283,17 +1253,13 @@ extension FoodFinder_EntryPoint {
         let aiId = "ai_\(UUID().uuidString.prefix(8))"
         let displayName = extractFoodNameFromAIResult(result)
 
-        let aiServings = result.servings
-        let useTotalsAsServing = aiServings > 0 && aiServings < 0.95
-        #if DEBUG
-        print("AI scaling: servings=\(aiServings), useTotalsAsServing=\(useTotalsAsServing)")
-        #endif
-        let baseDivisor = useTotalsAsServing ? 1.0 : max(1.0, aiServings)
-        let carbsPerServing = result.carbohydrates / baseDivisor
-        let proteinPerServing = (result.protein ?? 0) / baseDivisor
-        let fatPerServing = (result.fat ?? 0) / baseDivisor
-        let caloriesPerServing = (result.calories ?? 0) / baseDivisor
-        let fiberPerServing = (result.fiber ?? 0) / baseDivisor
+        // AI totals represent the full meal as photographed — 1 serving = 1 plate.
+        // No division needed; the AI's carbs/protein/fat are already meal-level totals.
+        let carbsPerServing = result.carbohydrates
+        let proteinPerServing = result.protein ?? 0
+        let fatPerServing = result.fat ?? 0
+        let caloriesPerServing = result.calories ?? 0
+        let fiberPerServing = result.fiber ?? 0
 
         let nutriments = Nutriments(
             carbohydrates: carbsPerServing,
@@ -1305,30 +1271,6 @@ extension FoodFinder_EntryPoint {
         )
 
         let servingSizeDisplay = result.servingSizeDescription
-
-        var adjustedNutriments = nutriments
-        var adjustedServings = result.servings
-        if result.servings > 0, result.servings < 0.95, servingSizeDisplay.localizedCaseInsensitiveContains("medium") {
-            let divisor = max(result.servings, 0.01)
-            let baseCarbs = result.carbohydrates / divisor
-            let baseProtein = (result.protein ?? 0) / divisor
-            let baseFat = (result.fat ?? 0) / divisor
-            let baseCalories = (result.calories ?? 0) / divisor
-            let baseFiber = (result.fiber ?? 0) / divisor
-            adjustedNutriments = Nutriments(
-                carbohydrates: baseCarbs,
-                proteins: baseProtein > 0 ? baseProtein : nil,
-                fat: baseFat > 0 ? baseFat : nil,
-                calories: baseCalories > 0 ? baseCalories : nil,
-                sugars: nil,
-                fiber: baseFiber > 0 ? baseFiber : nil
-            )
-            adjustedServings = result.servings
-            #if DEBUG
-            print("Base-serving mode: totals => base (div \(divisor)) => carbs=\(baseCarbs), multiplier=\(adjustedServings)")
-            #endif
-        }
-
         let analysisInfo = result.analysisNotes ?? "AI food recognition analysis"
 
         return OpenFoodFactsProduct(
@@ -1336,7 +1278,7 @@ extension FoodFinder_EntryPoint {
             productName: displayName.isEmpty ? "AI Analyzed Food" : displayName,
             brands: "AI Analysis",
             categories: analysisInfo,
-            nutriments: adjustedNutriments,
+            nutriments: nutriments,
             servingSize: servingSizeDisplay,
             servingQuantity: 100.0,
             imageURL: nil,
