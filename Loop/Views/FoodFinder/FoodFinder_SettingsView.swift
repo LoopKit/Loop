@@ -42,6 +42,7 @@ struct AISettingsView: View {
     @State private var formatOverride: RequestFormat?
     @State private var analysisRecords: [FoodFinder_AnalysisRecord] = []
     @State private var selectedRecordID: String = ""
+    @State private var showHistoryList: Bool = false
 
     private enum TestResult {
         case success
@@ -187,18 +188,74 @@ extension AISettingsView {
         if !analysisRecords.isEmpty {
             Divider()
             VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Recent Analyses")
-                    Picker("", selection: $selectedRecordID) {
-                        Text("Select...").tag("")
-                        ForEach(analysisRecords) { record in
-                            Text("\(record.name) — \(Int(record.carbsGrams))g")
-                                .tag(record.id)
+                // Tap to expand/collapse
+                Button(action: { withAnimation { showHistoryList.toggle() } }) {
+                    HStack {
+                        Text("Recent Analyses (\(analysisRecords.count))")
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Image(systemName: showHistoryList ? "chevron.up" : "chevron.down")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .buttonStyle(.plain)
+
+                if showHistoryList {
+                    // Scrollable compact list with thumbnails
+                    ScrollView {
+                        VStack(spacing: 6) {
+                            ForEach(analysisRecords) { record in
+                                Button(action: {
+                                    selectedRecordID = record.id
+                                    withAnimation { showHistoryList = false }
+                                }) {
+                                    HStack(spacing: 8) {
+                                        if let thumbID = record.thumbnailID,
+                                           let uiImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
+                                            Image(uiImage: uiImage)
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 32, height: 32)
+                                                .clipShape(RoundedRectangle(cornerRadius: 5))
+                                        } else {
+                                            Image(systemName: "fork.knife.circle.fill")
+                                                .font(.system(size: 20))
+                                                .foregroundColor(Color(red: 107/255, green: 47/255, blue: 160/255))
+                                                .frame(width: 32, height: 32)
+                                        }
+
+                                        VStack(alignment: .leading, spacing: 1) {
+                                            Text(record.name)
+                                                .font(.subheadline)
+                                                .lineLimit(1)
+                                                .foregroundColor(.primary)
+                                            Text("\(Int(record.carbsGrams))g carbs")
+                                                .font(.caption2)
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        Spacer()
+
+                                        if record.id == selectedRecordID {
+                                            Image(systemName: "checkmark")
+                                                .font(.caption)
+                                                .foregroundColor(Color(red: 107/255, green: 47/255, blue: 160/255))
+                                        }
+                                    }
+                                    .padding(.vertical, 4)
+                                    .padding(.horizontal, 8)
+                                    .background(record.id == selectedRecordID ? Color(red: 107/255, green: 47/255, blue: 160/255).opacity(0.1) : Color.clear)
+                                    .cornerRadius(8)
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
                     }
-                    .pickerStyle(.menu)
+                    .frame(maxHeight: 200)
                 }
 
+                // Selected item detail + Re-use
                 if let selected = analysisRecords.first(where: { $0.id == selectedRecordID }) {
                     HStack(spacing: 10) {
                         if let thumbID = selected.thumbnailID,
@@ -253,6 +310,7 @@ extension AISettingsView {
                         FoodFinder_AnalysisHistoryStore.clearAll()
                         analysisRecords = []
                         selectedRecordID = ""
+                        showHistoryList = false
                     }) {
                         HStack(spacing: 4) {
                             Image(systemName: "trash")
