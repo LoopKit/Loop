@@ -106,6 +106,9 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
             }
         }
         .alert(item: $viewModel.alert, content: alert(for:))
+        .onAppear {
+            viewModel.checkForPendingReUse()
+        }
         .sheet(isPresented: $showAddFavoriteFood, onDismiss: clearExpandedRow) {
             AddEditFavoriteFoodView(carbsQuantity: $viewModel.carbsQuantity.wrappedValue, foodType: $viewModel.foodType.wrappedValue, absorptionTime: $viewModel.absorptionTime.wrappedValue, name: foodFinderFoodName, thumbnailImage: foodFinderImage, onSave: onFavoriteFoodSave(_:))
         }

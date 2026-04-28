@@ -104,7 +104,6 @@ final class CarbEntryViewModel: ObservableObject {
         observeLoopUpdates()
         loadAnalysisHistory()
         observeAnalysisHistoryIndexChange()
-        checkForPendingReUse()
 
         if FoodFinder_FeatureFlags.carbTrackingEnabled {
             Task { await FoodFinder_CarbTrackingService.shared.fetchSnapshot() }
@@ -285,7 +284,9 @@ final class CarbEntryViewModel: ObservableObject {
     }
 
     /// If the user tapped "Re-use" in FoodFinder Settings, pre-fill the entry form.
-    private func checkForPendingReUse() {
+    /// Called from CarbEntryView.onAppear so the FoodFinder_EntryPoint's .onChange
+    /// observer is active and can restore the full analysis UI (nutrition circles, thumbnail, etc.).
+    func checkForPendingReUse() {
         guard let record = FoodFinder_AnalysisHistoryStore.pendingReUseRecord else { return }
         FoodFinder_AnalysisHistoryStore.pendingReUseRecord = nil
         self.carbsQuantity = record.carbsGrams
@@ -294,7 +295,11 @@ final class CarbEntryViewModel: ObservableObject {
         self.absorptionTimeWasEdited = true
         self.usesCustomFoodType = true
         self.restoredThumbnailID = record.thumbnailID
-        self.restoredAnalysisResult = record.analysisResult
+        // Set restoredAnalysisResult after a brief delay to ensure the view's
+        // .onChange observer is registered and can trigger the full UI restore.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.restoredAnalysisResult = record.analysisResult
+        }
     }
 
     private func observeAnalysisHistoryIndexChange() {
