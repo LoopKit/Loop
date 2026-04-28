@@ -41,6 +41,7 @@ struct AISettingsView: View {
     @State private var showAdvanced: Bool = false
     @State private var formatOverride: RequestFormat?
     @State private var analysisRecords: [FoodFinder_AnalysisRecord] = []
+    @State private var selectedRecordID: String = ""
 
     private enum TestResult {
         case success
@@ -187,55 +188,41 @@ extension AISettingsView {
             Divider()
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("RECENT ANALYSES")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Button(action: {
-                        FoodFinder_AnalysisHistoryStore.clearAll()
-                        analysisRecords = []
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "trash")
-                                .font(.caption)
-                            Text("Clear All")
-                                .font(.caption)
+                    Text("Recent Analyses")
+                    Picker("", selection: $selectedRecordID) {
+                        Text("Select...").tag("")
+                        ForEach(analysisRecords) { record in
+                            Text("\(record.name) — \(Int(record.carbsGrams))g")
+                                .tag(record.id)
                         }
-                        .foregroundColor(.red)
                     }
-                    .buttonStyle(.plain)
+                    .pickerStyle(.menu)
                 }
 
-                ForEach(analysisRecords) { record in
+                if let selected = analysisRecords.first(where: { $0.id == selectedRecordID }) {
                     HStack(spacing: 10) {
-                        if let thumbID = record.thumbnailID,
+                        if let thumbID = selected.thumbnailID,
                            let uiImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
                             Image(uiImage: uiImage)
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: 36, height: 36)
                                 .clipShape(RoundedRectangle(cornerRadius: 6))
-                        } else {
-                            Image(systemName: "fork.knife.circle.fill")
-                                .font(.title2)
-                                .foregroundColor(Color(red: 107/255, green: 47/255, blue: 160/255))
-                                .frame(width: 36, height: 36)
                         }
 
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(record.name)
+                            Text(selected.name)
                                 .font(.subheadline)
                                 .fontWeight(.medium)
                                 .lineLimit(1)
                             HStack(spacing: 6) {
-                                Text("\(Int(record.carbsGrams))g carbs")
+                                Text("\(Int(selected.carbsGrams))g carbs")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                 Text("•")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
-                                Text(record.date, style: .relative)
+                                Text(selected.date, style: .relative)
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -244,7 +231,7 @@ extension AISettingsView {
                         Spacer()
 
                         Button(action: {
-                            FoodFinder_AnalysisHistoryStore.pendingReUseRecord = record
+                            FoodFinder_AnalysisHistoryStore.pendingReUseRecord = selected
                             NotificationCenter.default.post(name: .foodFinderReUseAnalysis, object: nil)
                         }) {
                             Text("Re-use")
@@ -258,7 +245,24 @@ extension AISettingsView {
                         }
                         .buttonStyle(.plain)
                     }
-                    .padding(.vertical, 4)
+                }
+
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        FoodFinder_AnalysisHistoryStore.clearAll()
+                        analysisRecords = []
+                        selectedRecordID = ""
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "trash")
+                                .font(.caption)
+                            Text("Clear All")
+                                .font(.caption)
+                        }
+                        .foregroundColor(.red)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
