@@ -120,6 +120,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     self?.reloadData(animated: true)
                 }
             },
+            notificationCenter.addObserver(forName: .foodFinderReUseAnalysis, object: nil, queue: nil) { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.dismiss(animated: true) {
+                        self?.presentCarbEntryScreen(nil)
+                    }
+                }
+            },
         ]
 
         automaticDosingStatus.$automaticDosingEnabled

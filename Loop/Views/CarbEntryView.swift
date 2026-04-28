@@ -89,10 +89,6 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
 
                         continueActionButton
 
-                        if isNewEntry, UserDefaults.standard.foodFinderEnabled, !viewModel.analysisHistory.isEmpty {
-                            analysisHistoryCard
-                        }
-
                         if isNewEntry, FeatureFlags.allowExperimentalFeatures {
                             favoriteFoodsCard
                         }
@@ -248,153 +244,6 @@ extension CarbEntryView {
                 primaryButton: .default(Text("No, edit amount", comment: "The title of the action used when rejecting the the amount of carbohydrates entered."), action: viewModel.clearAlert),
                 secondaryButton: .cancel(Text("Yes", comment: "The title of the action used when confirming entered amount of carbohydrates."), action: viewModel.clearAlertAndContinueToBolus)
             )
-        }
-    }
-}
-
-// MARK: - Analysis History Card
-extension CarbEntryView {
-    private var analysisHistoryCard: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text("RECENT AI ANALYSES")
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-
-                Spacer()
-
-                Button(action: {
-                    viewModel.clearAnalysisHistory()
-                }) {
-                    Image(systemName: "trash")
-                        .font(.footnote)
-                        .foregroundColor(.red)
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, 26)
-
-            VStack(spacing: 10) {
-                VStack {
-                    HStack {
-                        Text("Choose Recent:")
-                            .foregroundColor(.accentColor)
-                            .onTapGesture {
-                                withAnimation {
-                                    if expandedRow == .analysisHistorySelection {
-                                        expandedRow = nil
-                                    } else {
-                                        expandedRow = .analysisHistorySelection
-                                    }
-                                }
-                            }
-
-                        analysisHistorySelectedLabel(viewModel.selectedAnalysisHistoryIndex)
-                            .frame(maxWidth: .infinity, alignment: .trailing)
-                    }
-
-                    if expandedRow == .analysisHistorySelection {
-                        Picker(String(""), selection: $viewModel.selectedAnalysisHistoryIndex) {
-                            ForEach(-1..<viewModel.analysisHistory.count, id: \.self) { index in
-                                analysisHistoryPickerRow(index)
-                                    .tag(index)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(maxWidth: .infinity)
-                        .clipped()
-                    }
-                }
-            }
-            .padding(.vertical, 12)
-            .padding(.horizontal)
-            .background(CardBackground())
-            .padding(.horizontal)
-        }
-    }
-
-    /// Truncate a string to a max character count, appending "..." if needed.
-    private func truncatedName(_ name: String, maxLength: Int = 30) -> String {
-        guard name.count > maxLength else { return name }
-        let idx = name.index(name.startIndex, offsetBy: maxLength)
-        return String(name[..<idx]) + "…"
-    }
-
-    @ViewBuilder
-    private func analysisHistorySelectedLabel(_ index: Int) -> some View {
-        if index >= 0 {
-            let record = viewModel.analysisHistory[index]
-            if let thumbID = record.thumbnailID,
-               let uiImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
-                HStack(spacing: 4) {
-                    Text(truncatedName(record.name))
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                        .minimumScaleFactor(0.8)
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 20, height: 20)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                }
-            } else {
-                Text(truncatedName("\(record.name) \(record.foodType)"))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .minimumScaleFactor(0.8)
-            }
-        } else if let lastRecord = viewModel.analysisHistory.first {
-            if let thumbID = lastRecord.thumbnailID,
-               let uiImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
-                HStack(spacing: 4) {
-                    Text(truncatedName(lastRecord.name))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                        .minimumScaleFactor(0.8)
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 20, height: 20)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                }
-            } else {
-                Text(truncatedName("\(lastRecord.name) \(lastRecord.foodType)"))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .minimumScaleFactor(0.8)
-            }
-        } else {
-            Text(String(localized: "None", comment: "Indicates no analysis history record is selected"))
-                .foregroundColor(.secondary)
-                .minimumScaleFactor(0.8)
-        }
-    }
-
-    @ViewBuilder
-    private func analysisHistoryPickerRow(_ index: Int) -> some View {
-        if index == -1 {
-            Text(String(localized: "None", comment: "Indicates no analysis history record is selected"))
-        } else {
-            let record = viewModel.analysisHistory[index]
-            if let thumbID = record.thumbnailID,
-               let uiImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
-                HStack(spacing: 4) {
-                    Text(truncatedName(record.name))
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 24, height: 24)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                }
-            } else {
-                Text(truncatedName("\(record.name) \(record.foodType)"))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            }
         }
     }
 }
@@ -558,6 +407,6 @@ extension CarbEntryView {
 
 extension CarbEntryView {
     enum Row {
-        case amountConsumed, time, foodType, absorptionTime, favoriteFoodSelection, analysisHistorySelection
+        case amountConsumed, time, foodType, absorptionTime, favoriteFoodSelection
     }
 }

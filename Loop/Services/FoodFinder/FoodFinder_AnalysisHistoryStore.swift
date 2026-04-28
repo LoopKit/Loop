@@ -22,6 +22,9 @@ import Foundation
 extension Notification.Name {
     static let foodFinderMealLogged = Notification.Name("com.loopkit.Loop.foodFinderMealLogged")
     static let foodFinderMealAnalyzed = Notification.Name("com.loopkit.Loop.foodFinderMealAnalyzed")
+    /// Posted when user taps "Re-use" in FoodFinder Settings. StatusTableViewController
+    /// observes this to dismiss Settings and present Add Carb Entry with the record pre-filled.
+    static let foodFinderReUseAnalysis = Notification.Name("com.loopkit.Loop.foodFinderReUseAnalysis")
 }
 
 // MARK: - MealDataProvider Protocol
@@ -75,6 +78,12 @@ enum FoodFinder_AnalysisHistoryStore {
         if let v = record.locationName { mealInfo["locationName"] = v }
         NotificationCenter.default.post(name: .foodFinderMealAnalyzed, object: nil, userInfo: mealInfo)
     }
+
+    // MARK: - Re-use from Settings
+
+    /// Set when the user taps "Re-use" on a past analysis in FoodFinder Settings.
+    /// CarbEntryViewModel picks this up on init and pre-fills the entry form.
+    static var pendingReUseRecord: FoodFinder_AnalysisRecord?
 
     // MARK: - Meal Confirmation
 

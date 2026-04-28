@@ -597,10 +597,11 @@ extension FoodFinder_EntryPoint {
             .frame(height: 90)
             .id("nutrition-circles-\(searchVM.numberOfServings)")
 
-            // Confidence line (AI only)
+            // Confidence line with ± range (AI only)
             Group {
                 if let ai = searchVM.lastAIAnalysisResult {
                     let pct = computeConfidencePercent(from: ai, servings: searchVM.numberOfServings)
+                    let range = computeCarbRange(carbs: carbsValue, confidencePercent: pct)
                     HStack(spacing: 6) {
                         Text("Confidence:")
                             .font(.caption)
@@ -613,6 +614,10 @@ extension FoodFinder_EntryPoint {
                             .background(confidenceBadgeColor(pct))
                             .foregroundColor(confidenceColor(pct))
                             .clipShape(Capsule())
+                        Text("±\(range)g")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.secondary)
                     }
                     .padding(.top, 2)
                 }
@@ -643,7 +648,8 @@ extension FoodFinder_EntryPoint {
             let portionSummary = trimmedPortion.isEmpty ? fallbackPortionSummary(aiResult: aiResult) : trimmedPortion
             if !portionSummary.isEmpty {
                 let pct = computeConfidencePercent(from: aiResult, servings: searchVM.numberOfServings)
-                let confidenceLine = pct < 60 ? "Confidence: \(pct)% -- treat as estimate" : "Confidence: \(pct)%"
+                let range = computeCarbRange(carbs: aiResult.totalCarbohydrates, confidencePercent: pct)
+                let confidenceLine = pct < 60 ? "Confidence: \(pct)% (±\(range)g) -- treat as estimate" : "Confidence: \(pct)% (±\(range)g)"
                 let noteContent = portionSummary + "\n\n" + confidenceLine
                 ExpandableNoteView(
                     icon: "ruler",
@@ -1519,6 +1525,22 @@ extension FoodFinder_EntryPoint {
 
         percent = max(20, min(97, percent))
         return percent
+    }
+
+    /// Computes the ± carb range based on confidence percentage.
+    /// Based on documented LLM CV data: high-confidence ~5%, medium ~12%, low ~20%.
+    private func computeCarbRange(carbs: Double, confidencePercent: Int) -> Int {
+        let factor: Double
+        if confidencePercent >= 85 {
+            factor = 0.05
+        } else if confidencePercent >= 70 {
+            factor = 0.10
+        } else if confidencePercent >= 55 {
+            factor = 0.15
+        } else {
+            factor = 0.20
+        }
+        return max(1, Int((carbs * factor).rounded()))
     }
 
     private func confidenceColor(_ percent: Int) -> Color {

@@ -104,6 +104,7 @@ final class CarbEntryViewModel: ObservableObject {
         observeLoopUpdates()
         loadAnalysisHistory()
         observeAnalysisHistoryIndexChange()
+        checkForPendingReUse()
 
         if FoodFinder_FeatureFlags.carbTrackingEnabled {
             Task { await FoodFinder_CarbTrackingService.shared.fetchSnapshot() }
@@ -283,6 +284,19 @@ final class CarbEntryViewModel: ObservableObject {
         selectedAnalysisHistoryIndex = -1
     }
 
+    /// If the user tapped "Re-use" in FoodFinder Settings, pre-fill the entry form.
+    private func checkForPendingReUse() {
+        guard let record = FoodFinder_AnalysisHistoryStore.pendingReUseRecord else { return }
+        FoodFinder_AnalysisHistoryStore.pendingReUseRecord = nil
+        self.carbsQuantity = record.carbsGrams
+        self.foodType = record.foodType
+        self.absorptionTime = record.absorptionTime
+        self.absorptionTimeWasEdited = true
+        self.usesCustomFoodType = true
+        self.restoredThumbnailID = record.thumbnailID
+        self.restoredAnalysisResult = record.analysisResult
+    }
+
     private func observeAnalysisHistoryIndexChange() {
         $selectedAnalysisHistoryIndex
             .receive(on: RunLoop.main)
@@ -296,7 +310,7 @@ final class CarbEntryViewModel: ObservableObject {
     private func analysisHistorySelected(at index: Int) {
         self.absorptionEditIsProgrammatic = true
         if index == -1 {
-            self.carbsQuantity = 0
+            self.carbsQuantity = nil
             self.foodType = ""
             self.absorptionTime = defaultAbsorptionTimes.medium
             self.absorptionTimeWasEdited = false

@@ -40,6 +40,7 @@ struct AISettingsView: View {
     @State private var testResult: TestResult?
     @State private var showAdvanced: Bool = false
     @State private var formatOverride: RequestFormat?
+    @State private var analysisRecords: [FoodFinder_AnalysisRecord] = []
 
     private enum TestResult {
         case success
@@ -78,7 +79,15 @@ struct AISettingsView: View {
             if !baseURL.isEmpty {
                 saveConfiguration()
             }
+
+            // Load analysis history records
+            loadAnalysisRecords()
         }
+    }
+
+    private func loadAnalysisRecords() {
+        FoodFinder_AnalysisHistoryStore.pruneExpired(retentionDays: retentionDays)
+        analysisRecords = FoodFinder_AnalysisHistoryStore.loadRecords(retentionDays: retentionDays)
     }
 }
 
@@ -136,6 +145,7 @@ extension AISettingsView {
                     Text("How long to keep AI-analyzed foods available for quick re-entry.")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                    analysisHistoryList
                     Divider()
                     Toggle("Advanced Dosing Insights", isOn: $advancedDosingRecommendationsEnabled)
                     Text("Enable advanced dosing advice including Fat/Protein Units (FPUs) calculations. Prolongs analysis.")
@@ -164,6 +174,91 @@ extension AISettingsView {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    // MARK: Analysis History List
+
+    @ViewBuilder
+    private var analysisHistoryList: some View {
+        if !analysisRecords.isEmpty {
+            Divider()
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("RECENT ANALYSES")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Button(action: {
+                        FoodFinder_AnalysisHistoryStore.clearAll()
+                        analysisRecords = []
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "trash")
+                                .font(.caption)
+                            Text("Clear All")
+                                .font(.caption)
+                        }
+                        .foregroundColor(.red)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                ForEach(analysisRecords) { record in
+                    HStack(spacing: 10) {
+                        if let thumbID = record.thumbnailID,
+                           let uiImage = FavoriteFoodImageStore.loadThumbnail(id: thumbID) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 36, height: 36)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                        } else {
+                            Image(systemName: "fork.knife.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(Color(red: 107/255, green: 47/255, blue: 160/255))
+                                .frame(width: 36, height: 36)
+                        }
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(record.name)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .lineLimit(1)
+                            HStack(spacing: 6) {
+                                Text("\(Int(record.carbsGrams))g carbs")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Text("•")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Text(record.date, style: .relative)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+
+                        Spacer()
+
+                        Button(action: {
+                            FoodFinder_AnalysisHistoryStore.pendingReUseRecord = record
+                            NotificationCenter.default.post(name: .foodFinderReUseAnalysis, object: nil)
+                        }) {
+                            Text("Re-use")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(Color(red: 107/255, green: 47/255, blue: 160/255))
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.vertical, 4)
                 }
             }
         }
