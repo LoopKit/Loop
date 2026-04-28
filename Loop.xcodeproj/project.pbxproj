@@ -638,6 +638,7 @@
 		0B0154317331EDF4423F3326 /* FoodFinder_InputResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56D8F11E6D6280233F95AA93 /* FoodFinder_InputResults.swift */; };
 		C4B24648B35EE29C1D9DE33A /* FoodFinder_FavoritesHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406DF1A9DEBA5BEB8D2815A1 /* FoodFinder_FavoritesHelpers.swift */; };
 		EF134BD7F1B6F20BFF523625 /* FoodFinder_AICameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04BA0B00F58C59F64EEE46FF /* FoodFinder_AICameraView.swift */; };
+		62C91699197A1755A881B0D4 /* FoodFinder_ImageCropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1410B04C87F6E1151B43C64E /* FoodFinder_ImageCropView.swift */; };
 		6F86CED6E856EC572B1EC890 /* FoodFinder_AIProviderConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0991C859E0D9DE159DCB2B70 /* FoodFinder_AIProviderConfig.swift */; };
 		69A01BCB43357C948E70ED96 /* FoodFinder_AIServiceAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F58A7DE6D538296D6AB40C4F /* FoodFinder_AIServiceAdapter.swift */; };
 		B9785687C724B02E219DD94C /* FoodFinder_SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF3E369865A632F1C1BDA152 /* FoodFinder_SecureStorage.swift */; };
@@ -1564,6 +1565,7 @@
 		56D8F11E6D6280233F95AA93 /* FoodFinder_InputResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_InputResults.swift; sourceTree = "<group>"; };
 		406DF1A9DEBA5BEB8D2815A1 /* FoodFinder_FavoritesHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_FavoritesHelpers.swift; sourceTree = "<group>"; };
 		04BA0B00F58C59F64EEE46FF /* FoodFinder_AICameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AICameraView.swift; sourceTree = "<group>"; };
+		1410B04C87F6E1151B43C64E /* FoodFinder_ImageCropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_ImageCropView.swift; sourceTree = "<group>"; };
 		0991C859E0D9DE159DCB2B70 /* FoodFinder_AIProviderConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AIProviderConfig.swift; sourceTree = "<group>"; };
 		F58A7DE6D538296D6AB40C4F /* FoodFinder_AIServiceAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AIServiceAdapter.swift; sourceTree = "<group>"; };
 		CF3E369865A632F1C1BDA152 /* FoodFinder_SecureStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_SecureStorage.swift; sourceTree = "<group>"; };
@@ -2987,6 +2989,7 @@
 				E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */,
 				94FAA6B5BFCA71FA1330CF5D /* FoodFinder_EntryPoint.swift */,
 				406DF1A9DEBA5BEB8D2815A1 /* FoodFinder_FavoritesHelpers.swift */,
+				1410B04C87F6E1151B43C64E /* FoodFinder_ImageCropView.swift */,
 				F62E1AC96EEC1636891E430C /* FoodFinder_ScannerView.swift */,
 				8FD9381A53A1E185D80B30CA /* FoodFinder_SearchBar.swift */,
 				02B08D4291FDCDFC7C7BAFD3 /* FoodFinder_SearchResultsView.swift */,
@@ -4178,6 +4181,7 @@
 				0B0154317331EDF4423F3326 /* FoodFinder_InputResults.swift in Sources */,
 				C4B24648B35EE29C1D9DE33A /* FoodFinder_FavoritesHelpers.swift in Sources */,
 				EF134BD7F1B6F20BFF523625 /* FoodFinder_AICameraView.swift in Sources */,
+				62C91699197A1755A881B0D4 /* FoodFinder_ImageCropView.swift in Sources */,
 				6F86CED6E856EC572B1EC890 /* FoodFinder_AIProviderConfig.swift in Sources */,
 				69A01BCB43357C948E70ED96 /* FoodFinder_AIServiceAdapter.swift in Sources */,
 				B9785687C724B02E219DD94C /* FoodFinder_SecureStorage.swift in Sources */,

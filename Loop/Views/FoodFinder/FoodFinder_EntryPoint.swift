@@ -601,7 +601,8 @@ extension FoodFinder_EntryPoint {
             Group {
                 if let ai = searchVM.lastAIAnalysisResult {
                     let pct = computeConfidencePercent(from: ai, servings: searchVM.numberOfServings)
-                    let range = computeCarbRange(carbs: carbsValue, confidencePercent: pct)
+                    let displayedCarbs = computeDisplayedMacros(selectedFood: selectedFood, aiResult: ai, numberOfServings: searchVM.numberOfServings, excluded: searchVM.excludedAIItemIndices).carbs
+                    let range = computeCarbRange(carbs: displayedCarbs, confidencePercent: pct)
                     HStack(spacing: 6) {
                         Text("Confidence:")
                             .font(.caption)
