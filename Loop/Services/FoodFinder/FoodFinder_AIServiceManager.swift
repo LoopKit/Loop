@@ -22,8 +22,8 @@ final class AIServiceManager {
 
     private init() {
         let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 60
-        config.timeoutIntervalForResource = 90
+        config.timeoutIntervalForRequest = 90
+        config.timeoutIntervalForResource = 150
         session = URLSession(configuration: config)
     }
 
@@ -52,9 +52,9 @@ final class AIServiceManager {
 
         var request = try buildRequest(config: adjustedConfig, prompt: query, imageBase64: imageBase64)
 
-        // Advanced dosing prompts are much larger and produce longer responses
+        // Vision requests take longer — Anthropic/Gemini can take 30-45s for the API call alone
         let isAdvanced = UserDefaults.standard.advancedDosingRecommendationsEnabled
-        request.timeoutInterval = isAdvanced ? 120 : 60
+        request.timeoutInterval = isAdvanced ? 150 : 90
 
         let requestStart = Date()
         let (data, response) = try await executeRequest(request)
@@ -85,7 +85,7 @@ final class AIServiceManager {
         var request = try buildRequest(config: adjustedConfig, prompt: query, imageBase64: base64)
 
         let isAdvanced = UserDefaults.standard.advancedDosingRecommendationsEnabled
-        request.timeoutInterval = isAdvanced ? 120 : 60
+        request.timeoutInterval = isAdvanced ? 150 : 90
 
         let requestStart = Date()
         let (data, response) = try await executeRequest(request)
