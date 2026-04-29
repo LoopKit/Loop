@@ -81,6 +81,20 @@ final class LoopInsights_AIAnalysis {
         working. You are not here to impress or people-please. You are here to find real problems \
         in THIS person's data and propose precise fixes grounded in THEIR numbers.
 
+        CRITICAL — DATA-DRIVEN ONLY: You are a clinical reasoning system, not a text generation system. \
+        Do NOT produce recommendations that merely "sound clinically plausible" without being derived \
+        from the actual data provided. If you cannot determine a setting from the available data, you \
+        MUST return empty suggestions for that setting — never fill the gap with training-data priors \
+        or textbook defaults. Specifically: \
+        - If there are insufficient carb entries or meal boluses to evaluate Carb Ratio, return [] for suggestions. \
+        - If there are insufficient correction events to evaluate ISF, return [] for suggestions. \
+        - NEVER recommend a value just because it falls in a "typical" range. Typical ranges are irrelevant — \
+          only THIS person's data matters. \
+        - If you find yourself writing "kept close to current settings because no data supports a change" — \
+          that means you should return ZERO suggestions, not echo the current value with medium/high confidence. \
+        - Every proposed_value MUST be justified by a specific, citable pattern in the glucose/insulin data. \
+          If you cannot point to the exact data pattern that drives your recommendation, do not make it.
+
         CLINICAL REASONING FRAMEWORK — How AID settings interact:
         - BASAL RATE: Controls glucose during fasting periods. Analyze overnight (12AM-6AM) and \
           between-meal trends. In AID systems, the algorithm adjusts delivery around this baseline. \
@@ -403,6 +417,18 @@ final class LoopInsights_AIAnalysis {
             prompt += "\n"
         }
 
+        // AID system identification — critical for avoiding training-prior anchoring (Street 2026)
+        prompt += "## AID System & Device Context\n"
+        prompt += "- **System**: Loop (oref-based automated insulin delivery)\n"
+        prompt += "- **Algorithm**: Loop's dosing algorithm uses DIA, ISF, CR, and basal schedules to calculate IOB and make automated delivery adjustments.\n"
+        if let diaHours = settings.insulinDiaHours {
+            prompt += "- **Duration of Insulin Action (DIA): \(String(format: "%.1f", diaHours)) hours** ← This is the user's ACTUAL configured DIA. Do NOT recommend a different DIA. The oref algorithm in Loop uses longer DIA values (typically 6-10 hours) than textbook insulin action curves. This is intentional and correct for this AID system.\n"
+        }
+        if let insulinType = settings.insulinTypeName {
+            prompt += "- **Insulin Type**: \(insulinType)\n"
+        }
+        prompt += "- Use these current settings as your reference point. Any recommendations must be small adjustments FROM these values based on data patterns, not replacements based on clinical norms.\n\n"
+
         // All three therapy settings — AI needs full context to reason about interactions
         prompt += "## All Current Therapy Settings\n"
         prompt += "You are analyzing **\(settingType.displayName)** specifically, but consider how all three settings interact.\n\n"
@@ -420,15 +446,6 @@ final class LoopInsights_AIAnalysis {
         prompt += "\n### Carb Ratio Schedule\(settingType == .carbRatio ? " ← ANALYZING THIS" : "")\n"
         for item in settings.carbRatioItems {
             prompt += "- \(formatTime(item.startTime)): \(String(format: "%.1f", item.value)) g/U\n"
-        }
-
-        if let insulinType = settings.insulinTypeName {
-            prompt += "\n### Insulin Type & DIA\n"
-            prompt += "- Currently using: \(insulinType)\n"
-            if let diaHours = settings.insulinDiaHours {
-                prompt += "- Duration of Insulin Action (DIA): \(String(format: "%.1f", diaHours)) hours\n"
-                prompt += "- IOB window: All bolus and basal insulin effects are modeled within this \(String(format: "%.1f", diaHours))-hour window\n"
-            }
         }
 
         prompt += "\n"
@@ -901,6 +918,28 @@ final class LoopInsights_AIAnalysis {
                     successCriteria: suggestion.successCriteria
                 )
             }
+        }
+
+        // 4. Contradiction detection — models produce confident recommendations while
+        //    simultaneously admitting data is insufficient (Street 2026 §8.3c: "The model
+        //    cannot distinguish 'I have evidence' from 'I should generate something plausible'").
+        //    Detect this contradiction and suppress the suggestion entirely.
+        validatedSuggestions = validatedSuggestions.filter { suggestion in
+            let reasoning = suggestion.reasoning.lowercased()
+            let insufficiencyPhrases = [
+                "cannot be derived", "cannot be determined", "cannot be calculated",
+                "cannot be meaningfully", "insufficient data", "no meal data",
+                "no carb entries", "no bolus data", "unable to determine",
+                "kept close to current settings", "echoing current", "no meals available",
+                "cannot validate", "no correction events"
+            ]
+            let admitsInsufficiency = insufficiencyPhrases.contains { reasoning.contains($0) }
+
+            if admitsInsufficiency && suggestion.confidence != .low {
+                validationNotes.append("Contradiction detected: AI admitted insufficient data to derive \(settingType.displayName) but returned \(suggestion.confidence.displayName) confidence. Suggestion suppressed — model was filling gaps with training priors, not reasoning from data.")
+                return false // Remove this suggestion
+            }
+            return true
         }
 
         return LoopInsightsAnalysisResponse(
