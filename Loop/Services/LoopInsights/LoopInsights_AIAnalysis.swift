@@ -60,7 +60,7 @@ final class LoopInsights_AIAnalysis {
             rawResponse: rawResponse
         )
 
-        return try parseResponse(rawResponse: rawResponse, settingType: settingType, period: stats.period)
+        return try parseResponse(rawResponse: rawResponse, settingType: settingType, period: stats.period, stats: stats)
     }
 
     // MARK: - System Prompt
@@ -643,7 +643,7 @@ final class LoopInsights_AIAnalysis {
 
     // MARK: - Response Parsing
 
-    private func parseResponse(rawResponse: String, settingType: LoopInsightsSettingType, period: LoopInsightsAnalysisPeriod) throws -> LoopInsightsAnalysisResponse {
+    private func parseResponse(rawResponse: String, settingType: LoopInsightsSettingType, period: LoopInsightsAnalysisPeriod, stats: LoopInsightsAggregatedStats) throws -> LoopInsightsAnalysisResponse {
         // Extract JSON from the response (AI might wrap it in markdown code blocks)
         var jsonString = extractJSON(from: rawResponse)
 
@@ -806,12 +806,110 @@ final class LoopInsights_AIAnalysis {
             }
         }
 
+        // ─── Post-hoc validation (Street 2026, recommendations #2 and #3) ───
+        var validationNotes: [String] = []
+        var validatedSuggestions = merged
+
+        // 1. Programmatic bounds checking — clamp values that exceed max change %
+        //    but fall within absolute bounds (vs hard reject above, this catches edge cases
+        //    where the AI slightly overshoots the percentage limit after rounding)
+        validatedSuggestions = validatedSuggestions.map { suggestion in
+            let clampedBlocks = suggestion.timeBlocks.map { block -> LoopInsightsTimeBlock in
+                let maxPct = settingType == .basalRate
+                    ? LoopInsights_SafetyGuardrails.maxBasalChangePercent
+                    : LoopInsights_SafetyGuardrails.maxChangePercent
+                let changePct = block.changePercent
+                if abs(changePct) > maxPct && abs(changePct) <= maxPct * 1.5 {
+                    // Clamp to max allowed change instead of rejecting
+                    let direction: Double = block.proposedValue > block.currentValue ? 1.0 : -1.0
+                    let clamped = block.currentValue * (1.0 + direction * maxPct / 100.0)
+                    let rounded = settingType.roundedToIncrement(clamped)
+                    validationNotes.append("Clamped \(settingType.displayName) at \(block.startTimeFormatted) from \(String(format: "%.1f", block.proposedValue)) to \(String(format: "%.1f", rounded)) (exceeded \(String(format: "%.0f", maxPct))% limit)")
+                    return LoopInsightsTimeBlock(
+                        startTime: block.startTime,
+                        endTime: block.endTime,
+                        currentValue: block.currentValue,
+                        proposedValue: rounded
+                    )
+                }
+                return block
+            }
+            return LoopInsightsSuggestion(
+                id: suggestion.id,
+                settingType: suggestion.settingType,
+                timeBlocks: clampedBlocks,
+                reasoning: suggestion.reasoning,
+                confidence: suggestion.confidence,
+                analysisPeriod: suggestion.analysisPeriod,
+                createdAt: suggestion.createdAt,
+                successCriteria: suggestion.successCriteria
+            )
+        }
+
+        // 2. Citation verification — check glucose values cited in reasoning against
+        //    actual hourly averages. Misattributed citations are the dominant error mode
+        //    (30-70% per Street 2026) and are architecturally independent of anchoring.
+        let hourlyAverages = stats.glucoseStats.hourlyAverages
+        if !hourlyAverages.isEmpty {
+            for suggestion in validatedSuggestions {
+                let cited = extractCitedGlucoseValues(from: suggestion.reasoning)
+                guard !cited.isEmpty else { continue }
+                let actualValues = hourlyAverages.values.map { Int($0.rounded()) }
+                let misattributed = cited.filter { citedValue in
+                    // Allow ±2 mg/dL tolerance for rounding differences
+                    !actualValues.contains(where: { abs($0 - citedValue) <= 2 })
+                }
+                if !misattributed.isEmpty {
+                    let pct = Int((Double(misattributed.count) / Double(cited.count)) * 100)
+                    validationNotes.append("Citation check: \(misattributed.count)/\(cited.count) glucose values (\(pct)%) cited in reasoning do not match hourly averages provided to the model")
+                }
+            }
+        }
+
+        // 3. Confidence adjustment by data availability — if insufficient data exists
+        //    to validate a setting, cap confidence at "low" to flag anchor substitution risk.
+        //    Per Street 2026: ICR is "mostly anchor" without meal data; ISF is "mixed" without corrections.
+        let dataAvailabilityWarning: String? = {
+            switch settingType {
+            case .carbRatio:
+                if stats.carbStats.mealCount < 5 {
+                    return "Carb Ratio analysis has limited meal data (\(stats.carbStats.mealCount) meals in period). Confidence capped at Low — recommendations may reflect model training priors rather than your data (Street 2026: anchor substitution risk)."
+                }
+            case .insulinSensitivity:
+                if stats.insulinStats.correctionBolusCount < 3 {
+                    return "ISF analysis has limited correction data (\(stats.insulinStats.correctionBolusCount) corrections in period). Confidence capped at Low — insufficient correction events to validate sensitivity factor."
+                }
+            case .basalRate:
+                break // Basal is the most data-driven setting (CGM patterns); no cap needed
+            }
+            return nil
+        }()
+
+        if let warning = dataAvailabilityWarning {
+            validationNotes.append(warning)
+            // Cap all suggestion confidence to .low
+            validatedSuggestions = validatedSuggestions.map { suggestion in
+                guard suggestion.confidence != .low else { return suggestion }
+                return LoopInsightsSuggestion(
+                    id: suggestion.id,
+                    settingType: suggestion.settingType,
+                    timeBlocks: suggestion.timeBlocks,
+                    reasoning: suggestion.reasoning + "\n\n⚠️ " + warning,
+                    confidence: .low,
+                    analysisPeriod: suggestion.analysisPeriod,
+                    createdAt: suggestion.createdAt,
+                    successCriteria: suggestion.successCriteria
+                )
+            }
+        }
+
         return LoopInsightsAnalysisResponse(
-            suggestions: merged,
+            suggestions: validatedSuggestions,
             overallAssessment: overallAssessment,
             nextRecommendedFocus: nextFocus,
             rawResponse: rawResponse,
-            pastEvaluations: pastEvaluations
+            pastEvaluations: pastEvaluations,
+            validationNotes: validationNotes
         )
     }
 
@@ -907,6 +1005,35 @@ final class LoopInsights_AIAnalysis {
         for _ in 0..<max(0, openBraces) { result += "}" }
 
         return result
+    }
+
+    /// Extract integer glucose values cited in AI reasoning text.
+    /// Looks for patterns like "145 mg/dL", "glucose of 132", "average 128 mg/dL", etc.
+    /// Used for citation verification per Street (2026) recommendation #3.
+    private func extractCitedGlucoseValues(from text: String) -> [Int] {
+        // Match numbers in plausible glucose range (40-400) followed by mg/dL or preceded by glucose-related words
+        let patterns = [
+            "([0-9]{2,3})\\s*mg/dL",           // "145 mg/dL"
+            "glucose.*?([0-9]{2,3})",            // "glucose of 145"
+            "average.*?([0-9]{2,3})",            // "average 145"
+            "([0-9]{2,3})\\s*mg/dl"             // case-insensitive variant
+        ]
+        var values: [Int] = []
+        for pattern in patterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else { continue }
+            let matches = regex.matches(in: text, range: NSRange(text.startIndex..., in: text))
+            for match in matches {
+                if match.numberOfRanges > 1,
+                   let range = Range(match.range(at: 1), in: text),
+                   let value = Int(text[range]),
+                   value >= 40 && value <= 400 {
+                    values.append(value)
+                }
+            }
+        }
+        // Deduplicate while preserving order
+        var seen = Set<Int>()
+        return values.filter { seen.insert($0).inserted }
     }
 
     private func formatTime(_ seconds: TimeInterval) -> String {

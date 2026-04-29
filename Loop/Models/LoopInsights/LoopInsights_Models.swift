@@ -894,6 +894,37 @@ struct LoopInsightsAnalysisResponse: Codable {
     let nextRecommendedFocus: LoopInsightsSettingType?
     let rawResponse: String?
     let pastEvaluations: [String: LoopInsightsOutcomeEvaluation]
+
+    /// Post-hoc validation notes from programmatic checks applied after AI response parsing.
+    /// Implements recommendations from Street (2026) diabettech preprint on LLM anchoring:
+    /// - Bounds checking (recommendation #2)
+    /// - Citation verification (recommendation #3)
+    /// - Data-availability confidence adjustment
+    var validationNotes: [String]
+
+    // Custom Codable to handle backwards-compat with stored responses missing validationNotes
+    enum CodingKeys: String, CodingKey {
+        case suggestions, overallAssessment, nextRecommendedFocus, rawResponse, pastEvaluations, validationNotes
+    }
+
+    init(suggestions: [LoopInsightsSuggestion], overallAssessment: String, nextRecommendedFocus: LoopInsightsSettingType?, rawResponse: String?, pastEvaluations: [String: LoopInsightsOutcomeEvaluation], validationNotes: [String] = []) {
+        self.suggestions = suggestions
+        self.overallAssessment = overallAssessment
+        self.nextRecommendedFocus = nextRecommendedFocus
+        self.rawResponse = rawResponse
+        self.pastEvaluations = pastEvaluations
+        self.validationNotes = validationNotes
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        suggestions = try container.decode([LoopInsightsSuggestion].self, forKey: .suggestions)
+        overallAssessment = try container.decode(String.self, forKey: .overallAssessment)
+        nextRecommendedFocus = try container.decodeIfPresent(LoopInsightsSettingType.self, forKey: .nextRecommendedFocus)
+        rawResponse = try container.decodeIfPresent(String.self, forKey: .rawResponse)
+        pastEvaluations = try container.decode([String: LoopInsightsOutcomeEvaluation].self, forKey: .pastEvaluations)
+        validationNotes = try container.decodeIfPresent([String].self, forKey: .validationNotes) ?? []
+    }
 }
 
 // MARK: - Error Types

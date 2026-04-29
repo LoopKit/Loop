@@ -807,6 +807,26 @@ struct LoopInsights_DashboardView: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
+
+            // Post-hoc validation notes (Street 2026 recommendations)
+            if let notes = viewModel.analysisResponse?.validationNotes, !notes.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(NSLocalizedString("Validation Notes", comment: "LoopInsights validation notes header"))
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.orange)
+                    ForEach(notes, id: \.self) { note in
+                        HStack(alignment: .top, spacing: 4) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.caption2)
+                                .foregroundColor(.orange)
+                            Text(note)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .padding(.top, 6)
+            }
         }
     }
 
