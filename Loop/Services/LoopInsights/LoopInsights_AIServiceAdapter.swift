@@ -221,7 +221,9 @@ final class LoopInsights_AIServiceAdapter {
             ],
             "generationConfig": [
                 "temperature": config.temperature,
-                "maxOutputTokens": config.maxTokens
+                "maxOutputTokens": config.maxTokens,
+                "topP": 0.95,
+                "topK": 8
             ]
         ]
         return try JSONSerialization.data(withJSONObject: body)
