@@ -62,6 +62,10 @@ struct FoodFinder_EntryPoint: View {
     /// AI reasoning for the absorption time (exposed to host for inline display).
     @Binding var aiAbsorptionReasoning: String?
 
+    /// AI confidence range bounds for carb slider (exposed to host for Amount Consumed row).
+    @Binding var aiCarbRangeMin: Double?
+    @Binding var aiCarbRangeMax: Double?
+
     // MARK: - Internal State
 
     @StateObject private var searchVM: FoodFinder_SearchViewModel
@@ -111,7 +115,9 @@ struct FoodFinder_EntryPoint: View {
         restoredAnalysisResult: Binding<AIFoodAnalysisResult?> = .constant(nil),
         restoredThumbnailID: Binding<String?> = .constant(nil),
         absorptionTimeIsAIGenerated: Binding<Bool> = .constant(false),
-        aiAbsorptionReasoning: Binding<String?> = .constant(nil)
+        aiAbsorptionReasoning: Binding<String?> = .constant(nil),
+        aiCarbRangeMin: Binding<Double?> = .constant(nil),
+        aiCarbRangeMax: Binding<Double?> = .constant(nil)
     ) {
         self._carbsQuantity = carbsQuantity
         self._foodType = foodType
@@ -127,6 +133,8 @@ struct FoodFinder_EntryPoint: View {
         self._restoredThumbnailID = restoredThumbnailID
         self._absorptionTimeIsAIGenerated = absorptionTimeIsAIGenerated
         self._aiAbsorptionReasoning = aiAbsorptionReasoning
+        self._aiCarbRangeMin = aiCarbRangeMin
+        self._aiCarbRangeMax = aiCarbRangeMax
 
         let initialEnabled = UserDefaults.standard.foodFinderEnabled
         self._isFoodSearchEnabled = State(initialValue: initialEnabled)
@@ -299,6 +307,18 @@ struct FoodFinder_EntryPoint: View {
             absorptionTime = result.absorptionTime
             absorptionTimeIsAIGenerated = result.absorptionTimeWasAIGenerated
             aiAbsorptionReasoning = searchVM.lastAIAnalysisResult?.absorptionTimeReasoning
+
+            // Set AI confidence range for carb slider (AI analysis only)
+            if let ai = searchVM.lastAIAnalysisResult {
+                let pct = computeConfidencePercent(from: ai, servings: searchVM.numberOfServings)
+                let range = computeCarbRange(carbs: result.carbs, confidencePercent: pct)
+                aiCarbRangeMin = max(0, result.carbs - Double(range))
+                aiCarbRangeMax = result.carbs + Double(range)
+            } else {
+                aiCarbRangeMin = nil
+                aiCarbRangeMax = nil
+            }
+
             // Mirror selected product to host if binding provided
             selectedFoodProduct?.wrappedValue = searchVM.selectedFoodProduct
             // Record barcode/text-search products to MealArchive once per product selection.
@@ -315,6 +335,8 @@ struct FoodFinder_EntryPoint: View {
             selectedFoodProduct?.wrappedValue = nil
             absorptionTimeIsAIGenerated = false
             aiAbsorptionReasoning = nil
+            aiCarbRangeMin = nil
+            aiCarbRangeMax = nil
             recordedProductID = nil
         }
         // When the search field detects natural language (e.g. iOS keyboard dictation),

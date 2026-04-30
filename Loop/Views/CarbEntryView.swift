@@ -26,6 +26,10 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     @State private var absorptionTimeIsAIGenerated: Bool = false
     @State private var aiAbsorptionReasoning: String? = nil
 
+    // FoodFinder AI carb confidence range (for slider display)
+    @State private var aiCarbRangeMin: Double? = nil
+    @State private var aiCarbRangeMax: Double? = nil
+
     // FoodFinder data for favorite food pre-population
     @State private var foodFinderFoodName: String = ""
     @State private var foodFinderImage: UIImage? = nil
@@ -124,7 +128,16 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
             let foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
             let absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
             
-            CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: amountConsumedFocused, title: NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"), preferredCarbUnit: viewModel.preferredCarbUnit)
+            // AI confidence range slider replaces the text field when active
+            if let rangeMin = aiCarbRangeMin, let rangeMax = aiCarbRangeMax, rangeMin < rangeMax {
+                AICarbRangeSlider(
+                    carbsQuantity: $viewModel.carbsQuantity,
+                    rangeMin: rangeMin,
+                    rangeMax: rangeMax
+                )
+            } else {
+                CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: amountConsumedFocused, title: NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"), preferredCarbUnit: viewModel.preferredCarbUnit)
+            }
 
             // FoodFinder integration — inside the main card
             if isNewEntry {
@@ -139,7 +152,9 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                     restoredAnalysisResult: $viewModel.restoredAnalysisResult,
                     restoredThumbnailID: $viewModel.restoredThumbnailID,
                     absorptionTimeIsAIGenerated: $absorptionTimeIsAIGenerated,
-                    aiAbsorptionReasoning: $aiAbsorptionReasoning
+                    aiAbsorptionReasoning: $aiAbsorptionReasoning,
+                    aiCarbRangeMin: $aiCarbRangeMin,
+                    aiCarbRangeMax: $aiCarbRangeMax
                 )
             }
 
@@ -411,5 +426,109 @@ extension CarbEntryView {
 extension CarbEntryView {
     enum Row {
         case amountConsumed, time, foodType, absorptionTime, favoriteFoodSelection
+    }
+}
+
+// MARK: - AI Carb Range Slider
+
+/// Slider that lets the user adjust AI-estimated carbs within the confidence range.
+/// Only shown when FoodFinder AI analysis has been performed.
+private struct AICarbRangeSlider: View {
+    static let brandPurple = Color(red: 107/255, green: 47/255, blue: 160/255)
+
+    @Binding var carbsQuantity: Double?
+    let rangeMin: Double
+    let rangeMax: Double
+
+    @State private var sliderValue: Double = 0
+    @State private var carbInput: String = ""
+    @State private var isEditing: Bool = false
+    @State private var manualOverride: Bool = false
+
+    private static let formatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.maximumIntegerDigits = 3
+        f.maximumFractionDigits = 1
+        return f
+    }()
+
+    var body: some View {
+        HStack(spacing: 2) {
+            Text(NSLocalizedString("Amount\nConsumed", comment: "Label for carb quantity entry row on carb entry screen (with AI slider)"))
+                .foregroundColor(.primary)
+                .font(.caption)
+                .lineLimit(2)
+                .fixedSize(horizontal: true, vertical: false)
+
+            Slider(
+                value: $sliderValue,
+                in: rangeMin...rangeMax,
+                step: 1
+            )
+            .tint(manualOverride ? Color.gray : AICarbRangeSlider.brandPurple)
+            .scaleEffect(0.75)
+            .frame(height: 22)
+            .onChange(of: sliderValue) { newValue in
+                let rounded = newValue.rounded()
+                carbsQuantity = rounded
+                if !isEditing {
+                    carbInput = AICarbRangeSlider.formatter.string(from: NSNumber(value: rounded)) ?? ""
+                    // User dragged the slider — restore active state
+                    manualOverride = false
+                }
+            }
+
+            TextField("0", text: $carbInput, onEditingChanged: { editing in
+                isEditing = editing
+                if !editing && manualOverride {
+                    // User finished typing — center slider in range
+                    sliderValue = (rangeMin + rangeMax) / 2
+                }
+            })
+            .keyboardType(.decimalPad)
+            .multilineTextAlignment(.trailing)
+            .frame(width: 44)
+            .font(.body)
+            .overlay(
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(isEditing ? AICarbRangeSlider.brandPurple : Color(.secondaryLabel).opacity(0.4)),
+                alignment: .bottom
+            )
+            .onChange(of: carbInput) { newValue in
+                if isEditing {
+                    // User is manually typing — mark as overridden
+                    manualOverride = true
+                }
+                if let number = AICarbRangeSlider.formatter.number(from: newValue) {
+                    let val = number.doubleValue
+                    carbsQuantity = val
+                    if !manualOverride {
+                        sliderValue = min(max(val, rangeMin), rangeMax)
+                    }
+                }
+            }
+
+            Text(QuantityFormatter(for: .gram()).localizedUnitStringWithPlurality())
+                .foregroundColor(Color(.secondaryLabel))
+        }
+        .onAppear {
+            sliderValue = carbsQuantity ?? ((rangeMin + rangeMax) / 2)
+            if let q = carbsQuantity {
+                carbInput = AICarbRangeSlider.formatter.string(from: NSNumber(value: q)) ?? ""
+            }
+        }
+        .onChange(of: carbsQuantity) { newValue in
+            // Sync from external changes (e.g. serving size update)
+            if let v = newValue {
+                if abs(v - sliderValue) > 0.5 {
+                    sliderValue = min(max(v, rangeMin), rangeMax)
+                }
+                if !isEditing {
+                    carbInput = AICarbRangeSlider.formatter.string(from: NSNumber(value: v)) ?? ""
+                }
+            }
+        }
     }
 }
