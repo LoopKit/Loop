@@ -150,11 +150,23 @@ final class FoodFinder_LocationService: NSObject, ObservableObject, CLLocationMa
                     return
                 }
 
-                // Prefer the business/POI name, fall back to thoroughfare
+                // Only use venue/POI names — skip bare street addresses
                 if let placemark = placemarks?.first {
-                    let name = placemark.name
-                        ?? placemark.areasOfInterest?.first
-                        ?? placemark.thoroughfare
+                    var name = placemark.name ?? placemark.areasOfInterest?.first
+
+                    // CoreLocation sometimes returns a street address as `name`
+                    // when there's no POI — discard it so we don't send
+                    // meaningless addresses to the AI prompt.
+                    if let n = name, let street = placemark.thoroughfare, n == street {
+                        name = nil
+                    }
+                    // Also discard if name looks like a street number + name pattern
+                    // (e.g. "1234 Oak Ave") with no business context
+                    if let n = name, let street = placemark.thoroughfare,
+                       n.hasPrefix(street) || n.hasSuffix(street) {
+                        name = nil
+                    }
+
                     self.locationName = name
                     self.cityName = placemark.locality
                     self.countryName = placemark.country

@@ -186,27 +186,50 @@ FOR MENU AND RECIPE ITEMS:
 ✅ ALWAYS make reasonable USDA-based assumptions for nutrition when details are missing and document those assumptions in assessment_notes
 """
 
+/// Locale-aware measurement context injected into every AI prompt.
+private func measurementUnitContext() -> String {
+    let isMetric = Locale.current.usesMetricSystem
+    let scaleRefs = isMetric
+        ? "dinner fork ≈ 19–20 mm wide at the tines, plate ≈ 25–28 cm diameter, can diameter ≈ 66 mm, standard cup ≈ 240 ml"
+        : "dinner fork ≈ 0.75–0.8 in wide at the tines, plate ≈ 10–11 in diameter, can diameter ≈ 2.6 in, standard cup ≈ 8 fl oz"
+    let unitRule = isMetric
+        ? "Express ALL physical measurements (plate size, food dimensions, heights, distances) in metric units (cm, mm, ml). Do NOT use inches, ounces, or other imperial units."
+        : "Express ALL physical measurements (plate size, food dimensions, heights, distances) in imperial units (inches, fl oz, oz). Do NOT use centimeters, millimeters, or other metric units."
+
+    return """
+
+    MEASUREMENT UNITS:
+    - Use these scale references: \(scaleRefs).
+    - \(unitRule)
+    """
+}
+
 private enum AnalysisPromptCache {
     private static var cachedAdvanced: Bool?
+    private static var cachedMetric: Bool?
     private static var cachedPrompt: String?
 
     static func prompt(isAdvancedEnabled: Bool) -> String {
-        if cachedAdvanced == isAdvancedEnabled, let prompt = cachedPrompt {
+        let isMetric = Locale.current.usesMetricSystem
+        if cachedAdvanced == isAdvancedEnabled, cachedMetric == isMetric, let prompt = cachedPrompt {
             return prompt
         }
 
         let base = [standardAnalysisPrompt, mandatoryNoVagueBlock].joined(separator: "\n\n")
-        let prompt = isAdvancedEnabled
+        var prompt = isAdvancedEnabled
             ? [base, advancedAnalysisRequirements].joined(separator: "\n\n")
             : base
+        prompt += measurementUnitContext()
 
         cachedAdvanced = isAdvancedEnabled
+        cachedMetric = isMetric
         cachedPrompt = prompt
         return prompt
     }
 
     static func invalidate() {
         cachedAdvanced = nil
+        cachedMetric = nil
         cachedPrompt = nil
     }
 }
