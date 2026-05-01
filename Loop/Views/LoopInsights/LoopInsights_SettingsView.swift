@@ -1522,7 +1522,7 @@ struct LoopInsights_SettingsView: View {
 /// so the wrapper view re-renders when any ViewModel @Published property changes.
 /// This allows DashboardView to use a plain `var` instead of @ObservedObject,
 /// avoiding a silent SwiftUI crash during sheet presentation rendering.
-private class LoopInsights_DashboardContainer: ObservableObject {
+class LoopInsights_DashboardContainer: ObservableObject {
     @Published var viewModel: LoopInsights_DashboardViewModel?
     /// Increments on every ViewModel objectWillChange, forcing SwiftUI to
     /// re-evaluate DashboardView's body (since the reference itself doesn't change).
@@ -1578,7 +1578,7 @@ private class LoopInsights_DashboardContainer: ObservableObject {
 
 /// Wrapper view that owns the Container via @StateObject and presents
 /// the DashboardView once the ViewModel is ready.
-private struct LoopInsights_TestDashboardWrapper: View {
+struct LoopInsights_TestDashboardWrapper: View {
     @StateObject private var container = LoopInsights_DashboardContainer()
     var dataStoresProvider: (() -> Any?)?
 
