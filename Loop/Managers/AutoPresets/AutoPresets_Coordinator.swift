@@ -321,6 +321,15 @@ extension AutoPresets_Coordinator: AutoPresets_ActivityDetectionDelegate {
 
             self.currentDetectedActivity = activity
             self.activatePreset(for: activity)
+
+            // DataLayer: activity detected
+            NotificationCenter.default.post(
+                name: Notification.Name("com.loopkit.Loop.autoPresetsActivityDetected"),
+                object: nil,
+                userInfo: [
+                    "activityType": activity.rawValue
+                ]
+            )
         }
     }
 

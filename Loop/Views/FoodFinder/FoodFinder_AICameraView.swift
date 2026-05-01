@@ -261,6 +261,25 @@ struct AICameraView: View {
 
         Task {
             do {
+                // Brief fallback wait if location is still resolving
+                // (location request fires on camera button tap, so it usually
+                // resolves during photo framing — this is just a safety net)
+                let locService = FoodFinder_LocationService.shared
+                if locService.isResolving {
+                    await MainActor.run {
+                        addTelemetryLog("📍 Resolving location...")
+                    }
+                    for _ in 0..<15 {
+                        try await Task.sleep(nanoseconds: 100_000_000) // 100ms
+                        if !locService.isResolving { break }
+                    }
+                }
+                if let locLabel = locService.locationName ?? locService.cityName {
+                    await MainActor.run {
+                        addTelemetryLog("📍 \(locLabel)")
+                    }
+                }
+
                 // Image preparation + send
                 await MainActor.run {
                     addTelemetryLog("📡 Sending to AI provider...")

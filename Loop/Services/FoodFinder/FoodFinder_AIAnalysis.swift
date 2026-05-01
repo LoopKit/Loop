@@ -272,7 +272,7 @@ Portion Estimation Guidance (MANDATORY to include in "portion_assessment_method"
 - State the scale references used (e.g., dinner fork ≈ 19–20 mm wide at the tines, plate ≈ 10–11 inches, can diameter ≈ 66 mm, standard cup ≈ 240 ml).
 - Infer an approximate plate diameter or other reference and describe how you derived it from the photo.
 - For each major item, explain how the visible area/height maps to a volume or weight estimate.
-- Explicitly compare to the typical USDA serving size for that item and compute the serving_multiplier (portion ÷ USDA serving). Include 1–2 concrete examples, e.g., "corn appears ≈ 1 cup (2× USDA 1/2 cup)."
+- Explicitly compare to the typical USDA serving size for that item and compute the serving_multiplier (visible portion ÷ USDA serving). This is CRITICAL — the user sees this number and can adjust it per-item before confirming. Example: if corn on plate appears ≈ 1 cup and USDA serving is 1/2 cup, serving_multiplier = 2.0. If rice appears ≈ 1.5 cups and USDA serving is 1 cup, serving_multiplier = 1.5. The carbohydrates field must reflect the FULL amount for the visible portion (serving_multiplier × USDA carbs per serving).
 - Keep to 3–6 concise sentences written in natural language.
 
 JSON schema (required):
@@ -282,7 +282,7 @@ JSON schema (required):
     "name": string,
     "portion_estimate": string,
     "usda_serving_size": string,
-    "serving_multiplier": number,
+    "serving_multiplier": number,  // visible portion ÷ USDA serving (e.g. 2.0 = twice USDA serving)
     "preparation_method": string | null,
     "visual_cues": string | null,
     "carbohydrates": number,

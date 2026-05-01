@@ -1651,6 +1651,27 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
             settings.carbRatioSchedule = therapySettings.carbRatioSchedule
             settings.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
         }
+
+        // DataLayer: therapy settings changed
+        var changedTypes: [String] = []
+        if therapySettings.carbRatioSchedule != nil { changedTypes.append("CarbRatio") }
+        if therapySettings.insulinSensitivitySchedule != nil { changedTypes.append("ISF") }
+        if therapySettings.basalRateSchedule != nil { changedTypes.append("BasalRate") }
+        if therapySettings.glucoseTargetRangeSchedule != nil { changedTypes.append("GlucoseTarget") }
+        if therapySettings.suspendThreshold != nil { changedTypes.append("SuspendThreshold") }
+
+        for settingType in changedTypes {
+            NotificationCenter.default.post(
+                name: Notification.Name("com.loopkit.Loop.therapySettingsChanged"),
+                object: nil,
+                userInfo: [
+                    "settingType": settingType,
+                    "timeBlocksChanged": 1,
+                    "wasAISuggested": false,
+                    "source": "manual"
+                ]
+            )
+        }
     }
     
     func pumpSupportedIncrements() -> PumpSupportedIncrements? {
