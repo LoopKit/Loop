@@ -2522,6 +2522,38 @@ extension LoopDataManager: ServicesManagerDelegate {
     
     func enactOverride(_ override: TemporaryScheduleOverride?) async {
         mutateSettings { settings in settings.scheduleOverride = override }
+
+        // DataLayer: override activated/deactivated
+        if let override = override {
+            let overrideType: String
+            let presetName: String
+            switch override.context {
+            case .preMeal: overrideType = "preMeal"; presetName = "Pre-Meal"
+            case .legacyWorkout: overrideType = "workout"; presetName = "Workout"
+            case .preset(let preset): overrideType = "preset"; presetName = preset.name
+            case .custom: overrideType = "custom"; presetName = "Custom"
+            }
+            NotificationCenter.default.post(
+                name: Notification.Name("com.loopkit.Loop.overrideActivated"),
+                object: nil,
+                userInfo: [
+                    "overrideType": overrideType,
+                    "presetName": presetName,
+                    "insulinNeedsScale": override.settings.insulinNeedsScaleFactor as Any,
+                    "targetRangeLow": override.settings.targetRange?.lowerBound.doubleValue(for: .milligramsPerDeciliter) as Any,
+                    "targetRangeHigh": override.settings.targetRange?.upperBound.doubleValue(for: .milligramsPerDeciliter) as Any
+                ]
+            )
+        } else {
+            NotificationCenter.default.post(
+                name: Notification.Name("com.loopkit.Loop.overrideDeactivated"),
+                object: nil,
+                userInfo: [
+                    "overrideType": "cleared",
+                    "presetName": ""
+                ]
+            )
+        }
     }
     
     enum EnactOverrideError: LocalizedError {

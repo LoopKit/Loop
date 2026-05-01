@@ -126,6 +126,7 @@ final class DataLayer_Coordinator: ObservableObject {
         pollGlucose(start: start, end: end)
         pollInsulin(start: start, end: end)
         pollCarbs(start: start, end: end)
+        pollBiometrics()
     }
 
     // MARK: - Glucose Polling
@@ -215,6 +216,12 @@ final class DataLayer_Coordinator: ObservableObject {
         observeCaffeineNotifications()
         observeAlcoholNotifications()
         observeAutoPresetsNotifications()
+        observeBarcodeNotifications()
+        observeChatNotifications()
+        observeMealDebriefNotifications()
+        observeTherapySettingsNotifications()
+        observeOverrideNotifications()
+        observeActivityDetectedNotifications()
     }
 
     private func observeFoodFinderNotifications() {
@@ -366,6 +373,172 @@ final class DataLayer_Coordinator: ObservableObject {
                 activityType: activityType,
                 presetName: presetName,
                 durationMinutes: nil
+            ))
+        }
+    }
+
+    private func observeBarcodeNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.loopkit.Loop.foodFinderBarcodeScanned"),
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self else { return }
+            guard let info = notification.userInfo,
+                  let barcode = info["barcode"] as? String,
+                  let source = info["source"] as? String,
+                  let found = info["found"] as? Bool else { return }
+            self.collector.record(type: .barcodeScanned, payload: DataLayer_BarcodeScannedPayload(
+                barcode: barcode,
+                productName: info["productName"] as? String,
+                carbsGrams: info["carbsGrams"] as? Double,
+                source: source,
+                found: found
+            ))
+        }
+    }
+
+    private func observeChatNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.loopkit.Loop.loopInsightsChatMessage"),
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self else { return }
+            guard let info = notification.userInfo,
+                  let isVoiceInitiated = info["isVoiceInitiated"] as? Bool,
+                  let responseTimeSeconds = info["responseTimeSeconds"] as? Double else { return }
+            self.collector.record(type: .chatMessage, payload: DataLayer_ChatTopicPayload(
+                isVoiceInitiated: isVoiceInitiated,
+                responseTimeSeconds: responseTimeSeconds,
+                topicCategory: info["topicCategory"] as? String
+            ))
+        }
+    }
+
+    private func observeMealDebriefNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.loopkit.Loop.loopInsightsMealDebrief"),
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self else { return }
+            guard let info = notification.userInfo,
+                  let learningCount = info["learningCount"] as? Int else { return }
+            self.collector.record(type: .mealDebrief, payload: DataLayer_MealDebriefPayload(
+                predictedPeakMgDl: info["predictedPeakMgDl"] as? Double,
+                actualPeakMgDl: info["actualPeakMgDl"] as? Double,
+                effectiveCarbsEstimate: info["effectiveCarbsEstimate"] as? Double,
+                timeToPeakMinutes: info["timeToPeakMinutes"] as? Double,
+                learningCount: learningCount
+            ))
+        }
+    }
+
+    private func observeTherapySettingsNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.loopkit.Loop.therapySettingsChanged"),
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self else { return }
+            guard let info = notification.userInfo,
+                  let settingType = info["settingType"] as? String,
+                  let timeBlocksChanged = info["timeBlocksChanged"] as? Int,
+                  let wasAISuggested = info["wasAISuggested"] as? Bool,
+                  let source = info["source"] as? String else { return }
+            self.collector.record(type: .therapySettingsChanged, payload: DataLayer_TherapySettingsChangedPayload(
+                settingType: settingType,
+                timeBlocksChanged: timeBlocksChanged,
+                wasAISuggested: wasAISuggested,
+                source: source
+            ))
+        }
+    }
+
+    private func observeOverrideNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.loopkit.Loop.overrideActivated"),
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self else { return }
+            guard let info = notification.userInfo,
+                  let overrideType = info["overrideType"] as? String else { return }
+            self.collector.record(type: .overrideActivated, payload: DataLayer_OverridePayload(
+                overrideType: overrideType,
+                presetName: info["presetName"] as? String,
+                insulinNeedsScale: info["insulinNeedsScale"] as? Double,
+                targetRangeLow: info["targetRangeLow"] as? Double,
+                targetRangeHigh: info["targetRangeHigh"] as? Double
+            ))
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.loopkit.Loop.overrideDeactivated"),
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self else { return }
+            guard let info = notification.userInfo,
+                  let overrideType = info["overrideType"] as? String else { return }
+            self.collector.record(type: .overrideDeactivated, payload: DataLayer_OverridePayload(
+                overrideType: overrideType,
+                presetName: info["presetName"] as? String,
+                insulinNeedsScale: nil,
+                targetRangeLow: nil,
+                targetRangeHigh: nil
+            ))
+        }
+    }
+
+    private func observeActivityDetectedNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.loopkit.Loop.autoPresetsActivityDetected"),
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self else { return }
+            guard let info = notification.userInfo,
+                  let activityType = info["activityType"] as? String else { return }
+            self.collector.record(type: .activityDetected, payload: DataLayer_PresetEventPayload(
+                activityType: activityType,
+                presetName: "detected",
+                durationMinutes: nil
+            ))
+        }
+    }
+
+    // MARK: - Biometric Polling
+
+    /// Poll biometric data from HealthKit via LoopInsights_HealthKitManager.
+    /// Called alongside glucose/insulin/carb polling every 5 minutes,
+    /// but only records a snapshot every 4 hours to avoid excessive data volume.
+    private var lastBiometricSnapshot: Date?
+    private lazy var hkManager = LoopInsights_HealthKitManager()
+
+    private func pollBiometrics() {
+        guard consent.isGranted(for: .biometrics) else { return }
+        guard LoopInsights_HealthKitManager.isHealthDataAvailable else { return }
+
+        // Only snapshot every 4 hours
+        if let last = lastBiometricSnapshot, Date().timeIntervalSince(last) < 14400 { return }
+        lastBiometricSnapshot = Date()
+
+        let end = Date()
+        let start = end.addingTimeInterval(-14400) // 4 hours
+
+        Task {
+            guard let bio = try? await hkManager.fetchAllBiometrics(start: start, end: end) else { return }
+            self.collector.record(type: .biometricSnapshot, payload: DataLayer_BiometricSnapshotPayload(
+                periodHours: 4,
+                avgHeartRate: bio.heartRate?.averageRestingHR,
+                avgHRV: bio.hrv?.averageSDNN,
+                totalSteps: bio.steps.map { Int($0.averageDailySteps) },
+                sleepHours: bio.sleep?.averageDurationHours,
+                activeCalories: bio.activeEnergy?.averageDailyCalories,
+                weightKg: bio.weight?.latestWeight,
+                menstrualPhase: bio.menstrualCycle?.currentPhase.rawValue
             ))
         }
     }

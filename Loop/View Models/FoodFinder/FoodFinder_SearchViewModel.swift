@@ -123,6 +123,10 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// Indices of AI-detected items excluded by the user (soft delete)
     @Published var excludedAIItemIndices: Set<Int> = []
 
+    /// Per-item serving multiplier overrides (index → multiplier).
+    /// Defaults to the AI's servingMultiplier; user can adjust per-item.
+    @Published var itemServingOverrides: [Int: Double] = [:]
+
     /// Store the captured AI image for display
     @Published var capturedAIImage: UIImage? = nil
 
@@ -268,9 +272,9 @@ final class FoodFinder_SearchViewModel: ObservableObject {
 
     private func observeAIExclusionsChange() {
         $excludedAIItemIndices
-            .combineLatest($lastAIAnalysisResult)
+            .combineLatest($lastAIAnalysisResult, $itemServingOverrides)
             .receive(on: RunLoop.main)
-            .sink { [weak self] _, _ in
+            .sink { [weak self] _, _, _ in
                 self?.recomputeAIAdjustments()
             }
             .store(in: &cancellables)
@@ -281,13 +285,23 @@ final class FoodFinder_SearchViewModel: ObservableObject {
     /// Recompute carbs and absorption time based on included AI items
     func recomputeAIAdjustments() {
         guard let ai = lastAIAnalysisResult else { return }
-        let included = ai.foodItemsDetailed.enumerated()
+        let includedItems = ai.foodItemsDetailed.enumerated()
             .filter { !excludedAIItemIndices.contains($0.offset) }
-            .map { $0.element }
-        // Carbs
-        let baseCarbs = included.reduce(0.0) { $0 + $1.carbohydrates }
-        let scale = ai.originalServings > 0 ? (numberOfServings / ai.originalServings) : 1.0
-        let newCarbs = baseCarbs * scale
+
+        // Per-item carbs: scale each item by its own serving override vs AI original
+        let baseCarbs = includedItems.reduce(0.0) { total, entry in
+            let (index, item) = entry
+            let aiMultiplier = item.servingMultiplier > 0 ? item.servingMultiplier : 1.0
+            let userMultiplier = itemServingOverrides[index] ?? aiMultiplier
+            // item.carbohydrates is already scaled by aiMultiplier, so rescale to user's value
+            let perUsdaServing = item.carbohydrates / aiMultiplier
+            return total + (perUsdaServing * userMultiplier)
+        }
+        // Plate-level multiplier (the "Servings" slider — for "I ate 2 plates")
+        let plateScale = numberOfServings
+        let newCarbs = baseCarbs * plateScale
+
+        let included = includedItems.map { $0.element }
 
         // Absorption time: use overall AI time if present (per-item times not available)
         var newAbsorptionTime = absorptionTime
@@ -326,6 +340,23 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             absorptionTime: newAbsorptionTime,
             absorptionTimeWasAIGenerated: aiGenerated
         ))
+    }
+
+    /// Get the effective serving multiplier for an item (user override or AI default)
+    func effectiveServings(for index: Int) -> Double {
+        if let override = itemServingOverrides[index] {
+            return override
+        }
+        guard let items = lastAIAnalysisResult?.foodItemsDetailed,
+              index >= 0, index < items.count else { return 1.0 }
+        return items[index].servingMultiplier > 0 ? items[index].servingMultiplier : 1.0
+    }
+
+    /// Adjust per-item serving multiplier by a delta (clamped to 0.25 minimum)
+    func adjustItemServings(index: Int, delta: Double) {
+        let current = effectiveServings(for: index)
+        let newValue = max(0.25, current + delta)
+        itemServingOverrides[index] = newValue
     }
 
     // MARK: - Voice / Generative Search
@@ -715,11 +746,35 @@ final class FoodFinder_SearchViewModel: ObservableObject {
                        type: .info,
                        barcode,
                        product.displayName)
+
+                // DataLayer: barcode scan found
+                NotificationCenter.default.post(
+                    name: Notification.Name("com.loopkit.Loop.foodFinderBarcodeScanned"),
+                    object: nil,
+                    userInfo: [
+                        "barcode": barcode,
+                        "productName": product.displayName,
+                        "carbsGrams": product.nutriments.carbohydrates as Any,
+                        "source": "openfoodfacts",
+                        "found": true
+                    ]
+                )
             } else {
                 #if DEBUG
                 print("🔍 No product found, creating manual entry placeholder")
                 #endif
                 createManualEntryPlaceholder(for: barcode)
+
+                // DataLayer: barcode scan not found
+                NotificationCenter.default.post(
+                    name: Notification.Name("com.loopkit.Loop.foodFinderBarcodeScanned"),
+                    object: nil,
+                    userInfo: [
+                        "barcode": barcode,
+                        "source": "openfoodfacts",
+                        "found": false
+                    ]
+                )
             }
 
         } catch {
@@ -909,6 +964,8 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         if !product.id.hasPrefix("ai_") {
             lastAIAnalysisResult = nil
             capturedAIImage = nil
+            excludedAIItemIndices = []
+            itemServingOverrides = [:]
             absorptionTimeWasAIGenerated = false  // Clear AI absorption time flag for non-AI products
             os_log("🔄 Cleared AI analysis state when selecting non-AI product: %{public}@",
                    log: OSLog(category: "FoodSearch"),
@@ -1093,6 +1150,8 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         numberOfServings = 1.0
         lastAIAnalysisResult = nil
         capturedAIImage = nil
+        excludedAIItemIndices = []
+        itemServingOverrides = [:]
         absorptionTimeWasAIGenerated = false  // Clear AI absorption time flag
         lastBarcodeSearched = nil  // Allow re-scanning the same barcode
 

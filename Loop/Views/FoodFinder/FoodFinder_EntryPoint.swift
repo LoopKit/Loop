@@ -389,6 +389,7 @@ extension FoodFinder_EntryPoint {
                     // Barcode scanning is handled by FoodSearchBar's sheet presentation
                 },
                 onAICameraTapped: {
+                    FoodFinder_LocationService.shared.requestLocationIfEnabled()
                     showingAICamera = true
                 },
                 onDictationDetected: {
@@ -617,7 +618,7 @@ extension FoodFinder_EntryPoint {
                 Spacer()
             }
             .frame(height: 90)
-            .id("nutrition-circles-\(searchVM.numberOfServings)")
+            .id("nutrition-circles-\(searchVM.numberOfServings)-\(searchVM.itemServingOverrides.values.map { $0 }.description)-\(searchVM.excludedAIItemIndices.count)")
 
             // Confidence line with ± range (AI only)
             Group {
@@ -773,23 +774,49 @@ extension FoodFinder_EntryPoint {
     @ViewBuilder
     private func renderAIItemRow(index: Int, item: FoodItemAnalysis) -> some View {
         let isExcluded = searchVM.excludedAIItemIndices.contains(index)
+        let effectiveServings = searchVM.effectiveServings(for: index)
+        let aiMultiplier = item.servingMultiplier > 0 ? item.servingMultiplier : 1.0
+        let perUsdaCarbs = item.carbohydrates / aiMultiplier
+        let effectiveCarbs = perUsdaCarbs * effectiveServings
         VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .center, spacing: 8) {
-                Text("\(index + 1).")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                Text(item.name)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(isExcluded ? .secondary : .primary)
-                    .strikethrough(isExcluded, color: .secondary)
+            // Carbs + servings stepper + exclude button — above the name
+            HStack(spacing: 6) {
+                // Per-item USDA servings stepper
+                HStack(spacing: 2) {
+                    Button(action: { searchVM.adjustItemServings(index: index, delta: -0.25) }) {
+                        Image(systemName: "minus.circle.fill")
+                            .foregroundColor(effectiveServings <= 0.25 ? .gray : .orange)
+                            .font(.system(size: 18))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isExcluded || effectiveServings <= 0.25)
+
+                    Text("\(String(format: "%.2g", effectiveServings))x USDA")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(isExcluded ? .secondary : .orange)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+
+                    Button(action: { searchVM.adjustItemServings(index: index, delta: 0.25) }) {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.orange)
+                            .font(.system(size: 18))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isExcluded)
+                }
+                .fixedSize(horizontal: true, vertical: false)
+
                 Spacer()
-                // Carbs with subtle gray background for contrast
-                Text("\(String(format: "%.1f", item.carbohydrates)) g carbs")
+
+                Text("\(String(format: "%.1f", effectiveCarbs))g carbs")
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundColor(isExcluded ? .secondary : .blue)
                     .strikethrough(isExcluded, color: .secondary)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
                     .padding(.vertical, 4)
                     .padding(.horizontal, 8)
                     .background(Color(.systemGray5))
@@ -804,6 +831,18 @@ extension FoodFinder_EntryPoint {
                         .font(.system(size: 18, weight: .medium))
                 }
                 .buttonStyle(.plain)
+            }
+            // Food name — full width
+            HStack(alignment: .top, spacing: 8) {
+                Text("\(index + 1).")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                Text(item.name)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(isExcluded ? .secondary : .primary)
+                    .strikethrough(isExcluded, color: .secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             VStack(alignment: .leading, spacing: 4) {
                 let trimmedUSDA = item.usdaServingSize?.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1553,17 +1592,35 @@ extension FoodFinder_EntryPoint {
     // Compute displayed macro values for circles
     private func computeDisplayedMacros(selectedFood: OpenFoodFactsProduct, aiResult: AIFoodAnalysisResult?, numberOfServings: Double, excluded: Set<Int>) -> (carbs: Double, calories: Double?, fat: Double?, fiber: Double?, protein: Double?) {
         if let ai = aiResult {
-            let servingScale = numberOfServings / ai.originalServings
-            let included = ai.foodItemsDetailed.enumerated().filter { !excluded.contains($0.offset) }.map { $0.element }
-            let carbs = included.reduce(0.0) { $0 + $1.carbohydrates } * servingScale
-            let caloriesSum = included.compactMap { $0.calories }.reduce(0.0, +)
-            let fatSum = included.compactMap { $0.fat }.reduce(0.0, +)
-            let fiberSum = included.compactMap { $0.fiber }.reduce(0.0, +)
-            let proteinSum = included.compactMap { $0.protein }.reduce(0.0, +)
-            let cals: Double? = caloriesSum > 0 ? caloriesSum * servingScale : nil
-            let fat: Double? = fatSum > 0 ? fatSum * servingScale : nil
-            let fiber: Double? = fiberSum > 0 ? fiberSum * servingScale : nil
-            let protein: Double? = proteinSum > 0 ? proteinSum * servingScale : nil
+            let overrides = searchVM.itemServingOverrides
+            let includedItems = ai.foodItemsDetailed.enumerated()
+                .filter { !excluded.contains($0.offset) }
+
+            // Scale each item by its per-item serving override
+            var carbs = 0.0, caloriesSum = 0.0, fatSum = 0.0, fiberSum = 0.0, proteinSum = 0.0
+            for (index, item) in includedItems {
+                let aiMult = item.servingMultiplier > 0 ? item.servingMultiplier : 1.0
+                let userMult = overrides[index] ?? aiMult
+                let scale = userMult / aiMult
+                carbs += item.carbohydrates * scale
+                if let cal = item.calories { caloriesSum += cal * scale }
+                if let f = item.fat { fatSum += f * scale }
+                if let fb = item.fiber { fiberSum += fb * scale }
+                if let p = item.protein { proteinSum += p * scale }
+            }
+
+            // Apply plate-level multiplier
+            let plateScale = numberOfServings
+            carbs *= plateScale
+            caloriesSum *= plateScale
+            fatSum *= plateScale
+            fiberSum *= plateScale
+            proteinSum *= plateScale
+
+            let cals: Double? = caloriesSum > 0 ? caloriesSum : nil
+            let fat: Double? = fatSum > 0 ? fatSum : nil
+            let fiber: Double? = fiberSum > 0 ? fiberSum : nil
+            let protein: Double? = proteinSum > 0 ? proteinSum : nil
             return (carbs, cals, fat, fiber, protein)
         } else {
             let carbs = (selectedFood.carbsPerServing ?? selectedFood.nutriments.carbohydrates) * numberOfServings
@@ -1635,12 +1692,11 @@ private struct FoodFinder_LinePair: View {
     let value: String
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
+        VStack(alignment: .leading, spacing: 2) {
             Text(label)
                 .font(.caption2)
                 .fontWeight(.medium)
                 .foregroundColor(.secondary)
-                .layoutPriority(1)
                 .lineLimit(1)
             Text(value)
                 .font(.caption)

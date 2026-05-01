@@ -58,6 +58,9 @@ final class FoodFinder_LocationService: NSObject, ObservableObject, CLLocationMa
     func requestLocationIfEnabled() {
         guard FoodFinder_FeatureFlags.locationTaggingEnabled else { return }
 
+        // Skip if we already have a resolved location or are currently resolving
+        guard locationName == nil && cityName == nil && !isResolving else { return }
+
         let status = locationManager.authorizationStatus
         switch status {
         case .notDetermined:

@@ -116,6 +116,20 @@ final class LoopInsights_MealDebriefService {
 
         LoopInsights_MealDebriefCache.append(debrief)
         log.info("Generated debrief for meal \(mealRecord.id): \(debrief.learnings.count) learnings")
+
+        // DataLayer: meal debrief generated
+        NotificationCenter.default.post(
+            name: Notification.Name("com.loopkit.Loop.loopInsightsMealDebrief"),
+            object: nil,
+            userInfo: [
+                "predictedPeakMgDl": debrief.predictedPeakGlucose as Any,
+                "actualPeakMgDl": debrief.actualPeakGlucose as Any,
+                "effectiveCarbsEstimate": debrief.effectiveCarbsEstimate as Any,
+                "timeToPeakMinutes": debrief.peakTimingDeltaMinutes as Any,
+                "learningCount": debrief.learnings.count
+            ]
+        )
+
         return debrief
     }
 
