@@ -294,23 +294,17 @@ struct AICameraView: View {
 
                 await MainActor.run {
                     addTelemetryLog("✅ Analysis complete!")
-
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        showTelemetry = false
-                        isAnalyzing = false
-                        onFoodAnalyzed(result, capturedImage)
-                    }
+                    showTelemetry = false
+                    isAnalyzing = false
+                    onFoodAnalyzed(result, capturedImage)
                 }
             } catch {
                 await MainActor.run {
                     addTelemetryLog("❌ Analysis failed")
-
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        showTelemetry = false
-                        isAnalyzing = false
-                        analysisError = error.localizedDescription
-                        showingErrorAlert = true
-                    }
+                    showTelemetry = false
+                    isAnalyzing = false
+                    analysisError = error.localizedDescription
+                    showingErrorAlert = true
                 }
             }
         }
