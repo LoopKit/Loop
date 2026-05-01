@@ -1071,6 +1071,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 })
                 cell.setTitleLabelText(label: NSLocalizedString("Glucose", comment: "The title of the glucose and prediction graph"))
                 cell.doesNavigate = automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled
+
+                // LoopInsights quick-access button
+                addLoopInsightsButton(to: cell)
             case .iob:
                 cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.statusCharts.iobChart(withFrame: frame)?.view
@@ -2133,6 +2136,108 @@ extension UIAlertController {
         viewController.preferredContentSize = frame.size
         viewController.view.addSubview(activityIndicator)
         setValue(viewController, forKey: "contentViewController")
+    }
+}
+
+// MARK: - LoopInsights Quick Access
+
+extension StatusTableViewController {
+    private static let loopInsightsButtonTag = 9201
+    private static let loopInsightsBadgeTag = 9202
+
+    func addLoopInsightsButton(to cell: UITableViewCell) {
+        guard LoopInsights_FeatureFlags.isEnabled else {
+            cell.contentView.viewWithTag(Self.loopInsightsButtonTag)?.removeFromSuperview()
+            return
+        }
+
+        // Avoid duplicates on cell reuse
+        if cell.contentView.viewWithTag(Self.loopInsightsButtonTag) != nil {
+            updateLoopInsightsBadge(in: cell)
+            return
+        }
+
+        let size: CGFloat = 32
+        let button = UIButton(type: .custom)
+        button.tag = Self.loopInsightsButtonTag
+        button.backgroundColor = UIColor(red: 20/255, green: 110/255, blue: 128/255, alpha: 1)
+        button.layer.cornerRadius = size / 2
+        button.clipsToBounds = false
+
+        let label = UILabel()
+        label.text = "LI"
+        label.font = .systemFont(ofSize: 13, weight: .bold)
+        label.textColor = .white
+        label.textAlignment = .center
+        label.isUserInteractionEnabled = false
+        label.translatesAutoresizingMaskIntoConstraints = false
+        button.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: button.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: button.centerYAnchor)
+        ])
+
+        // Red badge dot
+        let badgeSize: CGFloat = size * 0.35  // ~11pt, proportionate to 32pt circle
+        let badge = UIView()
+        badge.tag = Self.loopInsightsBadgeTag
+        badge.backgroundColor = .systemRed
+        badge.layer.cornerRadius = badgeSize / 2
+        badge.translatesAutoresizingMaskIntoConstraints = false
+        badge.isHidden = true
+        badge.isUserInteractionEnabled = false
+        button.addSubview(badge)
+        NSLayoutConstraint.activate([
+            badge.widthAnchor.constraint(equalToConstant: badgeSize),
+            badge.heightAnchor.constraint(equalToConstant: badgeSize),
+            badge.topAnchor.constraint(equalTo: button.topAnchor, constant: -2),
+            badge.trailingAnchor.constraint(equalTo: button.trailingAnchor, constant: 2)
+        ])
+
+        button.translatesAutoresizingMaskIntoConstraints = false
+        cell.contentView.addSubview(button)
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(equalToConstant: size),
+            button.heightAnchor.constraint(equalToConstant: size),
+            button.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -12),
+            button.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 52)
+        ])
+
+        button.addTarget(self, action: #selector(loopInsightsButtonTapped), for: .touchUpInside)
+
+        // Observe pending suggestions to update badge
+        LoopInsights_SuggestionStore.shared.$records
+            .receive(on: DispatchQueue.main)
+            .sink { [weak cell] _ in
+                guard let cell = cell else { return }
+                self.updateLoopInsightsBadge(in: cell)
+            }
+            .store(in: &cancellables)
+
+        updateLoopInsightsBadge(in: cell)
+    }
+
+    private func updateLoopInsightsBadge(in cell: UITableViewCell) {
+        guard let button = cell.contentView.viewWithTag(Self.loopInsightsButtonTag),
+              let badge = button.viewWithTag(Self.loopInsightsBadgeTag) else { return }
+
+        let hasPending = !LoopInsights_SuggestionStore.shared.pendingRecords.isEmpty
+        badge.isHidden = !hasPending
+    }
+
+    @objc private func loopInsightsButtonTapped() {
+        let wrapper = LoopInsights_TestDashboardWrapper(dataStoresProvider: { [weak self] in
+            guard let dm = self?.deviceManager else { return nil }
+            let writer: LoopInsightsSettingsWriter = { mutate in
+                dm.loopManager.mutateSettings(mutate)
+            }
+            return (dm.glucoseStore, dm.doseStore, dm.carbStore, dm.settingsManager, writer)
+        })
+
+        let hostingController = UIHostingController(
+            rootView: NavigationView { wrapper }
+        )
+        present(hostingController, animated: true)
     }
 }
 
