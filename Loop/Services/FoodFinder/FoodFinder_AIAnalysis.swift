@@ -132,6 +132,7 @@ FOR FOOD PHOTOS:
 ✅ ALWAYS calculate FPUs = (fat + protein) ÷ 10, classify Low/Medium/High, and provide insulin timing guidance.
 ✅ ALWAYS calculate absorption_time_hours conservatively — anchor to Loop's 3-hour default; only deviate with clear justification (high fat/protein, high fiber, large meal). Frequent non-default values reduce user trust.
 ✅ ALWAYS provide net carbs adjustment when fiber >5g, safety alerts, and exercise timing considerations.
+✅ ALWAYS include a pre-bolus timing recommendation in diabetes_considerations: state how many minutes before eating to bolus based on GI category and meal composition (high-GI/simple carbs with low fat = 15-20 min pre-bolus; mixed meals = 10-15 min; high-fat/protein-heavy or low-GI = bolus at first bite or 0-5 min before). If current glucose context is available and elevated, recommend longer pre-bolus; if low/dropping, recommend bolusing after starting to eat.
 
 FOR MENU AND RECIPE ITEMS:
 ❌ NEVER assume plate sizes, visual portions, or cooking details from menu text alone.
