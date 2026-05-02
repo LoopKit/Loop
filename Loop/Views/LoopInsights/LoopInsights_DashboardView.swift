@@ -1182,7 +1182,7 @@ struct LoopInsights_DashboardView: View {
     private func impactMetric(label: String, before: Double, format: String) -> some View {
         VStack(spacing: 2) {
             Text(label)
-                .fontWeight(.medium)
+                .font(.caption2.weight(.medium))
             Text(String(format: format, before))
                 .foregroundColor(.primary)
         }
