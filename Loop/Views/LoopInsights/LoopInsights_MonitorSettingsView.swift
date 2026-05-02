@@ -52,6 +52,32 @@ private final class MonitorSettingsViewModel: ObservableObject {
         self.notificationStyle = LoopInsights_FeatureFlags.notificationStyle
     }
 
+    /// Human-readable display of when the last background check ran
+    var lastCheckedDisplay: String {
+        let timestamp = UserDefaults.standard.double(forKey: "LoopInsights_lastBackgroundAnalysis")
+        guard timestamp > 0 else {
+            return NSLocalizedString("Never", comment: "LoopInsights monitor: never checked")
+        }
+        let date = Date(timeIntervalSince1970: timestamp)
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return formatter.localizedString(for: date, relativeTo: Date())
+    }
+
+    /// Human-readable display of when the next check is expected
+    var nextCheckDisplay: String? {
+        let timestamp = UserDefaults.standard.double(forKey: "LoopInsights_lastBackgroundAnalysis")
+        guard timestamp > 0 else { return nil }
+        let lastDate = Date(timeIntervalSince1970: timestamp)
+        let nextDate = lastDate.addingTimeInterval(frequency.timeInterval)
+        if nextDate <= Date() {
+            return NSLocalizedString("Next Loop cycle", comment: "LoopInsights monitor: next check imminent")
+        }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return formatter.localizedString(for: nextDate, relativeTo: Date())
+    }
+
     func formatHour(_ hour: Int) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "h a"
@@ -78,6 +104,7 @@ struct LoopInsights_MonitorSettingsView: View {
         Form {
             masterToggleSection
             if viewModel.isEnabled {
+                lastCheckedSection
                 frequencySection
                 confidenceSection
                 quietHoursSection
@@ -212,6 +239,28 @@ struct LoopInsights_MonitorSettingsView: View {
             Text(viewModel.notificationStyle.description)
                 .font(.caption)
                 .foregroundColor(.secondary)
+        }
+    }
+
+    // MARK: - Last Checked
+
+    private var lastCheckedSection: some View {
+        Section(header: Text(NSLocalizedString("STATUS", comment: "LoopInsights monitor status header"))) {
+            HStack {
+                Text(NSLocalizedString("Last checked", comment: "LoopInsights monitor last checked label"))
+                Spacer()
+                Text(viewModel.lastCheckedDisplay)
+                    .foregroundColor(.secondary)
+            }
+
+            if let next = viewModel.nextCheckDisplay {
+                HStack {
+                    Text(NSLocalizedString("Next check", comment: "LoopInsights monitor next check label"))
+                    Spacer()
+                    Text(next)
+                        .foregroundColor(.secondary)
+                }
+            }
         }
     }
 
