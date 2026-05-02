@@ -39,6 +39,12 @@ final class LoopInsights_Coordinator: ObservableObject {
     /// Observation token for meal-logged notifications
     private var mealLoggedObserver: NSObjectProtocol?
 
+    /// Observation token for LoopDataUpdated (deferred snapshot capture)
+    private var loopDataUpdatedObserver: NSObjectProtocol?
+
+    /// Meal record IDs awaiting the next LoopDataUpdated to capture prediction snapshots
+    private var pendingSnapshotMealIDs: [(id: String, queuedAt: Date)] = []
+
     // MARK: - Data Provider Bridge
 
     private var dataProviderBridge: DataProviderBridge?
@@ -128,20 +134,51 @@ final class LoopInsights_Coordinator: ObservableObject {
         LoopInsights_MealDebriefCache.pruneStale()
     }
 
-    /// Observe FoodFinder meal-logged notifications to capture prediction snapshots.
+    /// Observe FoodFinder meal-logged notifications to queue deferred snapshot capture.
+    /// Snapshots are NOT captured immediately because StatusExtensionContext (which holds
+    /// the predicted glucose curve) is only updated on .LoopDataUpdated — an async event
+    /// that fires after the next Loop algorithm cycle (~5 min). Capturing immediately would
+    /// read stale predictions that don't account for the just-entered carbs.
     private func observeMealLogged() {
         mealLoggedObserver = NotificationCenter.default.addObserver(
             forName: .foodFinderMealLogged,
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let mealRecordID = notification.userInfo?["recordID"] as? String else { return }
-            self?.mealDebriefService.capturePredictionSnapshot(mealRecordID: mealRecordID)
+            guard let self, let mealRecordID = notification.userInfo?["recordID"] as? String else { return }
+            self.pendingSnapshotMealIDs.append((id: mealRecordID, queuedAt: Date()))
+
+            // Safety net: if LoopDataUpdated doesn't fire within 90 seconds, capture with
+            // whatever prediction data is available (better stale than nothing).
+            DispatchQueue.main.asyncAfter(deadline: .now() + 90) { [weak self] in
+                guard let self else { return }
+                if let idx = self.pendingSnapshotMealIDs.firstIndex(where: { $0.id == mealRecordID }) {
+                    self.pendingSnapshotMealIDs.remove(at: idx)
+                    self.mealDebriefService.capturePredictionSnapshot(mealRecordID: mealRecordID)
+                }
+            }
+        }
+
+        // Observe LoopDataUpdated to capture snapshots once predictions are fresh
+        loopDataUpdatedObserver = NotificationCenter.default.addObserver(
+            forName: .LoopDataUpdated,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self, !self.pendingSnapshotMealIDs.isEmpty else { return }
+            let pending = self.pendingSnapshotMealIDs
+            self.pendingSnapshotMealIDs.removeAll()
+            for entry in pending {
+                self.mealDebriefService.capturePredictionSnapshot(mealRecordID: entry.id)
+            }
         }
     }
 
     deinit {
         if let observer = mealLoggedObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        if let observer = loopDataUpdatedObserver {
             NotificationCenter.default.removeObserver(observer)
         }
     }
