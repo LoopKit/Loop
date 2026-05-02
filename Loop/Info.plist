@@ -61,6 +61,10 @@
 	<string>The app needs to use Bluetooth to send and receive data from your diabetes devices.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>The app needs to use Bluetooth to send and receive data from your diabetes devices.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>AutoPresets reads your calendar to automatically activate presets before scheduled activities like gym sessions or runs. Calendar data stays on your device.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>AutoPresets reads your calendar to automatically activate presets before scheduled activities like gym sessions or runs. Calendar data stays on your device.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera is used to scan barcodes of devices.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

@@ -40,12 +40,13 @@ struct AutoPresets_SettingsView: View {
             enableSection
 
             if coordinator.isEnabled {
-                geofenceSection
                 activityTypeSections
                 detectionSettingsSection
                 if dataStoresProvider != nil {
                     aiAdvisorSection
                 }
+                geofenceSection
+                calendarSection
                 activityLogSection
                 debugLogsSection
             }
@@ -149,6 +150,44 @@ struct AutoPresets_SettingsView: View {
             return "Enabled — no locations saved"
         }
         return "\(count) location\(count == 1 ? "" : "s") monitored"
+    }
+
+    // MARK: - Calendar Section
+
+    private var calendarSection: some View {
+        Section {
+            NavigationLink {
+                AutoPresets_CalendarSettingsView()
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "calendar.badge.clock")
+                        .font(.title3)
+                        .foregroundColor(AutoPresets_CalendarManager.shared.isEnabled ? Color(red: 76/255, green: 175/255, blue: 80/255) : .secondary)
+                        .frame(width: 28)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Calendar Triggers")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text(calendarSummary)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    private var calendarSummary: String {
+        let manager = AutoPresets_CalendarManager.shared
+        if !manager.isEnabled {
+            return "Off"
+        }
+        let count = manager.triggers.filter(\.isEnabled).count
+        if count == 0 {
+            return "Enabled — no keywords saved"
+        }
+        return "\(count) keyword\(count == 1 ? "" : "s") active"
     }
 
     // MARK: - AI Advisor Section
