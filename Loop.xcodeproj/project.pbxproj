@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		126412E6CB2B693A93FE0A0C /* GraphDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDF56556BF1BE5E7875BED21 /* GraphDetailView.swift */; };
+		14C479C5591D8D8C3E471259 /* GraphDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9613AA3497F104C0F86A2DF /* GraphDetailViewModel.swift */; };
 		8D0F376E7E338ECB93EE03E0 /* LoopInsights_TrendsInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7AAD3549253FE16941E10D /* LoopInsights_TrendsInsightsView.swift */; };
 		B9D78BD57F35DBCFEC65530D /* AutoPresets_Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B2D28F4F6C8955AB18A98C /* AutoPresets_Coordinator.swift */; };
 		BACF15F57C2B75D78B797778 /* AutoPresets_Delegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D17206C8109E75D64068F3D1 /* AutoPresets_Delegate.swift */; };
@@ -1004,6 +1006,8 @@
 		459EFB26025611ED5044134D /* AutoPresets_RecommendationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_RecommendationModels.swift; sourceTree = "<group>"; };
 		62520B3DF755819815919570 /* AutoPresets_AIAdvisor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_AIAdvisor.swift; sourceTree = "<group>"; };
 		A92563E71BB3873233772CCE /* AutoPresets_AIRecommendationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_AIRecommendationView.swift; sourceTree = "<group>"; };
+		CDF56556BF1BE5E7875BED21 /* GraphDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphDetailView.swift; sourceTree = "<group>"; };
+		C9613AA3497F104C0F86A2DF /* GraphDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphDetailViewModel.swift; sourceTree = "<group>"; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
 		1452F4A82A851C9400F8B9E4 /* AddEditFavoriteFoodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditFavoriteFoodViewModel.swift; sourceTree = "<group>"; };
@@ -2510,6 +2514,7 @@
 				899433B723FE129700FA4BEA /* OverrideBadgeView.swift */,
 				89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */,
 				89CAB36224C8FE95009EE3CE /* PredictedGlucoseChartView.swift */,
+				CDF56556BF1BE5E7875BED21 /* GraphDetailView.swift */,
 				438D42FA1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift */,
 				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
 				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
@@ -2559,6 +2564,7 @@
 				E9BB27AA23B85C3500FB4987 /* SleepStore.swift */,
 				B470F5832AB22B5100049695 /* StatefulPluggable.swift */,
 				43FCEEA8221A615B0013DD30 /* StatusChartsManager.swift */,
+				C9613AA3497F104C0F86A2DF /* GraphDetailViewModel.swift */,
 				1D63DEA426E950D400F46FA5 /* SupportManager.swift */,
 				4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */,
 				89ADE13A226BFA0F0067222B /* TestingScenariosManager.swift */,
@@ -4565,6 +4571,8 @@
 				A9F703752489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift in Sources */,
 				E95D380524EADF78005E2F50 /* GlucoseStoreProtocol.swift in Sources */,
 				43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */,
+				126412E6CB2B693A93FE0A0C /* GraphDetailView.swift in Sources */,
+				14C479C5591D8D8C3E471259 /* GraphDetailViewModel.swift in Sources */,
 				B42D124328D371C400E43D22 /* AlertMuter.swift in Sources */,
 				A96DAC242838325900D94E38 /* DiagnosticLog.swift in Sources */,
 				A9CBE45A248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift in Sources */,
