@@ -189,12 +189,6 @@ public class AutoPresets_Coordinator: ObservableObject {
 
         applySettingsToDetectionManager()
         activityDetectionManager.startMonitoring()
-
-        // Start geofence monitoring if enabled
-        if AutoPresets_GeofenceManager.shared.isEnabled {
-            AutoPresets_GeofenceManager.shared.startMonitoring()
-        }
-
         isMonitoring = true
 
         os_log(
@@ -210,7 +204,6 @@ public class AutoPresets_Coordinator: ObservableObject {
     /// Stop monitoring
     public func stop() {
         activityDetectionManager.stopMonitoring()
-        AutoPresets_GeofenceManager.shared.stopMonitoring()
         isMonitoring = false
         currentDetectedActivity = nil
 
