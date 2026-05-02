@@ -32,6 +32,8 @@ struct LoopInsights_DashboardView: View {
     @State private var showingMealInsights = false
     @State private var showingCaffeineLog = false
     @State private var showingAlcoholLog = false
+    @State private var showingBehaviorInsights = false
+    @State private var settingsImpactExpanded = false
     @State private var selectedRecord: LoopInsightsSuggestionRecord?
     @State private var developerTapCount = 0
     @State private var showingSupportedModels = false
@@ -89,6 +91,9 @@ struct LoopInsights_DashboardView: View {
             }
             if !viewModel.recentlyAppliedSuggestions.isEmpty {
                 settingsImpactSection
+            }
+            if !viewModel.newBehaviorDiscoveries.isEmpty {
+                behaviorDiscoverySection
             }
             navigationSection
         }
@@ -182,6 +187,11 @@ struct LoopInsights_DashboardView: View {
         .sheet(isPresented: $showingAlcoholLog) {
             NavigationView {
                 LoopInsights_AlcoholLogView(tracker: viewModel.coordinator.alcoholTracker)
+            }
+        }
+        .sheet(isPresented: $showingBehaviorInsights) {
+            NavigationView {
+                LoopInsights_BehaviorInsightsView()
             }
         }
         .sheet(isPresented: $showingSupportedModels) {
@@ -1087,10 +1097,28 @@ struct LoopInsights_DashboardView: View {
     // MARK: - Settings Impact Tracker
 
     private var settingsImpactSection: some View {
-        Section(header: Text(NSLocalizedString("Settings Impact", comment: "LoopInsights settings impact section header"))) {
-            ForEach(viewModel.recentlyAppliedSuggestions.prefix(5)) { record in
-                settingsImpactRow(for: record)
-            }
+        Section {
+            DisclosureGroup(
+                isExpanded: $settingsImpactExpanded,
+                content: {
+                    ForEach(viewModel.recentlyAppliedSuggestions.prefix(5)) { record in
+                        settingsImpactRow(for: record)
+                    }
+                },
+                label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "chart.line.uptrend.xyaxis.circle.fill")
+                            .foregroundColor(.accentColor)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(NSLocalizedString("Settings Impact", comment: "LoopInsights settings impact section header"))
+                                .font(.subheadline.weight(.medium))
+                            Text(String(format: NSLocalizedString("%d recent change(s) tracked", comment: "LoopInsights impact count"), viewModel.recentlyAppliedSuggestions.prefix(5).count))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            )
         }
     }
 
@@ -1186,6 +1214,53 @@ struct LoopInsights_DashboardView: View {
         }
     }
 
+    // MARK: - Behavior Discovery Alert
+
+    private var behaviorDiscoverySection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 8) {
+                    Image(systemName: "brain.head.profile")
+                        .font(.title3)
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(NSLocalizedString("New Pattern Discovered", comment: "Behavior insights discovery title"))
+                            .font(.subheadline.weight(.semibold))
+                        Text(String(format: NSLocalizedString("We found %d new correction pattern(s) in your meal data", comment: "Behavior insights discovery subtitle"), viewModel.newBehaviorDiscoveries.count))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                }
+
+                ForEach(viewModel.newBehaviorDiscoveries.prefix(3)) { pattern in
+                    HStack(spacing: 8) {
+                        Image(systemName: pattern.isUnderestimation ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                            .font(.caption)
+                            .foregroundColor(pattern.isUnderestimation ? .orange : .blue)
+                        Text(pattern.summaryDescription)
+                            .font(.caption)
+                            .lineLimit(2)
+                    }
+                }
+
+                HStack {
+                    Button(action: { showingBehaviorInsights = true }) {
+                        Text(NSLocalizedString("View All", comment: "Behavior insights view all button"))
+                            .font(.caption.weight(.medium))
+                    }
+                    Spacer()
+                    Button(action: { viewModel.dismissBehaviorDiscoveries() }) {
+                        Text(NSLocalizedString("Dismiss", comment: "Dismiss button"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
     // MARK: - Navigation
 
     private var navigationSection: some View {
@@ -1251,6 +1326,18 @@ struct LoopInsights_DashboardView: View {
                         Image(systemName: "fork.knife")
                             .foregroundColor(.accentColor)
                         Text(NSLocalizedString("Meal Insights", comment: "LoopInsights meal insights button"))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Button(action: { showingBehaviorInsights = true }) {
+                    HStack {
+                        Image(systemName: "brain.head.profile")
+                            .foregroundColor(.accentColor)
+                        Text(NSLocalizedString("Behavior Insights", comment: "LoopInsights behavior insights button"))
                         Spacer()
                         Image(systemName: "chevron.right")
                             .font(.caption)

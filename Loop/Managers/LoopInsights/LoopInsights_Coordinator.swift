@@ -337,6 +337,13 @@ final class LoopInsights_Coordinator: ObservableObject {
             if !exerciseCtx.isEmpty { context.append(exerciseCtx) }
         }
 
+        // Behavior insights — systematic user correction patterns
+        if LoopInsights_FeatureFlags.foodResponseEnabled {
+            let behaviorPatterns = LoopInsights_BehaviorInsightsAnalyzer.analyzePatterns()
+            let behaviorCtx = LoopInsights_BehaviorInsightsAnalyzer.buildPromptContext(patterns: behaviorPatterns)
+            if !behaviorCtx.isEmpty { context.append(behaviorCtx) }
+        }
+
         // User engagement & adherence metrics
         let engagementCtx = buildEngagementPromptContext(stats: stats)
         if !engagementCtx.isEmpty { context.append(engagementCtx) }

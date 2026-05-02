@@ -64,6 +64,9 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     /// Detected glucose/insulin patterns from aggregated data
     @Published var detectedPatterns: [LoopInsightsDetectedPattern] = []
 
+    /// Newly discovered behavior correction patterns (alert upon discovery)
+    @Published var newBehaviorDiscoveries: [LoopInsightsCorrectionPattern] = []
+
     /// Suggestions that were just auto-applied (for notification display)
     @Published var autoAppliedSuggestions: [LoopInsightsSuggestion] = []
 
@@ -111,6 +114,9 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
         // Load initial snapshot
         loadCurrentSettings()
+
+        // Check for new behavior correction patterns (alert upon discovery)
+        checkBehaviorDiscoveries()
     }
 
     // MARK: - Actions
@@ -122,6 +128,22 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
         } catch {
             LoopInsights_FeatureFlags.log.error("Failed to capture therapy snapshot: \(error)")
         }
+    }
+
+    /// Check for newly discovered behavior correction patterns
+    func checkBehaviorDiscoveries() {
+        guard LoopInsights_FeatureFlags.foodResponseEnabled else { return }
+        DispatchQueue.global(qos: .utility).async {
+            let discoveries = LoopInsights_BehaviorInsightsStore.checkForNewDiscoveries()
+            DispatchQueue.main.async {
+                self.newBehaviorDiscoveries = discoveries
+            }
+        }
+    }
+
+    /// Dismiss the behavior discovery alert
+    func dismissBehaviorDiscoveries() {
+        newBehaviorDiscoveries = []
     }
 
     /// Run AI analysis for the focused setting type
