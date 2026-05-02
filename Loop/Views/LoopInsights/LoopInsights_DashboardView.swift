@@ -1103,8 +1103,7 @@ struct LoopInsights_DashboardView: View {
             // Header: setting type + days ago + verdict badge
             HStack {
                 Text(settingLabel)
-                    .font(.caption)
-                    .fontWeight(.bold)
+                    .font(.caption.bold())
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(Color.accentColor.opacity(0.15))
@@ -1118,8 +1117,7 @@ struct LoopInsights_DashboardView: View {
 
                 if let eval = evaluation {
                     Label(eval.verdict.displayName, systemImage: eval.verdict.systemImage)
-                        .font(.caption)
-                        .fontWeight(.semibold)
+                        .font(.caption.weight(.semibold))
                         .foregroundColor(eval.verdict.color)
                 } else {
                     let evalDays = record.suggestion.successCriteria?.evaluationDays ?? 5
