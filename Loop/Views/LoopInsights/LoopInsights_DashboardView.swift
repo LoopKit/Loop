@@ -87,6 +87,9 @@ struct LoopInsights_DashboardView: View {
             if viewModel.pendingSuggestions.isEmpty && viewModel.analysisResponse != nil && !viewModel.isAnalyzing {
                 noChangesSection
             }
+            if !viewModel.recentlyAppliedSuggestions.isEmpty {
+                settingsImpactSection
+            }
             navigationSection
         }
         .modifier(ListSectionSpacingModifier())
@@ -1078,6 +1081,110 @@ struct LoopInsights_DashboardView: View {
                 }
             }
             .padding(.vertical, 4)
+        }
+    }
+
+    // MARK: - Settings Impact Tracker
+
+    private var settingsImpactSection: some View {
+        Section(header: Text(NSLocalizedString("Settings Impact", comment: "LoopInsights settings impact section header"))) {
+            ForEach(viewModel.recentlyAppliedSuggestions.prefix(5)) { record in
+                settingsImpactRow(for: record)
+            }
+        }
+    }
+
+    private func settingsImpactRow(for record: LoopInsightsSuggestionRecord) -> some View {
+        let daysAgo = Int(Date().timeIntervalSince(record.resolvedAt ?? record.createdAt) / 86400)
+        let settingLabel = record.suggestion.settingType.abbreviation
+        let evaluation = record.outcomeEvaluation
+
+        return VStack(alignment: .leading, spacing: 8) {
+            // Header: setting type + days ago + verdict badge
+            HStack {
+                Text(settingLabel)
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.accentColor.opacity(0.15))
+                    .cornerRadius(4)
+
+                Text(record.suggestion.summaryDescription)
+                    .font(.subheadline)
+                    .lineLimit(1)
+
+                Spacer()
+
+                if let eval = evaluation {
+                    Label(eval.verdict.displayName, systemImage: eval.verdict.systemImage)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(eval.verdict.color)
+                } else {
+                    let evalDays = record.suggestion.successCriteria?.evaluationDays ?? 5
+                    if daysAgo < evalDays {
+                        Text("\(evalDays - daysAgo)d until eval")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Awaiting eval")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                    }
+                }
+            }
+
+            // Glucose stats comparison (if captured at apply time)
+            if let before = record.glucoseStatsAtApply {
+                HStack(spacing: 16) {
+                    impactMetric(
+                        label: "TIR",
+                        before: before.timeInRange,
+                        format: "%.0f%%"
+                    )
+                    impactMetric(
+                        label: "Avg",
+                        before: before.averageGlucose,
+                        format: "%.0f"
+                    )
+                    impactMetric(
+                        label: "Below",
+                        before: before.timeBelowRange,
+                        format: "%.1f%%"
+                    )
+                    impactMetric(
+                        label: "CV",
+                        before: before.coefficientOfVariation,
+                        format: "%.0f%%"
+                    )
+                }
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            }
+
+            // Outcome reasoning (if evaluated)
+            if let eval = evaluation, !eval.reasoning.isEmpty {
+                Text(eval.reasoning)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+
+            // Applied date
+            Text(String(format: NSLocalizedString("Applied %d day(s) ago", comment: "LoopInsights impact: days since applied"), daysAgo))
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func impactMetric(label: String, before: Double, format: String) -> some View {
+        VStack(spacing: 2) {
+            Text(label)
+                .fontWeight(.medium)
+            Text(String(format: format, before))
+                .foregroundColor(.primary)
         }
     }
 
