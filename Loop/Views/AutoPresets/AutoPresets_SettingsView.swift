@@ -40,6 +40,7 @@ struct AutoPresets_SettingsView: View {
             enableSection
 
             if coordinator.isEnabled {
+                geofenceSection
                 activityTypeSections
                 detectionSettingsSection
                 if dataStoresProvider != nil {
@@ -110,6 +111,44 @@ struct AutoPresets_SettingsView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Geofence Section
+
+    private var geofenceSection: some View {
+        Section {
+            NavigationLink {
+                AutoPresets_GeofenceSettingsView()
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(AutoPresets_GeofenceManager.shared.isEnabled ? Color(red: 76/255, green: 175/255, blue: 80/255) : .secondary)
+                        .frame(width: 28)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Location Triggers")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text(geofenceSummary)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    private var geofenceSummary: String {
+        let manager = AutoPresets_GeofenceManager.shared
+        if !manager.isEnabled {
+            return "Off"
+        }
+        let count = manager.locations.filter(\.isEnabled).count
+        if count == 0 {
+            return "Enabled — no locations saved"
+        }
+        return "\(count) location\(count == 1 ? "" : "s") monitored"
     }
 
     // MARK: - AI Advisor Section

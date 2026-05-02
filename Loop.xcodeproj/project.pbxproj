@@ -13,6 +13,8 @@
 		B1F90AD96E591453CF003AC2 /* AutoPresets_Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F92C032F72116EA4C06250F9 /* AutoPresets_Logger.swift */; };
 		211A65C85F6FEC59ED083F2D /* AutoPresets_Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EED74A3E39956E5218453D1 /* AutoPresets_Storage.swift */; };
 		0556C20E91536D540ED3D91E /* AutoPresets_ActivityDetectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58CA1221236A70935E684238 /* AutoPresets_ActivityDetectionManager.swift */; };
+		BAD5614ADF674903DDA6CB66 /* AutoPresets_GeofenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE750480EFE1634C0059742C /* AutoPresets_GeofenceManager.swift */; };
+		852954520F4B88A1B57C48D5 /* AutoPresets_GeofenceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C8C4ECE1B6F36E8E1307AA /* AutoPresets_GeofenceSettingsView.swift */; };
 		FFF05E4789A2D06526EB0A24 /* AutoPresets_SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177A32DF2F91D26776BF2C7F /* AutoPresets_SettingsView.swift */; };
 		232E357E321361C66498FEEA /* AutoPresets_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D90E77F7FA3F7557C52EA5B /* AutoPresets_Models.swift */; };
 		13992ED79F79937110B6BFCD /* AutoPresets_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 593F5B3264F8383861CE3027 /* AutoPresets_FeatureFlags.swift */; };
@@ -875,6 +877,8 @@
 		F92C032F72116EA4C06250F9 /* AutoPresets_Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Logger.swift; sourceTree = "<group>"; };
 		1EED74A3E39956E5218453D1 /* AutoPresets_Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Storage.swift; sourceTree = "<group>"; };
 		58CA1221236A70935E684238 /* AutoPresets_ActivityDetectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_ActivityDetectionManager.swift; sourceTree = "<group>"; };
+		BE750480EFE1634C0059742C /* AutoPresets_GeofenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_GeofenceManager.swift; sourceTree = "<group>"; };
+		03C8C4ECE1B6F36E8E1307AA /* AutoPresets_GeofenceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_GeofenceSettingsView.swift; sourceTree = "<group>"; };
 		177A32DF2F91D26776BF2C7F /* AutoPresets_SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_SettingsView.swift; sourceTree = "<group>"; };
 		2D90E77F7FA3F7557C52EA5B /* AutoPresets_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Models.swift; sourceTree = "<group>"; };
 		593F5B3264F8383861CE3027 /* AutoPresets_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_FeatureFlags.swift; sourceTree = "<group>"; };
@@ -1750,6 +1754,7 @@
 				F92C032F72116EA4C06250F9 /* AutoPresets_Logger.swift */,
 				1EED74A3E39956E5218453D1 /* AutoPresets_Storage.swift */,
 				58CA1221236A70935E684238 /* AutoPresets_ActivityDetectionManager.swift */,
+				BE750480EFE1634C0059742C /* AutoPresets_GeofenceManager.swift */,
 			);
 			path = AutoPresets;
 			sourceTree = "<group>";
@@ -1759,6 +1764,7 @@
 			children = (
 				177A32DF2F91D26776BF2C7F /* AutoPresets_SettingsView.swift */,
 				A92563E71BB3873233772CCE /* AutoPresets_AIRecommendationView.swift */,
+				03C8C4ECE1B6F36E8E1307AA /* AutoPresets_GeofenceSettingsView.swift */,
 			);
 			path = AutoPresets;
 			sourceTree = "<group>";
@@ -3956,6 +3962,8 @@
 				B1F90AD96E591453CF003AC2 /* AutoPresets_Logger.swift in Sources */,
 				211A65C85F6FEC59ED083F2D /* AutoPresets_Storage.swift in Sources */,
 				0556C20E91536D540ED3D91E /* AutoPresets_ActivityDetectionManager.swift in Sources */,
+				BAD5614ADF674903DDA6CB66 /* AutoPresets_GeofenceManager.swift in Sources */,
+				852954520F4B88A1B57C48D5 /* AutoPresets_GeofenceSettingsView.swift in Sources */,
 				FFF05E4789A2D06526EB0A24 /* AutoPresets_SettingsView.swift in Sources */,
 				232E357E321361C66498FEEA /* AutoPresets_Models.swift in Sources */,
 				13992ED79F79937110B6BFCD /* AutoPresets_FeatureFlags.swift in Sources */,
