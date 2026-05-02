@@ -122,8 +122,8 @@ public final class AutoPresets_CalendarManager: NSObject, ObservableObject {
     /// Minutes before event to activate preset (default 15)
     public var leadTimeMinutes: Int {
         get {
-            let val = defaults.integer(forKey: Self.leadTimeKey)
-            return val > 0 ? val : 15
+            if defaults.object(forKey: Self.leadTimeKey) == nil { return 15 }
+            return defaults.integer(forKey: Self.leadTimeKey)
         }
         set {
             defaults.set(newValue, forKey: Self.leadTimeKey)
