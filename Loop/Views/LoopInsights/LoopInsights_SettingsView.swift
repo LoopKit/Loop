@@ -134,6 +134,7 @@ struct LoopInsights_SettingsView: View {
                 phase5FeaturesSection
                 personalitySection
                 backgroundMonitoringSection
+                caregiverDigestSection
                 dataSection
                 if LoopInsights_FeatureFlags.developerModeEnabled {
                     developerSection
@@ -907,6 +908,41 @@ struct LoopInsights_SettingsView: View {
                 }
 
                 Text(NSLocalizedString("LoopInsights can continuously monitor your data and proactively notify you when it detects a setting change opportunity.", comment: "LoopInsights background monitoring description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    // MARK: - Caregiver Digest
+
+    private var caregiverDigestSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    Image(systemName: "person.2.fill")
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
+                    Text(NSLocalizedString("CAREGIVER DIGEST", comment: "LoopInsights caregiver digest header"))
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                }
+
+                NavigationLink {
+                    LoopInsights_CaregiverDigestView(dataStoresProvider: dataStoresProvider)
+                } label: {
+                    HStack {
+                        Text(NSLocalizedString("Caregiver Digest", comment: "LoopInsights caregiver digest row"))
+                        Spacer()
+                        Text(LoopInsights_CaregiverDigestService.isEnabled
+                            ? LoopInsights_CaregiverDigestService.frequency.displayName
+                            : NSLocalizedString("Off", comment: "LoopInsights digest off"))
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Text(NSLocalizedString("Share glucose summaries with caregivers, parents, or family members via email or iMessage.", comment: "LoopInsights caregiver digest description"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
