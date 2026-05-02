@@ -714,24 +714,6 @@ struct AutoPresets_SettingsView: View {
         return Self.stopDelayValues[index]
     }
 
-    private func formatDuration(_ interval: TimeInterval) -> String {
-        if interval < 60 {
-            return "\(Int(interval)) sec"
-        } else if interval < 3600 {
-            let minutes = Int(interval / 60)
-            return "\(minutes) min"
-        } else {
-            let hours = interval / 3600
-            if hours == floor(hours) {
-                return "\(Int(hours)) hr"
-            } else {
-                let h = Int(hours)
-                let m = Int((hours - Double(h)) * 60)
-                return "\(h) hr \(m) min"
-            }
-        }
-    }
-
     private func formatContinuousActivityTime(_ interval: TimeInterval) -> String {
         return formatDuration(interval)
     }
