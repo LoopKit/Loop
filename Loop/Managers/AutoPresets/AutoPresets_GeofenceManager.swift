@@ -11,6 +11,7 @@
 import Combine
 import CoreLocation
 import Foundation
+import LoopKit
 import os.log
 
 // MARK: - Geofence Location Model
