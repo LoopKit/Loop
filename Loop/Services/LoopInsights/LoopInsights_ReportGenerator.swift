@@ -255,3 +255,26 @@ struct LoopInsights_ActivityViewRepresentable: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
+
+/// A UIActivityItemSource that provides a file URL with a custom email subject line.
+final class LoopInsights_SubjectItemSource: NSObject, UIActivityItemSource {
+    let url: URL
+    let subject: String
+
+    init(url: URL, subject: String) {
+        self.url = url
+        self.subject = subject
+    }
+
+    func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
+        return url
+    }
+
+    func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
+        return url
+    }
+
+    func activityViewController(_ activityViewController: UIActivityViewController, subjectForActivityType activityType: UIActivity.ActivityType?) -> String {
+        return subject
+    }
+}

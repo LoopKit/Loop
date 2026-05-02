@@ -33,6 +33,7 @@ struct LoopInsights_DashboardView: View {
     @State private var showingCaffeineLog = false
     @State private var showingAlcoholLog = false
     @State private var showingBehaviorInsights = false
+    @State private var showingEndoReport = false
     @State private var settingsImpactExpanded = false
     @State private var selectedRecord: LoopInsightsSuggestionRecord?
     @State private var developerTapCount = 0
@@ -192,6 +193,11 @@ struct LoopInsights_DashboardView: View {
         .sheet(isPresented: $showingBehaviorInsights) {
             NavigationView {
                 LoopInsights_BehaviorInsightsView()
+            }
+        }
+        .sheet(isPresented: $showingEndoReport) {
+            NavigationView {
+                LoopInsights_EndoReportView(coordinator: viewModel.coordinator)
             }
         }
         .sheet(isPresented: $showingSupportedModels) {
@@ -1381,6 +1387,20 @@ struct LoopInsights_DashboardView: View {
                             .foregroundColor(.secondary)
                     }
                     .foregroundColor(.orange)
+                }
+            }
+
+            // Endo Report — always last
+            Button(action: { showingEndoReport = true }) {
+                HStack(spacing: 10) {
+                    Image(systemName: "doc.text.fill")
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
+                    Text(NSLocalizedString("Generate Endo Report", comment: "LoopInsights endo report button"))
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
+                    Spacer()
+                    Image(systemName: "arrow.up.doc.fill")
+                        .font(.caption)
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255).opacity(0.6))
                 }
             }
         }
