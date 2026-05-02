@@ -1382,31 +1382,29 @@ final class FoodFinder_SearchViewModel: ObservableObject {
         currentResult.totalFiber = newTotalFiber > 0 ? newTotalFiber : nil
         currentResult.totalCalories = newTotalCalories > 0 ? newTotalCalories : nil
 
-        // Recalculate absorption time if advanced dosing is enabled
-        if UserDefaults.standard.foodFinder_advancedDosingRecommendationsEnabled {
-            let (newAbsorptionHours, newReasoning) = recalculateAbsorptionTime(
-                carbs: newTotalCarbs,
-                protein: newTotalProtein,
-                fat: newTotalFat,
-                fiber: newTotalFiber,
-                calories: newTotalCalories,
-                remainingItems: currentResult.foodItemsDetailed,
-                context: "Adjusted after removing an item"
-            )
+        // Recalculate absorption time based on remaining meal composition
+        let (newAbsorptionHours, newReasoning) = recalculateAbsorptionTime(
+            carbs: newTotalCarbs,
+            protein: newTotalProtein,
+            fat: newTotalFat,
+            fiber: newTotalFiber,
+            calories: newTotalCalories,
+            remainingItems: currentResult.foodItemsDetailed,
+            context: "Adjusted after removing an item"
+        )
 
-            currentResult.absorptionTimeHours = newAbsorptionHours
-            currentResult.absorptionTimeReasoning = newReasoning
+        currentResult.absorptionTimeHours = newAbsorptionHours
+        currentResult.absorptionTimeReasoning = newReasoning
 
-            // Update the UI absorption time if it was previously AI-generated
-            if absorptionTimeWasAIGenerated {
-                let newAbsorptionTimeInterval = TimeInterval(newAbsorptionHours * 3600)
-                absorptionEditIsProgrammatic = true
-                absorptionTime = newAbsorptionTimeInterval
+        // Update the UI absorption time if it was previously AI-generated
+        if absorptionTimeWasAIGenerated {
+            let newAbsorptionTimeInterval = TimeInterval(newAbsorptionHours * 3600)
+            absorptionEditIsProgrammatic = true
+            absorptionTime = newAbsorptionTimeInterval
 
-                #if DEBUG
-                print("🤖 Updated AI absorption time after deletion: \(newAbsorptionHours) hours")
-                #endif
-            }
+            #if DEBUG
+            print("🤖 Updated AI absorption time after deletion: \(newAbsorptionHours) hours")
+            #endif
         }
 
         // Update the stored result
@@ -1510,8 +1508,8 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             fpuAdjustment = 0.5
             fpuDescription = "Medium FPU (\(String(format: "%.1f", fpuValue))) — slight gastric emptying delay"
         } else {
-            fpuAdjustment = 1.0
-            fpuDescription = "High FPU (\(String(format: "%.1f", fpuValue))) — moderate gastric emptying delay"
+            fpuAdjustment = 1.5
+            fpuDescription = "High FPU (\(String(format: "%.1f", fpuValue))) — significant gastric emptying delay (pizza/nachos pattern)"
         }
 
         // Fiber — modest effect on absorption speed.
@@ -1548,8 +1546,8 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             mealSizeDescription = "Small meal (\(String(format: "%.0f", calories)) cal) — no impact"
         }
 
-        // Total: capped at 2–5 hours (aligned with Loop's fast/medium/slow range)
-        let totalHours = min(max(baselineHours + fpuAdjustment + fiberAdjustment + mealSizeAdjustment, 2.0), 5.0)
+        // Total: capped at 2–6 hours (extended from 5h to accommodate high-fat meals like pizza)
+        let totalHours = min(max(baselineHours + fpuAdjustment + fiberAdjustment + mealSizeAdjustment, 2.0), 6.0)
 
         // Generate detailed reasoning
         let reasoning = "\(context): " +
