@@ -32,6 +32,9 @@ struct LoopInsights_DashboardView: View {
     @State private var showingMealInsights = false
     @State private var showingCaffeineLog = false
     @State private var showingAlcoholLog = false
+    @State private var showingBehaviorInsights = false
+    @State private var showingEndoReport = false
+    @State private var settingsImpactExpanded = false
     @State private var selectedRecord: LoopInsightsSuggestionRecord?
     @State private var developerTapCount = 0
     @State private var showingSupportedModels = false
@@ -86,6 +89,12 @@ struct LoopInsights_DashboardView: View {
             }
             if viewModel.pendingSuggestions.isEmpty && viewModel.analysisResponse != nil && !viewModel.isAnalyzing {
                 noChangesSection
+            }
+            if !viewModel.recentlyAppliedSuggestions.isEmpty {
+                settingsImpactSection
+            }
+            if !viewModel.newBehaviorDiscoveries.isEmpty {
+                behaviorDiscoverySection
             }
             navigationSection
         }
@@ -179,6 +188,16 @@ struct LoopInsights_DashboardView: View {
         .sheet(isPresented: $showingAlcoholLog) {
             NavigationView {
                 LoopInsights_AlcoholLogView(tracker: viewModel.coordinator.alcoholTracker)
+            }
+        }
+        .sheet(isPresented: $showingBehaviorInsights) {
+            NavigationView {
+                LoopInsights_BehaviorInsightsView()
+            }
+        }
+        .sheet(isPresented: $showingEndoReport) {
+            NavigationView {
+                LoopInsights_EndoReportView(coordinator: viewModel.coordinator)
             }
         }
         .sheet(isPresented: $showingSupportedModels) {
@@ -1081,6 +1100,173 @@ struct LoopInsights_DashboardView: View {
         }
     }
 
+    // MARK: - Settings Impact Tracker
+
+    private var settingsImpactSection: some View {
+        Section {
+            DisclosureGroup(
+                isExpanded: $settingsImpactExpanded,
+                content: {
+                    ForEach(viewModel.recentlyAppliedSuggestions.prefix(5)) { record in
+                        settingsImpactRow(for: record)
+                    }
+                },
+                label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "chart.line.uptrend.xyaxis.circle.fill")
+                            .foregroundColor(.accentColor)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(NSLocalizedString("Settings Impact", comment: "LoopInsights settings impact section header"))
+                                .font(.subheadline.weight(.medium))
+                            Text(String(format: NSLocalizedString("%d recent change(s) tracked", comment: "LoopInsights impact count"), viewModel.recentlyAppliedSuggestions.prefix(5).count))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    private func settingsImpactRow(for record: LoopInsightsSuggestionRecord) -> some View {
+        let daysAgo = Int(Date().timeIntervalSince(record.resolvedAt ?? record.createdAt) / 86400)
+        let settingLabel = record.suggestion.settingType.abbreviation
+        let evaluation = record.outcomeEvaluation
+
+        return VStack(alignment: .leading, spacing: 8) {
+            // Header: setting type + days ago + verdict badge
+            HStack {
+                Text(settingLabel)
+                    .font(.caption.bold())
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.accentColor.opacity(0.15))
+                    .cornerRadius(4)
+
+                Text(record.suggestion.summaryDescription)
+                    .font(.subheadline)
+                    .lineLimit(1)
+
+                Spacer()
+
+                if let eval = evaluation {
+                    Label(eval.verdict.displayName, systemImage: eval.verdict.systemImage)
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(eval.verdict.color)
+                } else {
+                    let evalDays = record.suggestion.successCriteria?.evaluationDays ?? 5
+                    if daysAgo < evalDays {
+                        Text("\(evalDays - daysAgo)d until eval")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Awaiting eval")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                    }
+                }
+            }
+
+            // Glucose stats comparison (if captured at apply time)
+            if let before = record.glucoseStatsAtApply {
+                HStack(spacing: 16) {
+                    impactMetric(
+                        label: "TIR",
+                        before: before.timeInRange,
+                        format: "%.0f%%"
+                    )
+                    impactMetric(
+                        label: "Avg",
+                        before: before.averageGlucose,
+                        format: "%.0f"
+                    )
+                    impactMetric(
+                        label: "Below",
+                        before: before.timeBelowRange,
+                        format: "%.1f%%"
+                    )
+                    impactMetric(
+                        label: "CV",
+                        before: before.coefficientOfVariation,
+                        format: "%.0f%%"
+                    )
+                }
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            }
+
+            // Outcome reasoning (if evaluated)
+            if let eval = evaluation, !eval.reasoning.isEmpty {
+                Text(eval.reasoning)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+
+            // Applied date
+            Text(String(format: NSLocalizedString("Applied %d day(s) ago", comment: "LoopInsights impact: days since applied"), daysAgo))
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func impactMetric(label: String, before: Double, format: String) -> some View {
+        VStack(spacing: 2) {
+            Text(label)
+                .font(.caption2.weight(.medium))
+            Text(String(format: format, before))
+                .foregroundColor(.primary)
+        }
+    }
+
+    // MARK: - Behavior Discovery Alert
+
+    private var behaviorDiscoverySection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 8) {
+                    Image(systemName: "brain.head.profile")
+                        .font(.title3)
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(NSLocalizedString("New Pattern Discovered", comment: "Behavior insights discovery title"))
+                            .font(.subheadline.weight(.semibold))
+                        Text(String(format: NSLocalizedString("We found %d new correction pattern(s) in your meal data", comment: "Behavior insights discovery subtitle"), viewModel.newBehaviorDiscoveries.count))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                }
+
+                ForEach(viewModel.newBehaviorDiscoveries.prefix(3)) { pattern in
+                    HStack(spacing: 8) {
+                        Image(systemName: pattern.isUnderestimation ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                            .font(.caption)
+                            .foregroundColor(pattern.isUnderestimation ? .orange : .blue)
+                        Text(pattern.summaryDescription)
+                            .font(.caption)
+                            .lineLimit(2)
+                    }
+                }
+
+                HStack {
+                    Button(action: { showingBehaviorInsights = true }) {
+                        Text(NSLocalizedString("View All", comment: "Behavior insights view all button"))
+                            .font(.caption.weight(.medium))
+                    }
+                    Spacer()
+                    Button(action: { viewModel.dismissBehaviorDiscoveries() }) {
+                        Text(NSLocalizedString("Dismiss", comment: "Dismiss button"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
     // MARK: - Navigation
 
     private var navigationSection: some View {
@@ -1152,6 +1338,18 @@ struct LoopInsights_DashboardView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+
+                Button(action: { showingBehaviorInsights = true }) {
+                    HStack {
+                        Image(systemName: "brain.head.profile")
+                            .foregroundColor(.accentColor)
+                        Text(NSLocalizedString("Behavior Insights", comment: "LoopInsights behavior insights button"))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
 
             Button(action: { showingHistory = true }) {
@@ -1189,6 +1387,20 @@ struct LoopInsights_DashboardView: View {
                             .foregroundColor(.secondary)
                     }
                     .foregroundColor(.orange)
+                }
+            }
+
+            // Endo Report — always last
+            Button(action: { showingEndoReport = true }) {
+                HStack(spacing: 10) {
+                    Image(systemName: "doc.text.fill")
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
+                    Text(NSLocalizedString("Generate Endo Report", comment: "LoopInsights endo report button"))
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
+                    Spacer()
+                    Image(systemName: "arrow.up.doc.fill")
+                        .font(.caption)
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255).opacity(0.6))
                 }
             }
         }

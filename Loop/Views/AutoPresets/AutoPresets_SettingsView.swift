@@ -427,22 +427,22 @@ struct AutoPresets_SettingsView: View {
                     Text("Stop Delay")
                         .font(.headline)
                     Spacer()
-                    Text(formatContinuousActivityTime(coordinator.settings.stopInterval))
+                    Text(formatDuration(coordinator.settings.stopInterval))
                         .foregroundColor(.secondary)
                 }
 
-                Text("How long to wait after motion stops before deactivating preset.")
+                Text("How long to wait after motion stops before deactivating preset. Longer delays help cover post-exercise insulin sensitivity.")
                     .font(.caption)
                     .foregroundColor(.secondary)
 
                 Slider(
                     value: Binding(
-                        get: { continuousActivityTimeSliderValue(from: coordinator.settings.stopInterval) },
+                        get: { stopDelaySliderValue(from: coordinator.settings.stopInterval) },
                         set: { sliderValue in
-                            coordinator.updateSettings { $0.stopInterval = continuousActivityTimeFromSlider(sliderValue) }
+                            coordinator.updateSettings { $0.stopInterval = stopDelayFromSlider(sliderValue) }
                         }
                     ),
-                    in: 0 ... 12,
+                    in: 0 ... Double(Self.stopDelayValues.count - 1),
                     step: 1
                 )
             }
@@ -681,11 +681,14 @@ struct AutoPresets_SettingsView: View {
 
     private static let continuousActivityTimeValues: [TimeInterval] = [10, 20, 30, 60, 120, 180, 240, 300, 360, 420, 480, 540, 600]
 
+    /// Stop Delay extends to 2 hours (7200s) for post-exercise recovery use cases
+    private static let stopDelayValues: [TimeInterval] = [10, 20, 30, 60, 120, 180, 300, 600, 900, 1200, 1800, 2700, 3600, 5400, 7200]
+
     private func continuousActivityTimeSliderValue(from interval: TimeInterval) -> Double {
         if let index = Self.continuousActivityTimeValues.firstIndex(where: { $0 >= interval }) {
             return Double(index)
         }
-        return 12
+        return Double(Self.continuousActivityTimeValues.count - 1)
     }
 
     private func continuousActivityTimeFromSlider(_ sliderValue: Double) -> TimeInterval {
@@ -696,13 +699,23 @@ struct AutoPresets_SettingsView: View {
         return Self.continuousActivityTimeValues[index]
     }
 
-    private func formatContinuousActivityTime(_ interval: TimeInterval) -> String {
-        if interval < 60 {
-            return "\(Int(interval)) sec"
-        } else {
-            let minutes = Int(interval / 60)
-            return "\(minutes) min"
+    private func stopDelaySliderValue(from interval: TimeInterval) -> Double {
+        if let index = Self.stopDelayValues.firstIndex(where: { $0 >= interval }) {
+            return Double(index)
         }
+        return Double(Self.stopDelayValues.count - 1)
+    }
+
+    private func stopDelayFromSlider(_ sliderValue: Double) -> TimeInterval {
+        let index = Int(sliderValue.rounded())
+        guard index >= 0 && index < Self.stopDelayValues.count else {
+            return 300
+        }
+        return Self.stopDelayValues[index]
+    }
+
+    private func formatContinuousActivityTime(_ interval: TimeInterval) -> String {
+        return formatDuration(interval)
     }
 
     // MARK: - Formatters

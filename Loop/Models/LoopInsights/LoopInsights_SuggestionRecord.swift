@@ -9,6 +9,21 @@
 import Foundation
 import SwiftUI
 
+// MARK: - Glucose Stats Snapshot
+
+/// Lightweight glucose metrics captured at the time a suggestion is applied,
+/// enabling before/after impact comparison on the Settings Impact Tracker.
+struct LoopInsightsGlucoseStatsSnapshot: Codable, Equatable {
+    let timeInRange: Double          // % time 70-180
+    let timeBelowRange: Double       // % time <70
+    let timeAboveRange: Double       // % time >180
+    let averageGlucose: Double       // mg/dL
+    let coefficientOfVariation: Double // %
+    let gmi: Double                  // Glucose Management Indicator %
+    let capturedAt: Date
+    let periodDays: Int              // analysis period these stats represent
+}
+
 // MARK: - Outcome Evaluation
 
 /// The AI's evaluation of whether a previously applied suggestion achieved its success criteria
@@ -127,6 +142,9 @@ struct LoopInsightsSuggestionRecord: Codable, Identifiable, Equatable {
     var settingsSnapshotAfter: LoopInsightsTherapySnapshot?
     var outcomeEvaluation: LoopInsightsOutcomeEvaluation?
 
+    /// Glucose stats captured at the time the suggestion was applied, for before/after comparison
+    var glucoseStatsAtApply: LoopInsightsGlucoseStatsSnapshot?
+
     init(suggestion: LoopInsightsSuggestion) {
         self.id = UUID()
         self.suggestion = suggestion
@@ -137,14 +155,16 @@ struct LoopInsightsSuggestionRecord: Codable, Identifiable, Equatable {
         self.settingsSnapshotBefore = nil
         self.settingsSnapshotAfter = nil
         self.outcomeEvaluation = nil
+        self.glucoseStatsAtApply = nil
     }
 
-    mutating func markApplied(mode: LoopInsightsApplyMode, snapshotBefore: LoopInsightsTherapySnapshot?, snapshotAfter: LoopInsightsTherapySnapshot?) {
+    mutating func markApplied(mode: LoopInsightsApplyMode, snapshotBefore: LoopInsightsTherapySnapshot?, snapshotAfter: LoopInsightsTherapySnapshot?, glucoseStats: LoopInsightsGlucoseStatsSnapshot? = nil) {
         self.status = mode == .autoApply ? .autoApplied : .applied
         self.resolvedAt = Date()
         self.applyMode = mode
         self.settingsSnapshotBefore = snapshotBefore
         self.settingsSnapshotAfter = snapshotAfter
+        self.glucoseStatsAtApply = glucoseStats
     }
 
     mutating func markDismissed() {

@@ -35,6 +35,14 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     /// Suggestion records (pending)
     @Published var pendingSuggestions: [LoopInsightsSuggestionRecord] = []
 
+    /// Recently applied suggestions (last 30 days) for the Settings Impact Tracker
+    var recentlyAppliedSuggestions: [LoopInsightsSuggestionRecord] {
+        let cutoff = Date().addingTimeInterval(-30 * 24 * 3600)
+        return coordinator.suggestionStore.resolvedRecords
+            .filter { ($0.status == .applied || $0.status == .autoApplied) && ($0.resolvedAt ?? $0.createdAt) > cutoff }
+            .sorted { ($0.resolvedAt ?? $0.createdAt) > ($1.resolvedAt ?? $1.createdAt) }
+    }
+
     /// Selected setting type for analysis focus
     @Published var focusSettingType: LoopInsightsSettingType = .basalRate
 
@@ -55,6 +63,9 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
     /// Detected glucose/insulin patterns from aggregated data
     @Published var detectedPatterns: [LoopInsightsDetectedPattern] = []
+
+    /// Newly discovered behavior correction patterns (alert upon discovery)
+    @Published var newBehaviorDiscoveries: [LoopInsightsCorrectionPattern] = []
 
     /// Suggestions that were just auto-applied (for notification display)
     @Published var autoAppliedSuggestions: [LoopInsightsSuggestion] = []
@@ -103,6 +114,9 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
         // Load initial snapshot
         loadCurrentSettings()
+
+        // Check for new behavior correction patterns (alert upon discovery)
+        checkBehaviorDiscoveries()
     }
 
     // MARK: - Actions
@@ -114,6 +128,22 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
         } catch {
             LoopInsights_FeatureFlags.log.error("Failed to capture therapy snapshot: \(error)")
         }
+    }
+
+    /// Check for newly discovered behavior correction patterns
+    func checkBehaviorDiscoveries() {
+        guard LoopInsights_FeatureFlags.foodResponseEnabled else { return }
+        DispatchQueue.global(qos: .utility).async {
+            let discoveries = LoopInsights_BehaviorInsightsStore.checkForNewDiscoveries()
+            DispatchQueue.main.async {
+                self.newBehaviorDiscoveries = discoveries
+            }
+        }
+    }
+
+    /// Dismiss the behavior discovery alert
+    func dismissBehaviorDiscoveries() {
+        newBehaviorDiscoveries = []
     }
 
     /// Run AI analysis for the focused setting type
@@ -300,6 +330,21 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     }
 
     /// Apply a suggestion based on the current apply mode
+    /// Build a glucose stats snapshot from the current aggregated stats for impact tracking
+    private var currentGlucoseStatsSnapshot: LoopInsightsGlucoseStatsSnapshot? {
+        guard let stats = aggregatedStats else { return nil }
+        return LoopInsightsGlucoseStatsSnapshot(
+            timeInRange: stats.glucoseStats.timeInRange,
+            timeBelowRange: stats.glucoseStats.timeBelowRange,
+            timeAboveRange: stats.glucoseStats.timeAboveRange,
+            averageGlucose: stats.glucoseStats.averageGlucose,
+            coefficientOfVariation: stats.glucoseStats.coefficientOfVariation,
+            gmi: stats.glucoseStats.gmi,
+            capturedAt: Date(),
+            periodDays: stats.period.rawValue
+        )
+    }
+
     func applySuggestion(_ record: LoopInsightsSuggestionRecord) {
         let mode = LoopInsights_FeatureFlags.applyMode
 
@@ -311,7 +356,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 recordID: record.id,
                 mode: .manual,
                 snapshotBefore: snapshotBefore,
-                snapshotAfter: nil
+                snapshotAfter: nil,
+                glucoseStats: currentGlucoseStatsSnapshot
             )
 
         case .oneTap:
@@ -355,7 +401,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             recordID: record.id,
             mode: LoopInsights_FeatureFlags.applyMode,
             snapshotBefore: snapshotBefore,
-            snapshotAfter: snapshotAfter
+            snapshotAfter: snapshotAfter,
+            glucoseStats: currentGlucoseStatsSnapshot
         )
 
         recordToApply = nil
@@ -410,7 +457,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             recordID: record.id,
             mode: .preFill,
             snapshotBefore: snapshotBefore,
-            snapshotAfter: snapshotAfter
+            snapshotAfter: snapshotAfter,
+            glucoseStats: currentGlucoseStatsSnapshot
         )
 
         recordToApply = nil
@@ -602,7 +650,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 recordID: record.id,
                 mode: .autoApply,
                 snapshotBefore: snapshotBefore,
-                snapshotAfter: snapshotAfter
+                snapshotAfter: snapshotAfter,
+                glucoseStats: currentGlucoseStatsSnapshot
             )
         }
 

@@ -337,8 +337,66 @@ final class LoopInsights_Coordinator: ObservableObject {
             if !exerciseCtx.isEmpty { context.append(exerciseCtx) }
         }
 
+        // Behavior insights — systematic user correction patterns
+        if LoopInsights_FeatureFlags.foodResponseEnabled {
+            let behaviorPatterns = LoopInsights_BehaviorInsightsAnalyzer.analyzePatterns()
+            let behaviorCtx = LoopInsights_BehaviorInsightsAnalyzer.buildPromptContext(patterns: behaviorPatterns)
+            if !behaviorCtx.isEmpty { context.append(behaviorCtx) }
+        }
+
+        // User engagement & adherence metrics
+        let engagementCtx = buildEngagementPromptContext(stats: stats)
+        if !engagementCtx.isEmpty { context.append(engagementCtx) }
+
         guard !context.isEmpty else { return nil }
         return context.joined(separator: "\n")
+    }
+
+    /// Compute user engagement metrics from carb logging frequency, correction trends,
+    /// and recent suggestion outcomes. Provides the AI with adherence context so it can
+    /// temper recommendations when the user may be disengaged or experiencing burnout.
+    private func buildEngagementPromptContext(stats: LoopInsightsAggregatedStats) -> String {
+        var lines: [String] = []
+
+        // Carb logging compliance: estimate ~3 meals/day as baseline
+        let expectedMeals = max(1, stats.period.rawValue) * 3
+        let mealCount = stats.carbStats.mealCount
+        let loggingRate = Double(mealCount) / Double(expectedMeals)
+        lines.append("- Carb logging rate: \(mealCount) meals logged over \(stats.period.rawValue) days (\(Int(loggingRate * 100))% of ~3/day estimate)")
+
+        // Correction bolus frequency
+        let correctionsPerDay = Double(stats.insulinStats.correctionBolusCount) / Double(max(1, stats.period.rawValue))
+        lines.append("- Corrections per day: \(String(format: "%.1f", correctionsPerDay))")
+
+        // Recent suggestion compliance
+        let recentSuggestions = Array(suggestionStore.resolvedRecords.prefix(10))
+        if !recentSuggestions.isEmpty {
+            let applied = recentSuggestions.filter { $0.status == .applied || $0.status == .autoApplied }.count
+            let reverted = recentSuggestions.filter { $0.status == .reverted }.count
+            let dismissed = recentSuggestions.filter { $0.status == .dismissed }.count
+            lines.append("- Recent suggestions: \(applied) applied, \(reverted) reverted, \(dismissed) dismissed (of last \(recentSuggestions.count))")
+        }
+
+        // Flag low engagement
+        var warnings: [String] = []
+        if loggingRate < 0.5 {
+            warnings.append("LOW CARB LOGGING (<50% of estimated meals)")
+        }
+        if correctionsPerDay < 0.3 && stats.glucoseStats.timeAboveRange > 20 {
+            warnings.append("FEW CORRECTIONS despite high time-above-range — possible disengagement")
+        }
+        let revertRate = Double(recentSuggestions.filter { $0.status == .reverted }.count) / Double(max(1, recentSuggestions.count))
+        if revertRate > 0.5 && recentSuggestions.count >= 3 {
+            warnings.append("HIGH SUGGESTION REVERSION (\(Int(revertRate * 100))% reverted) — user may not trust recommendations")
+        }
+
+        guard !lines.isEmpty else { return "" }
+
+        var result = "USER ENGAGEMENT & ADHERENCE:\n" + lines.joined(separator: "\n")
+        if !warnings.isEmpty {
+            result += "\n⚠️ " + warnings.joined(separator: "\n⚠️ ")
+        }
+        return result
     }
 
     // MARK: - Meal Debrief Context

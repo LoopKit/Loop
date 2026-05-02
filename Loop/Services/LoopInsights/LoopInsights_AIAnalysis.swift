@@ -254,6 +254,22 @@ final class LoopInsights_AIAnalysis {
           On an empty stomach, drinking alcohol can also cause short term hypoglycemia. Alcohol is a toxin, \
           so the body 'spends' extra glucose energy to process the toxin out. With no onboard glucose the user may go low. \
 
+        USER ENGAGEMENT & ADHERENCE — When engagement metrics are provided:
+        - LOW CARB LOGGING (meals logged vs estimated): If the user is logging fewer than 50% of \
+          estimated meals, their carb data is incomplete. Cap CR confidence at "low" and note the gap. \
+          Do NOT interpret missing carb data as "no meals" — it means data is unavailable.
+        - DECLINING CORRECTIONS: A falling correction bolus trend over time may indicate disengagement \
+          or burnout — the user may be ignoring highs. Note this gently in overall_assessment as a \
+          factor that limits confidence, not as a judgment. Recommend conservative changes only.
+        - HIGH SUGGESTION REVERSION: If >50% of recent suggestions were reverted, the user may not \
+          trust or benefit from large changes. Reduce proposed change magnitudes and increase \
+          evaluation_days to build confidence gradually.
+        - BURNOUT SIGNALS: Data gaps, declining TIR trend over weeks, or combination of low logging + \
+          declining corrections = possible diabetes fatigue. In overall_assessment, acknowledge gently: \
+          "Data patterns suggest engagement may be lower recently. Consider focusing on one small, \
+          high-impact change rather than multiple adjustments." Never be judgmental or prescriptive \
+          about the user's behavior — focus only on what the DATA shows and offer supportive framing.
+
         INSULIN TYPE & DIA — Duration of Insulin Action defines the IOB calculation window:
         - RAPID-ACTING (Novolog/Humalog/Apidra): Onset ~15 min, peak ~75 min, DIA ~6 hrs. \
           Pre-bolusing 15-20 min is effective. Corrections take 2-3 hrs to fully resolve.

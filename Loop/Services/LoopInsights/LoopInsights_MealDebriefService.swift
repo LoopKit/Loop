@@ -199,6 +199,20 @@ final class LoopInsights_MealDebriefService {
             lines.append("Historical pattern for \(pattern.foodType) (\(pattern.mealCount) meals): avg peak +\(String(format: "%.0f", pattern.peakGlucoseRise)) mg/dL in \(String(format: "%.0f", pattern.timeToPeakMinutes)) min")
         }
 
+        // Correction pattern context (if relevant to this food type)
+        let behaviorPatterns = LoopInsights_BehaviorInsightsAnalyzer.analyzePatterns()
+        let relevantPatterns = behaviorPatterns.filter { pattern in
+            (pattern.groupingType == .foodType && mealRecord.foodType.localizedCaseInsensitiveContains(pattern.groupingValue)) ||
+            (pattern.groupingType == .location && mealRecord.locationName?.localizedCaseInsensitiveContains(pattern.groupingValue) == true)
+        }
+        if !relevantPatterns.isEmpty {
+            lines.append("")
+            lines.append("Known correction patterns for this meal context:")
+            for pattern in relevantPatterns.prefix(3) {
+                lines.append("  • \(pattern.summaryDescription)")
+            }
+        }
+
         lines.append("")
         lines.append("Analyze: What happened vs what was predicted? What did the carbs effectively behave like? What should be learned for next time? Keep it under 5 sentences.")
         lines.append("")
