@@ -64,11 +64,6 @@ class NetworkQualityMonitor: ObservableObject {
         return !isConnected || isExpensive || isConstrained || connectionType == .cellular
     }
     
-    /// Determines if parallel processing is safe
-    var shouldUseParallelProcessing: Bool {
-        return isConnected && !isExpensive && !isConstrained && connectionType == .wifi
-    }
-    
     /// Gets appropriate timeout for current network conditions
     var recommendedTimeout: TimeInterval {
         if shouldUseConservativeMode {
@@ -673,29 +668,6 @@ enum SearchProvider: String, CaseIterable {
             return true
         }
     }
-}
-
-// MARK: - Confidence Extraction (file-scope helper)
-
-/// Attempts to extract a numeric confidence score (0.0–1.0) from provider JSON.
-/// Accepts numeric values or common string variants such as "high", "medium", etc.
-private func extractNumericConfidence(from json: [String: Any]) -> Double? {
-    let keys = ["confidence", "confidence_score", "accuracy", "confidence_level"]
-    for key in keys {
-        if let d = json[key] as? Double { return min(1.0, max(0.0, d)) }
-        if let s = json[key] as? String {
-            let ls = s.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            if let v = Double(ls) { return min(1.0, max(0.0, v)) }
-            switch ls {
-            case "very high": return 0.9
-            case "high": return 0.85
-            case "medium", "moderate": return 0.65
-            case "low", "very low": return 0.4
-            default: break
-            }
-        }
-    }
-    return nil
 }
 
 // MARK: - Intelligent Caching System

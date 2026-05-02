@@ -130,35 +130,4 @@ class FoodSearchRouter {
     
     
     
-    // MARK: - Helper Methods
-    
-    /// Creates a small placeholder image for text-based Gemini queries
-    private func createPlaceholderImage() -> UIImage {
-        let size = CGSize(width: 100, height: 100)
-        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-        
-        // Create a simple gradient background
-        let context = UIGraphicsGetCurrentContext()!
-        let colors = [UIColor.systemBlue.cgColor, UIColor.systemGreen.cgColor]
-        let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors as CFArray, locations: nil)!
-        
-        context.drawLinearGradient(gradient, start: CGPoint.zero, end: CGPoint(x: size.width, y: size.height), options: [])
-        
-        // Add a food icon in the center
-        let iconSize: CGFloat = 40
-        let iconFrame = CGRect(
-            x: (size.width - iconSize) / 2,
-            y: (size.height - iconSize) / 2,
-            width: iconSize,
-            height: iconSize
-        )
-        
-        context.setFillColor(UIColor.white.cgColor)
-        context.fillEllipse(in: iconFrame)
-        
-        let image = UIGraphicsGetImageFromCurrentImageContext() ?? UIImage()
-        UIGraphicsEndImageContext()
-        
-        return image
-    }
 }

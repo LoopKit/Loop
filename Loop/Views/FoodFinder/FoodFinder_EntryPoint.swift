@@ -211,6 +211,9 @@ struct FoodFinder_EntryPoint: View {
             searchVM.setupObservers()
             FoodFinder_LocationService.shared.requestLocationIfEnabled()
         }
+        .onDisappear {
+            FoodFinder_LocationService.shared.clearLocation()
+        }
         .onChange(of: restoredAnalysisResult) { newResult in
             guard let result = newResult else { return }
             // Restore thumbnail from history record
