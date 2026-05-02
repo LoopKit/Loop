@@ -149,7 +149,9 @@ final class LoopInsights_ChatViewModel: ObservableObject {
                 let systemPrompt = buildChatSystemPrompt(therapyContext: context)
                 let userPrompt = buildUserPrompt(message: text, conversationHistory: Array(history))
 
+                let requestStart = Date()
                 let response = try await serviceAdapter.sendPrompt(systemPrompt, userPrompt: userPrompt)
+                let responseTime = Date().timeIntervalSince(requestStart)
 
                 let aiMessage = LoopInsightsChatMessage(role: .assistant, content: response, voiceInitiated: isVoice)
                 session.appendMessage(aiMessage)
@@ -159,6 +161,17 @@ final class LoopInsights_ChatViewModel: ObservableObject {
                 if isVoice {
                     voiceService.speak(response)
                 }
+
+                // DataLayer: chat message sent
+                NotificationCenter.default.post(
+                    name: Notification.Name("com.loopkit.Loop.loopInsightsChatMessage"),
+                    object: nil,
+                    userInfo: [
+                        "isVoiceInitiated": isVoice,
+                        "responseTimeSeconds": responseTime,
+                        "topicCategory": "general"
+                    ]
+                )
 
             } catch {
                 errorMessage = error.localizedDescription

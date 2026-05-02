@@ -127,63 +127,23 @@ private let mandatoryNoVagueBlock = """
 MANDATORY REQUIREMENTS - DO NOT BE VAGUE:
 
 FOR FOOD PHOTOS:
-❌ NEVER confuse portions with servings - count distinct food items as portions, calculate number of servings based on USDA standards
-❌ NEVER say "4 servings" when you mean "4 portions" - be precise about USDA serving calculations
-❌ NEVER say "mixed vegetables" - specify "steamed broccoli florets, diced carrots"
-❌ NEVER say "chicken" - specify "grilled chicken breast"
-❌ NEVER say "average portion" - specify "6 oz portion covering 1/4 of plate = 2 USDA servings"
-❌ NEVER say "well-cooked" - specify "golden-brown with visible caramelization"
+❌ NEVER confuse portions (distinct items on plate) with USDA servings (standardized amounts). Calculate serving_multiplier = visible portion ÷ USDA serving.
+❌ NEVER use vague names — specify preparation: "grilled chicken breast", not "chicken"; "steamed broccoli florets, diced carrots", not "mixed vegetables".
+❌ NEVER use vague portions — specify with evidence: "6 oz covering 1/4 of 10-inch plate = 2 USDA servings", not "average portion".
 
-✅ ALWAYS distinguish between food portions (distinct items) and USDA servings (standardized amounts)
-✅ ALWAYS calculate serving_multiplier based on USDA serving sizes
-✅ ALWAYS explain WHY you calculated the number of servings (e.g., "twice the standard serving size")
-✅ ALWAYS indicate if portions are larger/smaller than typical (helps with portion control)
-✅ ALWAYS describe exact colors, textures, sizes, shapes, cooking evidence
-✅ ALWAYS compare portions to visible objects (fork, plate, hand if visible)
-✅ ALWAYS explain if the food appears to be on a platter of food or a single plate of food
-✅ ALWAYS describe specific cooking methods you can see evidence of
-✅ ALWAYS count discrete items (3 broccoli florets, 4 potato wedges)
-✅ ALWAYS calculate nutrition from YOUR visual portion assessment
-✅ ALWAYS explain your reasoning with specific visual evidence
-✅ ALWAYS identify glycemic index category (low/medium/high GI) for carbohydrate-containing foods
-✅ ALWAYS explain how cooking method affects GI when visible (e.g., "well-cooked white rice = high GI ~73")
-✅ ALWAYS provide specific insulin timing guidance based on GI classification
-✅ ALWAYS consider how protein/fat in mixed meals may moderate carb absorption
-✅ ALWAYS assess food combinations and explain how low GI foods may balance high GI foods in the meal
-✅ ALWAYS note fiber content and processing level as factors affecting GI
-✅ ALWAYS consider food ripeness and cooking degree when assessing GI impact
-✅ ALWAYS calculate Fat/Protein Units (FPUs) and provide classification (Low/Medium/High)
-✅ ALWAYS calculate net carbs adjustment for fiber content >5g
-✅ ALWAYS provide specific insulin timing recommendations based on meal composition
-✅ ALWAYS include FPU-based dosing guidance for extended insulin needs
-✅ ALWAYS consider exercise timing and provide specific insulin adjustments
-✅ ALWAYS include relevant safety alerts for the specific meal composition
-✅ ALWAYS provide quantitative dosing percentages and timing durations
-✅ ALWAYS calculate absorption_time_hours conservatively — most mixed meals should be 3–4 hours; only truly high-fat/high-fiber meals warrant 4.5–5 hours
-✅ ALWAYS provide detailed absorption_time_reasoning showing the calculation process
-✅ ALWAYS anchor to Loop's default 3-hour absorption time and only deviate with clear justification (high fat/protein, very high fiber, or very large meal)
-✅ ALWAYS consider that Loop will highlight non-default absorption times in blue to alert user — frequent deviations from 3 hours reduce user trust
+✅ ALWAYS describe exact visual evidence: colors, textures, cooking method signs, discrete item counts, and size comparisons to visible objects (fork, plate, hand).
+✅ ALWAYS explain serving_multiplier reasoning with visual evidence (e.g., "rice covers 1/3 of plate ≈ 1.5 cups = 3× USDA half-cup serving").
+✅ ALWAYS identify GI category (low <55 / medium 56-69 / high 70+) and explain how cooking method, fiber, and protein/fat moderate absorption.
+✅ ALWAYS calculate FPUs = (fat + protein) ÷ 10, classify Low/Medium/High, and provide insulin timing guidance.
+✅ ALWAYS calculate absorption_time_hours conservatively — anchor to Loop's 3-hour default; only deviate with clear justification (high fat/protein, high fiber, large meal). Frequent non-default values reduce user trust.
+✅ ALWAYS provide net carbs adjustment when fiber >5g, safety alerts, and exercise timing considerations.
 
 FOR MENU AND RECIPE ITEMS:
-❌ NEVER make assumptions about plate sizes, portions, or actual serving sizes
-❌ NEVER estimate visual portions when analyzing menu text only
-❌ NEVER claim to see cooking methods, textures, or visual details from menu text
-❌ NEVER multiply nutrition values by assumed restaurant portion sizes
+❌ NEVER assume plate sizes, visual portions, or cooking details from menu text alone.
 
-✅ ALWAYS set image_type to "menu_item" when analyzing menu text
-✅ ALWAYS set portion_estimate to "CANNOT DETERMINE PORTIONS - menu text only"
-✅ ALWAYS set serving_multiplier to 1.0 for menu items (USDA standard only)
-✅ ALWAYS set visual_cues to "NO VISUAL CUES - menu text analysis only"
-✅ ALWAYS mark assessment_notes as "ESTIMATE ONLY - Based on USDA standard serving size"
-✅ ALWAYS use portion_assessment_method to explain this is menu analysis with no visual portions
-✅ ALWAYS provide actual USDA standard nutrition values (carbohydrates, protein, fat, calories)
-✅ ALWAYS calculate nutrition based on typical USDA serving sizes for the identified food type
-✅ ALWAYS include total nutrition fields even for menu items (based on USDA standards)
-✅ ALWAYS translate menu item text into the user's device language (fallback to English if unknown) before populating JSON fields, and include the original wording in assessment_notes when helpful
-✅ ALWAYS use translated item names and descriptions when presenting results
-✅ ALWAYS provide glycemic index assessment for menu items based on typical preparation methods
-✅ ALWAYS include diabetes timing guidance even for menu items based on typical GI values
-✅ ALWAYS make reasonable USDA-based assumptions for nutrition when details are missing and document those assumptions in assessment_notes
+✅ ALWAYS set image_type="menu_item", serving_multiplier=1.0, portion_estimate="CANNOT DETERMINE PORTIONS - menu text only", visual_cues="NO VISUAL CUES - menu text analysis only".
+✅ ALWAYS use USDA standard serving sizes for nutrition, note estimates in assessment_notes, and translate foreign-language items to the user's language.
+✅ ALWAYS include GI assessment and diabetes timing guidance even for menu items.
 """
 
 /// Locale-aware measurement context injected into every AI prompt.
@@ -272,7 +232,7 @@ Portion Estimation Guidance (MANDATORY to include in "portion_assessment_method"
 - State the scale references used (e.g., dinner fork ≈ 19–20 mm wide at the tines, plate ≈ 10–11 inches, can diameter ≈ 66 mm, standard cup ≈ 240 ml).
 - Infer an approximate plate diameter or other reference and describe how you derived it from the photo.
 - For each major item, explain how the visible area/height maps to a volume or weight estimate.
-- Explicitly compare to the typical USDA serving size for that item and compute the serving_multiplier (portion ÷ USDA serving). Include 1–2 concrete examples, e.g., "corn appears ≈ 1 cup (2× USDA 1/2 cup)."
+- Explicitly compare to the typical USDA serving size for that item and compute the serving_multiplier (visible portion ÷ USDA serving). This is CRITICAL — the user sees this number and can adjust it per-item before confirming. Example: if corn on plate appears ≈ 1 cup and USDA serving is 1/2 cup, serving_multiplier = 2.0. If rice appears ≈ 1.5 cups and USDA serving is 1 cup, serving_multiplier = 1.5. The carbohydrates field must reflect the FULL amount for the visible portion (serving_multiplier × USDA carbs per serving).
 - Keep to 3–6 concise sentences written in natural language.
 
 JSON schema (required):
@@ -282,7 +242,7 @@ JSON schema (required):
     "name": string,
     "portion_estimate": string,
     "usda_serving_size": string,
-    "serving_multiplier": number,
+    "serving_multiplier": number,  // visible portion ÷ USDA serving (e.g. 2.0 = twice USDA serving)
     "preparation_method": string | null,
     "visual_cues": string | null,
     "carbohydrates": number,
@@ -399,49 +359,7 @@ FOR MENU ITEMS:
   "portion_assessment_method": "MENU ANALYSIS ONLY - Cannot determine actual portions without seeing food on plate. All nutrition values are ESTIMATES based on USDA standard serving sizes. Actual restaurant portions may vary significantly."
 }
 
-MENU ITEM EXAMPLE:
-If menu shows "Grilled Chicken Caesar Salad", respond:
-{
-  "image_type": "menu_item",
-  "food_items": [
-    {
-      "name": "Grilled Chicken Caesar Salad",
-      "portion_estimate": "CANNOT DETERMINE - menu text only, no actual food visible",
-      "usda_serving_size": "3 oz chicken breast + 2 cups mixed greens",
-      "serving_multiplier": 1.0,
-      "preparation_method": "grilled chicken as described on menu",
-      "visual_cues": "NONE - menu text analysis only",
-      "carbohydrates": 8.0,
-      "calories": 250,
-      "fat": 12.0,
-      "fiber": 3.0,
-      "protein": 25.0,
-      "assessment_notes": "ESTIMATE ONLY - Based on USDA standard serving size. Cannot assess actual portions without seeing prepared food on plate."
-    }
-  ],
-  "total_carbohydrates": 8.0,
-  "total_calories": 250,
-  "total_fat": 12.0,
-  "total_fiber": 3.0,
-  "total_protein": 25.0,
-  "confidence": 0.7,
-  "fat_protein_units": "FPUs = (12g fat + 25g protein) ÷ 10 = 3.7 FPUs. Classification: Medium-High FPU meal",
-  "net_carbs_adjustment": "Net carbs = 8g total carbs - (3g fiber × 0.5) = 6.5g effective carbs for insulin dosing",
-  "diabetes_considerations": "Based on menu analysis: Low glycemic impact due to minimal carbs from vegetables and croutons (estimated 8g total). Mixed meal with high protein (25g) and moderate fat (12g) will slow carb absorption. For insulin dosing, this is a low-carb meal requiring minimal rapid-acting insulin. Consider extended bolus if using insulin pump due to protein and fat content.",
-  "insulin_timing_recommendations": "MEAL TYPE: High Fat-Protein. PRE-MEAL INSULIN TIMING: 5-10 minutes before eating. BOLUS STRATEGY: 50% now, 50% extended over 3-4 hours. MONITORING: Check BG at 2 hours and 4 hours post-meal",
-  "fpu_dosing_guidance": "FPU LEVEL: Medium-High (3.7 FPUs). ADDITIONAL INSULIN: Consider 15-20% extra insulin over 3-4 hours for protein conversion. EXTENDED BOLUS: Use square wave 50%/50% over 3-4 hours. MDI USERS: Consider small additional injection at 2-3 hours post-meal",
-  "exercise_considerations": "PRE-EXERCISE: Ideal pre-workout meal due to sustained energy from protein/fat. POST-EXERCISE: Good recovery meal if within 2 hours of exercise. INSULIN ADJUSTMENTS: Reduce insulin by 25-30% if recent exercise",
-  "absorption_time_hours": 3,
-  "absorption_time_reasoning": "Staying close to Loop's 3-hour default. FPU IMPACT: 3.7 FPUs (Medium) — fat/protein slow gastric emptying slightly (+0.5 hours) but don't dramatically extend carb absorption. FIBER EFFECT: Low fiber (3g) — no meaningful impact. MEAL SIZE: Small-medium (250 kcal) — no impact. With only 8g carbs, the carb absorption itself is fast, but the moderate fat/protein content warrants a small extension. RECOMMENDED: 3 hours — the carbs absorb quickly and the fat/protein create a minor secondary glucose effect that Loop handles through its prediction algorithm.",
-  "meal_size_impact": "MEAL SIZE: Medium 250 kcal. GASTRIC EMPTYING: Normal rate expected due to moderate calories and liquid content. DOSING MODIFICATIONS: No size-related adjustments needed",
-  "individualization_factors": "PATIENT FACTORS: Standard adult dosing applies unless pregnancy/illness present. TECHNOLOGY: Pump users can optimize with precise extended bolus; MDI users should consider split injection. PERSONAL PATTERNS: Track 4-hour post-meal glucose to optimize protein dosing",
-  "safety_alerts": "Low carb content minimizes hypoglycemia risk. High protein may cause delayed glucose rise 3-5 hours post-meal - monitor extended.",
-  "visual_assessment_details": "Menu text shows 'Grilled Chicken Caesar Salad'. Cannot assess visual food qualities from menu text alone.",
-  "overall_description": "Menu item text analysis. No actual food portions visible for assessment.",
-  "portion_assessment_method": "MENU ANALYSIS ONLY - Cannot determine actual portions without seeing food on plate. All nutrition values are ESTIMATES based on USDA standard serving sizes. Actual restaurant portions may vary significantly."
-}
-
-HIGH GLYCEMIC INDEX EXAMPLE:
+EXAMPLE (HIGH GLYCEMIC INDEX):
 If menu shows "Teriyaki Chicken Bowl with White Rice", respond:
 {
   "image_type": "menu_item",
@@ -477,46 +395,6 @@ If menu shows "Teriyaki Chicken Bowl with White Rice", respond:
   "absorption_time_reasoning": "Starting from Loop's 3-hour default. FPU IMPACT: 3.4 FPUs (Medium) — moderate fat/protein slows gastric emptying slightly (+0.5 hours). FIBER EFFECT: Low fiber (1.5g) — no meaningful impact. MEAL SIZE: Small-medium (320 kcal) — no impact. White rice is high-GI and absorbs quickly, but the protein content provides a small slowing effect. RECOMMENDED: 3.5 hours — a modest increase from the default to account for the mixed meal composition.",
   "safety_alerts": "High GI rice may cause rapid BG spike - monitor closely at 1 hour. Protein may extend glucose response beyond 3 hours.",
   "visual_assessment_details": "Menu text shows 'Teriyaki Chicken Bowl with White Rice'. Cannot assess visual food qualities from menu text alone.",
-  "overall_description": "Menu item text analysis. No actual food portions visible for assessment.",
-  "portion_assessment_method": "MENU ANALYSIS ONLY - Cannot determine actual portions without seeing food on plate. All nutrition values are ESTIMATES based on USDA standard serving sizes. Actual restaurant portions may vary significantly."
-}
-
-MIXED GI FOOD COMBINATION EXAMPLE:
-If menu shows "Quinoa Bowl with Sweet Potato and Black Beans", respond:
-{
-  "image_type": "menu_item",
-  "food_items": [
-    {
-      "name": "Quinoa Bowl with Sweet Potato and Black Beans",
-      "portion_estimate": "CANNOT DETERMINE - menu text only, no actual food visible",
-      "usda_serving_size": "1/2 cup cooked quinoa + 1/2 cup sweet potato + 1/2 cup black beans",
-      "serving_multiplier": 1.0,
-      "preparation_method": "cooked quinoa, roasted sweet potato, and seasoned black beans as described on menu",
-      "visual_cues": "NONE - menu text analysis only",
-      "carbohydrates": 42.0,
-      "calories": 285,
-      "fat": 4.0,
-      "fiber": 8.5,
-      "protein": 12.0,
-      "assessment_notes": "ESTIMATE ONLY - Based on USDA standard serving size. Cannot assess actual portions without seeing prepared food on plate."
-    }
-  ],
-  "total_carbohydrates": 42.0,
-  "total_calories": 285,
-  "total_fat": 4.0,
-  "total_fiber": 8.5,
-  "total_protein": 12.0,
-  "confidence": 0.8,
-  "fat_protein_units": "FPUs = (4g fat + 12g protein) ÷ 10 = 1.6 FPUs. Classification: Low FPU meal",
-  "net_carbs_adjustment": "Net carbs = 42g total carbs - (8.5g fiber × 0.75) = 35.6g effective carbs for insulin dosing (significant fiber reduction)",
-  "diabetes_considerations": "Based on menu analysis: MIXED GLYCEMIC INDEX meal with balanced components. Quinoa (low-medium GI ~53), sweet potato (medium GI ~54), and black beans (low GI ~30) create favorable combination. High fiber content (estimated 8.5g+) and plant protein (12g) significantly slow carb absorption. For insulin dosing: This meal allows 20-30 minute pre-meal insulin timing due to low-medium GI foods and high fiber. Expect gradual, sustained blood sugar rise over 60-120 minutes rather than sharp spike. Ideal for extended insulin action.",
-  "insulin_timing_recommendations": "MEAL TYPE: Complex carbs with high fiber. PRE-MEAL INSULIN TIMING: 20-25 minutes before eating. BOLUS STRATEGY: 80% now, 20% extended over 2 hours. MONITORING: Check BG at 2 hours post-meal",
-  "fpu_dosing_guidance": "FPU LEVEL: Low (1.6 FPUs). ADDITIONAL INSULIN: Minimal extra needed for protein/fat. EXTENDED BOLUS: Use slight tail 80%/20% over 2 hours. MDI USERS: Single injection should suffice",
-  "exercise_considerations": "PRE-EXERCISE: Excellent sustained energy meal for endurance activities. POST-EXERCISE: Good recovery with complex carbs and plant protein. INSULIN ADJUSTMENTS: Reduce insulin by 15-20% if recent exercise",
-  "absorption_time_hours": 3.5,
-  "absorption_time_reasoning": "Starting from Loop's 3-hour default. FPU IMPACT: 1.6 FPUs (Low) — minimal fat/protein, no meaningful extension. FIBER EFFECT: High fiber (8.5g) slows carb absorption modestly (+0.5 hours). MEAL SIZE: Small-medium (285 kcal) — no impact. While the high fiber and complex carbs (quinoa, sweet potato, beans) slow the glucose rise, this primarily affects the *shape* of the curve (flatter, more gradual) rather than dramatically extending total absorption duration. RECOMMENDED: 3.5 hours — a modest increase from default to account for the high fiber content slowing gastric emptying.",
-  "safety_alerts": "High fiber significantly blunts glucose response - avoid over-dosing insulin. Gradual rise may delay hypoglycemia symptoms.",
-  "visual_assessment_details": "Menu text shows 'Quinoa Bowl with Sweet Potato and Black Beans'. Cannot assess visual food qualities from menu text alone.",
   "overall_description": "Menu item text analysis. No actual food portions visible for assessment.",
   "portion_assessment_method": "MENU ANALYSIS ONLY - Cannot determine actual portions without seeing food on plate. All nutrition values are ESTIMATES based on USDA standard serving sizes. Actual restaurant portions may vary significantly."
 }
@@ -1301,16 +1179,43 @@ class ConfigurableAIService: ObservableObject {
         let isMenuOrRecipe: Bool
     }
 
+    /// Fast pre-check: detects whether the image contains enough text regions to
+    /// potentially be a menu/recipe. Uses VNDetectTextRectanglesRequest which finds
+    /// bounding boxes without recognizing characters — much faster than full OCR.
+    /// Returns true only if 5+ text regions are found (matching the menu heuristic threshold).
+    private static func hasSignificantText(in cgImage: CGImage) async -> Bool {
+        await withCheckedContinuation { continuation in
+            let request = VNDetectTextRectanglesRequest { request, error in
+                let count = (request.results as? [VNTextObservation])?.count ?? 0
+                continuation.resume(returning: count >= 5)
+            }
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            do {
+                try handler.perform([request])
+            } catch {
+                continuation.resume(returning: false)
+            }
+        }
+    }
+
     /// Performs on-device OCR using Apple Vision to detect and extract text from an image.
+    /// First runs a fast text-detection gate — if fewer than 5 text regions are found,
+    /// skips the expensive accurate OCR entirely (food photos rarely have menu-level text).
     /// Runs on the full-resolution image for maximum accuracy — no compression or resizing.
     /// Returns extracted text and a flag indicating whether the image appears to be a menu/recipe.
     static func performOCR(on image: UIImage) async -> OCRResult {
-        await withCheckedContinuation { continuation in
-            guard let cgImage = image.cgImage else {
-                continuation.resume(returning: OCRResult(text: "", lineCount: 0, averageConfidence: 0, isMenuOrRecipe: false))
-                return
-            }
+        guard let cgImage = image.cgImage else {
+            return OCRResult(text: "", lineCount: 0, averageConfidence: 0, isMenuOrRecipe: false)
+        }
 
+        // Fast gate: skip expensive OCR if image doesn't contain enough text regions
+        let hasText = await hasSignificantText(in: cgImage)
+        guard hasText else {
+            return OCRResult(text: "", lineCount: 0, averageConfidence: 0, isMenuOrRecipe: false)
+        }
+
+        // Passed the gate — run full accurate OCR
+        return await withCheckedContinuation { continuation in
             let request = VNRecognizeTextRequest { request, error in
                 guard let observations = request.results as? [VNRecognizedTextObservation], error == nil else {
                     continuation.resume(returning: OCRResult(text: "", lineCount: 0, averageConfidence: 0, isMenuOrRecipe: false))
