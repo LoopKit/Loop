@@ -535,6 +535,12 @@ final class DeviceDataManager {
             return nil
         }
 
+        // ensure the OmnipodKit Pump manager captures pod information
+        let OmniStr = "Omni"
+        if managerIdentifier.hasPrefix(OmniStr) {
+            return pumpManagerTypeByIdentifier(OmniStr)
+        }
+
         return pumpManagerTypeByIdentifier(managerIdentifier)
     }
 
