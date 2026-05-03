@@ -113,7 +113,11 @@ public final class AutoPresets_GeofenceManager: NSObject, ObservableObject, CLLo
     private override init() {
         super.init()
         locationManager.delegate = self
-        locationManager.allowsBackgroundLocationUpdates = true
+        // Only enable background updates if the app has the location background mode
+        if let modes = Bundle.main.infoDictionary?["UIBackgroundModes"] as? [String],
+           modes.contains("location") {
+            locationManager.allowsBackgroundLocationUpdates = true
+        }
         authorizationStatus = locationManager.authorizationStatus
         loadLocations()
     }
