@@ -142,6 +142,9 @@ public struct SettingsView: View {
             }
         }
         .navigationViewStyle(.stack)
+        .onAppear {
+            TherapyHelpRegistry.destination = AnyView(LoopInsights_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores))
+        }
     }
 
     private func menuItemsForSection(name: String) -> some View {
@@ -286,9 +289,6 @@ extension SettingsView {
         .environment(\.glucoseTintColor, self.glucoseTintColor)
         .environment(\.guidanceColors, self.guidanceColors)
         .environment(\.insulinTintColor, self.insulinTintColor)
-        .onAppear {
-            TherapyHelpRegistry.destination = AnyView(LoopInsights_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores))
-        }
     }
 
     private var configurationSection: some View {
