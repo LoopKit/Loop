@@ -110,6 +110,16 @@ When dragging a new pin on the placement sheet, the pin color shifts in real-tim
 ### Body Bounds Clamping
 Pins cannot be placed outside the body silhouette. A body profile defines valid horizontal bounds at 14 Y-positions (head through ankles). If a pin is dropped outside this boundary — via tap or drag — it snaps to the nearest valid point with a spring animation.
 
+### Recommended Placement Zones
+12 predefined zones shown as grey semi-transparent ellipses on the body map:
+- **Front (8):** Front abdomen L/R, side abdomen L/R, front thigh L/R, side thigh L/R
+- **Back (4):** Back of arm L/R, buttocks L/R
+- Defined in `SiteAtlas_Zones.all` as `SiteAtlas_Zone` structs with normalized center + radii
+- Each zone toggleable on/off via `SiteAtlas_Zones.toggleZone()`, persisted in UserDefaults
+- Settings UI uses `DisclosureGroup` — collapsed shows "X of 12 zones active", expands to toggle list
+- Rendered on both the settings body map and the site selection sheet
+- Uses `.fill()` + `.overlay(.strokeBorder())` for iOS 15 compatibility (not `.fill().stroke()` which is iOS 17+)
+
 ### Swipeable Body Map
 Front/back views in a `TabView(.page)` — swipe the image itself to flip. Uses `UITapGestureRecognizer` (via `UIViewRepresentable`) for pin placement so swipe gestures pass through to TabView.
 

@@ -20,14 +20,17 @@ struct SiteAtlas_SettingsView: View {
     @State private var showDeleteConfirmation = false
     @State private var showSiteSelectionSheet = false
     @State private var editingEntry: SiteAtlas_SiteEntry? = nil
+    @State private var zoneToggleCount = 0
+    @State private var featureEnabled = SiteAtlas_FeatureFlags.isEnabled
 
     var body: some View {
         List {
             featureToggleSection
-            if SiteAtlas_FeatureFlags.isEnabled {
+            if featureEnabled {
                 nextUpSection
                 quickActionsSection
                 mapOverviewSection
+                zoneManagementSection
                 historySection
                 if !hiddenEntries.isEmpty {
                     hiddenSection
@@ -62,8 +65,11 @@ struct SiteAtlas_SettingsView: View {
     private var featureToggleSection: some View {
         Section {
             Toggle(isOn: Binding(
-                get: { SiteAtlas_FeatureFlags.isEnabled },
-                set: { SiteAtlas_FeatureFlags.isEnabled = $0 }
+                get: { featureEnabled },
+                set: {
+                    SiteAtlas_FeatureFlags.isEnabled = $0
+                    featureEnabled = $0
+                }
             )) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Site Atlas")
@@ -117,6 +123,7 @@ struct SiteAtlas_SettingsView: View {
                     }
                 )
                 .frame(height: 608)
+                .id(zoneToggleCount)
 
                 SiteAtlas_MapLegend()
 
@@ -125,6 +132,54 @@ struct SiteAtlas_SettingsView: View {
                     .foregroundColor(.secondary)
             }
             .padding(.vertical, 4)
+        }
+    }
+
+    private var zoneManagementSection: some View {
+        Section {
+            DisclosureGroup {
+                ForEach(SiteAtlas_Zones.all) { zone in
+                    Toggle(isOn: Binding(
+                        get: { SiteAtlas_Zones.isEnabled(zone) },
+                        set: { _ in
+                            SiteAtlas_Zones.toggleZone(zone)
+                            zoneToggleCount += 1
+                        }
+                    )) {
+                        HStack(spacing: 10) {
+                            Ellipse()
+                                .fill(Color.gray.opacity(0.25))
+                                .overlay(Ellipse().strokeBorder(Color.gray.opacity(0.5), lineWidth: 1))
+                                .frame(width: 20, height: 14)
+
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(zone.displayName)
+                                    .font(.subheadline)
+                                Text(zone.bodySide.displayName)
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .tint(SiteAtlas_Theme.primaryColor)
+                }
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "rectangle.dashed")
+                        .foregroundColor(SiteAtlas_Theme.primaryColor)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("Enable Placement Zones")
+                            .font(.subheadline.weight(.medium))
+                        let _ = zoneToggleCount // trigger re-render on toggle
+                        let enabled = SiteAtlas_Zones.all.filter { SiteAtlas_Zones.isEnabled($0) }.count
+                        Text("\(enabled) of \(SiteAtlas_Zones.all.count) zones active")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        } footer: {
+            Text("Toggle off zones you don't use. Disabled zones are hidden from the body map.")
         }
     }
 

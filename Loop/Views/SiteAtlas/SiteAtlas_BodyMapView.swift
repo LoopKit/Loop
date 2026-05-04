@@ -97,6 +97,22 @@ struct SiteAtlas_BodyMapView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
 
+                // Recommended placement zones (grey ellipses)
+                ForEach(SiteAtlas_Zones.zones(for: selectedSide).filter { SiteAtlas_Zones.isEnabled($0) }) { zone in
+                    Ellipse()
+                        .fill(Color.gray.opacity(0.18))
+                        .overlay(Ellipse().strokeBorder(Color.gray.opacity(0.35), lineWidth: 1))
+                        .frame(
+                            width: zone.radiusX * 2 * imageSize.width,
+                            height: zone.radiusY * 2 * imageSize.height
+                        )
+                        .position(
+                            x: imageOrigin.x + zone.centerX * imageSize.width,
+                            y: imageOrigin.y + zone.centerY * imageSize.height
+                        )
+                        .allowsHitTesting(false)
+                }
+
                 // Existing pins — draggable when onPinMoved is provided
                 ForEach(filteredEntries) { entry in
                     if onPinMoved != nil {

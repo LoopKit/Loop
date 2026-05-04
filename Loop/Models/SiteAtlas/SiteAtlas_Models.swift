@@ -107,6 +107,89 @@ struct SiteAtlas_SiteEntry: Codable, Identifiable, Equatable {
     }
 }
 
+// MARK: - Recommended Zone
+
+/// A predefined recommended placement zone on the body map.
+struct SiteAtlas_Zone: Identifiable, Equatable {
+    let id: String          // Unique key, e.g. "front_abdomen_left"
+    let displayName: String
+    let bodySide: SiteAtlas_BodySide
+    /// Center of the zone in normalized coords (0-1).
+    let centerX: Double
+    let centerY: Double
+    /// Ellipse radii in normalized coords.
+    let radiusX: Double
+    let radiusY: Double
+}
+
+/// All 14 recommended placement zones.
+enum SiteAtlas_Zones {
+
+    static let all: [SiteAtlas_Zone] = [
+        // ── Front body ──
+        SiteAtlas_Zone(id: "front_abdomen_left",  displayName: "Front Abdomen (Left)",
+                       bodySide: .front, centerX: 0.58, centerY: 0.44, radiusX: 0.10, radiusY: 0.06),
+        SiteAtlas_Zone(id: "front_abdomen_right", displayName: "Front Abdomen (Right)",
+                       bodySide: .front, centerX: 0.42, centerY: 0.44, radiusX: 0.10, radiusY: 0.06),
+        SiteAtlas_Zone(id: "side_abdomen_left",   displayName: "Side Abdomen (Left)",
+                       bodySide: .front, centerX: 0.68, centerY: 0.42, radiusX: 0.06, radiusY: 0.06),
+        SiteAtlas_Zone(id: "side_abdomen_right",  displayName: "Side Abdomen (Right)",
+                       bodySide: .front, centerX: 0.32, centerY: 0.42, radiusX: 0.06, radiusY: 0.06),
+        SiteAtlas_Zone(id: "front_thigh_left",    displayName: "Front Thigh (Left)",
+                       bodySide: .front, centerX: 0.58, centerY: 0.62, radiusX: 0.07, radiusY: 0.08),
+        SiteAtlas_Zone(id: "front_thigh_right",   displayName: "Front Thigh (Right)",
+                       bodySide: .front, centerX: 0.42, centerY: 0.62, radiusX: 0.07, radiusY: 0.08),
+        SiteAtlas_Zone(id: "side_thigh_left",     displayName: "Side Thigh (Left)",
+                       bodySide: .front, centerX: 0.67, centerY: 0.64, radiusX: 0.05, radiusY: 0.07),
+        SiteAtlas_Zone(id: "side_thigh_right",    displayName: "Side Thigh (Right)",
+                       bodySide: .front, centerX: 0.33, centerY: 0.64, radiusX: 0.05, radiusY: 0.07),
+
+        // ── Back body ──
+        SiteAtlas_Zone(id: "back_arm_left",       displayName: "Back of Arm (Left)",
+                       bodySide: .back, centerX: 0.22, centerY: 0.30, radiusX: 0.05, radiusY: 0.07),
+        SiteAtlas_Zone(id: "back_arm_right",      displayName: "Back of Arm (Right)",
+                       bodySide: .back, centerX: 0.78, centerY: 0.30, radiusX: 0.05, radiusY: 0.07),
+        SiteAtlas_Zone(id: "buttocks_left",       displayName: "Buttocks (Left)",
+                       bodySide: .back, centerX: 0.42, centerY: 0.52, radiusX: 0.08, radiusY: 0.06),
+        SiteAtlas_Zone(id: "buttocks_right",      displayName: "Buttocks (Right)",
+                       bodySide: .back, centerX: 0.58, centerY: 0.52, radiusX: 0.08, radiusY: 0.06),
+    ]
+
+    /// Zones for a given body side.
+    static func zones(for side: SiteAtlas_BodySide) -> [SiteAtlas_Zone] {
+        all.filter { $0.bodySide == side }
+    }
+
+    /// UserDefaults key for disabled zone IDs.
+    private static let disabledKey = "com.loopkit.Loop.siteAtlasDisabledZones"
+
+    /// Currently disabled zone IDs.
+    static var disabledZoneIDs: Set<String> {
+        get {
+            Set(UserDefaults.standard.stringArray(forKey: disabledKey) ?? [])
+        }
+        set {
+            UserDefaults.standard.set(Array(newValue), forKey: disabledKey)
+        }
+    }
+
+    /// Whether a zone is enabled (shown on map).
+    static func isEnabled(_ zone: SiteAtlas_Zone) -> Bool {
+        !disabledZoneIDs.contains(zone.id)
+    }
+
+    /// Toggle a zone on or off.
+    static func toggleZone(_ zone: SiteAtlas_Zone) {
+        var disabled = disabledZoneIDs
+        if disabled.contains(zone.id) {
+            disabled.remove(zone.id)
+        } else {
+            disabled.insert(zone.id)
+        }
+        disabledZoneIDs = disabled
+    }
+}
+
 // MARK: - Site Data Container
 
 /// Top-level container for JSON persistence.

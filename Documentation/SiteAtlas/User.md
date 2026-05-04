@@ -49,6 +49,28 @@ Pins on the body map are color-coded by age:
 
 The legend at the bottom of the map shows the full color scale from "Recent" to "Safe."
 
+## Placement Zones — Where to Put Your Sites
+
+The body map shows **grey highlighted zones** in the recommended areas for pump and sensor placement:
+
+- Front abdomen (left & right)
+- Side abdomen (left & right)
+- Front thigh (left & right)
+- Side thigh (left & right)
+- Back of arm (left & right)
+- Buttocks (left & right)
+
+### Turning Off Zones You Don't Use
+
+Not everyone uses every body area. To hide zones:
+
+1. Go to Settings → Site Atlas
+2. Tap **Enable Placement Zones** to expand the list
+3. Toggle off any zones you don't use
+4. Those zones disappear from the body map immediately
+
+The counter shows how many zones are active (e.g., "10 of 12 zones active").
+
 ## Next Up — Finding Your Best Site
 
 The **Next Up** section at the top of Site Atlas answers the key question: "Where should I put my next site?"
