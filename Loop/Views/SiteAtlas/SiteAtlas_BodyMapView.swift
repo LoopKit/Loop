@@ -171,12 +171,7 @@ struct SiteAtlas_BodyMapView: View {
     // MARK: - Subviews
 
     private func bodyImage(for side: SiteAtlas_BodySide) -> Image {
-        let filename = side == .front ? "BodyMapFront" : "BodyMapBack"
-        if let path = Bundle.main.path(forResource: filename, ofType: "png"),
-           let uiImage = UIImage(contentsOfFile: path) {
-            return Image(uiImage: uiImage)
-        }
-        return Image(systemName: "figure.stand")
+        Image(side == .front ? "BodyMapFront" : "BodyMapBack")
     }
 }
 

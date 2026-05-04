@@ -260,12 +260,7 @@ struct SiteAtlas_SiteSelectionSheet: View {
     // MARK: - Helpers
 
     private func bodyImage(for side: SiteAtlas_BodySide) -> Image {
-        let filename = side == .front ? "BodyMapFront" : "BodyMapBack"
-        if let path = Bundle.main.path(forResource: filename, ofType: "png"),
-           let uiImage = UIImage(contentsOfFile: path) {
-            return Image(uiImage: uiImage)
-        }
-        return Image(systemName: "figure.stand")
+        Image(side == .front ? "BodyMapFront" : "BodyMapBack")
     }
 
     private func imageFitSize(in containerSize: CGSize) -> CGSize {
