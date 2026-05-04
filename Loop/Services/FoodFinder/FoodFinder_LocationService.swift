@@ -10,6 +10,7 @@
 
 import Foundation
 import CoreLocation
+import MapKit
 import Combine
 import os.log
 
@@ -119,7 +120,9 @@ final class FoodFinder_LocationService: NSObject, ObservableObject, CLLocationMa
         3. CROSS-REFERENCE: Also look for restaurant names, logos, or branding visible in the image \
         (on napkins, plates, menus, receipts, signage). If you find a name that matches or confirms \
         the GPS location, use that restaurant's known menu items for identification and nutrition.
-        4. LOCATION NOTE: Begin your "diabetes_considerations" field with a brief location line, e.g.: \
+        4. TITLE FORMAT: Include the restaurant/venue name in the food title, e.g.: \
+        "Carne Asada (grilled) – Casa de Bandini" so the user can see where it came from at a glance.
+        5. LOCATION NOTE: Begin your "diabetes_considerations" field with a brief location line, e.g.: \
         "📍 \(buildLocationLabel()). " \
         Then continue with your normal diabetes guidance.
         """
@@ -174,10 +177,62 @@ final class FoodFinder_LocationService: NSObject, ObservableObject, CLLocationMa
                     self.cityName = placemark.locality
                     self.countryName = placemark.country
                     #if DEBUG
-                    print("📍 FoodFinder Location: \(name ?? "unknown"), \(placemark.locality ?? "?"), \(placemark.country ?? "?") (\(self.latitude ?? 0), \(self.longitude ?? 0))")
+                    print("📍 FoodFinder Geocode: \(name ?? "unknown"), \(placemark.locality ?? "?"), \(placemark.country ?? "?") (\(self.latitude ?? 0), \(self.longitude ?? 0))")
                     #endif
                 }
-                self.isResolving = false
+
+                // Refine with MapKit local search for nearby restaurants/food venues
+                self.searchNearbyFoodVenues(location)
+            }
+        }
+    }
+
+    /// Uses MKLocalSearch to find the closest restaurant/food venue within 100m.
+    /// If found, replaces the generic geocode name (often a shopping center) with
+    /// the specific restaurant name.
+    private func searchNearbyFoodVenues(_ location: CLLocation) {
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = "restaurant"
+        request.region = MKCoordinateRegion(
+            center: location.coordinate,
+            latitudinalMeters: 100,
+            longitudinalMeters: 100
+        )
+        request.resultTypes = .pointOfInterest
+
+        MKLocalSearch(request: request).start { [weak self] response, error in
+            guard let self else { return }
+            DispatchQueue.main.async {
+                defer { self.isResolving = false }
+
+                guard let items = response?.mapItems, !items.isEmpty else {
+                    #if DEBUG
+                    print("📍 FoodFinder MapKit: no nearby restaurants found")
+                    #endif
+                    return
+                }
+
+                // Find the closest food venue by distance
+                let closest = items
+                    .compactMap { item -> (name: String, distance: CLLocationDistance)? in
+                        guard let name = item.name, !name.isEmpty else { return nil }
+                        let dist = location.distance(from: MKMapItem.forCurrentLocation().placemark.location ?? location)
+                        let itemLoc = CLLocation(latitude: item.placemark.coordinate.latitude,
+                                                 longitude: item.placemark.coordinate.longitude)
+                        return (name, location.distance(from: itemLoc))
+                    }
+                    .sorted { $0.distance < $1.distance }
+                    .first
+
+                if let match = closest {
+                    // Only replace if the MapKit result is different from the geocode result
+                    if self.locationName != match.name {
+                        #if DEBUG
+                        print("📍 FoodFinder MapKit: refined \"\(self.locationName ?? "nil")\" → \"\(match.name)\" (\(Int(match.distance))m away)")
+                        #endif
+                        self.locationName = match.name
+                    }
+                }
             }
         }
     }
