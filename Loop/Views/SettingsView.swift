@@ -286,11 +286,9 @@ extension SettingsView {
         .environment(\.glucoseTintColor, self.glucoseTintColor)
         .environment(\.guidanceColors, self.guidanceColors)
         .environment(\.insulinTintColor, self.insulinTintColor)
-        .environment(\.therapyHelpDestination,
-                     LoopInsights_FeatureFlags.isEnabled
-                        ? TherapyHelpDestination(AnyView(LoopInsights_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores)))
-                        : .empty
-        )
+        .onAppear {
+            TherapyHelpRegistry.destination = AnyView(LoopInsights_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores))
+        }
     }
 
     private var configurationSection: some View {
