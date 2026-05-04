@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E99E746DC66A23098BEE7C6D /* SiteAtlas_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00DAF82811DE6BE326F7610 /* SiteAtlas_FeatureFlags.swift */; };
+		A3E380B614277C4C788365FA /* SiteAtlas_Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF4A7212FE066CC7754F207 /* SiteAtlas_Storage.swift */; };
+		97C5ABDCD645F8D01E91DC0D /* SiteAtlas_Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2644A16811D8A9EA3F4B89AF /* SiteAtlas_Coordinator.swift */; };
+		D4AE83C79DCCE8E4430F1ACB /* SiteAtlas_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C02529B18500E73BD995F5A /* SiteAtlas_Models.swift */; };
+		737257DBEF9961A04DD08D08 /* SiteAtlas_BodyMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CEF7E6F424695B044A8FB23 /* SiteAtlas_BodyMapView.swift */; };
+		33BC23EC3340A6228E210842 /* SiteAtlas_SiteSelectionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347C3E540F8E14C26EA3E557 /* SiteAtlas_SiteSelectionSheet.swift */; };
+		D04F00E00F1E809D478AF4EC /* SiteAtlas_SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7A29E1E802E19C41166AE01 /* SiteAtlas_SettingsView.swift */; };
+		32A3BFAA99E26BFDB5E23AAC /* BodyMapFront.png in Resources */ = {isa = PBXBuildFile; fileRef = 553159FF12B2F1EA66F46735 /* BodyMapFront.png */; };
+		6B068FE26CB61293AAF7500D /* BodyMapBack.png in Resources */ = {isa = PBXBuildFile; fileRef = D956D2BCFB715323F53E463B /* BodyMapBack.png */; };
 		126412E6CB2B693A93FE0A0C /* GraphDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDF56556BF1BE5E7875BED21 /* GraphDetailView.swift */; };
 		14C479C5591D8D8C3E471259 /* GraphDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9613AA3497F104C0F86A2DF /* GraphDetailViewModel.swift */; };
 		8D0F376E7E338ECB93EE03E0 /* LoopInsights_TrendsInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7AAD3549253FE16941E10D /* LoopInsights_TrendsInsightsView.swift */; };
@@ -990,6 +999,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D00DAF82811DE6BE326F7610 /* SiteAtlas_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_FeatureFlags.swift; sourceTree = "<group>"; };
+		FCF4A7212FE066CC7754F207 /* SiteAtlas_Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_Storage.swift; sourceTree = "<group>"; };
+		2644A16811D8A9EA3F4B89AF /* SiteAtlas_Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_Coordinator.swift; sourceTree = "<group>"; };
+		2C02529B18500E73BD995F5A /* SiteAtlas_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_Models.swift; sourceTree = "<group>"; };
+		2CEF7E6F424695B044A8FB23 /* SiteAtlas_BodyMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_BodyMapView.swift; sourceTree = "<group>"; };
+		347C3E540F8E14C26EA3E557 /* SiteAtlas_SiteSelectionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_SiteSelectionSheet.swift; sourceTree = "<group>"; };
+		E7A29E1E802E19C41166AE01 /* SiteAtlas_SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_SettingsView.swift; sourceTree = "<group>"; };
+		553159FF12B2F1EA66F46735 /* BodyMapFront.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BodyMapFront.png; sourceTree = "<group>"; };
+		D956D2BCFB715323F53E463B /* BodyMapBack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BodyMapBack.png; sourceTree = "<group>"; };
 		EE7AAD3549253FE16941E10D /* LoopInsights_TrendsInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_TrendsInsightsView.swift; sourceTree = "<group>"; };
 		31B2D28F4F6C8955AB18A98C /* AutoPresets_Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Coordinator.swift; sourceTree = "<group>"; };
 		D17206C8109E75D64068F3D1 /* AutoPresets_Delegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Delegate.swift; sourceTree = "<group>"; };
@@ -2030,6 +2048,7 @@
 			isa = PBXGroup;
 			children = (
 				F37727DBE886D7AF624C93AE /* AutoPresets */,
+				9888DFE00751D426EE15FBDB /* SiteAtlas */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -2197,6 +2216,7 @@
 				D90350ACCDD06A242AEE33D7 /* FoodFinder */,
 				1394E0FB790EB3D4C7A22A5E /* LoopInsights */,
 				AB1ECE9B6639456C061F3765 /* DataLayer */,
+				6CFC448741092C876AD030C9 /* SiteAtlas */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2531,6 +2551,7 @@
 				F132ADA2C8D7384DB2F2FE1D /* FoodFinder */,
 				73D1F909821AB044995D15C9 /* LoopInsights */,
 				41FE167B28A4E1B5C20E5CD4 /* DataLayer */,
+				889763863213CA976E18850D /* SiteAtlas */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -3328,6 +3349,7 @@
 				280ADB89982455214AC18FC4 /* FoodFinder */,
 				4432E0AF82A533BD805DD582 /* LoopInsights */,
 				78A132379753FE176147ADB0 /* DataLayer */,
+				510BD1AC420DD61DBA9B7E33 /* SiteAtlas */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -3768,6 +3790,43 @@
 			path = LoopInsights;
 			sourceTree = "<group>";
 		};
+		510BD1AC420DD61DBA9B7E33 /* SiteAtlas */ = {
+			isa = PBXGroup;
+			children = (
+				D00DAF82811DE6BE326F7610 /* SiteAtlas_FeatureFlags.swift */,
+				FCF4A7212FE066CC7754F207 /* SiteAtlas_Storage.swift */,
+				2644A16811D8A9EA3F4B89AF /* SiteAtlas_Coordinator.swift */,
+			);
+			path = SiteAtlas;
+			sourceTree = "<group>";
+		};
+		6CFC448741092C876AD030C9 /* SiteAtlas */ = {
+			isa = PBXGroup;
+			children = (
+				2C02529B18500E73BD995F5A /* SiteAtlas_Models.swift */,
+			);
+			path = SiteAtlas;
+			sourceTree = "<group>";
+		};
+		889763863213CA976E18850D /* SiteAtlas */ = {
+			isa = PBXGroup;
+			children = (
+				2CEF7E6F424695B044A8FB23 /* SiteAtlas_BodyMapView.swift */,
+				347C3E540F8E14C26EA3E557 /* SiteAtlas_SiteSelectionSheet.swift */,
+				E7A29E1E802E19C41166AE01 /* SiteAtlas_SettingsView.swift */,
+			);
+			path = SiteAtlas;
+			sourceTree = "<group>";
+		};
+		9888DFE00751D426EE15FBDB /* SiteAtlas */ = {
+			isa = PBXGroup;
+			children = (
+				553159FF12B2F1EA66F46735 /* BodyMapFront.png */,
+				D956D2BCFB715323F53E463B /* BodyMapBack.png */,
+			);
+			path = SiteAtlas;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -4187,6 +4246,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				32A3BFAA99E26BFDB5E23AAC /* BodyMapFront.png in Resources */,
+				6B068FE26CB61293AAF7500D /* BodyMapBack.png in Resources */,
 				B66D1F392E6A5D6600471149 /* InfoPlist.xcstrings in Resources */,
 				C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */,
 				C1EE9E812A38D0FB0064784A /* BuildDetails.plist in Resources */,
@@ -4486,6 +4547,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E99E746DC66A23098BEE7C6D /* SiteAtlas_FeatureFlags.swift in Sources */,
+				A3E380B614277C4C788365FA /* SiteAtlas_Storage.swift in Sources */,
+				97C5ABDCD645F8D01E91DC0D /* SiteAtlas_Coordinator.swift in Sources */,
+				D4AE83C79DCCE8E4430F1ACB /* SiteAtlas_Models.swift in Sources */,
+				737257DBEF9961A04DD08D08 /* SiteAtlas_BodyMapView.swift in Sources */,
+				33BC23EC3340A6228E210842 /* SiteAtlas_SiteSelectionSheet.swift in Sources */,
+				D04F00E00F1E809D478AF4EC /* SiteAtlas_SettingsView.swift in Sources */,
 				C6019A74B4887B80959544CC /* DataLayer_ConsentManager.swift in Sources */,
 				CAEF1835890DA321090A01EB /* DataLayer_ConsentModels.swift in Sources */,
 				05382A77AD01D66964EB058D /* DataLayer_ConsentView.swift in Sources */,
