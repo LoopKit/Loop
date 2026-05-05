@@ -244,6 +244,7 @@ final class LoopInsights_ChatViewModel: ObservableObject {
 
     private func buildChatSystemPrompt(therapyContext: String) -> String {
         let personality = LoopInsights_FeatureFlags.aiPersonality
+        let unitContext = coordinator.unitContext.aiPromptUnitContext()
 
         return """
         You're a diabetes-savvy friend who can see this person's actual Loop data. \
@@ -265,6 +266,7 @@ final class LoopInsights_ChatViewModel: ObservableObject {
         - NEVER give unsolicited praise, encouragement, or reassurance. No "Great job!", \
           "You're doing well!", "Keep it up!" or similar. Just answer the question. \
           If they ask how they're doing, then evaluate honestly. Otherwise, skip it entirely.
+        \(unitContext)
 
         DATA:
         \(therapyContext)

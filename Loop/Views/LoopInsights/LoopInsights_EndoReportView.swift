@@ -200,7 +200,7 @@ struct LoopInsights_EndoReportView: View {
                 let dismissedCount = allResolved.filter { $0.status == .dismissed }.count
                 let revertedCount = allResolved.filter { $0.status == .reverted }.count
                 let behaviorPatterns = LoopInsights_BehaviorInsightsAnalyzer.analyzePatterns()
-                let detectedPatterns = LoopInsights_DashboardViewModel.detectPatterns(from: stats)
+                let detectedPatterns = LoopInsights_DashboardViewModel.detectPatterns(from: stats, unitContext: coordinator.unitContext)
                 let mealArchive = MealArchive.meals(
                     from: Date().addingTimeInterval(-reportPeriod.timeInterval),
                     to: Date()
@@ -229,7 +229,8 @@ struct LoopInsights_EndoReportView: View {
                     mealCount: mealArchive.count,
                     caffeineTracker: coordinator.caffeineTracker,
                     alcoholTracker: coordinator.alcoholTracker,
-                    sections: sections
+                    sections: sections,
+                    unitContext: coordinator.unitContext
                 )
 
                 if let url = await LoopInsights_ReportGenerator.generatePDF(from: html) {
@@ -281,7 +282,8 @@ enum LoopInsights_EndoReportGenerator {
         mealCount: Int,
         caffeineTracker: LoopInsights_CaffeineTracker,
         alcoholTracker: LoopInsights_AlcoholTracker,
-        sections: SectionFlags = SectionFlags()
+        sections: SectionFlags = SectionFlags(),
+        unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl
     ) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .long
@@ -611,8 +613,8 @@ enum LoopInsights_EndoReportGenerator {
                     </div>
                 </div>
                 <div class="tir-footer">
-                    <strong>Target Range:</strong> 70–180 mg/dL<br>
-                    <span style="color: #1a8a9e;">Tight Range: 70–\(stats.glucoseStats.tightRangeUpperBound) mg/dL</span>
+                    <strong>Target Range:</strong> \(unitContext.tirRangeString)<br>
+                    <span style="color: #1a8a9e;">Tight Range: \(unitContext.formatUserValue(unitContext.lowValue, includeUnit: false))–\(unitContext.formatMgdl(Double(stats.glucoseStats.tightRangeUpperBound)))</span>
                 </div>
             </div>
         </div>
@@ -621,7 +623,7 @@ enum LoopInsights_EndoReportGenerator {
         // Time of Day glucose averages
         let sortedHours = stats.glucoseStats.hourlyAverages.sorted { $0.key < $1.key }
         if !sortedHours.isEmpty {
-            html += "<strong style=\"font-size: 11px;\">Glucose by Time of Day (mg/dL)</strong>"
+            html += "<strong style=\"font-size: 11px;\">Glucose by Time of Day (\(unitContext.unitString))</strong>"
             html += "<div class=\"tod-grid\">"
             let buckets: [(label: String, hours: [Int])] = [
                 ("Night", [0,1,2,3]),
@@ -634,11 +636,12 @@ enum LoopInsights_EndoReportGenerator {
             for bucket in buckets {
                 let avg = bucket.hours.compactMap { stats.glucoseStats.hourlyAverages[$0] }
                 let mean = avg.isEmpty ? 0 : avg.reduce(0, +) / Double(avg.count)
+                // Comparisons in canonical mg/dL; display value converted to user unit
                 let bgColor = mean < 70 ? "#ffe0e0" : mean > 180 ? "#fff3e0" : "#e8f8e8"
                 let textColor = mean < 70 ? "#cc0000" : mean > 180 ? "#cc6600" : "#1a7a2e"
                 html += """
                 <div class="tod-cell" style="background: \(bgColor);">
-                    <div class="tod-value" style="color: \(textColor);">\(String(format: "%.0f", mean))</div>
+                    <div class="tod-value" style="color: \(textColor);">\(unitContext.formatMgdl(mean, includeUnit: false))</div>
                     <div class="tod-label">\(bucket.label)</div>
                 </div>
                 """

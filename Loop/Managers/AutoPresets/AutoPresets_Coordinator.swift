@@ -11,6 +11,7 @@
 import Combine
 import Foundation
 import LoopKit
+import LoopKitUI
 import os.log
 
 // MARK: - DataLayer Notifications
@@ -61,6 +62,22 @@ public class AutoPresets_Coordinator: ObservableObject {
                 startIfConfigured()
             }
         }
+    }
+
+    /// User's preferred glucose display unit. Set during app boot in `LoopAppManager`
+    /// from `DeviceDataManager.displayGlucosePreference`. Used by AIAdvisor and
+    /// AIRecommendationView so guardrails, prompts, and override editor honor mmol/L.
+    /// Declared `internal` (no `public`) — only same-module callers need access, and
+    /// `LoopInsights_GlucoseUnitContext` is itself internal.
+    var displayGlucosePreference: DisplayGlucosePreference?
+
+    /// Convenience helper for unit-aware operations. Falls back to mg/dL if the
+    /// preference hasn't been wired (e.g. during early boot or unit tests).
+    var unitContext: LoopInsights_GlucoseUnitContext {
+        if let pref = displayGlucosePreference {
+            return LoopInsights_GlucoseUnitContext(displayGlucosePreference: pref)
+        }
+        return .fallbackMgdl
     }
 
     // Track which preset we activated so we can deactivate the same one

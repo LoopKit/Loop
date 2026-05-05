@@ -82,16 +82,17 @@ struct LoopInsights_MealInsightsView: View {
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         // Color key
+                        let riseThresholdStr = coordinator.unitContext.formatMgdl(50)
                         HStack(spacing: 16) {
                             HStack(spacing: 4) {
                                 Circle().fill(Color.green).frame(width: 8, height: 8)
-                                Text(NSLocalizedString("Rise is \u{2264} 50 mg/dL", comment: "LoopInsights meal legend green"))
+                                Text(String(format: NSLocalizedString("Rise is \u{2264} %@", comment: "LoopInsights meal legend green"), riseThresholdStr))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
                             HStack(spacing: 4) {
                                 Circle().fill(Color.orange).frame(width: 8, height: 8)
-                                Text(NSLocalizedString("Rise is > 50 mg/dL", comment: "LoopInsights meal legend orange"))
+                                Text(String(format: NSLocalizedString("Rise is > %@", comment: "LoopInsights meal legend orange"), riseThresholdStr))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -215,13 +216,14 @@ struct LoopInsights_MealInsightsView: View {
                     )
                 }
 
-                // Rise indicator
+                // Rise indicator (rise is in canonical mg/dL — convert at display)
                 let rise = peak - preMeal
+                let riseDisplay = coordinator.unitContext.formatMgdl(rise)
                 HStack(spacing: 4) {
                     Image(systemName: rise > 50 ? "arrow.up.circle.fill" : "arrow.up.circle")
                         .foregroundColor(rise > 50 ? .orange : .green)
                         .font(.caption)
-                    Text(String(format: NSLocalizedString("Rise: %+.0f mg/dL", comment: "LoopInsights meal glucose rise"), rise))
+                    Text(String(format: NSLocalizedString("Rise: %@%@", comment: "LoopInsights meal glucose rise"), rise >= 0 ? "+" : "", riseDisplay))
                         .font(.caption)
                         .foregroundColor(rise > 50 ? .orange : .green)
 
@@ -229,7 +231,7 @@ struct LoopInsights_MealInsightsView: View {
                         Text("·")
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        Text(String(format: "%.1f mg/dL per unit", rise / units))
+                        Text(String(format: "%@ per unit", coordinator.unitContext.formatMgdl(rise / units)))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -271,7 +273,8 @@ struct LoopInsights_MealInsightsView: View {
                         isLoading: viewModel.debriefLoadingIDs.contains(event.id.uuidString),
                         errorMessage: viewModel.debriefErrors[event.id.uuidString],
                         isExpanded: viewModel.expandedDebriefID == event.id.uuidString,
-                        onToggle: { viewModel.toggleDebrief(for: event) }
+                        onToggle: { viewModel.toggleDebrief(for: event) },
+                        unitContext: coordinator.unitContext
                     )
                 }
             }
@@ -377,7 +380,7 @@ struct LoopInsights_MealInsightsView: View {
                         Text(NSLocalizedString("Peak Rise", comment: "LoopInsights peak rise label"))
                             .font(.caption2)
                             .foregroundColor(.secondary)
-                        Text(String(format: "+%.0f mg/dL", pattern.peakGlucoseRise))
+                        Text("+" + coordinator.unitContext.formatMgdl(pattern.peakGlucoseRise))
                             .font(.caption.weight(.bold))
                             .foregroundColor(pattern.peakGlucoseRise > 60 ? .orange : .green)
                     }

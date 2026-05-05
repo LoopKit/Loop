@@ -500,7 +500,10 @@ private struct PresetEditorWrapper: UIViewControllerRepresentable {
     }
 
     func makeUIViewController(context: Context) -> UINavigationController {
-        let editVC = AddEditOverrideTableViewController(glucoseUnit: .milligramsPerDeciliter)
+        // Honor the user's preferred display unit (mg/dL or mmol/L); fall back to mg/dL
+        // if the preference hasn't been wired (e.g. very early boot).
+        let glucoseUnit = AutoPresets_Coordinator.shared.displayGlucosePreference?.unit ?? .milligramsPerDeciliter
+        let editVC = AddEditOverrideTableViewController(glucoseUnit: glucoseUnit)
         editVC.delegate = context.coordinator
         editVC.customDismissalMode = .dismissModal
 

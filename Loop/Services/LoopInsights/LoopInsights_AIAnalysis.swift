@@ -43,9 +43,10 @@ final class LoopInsights_AIAnalysis {
         stats: LoopInsightsAggregatedStats,
         recentChanges: [LoopInsightsSuggestionRecord] = [],
         supplementalContext: String? = nil,
-        pastAppliedWithOutcomes: [SuggestionWithOutcomeData] = []
+        pastAppliedWithOutcomes: [SuggestionWithOutcomeData] = [],
+        unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl
     ) async throws -> LoopInsightsAnalysisResponse {
-        let systemPrompt = buildSystemPrompt(supplementalContext: supplementalContext)
+        let systemPrompt = buildSystemPrompt(supplementalContext: supplementalContext, unitContext: unitContext)
         let userPrompt = buildUserPrompt(settingType: settingType, settings: currentSettings, stats: stats, recentChanges: recentChanges, supplementalContext: supplementalContext, pastAppliedWithOutcomes: pastAppliedWithOutcomes)
 
         let timestamp = Date()
@@ -65,9 +66,19 @@ final class LoopInsights_AIAnalysis {
 
     // MARK: - System Prompt
 
-    private func buildSystemPrompt(supplementalContext: String? = nil) -> String {
+    private func buildSystemPrompt(supplementalContext: String? = nil, unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl) -> String {
         let personality = LoopInsights_FeatureFlags.aiPersonality
         return """
+        \(unitContext.aiPromptUnitContext())
+
+        JSON FIELD UNITS — IMPORTANT:
+        Although prose in `reasoning` and `overall_assessment` must use the user's unit,
+        the JSON numeric fields `current_value` and `proposed_value` for INSULIN SENSITIVITY
+        suggestions MUST ALWAYS contain values in mg/dL — they are canonical storage fields.
+        Convert from your prose unit to mg/dL before populating those fields. The app converts
+        back to the user's unit for display. Carb ratio (g/U) and basal rate (U/hr) are
+        unit-independent and unaffected.
+
         You are Loopy, an expert-level automated insulin delivery (AID) therapy settings analyst. \
         You think like a top board certified endocrinologist who specializes in insulin pump optimization. \
         You analyze glucose, insulin, and carbohydrate data to determine whether therapy settings need adjustment.

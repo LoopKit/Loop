@@ -8,6 +8,7 @@
 
 import Foundation
 import LoopKit
+import LoopKitUI
 import LoopCore
 import HealthKit
 
@@ -55,6 +56,16 @@ final class LoopInsights_Coordinator: ObservableObject {
     /// Closure to write therapy settings back to Loop via LoopDataManager.mutateSettings
     var settingsWriter: LoopInsightsSettingsWriter?
 
+    /// User's preferred glucose display unit (mg/dL or mmol/L), sourced from HealthKit
+    /// via Loop's `DeviceDataManager.displayGlucosePreference`. Used by services and
+    /// view models to localize thresholds, AI prompts, and formatted output.
+    let displayGlucosePreference: DisplayGlucosePreference
+
+    /// Convenience helper bound to `displayGlucosePreference`.
+    var unitContext: LoopInsights_GlucoseUnitContext {
+        LoopInsights_GlucoseUnitContext(displayGlucosePreference: displayGlucosePreference)
+    }
+
     // MARK: - Initialization
 
     /// Initialize with Loop's existing store references.
@@ -64,6 +75,7 @@ final class LoopInsights_Coordinator: ObservableObject {
         doseStore: DoseStoreProtocol,
         carbStore: CarbStoreProtocol,
         settingsProvider: LatestStoredSettingsProvider,
+        displayGlucosePreference: DisplayGlucosePreference,
         settingsWriter: LoopInsightsSettingsWriter? = nil
     ) {
         let bridge = DataProviderBridge(
@@ -74,6 +86,7 @@ final class LoopInsights_Coordinator: ObservableObject {
         )
         self.dataProviderBridge = bridge
         self.settingsWriter = settingsWriter
+        self.displayGlucosePreference = displayGlucosePreference
 
         let hkManager: LoopInsights_HealthKitManager? = LoopInsights_FeatureFlags.biometricsEnabled
             ? LoopInsights_HealthKitManager() : nil
@@ -93,11 +106,21 @@ final class LoopInsights_Coordinator: ObservableObject {
 
     /// Initialize with test data fixtures (for simulator/developer mode).
     /// Loads JSON fixtures from Documents/LoopInsights/ or the app bundle.
-    init(testDataProvider: LoopInsights_TestDataProvider) {
+    /// Optionally accepts a `DisplayGlucosePreference`; if omitted, queries HealthKit's
+    /// cached preferred unit so dev tooling still respects mmol/L users.
+    init(testDataProvider: LoopInsights_TestDataProvider,
+         displayGlucosePreference: DisplayGlucosePreference? = nil) {
         self.testDataProvider = testDataProvider
         self.dataProviderBridge = nil
         self.settingsWriter = nil
         self.healthKitManager = nil
+        if let pref = displayGlucosePreference {
+            self.displayGlucosePreference = pref
+        } else {
+            let cachedUnit = HealthStoreUnitCache.unitCache(for: HKHealthStore())
+                .preferredUnit(for: .bloodGlucose) ?? .milligramsPerDeciliter
+            self.displayGlucosePreference = DisplayGlucosePreference(displayGlucoseUnit: cachedUnit)
+        }
         self.dataAggregator = LoopInsights_DataAggregator(dataProvider: testDataProvider)
         self.aiAnalysis = LoopInsights_AIAnalysis()
         self.suggestionStore = LoopInsights_SuggestionStore.shared
@@ -762,9 +785,9 @@ final class LoopInsights_Coordinator: ObservableObject {
                     overrideDesc += " (insulin needs \(String(format: "%.0f", factor * 100))%)"
                 }
                 if let range = override.settings.targetRange {
-                    let low = range.lowerBound.doubleValue(for: .milligramsPerDeciliter)
-                    let high = range.upperBound.doubleValue(for: .milligramsPerDeciliter)
-                    overrideDesc += " target \(String(format: "%.0f", low))-\(String(format: "%.0f", high)) mg/dL"
+                    let lowStr = unitContext.format(range.lowerBound, includeUnit: false)
+                    let highStr = unitContext.format(range.upperBound, includeUnit: true)
+                    overrideDesc += " target \(lowStr)-\(highStr)"
                 }
                 let remaining = override.scheduledEndDate.timeIntervalSinceNow
                 if remaining.isFinite && remaining > 0 {

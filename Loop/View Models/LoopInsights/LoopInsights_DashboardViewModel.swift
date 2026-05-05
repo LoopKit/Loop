@@ -191,14 +191,15 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                     stats: stats,
                     recentChanges: recentChanges,
                     supplementalContext: supplementalContext,
-                    pastAppliedWithOutcomes: pastOutcomes
+                    pastAppliedWithOutcomes: pastOutcomes,
+                    unitContext: coordinator.unitContext
                 )
 
                 // Apply outcome evaluations from the AI back to the store
                 self.applyReturnedEvaluations(response.pastEvaluations)
 
                 // Show patterns, score, and AI results together after analysis completes
-                self.detectedPatterns = Self.detectPatterns(from: stats)
+                self.detectedPatterns = Self.detectPatterns(from: stats, unitContext: coordinator.unitContext)
                 self.updateSettingsScore()
                 self.analysisResponse = response
                 self.overallAssessment = response.overallAssessment
@@ -284,7 +285,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                         stats: stats,
                         recentChanges: recentChanges,
                         supplementalContext: supplementalContext,
-                        pastAppliedWithOutcomes: pastOutcomes
+                        pastAppliedWithOutcomes: pastOutcomes,
+                        unitContext: coordinator.unitContext
                     )
 
                     // Apply outcome evaluations from the AI back to the store
@@ -310,7 +312,7 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 }
 
                 // Show patterns and score after all analyses complete
-                self.detectedPatterns = Self.detectPatterns(from: stats)
+                self.detectedPatterns = Self.detectPatterns(from: stats, unitContext: coordinator.unitContext)
                 self.updateSettingsScore()
 
                 self.lastAnalysisDate = Date()
@@ -662,7 +664,9 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
     /// Detect glucose/insulin patterns from aggregated statistics.
     /// Returns patterns sorted by severity (high first).
-    static func detectPatterns(from stats: LoopInsightsAggregatedStats) -> [LoopInsightsDetectedPattern] {
+    /// Pattern detail strings use the user's preferred glucose unit; threshold comparisons
+    /// stay in canonical mg/dL because `g.hourlyAverages` and `glucoseValues` are mg/dL.
+    static func detectPatterns(from stats: LoopInsightsAggregatedStats, unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl) -> [LoopInsightsDetectedPattern] {
         var patterns: [LoopInsightsDetectedPattern] = []
         let g = stats.glucoseStats
         let period = stats.period
@@ -675,13 +679,13 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             if overnightAvg < 70 {
                 patterns.append(LoopInsightsDetectedPattern(
                     type: .overnightLows,
-                    detail: String(format: NSLocalizedString("Average overnight glucose %.0f mg/dL in %@", comment: "LoopInsights pattern detail: overnight lows"), overnightAvg, period.displayName),
+                    detail: String(format: NSLocalizedString("Average overnight glucose %@ in %@", comment: "LoopInsights pattern detail: overnight lows"), unitContext.formatMgdl(overnightAvg), period.displayName),
                     severity: .high
                 ))
             } else if overnightAvg < 80 {
                 patterns.append(LoopInsightsDetectedPattern(
                     type: .overnightLows,
-                    detail: String(format: NSLocalizedString("Average overnight glucose %.0f mg/dL in %@", comment: "LoopInsights pattern detail: overnight lows moderate"), overnightAvg, period.displayName),
+                    detail: String(format: NSLocalizedString("Average overnight glucose %@ in %@", comment: "LoopInsights pattern detail: overnight lows moderate"), unitContext.formatMgdl(overnightAvg), period.displayName),
                     severity: .medium
                 ))
             }
@@ -708,13 +712,13 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             if overnightAvg > 200 {
                 patterns.append(LoopInsightsDetectedPattern(
                     type: .overnightHighs,
-                    detail: String(format: NSLocalizedString("Average overnight glucose %.0f mg/dL in %@", comment: "LoopInsights pattern detail: overnight highs"), overnightAvg, period.displayName),
+                    detail: String(format: NSLocalizedString("Average overnight glucose %@ in %@", comment: "LoopInsights pattern detail: overnight highs"), unitContext.formatMgdl(overnightAvg), period.displayName),
                     severity: .high
                 ))
             } else if overnightAvg > 180 {
                 patterns.append(LoopInsightsDetectedPattern(
                     type: .overnightHighs,
-                    detail: String(format: NSLocalizedString("Average overnight glucose %.0f mg/dL in %@", comment: "LoopInsights pattern detail: overnight highs moderate"), overnightAvg, period.displayName),
+                    detail: String(format: NSLocalizedString("Average overnight glucose %@ in %@", comment: "LoopInsights pattern detail: overnight highs moderate"), unitContext.formatMgdl(overnightAvg), period.displayName),
                     severity: .medium
                 ))
             }
@@ -728,13 +732,13 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             if rise > 40 {
                 patterns.append(LoopInsightsDetectedPattern(
                     type: .dawnPhenomenon,
-                    detail: String(format: NSLocalizedString("Average rise of %.0f mg/dL between 3 AM–7 AM", comment: "LoopInsights pattern detail: dawn phenomenon"), rise),
+                    detail: String(format: NSLocalizedString("Average rise of %@ between 3 AM–7 AM", comment: "LoopInsights pattern detail: dawn phenomenon"), unitContext.formatMgdl(rise)),
                     severity: .high
                 ))
             } else if rise > 20 {
                 patterns.append(LoopInsightsDetectedPattern(
                     type: .dawnPhenomenon,
-                    detail: String(format: NSLocalizedString("Average rise of %.0f mg/dL between 3 AM–7 AM", comment: "LoopInsights pattern detail: dawn phenomenon moderate"), rise),
+                    detail: String(format: NSLocalizedString("Average rise of %@ between 3 AM–7 AM", comment: "LoopInsights pattern detail: dawn phenomenon moderate"), unitContext.formatMgdl(rise)),
                     severity: .medium
                 ))
             }
@@ -791,7 +795,7 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
         if g.averageGlucose < 100 && g.timeBelowRange > 2 {
             patterns.append(LoopInsightsDetectedPattern(
                 type: .consistentLows,
-                detail: String(format: NSLocalizedString("Average glucose %.0f mg/dL with %.1f%% below range", comment: "LoopInsights pattern detail: consistent lows"), g.averageGlucose, g.timeBelowRange),
+                detail: String(format: NSLocalizedString("Average glucose %@ with %.1f%% below range", comment: "LoopInsights pattern detail: consistent lows"), unitContext.formatMgdl(g.averageGlucose), g.timeBelowRange),
                 severity: g.averageGlucose < 90 ? .high : .medium
             ))
         }

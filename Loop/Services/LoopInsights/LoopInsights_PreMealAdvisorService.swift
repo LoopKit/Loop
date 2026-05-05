@@ -25,6 +25,11 @@ final class LoopInsights_PreMealAdvisorService {
     // Cache of recent advice to avoid re-querying for the same food type within a session
     private var adviceCache: [String: LoopInsights_PreMealAdvice] = [:]
 
+    /// User's preferred glucose display unit, set during app boot. Falls back to mg/dL.
+    /// FoodFinder shows the enriched summary in its pre-meal card, so this needs to
+    /// be wired before that card appears.
+    var unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl
+
     // MARK: - Public API
 
     /// Check if we have enough data to show advice for this food type.
@@ -166,7 +171,8 @@ final class LoopInsights_PreMealAdvisorService {
     }
 
     private func buildEnrichedSummary(foodType: String, mealCount: Int, avgCarbs: Double, peakRise: Double, timeToPeak: Double) -> String {
-        return String(format: NSLocalizedString("You've had %@ %d times. Avg peak: +%.0f mg/dL in %.0f min. Avg carbs: %.0fg.", comment: "Pre-meal advisor enriched summary"), foodType, mealCount, peakRise, timeToPeak, avgCarbs)
+        let peakStr = unitContext.formatMgdl(peakRise)
+        return String(format: NSLocalizedString("You've had %@ %d times. Avg peak: +%@ in %.0f min. Avg carbs: %.0fg.", comment: "Pre-meal advisor enriched summary"), foodType, mealCount, peakStr, timeToPeak, avgCarbs)
     }
 
     private func buildAIPrompt(advice: LoopInsights_PreMealAdvice, recentDebriefs: [LoopInsights_MealDebrief]) -> String {

@@ -10,6 +10,7 @@
 
 import SwiftUI
 import LoopKit
+import LoopKitUI
 import MessageUI
 
 struct LoopInsights_CaregiverDigestView: View {
@@ -106,13 +107,14 @@ struct LoopInsights_CaregiverDigestView: View {
         if let testCoordinator = LoopInsights_Coordinator.withTestDataIfAvailable() {
             coordinator = testCoordinator
         } else if let any = dataStoresProvider?(),
-                  let stores = any as? (GlucoseStoreProtocol, DoseStoreProtocol, CarbStoreProtocol, LatestStoredSettingsProvider, LoopInsightsSettingsWriter) {
+                  let stores = any as? (GlucoseStoreProtocol, DoseStoreProtocol, CarbStoreProtocol, LatestStoredSettingsProvider, DisplayGlucosePreference, LoopInsightsSettingsWriter) {
             coordinator = LoopInsights_Coordinator(
                 glucoseStore: stores.0,
                 doseStore: stores.1,
                 carbStore: stores.2,
                 settingsProvider: stores.3,
-                settingsWriter: stores.4
+                displayGlucosePreference: stores.4,
+                settingsWriter: stores.5
             )
         } else {
             coordinator = LoopInsights_Coordinator(testDataProvider: LoopInsights_TestDataProvider())
@@ -385,7 +387,8 @@ struct LoopInsights_CaregiverDigestView: View {
         Task {
             if let _ = await digestService.generateDigest(
                 using: coordinator.dataAggregator,
-                frequency: frequency
+                frequency: frequency,
+                unitContext: coordinator.unitContext
             ) {
                 await MainActor.run {
                     switch deliveryMethod {
@@ -412,7 +415,8 @@ struct LoopInsights_CaregiverDigestView: View {
         Task {
             if let _ = await digestService.generateDigest(
                 using: coordinator.dataAggregator,
-                frequency: frequency
+                frequency: frequency,
+                unitContext: coordinator.unitContext
             ) {
                 await MainActor.run {
                     showingPreview = true

@@ -9,6 +9,7 @@
 //
 
 import LoopKit
+import LoopKitUI
 import SwiftUI
 import UIKit
 
@@ -821,7 +822,7 @@ struct AutoPresets_SettingsView: View {
         }
         // Real data stores from Loop (cast from type-erased tuple)
         guard let any = dataStoresProvider?(),
-              let stores = any as? (GlucoseStoreProtocol, DoseStoreProtocol, CarbStoreProtocol, LatestStoredSettingsProvider, LoopInsightsSettingsWriter)
+              let stores = any as? (GlucoseStoreProtocol, DoseStoreProtocol, CarbStoreProtocol, LatestStoredSettingsProvider, DisplayGlucosePreference, LoopInsightsSettingsWriter)
         else {
             return nil
         }
@@ -830,7 +831,8 @@ struct AutoPresets_SettingsView: View {
             doseStore: stores.1,
             carbStore: stores.2,
             settingsProvider: stores.3,
-            settingsWriter: stores.4
+            displayGlucosePreference: stores.4,
+            settingsWriter: stores.5
         )
     }
 

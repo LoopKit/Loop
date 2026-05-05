@@ -1741,7 +1741,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                               let writer: LoopInsightsSettingsWriter = { mutate in
                                                   dm.loopManager.mutateSettings(mutate)
                                               }
-                                              return (dm.glucoseStore, dm.doseStore, dm.carbStore, dm.settingsManager, writer)
+                                              return (dm.glucoseStore, dm.doseStore, dm.carbStore, dm.settingsManager, dm.displayGlucosePreference, writer)
                                           },
                                           delegate: self)
         let hostingController = DismissibleHostingController(

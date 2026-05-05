@@ -135,13 +135,14 @@ final class LoopInsights_CaregiverDigestService: ObservableObject {
     /// Generate a digest from current LoopInsights data.
     func generateDigest(
         using aggregator: LoopInsights_DataAggregator,
-        frequency: DigestFrequency
+        frequency: DigestFrequency,
+        unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl
     ) async -> DigestContent? {
         await MainActor.run { isGenerating = true }
 
         do {
             let stats = try await aggregator.aggregateData(period: frequency.period)
-            let content = Self.buildDigest(from: stats, frequency: frequency)
+            let content = Self.buildDigest(from: stats, frequency: frequency, unitContext: unitContext)
 
             await MainActor.run {
                 self.lastGeneratedDigest = content
@@ -166,7 +167,8 @@ final class LoopInsights_CaregiverDigestService: ObservableObject {
 
     static func buildDigest(
         from stats: LoopInsightsAggregatedStats,
-        frequency: DigestFrequency
+        frequency: DigestFrequency,
+        unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl
     ) -> DigestContent {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
@@ -199,24 +201,26 @@ final class LoopInsights_CaregiverDigestService: ObservableObject {
             statusSummary = NSLocalizedString("There are some areas that could use attention.", comment: "Caregiver digest: attention status")
         }
 
-        // Low events description
+        // Low events description (unit-aware)
+        let lowStr = unitContext.formatUserValue(unitContext.lowValue, includeUnit: false)
+        let highStr = unitContext.formatUserValue(unitContext.highValue, includeUnit: false)
         let lowDesc: String
         if g.timeBelowRange < 1 {
             lowDesc = NSLocalizedString("No significant lows", comment: "Caregiver digest: no lows")
         } else if g.timeBelowRange < 4 {
-            lowDesc = String(format: NSLocalizedString("Minor low time (%.1f%% below 70)", comment: "Caregiver digest: minor lows"), g.timeBelowRange)
+            lowDesc = String(format: NSLocalizedString("Minor low time (%.1f%% below %@)", comment: "Caregiver digest: minor lows"), g.timeBelowRange, lowStr)
         } else {
-            lowDesc = String(format: NSLocalizedString("⚠️ Notable low time (%.1f%% below 70)", comment: "Caregiver digest: notable lows"), g.timeBelowRange)
+            lowDesc = String(format: NSLocalizedString("⚠️ Notable low time (%.1f%% below %@)", comment: "Caregiver digest: notable lows"), g.timeBelowRange, lowStr)
         }
 
-        // High events description
+        // High events description (unit-aware)
         let highDesc: String
         if g.timeAboveRange < 10 {
             highDesc = NSLocalizedString("Minimal time high", comment: "Caregiver digest: minimal highs")
         } else if g.timeAboveRange < 25 {
-            highDesc = String(format: NSLocalizedString("Some high time (%.0f%% above 180)", comment: "Caregiver digest: some highs"), g.timeAboveRange)
+            highDesc = String(format: NSLocalizedString("Some high time (%.0f%% above %@)", comment: "Caregiver digest: some highs"), g.timeAboveRange, highStr)
         } else {
-            highDesc = String(format: NSLocalizedString("⚠️ Significant high time (%.0f%% above 180)", comment: "Caregiver digest: significant highs"), g.timeAboveRange)
+            highDesc = String(format: NSLocalizedString("⚠️ Significant high time (%.0f%% above %@)", comment: "Caregiver digest: significant highs"), g.timeAboveRange, highStr)
         }
 
         let subject = "\(statusEmoji) LoopInsights Digest — \(shortDate.string(from: now))"
@@ -230,8 +234,8 @@ final class LoopInsights_CaregiverDigestService: ObservableObject {
         \(statusEmoji) Overall: \(statusSummary)
 
         📊 GLUCOSE
-        • Time in Range (70-180): \(String(format: "%.0f", g.timeInRange))%
-        • Average Glucose: \(String(format: "%.0f", g.averageGlucose)) mg/dL
+        • \(unitContext.tirRangeLabel): \(String(format: "%.0f", g.timeInRange))%
+        • Average Glucose: \(unitContext.formatMgdl(g.averageGlucose))
         • GMI (est. A1C): \(String(format: "%.1f", g.gmi))%
         • \(lowDesc)
         • \(highDesc)
@@ -330,10 +334,10 @@ final class LoopInsights_CaregiverDigestService: ObservableObject {
             <div class="content">
                 <div class="section-title">📊 Glucose</div>
                 <div class="tir-highlight">\(String(format: "%.0f", g.timeInRange))%</div>
-                <div class="tir-label">Time in Range (70–180 mg/dL)</div>
-                <div class="stat-row"><span class="stat-label">Average Glucose</span><span class="stat-value">\(String(format: "%.0f", g.averageGlucose)) mg/dL</span></div>
+                <div class="tir-label">Time in Range (\(unitContext.tirRangeString))</div>
+                <div class="stat-row"><span class="stat-label">Average Glucose</span><span class="stat-value">\(unitContext.formatMgdl(g.averageGlucose))</span></div>
                 <div class="stat-row"><span class="stat-label">GMI (est. A1C)</span><span class="stat-value">\(String(format: "%.1f", g.gmi))%</span></div>
-                <div class="stat-row"><span class="stat-label">Std Deviation</span><span class="stat-value">\(String(format: "%.0f", g.standardDeviation)) mg/dL</span></div>
+                <div class="stat-row"><span class="stat-label">Std Deviation</span><span class="stat-value">\(unitContext.formatMgdl(g.standardDeviation))</span></div>
                 <div class="alert-row">\(lowDesc)</div>
                 <div class="alert-row">\(highDesc)</div>
 

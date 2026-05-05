@@ -154,7 +154,8 @@ final class LoopInsights_BackgroundMonitor: ObservableObject {
                 let response = try await coordinator.aiAnalysis.analyze(
                     settingType: settingType,
                     currentSettings: snapshot,
-                    stats: stats
+                    stats: stats,
+                    unitContext: coordinator.unitContext
                 )
 
                 // Filter by minimum confidence

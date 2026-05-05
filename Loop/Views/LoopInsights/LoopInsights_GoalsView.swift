@@ -552,7 +552,7 @@ private final class GoalsViewModel: ObservableObject {
                 )
 
                 let goalsContext = buildGoalsContext()
-                let systemPrompt = buildPatternSystemPrompt()
+                let systemPrompt = buildPatternSystemPrompt(unitContext: coordinator.unitContext)
                 let userPrompt = buildPatternUserPrompt(therapyContext: context, goalsContext: goalsContext)
 
                 let response = try await LoopInsights_AIServiceAdapter.shared.sendPrompt(
@@ -604,7 +604,8 @@ private final class GoalsViewModel: ObservableObject {
                 stats: stats,
                 goals: goals,
                 patterns: patterns,
-                reflections: reflections
+                reflections: reflections,
+                unitContext: coordinator.unitContext
             )
 
             if let url = await LoopInsights_ReportGenerator.generatePDF(from: html) {
@@ -617,10 +618,12 @@ private final class GoalsViewModel: ObservableObject {
 
     // MARK: - Prompt Building
 
-    private func buildPatternSystemPrompt() -> String {
+    private func buildPatternSystemPrompt(unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl) -> String {
         let personality = LoopInsights_FeatureFlags.aiPersonality
 
         return """
+        \(unitContext.aiPromptUnitContext())
+
         You are an expert diabetes advisor analyzing 30 days of this specific person's Loop AID data \
         to discover patterns. You have their REAL glucose readings, insulin delivery, carb logs, \
         pump settings, and biometrics. This is not hypothetical — these are actual numbers from \

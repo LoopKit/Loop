@@ -274,7 +274,7 @@ struct LoopInsights_DashboardView: View {
                 settingRow(
                     type: .insulinSensitivity,
                     items: snapshot.insulinSensitivityItems,
-                    unit: "mg/dL/U"
+                    unit: "\(viewModel.coordinator.unitContext.unitString)/U"
                 )
                 HStack(spacing: 16) {
                     legendDot(color: .gray, label: NSLocalizedString("Not analyzed", comment: "LoopInsights legend: not analyzed"))
@@ -864,10 +864,10 @@ struct LoopInsights_DashboardView: View {
                     .font(.callout)
                     .foregroundColor(.primary)
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text(String(format: "%.0f", stats.glucoseStats.averageGlucose))
+                    Text(viewModel.coordinator.unitContext.formatMgdl(stats.glucoseStats.averageGlucose, includeUnit: false))
                         .font(.system(size: 42, weight: .bold, design: .rounded))
                         .foregroundColor(.primary)
-                    Text(NSLocalizedString("mg/dL", comment: "LoopInsights unit mg/dL"))
+                    Text(viewModel.coordinator.unitContext.unitString)
                         .font(.callout)
                         .foregroundColor(Color(.secondaryLabel))
                 }
@@ -880,10 +880,10 @@ struct LoopInsights_DashboardView: View {
                         .font(.callout)
                         .foregroundColor(.primary)
                     HStack(alignment: .firstTextBaseline, spacing: 3) {
-                        Text(String(format: "%.0f", stats.glucoseStats.standardDeviation))
+                        Text(viewModel.coordinator.unitContext.formatMgdl(stats.glucoseStats.standardDeviation, includeUnit: false))
                             .font(.system(size: 28, weight: .bold, design: .rounded))
                             .foregroundColor(.primary)
-                        Text(NSLocalizedString("mg/dL", comment: "LoopInsights unit mg/dL"))
+                        Text(viewModel.coordinator.unitContext.unitString)
                             .font(.caption)
                             .foregroundColor(Color(.secondaryLabel))
                     }
@@ -953,7 +953,7 @@ struct LoopInsights_DashboardView: View {
                     Text(NSLocalizedString("Target Range: ", comment: "LoopInsights TIR target label"))
                         .font(.subheadline.weight(.semibold))
                         .foregroundColor(.primary)
-                    Text(NSLocalizedString("70–180 mg/dL", comment: "LoopInsights TIR target value"))
+                    Text(viewModel.coordinator.unitContext.tirRangeString)
                         .font(.subheadline)
                         .foregroundColor(.primary)
                 }
@@ -961,7 +961,9 @@ struct LoopInsights_DashboardView: View {
                     Text(NSLocalizedString("Tight Range: ", comment: "LoopInsights TITR target label"))
                         .font(.subheadline.weight(.semibold))
                         .foregroundColor(Self.clarityTight)
-                    Text(String(format: NSLocalizedString("70–%d mg/dL", comment: "LoopInsights TITR target value"), g.tightRangeUpperBound))
+                    let lowStr = viewModel.coordinator.unitContext.formatUserValue(viewModel.coordinator.unitContext.lowValue, includeUnit: false)
+                    let tightUpperStr = viewModel.coordinator.unitContext.formatMgdl(Double(g.tightRangeUpperBound))
+                    Text("\(lowStr)–\(tightUpperStr)")
                         .font(.subheadline)
                         .foregroundColor(Self.clarityTight)
                 }
