@@ -30,7 +30,6 @@ struct DataLayer_ConsentView: View {
     @State private var pdfURL: URL?
     @State private var ingestEndpoint = DataLayer_FeatureFlags.ingestEndpointURL?.absoluteString ?? ""
     @State private var shareEndpoint = DataLayer_FeatureFlags.shareEndpointURL?.absoluteString ?? ""
-    @State private var apiKey = DataLayer_FeatureFlags.ingestAPIKey ?? ""
 
     var body: some View {
         Form {
@@ -601,19 +600,7 @@ struct DataLayer_ConsentView: View {
                         }
                 }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("API Key")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    SecureField("Paste API key", text: $apiKey)
-                        .font(.caption)
-                        .textFieldStyle(.roundedBorder)
-                        .onChange(of: apiKey) { newValue in
-                            DataLayer_FeatureFlags.ingestAPIKey = newValue.isEmpty ? nil : newValue
-                        }
-                }
-
-                if !ingestEndpoint.isEmpty && !apiKey.isEmpty {
+                if !ingestEndpoint.isEmpty {
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
