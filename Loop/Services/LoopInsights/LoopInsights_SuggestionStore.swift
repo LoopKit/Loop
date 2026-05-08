@@ -88,9 +88,9 @@ final class LoopInsights_SuggestionStore: ObservableObject {
     }
 
     /// Mark a record as applied
-    func markApplied(recordID: UUID, mode: LoopInsightsApplyMode, snapshotBefore: LoopInsightsTherapySnapshot?, snapshotAfter: LoopInsightsTherapySnapshot?) {
+    func markApplied(recordID: UUID, mode: LoopInsightsApplyMode, snapshotBefore: LoopInsightsTherapySnapshot?, snapshotAfter: LoopInsightsTherapySnapshot?, glucoseStats: LoopInsightsGlucoseStatsSnapshot? = nil) {
         guard let index = records.firstIndex(where: { $0.id == recordID }) else { return }
-        records[index].markApplied(mode: mode, snapshotBefore: snapshotBefore, snapshotAfter: snapshotAfter)
+        records[index].markApplied(mode: mode, snapshotBefore: snapshotBefore, snapshotAfter: snapshotAfter, glucoseStats: glucoseStats)
         saveRecords()
 
         // Notify DataLayer

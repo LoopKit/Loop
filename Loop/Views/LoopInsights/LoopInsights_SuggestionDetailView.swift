@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import LoopKitUI
 
 /// Detailed view of a single suggestion showing reasoning, current vs proposed
 /// values for each time block, and apply/dismiss actions.
@@ -18,6 +19,22 @@ struct LoopInsights_SuggestionDetailView: View {
     var onRevert: (() -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
+
+    private var unitContext: LoopInsights_GlucoseUnitContext {
+        LoopInsights_GlucoseUnitContext(displayGlucosePreference: displayGlucosePreference)
+    }
+
+    /// Format an ISF/CR/basal value with the user's unit. ISF values are stored
+    /// in canonical mg/dL — convert to mmol/L for mmol/L users.
+    private func formatValue(_ value: Double, settingType: LoopInsightsSettingType) -> String {
+        switch settingType {
+        case .insulinSensitivity:
+            return "\(unitContext.formatMgdl(value)) per U"
+        case .carbRatio, .basalRate:
+            return String(format: "\(settingType.valueFormatString) \(settingType.unitDescription)", value)
+        }
+    }
 
     var body: some View {
         List {
@@ -99,7 +116,7 @@ struct LoopInsights_SuggestionDetailView: View {
                             Text(NSLocalizedString("Current", comment: "LoopInsights current value label"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                            Text(String(format: "\(record.suggestion.settingType.valueFormatString) %@", block.currentValue, record.suggestion.settingType.unitDescription))
+                            Text(formatValue(block.currentValue, settingType: record.suggestion.settingType))
                                 .font(.body)
                                 .fontWeight(.medium)
                         }
@@ -115,7 +132,7 @@ struct LoopInsights_SuggestionDetailView: View {
                             Text(NSLocalizedString("Proposed", comment: "LoopInsights proposed value label"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                            Text(String(format: "\(record.suggestion.settingType.valueFormatString) %@", block.proposedValue, record.suggestion.settingType.unitDescription))
+                            Text(formatValue(block.proposedValue, settingType: record.suggestion.settingType))
                                 .font(.body)
                                 .fontWeight(.bold)
                                 .foregroundColor(proposedValueColor(for: block))

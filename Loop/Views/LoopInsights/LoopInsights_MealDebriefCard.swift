@@ -21,6 +21,7 @@ struct LoopInsights_MealDebriefCard: View {
     let errorMessage: String?
     let isExpanded: Bool
     let onToggle: () -> Void
+    let unitContext: LoopInsights_GlucoseUnitContext
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -316,7 +317,7 @@ struct LoopInsights_MealDebriefCard: View {
                 Text(NSLocalizedString("Predicted Peak", comment: "LoopInsights predicted peak"))
                     .font(.caption2)
                     .foregroundColor(.secondary)
-                Text(String(format: "%.0f mg/dL", predicted))
+                Text(unitContext.formatMgdl(predicted))
                     .font(.caption.weight(.semibold))
                     .foregroundColor(.blue)
             }
@@ -324,7 +325,7 @@ struct LoopInsights_MealDebriefCard: View {
                 Text(NSLocalizedString("Actual Peak", comment: "LoopInsights actual peak"))
                     .font(.caption2)
                     .foregroundColor(.secondary)
-                Text(String(format: "%.0f mg/dL", actual))
+                Text(unitContext.formatMgdl(actual))
                     .font(.caption.weight(.semibold))
                     .foregroundColor(.green)
             }

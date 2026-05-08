@@ -159,6 +159,8 @@ final class DataLayer_SyncService {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
+        // Auth header only sent if user pointed at their own protected endpoint;
+        // bundled backend is anonymous.
         if let apiKey = DataLayer_FeatureFlags.ingestAPIKey {
             request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         }

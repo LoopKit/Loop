@@ -67,7 +67,19 @@ final class AutoPresets_AIAdvisor {
     // MARK: - System Prompt
 
     private func buildSystemPrompt() -> String {
+        let unitContext = AutoPresets_Coordinator.shared.unitContext
+        let jsonFieldClarification = """
+
+        JSON FIELD UNITS — IMPORTANT:
+        Although prose in the `reasoning` and `overall_assessment` fields must use the user's unit,
+        the JSON fields `target_range_low_mgdl` and `target_range_high_mgdl` MUST ALWAYS contain
+        values in mg/dL — they are canonical storage fields. Convert from your prose unit to mg/dL
+        before populating those fields. The app converts back to the user's unit for display.
+        """
         return """
+        \(unitContext.aiPromptUnitContext())
+        \(jsonFieldClarification)
+
         You are a friendly, expert diabetes management advisor specializing in Loop's override \
         preset system. You are speaking DIRECTLY to the user — always use "you" and "your" \
         (never "this person", "the person", "the user", or "they"). Be warm, personal, and \

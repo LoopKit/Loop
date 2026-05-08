@@ -35,6 +35,14 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     /// Suggestion records (pending)
     @Published var pendingSuggestions: [LoopInsightsSuggestionRecord] = []
 
+    /// Recently applied suggestions (last 30 days) for the Settings Impact Tracker
+    var recentlyAppliedSuggestions: [LoopInsightsSuggestionRecord] {
+        let cutoff = Date().addingTimeInterval(-30 * 24 * 3600)
+        return coordinator.suggestionStore.resolvedRecords
+            .filter { ($0.status == .applied || $0.status == .autoApplied) && ($0.resolvedAt ?? $0.createdAt) > cutoff }
+            .sorted { ($0.resolvedAt ?? $0.createdAt) > ($1.resolvedAt ?? $1.createdAt) }
+    }
+
     /// Selected setting type for analysis focus
     @Published var focusSettingType: LoopInsightsSettingType = .basalRate
 
@@ -55,6 +63,9 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
     /// Detected glucose/insulin patterns from aggregated data
     @Published var detectedPatterns: [LoopInsightsDetectedPattern] = []
+
+    /// Newly discovered behavior correction patterns (alert upon discovery)
+    @Published var newBehaviorDiscoveries: [LoopInsightsCorrectionPattern] = []
 
     /// Suggestions that were just auto-applied (for notification display)
     @Published var autoAppliedSuggestions: [LoopInsightsSuggestion] = []
@@ -103,6 +114,9 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
         // Load initial snapshot
         loadCurrentSettings()
+
+        // Check for new behavior correction patterns (alert upon discovery)
+        checkBehaviorDiscoveries()
     }
 
     // MARK: - Actions
@@ -114,6 +128,22 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
         } catch {
             LoopInsights_FeatureFlags.log.error("Failed to capture therapy snapshot: \(error)")
         }
+    }
+
+    /// Check for newly discovered behavior correction patterns
+    func checkBehaviorDiscoveries() {
+        guard LoopInsights_FeatureFlags.foodResponseEnabled else { return }
+        DispatchQueue.global(qos: .utility).async {
+            let discoveries = LoopInsights_BehaviorInsightsStore.checkForNewDiscoveries()
+            DispatchQueue.main.async {
+                self.newBehaviorDiscoveries = discoveries
+            }
+        }
+    }
+
+    /// Dismiss the behavior discovery alert
+    func dismissBehaviorDiscoveries() {
+        newBehaviorDiscoveries = []
     }
 
     /// Run AI analysis for the focused setting type
@@ -161,14 +191,15 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                     stats: stats,
                     recentChanges: recentChanges,
                     supplementalContext: supplementalContext,
-                    pastAppliedWithOutcomes: pastOutcomes
+                    pastAppliedWithOutcomes: pastOutcomes,
+                    unitContext: coordinator.unitContext
                 )
 
                 // Apply outcome evaluations from the AI back to the store
                 self.applyReturnedEvaluations(response.pastEvaluations)
 
                 // Show patterns, score, and AI results together after analysis completes
-                self.detectedPatterns = Self.detectPatterns(from: stats)
+                self.detectedPatterns = Self.detectPatterns(from: stats, unitContext: coordinator.unitContext)
                 self.updateSettingsScore()
                 self.analysisResponse = response
                 self.overallAssessment = response.overallAssessment
@@ -254,7 +285,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                         stats: stats,
                         recentChanges: recentChanges,
                         supplementalContext: supplementalContext,
-                        pastAppliedWithOutcomes: pastOutcomes
+                        pastAppliedWithOutcomes: pastOutcomes,
+                        unitContext: coordinator.unitContext
                     )
 
                     // Apply outcome evaluations from the AI back to the store
@@ -280,7 +312,7 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 }
 
                 // Show patterns and score after all analyses complete
-                self.detectedPatterns = Self.detectPatterns(from: stats)
+                self.detectedPatterns = Self.detectPatterns(from: stats, unitContext: coordinator.unitContext)
                 self.updateSettingsScore()
 
                 self.lastAnalysisDate = Date()
@@ -300,6 +332,21 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
     }
 
     /// Apply a suggestion based on the current apply mode
+    /// Build a glucose stats snapshot from the current aggregated stats for impact tracking
+    private var currentGlucoseStatsSnapshot: LoopInsightsGlucoseStatsSnapshot? {
+        guard let stats = aggregatedStats else { return nil }
+        return LoopInsightsGlucoseStatsSnapshot(
+            timeInRange: stats.glucoseStats.timeInRange,
+            timeBelowRange: stats.glucoseStats.timeBelowRange,
+            timeAboveRange: stats.glucoseStats.timeAboveRange,
+            averageGlucose: stats.glucoseStats.averageGlucose,
+            coefficientOfVariation: stats.glucoseStats.coefficientOfVariation,
+            gmi: stats.glucoseStats.gmi,
+            capturedAt: Date(),
+            periodDays: stats.period.rawValue
+        )
+    }
+
     func applySuggestion(_ record: LoopInsightsSuggestionRecord) {
         let mode = LoopInsights_FeatureFlags.applyMode
 
@@ -311,7 +358,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 recordID: record.id,
                 mode: .manual,
                 snapshotBefore: snapshotBefore,
-                snapshotAfter: nil
+                snapshotAfter: nil,
+                glucoseStats: currentGlucoseStatsSnapshot
             )
 
         case .oneTap:
@@ -355,7 +403,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             recordID: record.id,
             mode: LoopInsights_FeatureFlags.applyMode,
             snapshotBefore: snapshotBefore,
-            snapshotAfter: snapshotAfter
+            snapshotAfter: snapshotAfter,
+            glucoseStats: currentGlucoseStatsSnapshot
         )
 
         recordToApply = nil
@@ -410,7 +459,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             recordID: record.id,
             mode: .preFill,
             snapshotBefore: snapshotBefore,
-            snapshotAfter: snapshotAfter
+            snapshotAfter: snapshotAfter,
+            glucoseStats: currentGlucoseStatsSnapshot
         )
 
         recordToApply = nil
@@ -602,7 +652,8 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
                 recordID: record.id,
                 mode: .autoApply,
                 snapshotBefore: snapshotBefore,
-                snapshotAfter: snapshotAfter
+                snapshotAfter: snapshotAfter,
+                glucoseStats: currentGlucoseStatsSnapshot
             )
         }
 
@@ -613,7 +664,9 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
 
     /// Detect glucose/insulin patterns from aggregated statistics.
     /// Returns patterns sorted by severity (high first).
-    static func detectPatterns(from stats: LoopInsightsAggregatedStats) -> [LoopInsightsDetectedPattern] {
+    /// Pattern detail strings use the user's preferred glucose unit; threshold comparisons
+    /// stay in canonical mg/dL because `g.hourlyAverages` and `glucoseValues` are mg/dL.
+    static func detectPatterns(from stats: LoopInsightsAggregatedStats, unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl) -> [LoopInsightsDetectedPattern] {
         var patterns: [LoopInsightsDetectedPattern] = []
         let g = stats.glucoseStats
         let period = stats.period
@@ -626,13 +679,13 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             if overnightAvg < 70 {
                 patterns.append(LoopInsightsDetectedPattern(
                     type: .overnightLows,
-                    detail: String(format: NSLocalizedString("Average overnight glucose %.0f mg/dL in %@", comment: "LoopInsights pattern detail: overnight lows"), overnightAvg, period.displayName),
+                    detail: String(format: NSLocalizedString("Average overnight glucose %@ in %@", comment: "LoopInsights pattern detail: overnight lows"), unitContext.formatMgdl(overnightAvg), period.displayName),
                     severity: .high
                 ))
             } else if overnightAvg < 80 {
                 patterns.append(LoopInsightsDetectedPattern(
                     type: .overnightLows,
-                    detail: String(format: NSLocalizedString("Average overnight glucose %.0f mg/dL in %@", comment: "LoopInsights pattern detail: overnight lows moderate"), overnightAvg, period.displayName),
+                    detail: String(format: NSLocalizedString("Average overnight glucose %@ in %@", comment: "LoopInsights pattern detail: overnight lows moderate"), unitContext.formatMgdl(overnightAvg), period.displayName),
                     severity: .medium
                 ))
             }
@@ -659,13 +712,13 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             if overnightAvg > 200 {
                 patterns.append(LoopInsightsDetectedPattern(
                     type: .overnightHighs,
-                    detail: String(format: NSLocalizedString("Average overnight glucose %.0f mg/dL in %@", comment: "LoopInsights pattern detail: overnight highs"), overnightAvg, period.displayName),
+                    detail: String(format: NSLocalizedString("Average overnight glucose %@ in %@", comment: "LoopInsights pattern detail: overnight highs"), unitContext.formatMgdl(overnightAvg), period.displayName),
                     severity: .high
                 ))
             } else if overnightAvg > 180 {
                 patterns.append(LoopInsightsDetectedPattern(
                     type: .overnightHighs,
-                    detail: String(format: NSLocalizedString("Average overnight glucose %.0f mg/dL in %@", comment: "LoopInsights pattern detail: overnight highs moderate"), overnightAvg, period.displayName),
+                    detail: String(format: NSLocalizedString("Average overnight glucose %@ in %@", comment: "LoopInsights pattern detail: overnight highs moderate"), unitContext.formatMgdl(overnightAvg), period.displayName),
                     severity: .medium
                 ))
             }
@@ -679,13 +732,13 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
             if rise > 40 {
                 patterns.append(LoopInsightsDetectedPattern(
                     type: .dawnPhenomenon,
-                    detail: String(format: NSLocalizedString("Average rise of %.0f mg/dL between 3 AM–7 AM", comment: "LoopInsights pattern detail: dawn phenomenon"), rise),
+                    detail: String(format: NSLocalizedString("Average rise of %@ between 3 AM–7 AM", comment: "LoopInsights pattern detail: dawn phenomenon"), unitContext.formatMgdl(rise)),
                     severity: .high
                 ))
             } else if rise > 20 {
                 patterns.append(LoopInsightsDetectedPattern(
                     type: .dawnPhenomenon,
-                    detail: String(format: NSLocalizedString("Average rise of %.0f mg/dL between 3 AM–7 AM", comment: "LoopInsights pattern detail: dawn phenomenon moderate"), rise),
+                    detail: String(format: NSLocalizedString("Average rise of %@ between 3 AM–7 AM", comment: "LoopInsights pattern detail: dawn phenomenon moderate"), unitContext.formatMgdl(rise)),
                     severity: .medium
                 ))
             }
@@ -742,7 +795,7 @@ final class LoopInsights_DashboardViewModel: ObservableObject {
         if g.averageGlucose < 100 && g.timeBelowRange > 2 {
             patterns.append(LoopInsightsDetectedPattern(
                 type: .consistentLows,
-                detail: String(format: NSLocalizedString("Average glucose %.0f mg/dL with %.1f%% below range", comment: "LoopInsights pattern detail: consistent lows"), g.averageGlucose, g.timeBelowRange),
+                detail: String(format: NSLocalizedString("Average glucose %@ with %.1f%% below range", comment: "LoopInsights pattern detail: consistent lows"), unitContext.formatMgdl(g.averageGlucose), g.timeBelowRange),
                 severity: g.averageGlucose < 90 ? .high : .medium
             ))
         }

@@ -7,12 +7,27 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E99E746DC66A23098BEE7C6D /* SiteAtlas_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00DAF82811DE6BE326F7610 /* SiteAtlas_FeatureFlags.swift */; };
+		A3E380B614277C4C788365FA /* SiteAtlas_Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF4A7212FE066CC7754F207 /* SiteAtlas_Storage.swift */; };
+		97C5ABDCD645F8D01E91DC0D /* SiteAtlas_Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2644A16811D8A9EA3F4B89AF /* SiteAtlas_Coordinator.swift */; };
+		D4AE83C79DCCE8E4430F1ACB /* SiteAtlas_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C02529B18500E73BD995F5A /* SiteAtlas_Models.swift */; };
+		737257DBEF9961A04DD08D08 /* SiteAtlas_BodyMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CEF7E6F424695B044A8FB23 /* SiteAtlas_BodyMapView.swift */; };
+		33BC23EC3340A6228E210842 /* SiteAtlas_SiteSelectionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347C3E540F8E14C26EA3E557 /* SiteAtlas_SiteSelectionSheet.swift */; };
+		D04F00E00F1E809D478AF4EC /* SiteAtlas_SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7A29E1E802E19C41166AE01 /* SiteAtlas_SettingsView.swift */; };
+		32A3BFAA99E26BFDB5E23AAC /* BodyMapFront.png in Resources */ = {isa = PBXBuildFile; fileRef = 553159FF12B2F1EA66F46735 /* BodyMapFront.png */; };
+		6B068FE26CB61293AAF7500D /* BodyMapBack.png in Resources */ = {isa = PBXBuildFile; fileRef = D956D2BCFB715323F53E463B /* BodyMapBack.png */; };
+		126412E6CB2B693A93FE0A0C /* GraphDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDF56556BF1BE5E7875BED21 /* GraphDetailView.swift */; };
+		14C479C5591D8D8C3E471259 /* GraphDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9613AA3497F104C0F86A2DF /* GraphDetailViewModel.swift */; };
 		8D0F376E7E338ECB93EE03E0 /* LoopInsights_TrendsInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7AAD3549253FE16941E10D /* LoopInsights_TrendsInsightsView.swift */; };
 		B9D78BD57F35DBCFEC65530D /* AutoPresets_Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B2D28F4F6C8955AB18A98C /* AutoPresets_Coordinator.swift */; };
 		BACF15F57C2B75D78B797778 /* AutoPresets_Delegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D17206C8109E75D64068F3D1 /* AutoPresets_Delegate.swift */; };
 		B1F90AD96E591453CF003AC2 /* AutoPresets_Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F92C032F72116EA4C06250F9 /* AutoPresets_Logger.swift */; };
 		211A65C85F6FEC59ED083F2D /* AutoPresets_Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EED74A3E39956E5218453D1 /* AutoPresets_Storage.swift */; };
 		0556C20E91536D540ED3D91E /* AutoPresets_ActivityDetectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58CA1221236A70935E684238 /* AutoPresets_ActivityDetectionManager.swift */; };
+		BAD5614ADF674903DDA6CB66 /* AutoPresets_GeofenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE750480EFE1634C0059742C /* AutoPresets_GeofenceManager.swift */; };
+		852954520F4B88A1B57C48D5 /* AutoPresets_GeofenceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C8C4ECE1B6F36E8E1307AA /* AutoPresets_GeofenceSettingsView.swift */; };
+		52F2BFD37514C123B6147721 /* AutoPresets_CalendarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF2E39565F6EE80BA66E7E7 /* AutoPresets_CalendarManager.swift */; };
+		C67E0955D2EBB8CC12BD3CD6 /* AutoPresets_CalendarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 620B3D0099888389E9D3B3F5 /* AutoPresets_CalendarSettingsView.swift */; };
 		FFF05E4789A2D06526EB0A24 /* AutoPresets_SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177A32DF2F91D26776BF2C7F /* AutoPresets_SettingsView.swift */; };
 		232E357E321361C66498FEEA /* AutoPresets_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D90E77F7FA3F7557C52EA5B /* AutoPresets_Models.swift */; };
 		13992ED79F79937110B6BFCD /* AutoPresets_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 593F5B3264F8383861CE3027 /* AutoPresets_FeatureFlags.swift */; };
@@ -608,6 +623,7 @@
 		D062E93B8CA1AFF98CCB804D /* LoopInsights_SuggestionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FF964C8C711F6D2BC5ABADF /* LoopInsights_SuggestionDetailView.swift */; };
 		C55289DE70B96F1DDAD60001 /* LoopInsights_SuggestionHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30BE128F5152CCEFCE77A91 /* LoopInsights_SuggestionHistoryView.swift */; };
 		88B26E5EBD790388B811AA73 /* LoopInsights_DataAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38E1A1D32871794C3B3D3627 /* LoopInsights_DataAggregator.swift */; };
+		A72F9742B37CB336AC090320 /* LoopInsights_GlucoseUnitContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD552BCC203C2C8AC7B136A5 /* LoopInsights_GlucoseUnitContext.swift */; };
 		9B67835D9437872514B959ED /* LoopInsights_AIAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D9C7D82541170EF3C66E380 /* LoopInsights_AIAnalysis.swift */; };
 		BB812EF3B85C5D20E4663846 /* LoopInsights_AIServiceAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330B944B4E606429228D8936 /* LoopInsights_AIServiceAdapter.swift */; };
 		26721D288EAABC6270DB048C /* LoopInsights_TestDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F875E984C8C1A149E4242E /* LoopInsights_TestDataProvider.swift */; };
@@ -673,6 +689,11 @@
 		8955F91F0614AB727678DE21 /* LoopInsights_ChatHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C18F5D863D949E4259A3DCB /* LoopInsights_ChatHistoryView.swift */; };
 		C43D60BE7EB18127C94178B9 /* LoopInsights_VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90281DB9786B60AE9388CF4 /* LoopInsights_VoiceService.swift */; };
 		726FC36A0F201A8204D10CBD /* LoopInsights_BackfillDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0820F7B0E9F04165D7455FF5 /* LoopInsights_BackfillDetector.swift */; };
+		2D500CBB7AC2A7ECEABFD547 /* LoopInsights_BehaviorInsightsAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20C30B336308A260B7A8B79 /* LoopInsights_BehaviorInsightsAnalyzer.swift */; };
+		BB89D4530772E3B1D4AA17A7 /* LoopInsights_BehaviorInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C1B6F9913B7849DF93ABA1 /* LoopInsights_BehaviorInsightsView.swift */; };
+		9556DAD64698B0AABD5F6DA6 /* LoopInsights_CaregiverDigestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478EEEE3F2ADEEB8F7C1F53E /* LoopInsights_CaregiverDigestService.swift */; };
+		4D9F0C62F55EA3BC7DC9AB85 /* LoopInsights_CaregiverDigestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5109FFCCF5E20AF2CA29A446 /* LoopInsights_CaregiverDigestView.swift */; };
+		5E071E4F0F8401A654C99836 /* LoopInsights_EndoReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22D011D73417DB261F2BF87C /* LoopInsights_EndoReportView.swift */; };
 		4D5A45BFBF1E29BF94FE5A64 /* LoopInsights_MealDebriefModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4A2E67CD7E5A4EDFC30932 /* LoopInsights_MealDebriefModels.swift */; };
 		02B780D9C1D4C4BBAAF1D24A /* LoopInsights_MealDebriefService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98D9E86D766B4072B4FF2C64 /* LoopInsights_MealDebriefService.swift */; };
 		C68FC1015924729C6AE278BC /* LoopInsights_PreMealAdvisorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BF2D36066BDBA09E965A0F0 /* LoopInsights_PreMealAdvisorService.swift */; };
@@ -694,6 +715,122 @@
 		88758BD943F7CA66483B2D1A /* DataLayer_ProviderProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E728EC69CA322D1D5B8B423C /* DataLayer_ProviderProtocol.swift */; };
 		5360E9F21CABAFD28DB505EB /* FoodFinder_CarbTrackingDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */; };
 		2A1B8D3286E1ED96FB2ED124 /* FoodFinder_CarbTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80940A6E390B157E04B9D2D /* FoodFinder_CarbTrackingService.swift */; };
+		9B4B836A0130380A1787B685 /* AutoPresets_ActivityDetectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56613E391A5E735E0235D4BE /* AutoPresets_ActivityDetectionManager.swift */; };
+		70443A8B65CE1B2DA0B7F0B4 /* AutoPresets_Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A4DA4190E78392E5955B76 /* AutoPresets_Coordinator.swift */; };
+		809B4CFD31EA1434F93381DD /* AutoPresets_Delegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F0DCFE43E6DB3A4E74E2AC /* AutoPresets_Delegate.swift */; };
+		2F832679D4E5870ACDB7E9CF /* AutoPresets_GeofenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F77974BAD8C8B8D9D54A90F /* AutoPresets_GeofenceManager.swift */; };
+		CDCC9FBD90E8D25B15DD319E /* AutoPresets_Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDDE7C0162939A900342F8D8 /* AutoPresets_Logger.swift */; };
+		F0556225BFA7AD2532BF8CFE /* AutoPresets_Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDFC1F29C2312E792516B13 /* AutoPresets_Storage.swift */; };
+		FACBCAB9166B79546E7F6281 /* AutoPresets_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F5172D47C81504B6F14D19 /* AutoPresets_Models.swift */; };
+		188F8AEA1E65B52DBE1E0559 /* AutoPresets_RecommendationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B91FB09EA02C1079290FA1 /* AutoPresets_RecommendationModels.swift */; };
+		DA8E68CC93178DE3066B9DEE /* AutoPresets_AIAdvisor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDFA7D6D1EB9AE92410C6040 /* AutoPresets_AIAdvisor.swift */; };
+		6FAD82D9474D5C9956440830 /* AutoPresets_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 024DE3B4146CA9D1B57F9FFD /* AutoPresets_FeatureFlags.swift */; };
+		878B03AE9AE258294DDC879A /* AutoPresets_AIRecommendationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30AF2AF42DC12C3916774432 /* AutoPresets_AIRecommendationView.swift */; };
+		8B34032136EAE8230DB056CE /* AutoPresets_GeofenceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7387EE5C4FD1515CE0B0A367 /* AutoPresets_GeofenceSettingsView.swift */; };
+		01DA4C82770776FE647FC636 /* AutoPresets_CalendarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FEFEFD99296F2F41468E5DA /* AutoPresets_CalendarManager.swift */; };
+		02FD6C9080F7C2682116B7C1 /* AutoPresets_CalendarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50B93F4A924A18A54CD4A1D /* AutoPresets_CalendarSettingsView.swift */; };
+		68F370AB66AF0B853621CCDC /* AutoPresets_SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1603F6C219C5CF41BA200D92 /* AutoPresets_SettingsView.swift */; };
+		64212EA79692EB9338E53C85 /* FoodFinder_AnalysisRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B723766697B01A143A1CEEB /* FoodFinder_AnalysisRecord.swift */; };
+		E88E68D68BF264F721AFC712 /* FoodFinder_InputResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = E982E4777A460182F9FEE5D7 /* FoodFinder_InputResults.swift */; };
+		7ADC7CCA827794317AA04776 /* FoodFinder_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB107CACA4FC04E8652B531 /* FoodFinder_Models.swift */; };
+		FB788D1EE6ADB3446110A1E4 /* FoodFinder_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73404923E06307CDCF420FE4 /* FoodFinder_FeatureFlags.swift */; };
+		B7F6252AE377538D14B924DF /* FoodFinder_CarbTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFCDBD9B90449DA0CDEA3299 /* FoodFinder_CarbTrackingService.swift */; };
+		33CAAACE11A18DF26E8388A2 /* FoodFinder_AIAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFB900EE960A218333F8BA1 /* FoodFinder_AIAnalysis.swift */; };
+		0069EFA11E7101DEB638B4C2 /* FoodFinder_AIProviderConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD1A5B12D21DD26F7818B08 /* FoodFinder_AIProviderConfig.swift */; };
+		27764BB7F99C7CA1B3BB0AC4 /* FoodFinder_AIServiceAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1682483CAD20AB33DEC25ADA /* FoodFinder_AIServiceAdapter.swift */; };
+		164EC6011323A48640046EB0 /* FoodFinder_AIServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEA35D0C77CFBE73CBBAF290 /* FoodFinder_AIServiceManager.swift */; };
+		D51C54AAD5AECFE1CAB6F647 /* FoodFinder_AnalysisHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C3890E0969AD9E1B01F4ED2 /* FoodFinder_AnalysisHistoryStore.swift */; };
+		C726C1C782BA0888FC33899F /* FoodFinder_EmojiProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C73FC463D2D989C3FD9922 /* FoodFinder_EmojiProvider.swift */; };
+		DABC221B5F95D30484E6618D /* FoodFinder_ImageDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E5D19327F64963E3C5BBA52 /* FoodFinder_ImageDownloader.swift */; };
+		41F847EDBA1E42D755FB492B /* FoodFinder_ImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE1A34A28C4C2B264A50C0E /* FoodFinder_ImageStore.swift */; };
+		0F344180B26115B3DB49A3F7 /* FoodFinder_LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B86683D6FC84C98C1021AC9 /* FoodFinder_LocationService.swift */; };
+		A1DAC248FAB1D0C3ED7FD490 /* FoodFinder_OpenFoodFactsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 301CAEF6EB83C57116815C63 /* FoodFinder_OpenFoodFactsService.swift */; };
+		1B21C0D879F682FD0DE7BB15 /* FoodFinder_ScannerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB316C0F6448184A5AD9AE5B /* FoodFinder_ScannerService.swift */; };
+		0E01156F77D4B2E75523D557 /* FoodFinder_SearchRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CB80A8355FAF1F4E646E111 /* FoodFinder_SearchRouter.swift */; };
+		D5B0EF5D0003524F988C3C0C /* FoodFinder_SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC3D13CCFA264E81C0B863C /* FoodFinder_SecureStorage.swift */; };
+		4A937F594BC57E1644C24B50 /* FoodFinder_VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D58DB646F97C3C6A3EEF1E /* FoodFinder_VoiceService.swift */; };
+		3C37B6236426D0E3EA651E6B /* FoodFinder_SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B8B27AA086D7DAE137E9BA8 /* FoodFinder_SearchViewModel.swift */; };
+		23EBC2AFF5B046DA71B8706B /* FoodFinder_CarbTrackingDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A071F1BBD88854C8B89CF0 /* FoodFinder_CarbTrackingDashboard.swift */; };
+		9A49A3AC2016C9FA23C057E6 /* FoodFinder_AICameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225333340D7B94B14ADB765D /* FoodFinder_AICameraView.swift */; };
+		4016E91E09EF6716B414F6CC /* FoodFinder_ImageCropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00960F09C394E3DEF2622168 /* FoodFinder_ImageCropView.swift */; };
+		B9D441B49A1EF902D4B4CD26 /* FoodFinder_EntryPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCED11B98BEAFD58C8AE941 /* FoodFinder_EntryPoint.swift */; };
+		45D21861D3C0ADF067F2767F /* FoodFinder_FavoritesHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2111B0756589CC6014EFC45F /* FoodFinder_FavoritesHelpers.swift */; };
+		7274C0B427751AA3CD81DEE4 /* FoodFinder_ScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EB1877A28B05637D8792EAB /* FoodFinder_ScannerView.swift */; };
+		A07F0CC0E0A98BAEEE6EBB03 /* FoodFinder_SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20C5ECE2E8754449F20840DD /* FoodFinder_SearchBar.swift */; };
+		49ED3DD0564A0DE7C8D9F19F /* FoodFinder_SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A590E20E1E9607F379E770F1 /* FoodFinder_SearchResultsView.swift */; };
+		5BCE0389AEB6BC4EC80F57AA /* FoodFinder_SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43216BEA2637938B8B507F92 /* FoodFinder_SettingsView.swift */; };
+		2E34F5AB8320222407AAFC1E /* FoodFinder_VoiceSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBD734A20EE282EE164FC6B9 /* FoodFinder_VoiceSearchView.swift */; };
+		A528A18F2ADB9529322801FC /* LoopInsights_BackgroundMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268747E96E69E4D5AB82AEA7 /* LoopInsights_BackgroundMonitor.swift */; };
+		A5F64582330AEEC8A1FC5D5F /* LoopInsights_Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC8418A13BEB028E920F1A3 /* LoopInsights_Coordinator.swift */; };
+		6A4BDC2EEE1179A2BE5C7754 /* LoopInsights_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22D0E736A1B253D37D9E9740 /* LoopInsights_Models.swift */; };
+		93621214B467806D9F09EEAA /* LoopInsights_MFPModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E4F7C2FEA9818DFEDDB5F1 /* LoopInsights_MFPModels.swift */; };
+		1FDE947C49DDB9F909D27B01 /* LoopInsights_Phase5Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6FB47168C7C5E107309CC2F /* LoopInsights_Phase5Models.swift */; };
+		84E7E7B7A794D8AB75034AF4 /* LoopInsights_SuggestionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF038EAE6D8A0A10D2E65158 /* LoopInsights_SuggestionRecord.swift */; };
+		A395749AFFBA35E871EEBFD6 /* LoopInsights_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1859D44BC7E28548B1EF85 /* LoopInsights_FeatureFlags.swift */; };
+		6F1B367F5EF09AEA30296F44 /* LoopInsights_AdvancedAnalyzers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1541ACC09ACED3D982BF7FC /* LoopInsights_AdvancedAnalyzers.swift */; };
+		079EC1F06F2F6038756BDDF2 /* LoopInsights_AIAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CCCF9346DD7370B3975A83 /* LoopInsights_AIAnalysis.swift */; };
+		7F85981E95E056FD14C9E658 /* LoopInsights_AIServiceAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607D9750CD60D2C5FBDE13FD /* LoopInsights_AIServiceAdapter.swift */; };
+		15CF9C0C36A50D07EDC72C04 /* LoopInsights_AlcoholTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD14B8265747D447C264D9A /* LoopInsights_AlcoholTracker.swift */; };
+		C0B209FC0F7923D3787F2CEF /* LoopInsights_ChatHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD28B7018C8109C3B352CBB8 /* LoopInsights_ChatHistoryStore.swift */; };
+		E49F383327456AA3DEF583AE /* LoopInsights_CaffeineTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108EFA414EC97DDAAF5FFBCB /* LoopInsights_CaffeineTracker.swift */; };
+		FDC7A8B99BD65BE3599AC8BD /* LoopInsights_VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 253674AABEF3343CE2B3B0C2 /* LoopInsights_VoiceService.swift */; };
+		6DB3F6A2D8AACF9650B59713 /* LoopInsights_BackfillDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2372E2DDBDA89A3B5B80EF44 /* LoopInsights_BackfillDetector.swift */; };
+		262F44E876C2FCB3817DCC72 /* LoopInsights_BehaviorInsightsAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B55B850825FC159EF1082B /* LoopInsights_BehaviorInsightsAnalyzer.swift */; };
+		551DFE85CB80C4446AD0DDEC /* LoopInsights_CaregiverDigestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7569E9F9E2299C7C7987190 /* LoopInsights_CaregiverDigestService.swift */; };
+		F56F1856A32E8160149B3149 /* LoopInsights_DataAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32883A0045816CA3128E3E /* LoopInsights_DataAggregator.swift */; };
+		FFED28F5B41C6EF1851B6139 /* LoopInsights_GlucoseUnitContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 940B95F8A4BE9A4A6E58CA79 /* LoopInsights_GlucoseUnitContext.swift */; };
+		955592F30284ED133EC150B3 /* LoopInsights_FoodResponseAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE15E9C010223EAC3F3FA6B8 /* LoopInsights_FoodResponseAnalyzer.swift */; };
+		E4BA2E42EF9C36EC6D602DBD /* LoopInsights_GoalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404B0C6DACC2F8E4E7FBA99D /* LoopInsights_GoalStore.swift */; };
+		0C4E19D6352BAEBD22195CF3 /* LoopInsights_HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2570F1035D3A845E6230189B /* LoopInsights_HealthKitManager.swift */; };
+		99CDB0D68ECEA2FA30AB1556 /* LoopInsights_NightscoutImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E4D5933C8B4305CE381143 /* LoopInsights_NightscoutImporter.swift */; };
+		051BB8037243680C0687EA79 /* LoopInsights_ReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29BFD6726CB3416DD8DE08BD /* LoopInsights_ReportGenerator.swift */; };
+		92BBCC6A731B66E67AE015A1 /* LoopInsights_SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 623C775B205EC24548B55C0A /* LoopInsights_SecureStorage.swift */; };
+		4B080F13EF98718A7FEAB176 /* LoopInsights_SuggestionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C706C2A64F28AF9DDA6A067 /* LoopInsights_SuggestionStore.swift */; };
+		C786708D1FA4617924CC94E6 /* LoopInsights_TestDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FE3E46FD43932AB074AB64C /* LoopInsights_TestDataProvider.swift */; };
+		81E41B7390A5EF347772042E /* LoopInsights_MealDebriefService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E738F2B7D83C7CB38A604606 /* LoopInsights_MealDebriefService.swift */; };
+		E0833959776966E1C62A992A /* LoopInsights_MFPImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E5FF49FA218599C1564C1AA /* LoopInsights_MFPImporter.swift */; };
+		3BF5D5292FC8EDC6325FF0BD /* LoopInsights_PreMealAdvisorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB73B83059DB9B4CE5BA012 /* LoopInsights_PreMealAdvisorService.swift */; };
+		44BC1C4741CF7C18FCD7C58E /* LoopInsights_ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8238AB5C1F2E769273A52070 /* LoopInsights_ChatViewModel.swift */; };
+		8F1C2592AAE578625FA1A663 /* LoopInsights_DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393D1967E1D7B498743CC283 /* LoopInsights_DashboardViewModel.swift */; };
+		D211C294E88C41B64BAEECB4 /* LoopInsights_MealInsightsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30DF3D77528EAB3B5AC1D7B /* LoopInsights_MealInsightsViewModel.swift */; };
+		2606552720BC12164C272913 /* LoopInsights_AGPChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D16B2477081D3D5D1AB8694 /* LoopInsights_AGPChartView.swift */; };
+		4A0942D447003E3056FF4639 /* LoopInsights_AlcoholLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF4DD5B857DD1B4FA1E86CD /* LoopInsights_AlcoholLogView.swift */; };
+		D1C8CBB54EC80FF5B9A945C8 /* LoopInsights_BehaviorInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3684DFB8012A3E2F911692 /* LoopInsights_BehaviorInsightsView.swift */; };
+		A3BF84DA6D4C2FB3E4BF684D /* LoopInsights_CaregiverDigestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D255B89E3F58237EA2781A60 /* LoopInsights_CaregiverDigestView.swift */; };
+		434A06CECCA775D37EC1F136 /* LoopInsights_EndoReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7B28DA4512332EE1123CAEF /* LoopInsights_EndoReportView.swift */; };
+		5562647A48360FA6CC36310A /* LoopInsights_ChatHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE09CA56245E040321AF4790 /* LoopInsights_ChatHistoryView.swift */; };
+		BAE38CDF96BA1DA27FF080B7 /* LoopInsights_CaffeineLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF710A849EA6CD879BD5AB80 /* LoopInsights_CaffeineLogView.swift */; };
+		26BE764B796A172A22B27880 /* LoopInsights_ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3763C4E9526F83AB3F7D3F70 /* LoopInsights_ChatView.swift */; };
+		5CA015D639F98929BB7D72F1 /* LoopInsights_DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA2071DFD6173C252FCD9F7D /* LoopInsights_DashboardView.swift */; };
+		B7A00EB74B19C7CA8FF57388 /* LoopInsights_GoalsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48D99CEBEED5A9FDAA0E87B /* LoopInsights_GoalsView.swift */; };
+		9C56E5C58F8504E0506D1B9F /* LoopInsights_MealInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBA04C6FC8871A04AFFD27F7 /* LoopInsights_MealInsightsView.swift */; };
+		01BA2BE752047393AB59ED36 /* LoopInsights_MonitorSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADE5833949817538698865F6 /* LoopInsights_MonitorSettingsView.swift */; };
+		1B51AC4E311024D7A81A634B /* LoopInsights_SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A266A15E411B4AB60ABC4B /* LoopInsights_SettingsView.swift */; };
+		4D43F8C1B10A2B51E61714EA /* LoopInsights_SuggestionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96D5D4547C87D4BBA73BB44 /* LoopInsights_SuggestionDetailView.swift */; };
+		9A5C88D1DFB3483CBD679519 /* LoopInsights_SuggestionHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B2881360260A9CC9A72532 /* LoopInsights_SuggestionHistoryView.swift */; };
+		97915790F5F734FDF0FD1922 /* LoopInsights_TrendsInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 959413A21CA05A5EC375390F /* LoopInsights_TrendsInsightsView.swift */; };
+		A90894B1A9826F57A6F1FC03 /* LoopInsights_MealDebriefCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56616199181C51D1D00897F2 /* LoopInsights_MealDebriefCard.swift */; };
+		2C52C27A9D699F9CD6DB6C56 /* LoopInsights_PreMealAdvisorCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45AC2E89C78E9F2A46E75145 /* LoopInsights_PreMealAdvisorCard.swift */; };
+		38CE2C9F6B29D4114D1A5D07 /* LoopInsights_MealDebriefModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854E048791BB6D8578CEE684 /* LoopInsights_MealDebriefModels.swift */; };
+		DBAF6D59067C2F54BC05F3F6 /* DataLayer_Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23C515F22083FAA5A4B0A5B8 /* DataLayer_Coordinator.swift */; };
+		26D1850F1DD974F4393D5C02 /* DataLayer_EventModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB559C05A731CABF6F0B4201 /* DataLayer_EventModels.swift */; };
+		E29D1EB46A2B91AE3FDFB347 /* DataLayer_ConsentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19CF13B1F0B2354035C7019B /* DataLayer_ConsentModels.swift */; };
+		775AC761C750DEC6B6F81B72 /* DataLayer_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4516EF558EAE581A9ADCA97D /* DataLayer_FeatureFlags.swift */; };
+		6C09652D8042E266E68049E5 /* DataLayer_SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18958E699F8A7B9A6A2BA61E /* DataLayer_SecureStorage.swift */; };
+		16990648A5D75816270ED7F8 /* DataLayer_ConsentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 244F25FF57E564C904208F5E /* DataLayer_ConsentManager.swift */; };
+		B68F5C5B648322AED1B96CF5 /* DataLayer_EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C9A138F7FA663FBB33AA464 /* DataLayer_EventStore.swift */; };
+		97EABDD24D213615C9F3891C /* DataLayer_EventCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAA070556C9613A6DBC68559 /* DataLayer_EventCollector.swift */; };
+		FA5A376108B402FC8D9281FA /* DataLayer_SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BBD5F1E94A947BB4A7B0823 /* DataLayer_SyncService.swift */; };
+		015042D80CDCC9F9B61B903F /* DataLayer_ReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8F547BCEE483F5F2DF323CE /* DataLayer_ReportGenerator.swift */; };
+		0BEF9B56D9BF491F2392550F /* DataLayer_ProviderProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97E96DDA78152A5FE740FD4 /* DataLayer_ProviderProtocol.swift */; };
+		5B762A5BD7D1D9B5170C72C1 /* DataLayer_ConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0115F4773826E9EAF5F96488 /* DataLayer_ConsentView.swift */; };
+		6F5FEB4509B4644C020BD08D /* DataLayer_DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D676C326CA848F36F10BE3A /* DataLayer_DashboardView.swift */; };
+		594445C0AFBCCFCC6CC3137D /* FoodFinder_BarcodeScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7257AB964A1C8B6769E90882 /* FoodFinder_BarcodeScannerTests.swift */; };
+		83A73F5796F6A35551234E7D /* FoodFinder_OpenFoodFactsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1705C20E7AC9F6FF2322C1D7 /* FoodFinder_OpenFoodFactsTests.swift */; };
+		CFB644A4359EF71FA126A5C7 /* FoodFinder_VoiceSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09FA666A9CB87C31C053C5E7 /* FoodFinder_VoiceSearchTests.swift */; };
+		EBF56903B5932834DF35599E /* LoopInsights_DataAggregatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B9798E5BC182FCB5A9B18BB /* LoopInsights_DataAggregatorTests.swift */; };
+		6F8D19EECE4E792342E07948 /* LoopInsights_ModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B59242D8B9C330608E795CA /* LoopInsights_ModelsTests.swift */; };
+		F06F348BBB58A7D7CDE9517F /* LoopInsights_SuggestionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA22E9E5FE02C94F490DD246 /* LoopInsights_SuggestionStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -864,18 +1001,33 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D00DAF82811DE6BE326F7610 /* SiteAtlas_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_FeatureFlags.swift; sourceTree = "<group>"; };
+		FCF4A7212FE066CC7754F207 /* SiteAtlas_Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_Storage.swift; sourceTree = "<group>"; };
+		2644A16811D8A9EA3F4B89AF /* SiteAtlas_Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_Coordinator.swift; sourceTree = "<group>"; };
+		2C02529B18500E73BD995F5A /* SiteAtlas_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_Models.swift; sourceTree = "<group>"; };
+		2CEF7E6F424695B044A8FB23 /* SiteAtlas_BodyMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_BodyMapView.swift; sourceTree = "<group>"; };
+		347C3E540F8E14C26EA3E557 /* SiteAtlas_SiteSelectionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_SiteSelectionSheet.swift; sourceTree = "<group>"; };
+		E7A29E1E802E19C41166AE01 /* SiteAtlas_SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAtlas_SettingsView.swift; sourceTree = "<group>"; };
+		553159FF12B2F1EA66F46735 /* BodyMapFront.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BodyMapFront.png; sourceTree = "<group>"; };
+		D956D2BCFB715323F53E463B /* BodyMapBack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BodyMapBack.png; sourceTree = "<group>"; };
 		EE7AAD3549253FE16941E10D /* LoopInsights_TrendsInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_TrendsInsightsView.swift; sourceTree = "<group>"; };
 		31B2D28F4F6C8955AB18A98C /* AutoPresets_Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Coordinator.swift; sourceTree = "<group>"; };
 		D17206C8109E75D64068F3D1 /* AutoPresets_Delegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Delegate.swift; sourceTree = "<group>"; };
 		F92C032F72116EA4C06250F9 /* AutoPresets_Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Logger.swift; sourceTree = "<group>"; };
 		1EED74A3E39956E5218453D1 /* AutoPresets_Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Storage.swift; sourceTree = "<group>"; };
 		58CA1221236A70935E684238 /* AutoPresets_ActivityDetectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_ActivityDetectionManager.swift; sourceTree = "<group>"; };
+		BE750480EFE1634C0059742C /* AutoPresets_GeofenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_GeofenceManager.swift; sourceTree = "<group>"; };
+		7DF2E39565F6EE80BA66E7E7 /* AutoPresets_CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_CalendarManager.swift; sourceTree = "<group>"; };
+		03C8C4ECE1B6F36E8E1307AA /* AutoPresets_GeofenceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_GeofenceSettingsView.swift; sourceTree = "<group>"; };
+		620B3D0099888389E9D3B3F5 /* AutoPresets_CalendarSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_CalendarSettingsView.swift; sourceTree = "<group>"; };
 		177A32DF2F91D26776BF2C7F /* AutoPresets_SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_SettingsView.swift; sourceTree = "<group>"; };
 		2D90E77F7FA3F7557C52EA5B /* AutoPresets_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Models.swift; sourceTree = "<group>"; };
 		593F5B3264F8383861CE3027 /* AutoPresets_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_FeatureFlags.swift; sourceTree = "<group>"; };
 		459EFB26025611ED5044134D /* AutoPresets_RecommendationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_RecommendationModels.swift; sourceTree = "<group>"; };
 		62520B3DF755819815919570 /* AutoPresets_AIAdvisor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_AIAdvisor.swift; sourceTree = "<group>"; };
 		A92563E71BB3873233772CCE /* AutoPresets_AIRecommendationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_AIRecommendationView.swift; sourceTree = "<group>"; };
+		CDF56556BF1BE5E7875BED21 /* GraphDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphDetailView.swift; sourceTree = "<group>"; };
+		C9613AA3497F104C0F86A2DF /* GraphDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphDetailViewModel.swift; sourceTree = "<group>"; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
 		1452F4A82A851C9400F8B9E4 /* AddEditFavoriteFoodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditFavoriteFoodViewModel.swift; sourceTree = "<group>"; };
@@ -1535,6 +1687,7 @@
 		6FF964C8C711F6D2BC5ABADF /* LoopInsights_SuggestionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_SuggestionDetailView.swift; sourceTree = "<group>"; };
 		F30BE128F5152CCEFCE77A91 /* LoopInsights_SuggestionHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_SuggestionHistoryView.swift; sourceTree = "<group>"; };
 		38E1A1D32871794C3B3D3627 /* LoopInsights_DataAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_DataAggregator.swift; sourceTree = "<group>"; };
+		BD552BCC203C2C8AC7B136A5 /* LoopInsights_GlucoseUnitContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_GlucoseUnitContext.swift; sourceTree = "<group>"; };
 		0D9C7D82541170EF3C66E380 /* LoopInsights_AIAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AIAnalysis.swift; sourceTree = "<group>"; };
 		330B944B4E606429228D8936 /* LoopInsights_AIServiceAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AIServiceAdapter.swift; sourceTree = "<group>"; };
 		E8F875E984C8C1A149E4242E /* LoopInsights_TestDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_TestDataProvider.swift; sourceTree = "<group>"; };
@@ -1600,6 +1753,11 @@
 		5C18F5D863D949E4259A3DCB /* LoopInsights_ChatHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_ChatHistoryView.swift; sourceTree = "<group>"; };
 		C90281DB9786B60AE9388CF4 /* LoopInsights_VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_VoiceService.swift; sourceTree = "<group>"; };
 		0820F7B0E9F04165D7455FF5 /* LoopInsights_BackfillDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_BackfillDetector.swift; sourceTree = "<group>"; };
+		D20C30B336308A260B7A8B79 /* LoopInsights_BehaviorInsightsAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_BehaviorInsightsAnalyzer.swift; sourceTree = "<group>"; };
+		A7C1B6F9913B7849DF93ABA1 /* LoopInsights_BehaviorInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_BehaviorInsightsView.swift; sourceTree = "<group>"; };
+		478EEEE3F2ADEEB8F7C1F53E /* LoopInsights_CaregiverDigestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_CaregiverDigestService.swift; sourceTree = "<group>"; };
+		5109FFCCF5E20AF2CA29A446 /* LoopInsights_CaregiverDigestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_CaregiverDigestView.swift; sourceTree = "<group>"; };
+		22D011D73417DB261F2BF87C /* LoopInsights_EndoReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_EndoReportView.swift; sourceTree = "<group>"; };
 		7D4A2E67CD7E5A4EDFC30932 /* LoopInsights_MealDebriefModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealDebriefModels.swift; sourceTree = "<group>"; };
 		98D9E86D766B4072B4FF2C64 /* LoopInsights_MealDebriefService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealDebriefService.swift; sourceTree = "<group>"; };
 		4BF2D36066BDBA09E965A0F0 /* LoopInsights_PreMealAdvisorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_PreMealAdvisorService.swift; sourceTree = "<group>"; };
@@ -1621,6 +1779,122 @@
 		E728EC69CA322D1D5B8B423C /* DataLayer_ProviderProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ProviderProtocol.swift; sourceTree = "<group>"; };
 		E43B5BDA7F0DAF8CBAF044E7 /* FoodFinder_CarbTrackingDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingDashboard.swift; sourceTree = "<group>"; };
 		F80940A6E390B157E04B9D2D /* FoodFinder_CarbTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingService.swift; sourceTree = "<group>"; };
+		56613E391A5E735E0235D4BE /* AutoPresets_ActivityDetectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_ActivityDetectionManager.swift; sourceTree = "<group>"; };
+		51A4DA4190E78392E5955B76 /* AutoPresets_Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Coordinator.swift; sourceTree = "<group>"; };
+		85F0DCFE43E6DB3A4E74E2AC /* AutoPresets_Delegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Delegate.swift; sourceTree = "<group>"; };
+		6F77974BAD8C8B8D9D54A90F /* AutoPresets_GeofenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_GeofenceManager.swift; sourceTree = "<group>"; };
+		6FEFEFD99296F2F41468E5DA /* AutoPresets_CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_CalendarManager.swift; sourceTree = "<group>"; };
+		CDDE7C0162939A900342F8D8 /* AutoPresets_Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Logger.swift; sourceTree = "<group>"; };
+		DDDFC1F29C2312E792516B13 /* AutoPresets_Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Storage.swift; sourceTree = "<group>"; };
+		62F5172D47C81504B6F14D19 /* AutoPresets_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_Models.swift; sourceTree = "<group>"; };
+		47B91FB09EA02C1079290FA1 /* AutoPresets_RecommendationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_RecommendationModels.swift; sourceTree = "<group>"; };
+		FDFA7D6D1EB9AE92410C6040 /* AutoPresets_AIAdvisor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_AIAdvisor.swift; sourceTree = "<group>"; };
+		024DE3B4146CA9D1B57F9FFD /* AutoPresets_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_FeatureFlags.swift; sourceTree = "<group>"; };
+		30AF2AF42DC12C3916774432 /* AutoPresets_AIRecommendationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_AIRecommendationView.swift; sourceTree = "<group>"; };
+		7387EE5C4FD1515CE0B0A367 /* AutoPresets_GeofenceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_GeofenceSettingsView.swift; sourceTree = "<group>"; };
+		D50B93F4A924A18A54CD4A1D /* AutoPresets_CalendarSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_CalendarSettingsView.swift; sourceTree = "<group>"; };
+		1603F6C219C5CF41BA200D92 /* AutoPresets_SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPresets_SettingsView.swift; sourceTree = "<group>"; };
+		5B723766697B01A143A1CEEB /* FoodFinder_AnalysisRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AnalysisRecord.swift; sourceTree = "<group>"; };
+		E982E4777A460182F9FEE5D7 /* FoodFinder_InputResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_InputResults.swift; sourceTree = "<group>"; };
+		8BB107CACA4FC04E8652B531 /* FoodFinder_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_Models.swift; sourceTree = "<group>"; };
+		73404923E06307CDCF420FE4 /* FoodFinder_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_FeatureFlags.swift; sourceTree = "<group>"; };
+		AFCDBD9B90449DA0CDEA3299 /* FoodFinder_CarbTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingService.swift; sourceTree = "<group>"; };
+		4DFB900EE960A218333F8BA1 /* FoodFinder_AIAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AIAnalysis.swift; sourceTree = "<group>"; };
+		DDD1A5B12D21DD26F7818B08 /* FoodFinder_AIProviderConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AIProviderConfig.swift; sourceTree = "<group>"; };
+		1682483CAD20AB33DEC25ADA /* FoodFinder_AIServiceAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AIServiceAdapter.swift; sourceTree = "<group>"; };
+		AEA35D0C77CFBE73CBBAF290 /* FoodFinder_AIServiceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AIServiceManager.swift; sourceTree = "<group>"; };
+		1C3890E0969AD9E1B01F4ED2 /* FoodFinder_AnalysisHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AnalysisHistoryStore.swift; sourceTree = "<group>"; };
+		A2C73FC463D2D989C3FD9922 /* FoodFinder_EmojiProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_EmojiProvider.swift; sourceTree = "<group>"; };
+		7E5D19327F64963E3C5BBA52 /* FoodFinder_ImageDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_ImageDownloader.swift; sourceTree = "<group>"; };
+		0EE1A34A28C4C2B264A50C0E /* FoodFinder_ImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_ImageStore.swift; sourceTree = "<group>"; };
+		3B86683D6FC84C98C1021AC9 /* FoodFinder_LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_LocationService.swift; sourceTree = "<group>"; };
+		301CAEF6EB83C57116815C63 /* FoodFinder_OpenFoodFactsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_OpenFoodFactsService.swift; sourceTree = "<group>"; };
+		BB316C0F6448184A5AD9AE5B /* FoodFinder_ScannerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_ScannerService.swift; sourceTree = "<group>"; };
+		7CB80A8355FAF1F4E646E111 /* FoodFinder_SearchRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_SearchRouter.swift; sourceTree = "<group>"; };
+		7EC3D13CCFA264E81C0B863C /* FoodFinder_SecureStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_SecureStorage.swift; sourceTree = "<group>"; };
+		47D58DB646F97C3C6A3EEF1E /* FoodFinder_VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_VoiceService.swift; sourceTree = "<group>"; };
+		6B8B27AA086D7DAE137E9BA8 /* FoodFinder_SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_SearchViewModel.swift; sourceTree = "<group>"; };
+		33A071F1BBD88854C8B89CF0 /* FoodFinder_CarbTrackingDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingDashboard.swift; sourceTree = "<group>"; };
+		225333340D7B94B14ADB765D /* FoodFinder_AICameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AICameraView.swift; sourceTree = "<group>"; };
+		00960F09C394E3DEF2622168 /* FoodFinder_ImageCropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_ImageCropView.swift; sourceTree = "<group>"; };
+		EDCED11B98BEAFD58C8AE941 /* FoodFinder_EntryPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_EntryPoint.swift; sourceTree = "<group>"; };
+		2111B0756589CC6014EFC45F /* FoodFinder_FavoritesHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_FavoritesHelpers.swift; sourceTree = "<group>"; };
+		8EB1877A28B05637D8792EAB /* FoodFinder_ScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_ScannerView.swift; sourceTree = "<group>"; };
+		20C5ECE2E8754449F20840DD /* FoodFinder_SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_SearchBar.swift; sourceTree = "<group>"; };
+		A590E20E1E9607F379E770F1 /* FoodFinder_SearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_SearchResultsView.swift; sourceTree = "<group>"; };
+		43216BEA2637938B8B507F92 /* FoodFinder_SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_SettingsView.swift; sourceTree = "<group>"; };
+		EBD734A20EE282EE164FC6B9 /* FoodFinder_VoiceSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_VoiceSearchView.swift; sourceTree = "<group>"; };
+		268747E96E69E4D5AB82AEA7 /* LoopInsights_BackgroundMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_BackgroundMonitor.swift; sourceTree = "<group>"; };
+		DEC8418A13BEB028E920F1A3 /* LoopInsights_Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_Coordinator.swift; sourceTree = "<group>"; };
+		22D0E736A1B253D37D9E9740 /* LoopInsights_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_Models.swift; sourceTree = "<group>"; };
+		26E4F7C2FEA9818DFEDDB5F1 /* LoopInsights_MFPModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MFPModels.swift; sourceTree = "<group>"; };
+		B6FB47168C7C5E107309CC2F /* LoopInsights_Phase5Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_Phase5Models.swift; sourceTree = "<group>"; };
+		BF038EAE6D8A0A10D2E65158 /* LoopInsights_SuggestionRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_SuggestionRecord.swift; sourceTree = "<group>"; };
+		BD1859D44BC7E28548B1EF85 /* LoopInsights_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_FeatureFlags.swift; sourceTree = "<group>"; };
+		D1541ACC09ACED3D982BF7FC /* LoopInsights_AdvancedAnalyzers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AdvancedAnalyzers.swift; sourceTree = "<group>"; };
+		84CCCF9346DD7370B3975A83 /* LoopInsights_AIAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AIAnalysis.swift; sourceTree = "<group>"; };
+		607D9750CD60D2C5FBDE13FD /* LoopInsights_AIServiceAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AIServiceAdapter.swift; sourceTree = "<group>"; };
+		4CD14B8265747D447C264D9A /* LoopInsights_AlcoholTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AlcoholTracker.swift; sourceTree = "<group>"; };
+		AD28B7018C8109C3B352CBB8 /* LoopInsights_ChatHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_ChatHistoryStore.swift; sourceTree = "<group>"; };
+		108EFA414EC97DDAAF5FFBCB /* LoopInsights_CaffeineTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_CaffeineTracker.swift; sourceTree = "<group>"; };
+		253674AABEF3343CE2B3B0C2 /* LoopInsights_VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_VoiceService.swift; sourceTree = "<group>"; };
+		2372E2DDBDA89A3B5B80EF44 /* LoopInsights_BackfillDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_BackfillDetector.swift; sourceTree = "<group>"; };
+		05B55B850825FC159EF1082B /* LoopInsights_BehaviorInsightsAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_BehaviorInsightsAnalyzer.swift; sourceTree = "<group>"; };
+		E7569E9F9E2299C7C7987190 /* LoopInsights_CaregiverDigestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_CaregiverDigestService.swift; sourceTree = "<group>"; };
+		DA32883A0045816CA3128E3E /* LoopInsights_DataAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_DataAggregator.swift; sourceTree = "<group>"; };
+		940B95F8A4BE9A4A6E58CA79 /* LoopInsights_GlucoseUnitContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_GlucoseUnitContext.swift; sourceTree = "<group>"; };
+		FE15E9C010223EAC3F3FA6B8 /* LoopInsights_FoodResponseAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_FoodResponseAnalyzer.swift; sourceTree = "<group>"; };
+		404B0C6DACC2F8E4E7FBA99D /* LoopInsights_GoalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_GoalStore.swift; sourceTree = "<group>"; };
+		2570F1035D3A845E6230189B /* LoopInsights_HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_HealthKitManager.swift; sourceTree = "<group>"; };
+		97E4D5933C8B4305CE381143 /* LoopInsights_NightscoutImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_NightscoutImporter.swift; sourceTree = "<group>"; };
+		29BFD6726CB3416DD8DE08BD /* LoopInsights_ReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_ReportGenerator.swift; sourceTree = "<group>"; };
+		623C775B205EC24548B55C0A /* LoopInsights_SecureStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_SecureStorage.swift; sourceTree = "<group>"; };
+		5C706C2A64F28AF9DDA6A067 /* LoopInsights_SuggestionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_SuggestionStore.swift; sourceTree = "<group>"; };
+		1FE3E46FD43932AB074AB64C /* LoopInsights_TestDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_TestDataProvider.swift; sourceTree = "<group>"; };
+		E738F2B7D83C7CB38A604606 /* LoopInsights_MealDebriefService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealDebriefService.swift; sourceTree = "<group>"; };
+		6E5FF49FA218599C1564C1AA /* LoopInsights_MFPImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MFPImporter.swift; sourceTree = "<group>"; };
+		8AB73B83059DB9B4CE5BA012 /* LoopInsights_PreMealAdvisorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_PreMealAdvisorService.swift; sourceTree = "<group>"; };
+		8238AB5C1F2E769273A52070 /* LoopInsights_ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_ChatViewModel.swift; sourceTree = "<group>"; };
+		393D1967E1D7B498743CC283 /* LoopInsights_DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_DashboardViewModel.swift; sourceTree = "<group>"; };
+		C30DF3D77528EAB3B5AC1D7B /* LoopInsights_MealInsightsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealInsightsViewModel.swift; sourceTree = "<group>"; };
+		0D16B2477081D3D5D1AB8694 /* LoopInsights_AGPChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AGPChartView.swift; sourceTree = "<group>"; };
+		8BF4DD5B857DD1B4FA1E86CD /* LoopInsights_AlcoholLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_AlcoholLogView.swift; sourceTree = "<group>"; };
+		BA3684DFB8012A3E2F911692 /* LoopInsights_BehaviorInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_BehaviorInsightsView.swift; sourceTree = "<group>"; };
+		D255B89E3F58237EA2781A60 /* LoopInsights_CaregiverDigestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_CaregiverDigestView.swift; sourceTree = "<group>"; };
+		F7B28DA4512332EE1123CAEF /* LoopInsights_EndoReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_EndoReportView.swift; sourceTree = "<group>"; };
+		FE09CA56245E040321AF4790 /* LoopInsights_ChatHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_ChatHistoryView.swift; sourceTree = "<group>"; };
+		CF710A849EA6CD879BD5AB80 /* LoopInsights_CaffeineLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_CaffeineLogView.swift; sourceTree = "<group>"; };
+		3763C4E9526F83AB3F7D3F70 /* LoopInsights_ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_ChatView.swift; sourceTree = "<group>"; };
+		CA2071DFD6173C252FCD9F7D /* LoopInsights_DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_DashboardView.swift; sourceTree = "<group>"; };
+		F48D99CEBEED5A9FDAA0E87B /* LoopInsights_GoalsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_GoalsView.swift; sourceTree = "<group>"; };
+		FBA04C6FC8871A04AFFD27F7 /* LoopInsights_MealInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealInsightsView.swift; sourceTree = "<group>"; };
+		ADE5833949817538698865F6 /* LoopInsights_MonitorSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MonitorSettingsView.swift; sourceTree = "<group>"; };
+		A1A266A15E411B4AB60ABC4B /* LoopInsights_SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_SettingsView.swift; sourceTree = "<group>"; };
+		B96D5D4547C87D4BBA73BB44 /* LoopInsights_SuggestionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_SuggestionDetailView.swift; sourceTree = "<group>"; };
+		A6B2881360260A9CC9A72532 /* LoopInsights_SuggestionHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_SuggestionHistoryView.swift; sourceTree = "<group>"; };
+		959413A21CA05A5EC375390F /* LoopInsights_TrendsInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_TrendsInsightsView.swift; sourceTree = "<group>"; };
+		56616199181C51D1D00897F2 /* LoopInsights_MealDebriefCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealDebriefCard.swift; sourceTree = "<group>"; };
+		45AC2E89C78E9F2A46E75145 /* LoopInsights_PreMealAdvisorCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_PreMealAdvisorCard.swift; sourceTree = "<group>"; };
+		854E048791BB6D8578CEE684 /* LoopInsights_MealDebriefModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_MealDebriefModels.swift; sourceTree = "<group>"; };
+		23C515F22083FAA5A4B0A5B8 /* DataLayer_Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_Coordinator.swift; sourceTree = "<group>"; };
+		BB559C05A731CABF6F0B4201 /* DataLayer_EventModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_EventModels.swift; sourceTree = "<group>"; };
+		19CF13B1F0B2354035C7019B /* DataLayer_ConsentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ConsentModels.swift; sourceTree = "<group>"; };
+		4516EF558EAE581A9ADCA97D /* DataLayer_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_FeatureFlags.swift; sourceTree = "<group>"; };
+		18958E699F8A7B9A6A2BA61E /* DataLayer_SecureStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_SecureStorage.swift; sourceTree = "<group>"; };
+		244F25FF57E564C904208F5E /* DataLayer_ConsentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ConsentManager.swift; sourceTree = "<group>"; };
+		7C9A138F7FA663FBB33AA464 /* DataLayer_EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_EventStore.swift; sourceTree = "<group>"; };
+		CAA070556C9613A6DBC68559 /* DataLayer_EventCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_EventCollector.swift; sourceTree = "<group>"; };
+		4BBD5F1E94A947BB4A7B0823 /* DataLayer_SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_SyncService.swift; sourceTree = "<group>"; };
+		C8F547BCEE483F5F2DF323CE /* DataLayer_ReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ReportGenerator.swift; sourceTree = "<group>"; };
+		D97E96DDA78152A5FE740FD4 /* DataLayer_ProviderProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ProviderProtocol.swift; sourceTree = "<group>"; };
+		0115F4773826E9EAF5F96488 /* DataLayer_ConsentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_ConsentView.swift; sourceTree = "<group>"; };
+		9D676C326CA848F36F10BE3A /* DataLayer_DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayer_DashboardView.swift; sourceTree = "<group>"; };
+		7257AB964A1C8B6769E90882 /* FoodFinder_BarcodeScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_BarcodeScannerTests.swift; sourceTree = "<group>"; };
+		1705C20E7AC9F6FF2322C1D7 /* FoodFinder_OpenFoodFactsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_OpenFoodFactsTests.swift; sourceTree = "<group>"; };
+		09FA666A9CB87C31C053C5E7 /* FoodFinder_VoiceSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_VoiceSearchTests.swift; sourceTree = "<group>"; };
+		1B9798E5BC182FCB5A9B18BB /* LoopInsights_DataAggregatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_DataAggregatorTests.swift; sourceTree = "<group>"; };
+		4B59242D8B9C330608E795CA /* LoopInsights_ModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_ModelsTests.swift; sourceTree = "<group>"; };
+		AA22E9E5FE02C94F490DD246 /* LoopInsights_SuggestionStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopInsights_SuggestionStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1740,6 +2014,8 @@
 				F92C032F72116EA4C06250F9 /* AutoPresets_Logger.swift */,
 				1EED74A3E39956E5218453D1 /* AutoPresets_Storage.swift */,
 				58CA1221236A70935E684238 /* AutoPresets_ActivityDetectionManager.swift */,
+				BE750480EFE1634C0059742C /* AutoPresets_GeofenceManager.swift */,
+				7DF2E39565F6EE80BA66E7E7 /* AutoPresets_CalendarManager.swift */,
 			);
 			path = AutoPresets;
 			sourceTree = "<group>";
@@ -1749,6 +2025,8 @@
 			children = (
 				177A32DF2F91D26776BF2C7F /* AutoPresets_SettingsView.swift */,
 				A92563E71BB3873233772CCE /* AutoPresets_AIRecommendationView.swift */,
+				03C8C4ECE1B6F36E8E1307AA /* AutoPresets_GeofenceSettingsView.swift */,
+				620B3D0099888389E9D3B3F5 /* AutoPresets_CalendarSettingsView.swift */,
 			);
 			path = AutoPresets;
 			sourceTree = "<group>";
@@ -1774,6 +2052,7 @@
 			isa = PBXGroup;
 			children = (
 				F37727DBE886D7AF624C93AE /* AutoPresets */,
+				9888DFE00751D426EE15FBDB /* SiteAtlas */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -1937,6 +2216,11 @@
 				A987CD4824A58A0100439ADC /* ZipArchive.swift */,
 				45118D66CCF482E662F7DAC5 /* LoopInsights */,
 				2C4061FC203783D99294F985 /* FoodFinder */,
+				B16CD42F8CE331111DC44DE7 /* AutoPresets */,
+				D90350ACCDD06A242AEE33D7 /* FoodFinder */,
+				1394E0FB790EB3D4C7A22A5E /* LoopInsights */,
+				AB1ECE9B6639456C061F3765 /* DataLayer */,
+				6CFC448741092C876AD030C9 /* SiteAtlas */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2005,6 +2289,8 @@
 				43F5C2CE1B92A2A0003EB13D /* View Controllers */,
 				43F5C2CF1B92A2ED003EB13D /* Views */,
 				897A5A9724C22DCE00C4E71D /* View Models */,
+				30A7BA28AD6B99C005058D2B /* Services */,
+				64E225E5D16AAC4F29EDC1FA /* Resources */,
 				30A7BA28AD6B99C005058D2B /* Services */,
 				64E225E5D16AAC4F29EDC1FA /* Resources */,
 			);
@@ -2252,6 +2538,7 @@
 				899433B723FE129700FA4BEA /* OverrideBadgeView.swift */,
 				89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */,
 				89CAB36224C8FE95009EE3CE /* PredictedGlucoseChartView.swift */,
+				CDF56556BF1BE5E7875BED21 /* GraphDetailView.swift */,
 				438D42FA1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift */,
 				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
 				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
@@ -2264,6 +2551,11 @@
 				DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */,
 				3EE1B928CEC88845E1F639EA /* LoopInsights */,
 				8220132054FB912DFADFA1FD /* FoodFinder */,
+				BD303AD1C160D7CC5C754B4D /* AutoPresets */,
+				F132ADA2C8D7384DB2F2FE1D /* FoodFinder */,
+				73D1F909821AB044995D15C9 /* LoopInsights */,
+				41FE167B28A4E1B5C20E5CD4 /* DataLayer */,
+				889763863213CA976E18850D /* SiteAtlas */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2297,6 +2589,7 @@
 				E9BB27AA23B85C3500FB4987 /* SleepStore.swift */,
 				B470F5832AB22B5100049695 /* StatefulPluggable.swift */,
 				43FCEEA8221A615B0013DD30 /* StatusChartsManager.swift */,
+				C9613AA3497F104C0F86A2DF /* GraphDetailViewModel.swift */,
 				1D63DEA426E950D400F46FA5 /* SupportManager.swift */,
 				4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */,
 				89ADE13A226BFA0F0067222B /* TestingScenariosManager.swift */,
@@ -2311,6 +2604,9 @@
 				7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */,
 				84AA81E42A4A3981000B658B /* DeeplinkManager.swift */,
 				0CCABD3F947EB320F1E71E1A /* LoopInsights */,
+				D5C648AD636FDE5276D80627 /* AutoPresets */,
+				70DE5AA0A23DBC5E57519E2B /* LoopInsights */,
+				CAC8868C9D604DCDDD42CE42 /* DataLayer */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -2331,6 +2627,8 @@
 				E93E86AC24DDE02C00FF40C8 /* Mock Stores */,
 				8B8260200F8E2C87C406E665 /* LoopInsights */,
 				93F4741D9B20D83B5B586D72 /* FoodFinder */,
+				DEFFCA5690808CDE50EF27AF /* FoodFinder */,
+				A9003624677C30C77E7B43C1 /* LoopInsights */,
 			);
 			path = LoopTests;
 			sourceTree = "<group>";
@@ -2627,6 +2925,8 @@
 				3ED319952EB65A5C00820BCF /* LiveActivityManagementViewModel.swift */,
 				28AF6BC126CFBFAA4E6A2F5C /* LoopInsights */,
 				88C428BA6D11553B8D7CF090 /* FoodFinder */,
+				4518A52E78C49C9F320E25BE /* FoodFinder */,
+				853E8B26A762B09BC2CC95B1 /* LoopInsights */,
 			);
 			path = "View Models";
 			sourceTree = "<group>";
@@ -2975,6 +3275,9 @@
 				D9C47D229ABCAB8F4394631D /* LoopInsights_MealInsightsView.swift */,
 				50DB299AD493553DA6E1A02B /* LoopInsights_CaffeineLogView.swift */,
 				6A1F607877F41965FF710D61 /* LoopInsights_AlcoholLogView.swift */,
+				A7C1B6F9913B7849DF93ABA1 /* LoopInsights_BehaviorInsightsView.swift */,
+				5109FFCCF5E20AF2CA29A446 /* LoopInsights_CaregiverDigestView.swift */,
+				22D011D73417DB261F2BF87C /* LoopInsights_EndoReportView.swift */,
 				5C18F5D863D949E4259A3DCB /* LoopInsights_ChatHistoryView.swift */,
 
 				4705B24EF9A41FF18208064E /* LoopInsights_MealDebriefCard.swift */,
@@ -3046,6 +3349,11 @@
 				E2B183EAECD6393B2AE7F724 /* LoopInsights */,
 				3007854D1E2C462A43BB49EA /* FoodFinder */,
 				42D4BD4553794977DD2CEC62 /* AutoPresets */,
+				4DDBC27B39DEC22ED5C45698 /* AutoPresets */,
+				280ADB89982455214AC18FC4 /* FoodFinder */,
+				4432E0AF82A533BD805DD582 /* LoopInsights */,
+				78A132379753FE176147ADB0 /* DataLayer */,
+				510BD1AC420DD61DBA9B7E33 /* SiteAtlas */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -3054,6 +3362,7 @@
 			isa = PBXGroup;
 			children = (
 				38E1A1D32871794C3B3D3627 /* LoopInsights_DataAggregator.swift */,
+				BD552BCC203C2C8AC7B136A5 /* LoopInsights_GlucoseUnitContext.swift */,
 				0D9C7D82541170EF3C66E380 /* LoopInsights_AIAnalysis.swift */,
 				330B944B4E606429228D8936 /* LoopInsights_AIServiceAdapter.swift */,
 				E8F875E984C8C1A149E4242E /* LoopInsights_TestDataProvider.swift */,
@@ -3070,6 +3379,8 @@
 				CCF01B157024EB72F8BF1F77 /* LoopInsights_ChatHistoryStore.swift */,
 				C90281DB9786B60AE9388CF4 /* LoopInsights_VoiceService.swift */,
 				0820F7B0E9F04165D7455FF5 /* LoopInsights_BackfillDetector.swift */,
+				D20C30B336308A260B7A8B79 /* LoopInsights_BehaviorInsightsAnalyzer.swift */,
+				478EEEE3F2ADEEB8F7C1F53E /* LoopInsights_CaregiverDigestService.swift */,
 				98D9E86D766B4072B4FF2C64 /* LoopInsights_MealDebriefService.swift */,
 				4BF2D36066BDBA09E965A0F0 /* LoopInsights_PreMealAdvisorService.swift */,
 				6C0F4AADBE0A552B197D29DD /* LoopInsights_MFPImporter.swift */,
@@ -3099,6 +3410,10 @@
 				F985DAB1BC800E9E1F418639 /* DataLayer */,
 				D039CC9018413633A20943E1 /* LoopInsights */,
 				8C92ACBE693772D89D0718B8 /* FoodFinder */,
+				D30E34AA292C0FDFF382C173 /* AutoPresets */,
+				95EE87C37CEB4BDEE4977D24 /* FoodFinder */,
+				88CDF3C03FB7CEA878C97FA3 /* LoopInsights */,
+				C3FF320DE58F34A77D4D5254 /* DataLayer */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -3202,6 +3517,320 @@
 				515929B4E87CC8B0D055B031 /* DataLayer_DashboardView.swift */,
 			);
 			path = DataLayer;
+			sourceTree = "<group>";
+		};
+		D5C648AD636FDE5276D80627 /* AutoPresets */ = {
+			isa = PBXGroup;
+			children = (
+				56613E391A5E735E0235D4BE /* AutoPresets_ActivityDetectionManager.swift */,
+				51A4DA4190E78392E5955B76 /* AutoPresets_Coordinator.swift */,
+				85F0DCFE43E6DB3A4E74E2AC /* AutoPresets_Delegate.swift */,
+				6F77974BAD8C8B8D9D54A90F /* AutoPresets_GeofenceManager.swift */,
+				6FEFEFD99296F2F41468E5DA /* AutoPresets_CalendarManager.swift */,
+				CDDE7C0162939A900342F8D8 /* AutoPresets_Logger.swift */,
+				DDDFC1F29C2312E792516B13 /* AutoPresets_Storage.swift */,
+			);
+			path = AutoPresets;
+			sourceTree = "<group>";
+		};
+		B16CD42F8CE331111DC44DE7 /* AutoPresets */ = {
+			isa = PBXGroup;
+			children = (
+				62F5172D47C81504B6F14D19 /* AutoPresets_Models.swift */,
+				47B91FB09EA02C1079290FA1 /* AutoPresets_RecommendationModels.swift */,
+			);
+			path = AutoPresets;
+			sourceTree = "<group>";
+		};
+		D90350ACCDD06A242AEE33D7 /* FoodFinder */ = {
+			isa = PBXGroup;
+			children = (
+				5B723766697B01A143A1CEEB /* FoodFinder_AnalysisRecord.swift */,
+				E982E4777A460182F9FEE5D7 /* FoodFinder_InputResults.swift */,
+				8BB107CACA4FC04E8652B531 /* FoodFinder_Models.swift */,
+			);
+			path = FoodFinder;
+			sourceTree = "<group>";
+		};
+		1394E0FB790EB3D4C7A22A5E /* LoopInsights */ = {
+			isa = PBXGroup;
+			children = (
+				22D0E736A1B253D37D9E9740 /* LoopInsights_Models.swift */,
+				26E4F7C2FEA9818DFEDDB5F1 /* LoopInsights_MFPModels.swift */,
+				B6FB47168C7C5E107309CC2F /* LoopInsights_Phase5Models.swift */,
+				BF038EAE6D8A0A10D2E65158 /* LoopInsights_SuggestionRecord.swift */,
+				854E048791BB6D8578CEE684 /* LoopInsights_MealDebriefModels.swift */,
+			);
+			path = LoopInsights;
+			sourceTree = "<group>";
+		};
+		BD303AD1C160D7CC5C754B4D /* AutoPresets */ = {
+			isa = PBXGroup;
+			children = (
+				30AF2AF42DC12C3916774432 /* AutoPresets_AIRecommendationView.swift */,
+				7387EE5C4FD1515CE0B0A367 /* AutoPresets_GeofenceSettingsView.swift */,
+				D50B93F4A924A18A54CD4A1D /* AutoPresets_CalendarSettingsView.swift */,
+				1603F6C219C5CF41BA200D92 /* AutoPresets_SettingsView.swift */,
+			);
+			path = AutoPresets;
+			sourceTree = "<group>";
+		};
+		F132ADA2C8D7384DB2F2FE1D /* FoodFinder */ = {
+			isa = PBXGroup;
+			children = (
+				33A071F1BBD88854C8B89CF0 /* FoodFinder_CarbTrackingDashboard.swift */,
+				225333340D7B94B14ADB765D /* FoodFinder_AICameraView.swift */,
+				00960F09C394E3DEF2622168 /* FoodFinder_ImageCropView.swift */,
+				EDCED11B98BEAFD58C8AE941 /* FoodFinder_EntryPoint.swift */,
+				2111B0756589CC6014EFC45F /* FoodFinder_FavoritesHelpers.swift */,
+				8EB1877A28B05637D8792EAB /* FoodFinder_ScannerView.swift */,
+				20C5ECE2E8754449F20840DD /* FoodFinder_SearchBar.swift */,
+				A590E20E1E9607F379E770F1 /* FoodFinder_SearchResultsView.swift */,
+				43216BEA2637938B8B507F92 /* FoodFinder_SettingsView.swift */,
+				EBD734A20EE282EE164FC6B9 /* FoodFinder_VoiceSearchView.swift */,
+			);
+			path = FoodFinder;
+			sourceTree = "<group>";
+		};
+		73D1F909821AB044995D15C9 /* LoopInsights */ = {
+			isa = PBXGroup;
+			children = (
+				0D16B2477081D3D5D1AB8694 /* LoopInsights_AGPChartView.swift */,
+				8BF4DD5B857DD1B4FA1E86CD /* LoopInsights_AlcoholLogView.swift */,
+				BA3684DFB8012A3E2F911692 /* LoopInsights_BehaviorInsightsView.swift */,
+				D255B89E3F58237EA2781A60 /* LoopInsights_CaregiverDigestView.swift */,
+				F7B28DA4512332EE1123CAEF /* LoopInsights_EndoReportView.swift */,
+				FE09CA56245E040321AF4790 /* LoopInsights_ChatHistoryView.swift */,
+				CF710A849EA6CD879BD5AB80 /* LoopInsights_CaffeineLogView.swift */,
+				3763C4E9526F83AB3F7D3F70 /* LoopInsights_ChatView.swift */,
+				CA2071DFD6173C252FCD9F7D /* LoopInsights_DashboardView.swift */,
+				F48D99CEBEED5A9FDAA0E87B /* LoopInsights_GoalsView.swift */,
+				FBA04C6FC8871A04AFFD27F7 /* LoopInsights_MealInsightsView.swift */,
+				ADE5833949817538698865F6 /* LoopInsights_MonitorSettingsView.swift */,
+				A1A266A15E411B4AB60ABC4B /* LoopInsights_SettingsView.swift */,
+				B96D5D4547C87D4BBA73BB44 /* LoopInsights_SuggestionDetailView.swift */,
+				A6B2881360260A9CC9A72532 /* LoopInsights_SuggestionHistoryView.swift */,
+				959413A21CA05A5EC375390F /* LoopInsights_TrendsInsightsView.swift */,
+				56616199181C51D1D00897F2 /* LoopInsights_MealDebriefCard.swift */,
+				45AC2E89C78E9F2A46E75145 /* LoopInsights_PreMealAdvisorCard.swift */,
+			);
+			path = LoopInsights;
+			sourceTree = "<group>";
+		};
+		4518A52E78C49C9F320E25BE /* FoodFinder */ = {
+			isa = PBXGroup;
+			children = (
+				6B8B27AA086D7DAE137E9BA8 /* FoodFinder_SearchViewModel.swift */,
+			);
+			path = FoodFinder;
+			sourceTree = "<group>";
+		};
+		853E8B26A762B09BC2CC95B1 /* LoopInsights */ = {
+			isa = PBXGroup;
+			children = (
+				8238AB5C1F2E769273A52070 /* LoopInsights_ChatViewModel.swift */,
+				393D1967E1D7B498743CC283 /* LoopInsights_DashboardViewModel.swift */,
+				C30DF3D77528EAB3B5AC1D7B /* LoopInsights_MealInsightsViewModel.swift */,
+			);
+			path = LoopInsights;
+			sourceTree = "<group>";
+		};
+		70DE5AA0A23DBC5E57519E2B /* LoopInsights */ = {
+			isa = PBXGroup;
+			children = (
+				268747E96E69E4D5AB82AEA7 /* LoopInsights_BackgroundMonitor.swift */,
+				DEC8418A13BEB028E920F1A3 /* LoopInsights_Coordinator.swift */,
+			);
+			path = LoopInsights;
+			sourceTree = "<group>";
+		};
+		4DDBC27B39DEC22ED5C45698 /* AutoPresets */ = {
+			isa = PBXGroup;
+			children = (
+				FDFA7D6D1EB9AE92410C6040 /* AutoPresets_AIAdvisor.swift */,
+			);
+			path = AutoPresets;
+			sourceTree = "<group>";
+		};
+		280ADB89982455214AC18FC4 /* FoodFinder */ = {
+			isa = PBXGroup;
+			children = (
+				AFCDBD9B90449DA0CDEA3299 /* FoodFinder_CarbTrackingService.swift */,
+				4DFB900EE960A218333F8BA1 /* FoodFinder_AIAnalysis.swift */,
+				DDD1A5B12D21DD26F7818B08 /* FoodFinder_AIProviderConfig.swift */,
+				1682483CAD20AB33DEC25ADA /* FoodFinder_AIServiceAdapter.swift */,
+				AEA35D0C77CFBE73CBBAF290 /* FoodFinder_AIServiceManager.swift */,
+				1C3890E0969AD9E1B01F4ED2 /* FoodFinder_AnalysisHistoryStore.swift */,
+				A2C73FC463D2D989C3FD9922 /* FoodFinder_EmojiProvider.swift */,
+				7E5D19327F64963E3C5BBA52 /* FoodFinder_ImageDownloader.swift */,
+				0EE1A34A28C4C2B264A50C0E /* FoodFinder_ImageStore.swift */,
+				3B86683D6FC84C98C1021AC9 /* FoodFinder_LocationService.swift */,
+				301CAEF6EB83C57116815C63 /* FoodFinder_OpenFoodFactsService.swift */,
+				BB316C0F6448184A5AD9AE5B /* FoodFinder_ScannerService.swift */,
+				7CB80A8355FAF1F4E646E111 /* FoodFinder_SearchRouter.swift */,
+				7EC3D13CCFA264E81C0B863C /* FoodFinder_SecureStorage.swift */,
+				47D58DB646F97C3C6A3EEF1E /* FoodFinder_VoiceService.swift */,
+			);
+			path = FoodFinder;
+			sourceTree = "<group>";
+		};
+		4432E0AF82A533BD805DD582 /* LoopInsights */ = {
+			isa = PBXGroup;
+			children = (
+				D1541ACC09ACED3D982BF7FC /* LoopInsights_AdvancedAnalyzers.swift */,
+				84CCCF9346DD7370B3975A83 /* LoopInsights_AIAnalysis.swift */,
+				607D9750CD60D2C5FBDE13FD /* LoopInsights_AIServiceAdapter.swift */,
+				4CD14B8265747D447C264D9A /* LoopInsights_AlcoholTracker.swift */,
+				AD28B7018C8109C3B352CBB8 /* LoopInsights_ChatHistoryStore.swift */,
+				108EFA414EC97DDAAF5FFBCB /* LoopInsights_CaffeineTracker.swift */,
+				253674AABEF3343CE2B3B0C2 /* LoopInsights_VoiceService.swift */,
+				2372E2DDBDA89A3B5B80EF44 /* LoopInsights_BackfillDetector.swift */,
+				05B55B850825FC159EF1082B /* LoopInsights_BehaviorInsightsAnalyzer.swift */,
+				E7569E9F9E2299C7C7987190 /* LoopInsights_CaregiverDigestService.swift */,
+				DA32883A0045816CA3128E3E /* LoopInsights_DataAggregator.swift */,
+				940B95F8A4BE9A4A6E58CA79 /* LoopInsights_GlucoseUnitContext.swift */,
+				FE15E9C010223EAC3F3FA6B8 /* LoopInsights_FoodResponseAnalyzer.swift */,
+				404B0C6DACC2F8E4E7FBA99D /* LoopInsights_GoalStore.swift */,
+				2570F1035D3A845E6230189B /* LoopInsights_HealthKitManager.swift */,
+				97E4D5933C8B4305CE381143 /* LoopInsights_NightscoutImporter.swift */,
+				29BFD6726CB3416DD8DE08BD /* LoopInsights_ReportGenerator.swift */,
+				623C775B205EC24548B55C0A /* LoopInsights_SecureStorage.swift */,
+				5C706C2A64F28AF9DDA6A067 /* LoopInsights_SuggestionStore.swift */,
+				1FE3E46FD43932AB074AB64C /* LoopInsights_TestDataProvider.swift */,
+				E738F2B7D83C7CB38A604606 /* LoopInsights_MealDebriefService.swift */,
+				6E5FF49FA218599C1564C1AA /* LoopInsights_MFPImporter.swift */,
+				8AB73B83059DB9B4CE5BA012 /* LoopInsights_PreMealAdvisorService.swift */,
+			);
+			path = LoopInsights;
+			sourceTree = "<group>";
+		};
+		D30E34AA292C0FDFF382C173 /* AutoPresets */ = {
+			isa = PBXGroup;
+			children = (
+				024DE3B4146CA9D1B57F9FFD /* AutoPresets_FeatureFlags.swift */,
+			);
+			path = AutoPresets;
+			sourceTree = "<group>";
+		};
+		95EE87C37CEB4BDEE4977D24 /* FoodFinder */ = {
+			isa = PBXGroup;
+			children = (
+				73404923E06307CDCF420FE4 /* FoodFinder_FeatureFlags.swift */,
+			);
+			path = FoodFinder;
+			sourceTree = "<group>";
+		};
+		88CDF3C03FB7CEA878C97FA3 /* LoopInsights */ = {
+			isa = PBXGroup;
+			children = (
+				BD1859D44BC7E28548B1EF85 /* LoopInsights_FeatureFlags.swift */,
+			);
+			path = LoopInsights;
+			sourceTree = "<group>";
+		};
+		CAC8868C9D604DCDDD42CE42 /* DataLayer */ = {
+			isa = PBXGroup;
+			children = (
+				23C515F22083FAA5A4B0A5B8 /* DataLayer_Coordinator.swift */,
+			);
+			path = DataLayer;
+			sourceTree = "<group>";
+		};
+		AB1ECE9B6639456C061F3765 /* DataLayer */ = {
+			isa = PBXGroup;
+			children = (
+				BB559C05A731CABF6F0B4201 /* DataLayer_EventModels.swift */,
+				19CF13B1F0B2354035C7019B /* DataLayer_ConsentModels.swift */,
+			);
+			path = DataLayer;
+			sourceTree = "<group>";
+		};
+		C3FF320DE58F34A77D4D5254 /* DataLayer */ = {
+			isa = PBXGroup;
+			children = (
+				4516EF558EAE581A9ADCA97D /* DataLayer_FeatureFlags.swift */,
+			);
+			path = DataLayer;
+			sourceTree = "<group>";
+		};
+		78A132379753FE176147ADB0 /* DataLayer */ = {
+			isa = PBXGroup;
+			children = (
+				18958E699F8A7B9A6A2BA61E /* DataLayer_SecureStorage.swift */,
+				244F25FF57E564C904208F5E /* DataLayer_ConsentManager.swift */,
+				7C9A138F7FA663FBB33AA464 /* DataLayer_EventStore.swift */,
+				CAA070556C9613A6DBC68559 /* DataLayer_EventCollector.swift */,
+				4BBD5F1E94A947BB4A7B0823 /* DataLayer_SyncService.swift */,
+				C8F547BCEE483F5F2DF323CE /* DataLayer_ReportGenerator.swift */,
+				D97E96DDA78152A5FE740FD4 /* DataLayer_ProviderProtocol.swift */,
+			);
+			path = DataLayer;
+			sourceTree = "<group>";
+		};
+		41FE167B28A4E1B5C20E5CD4 /* DataLayer */ = {
+			isa = PBXGroup;
+			children = (
+				0115F4773826E9EAF5F96488 /* DataLayer_ConsentView.swift */,
+				9D676C326CA848F36F10BE3A /* DataLayer_DashboardView.swift */,
+			);
+			path = DataLayer;
+			sourceTree = "<group>";
+		};
+		DEFFCA5690808CDE50EF27AF /* FoodFinder */ = {
+			isa = PBXGroup;
+			children = (
+				7257AB964A1C8B6769E90882 /* FoodFinder_BarcodeScannerTests.swift */,
+				1705C20E7AC9F6FF2322C1D7 /* FoodFinder_OpenFoodFactsTests.swift */,
+				09FA666A9CB87C31C053C5E7 /* FoodFinder_VoiceSearchTests.swift */,
+			);
+			path = FoodFinder;
+			sourceTree = "<group>";
+		};
+		A9003624677C30C77E7B43C1 /* LoopInsights */ = {
+			isa = PBXGroup;
+			children = (
+				1B9798E5BC182FCB5A9B18BB /* LoopInsights_DataAggregatorTests.swift */,
+				4B59242D8B9C330608E795CA /* LoopInsights_ModelsTests.swift */,
+				AA22E9E5FE02C94F490DD246 /* LoopInsights_SuggestionStoreTests.swift */,
+			);
+			path = LoopInsights;
+			sourceTree = "<group>";
+		};
+		510BD1AC420DD61DBA9B7E33 /* SiteAtlas */ = {
+			isa = PBXGroup;
+			children = (
+				D00DAF82811DE6BE326F7610 /* SiteAtlas_FeatureFlags.swift */,
+				FCF4A7212FE066CC7754F207 /* SiteAtlas_Storage.swift */,
+				2644A16811D8A9EA3F4B89AF /* SiteAtlas_Coordinator.swift */,
+			);
+			path = SiteAtlas;
+			sourceTree = "<group>";
+		};
+		6CFC448741092C876AD030C9 /* SiteAtlas */ = {
+			isa = PBXGroup;
+			children = (
+				2C02529B18500E73BD995F5A /* SiteAtlas_Models.swift */,
+			);
+			path = SiteAtlas;
+			sourceTree = "<group>";
+		};
+		889763863213CA976E18850D /* SiteAtlas */ = {
+			isa = PBXGroup;
+			children = (
+				2CEF7E6F424695B044A8FB23 /* SiteAtlas_BodyMapView.swift */,
+				347C3E540F8E14C26EA3E557 /* SiteAtlas_SiteSelectionSheet.swift */,
+				E7A29E1E802E19C41166AE01 /* SiteAtlas_SettingsView.swift */,
+			);
+			path = SiteAtlas;
+			sourceTree = "<group>";
+		};
+		9888DFE00751D426EE15FBDB /* SiteAtlas */ = {
+			isa = PBXGroup;
+			children = (
+				553159FF12B2F1EA66F46735 /* BodyMapFront.png */,
+				D956D2BCFB715323F53E463B /* BodyMapBack.png */,
+			);
+			path = SiteAtlas;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -3623,6 +4252,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				32A3BFAA99E26BFDB5E23AAC /* BodyMapFront.png in Resources */,
+				6B068FE26CB61293AAF7500D /* BodyMapBack.png in Resources */,
 				B66D1F392E6A5D6600471149 /* InfoPlist.xcstrings in Resources */,
 				C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */,
 				C1EE9E812A38D0FB0064784A /* BuildDetails.plist in Resources */,
@@ -3922,6 +4553,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E99E746DC66A23098BEE7C6D /* SiteAtlas_FeatureFlags.swift in Sources */,
+				A3E380B614277C4C788365FA /* SiteAtlas_Storage.swift in Sources */,
+				97C5ABDCD645F8D01E91DC0D /* SiteAtlas_Coordinator.swift in Sources */,
+				D4AE83C79DCCE8E4430F1ACB /* SiteAtlas_Models.swift in Sources */,
+				737257DBEF9961A04DD08D08 /* SiteAtlas_BodyMapView.swift in Sources */,
+				33BC23EC3340A6228E210842 /* SiteAtlas_SiteSelectionSheet.swift in Sources */,
+				D04F00E00F1E809D478AF4EC /* SiteAtlas_SettingsView.swift in Sources */,
 				C6019A74B4887B80959544CC /* DataLayer_ConsentManager.swift in Sources */,
 				CAEF1835890DA321090A01EB /* DataLayer_ConsentModels.swift in Sources */,
 				05382A77AD01D66964EB058D /* DataLayer_ConsentView.swift in Sources */,
@@ -3941,6 +4579,10 @@
 				B1F90AD96E591453CF003AC2 /* AutoPresets_Logger.swift in Sources */,
 				211A65C85F6FEC59ED083F2D /* AutoPresets_Storage.swift in Sources */,
 				0556C20E91536D540ED3D91E /* AutoPresets_ActivityDetectionManager.swift in Sources */,
+				BAD5614ADF674903DDA6CB66 /* AutoPresets_GeofenceManager.swift in Sources */,
+				52F2BFD37514C123B6147721 /* AutoPresets_CalendarManager.swift in Sources */,
+				852954520F4B88A1B57C48D5 /* AutoPresets_GeofenceSettingsView.swift in Sources */,
+				C67E0955D2EBB8CC12BD3CD6 /* AutoPresets_CalendarSettingsView.swift in Sources */,
 				FFF05E4789A2D06526EB0A24 /* AutoPresets_SettingsView.swift in Sources */,
 				232E357E321361C66498FEEA /* AutoPresets_Models.swift in Sources */,
 				13992ED79F79937110B6BFCD /* AutoPresets_FeatureFlags.swift in Sources */,
@@ -4003,6 +4645,8 @@
 				A9F703752489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift in Sources */,
 				E95D380524EADF78005E2F50 /* GlucoseStoreProtocol.swift in Sources */,
 				43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */,
+				126412E6CB2B693A93FE0A0C /* GraphDetailView.swift in Sources */,
+				14C479C5591D8D8C3E471259 /* GraphDetailViewModel.swift in Sources */,
 				B42D124328D371C400E43D22 /* AlertMuter.swift in Sources */,
 				A96DAC242838325900D94E38 /* DiagnosticLog.swift in Sources */,
 				A9CBE45A248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift in Sources */,
@@ -4153,6 +4797,7 @@
 				D062E93B8CA1AFF98CCB804D /* LoopInsights_SuggestionDetailView.swift in Sources */,
 				C55289DE70B96F1DDAD60001 /* LoopInsights_SuggestionHistoryView.swift in Sources */,
 				88B26E5EBD790388B811AA73 /* LoopInsights_DataAggregator.swift in Sources */,
+				A72F9742B37CB336AC090320 /* LoopInsights_GlucoseUnitContext.swift in Sources */,
 				9B67835D9437872514B959ED /* LoopInsights_AIAnalysis.swift in Sources */,
 				BB812EF3B85C5D20E4663846 /* LoopInsights_AIServiceAdapter.swift in Sources */,
 				26721D288EAABC6270DB048C /* LoopInsights_TestDataProvider.swift in Sources */,
@@ -4209,6 +4854,11 @@
 				C3044449D094E01128700305 /* LoopInsights_MFPImporter.swift in Sources */,
 				08484BF38BCF05D6013FC659 /* LoopInsights_AlcoholTracker.swift in Sources */,
 				5750459159D6F9324C3CC23F /* LoopInsights_AlcoholLogView.swift in Sources */,
+				2D500CBB7AC2A7ECEABFD547 /* LoopInsights_BehaviorInsightsAnalyzer.swift in Sources */,
+				BB89D4530772E3B1D4AA17A7 /* LoopInsights_BehaviorInsightsView.swift in Sources */,
+				9556DAD64698B0AABD5F6DA6 /* LoopInsights_CaregiverDigestService.swift in Sources */,
+				4D9F0C62F55EA3BC7DC9AB85 /* LoopInsights_CaregiverDigestView.swift in Sources */,
+				5E071E4F0F8401A654C99836 /* LoopInsights_EndoReportView.swift in Sources */,
 				0158F5E842F8E730E144E872 /* LoopInsights_ChatHistoryStore.swift in Sources */,
 				8955F91F0614AB727678DE21 /* LoopInsights_ChatHistoryView.swift in Sources */,
 				C43D60BE7EB18127C94178B9 /* LoopInsights_VoiceService.swift in Sources */,
@@ -4221,6 +4871,116 @@
 				3624042E98291A5724E97ACD /* LoopInsights_PreMealAdvisorCard.swift in Sources */,
 				5360E9F21CABAFD28DB505EB /* FoodFinder_CarbTrackingDashboard.swift in Sources */,
 				2A1B8D3286E1ED96FB2ED124 /* FoodFinder_CarbTrackingService.swift in Sources */,
+				9B4B836A0130380A1787B685 /* AutoPresets_ActivityDetectionManager.swift in Sources */,
+				70443A8B65CE1B2DA0B7F0B4 /* AutoPresets_Coordinator.swift in Sources */,
+				809B4CFD31EA1434F93381DD /* AutoPresets_Delegate.swift in Sources */,
+				2F832679D4E5870ACDB7E9CF /* AutoPresets_GeofenceManager.swift in Sources */,
+				CDCC9FBD90E8D25B15DD319E /* AutoPresets_Logger.swift in Sources */,
+				F0556225BFA7AD2532BF8CFE /* AutoPresets_Storage.swift in Sources */,
+				FACBCAB9166B79546E7F6281 /* AutoPresets_Models.swift in Sources */,
+				188F8AEA1E65B52DBE1E0559 /* AutoPresets_RecommendationModels.swift in Sources */,
+				DA8E68CC93178DE3066B9DEE /* AutoPresets_AIAdvisor.swift in Sources */,
+				6FAD82D9474D5C9956440830 /* AutoPresets_FeatureFlags.swift in Sources */,
+				878B03AE9AE258294DDC879A /* AutoPresets_AIRecommendationView.swift in Sources */,
+				8B34032136EAE8230DB056CE /* AutoPresets_GeofenceSettingsView.swift in Sources */,
+				02FD6C9080F7C2682116B7C1 /* AutoPresets_CalendarSettingsView.swift in Sources */,
+				01DA4C82770776FE647FC636 /* AutoPresets_CalendarManager.swift in Sources */,
+				68F370AB66AF0B853621CCDC /* AutoPresets_SettingsView.swift in Sources */,
+				64212EA79692EB9338E53C85 /* FoodFinder_AnalysisRecord.swift in Sources */,
+				E88E68D68BF264F721AFC712 /* FoodFinder_InputResults.swift in Sources */,
+				7ADC7CCA827794317AA04776 /* FoodFinder_Models.swift in Sources */,
+				FB788D1EE6ADB3446110A1E4 /* FoodFinder_FeatureFlags.swift in Sources */,
+				B7F6252AE377538D14B924DF /* FoodFinder_CarbTrackingService.swift in Sources */,
+				33CAAACE11A18DF26E8388A2 /* FoodFinder_AIAnalysis.swift in Sources */,
+				0069EFA11E7101DEB638B4C2 /* FoodFinder_AIProviderConfig.swift in Sources */,
+				27764BB7F99C7CA1B3BB0AC4 /* FoodFinder_AIServiceAdapter.swift in Sources */,
+				164EC6011323A48640046EB0 /* FoodFinder_AIServiceManager.swift in Sources */,
+				D51C54AAD5AECFE1CAB6F647 /* FoodFinder_AnalysisHistoryStore.swift in Sources */,
+				C726C1C782BA0888FC33899F /* FoodFinder_EmojiProvider.swift in Sources */,
+				DABC221B5F95D30484E6618D /* FoodFinder_ImageDownloader.swift in Sources */,
+				41F847EDBA1E42D755FB492B /* FoodFinder_ImageStore.swift in Sources */,
+				0F344180B26115B3DB49A3F7 /* FoodFinder_LocationService.swift in Sources */,
+				A1DAC248FAB1D0C3ED7FD490 /* FoodFinder_OpenFoodFactsService.swift in Sources */,
+				1B21C0D879F682FD0DE7BB15 /* FoodFinder_ScannerService.swift in Sources */,
+				0E01156F77D4B2E75523D557 /* FoodFinder_SearchRouter.swift in Sources */,
+				D5B0EF5D0003524F988C3C0C /* FoodFinder_SecureStorage.swift in Sources */,
+				4A937F594BC57E1644C24B50 /* FoodFinder_VoiceService.swift in Sources */,
+				3C37B6236426D0E3EA651E6B /* FoodFinder_SearchViewModel.swift in Sources */,
+				23EBC2AFF5B046DA71B8706B /* FoodFinder_CarbTrackingDashboard.swift in Sources */,
+				9A49A3AC2016C9FA23C057E6 /* FoodFinder_AICameraView.swift in Sources */,
+				4016E91E09EF6716B414F6CC /* FoodFinder_ImageCropView.swift in Sources */,
+				B9D441B49A1EF902D4B4CD26 /* FoodFinder_EntryPoint.swift in Sources */,
+				45D21861D3C0ADF067F2767F /* FoodFinder_FavoritesHelpers.swift in Sources */,
+				7274C0B427751AA3CD81DEE4 /* FoodFinder_ScannerView.swift in Sources */,
+				A07F0CC0E0A98BAEEE6EBB03 /* FoodFinder_SearchBar.swift in Sources */,
+				49ED3DD0564A0DE7C8D9F19F /* FoodFinder_SearchResultsView.swift in Sources */,
+				5BCE0389AEB6BC4EC80F57AA /* FoodFinder_SettingsView.swift in Sources */,
+				2E34F5AB8320222407AAFC1E /* FoodFinder_VoiceSearchView.swift in Sources */,
+				A528A18F2ADB9529322801FC /* LoopInsights_BackgroundMonitor.swift in Sources */,
+				A5F64582330AEEC8A1FC5D5F /* LoopInsights_Coordinator.swift in Sources */,
+				6A4BDC2EEE1179A2BE5C7754 /* LoopInsights_Models.swift in Sources */,
+				93621214B467806D9F09EEAA /* LoopInsights_MFPModels.swift in Sources */,
+				1FDE947C49DDB9F909D27B01 /* LoopInsights_Phase5Models.swift in Sources */,
+				84E7E7B7A794D8AB75034AF4 /* LoopInsights_SuggestionRecord.swift in Sources */,
+				A395749AFFBA35E871EEBFD6 /* LoopInsights_FeatureFlags.swift in Sources */,
+				6F1B367F5EF09AEA30296F44 /* LoopInsights_AdvancedAnalyzers.swift in Sources */,
+				079EC1F06F2F6038756BDDF2 /* LoopInsights_AIAnalysis.swift in Sources */,
+				7F85981E95E056FD14C9E658 /* LoopInsights_AIServiceAdapter.swift in Sources */,
+				15CF9C0C36A50D07EDC72C04 /* LoopInsights_AlcoholTracker.swift in Sources */,
+				C0B209FC0F7923D3787F2CEF /* LoopInsights_ChatHistoryStore.swift in Sources */,
+				E49F383327456AA3DEF583AE /* LoopInsights_CaffeineTracker.swift in Sources */,
+				FDC7A8B99BD65BE3599AC8BD /* LoopInsights_VoiceService.swift in Sources */,
+				6DB3F6A2D8AACF9650B59713 /* LoopInsights_BackfillDetector.swift in Sources */,
+				262F44E876C2FCB3817DCC72 /* LoopInsights_BehaviorInsightsAnalyzer.swift in Sources */,
+				551DFE85CB80C4446AD0DDEC /* LoopInsights_CaregiverDigestService.swift in Sources */,
+				F56F1856A32E8160149B3149 /* LoopInsights_DataAggregator.swift in Sources */,
+				FFED28F5B41C6EF1851B6139 /* LoopInsights_GlucoseUnitContext.swift in Sources */,
+				955592F30284ED133EC150B3 /* LoopInsights_FoodResponseAnalyzer.swift in Sources */,
+				E4BA2E42EF9C36EC6D602DBD /* LoopInsights_GoalStore.swift in Sources */,
+				0C4E19D6352BAEBD22195CF3 /* LoopInsights_HealthKitManager.swift in Sources */,
+				99CDB0D68ECEA2FA30AB1556 /* LoopInsights_NightscoutImporter.swift in Sources */,
+				051BB8037243680C0687EA79 /* LoopInsights_ReportGenerator.swift in Sources */,
+				92BBCC6A731B66E67AE015A1 /* LoopInsights_SecureStorage.swift in Sources */,
+				4B080F13EF98718A7FEAB176 /* LoopInsights_SuggestionStore.swift in Sources */,
+				C786708D1FA4617924CC94E6 /* LoopInsights_TestDataProvider.swift in Sources */,
+				81E41B7390A5EF347772042E /* LoopInsights_MealDebriefService.swift in Sources */,
+				E0833959776966E1C62A992A /* LoopInsights_MFPImporter.swift in Sources */,
+				3BF5D5292FC8EDC6325FF0BD /* LoopInsights_PreMealAdvisorService.swift in Sources */,
+				44BC1C4741CF7C18FCD7C58E /* LoopInsights_ChatViewModel.swift in Sources */,
+				8F1C2592AAE578625FA1A663 /* LoopInsights_DashboardViewModel.swift in Sources */,
+				D211C294E88C41B64BAEECB4 /* LoopInsights_MealInsightsViewModel.swift in Sources */,
+				2606552720BC12164C272913 /* LoopInsights_AGPChartView.swift in Sources */,
+				4A0942D447003E3056FF4639 /* LoopInsights_AlcoholLogView.swift in Sources */,
+				D1C8CBB54EC80FF5B9A945C8 /* LoopInsights_BehaviorInsightsView.swift in Sources */,
+				A3BF84DA6D4C2FB3E4BF684D /* LoopInsights_CaregiverDigestView.swift in Sources */,
+				434A06CECCA775D37EC1F136 /* LoopInsights_EndoReportView.swift in Sources */,
+				5562647A48360FA6CC36310A /* LoopInsights_ChatHistoryView.swift in Sources */,
+				BAE38CDF96BA1DA27FF080B7 /* LoopInsights_CaffeineLogView.swift in Sources */,
+				26BE764B796A172A22B27880 /* LoopInsights_ChatView.swift in Sources */,
+				5CA015D639F98929BB7D72F1 /* LoopInsights_DashboardView.swift in Sources */,
+				B7A00EB74B19C7CA8FF57388 /* LoopInsights_GoalsView.swift in Sources */,
+				9C56E5C58F8504E0506D1B9F /* LoopInsights_MealInsightsView.swift in Sources */,
+				01BA2BE752047393AB59ED36 /* LoopInsights_MonitorSettingsView.swift in Sources */,
+				1B51AC4E311024D7A81A634B /* LoopInsights_SettingsView.swift in Sources */,
+				4D43F8C1B10A2B51E61714EA /* LoopInsights_SuggestionDetailView.swift in Sources */,
+				9A5C88D1DFB3483CBD679519 /* LoopInsights_SuggestionHistoryView.swift in Sources */,
+				97915790F5F734FDF0FD1922 /* LoopInsights_TrendsInsightsView.swift in Sources */,
+				A90894B1A9826F57A6F1FC03 /* LoopInsights_MealDebriefCard.swift in Sources */,
+				2C52C27A9D699F9CD6DB6C56 /* LoopInsights_PreMealAdvisorCard.swift in Sources */,
+				38CE2C9F6B29D4114D1A5D07 /* LoopInsights_MealDebriefModels.swift in Sources */,
+				DBAF6D59067C2F54BC05F3F6 /* DataLayer_Coordinator.swift in Sources */,
+				26D1850F1DD974F4393D5C02 /* DataLayer_EventModels.swift in Sources */,
+				E29D1EB46A2B91AE3FDFB347 /* DataLayer_ConsentModels.swift in Sources */,
+				775AC761C750DEC6B6F81B72 /* DataLayer_FeatureFlags.swift in Sources */,
+				6C09652D8042E266E68049E5 /* DataLayer_SecureStorage.swift in Sources */,
+				16990648A5D75816270ED7F8 /* DataLayer_ConsentManager.swift in Sources */,
+				B68F5C5B648322AED1B96CF5 /* DataLayer_EventStore.swift in Sources */,
+				97EABDD24D213615C9F3891C /* DataLayer_EventCollector.swift in Sources */,
+				FA5A376108B402FC8D9281FA /* DataLayer_SyncService.swift in Sources */,
+				015042D80CDCC9F9B61B903F /* DataLayer_ReportGenerator.swift in Sources */,
+				0BEF9B56D9BF491F2392550F /* DataLayer_ProviderProtocol.swift in Sources */,
+				5B762A5BD7D1D9B5170C72C1 /* DataLayer_ConsentView.swift in Sources */,
+				6F5FEB4509B4644C020BD08D /* DataLayer_DashboardView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4409,6 +5169,12 @@
 				9B8960934E11016BD5A3C893 /* FoodFinder_BarcodeScannerTests.swift in Sources */,
 				823DED9A0D02CE040129F44E /* FoodFinder_OpenFoodFactsTests.swift in Sources */,
 				47448AE2656870E8609E484C /* FoodFinder_VoiceSearchTests.swift in Sources */,
+				594445C0AFBCCFCC6CC3137D /* FoodFinder_BarcodeScannerTests.swift in Sources */,
+				83A73F5796F6A35551234E7D /* FoodFinder_OpenFoodFactsTests.swift in Sources */,
+				CFB644A4359EF71FA126A5C7 /* FoodFinder_VoiceSearchTests.swift in Sources */,
+				EBF56903B5932834DF35599E /* LoopInsights_DataAggregatorTests.swift in Sources */,
+				6F8D19EECE4E792342E07948 /* LoopInsights_ModelsTests.swift in Sources */,
+				F06F348BBB58A7D7CDE9517F /* LoopInsights_SuggestionStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -297,6 +297,7 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
         isLoadingAdvice = true
         aiAdvice = nil
 
+        let unitCtx = coordinator.unitContext
         let prompt = """
         Based on my glucose response pattern for \(pattern.foodType):
         - Average carbs: \(String(format: "%.0f", pattern.averageCarbsPerMeal))g per meal
@@ -312,7 +313,7 @@ final class LoopInsights_MealInsightsViewModel: ObservableObject {
         Task {
             do {
                 let response = try await LoopInsights_AIServiceAdapter.shared.sendPrompt(
-                    "You are a diabetes meal advisor. Be concise and practical.",
+                    "You are a diabetes meal advisor. Be concise and practical.\n\(unitCtx.aiPromptUnitContext())",
                     userPrompt: prompt
                 )
                 self.aiAdvice = response

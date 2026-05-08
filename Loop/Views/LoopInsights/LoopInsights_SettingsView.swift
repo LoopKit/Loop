@@ -9,6 +9,7 @@
 import SwiftUI
 import Combine
 import LoopKit
+import LoopKitUI
 import WebKit
 
 /// LoopInsights settings and configuration view.
@@ -16,10 +17,15 @@ import WebKit
 struct LoopInsights_SettingsView: View {
 
     @Environment(\.openURL) var openURL
+    @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
 
     /// Real data store references passed from Loop's SettingsView (type-erased).
     /// When nil, falls back to test data (simulator / preview).
     var dataStoresProvider: (() -> Any?)?
+
+    private var unitContext: LoopInsights_GlucoseUnitContext {
+        LoopInsights_GlucoseUnitContext(displayGlucosePreference: displayGlucosePreference)
+    }
 
     @State private var isEnabled = LoopInsights_FeatureFlags.isEnabled
     @State private var selectedPeriod = LoopInsights_FeatureFlags.analysisPeriod
@@ -134,6 +140,7 @@ struct LoopInsights_SettingsView: View {
                 phase5FeaturesSection
                 personalitySection
                 backgroundMonitoringSection
+                caregiverDigestSection
                 dataSection
                 if LoopInsights_FeatureFlags.developerModeEnabled {
                     developerSection
@@ -666,13 +673,13 @@ struct LoopInsights_SettingsView: View {
 
                 Divider()
 
-                // Tight Range Upper Bound
+                // Tight Range Upper Bound (stored as canonical mg/dL int; display in user unit)
                 Stepper(value: $tightRangeUpperBound, in: 120...160, step: 5) {
                     HStack {
                         Text(NSLocalizedString("Tight Range Upper Bound", comment: "LoopInsights tight range stepper label"))
                             .font(.subheadline)
                         Spacer()
-                        Text("\(tightRangeUpperBound) mg/dL")
+                        Text(unitContext.formatMgdl(Double(tightRangeUpperBound)))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.accentColor)
@@ -682,7 +689,7 @@ struct LoopInsights_SettingsView: View {
                     LoopInsights_FeatureFlags.tightRangeUpperBound = newValue
                 }
 
-                Text(NSLocalizedString("Upper limit for Time in Tight Range (TITR). Standard is 140 mg/dL per international consensus.", comment: "LoopInsights tight range description"))
+                Text(String(format: NSLocalizedString("Upper limit for Time in Tight Range (TITR). Standard is %@ per international consensus.", comment: "LoopInsights tight range description"), unitContext.formatMgdl(140)))
                     .font(.caption)
                     .foregroundColor(.secondary)
 
@@ -907,6 +914,41 @@ struct LoopInsights_SettingsView: View {
                 }
 
                 Text(NSLocalizedString("LoopInsights can continuously monitor your data and proactively notify you when it detects a setting change opportunity.", comment: "LoopInsights background monitoring description"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    // MARK: - Caregiver Digest
+
+    private var caregiverDigestSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    Image(systemName: "person.2.fill")
+                        .foregroundColor(Color(red: 26/255, green: 138/255, blue: 158/255))
+                    Text(NSLocalizedString("CAREGIVER DIGEST", comment: "LoopInsights caregiver digest header"))
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                }
+
+                NavigationLink {
+                    LoopInsights_CaregiverDigestView(dataStoresProvider: dataStoresProvider)
+                } label: {
+                    HStack {
+                        Text(NSLocalizedString("Caregiver Digest", comment: "LoopInsights caregiver digest row"))
+                        Spacer()
+                        Text(LoopInsights_CaregiverDigestService.isEnabled
+                            ? LoopInsights_CaregiverDigestService.frequency.displayName
+                            : NSLocalizedString("Off", comment: "LoopInsights digest off"))
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Text(NSLocalizedString("Share glucose summaries with caregivers, parents, or family members via email or iMessage.", comment: "LoopInsights caregiver digest description"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -1540,13 +1582,14 @@ class LoopInsights_DashboardContainer: ObservableObject {
         }
         // Real data stores from Loop (cast from type-erased tuple)
         else if let any = dataStoresProvider?(),
-                let stores = any as? (GlucoseStoreProtocol, DoseStoreProtocol, CarbStoreProtocol, LatestStoredSettingsProvider, LoopInsightsSettingsWriter) {
+                let stores = any as? (GlucoseStoreProtocol, DoseStoreProtocol, CarbStoreProtocol, LatestStoredSettingsProvider, DisplayGlucosePreference, LoopInsightsSettingsWriter) {
             coordinator = LoopInsights_Coordinator(
                 glucoseStore: stores.0,
                 doseStore: stores.1,
                 carbStore: stores.2,
                 settingsProvider: stores.3,
-                settingsWriter: stores.4
+                displayGlucosePreference: stores.4,
+                settingsWriter: stores.5
             )
         }
         // Fallback: test data provider (simulator with no real stores)

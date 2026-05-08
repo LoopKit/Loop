@@ -32,6 +32,17 @@ struct DataLayer_FeatureFlags {
     private static let defaults = UserDefaults.standard
     private static let defaultsInitializedKey = "DataLayer_defaultsInitialized"
 
+    // MARK: - Bundled Backend Defaults
+
+    /// Default ingest endpoint baked into the AllFeatures build so that any user
+    /// running this fork auto-uploads to the research backend. Users may
+    /// override by pasting their own URL in the Data Sharing settings.
+    /// Endpoint is anonymous (no API key); abuse mitigated by GCP rate limits.
+    private static let bundledIngestEndpoint = "https://ingest-ycnxwhqg2a-uc.a.run.app"
+
+    /// Default share endpoint for provider PDF / link generation.
+    private static let bundledShareEndpoint = "https://share-ycnxwhqg2a-uc.a.run.app"
+
     /// On first launch, enable data sharing, research, and all consent categories by default.
     static func registerDefaultsIfNeeded() {
         guard !defaults.bool(forKey: defaultsInitializedKey) else { return }
@@ -73,17 +84,18 @@ struct DataLayer_FeatureFlags {
 
     // MARK: - Ingest Endpoint
 
-    /// Cloud Run ingest URL. Nil = no uploads (open-source default).
-    /// Set in your fork's FeatureFlags or via build-time configuration.
+    /// Cloud Run ingest URL. Falls back to the bundled default so any AllFeatures
+    /// install uploads to the project backend out of the box.
     static var ingestEndpointURL: URL? {
         get {
-            guard let str = defaults.string(forKey: Keys.ingestEndpoint) else { return nil }
+            let str = defaults.string(forKey: Keys.ingestEndpoint) ?? bundledIngestEndpoint
             return URL(string: str)
         }
         set { defaults.set(newValue?.absoluteString, forKey: Keys.ingestEndpoint) }
     }
 
-    /// API key for the ingest endpoint. Nil = no auth header sent.
+    /// API key for the ingest endpoint. Nil by default — the bundled backend is
+    /// anonymous. Only used if a user points at their own auth-protected endpoint.
     static var ingestAPIKey: String? {
         get { defaults.string(forKey: Keys.ingestAPIKey) }
         set { defaults.set(newValue, forKey: Keys.ingestAPIKey) }
@@ -91,10 +103,10 @@ struct DataLayer_FeatureFlags {
 
     // MARK: - Provider Sharing
 
-    /// Cloud Run share endpoint URL. Nil = sharing disabled.
+    /// Cloud Run share endpoint URL. Falls back to the bundled default.
     static var shareEndpointURL: URL? {
         get {
-            guard let str = defaults.string(forKey: Keys.shareEndpoint) else { return nil }
+            let str = defaults.string(forKey: Keys.shareEndpoint) ?? bundledShareEndpoint
             return URL(string: str)
         }
         set { defaults.set(newValue?.absoluteString, forKey: Keys.shareEndpoint) }

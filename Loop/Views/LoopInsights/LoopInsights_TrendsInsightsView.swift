@@ -197,7 +197,7 @@ struct LoopInsights_TrendsInsightsView: View {
                 )
                 statsChip(
                     label: NSLocalizedString("Avg", comment: "LoopInsights trends avg chip"),
-                    value: String(format: "%.0f", stats.glucoseStats.averageGlucose),
+                    value: coordinator.unitContext.formatMgdl(stats.glucoseStats.averageGlucose, includeUnit: false),
                     color: avgColor(stats.glucoseStats.averageGlucose)
                 )
                 statsChip(
@@ -302,18 +302,22 @@ struct LoopInsights_TrendsInsightsView: View {
                     loadingView
                 } else if let stats = viewModel.statsTabData {
                     // Glucose section
+                    let unitCtx = coordinator.unitContext
+                    let lowStr = unitCtx.formatUserValue(unitCtx.lowValue, includeUnit: false)
+                    let highStr = unitCtx.formatUserValue(unitCtx.highValue, includeUnit: false)
+                    let tightUpperStr = unitCtx.formatMgdl(Double(stats.glucoseStats.tightRangeUpperBound), includeUnit: false)
                     statsSectionCard(
                         title: NSLocalizedString("Glucose", comment: "LoopInsights trends stats glucose"),
                         icon: "drop.fill",
                         rows: [
-                            (NSLocalizedString("Time in Range (70-180)", comment: ""), String(format: "%.1f%%", stats.glucoseStats.timeInRange)),
-                            (String(format: NSLocalizedString("Time in Tight Range (70-%d)", comment: ""), stats.glucoseStats.tightRangeUpperBound), String(format: "%.1f%%", stats.glucoseStats.timeInTightRange)),
-                            (NSLocalizedString("Below Range (<70)", comment: ""), String(format: "%.1f%%", stats.glucoseStats.timeBelowRange)),
-                            (NSLocalizedString("Above Range (>180)", comment: ""), String(format: "%.1f%%", stats.glucoseStats.timeAboveRange)),
-                            (NSLocalizedString("Average Glucose", comment: ""), String(format: "%.0f mg/dL", stats.glucoseStats.averageGlucose)),
+                            (unitCtx.tirRangeLabel, String(format: "%.1f%%", stats.glucoseStats.timeInRange)),
+                            (String(format: NSLocalizedString("Time in Tight Range (%@-%@)", comment: ""), lowStr, tightUpperStr), String(format: "%.1f%%", stats.glucoseStats.timeInTightRange)),
+                            (String(format: NSLocalizedString("Below Range (<%@)", comment: ""), lowStr), String(format: "%.1f%%", stats.glucoseStats.timeBelowRange)),
+                            (String(format: NSLocalizedString("Above Range (>%@)", comment: ""), highStr), String(format: "%.1f%%", stats.glucoseStats.timeAboveRange)),
+                            (NSLocalizedString("Average Glucose", comment: ""), unitCtx.formatMgdl(stats.glucoseStats.averageGlucose)),
                             (NSLocalizedString("GMI (est. A1C)", comment: ""), String(format: "%.1f%%", stats.glucoseStats.gmi)),
                             (NSLocalizedString("Coefficient of Variation", comment: ""), String(format: "%.1f%%", stats.glucoseStats.coefficientOfVariation)),
-                            (NSLocalizedString("Std Deviation", comment: ""), String(format: "%.1f mg/dL", stats.glucoseStats.standardDeviation)),
+                            (NSLocalizedString("Std Deviation", comment: ""), unitCtx.formatMgdl(stats.glucoseStats.standardDeviation)),
                             (NSLocalizedString("Readings", comment: ""), "\(stats.glucoseStats.sampleCount)")
                         ]
                     )
@@ -612,7 +616,7 @@ private final class TrendsViewModel: ObservableObject {
                     stats: stats
                 )
 
-                let systemPrompt = buildTrendsSystemPrompt()
+                let systemPrompt = buildTrendsSystemPrompt(unitContext: coordinator.unitContext)
                 let userPrompt = buildTrendsUserPrompt(
                     periodName: currentTab.label,
                     therapyContext: therapyContext
@@ -656,10 +660,12 @@ private final class TrendsViewModel: ObservableObject {
 
     // MARK: - Prompt Building
 
-    private func buildTrendsSystemPrompt() -> String {
+    private func buildTrendsSystemPrompt(unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl) -> String {
         let personality = LoopInsights_FeatureFlags.aiPersonality
 
         return """
+        \(unitContext.aiPromptUnitContext())
+
         You are an expert diabetes advisor providing a trends summary for a specific Loop AID user. \
         You have their REAL glucose readings, insulin delivery, carb logs, pump settings, and \
         biometrics. These are actual numbers from their actual pump and CGM — not hypothetical.

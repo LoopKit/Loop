@@ -61,10 +61,16 @@
 	<string>The app needs to use Bluetooth to send and receive data from your diabetes devices.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>The app needs to use Bluetooth to send and receive data from your diabetes devices.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>AutoPresets reads your calendar to automatically activate presets before scheduled activities like gym sessions or runs. Calendar data stays on your device.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>AutoPresets reads your calendar to automatically activate presets before scheduled activities like gym sessions or runs. Calendar data stays on your device.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera is used to scan barcodes of devices.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>FoodFinder uses your location to tag meals with where you ate. This helps identify how different restaurants affect your glucose. Location data stays on your device.</string>
+	<string>FoodFinder uses your location to tag meals with where you ate. AutoPresets uses location to activate presets when you arrive at or leave saved places like the gym.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>AutoPresets uses background location to monitor geofences and automatically activate presets when you arrive at or leave saved locations. This is battery-efficient and does not continuously track your position.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>FoodFinder uses the microphone for voice-powered food logging.</string>
 	<key>NSMotionUsageDescription</key>
@@ -93,6 +99,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
+		<string>location</string>
 		<string>processing</string>
 		<string>remote-notification</string>
 		<string>audio</string>

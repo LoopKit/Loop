@@ -1184,6 +1184,9 @@ extension DeviceDataManager: PumpManagerDelegate {
             self.pumpManager = nil
             self.deliveryUncertaintyAlertManager = nil
             self.settingsManager.storeSettings()
+
+            // Notify SiteAtlas that a pump site was deactivated
+            NotificationCenter.default.post(name: .pumpSiteDeactivated, object: nil)
         }
     }
 

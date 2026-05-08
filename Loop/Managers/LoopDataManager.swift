@@ -130,6 +130,9 @@ final class LoopDataManager {
         // Set up AutoPresets coordinator delegate
         AutoPresets_Coordinator.shared.delegate = self
 
+        // Initialize SiteAtlas coordinator (starts notification listeners)
+        _ = SiteAtlas_Coordinator.shared
+
         if #available(iOS 16.2, *) {
             self.liveActivityManager = LiveActivityManager(
                 glucoseStore: self.glucoseStore,

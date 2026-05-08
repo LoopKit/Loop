@@ -20,7 +20,8 @@ final class LoopInsights_ReportGenerator {
         stats: LoopInsightsAggregatedStats?,
         goals: [LoopInsightsGoal],
         patterns: [LoopInsightsCachedPattern],
-        reflections: [LoopInsightsReflection]
+        reflections: [LoopInsightsReflection],
+        unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl
     ) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .long
@@ -82,17 +83,20 @@ final class LoopInsights_ReportGenerator {
 
         // Glucose Section
         if let stats = stats {
+            let tightUpperUserStr = unitContext.formatMgdl(Double(stats.glucoseStats.tightRangeUpperBound), includeUnit: false)
+            let lowUserStr = unitContext.formatUserValue(unitContext.lowValue, includeUnit: false)
+            let highUserStr = unitContext.formatUserValue(unitContext.highValue, includeUnit: false)
             html += """
             <h2>Glucose</h2>
             <table>
-                <tr><td>Time in Range (70-180)</td><td>\(String(format: "%.1f%%", stats.glucoseStats.timeInRange))</td></tr>
-                <tr><td>Time in Tight Range (70-\(stats.glucoseStats.tightRangeUpperBound))</td><td>\(String(format: "%.1f%%", stats.glucoseStats.timeInTightRange))</td></tr>
-                <tr><td>Average Glucose</td><td>\(String(format: "%.0f mg/dL", stats.glucoseStats.averageGlucose))</td></tr>
+                <tr><td>\(unitContext.tirRangeLabel)</td><td>\(String(format: "%.1f%%", stats.glucoseStats.timeInRange))</td></tr>
+                <tr><td>Time in Tight Range (\(lowUserStr)-\(tightUpperUserStr))</td><td>\(String(format: "%.1f%%", stats.glucoseStats.timeInTightRange))</td></tr>
+                <tr><td>Average Glucose</td><td>\(unitContext.formatMgdl(stats.glucoseStats.averageGlucose))</td></tr>
                 <tr><td>GMI (est. A1C)</td><td>\(String(format: "%.1f%%", stats.glucoseStats.gmi))</td></tr>
                 <tr><td>Coefficient of Variation</td><td>\(String(format: "%.1f%%", stats.glucoseStats.coefficientOfVariation))</td></tr>
-                <tr><td>Below Range (&lt;70)</td><td>\(String(format: "%.1f%%", stats.glucoseStats.timeBelowRange))</td></tr>
-                <tr><td>Above Range (&gt;180)</td><td>\(String(format: "%.1f%%", stats.glucoseStats.timeAboveRange))</td></tr>
-                <tr><td>Std Deviation</td><td>\(String(format: "%.1f mg/dL", stats.glucoseStats.standardDeviation))</td></tr>
+                <tr><td>Below Range (&lt;\(lowUserStr))</td><td>\(String(format: "%.1f%%", stats.glucoseStats.timeBelowRange))</td></tr>
+                <tr><td>Above Range (&gt;\(highUserStr))</td><td>\(String(format: "%.1f%%", stats.glucoseStats.timeAboveRange))</td></tr>
+                <tr><td>Std Deviation</td><td>\(unitContext.formatMgdl(stats.glucoseStats.standardDeviation))</td></tr>
                 <tr><td>Readings</td><td>\(stats.glucoseStats.sampleCount)</td></tr>
             </table>
             """
@@ -254,4 +258,27 @@ struct LoopInsights_ActivityViewRepresentable: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+/// A UIActivityItemSource that provides a file URL with a custom email subject line.
+final class LoopInsights_SubjectItemSource: NSObject, UIActivityItemSource {
+    let url: URL
+    let subject: String
+
+    init(url: URL, subject: String) {
+        self.url = url
+        self.subject = subject
+    }
+
+    func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
+        return url
+    }
+
+    func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
+        return url
+    }
+
+    func activityViewController(_ activityViewController: UIActivityViewController, subjectForActivityType activityType: UIActivity.ActivityType?) -> String {
+        return subject
+    }
 }

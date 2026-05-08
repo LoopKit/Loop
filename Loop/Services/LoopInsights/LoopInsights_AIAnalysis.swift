@@ -43,9 +43,10 @@ final class LoopInsights_AIAnalysis {
         stats: LoopInsightsAggregatedStats,
         recentChanges: [LoopInsightsSuggestionRecord] = [],
         supplementalContext: String? = nil,
-        pastAppliedWithOutcomes: [SuggestionWithOutcomeData] = []
+        pastAppliedWithOutcomes: [SuggestionWithOutcomeData] = [],
+        unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl
     ) async throws -> LoopInsightsAnalysisResponse {
-        let systemPrompt = buildSystemPrompt(supplementalContext: supplementalContext)
+        let systemPrompt = buildSystemPrompt(supplementalContext: supplementalContext, unitContext: unitContext)
         let userPrompt = buildUserPrompt(settingType: settingType, settings: currentSettings, stats: stats, recentChanges: recentChanges, supplementalContext: supplementalContext, pastAppliedWithOutcomes: pastAppliedWithOutcomes)
 
         let timestamp = Date()
@@ -65,9 +66,19 @@ final class LoopInsights_AIAnalysis {
 
     // MARK: - System Prompt
 
-    private func buildSystemPrompt(supplementalContext: String? = nil) -> String {
+    private func buildSystemPrompt(supplementalContext: String? = nil, unitContext: LoopInsights_GlucoseUnitContext = .fallbackMgdl) -> String {
         let personality = LoopInsights_FeatureFlags.aiPersonality
         return """
+        \(unitContext.aiPromptUnitContext())
+
+        JSON FIELD UNITS — IMPORTANT:
+        Although prose in `reasoning` and `overall_assessment` must use the user's unit,
+        the JSON numeric fields `current_value` and `proposed_value` for INSULIN SENSITIVITY
+        suggestions MUST ALWAYS contain values in mg/dL — they are canonical storage fields.
+        Convert from your prose unit to mg/dL before populating those fields. The app converts
+        back to the user's unit for display. Carb ratio (g/U) and basal rate (U/hr) are
+        unit-independent and unaffected.
+
         You are Loopy, an expert-level automated insulin delivery (AID) therapy settings analyst. \
         You think like a top board certified endocrinologist who specializes in insulin pump optimization. \
         You analyze glucose, insulin, and carbohydrate data to determine whether therapy settings need adjustment.
@@ -253,6 +264,22 @@ final class LoopInsights_AIAnalysis {
           and REDUCE confidence in all settings change recommendations.
           On an empty stomach, drinking alcohol can also cause short term hypoglycemia. Alcohol is a toxin, \
           so the body 'spends' extra glucose energy to process the toxin out. With no onboard glucose the user may go low. \
+
+        USER ENGAGEMENT & ADHERENCE — When engagement metrics are provided:
+        - LOW CARB LOGGING (meals logged vs estimated): If the user is logging fewer than 50% of \
+          estimated meals, their carb data is incomplete. Cap CR confidence at "low" and note the gap. \
+          Do NOT interpret missing carb data as "no meals" — it means data is unavailable.
+        - DECLINING CORRECTIONS: A falling correction bolus trend over time may indicate disengagement \
+          or burnout — the user may be ignoring highs. Note this gently in overall_assessment as a \
+          factor that limits confidence, not as a judgment. Recommend conservative changes only.
+        - HIGH SUGGESTION REVERSION: If >50% of recent suggestions were reverted, the user may not \
+          trust or benefit from large changes. Reduce proposed change magnitudes and increase \
+          evaluation_days to build confidence gradually.
+        - BURNOUT SIGNALS: Data gaps, declining TIR trend over weeks, or combination of low logging + \
+          declining corrections = possible diabetes fatigue. In overall_assessment, acknowledge gently: \
+          "Data patterns suggest engagement may be lower recently. Consider focusing on one small, \
+          high-impact change rather than multiple adjustments." Never be judgmental or prescriptive \
+          about the user's behavior — focus only on what the DATA shows and offer supportive framing.
 
         INSULIN TYPE & DIA — Duration of Insulin Action defines the IOB calculation window:
         - RAPID-ACTING (Novolog/Humalog/Apidra): Onset ~15 min, peak ~75 min, DIA ~6 hrs. \

@@ -8,6 +8,7 @@
 
 import Foundation
 import LoopKit
+import LoopKitUI
 import LoopCore
 import HealthKit
 
@@ -39,6 +40,12 @@ final class LoopInsights_Coordinator: ObservableObject {
     /// Observation token for meal-logged notifications
     private var mealLoggedObserver: NSObjectProtocol?
 
+    /// Observation token for LoopDataUpdated (deferred snapshot capture)
+    private var loopDataUpdatedObserver: NSObjectProtocol?
+
+    /// Meal record IDs awaiting the next LoopDataUpdated to capture prediction snapshots
+    private var pendingSnapshotMealIDs: [(id: String, queuedAt: Date)] = []
+
     // MARK: - Data Provider Bridge
 
     private var dataProviderBridge: DataProviderBridge?
@@ -49,6 +56,16 @@ final class LoopInsights_Coordinator: ObservableObject {
     /// Closure to write therapy settings back to Loop via LoopDataManager.mutateSettings
     var settingsWriter: LoopInsightsSettingsWriter?
 
+    /// User's preferred glucose display unit (mg/dL or mmol/L), sourced from HealthKit
+    /// via Loop's `DeviceDataManager.displayGlucosePreference`. Used by services and
+    /// view models to localize thresholds, AI prompts, and formatted output.
+    let displayGlucosePreference: DisplayGlucosePreference
+
+    /// Convenience helper bound to `displayGlucosePreference`.
+    var unitContext: LoopInsights_GlucoseUnitContext {
+        LoopInsights_GlucoseUnitContext(displayGlucosePreference: displayGlucosePreference)
+    }
+
     // MARK: - Initialization
 
     /// Initialize with Loop's existing store references.
@@ -58,6 +75,7 @@ final class LoopInsights_Coordinator: ObservableObject {
         doseStore: DoseStoreProtocol,
         carbStore: CarbStoreProtocol,
         settingsProvider: LatestStoredSettingsProvider,
+        displayGlucosePreference: DisplayGlucosePreference,
         settingsWriter: LoopInsightsSettingsWriter? = nil
     ) {
         let bridge = DataProviderBridge(
@@ -68,6 +86,7 @@ final class LoopInsights_Coordinator: ObservableObject {
         )
         self.dataProviderBridge = bridge
         self.settingsWriter = settingsWriter
+        self.displayGlucosePreference = displayGlucosePreference
 
         let hkManager: LoopInsights_HealthKitManager? = LoopInsights_FeatureFlags.biometricsEnabled
             ? LoopInsights_HealthKitManager() : nil
@@ -87,11 +106,21 @@ final class LoopInsights_Coordinator: ObservableObject {
 
     /// Initialize with test data fixtures (for simulator/developer mode).
     /// Loads JSON fixtures from Documents/LoopInsights/ or the app bundle.
-    init(testDataProvider: LoopInsights_TestDataProvider) {
+    /// Optionally accepts a `DisplayGlucosePreference`; if omitted, queries HealthKit's
+    /// cached preferred unit so dev tooling still respects mmol/L users.
+    init(testDataProvider: LoopInsights_TestDataProvider,
+         displayGlucosePreference: DisplayGlucosePreference? = nil) {
         self.testDataProvider = testDataProvider
         self.dataProviderBridge = nil
         self.settingsWriter = nil
         self.healthKitManager = nil
+        if let pref = displayGlucosePreference {
+            self.displayGlucosePreference = pref
+        } else {
+            let cachedUnit = HealthStoreUnitCache.unitCache(for: HKHealthStore())
+                .preferredUnit(for: .bloodGlucose) ?? .milligramsPerDeciliter
+            self.displayGlucosePreference = DisplayGlucosePreference(displayGlucoseUnit: cachedUnit)
+        }
         self.dataAggregator = LoopInsights_DataAggregator(dataProvider: testDataProvider)
         self.aiAnalysis = LoopInsights_AIAnalysis()
         self.suggestionStore = LoopInsights_SuggestionStore.shared
@@ -128,20 +157,51 @@ final class LoopInsights_Coordinator: ObservableObject {
         LoopInsights_MealDebriefCache.pruneStale()
     }
 
-    /// Observe FoodFinder meal-logged notifications to capture prediction snapshots.
+    /// Observe FoodFinder meal-logged notifications to queue deferred snapshot capture.
+    /// Snapshots are NOT captured immediately because StatusExtensionContext (which holds
+    /// the predicted glucose curve) is only updated on .LoopDataUpdated — an async event
+    /// that fires after the next Loop algorithm cycle (~5 min). Capturing immediately would
+    /// read stale predictions that don't account for the just-entered carbs.
     private func observeMealLogged() {
         mealLoggedObserver = NotificationCenter.default.addObserver(
             forName: .foodFinderMealLogged,
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let mealRecordID = notification.userInfo?["recordID"] as? String else { return }
-            self?.mealDebriefService.capturePredictionSnapshot(mealRecordID: mealRecordID)
+            guard let self, let mealRecordID = notification.userInfo?["recordID"] as? String else { return }
+            self.pendingSnapshotMealIDs.append((id: mealRecordID, queuedAt: Date()))
+
+            // Safety net: if LoopDataUpdated doesn't fire within 90 seconds, capture with
+            // whatever prediction data is available (better stale than nothing).
+            DispatchQueue.main.asyncAfter(deadline: .now() + 90) { [weak self] in
+                guard let self else { return }
+                if let idx = self.pendingSnapshotMealIDs.firstIndex(where: { $0.id == mealRecordID }) {
+                    self.pendingSnapshotMealIDs.remove(at: idx)
+                    self.mealDebriefService.capturePredictionSnapshot(mealRecordID: mealRecordID)
+                }
+            }
+        }
+
+        // Observe LoopDataUpdated to capture snapshots once predictions are fresh
+        loopDataUpdatedObserver = NotificationCenter.default.addObserver(
+            forName: .LoopDataUpdated,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self, !self.pendingSnapshotMealIDs.isEmpty else { return }
+            let pending = self.pendingSnapshotMealIDs
+            self.pendingSnapshotMealIDs.removeAll()
+            for entry in pending {
+                self.mealDebriefService.capturePredictionSnapshot(mealRecordID: entry.id)
+            }
         }
     }
 
     deinit {
         if let observer = mealLoggedObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        if let observer = loopDataUpdatedObserver {
             NotificationCenter.default.removeObserver(observer)
         }
     }
@@ -300,8 +360,66 @@ final class LoopInsights_Coordinator: ObservableObject {
             if !exerciseCtx.isEmpty { context.append(exerciseCtx) }
         }
 
+        // Behavior insights — systematic user correction patterns
+        if LoopInsights_FeatureFlags.foodResponseEnabled {
+            let behaviorPatterns = LoopInsights_BehaviorInsightsAnalyzer.analyzePatterns()
+            let behaviorCtx = LoopInsights_BehaviorInsightsAnalyzer.buildPromptContext(patterns: behaviorPatterns)
+            if !behaviorCtx.isEmpty { context.append(behaviorCtx) }
+        }
+
+        // User engagement & adherence metrics
+        let engagementCtx = buildEngagementPromptContext(stats: stats)
+        if !engagementCtx.isEmpty { context.append(engagementCtx) }
+
         guard !context.isEmpty else { return nil }
         return context.joined(separator: "\n")
+    }
+
+    /// Compute user engagement metrics from carb logging frequency, correction trends,
+    /// and recent suggestion outcomes. Provides the AI with adherence context so it can
+    /// temper recommendations when the user may be disengaged or experiencing burnout.
+    private func buildEngagementPromptContext(stats: LoopInsightsAggregatedStats) -> String {
+        var lines: [String] = []
+
+        // Carb logging compliance: estimate ~3 meals/day as baseline
+        let expectedMeals = max(1, stats.period.rawValue) * 3
+        let mealCount = stats.carbStats.mealCount
+        let loggingRate = Double(mealCount) / Double(expectedMeals)
+        lines.append("- Carb logging rate: \(mealCount) meals logged over \(stats.period.rawValue) days (\(Int(loggingRate * 100))% of ~3/day estimate)")
+
+        // Correction bolus frequency
+        let correctionsPerDay = Double(stats.insulinStats.correctionBolusCount) / Double(max(1, stats.period.rawValue))
+        lines.append("- Corrections per day: \(String(format: "%.1f", correctionsPerDay))")
+
+        // Recent suggestion compliance
+        let recentSuggestions = Array(suggestionStore.resolvedRecords.prefix(10))
+        if !recentSuggestions.isEmpty {
+            let applied = recentSuggestions.filter { $0.status == .applied || $0.status == .autoApplied }.count
+            let reverted = recentSuggestions.filter { $0.status == .reverted }.count
+            let dismissed = recentSuggestions.filter { $0.status == .dismissed }.count
+            lines.append("- Recent suggestions: \(applied) applied, \(reverted) reverted, \(dismissed) dismissed (of last \(recentSuggestions.count))")
+        }
+
+        // Flag low engagement
+        var warnings: [String] = []
+        if loggingRate < 0.5 {
+            warnings.append("LOW CARB LOGGING (<50% of estimated meals)")
+        }
+        if correctionsPerDay < 0.3 && stats.glucoseStats.timeAboveRange > 20 {
+            warnings.append("FEW CORRECTIONS despite high time-above-range — possible disengagement")
+        }
+        let revertRate = Double(recentSuggestions.filter { $0.status == .reverted }.count) / Double(max(1, recentSuggestions.count))
+        if revertRate > 0.5 && recentSuggestions.count >= 3 {
+            warnings.append("HIGH SUGGESTION REVERSION (\(Int(revertRate * 100))% reverted) — user may not trust recommendations")
+        }
+
+        guard !lines.isEmpty else { return "" }
+
+        var result = "USER ENGAGEMENT & ADHERENCE:\n" + lines.joined(separator: "\n")
+        if !warnings.isEmpty {
+            result += "\n⚠️ " + warnings.joined(separator: "\n⚠️ ")
+        }
+        return result
     }
 
     // MARK: - Meal Debrief Context
@@ -667,9 +785,9 @@ final class LoopInsights_Coordinator: ObservableObject {
                     overrideDesc += " (insulin needs \(String(format: "%.0f", factor * 100))%)"
                 }
                 if let range = override.settings.targetRange {
-                    let low = range.lowerBound.doubleValue(for: .milligramsPerDeciliter)
-                    let high = range.upperBound.doubleValue(for: .milligramsPerDeciliter)
-                    overrideDesc += " target \(String(format: "%.0f", low))-\(String(format: "%.0f", high)) mg/dL"
+                    let lowStr = unitContext.format(range.lowerBound, includeUnit: false)
+                    let highStr = unitContext.format(range.upperBound, includeUnit: true)
+                    overrideDesc += " target \(lowStr)-\(highStr)"
                 }
                 let remaining = override.scheduledEndDate.timeIntervalSinceNow
                 if remaining.isFinite && remaining > 0 {

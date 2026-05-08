@@ -142,6 +142,9 @@ public struct SettingsView: View {
             }
         }
         .navigationViewStyle(.stack)
+        .onAppear {
+            TherapyHelpRegistry.destination = AnyView(LoopInsights_SettingsView(dataStoresProvider: viewModel.loopInsightsDataStores))
+        }
     }
 
     private func menuItemsForSection(name: String) -> some View {
@@ -312,6 +315,8 @@ extension SettingsView {
 
             loopInsightsSection
 
+            siteAtlasSettingsRow
+
             ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in
                 item.view
             }
@@ -417,6 +422,19 @@ extension SettingsView {
                             .font(.system(size: 36)),
                         label: NSLocalizedString("FoodFinder", comment: "Title text for button to FoodFinder Settings"),
                         descriptiveText: NSLocalizedString("AI-powered & barcode food analysis", comment: "Descriptive text for FoodFinder Settings"))
+        }
+    }
+
+    // SiteAtlas — single settings insertion point
+    private var siteAtlasSettingsRow: some View {
+        NavigationLink(destination: SiteAtlas_SettingsView()) {
+            LargeButton(action: {},
+                        includeArrow: false,
+                        imageView: Image(systemName: "mappin.and.ellipse")
+                            .foregroundColor(Color(red: 230/255, green: 126/255, blue: 34/255))
+                            .font(.system(size: 36)),
+                        label: NSLocalizedString("Site Atlas", comment: "Title text for button to Site Atlas Settings"),
+                        descriptiveText: NSLocalizedString("Track pump & sensor site rotation", comment: "Descriptive text for Site Atlas Settings"))
         }
     }
 

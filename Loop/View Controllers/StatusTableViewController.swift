@@ -45,6 +45,16 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     lazy private var cancellables = Set<AnyCancellable>()
 
+    // GraphDetailView (long-hold popup) state
+    private var graphDetailHostingController: UIHostingController<AnyView>?
+    private var graphDetailViewModel: GraphDetailViewModel?
+    private var graphDetailLeadingConstraint: NSLayoutConstraint?
+    private var graphDetailTopConstraint: NSLayoutConstraint?
+    private lazy var graphDetailScrubFeedback = UISelectionFeedbackGenerator()
+    private var graphDetailLastScrubDate: Date?
+    private var graphDetailDismissTap: UITapGestureRecognizer?
+    private var graphDetailAutoFadeTimer: Timer?
+
     override func viewDidLoad() {
 
         super.viewDidLoad()
@@ -154,6 +164,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             tableView.addGestureRecognizer(gestureRecognizer)
         }
 
+        setupGraphDetailGesture()
+
         tableView.estimatedRowHeight = 74
 
         // Estimate an initial value
@@ -231,6 +243,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
         refreshContext.update(with: .size(size))
 
         maybeOpenDebugMenu()
+
+        // Dismiss GraphDetailView popup — position would be stale after rotation
+        if graphDetailHostingController != nil {
+            dismissGraphDetail()
+        }
 
         super.viewWillTransition(to: size, with: coordinator)
     }
@@ -1353,6 +1370,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 }
             }
         case .charts:
+            // Don't navigate away while the GraphDetailView popup is showing
+            guard graphDetailHostingController == nil else { return }
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
                 if automaticDosingStatus.automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled {
@@ -1722,7 +1741,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                               let writer: LoopInsightsSettingsWriter = { mutate in
                                                   dm.loopManager.mutateSettings(mutate)
                                               }
-                                              return (dm.glucoseStore, dm.doseStore, dm.carbStore, dm.settingsManager, writer)
+                                              return (dm.glucoseStore, dm.doseStore, dm.carbStore, dm.settingsManager, dm.displayGlucosePreference, writer)
                                           },
                                           delegate: self)
         let hostingController = DismissibleHostingController(
@@ -2454,5 +2473,213 @@ extension StatusTableViewController: ServicesViewModelDelegate {
         settingsViewController.serviceOnboardingDelegate = deviceManager.servicesManager
         settingsViewController.completionDelegate = self
         show(settingsViewController, sender: self)
+    }
+
+    // MARK: - GraphDetailView (Long-Hold Detail Popup)
+
+    private func setupGraphDetailGesture() {
+        // Disable the original chart touch highlight gesture — GraphDetailView replaces it
+        charts.gestureRecognizer?.isEnabled = false
+
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleGraphDetailLongPress(_:)))
+        longPress.minimumPressDuration = 0.3
+        longPress.delegate = self
+        tableView.addGestureRecognizer(longPress)
+    }
+
+    @objc private func handleGraphDetailLongPress(_ recognizer: UILongPressGestureRecognizer) {
+        switch recognizer.state {
+        case .began:
+            let point = recognizer.location(in: tableView)
+            guard let indexPath = tableView.indexPathForRow(at: point),
+                  indexPath.section == Section.charts.rawValue,
+                  indexPath.row == ChartRow.glucose.rawValue else {
+                return
+            }
+            graphDetailScrubFeedback.prepare()
+            let touchedDate = dateForTouch(recognizer)
+            graphDetailLastScrubDate = touchedDate
+            presentGraphDetail(for: touchedDate, anchorPoint: point)
+
+        case .changed:
+            guard graphDetailHostingController != nil else { return }
+            let touchedDate = dateForTouch(recognizer)
+            // Update position
+            let point = recognizer.location(in: tableView)
+            guard let containerView = navigationController?.view ?? view.window else { return }
+            let touchInContainer = tableView.convert(point, to: containerView)
+            updateGraphDetailPosition(touchX: touchInContainer.x, touchY: touchInContainer.y, in: containerView)
+            // Tick haptic when crossing a 1-minute boundary
+            if let lastDate = graphDetailLastScrubDate,
+               Int(touchedDate.timeIntervalSinceReferenceDate / 60) != Int(lastDate.timeIntervalSinceReferenceDate / 60) {
+                graphDetailScrubFeedback.selectionChanged()
+            }
+            graphDetailLastScrubDate = touchedDate
+            // Update data
+            graphDetailViewModel?.update(for: touchedDate)
+
+        case .ended, .cancelled:
+            graphDetailLastScrubDate = nil
+            // Auto-fade after 5 seconds
+            graphDetailAutoFadeTimer?.invalidate()
+            graphDetailAutoFadeTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { [weak self] _ in
+                self?.dismissGraphDetail()
+            }
+            break
+
+        default:
+            break
+        }
+    }
+
+    /// Convert the current touch X position on the glucose chart to a Date
+    private func dateForTouch(_ recognizer: UIGestureRecognizer) -> Date {
+        let glucoseIndexPath = IndexPath(row: ChartRow.glucose.rawValue, section: Section.charts.rawValue)
+        let cell = tableView.cellForRow(at: glucoseIndexPath)
+
+        let touchInCell = recognizer.location(in: cell)
+        let chartLeading = charts.fixedHorizontalMargin
+        let chartWidth = (cell?.bounds.width ?? tableView.bounds.width) - chartLeading
+        let relativeX = (touchInCell.x - chartLeading) / chartWidth
+        let clampedX = max(0, min(1, relativeX))
+
+        let startDate = charts.startDate
+        let endDate = charts.maxEndDate
+        let timeRange = endDate.timeIntervalSince(startDate)
+        return startDate.addingTimeInterval(timeRange * Double(clampedX))
+    }
+
+    private func presentGraphDetail(for date: Date, anchorPoint: CGPoint) {
+        // Dismiss any existing popup immediately (no animation when replacing)
+        dismissGraphDetail(animated: false)
+
+        let glucoseUnit = deviceManager.displayGlucosePreference.unit
+        let viewModel = GraphDetailViewModel(date: date, glucoseUnit: glucoseUnit, deviceManager: deviceManager)
+        graphDetailViewModel = viewModel
+
+        let wrappedView = AnyView(
+            GraphDetailObservingView(viewModel: viewModel, onDismiss: { [weak self] in
+                self?.dismissGraphDetail()
+            })
+        )
+
+        let hostingController = UIHostingController(rootView: wrappedView)
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+
+        // Use the navigation controller's view (or window) so the popup floats above
+        // the table view and won't be affected by table reloads or scroll.
+        guard let containerView = navigationController?.view ?? view.window else { return }
+
+        // Add the popup as a child of the same VC that owns the container view
+        let parentVC: UIViewController = navigationController ?? self
+        parentVC.addChild(hostingController)
+        containerView.addSubview(hostingController.view)
+        hostingController.didMove(toParent: parentVC)
+
+        // Add a dismiss-on-tap gesture to the table view (delayed to avoid catching the long press lift)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissGraphDetailTap))
+        tapGesture.isEnabled = false
+        tableView.addGestureRecognizer(tapGesture)
+        graphDetailDismissTap = tapGesture
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            tapGesture.isEnabled = true
+        }
+
+        // Position the popup to the upper-right of the touch point
+        let touchInContainer = tableView.convert(anchorPoint, to: containerView)
+
+        let leading = hostingController.view.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 0)
+        let top = hostingController.view.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 0)
+        NSLayoutConstraint.activate([leading, top])
+        graphDetailLeadingConstraint = leading
+        graphDetailTopConstraint = top
+
+        // Set initial position
+        updateGraphDetailPosition(touchX: touchInContainer.x, touchY: touchInContainer.y, in: containerView)
+
+        // Animate in
+        hostingController.view.alpha = 0
+        hostingController.view.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+        UIView.animate(withDuration: 0.2) {
+            hostingController.view.alpha = 1
+            hostingController.view.transform = .identity
+        }
+
+        graphDetailHostingController = hostingController
+
+        // Haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+    }
+
+    private func updateGraphDetailPosition(touchX: CGFloat, touchY: CGFloat, in containerView: UIView) {
+        let padding: CGFloat = 12
+
+        // Use the actual popup size (let it layout first if needed)
+        let popupView = graphDetailHostingController?.view
+        popupView?.layoutIfNeeded()
+        let popupWidth = popupView?.intrinsicContentSize.width ?? 200
+        let popupHeight = popupView?.intrinsicContentSize.height ?? 150
+
+        // Use window-level safe area insets — always reflects device cutout
+        let safeInsets = containerView.window?.safeAreaInsets ?? containerView.safeAreaInsets
+        let minY = safeInsets.top + padding
+
+        // Try above the touch first; if it won't fit, go below
+        var popupY = touchY - padding - popupHeight
+        if popupY < minY {
+            popupY = touchY + padding
+        }
+
+        // Place to the right of the touch
+        var popupX = touchX + padding
+
+        // Clamp horizontal: respect safe areas on both sides
+        let maxX = containerView.bounds.width - popupWidth - max(padding, safeInsets.right)
+        let minX = max(padding, safeInsets.left)
+        popupX = max(minX, min(popupX, maxX))
+
+        graphDetailLeadingConstraint?.constant = popupX
+        graphDetailTopConstraint?.constant = popupY
+    }
+
+    @objc private func dismissGraphDetailTap() {
+        dismissGraphDetail()
+    }
+
+    private func dismissGraphDetail(animated: Bool = true) {
+        guard let hostingController = graphDetailHostingController else { return }
+
+        graphDetailAutoFadeTimer?.invalidate()
+        graphDetailAutoFadeTimer = nil
+
+        if let tap = graphDetailDismissTap {
+            tableView.removeGestureRecognizer(tap)
+            graphDetailDismissTap = nil
+        }
+
+        // Clear references immediately so a new popup can be created right away
+        graphDetailHostingController = nil
+        graphDetailViewModel = nil
+        graphDetailLeadingConstraint = nil
+        graphDetailTopConstraint = nil
+
+        let cleanup = {
+            hostingController.willMove(toParent: nil)
+            hostingController.view.removeFromSuperview()
+            hostingController.removeFromParent()
+        }
+
+        if animated {
+            UIView.animate(withDuration: 0.15, animations: {
+                hostingController.view.alpha = 0
+                hostingController.view.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            }, completion: { _ in
+                cleanup()
+            })
+        } else {
+            cleanup()
+        }
     }
 }

@@ -9,6 +9,7 @@
 //
 
 import LoopKit
+import LoopKitUI
 import SwiftUI
 import UIKit
 
@@ -45,6 +46,8 @@ struct AutoPresets_SettingsView: View {
                 if dataStoresProvider != nil {
                     aiAdvisorSection
                 }
+                geofenceSection
+                calendarSection
                 activityLogSection
                 debugLogsSection
             }
@@ -110,6 +113,82 @@ struct AutoPresets_SettingsView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Geofence Section
+
+    private var geofenceSection: some View {
+        Section {
+            NavigationLink {
+                AutoPresets_GeofenceSettingsView()
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(AutoPresets_GeofenceManager.shared.isEnabled ? Color(red: 76/255, green: 175/255, blue: 80/255) : .secondary)
+                        .frame(width: 28)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Location Triggers")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text(geofenceSummary)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    private var geofenceSummary: String {
+        let manager = AutoPresets_GeofenceManager.shared
+        if !manager.isEnabled {
+            return "Off"
+        }
+        let count = manager.locations.filter(\.isEnabled).count
+        if count == 0 {
+            return "Enabled — no locations saved"
+        }
+        return "\(count) location\(count == 1 ? "" : "s") monitored"
+    }
+
+    // MARK: - Calendar Section
+
+    private var calendarSection: some View {
+        Section {
+            NavigationLink {
+                AutoPresets_CalendarSettingsView()
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "calendar.badge.clock")
+                        .font(.title3)
+                        .foregroundColor(AutoPresets_CalendarManager.shared.isEnabled ? Color(red: 76/255, green: 175/255, blue: 80/255) : .secondary)
+                        .frame(width: 28)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Calendar Triggers")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text(calendarSummary)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    private var calendarSummary: String {
+        let manager = AutoPresets_CalendarManager.shared
+        if !manager.isEnabled {
+            return "Off"
+        }
+        let count = manager.triggers.filter(\.isEnabled).count
+        if count == 0 {
+            return "Enabled — no keywords saved"
+        }
+        return "\(count) keyword\(count == 1 ? "" : "s") active"
     }
 
     // MARK: - AI Advisor Section
@@ -427,22 +506,22 @@ struct AutoPresets_SettingsView: View {
                     Text("Stop Delay")
                         .font(.headline)
                     Spacer()
-                    Text(formatContinuousActivityTime(coordinator.settings.stopInterval))
+                    Text(formatDuration(coordinator.settings.stopInterval))
                         .foregroundColor(.secondary)
                 }
 
-                Text("How long to wait after motion stops before deactivating preset.")
+                Text("How long to wait after motion stops before deactivating preset. Longer delays help cover post-exercise insulin sensitivity.")
                     .font(.caption)
                     .foregroundColor(.secondary)
 
                 Slider(
                     value: Binding(
-                        get: { continuousActivityTimeSliderValue(from: coordinator.settings.stopInterval) },
+                        get: { stopDelaySliderValue(from: coordinator.settings.stopInterval) },
                         set: { sliderValue in
-                            coordinator.updateSettings { $0.stopInterval = continuousActivityTimeFromSlider(sliderValue) }
+                            coordinator.updateSettings { $0.stopInterval = stopDelayFromSlider(sliderValue) }
                         }
                     ),
-                    in: 0 ... 12,
+                    in: 0 ... Double(Self.stopDelayValues.count - 1),
                     step: 1
                 )
             }
@@ -681,11 +760,14 @@ struct AutoPresets_SettingsView: View {
 
     private static let continuousActivityTimeValues: [TimeInterval] = [10, 20, 30, 60, 120, 180, 240, 300, 360, 420, 480, 540, 600]
 
+    /// Stop Delay extends to 2 hours (7200s) for post-exercise recovery use cases
+    private static let stopDelayValues: [TimeInterval] = [10, 20, 30, 60, 120, 180, 300, 600, 900, 1200, 1800, 2700, 3600, 5400, 7200]
+
     private func continuousActivityTimeSliderValue(from interval: TimeInterval) -> Double {
         if let index = Self.continuousActivityTimeValues.firstIndex(where: { $0 >= interval }) {
             return Double(index)
         }
-        return 12
+        return Double(Self.continuousActivityTimeValues.count - 1)
     }
 
     private func continuousActivityTimeFromSlider(_ sliderValue: Double) -> TimeInterval {
@@ -696,13 +778,23 @@ struct AutoPresets_SettingsView: View {
         return Self.continuousActivityTimeValues[index]
     }
 
-    private func formatContinuousActivityTime(_ interval: TimeInterval) -> String {
-        if interval < 60 {
-            return "\(Int(interval)) sec"
-        } else {
-            let minutes = Int(interval / 60)
-            return "\(minutes) min"
+    private func stopDelaySliderValue(from interval: TimeInterval) -> Double {
+        if let index = Self.stopDelayValues.firstIndex(where: { $0 >= interval }) {
+            return Double(index)
         }
+        return Double(Self.stopDelayValues.count - 1)
+    }
+
+    private func stopDelayFromSlider(_ sliderValue: Double) -> TimeInterval {
+        let index = Int(sliderValue.rounded())
+        guard index >= 0 && index < Self.stopDelayValues.count else {
+            return 300
+        }
+        return Self.stopDelayValues[index]
+    }
+
+    private func formatContinuousActivityTime(_ interval: TimeInterval) -> String {
+        return formatDuration(interval)
     }
 
     // MARK: - Formatters
@@ -730,7 +822,7 @@ struct AutoPresets_SettingsView: View {
         }
         // Real data stores from Loop (cast from type-erased tuple)
         guard let any = dataStoresProvider?(),
-              let stores = any as? (GlucoseStoreProtocol, DoseStoreProtocol, CarbStoreProtocol, LatestStoredSettingsProvider, LoopInsightsSettingsWriter)
+              let stores = any as? (GlucoseStoreProtocol, DoseStoreProtocol, CarbStoreProtocol, LatestStoredSettingsProvider, DisplayGlucosePreference, LoopInsightsSettingsWriter)
         else {
             return nil
         }
@@ -739,7 +831,8 @@ struct AutoPresets_SettingsView: View {
             doseStore: stores.1,
             carbStore: stores.2,
             settingsProvider: stores.3,
-            settingsWriter: stores.4
+            displayGlucosePreference: stores.4,
+            settingsWriter: stores.5
         )
     }
 

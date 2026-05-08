@@ -269,6 +269,9 @@ class LoopAppManager: NSObject {
             .assign(to: \.automaticDosingStatus.automaticDosingEnabled, on: self)
             .store(in: &cancellables)
 
+        AutoPresets_Coordinator.shared.displayGlucosePreference = deviceDataManager.displayGlucosePreference
+        LoopInsights_PreMealAdvisorService.shared.unitContext = LoopInsights_GlucoseUnitContext(displayGlucosePreference: deviceDataManager.displayGlucosePreference)
+
         startLoopInsightsMonitorIfNeeded()
 
         state = state.next
@@ -285,6 +288,7 @@ class LoopAppManager: NSObject {
             doseStore: deviceDataManager.doseStore,
             carbStore: deviceDataManager.carbStore,
             settingsProvider: settingsManager,
+            displayGlucosePreference: deviceDataManager.displayGlucosePreference,
             settingsWriter: { [weak self] mutate in
                 self?.deviceDataManager.loopManager.mutateSettings(mutate)
             }
