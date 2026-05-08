@@ -62,6 +62,14 @@ struct FoodFinder_NutritionResult {
     let foodType: String
     let absorptionTime: TimeInterval
     let absorptionTimeWasAIGenerated: Bool
+    /// Optional macros for downstream features (e.g. BolusPro). nil when
+    /// the source (manual carb entry, basic search) didn't carry them.
+    let fat: Double?
+    let protein: Double?
+    /// String identifying which FoodFinder path produced the macros.
+    /// Mapped to `BolusProMacrosSource` by the host. Values: `"ai"`,
+    /// `"product"`, `"favorite"`. nil when no macros present.
+    let macrosSource: String?
 }
 
 // MARK: - Search ViewModel
@@ -297,9 +305,26 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             let perUsdaServing = item.carbohydrates / aiMultiplier
             return total + (perUsdaServing * userMultiplier)
         }
+        // Per-item fat / protein: same scaling logic. Drives BolusPro auto-populate.
+        let baseFat = includedItems.reduce(0.0) { total, entry in
+            let (index, item) = entry
+            let aiMultiplier = item.servingMultiplier > 0 ? item.servingMultiplier : 1.0
+            let userMultiplier = itemServingOverrides[index] ?? aiMultiplier
+            let perUsdaServing = (item.fat ?? 0) / aiMultiplier
+            return total + (perUsdaServing * userMultiplier)
+        }
+        let baseProtein = includedItems.reduce(0.0) { total, entry in
+            let (index, item) = entry
+            let aiMultiplier = item.servingMultiplier > 0 ? item.servingMultiplier : 1.0
+            let userMultiplier = itemServingOverrides[index] ?? aiMultiplier
+            let perUsdaServing = (item.protein ?? 0) / aiMultiplier
+            return total + (perUsdaServing * userMultiplier)
+        }
         // Plate-level multiplier (the "Servings" slider — for "I ate 2 plates")
         let plateScale = numberOfServings
         let newCarbs = baseCarbs * plateScale
+        let newFat = baseFat * plateScale
+        let newProtein = baseProtein * plateScale
 
         let included = includedItems.map { $0.element }
 
@@ -338,7 +363,10 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             carbs: newCarbs,
             foodType: foodType,
             absorptionTime: newAbsorptionTime,
-            absorptionTimeWasAIGenerated: aiGenerated
+            absorptionTimeWasAIGenerated: aiGenerated,
+            fat: newFat > 0 ? newFat : nil,
+            protein: newProtein > 0 ? newProtein : nil,
+            macrosSource: (newFat > 0 || newProtein > 0) ? "ai" : nil
         ))
     }
 
@@ -981,12 +1009,18 @@ final class FoodFinder_SearchViewModel: ObservableObject {
                selectedFoodServingSize ?? "serving",
                numberOfServings)
 
-        // Notify the host about the selection
+        // Notify the host about the selection. Macros from product nutriments
+        // (when available) drive BolusPro auto-populate.
+        let productFat = (product.nutriments.fat ?? 0) * numberOfServings
+        let productProtein = (product.nutriments.proteins ?? 0) * numberOfServings
         onNutritionApplied?(FoodFinder_NutritionResult(
             carbs: carbsQuantity ?? 0,
             foodType: foodType,
             absorptionTime: absorptionTime,
-            absorptionTimeWasAIGenerated: absorptionTimeWasAIGenerated
+            absorptionTimeWasAIGenerated: absorptionTimeWasAIGenerated,
+            fat: productFat > 0 ? productFat : nil,
+            protein: productProtein > 0 ? productProtein : nil,
+            macrosSource: (productFat > 0 || productProtein > 0) ? "product" : nil
         ))
     }
 
@@ -1054,12 +1088,17 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             foodType = selectedFood.displayName
         }
 
-        // Notify host of the updated carbs
+        // Notify host of the updated carbs (with optional macros from selected food).
+        let foodFat: Double = (selectedFood.fatPerServing ?? selectedFood.nutriments.fat ?? 0) * servings
+        let foodProtein: Double = (selectedFood.proteinPerServing ?? selectedFood.nutriments.proteins ?? 0) * servings
         onNutritionApplied?(FoodFinder_NutritionResult(
             carbs: newCarbsQuantity,
             foodType: foodType,
             absorptionTime: absorptionTime,
-            absorptionTimeWasAIGenerated: absorptionTimeWasAIGenerated
+            absorptionTimeWasAIGenerated: absorptionTimeWasAIGenerated,
+            fat: foodFat > 0 ? foodFat : nil,
+            protein: foodProtein > 0 ? foodProtein : nil,
+            macrosSource: (foodFat > 0 || foodProtein > 0) ? "favorite" : nil
         ))
 
         os_log("Recalculated carbs for %{public}.1f servings: %{public}g",
@@ -1428,12 +1467,15 @@ final class FoodFinder_SearchViewModel: ObservableObject {
             foodType = rawFoodType
         }
 
-        // Notify host
+        // Notify host (post-deletion totals; macros forwarded for BolusPro)
         onNutritionApplied?(FoodFinder_NutritionResult(
             carbs: newTotalCarbs,
             foodType: foodType,
             absorptionTime: absorptionTime,
-            absorptionTimeWasAIGenerated: absorptionTimeWasAIGenerated
+            absorptionTimeWasAIGenerated: absorptionTimeWasAIGenerated,
+            fat: newTotalFat > 0 ? newTotalFat : nil,
+            protein: newTotalProtein > 0 ? newTotalProtein : nil,
+            macrosSource: (newTotalFat > 0 || newTotalProtein > 0) ? "ai" : nil
         ))
 
         #if DEBUG

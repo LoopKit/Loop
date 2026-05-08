@@ -663,6 +663,16 @@
 		309660119104ABF9C7692F02 /* FoodFinder_EmojiProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831C0B7CE3534010D621E7D0 /* FoodFinder_EmojiProvider.swift */; };
 		10B625A9FF1939614C2E99F7 /* FoodFinder_EntryPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94FAA6B5BFCA71FA1330CF5D /* FoodFinder_EntryPoint.swift */; };
 		D9135D81AB12551A8AA150B0 /* FoodFinder_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E000C525103B3F398BFC7CF /* FoodFinder_FeatureFlags.swift */; };
+		E700DDD5D8516F85284CBF2C /* BolusPro_SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90DA33256FD56059EC12CA84 /* BolusPro_SettingsView.swift */; };
+		D7CDDF97F56EC15FAD631C40 /* BolusPro_CarbEntrySection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C02AEE425D84F297A17782C /* BolusPro_CarbEntrySection.swift */; };
+		7259CF64A323819AEEB6818C /* BolusPro_ManualMacroFields.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EACDDC72E01ADCFFE707E34 /* BolusPro_ManualMacroFields.swift */; };
+		0FFECEB8DBFCC9AFA69B77E9 /* BolusPro_OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A035C6C7F30893E0B20634A /* BolusPro_OnboardingView.swift */; };
+		9D4D2B222B45436DAA8C5842 /* BolusPro_InfoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3D718922E23906F24F001EA /* BolusPro_InfoSheet.swift */; };
+		54C88C6578528516131B8853 /* BolusPro_BehaviorAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6528661A09A079A81792BAC /* BolusPro_BehaviorAnalyzer.swift */; };
+		03BEA92A637C795E836D0E36 /* BolusPro_DataLayerHook.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFE15C0F906CA7C461934BE1 /* BolusPro_DataLayerHook.swift */; };
+		1355CF913B61184A8266C0C4 /* BolusPro_FPUCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8EE69C18DED1E3D917A318E /* BolusPro_FPUCalculator.swift */; };
+		9490E09523D49805FBB7CACE /* BolusPro_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB49DE7290960D2F84D648A /* BolusPro_FeatureFlags.swift */; };
+		B6A0ADD8A9BE7F1550E06F3F /* BolusPro_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE66CD370EA48F607A3A8970 /* BolusPro_Models.swift */; };
 		D10F2609416CC339056236D8 /* FoodFinder_ImageDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB00FF448F43B860CCD3B02 /* FoodFinder_ImageDownloader.swift */; };
 		A8BD0FB89E1131F1BB986DA7 /* FoodFinder_ImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDF09B9DFA98A7C6DFE74B0 /* FoodFinder_ImageStore.swift */; };
 		3A7FBD5751DA0C1FB71B9026 /* FoodFinder_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F161EF31970B55337F735E3 /* FoodFinder_Models.swift */; };
@@ -734,6 +744,16 @@
 		E88E68D68BF264F721AFC712 /* FoodFinder_InputResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = E982E4777A460182F9FEE5D7 /* FoodFinder_InputResults.swift */; };
 		7ADC7CCA827794317AA04776 /* FoodFinder_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB107CACA4FC04E8652B531 /* FoodFinder_Models.swift */; };
 		FB788D1EE6ADB3446110A1E4 /* FoodFinder_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73404923E06307CDCF420FE4 /* FoodFinder_FeatureFlags.swift */; };
+		0C4E459D5843DD7B65D73C00 /* BolusPro_SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4CD5435621576ABFACCC9F /* BolusPro_SettingsView.swift */; };
+		853BED474E42D75F5DEF64CF /* BolusPro_CarbEntrySection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486369514D9709ABF0B9BCB1 /* BolusPro_CarbEntrySection.swift */; };
+		B5CF559C802A0E83A2C71CDC /* BolusPro_ManualMacroFields.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3854B724C8177F69D5FA9FDA /* BolusPro_ManualMacroFields.swift */; };
+		575884F7B6AB2D596A010B02 /* BolusPro_OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B7BA32604444DA6A16BA5C /* BolusPro_OnboardingView.swift */; };
+		43CE11F1849E3A035E24D74D /* BolusPro_InfoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAE54AE85789778C1F623FF /* BolusPro_InfoSheet.swift */; };
+		4D44DE832A9AEB726634E7F4 /* BolusPro_BehaviorAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11BDB84D42ABD62A451F1BD6 /* BolusPro_BehaviorAnalyzer.swift */; };
+		0B8FE2158EA8F0937A781238 /* BolusPro_DataLayerHook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D092D1A791522383A027FB5 /* BolusPro_DataLayerHook.swift */; };
+		0BA769B5E6BF174559694E5C /* BolusPro_FPUCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04433B0A0314E013DFCF48EA /* BolusPro_FPUCalculator.swift */; };
+		DA7F73BC1725B94A21202576 /* BolusPro_FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8764414B55B47AF98156D78F /* BolusPro_FeatureFlags.swift */; };
+		F8E7E63F057B1E04FA1063EA /* BolusPro_Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB30754F37083B3B1ED13C1C /* BolusPro_Models.swift */; };
 		B7F6252AE377538D14B924DF /* FoodFinder_CarbTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFCDBD9B90449DA0CDEA3299 /* FoodFinder_CarbTrackingService.swift */; };
 		33CAAACE11A18DF26E8388A2 /* FoodFinder_AIAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFB900EE960A218333F8BA1 /* FoodFinder_AIAnalysis.swift */; };
 		0069EFA11E7101DEB638B4C2 /* FoodFinder_AIProviderConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD1A5B12D21DD26F7818B08 /* FoodFinder_AIProviderConfig.swift */; };
@@ -1727,6 +1747,16 @@
 		831C0B7CE3534010D621E7D0 /* FoodFinder_EmojiProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_EmojiProvider.swift; sourceTree = "<group>"; };
 		94FAA6B5BFCA71FA1330CF5D /* FoodFinder_EntryPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_EntryPoint.swift; sourceTree = "<group>"; };
 		6E000C525103B3F398BFC7CF /* FoodFinder_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_FeatureFlags.swift; sourceTree = "<group>"; };
+		90DA33256FD56059EC12CA84 /* BolusPro_SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Views/BolusPro/BolusPro_SettingsView.swift"; sourceTree = "<group>"; };
+		6C02AEE425D84F297A17782C /* BolusPro_CarbEntrySection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Views/BolusPro/BolusPro_CarbEntrySection.swift"; sourceTree = "<group>"; };
+		7EACDDC72E01ADCFFE707E34 /* BolusPro_ManualMacroFields.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Views/BolusPro/BolusPro_ManualMacroFields.swift"; sourceTree = "<group>"; };
+		9A035C6C7F30893E0B20634A /* BolusPro_OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Views/BolusPro/BolusPro_OnboardingView.swift"; sourceTree = "<group>"; };
+		F3D718922E23906F24F001EA /* BolusPro_InfoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Views/BolusPro/BolusPro_InfoSheet.swift"; sourceTree = "<group>"; };
+		C6528661A09A079A81792BAC /* BolusPro_BehaviorAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Services/BolusPro/BolusPro_BehaviorAnalyzer.swift"; sourceTree = "<group>"; };
+		EFE15C0F906CA7C461934BE1 /* BolusPro_DataLayerHook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Services/BolusPro/BolusPro_DataLayerHook.swift"; sourceTree = "<group>"; };
+		B8EE69C18DED1E3D917A318E /* BolusPro_FPUCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Services/BolusPro/BolusPro_FPUCalculator.swift"; sourceTree = "<group>"; };
+		6BB49DE7290960D2F84D648A /* BolusPro_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Resources/BolusPro/BolusPro_FeatureFlags.swift"; sourceTree = "<group>"; };
+		AE66CD370EA48F607A3A8970 /* BolusPro_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Models/BolusPro/BolusPro_Models.swift"; sourceTree = "<group>"; };
 		0AB00FF448F43B860CCD3B02 /* FoodFinder_ImageDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_ImageDownloader.swift; sourceTree = "<group>"; };
 		6CDF09B9DFA98A7C6DFE74B0 /* FoodFinder_ImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_ImageStore.swift; sourceTree = "<group>"; };
 		7F161EF31970B55337F735E3 /* FoodFinder_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_Models.swift; sourceTree = "<group>"; };
@@ -1798,6 +1828,16 @@
 		E982E4777A460182F9FEE5D7 /* FoodFinder_InputResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_InputResults.swift; sourceTree = "<group>"; };
 		8BB107CACA4FC04E8652B531 /* FoodFinder_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_Models.swift; sourceTree = "<group>"; };
 		73404923E06307CDCF420FE4 /* FoodFinder_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_FeatureFlags.swift; sourceTree = "<group>"; };
+		4B4CD5435621576ABFACCC9F /* BolusPro_SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Views/BolusPro/BolusPro_SettingsView.swift"; sourceTree = "<group>"; };
+		486369514D9709ABF0B9BCB1 /* BolusPro_CarbEntrySection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Views/BolusPro/BolusPro_CarbEntrySection.swift"; sourceTree = "<group>"; };
+		3854B724C8177F69D5FA9FDA /* BolusPro_ManualMacroFields.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Views/BolusPro/BolusPro_ManualMacroFields.swift"; sourceTree = "<group>"; };
+		D9B7BA32604444DA6A16BA5C /* BolusPro_OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Views/BolusPro/BolusPro_OnboardingView.swift"; sourceTree = "<group>"; };
+		8BAE54AE85789778C1F623FF /* BolusPro_InfoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Views/BolusPro/BolusPro_InfoSheet.swift"; sourceTree = "<group>"; };
+		11BDB84D42ABD62A451F1BD6 /* BolusPro_BehaviorAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Services/BolusPro/BolusPro_BehaviorAnalyzer.swift"; sourceTree = "<group>"; };
+		5D092D1A791522383A027FB5 /* BolusPro_DataLayerHook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Services/BolusPro/BolusPro_DataLayerHook.swift"; sourceTree = "<group>"; };
+		04433B0A0314E013DFCF48EA /* BolusPro_FPUCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Services/BolusPro/BolusPro_FPUCalculator.swift"; sourceTree = "<group>"; };
+		8764414B55B47AF98156D78F /* BolusPro_FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Resources/BolusPro/BolusPro_FeatureFlags.swift"; sourceTree = "<group>"; };
+		EB30754F37083B3B1ED13C1C /* BolusPro_Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Models/BolusPro/BolusPro_Models.swift"; sourceTree = "<group>"; };
 		AFCDBD9B90449DA0CDEA3299 /* FoodFinder_CarbTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_CarbTrackingService.swift; sourceTree = "<group>"; };
 		4DFB900EE960A218333F8BA1 /* FoodFinder_AIAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AIAnalysis.swift; sourceTree = "<group>"; };
 		DDD1A5B12D21DD26F7818B08 /* FoodFinder_AIProviderConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodFinder_AIProviderConfig.swift; sourceTree = "<group>"; };
@@ -3400,6 +3440,16 @@
 			isa = PBXGroup;
 			children = (
 				6E000C525103B3F398BFC7CF /* FoodFinder_FeatureFlags.swift */,
+				90DA33256FD56059EC12CA84 /* BolusPro_SettingsView.swift */,
+				6C02AEE425D84F297A17782C /* BolusPro_CarbEntrySection.swift */,
+				7EACDDC72E01ADCFFE707E34 /* BolusPro_ManualMacroFields.swift */,
+				9A035C6C7F30893E0B20634A /* BolusPro_OnboardingView.swift */,
+				F3D718922E23906F24F001EA /* BolusPro_InfoSheet.swift */,
+				C6528661A09A079A81792BAC /* BolusPro_BehaviorAnalyzer.swift */,
+				EFE15C0F906CA7C461934BE1 /* BolusPro_DataLayerHook.swift */,
+				B8EE69C18DED1E3D917A318E /* BolusPro_FPUCalculator.swift */,
+				6BB49DE7290960D2F84D648A /* BolusPro_FeatureFlags.swift */,
+				AE66CD370EA48F607A3A8970 /* BolusPro_Models.swift */,
 			);
 			path = FoodFinder;
 			sourceTree = "<group>";
@@ -3716,6 +3766,16 @@
 			isa = PBXGroup;
 			children = (
 				73404923E06307CDCF420FE4 /* FoodFinder_FeatureFlags.swift */,
+				4B4CD5435621576ABFACCC9F /* BolusPro_SettingsView.swift */,
+				486369514D9709ABF0B9BCB1 /* BolusPro_CarbEntrySection.swift */,
+				3854B724C8177F69D5FA9FDA /* BolusPro_ManualMacroFields.swift */,
+				D9B7BA32604444DA6A16BA5C /* BolusPro_OnboardingView.swift */,
+				8BAE54AE85789778C1F623FF /* BolusPro_InfoSheet.swift */,
+				11BDB84D42ABD62A451F1BD6 /* BolusPro_BehaviorAnalyzer.swift */,
+				5D092D1A791522383A027FB5 /* BolusPro_DataLayerHook.swift */,
+				04433B0A0314E013DFCF48EA /* BolusPro_FPUCalculator.swift */,
+				8764414B55B47AF98156D78F /* BolusPro_FeatureFlags.swift */,
+				EB30754F37083B3B1ED13C1C /* BolusPro_Models.swift */,
 			);
 			path = FoodFinder;
 			sourceTree = "<group>";
@@ -4834,6 +4894,16 @@
 				309660119104ABF9C7692F02 /* FoodFinder_EmojiProvider.swift in Sources */,
 				10B625A9FF1939614C2E99F7 /* FoodFinder_EntryPoint.swift in Sources */,
 				D9135D81AB12551A8AA150B0 /* FoodFinder_FeatureFlags.swift in Sources */,
+				E700DDD5D8516F85284CBF2C /* BolusPro_SettingsView.swift in Sources */,
+				D7CDDF97F56EC15FAD631C40 /* BolusPro_CarbEntrySection.swift in Sources */,
+				7259CF64A323819AEEB6818C /* BolusPro_ManualMacroFields.swift in Sources */,
+				0FFECEB8DBFCC9AFA69B77E9 /* BolusPro_OnboardingView.swift in Sources */,
+				9D4D2B222B45436DAA8C5842 /* BolusPro_InfoSheet.swift in Sources */,
+				54C88C6578528516131B8853 /* BolusPro_BehaviorAnalyzer.swift in Sources */,
+				03BEA92A637C795E836D0E36 /* BolusPro_DataLayerHook.swift in Sources */,
+				1355CF913B61184A8266C0C4 /* BolusPro_FPUCalculator.swift in Sources */,
+				9490E09523D49805FBB7CACE /* BolusPro_FeatureFlags.swift in Sources */,
+				B6A0ADD8A9BE7F1550E06F3F /* BolusPro_Models.swift in Sources */,
 				D10F2609416CC339056236D8 /* FoodFinder_ImageDownloader.swift in Sources */,
 				A8BD0FB89E1131F1BB986DA7 /* FoodFinder_ImageStore.swift in Sources */,
 				3A7FBD5751DA0C1FB71B9026 /* FoodFinder_Models.swift in Sources */,
@@ -4890,6 +4960,16 @@
 				E88E68D68BF264F721AFC712 /* FoodFinder_InputResults.swift in Sources */,
 				7ADC7CCA827794317AA04776 /* FoodFinder_Models.swift in Sources */,
 				FB788D1EE6ADB3446110A1E4 /* FoodFinder_FeatureFlags.swift in Sources */,
+				0C4E459D5843DD7B65D73C00 /* BolusPro_SettingsView.swift in Sources */,
+				853BED474E42D75F5DEF64CF /* BolusPro_CarbEntrySection.swift in Sources */,
+				B5CF559C802A0E83A2C71CDC /* BolusPro_ManualMacroFields.swift in Sources */,
+				575884F7B6AB2D596A010B02 /* BolusPro_OnboardingView.swift in Sources */,
+				43CE11F1849E3A035E24D74D /* BolusPro_InfoSheet.swift in Sources */,
+				4D44DE832A9AEB726634E7F4 /* BolusPro_BehaviorAnalyzer.swift in Sources */,
+				0B8FE2158EA8F0937A781238 /* BolusPro_DataLayerHook.swift in Sources */,
+				0BA769B5E6BF174559694E5C /* BolusPro_FPUCalculator.swift in Sources */,
+				DA7F73BC1725B94A21202576 /* BolusPro_FeatureFlags.swift in Sources */,
+				F8E7E63F057B1E04FA1063EA /* BolusPro_Models.swift in Sources */,
 				B7F6252AE377538D14B924DF /* FoodFinder_CarbTrackingService.swift in Sources */,
 				33CAAACE11A18DF26E8388A2 /* FoodFinder_AIAnalysis.swift in Sources */,
 				0069EFA11E7101DEB638B4C2 /* FoodFinder_AIProviderConfig.swift in Sources */,

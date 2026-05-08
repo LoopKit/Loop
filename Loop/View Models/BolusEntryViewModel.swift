@@ -113,6 +113,17 @@ final class BolusEntryViewModel: ObservableObject {
     let potentialCarbEntry: NewCarbEntry?
     let selectedCarbAbsorptionTimeEmoji: String?
 
+    /// BolusPro — optional secondary FPU carb entry, set by
+    /// `CarbEntryViewModel.setBolusViewModel()` when the user has the
+    /// per-entry toggle on and macros that yield a non-trivial bonus.
+    /// Saved alongside the primary in `saveAndDeliver()`.
+    var bolusProSecondaryEntry: NewCarbEntry?
+
+    /// BolusPro — analytics snapshot fired to DataLayer + LoopInsights
+    /// after the primary entry persists, regardless of whether the
+    /// per-entry toggle was on. Populated by CarbEntryViewModel.
+    var bolusProAnalyticsSnapshot: BolusProAnalyticsSnapshot?
+
     @Published var recommendedBolus: HKQuantity?
     var recommendedBolusAmount: Double? {
         recommendedBolus?.doubleValue(for: .internationalUnit())
@@ -408,6 +419,25 @@ final class BolusEntryViewModel: ObservableObject {
             if let storedCarbEntry = await saveCarbEntry(carbEntry, replacingEntry: originalCarbEntry) {
                 self.dosingDecision.carbEntry = storedCarbEntry
                 self.analyticsServicesManager?.didAddCarbs(source: "Phone", amount: storedCarbEntry.quantity.doubleValue(for: .gram()))
+
+                // BolusPro — save the optional secondary FPU entry alongside
+                // the primary. Failure here doesn't roll back the primary
+                // (the user already committed to that bolus); we just log
+                // and surface an alert so they know the tail isn't covered.
+                if let secondary = bolusProSecondaryEntry {
+                    if let storedSecondary = await saveCarbEntry(secondary, replacingEntry: nil) {
+                        self.analyticsServicesManager?.didAddCarbs(source: "BolusPro", amount: storedSecondary.quantity.doubleValue(for: .gram()))
+                    } else {
+                        log.error("BolusPro secondary entry save failed — primary already saved.")
+                    }
+                }
+
+                // BolusPro — fire analytics + BehaviorInsights notification
+                // even when per-entry toggle was off, so we capture
+                // adoption vs. non-adoption population data.
+                if let snapshot = bolusProAnalyticsSnapshot {
+                    BolusPro_DataLayerHook.recordSavedEntry(snapshot)
+                }
             } else {
                 self.presentAlert(.carbEntryPersistenceFailure)
                 return false

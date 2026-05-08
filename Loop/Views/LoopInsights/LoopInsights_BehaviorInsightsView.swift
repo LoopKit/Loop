@@ -18,6 +18,10 @@ struct LoopInsights_BehaviorInsightsView: View {
     @State private var isLoading = true
     @State private var selectedGrouping: LoopInsightsCorrectionPattern.GroupingType?
 
+    /// BolusPro behavior patterns rendered in their own section below
+    /// the FoodFinder correction patterns.
+    @State private var bolusProPatterns: [BolusProBehaviorPattern] = []
+
     private let tealColor = Color(red: 26/255, green: 138/255, blue: 158/255)
 
     var body: some View {
@@ -33,12 +37,17 @@ struct LoopInsights_BehaviorInsightsView: View {
                         Spacer()
                     }
                 }
-            } else if patterns.isEmpty {
+            } else if patterns.isEmpty && bolusProPatterns.isEmpty {
                 emptyStateSection
             } else {
-                summarySection
-                filterSection
-                patternsSection
+                if !patterns.isEmpty {
+                    summarySection
+                    filterSection
+                    patternsSection
+                }
+                if !bolusProPatterns.isEmpty {
+                    bolusProPatternsSection
+                }
             }
         }
         .navigationTitle(NSLocalizedString("Behavior Insights", comment: "LoopInsights behavior insights title"))
@@ -297,10 +306,43 @@ struct LoopInsights_BehaviorInsightsView: View {
         DispatchQueue.global(qos: .userInitiated).async {
             let detected = LoopInsights_BehaviorInsightsAnalyzer.analyzePatterns()
             LoopInsights_BehaviorInsightsStore.storePatterns(detected)
+            let bolusPro = BolusPro_BehaviorAnalyzer.shared.analyzePatterns()
             DispatchQueue.main.async {
                 self.patterns = detected
+                self.bolusProPatterns = bolusPro
                 self.isLoading = false
             }
         }
+    }
+}
+
+// MARK: - BolusPro Patterns Section
+
+extension LoopInsights_BehaviorInsightsView {
+    private var bolusProPatternsSection: some View {
+        Section(header: Text(NSLocalizedString("BolusPro Patterns", comment: "Behavior insights BolusPro section header"))) {
+            ForEach(bolusProPatterns) { pattern in
+                bolusProPatternRow(pattern)
+            }
+        }
+    }
+
+    private func bolusProPatternRow(_ pattern: BolusProBehaviorPattern) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: pattern.systemImage)
+                .font(.title3)
+                .foregroundColor((Color(red: 230/255, green: 188/255, blue: 60/255)))
+                .frame(width: 28)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(pattern.summary)
+                    .font(.subheadline.weight(.semibold))
+                Text(pattern.detail)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 4)
     }
 }

@@ -66,6 +66,12 @@ struct FoodFinder_EntryPoint: View {
     @Binding var aiCarbRangeMin: Double?
     @Binding var aiCarbRangeMax: Double?
 
+    /// Optional BolusPro hook — fires when fat/protein become known from
+    /// AI analysis or product/favorite-food selection. Used by CarbEntryView
+    /// to auto-populate `CarbEntryViewModel.bolusProState`.
+    /// `source` is one of `"ai"`, `"product"`, `"favorite"`.
+    var onMacrosResolved: ((_ fat: Double, _ protein: Double, _ source: String) -> Void)? = nil
+
     // MARK: - Internal State
 
     @StateObject private var searchVM: FoodFinder_SearchViewModel
@@ -117,7 +123,8 @@ struct FoodFinder_EntryPoint: View {
         absorptionTimeIsAIGenerated: Binding<Bool> = .constant(false),
         aiAbsorptionReasoning: Binding<String?> = .constant(nil),
         aiCarbRangeMin: Binding<Double?> = .constant(nil),
-        aiCarbRangeMax: Binding<Double?> = .constant(nil)
+        aiCarbRangeMax: Binding<Double?> = .constant(nil),
+        onMacrosResolved: ((_ fat: Double, _ protein: Double, _ source: String) -> Void)? = nil
     ) {
         self._carbsQuantity = carbsQuantity
         self._foodType = foodType
@@ -135,6 +142,7 @@ struct FoodFinder_EntryPoint: View {
         self._aiAbsorptionReasoning = aiAbsorptionReasoning
         self._aiCarbRangeMin = aiCarbRangeMin
         self._aiCarbRangeMax = aiCarbRangeMax
+        self.onMacrosResolved = onMacrosResolved
 
         let initialEnabled = UserDefaults.standard.foodFinderEnabled
         self._isFoodSearchEnabled = State(initialValue: initialEnabled)
@@ -310,6 +318,11 @@ struct FoodFinder_EntryPoint: View {
             absorptionTime = result.absorptionTime
             absorptionTimeIsAIGenerated = result.absorptionTimeWasAIGenerated
             aiAbsorptionReasoning = searchVM.lastAIAnalysisResult?.absorptionTimeReasoning
+
+            // BolusPro — forward macros to host when source delivered them.
+            if let fat = result.fat, let protein = result.protein, let src = result.macrosSource {
+                onMacrosResolved?(fat, protein, src)
+            }
 
             // Set AI confidence range for carb slider (AI analysis only)
             if let ai = searchVM.lastAIAnalysisResult {

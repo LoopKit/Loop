@@ -154,7 +154,10 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                     absorptionTimeIsAIGenerated: $absorptionTimeIsAIGenerated,
                     aiAbsorptionReasoning: $aiAbsorptionReasoning,
                     aiCarbRangeMin: $aiCarbRangeMin,
-                    aiCarbRangeMax: $aiCarbRangeMax
+                    aiCarbRangeMax: $aiCarbRangeMax,
+                    onMacrosResolved: { fat, protein, source in
+                        viewModel.applyBolusProMacrosFromFoodFinder(fat: fat, protein: protein, source: source)
+                    }
                 )
             }
 
@@ -174,6 +177,15 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
             } else {
                 AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, validDurationRange: viewModel.absorptionRimesRange, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
                     .padding(.bottom, 2)
+            }
+
+            if BolusPro_FeatureFlags.isEnabled {
+                CardSectionDivider()
+                BolusPro_CarbEntrySection(
+                    state: $viewModel.bolusProState,
+                    primaryCarbsGrams: viewModel.carbsQuantity,
+                    primaryAbsorptionTime: viewModel.absorptionTime
+                )
             }
         }
         .padding(.vertical, 12)

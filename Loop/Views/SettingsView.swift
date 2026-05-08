@@ -311,6 +311,8 @@ extension SettingsView {
                 )
             }
 
+            bolusProSettingsRow
+
             foodFinderSettingsRow
 
             loopInsightsSection
@@ -409,6 +411,19 @@ extension SettingsView {
                             label: NSLocalizedString("LoopInsights", comment: "LoopInsights settings button"),
                             descriptiveText: NSLocalizedString("AI-powered therapy settings analysis", comment: "LoopInsights settings descriptive text"))
             }
+        }
+    }
+
+    // BolusPro — single settings insertion point
+    private var bolusProSettingsRow: some View {
+        NavigationLink(destination: BolusPro_SettingsView()) {
+            LargeButton(action: {},
+                        includeArrow: false,
+                        imageView: Image(systemName: "drop.halffull")
+                            .foregroundColor((Color(red: 230/255, green: 188/255, blue: 60/255)))
+                            .font(.system(size: 36)),
+                        label: NSLocalizedString("BolusPro", comment: "Title text for button to BolusPro Settings"),
+                        descriptiveText: NSLocalizedString("Protein & fat-aware bolusing for long absorption meals", comment: "Descriptive text for BolusPro Settings"))
         }
     }
 

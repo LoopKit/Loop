@@ -37,6 +37,14 @@ final class DataLayer_Coordinator: ObservableObject {
     private init() {
         DataLayer_FeatureFlags.registerDefaultsIfNeeded()
         observeFeatureNotifications()
+
+        // BolusPro — register UserDefaults defaults and start the
+        // BehaviorAnalyzer observer. This is the central app-launch
+        // wiring point; piggy-backing on the DataLayer singleton init
+        // keeps BolusPro out of AppDelegate / LoopAppManager.
+        BolusPro_FeatureFlags.registerDefaults()
+        BolusPro_BehaviorAnalyzer.shared.start()
+
         DataLayer_FeatureFlags.log.info("DataLayer_Coordinator initialized")
     }
 

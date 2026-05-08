@@ -50,6 +50,9 @@ enum DataLayer_EventType: String, Codable, CaseIterable {
     case mealConfirmed
     case barcodeScanned
 
+    // BolusPro
+    case bolusProEntry
+
     // LoopInsights — AI Suggestions
     case aiSuggestionGenerated
     case aiSuggestionApplied
@@ -91,7 +94,7 @@ enum DataLayer_EventType: String, Codable, CaseIterable {
             return .glucose
         case .insulinDelivery:
             return .insulin
-        case .carbEntry, .mealAnalysis, .mealConfirmed, .barcodeScanned, .mealDebrief:
+        case .carbEntry, .mealAnalysis, .mealConfirmed, .barcodeScanned, .mealDebrief, .bolusProEntry:
             return .carbsAndMeals
         case .aiSuggestionGenerated, .aiSuggestionApplied, .aiSuggestionDismissed,
              .aiSuggestionReverted, .chatMessage, .backgroundAlert, .therapySettingsChanged:
@@ -168,6 +171,42 @@ struct DataLayer_MealConfirmedPayload: Codable {
     let mealEventID: String
     let finalCarbsGrams: Double
     let carbDeltaFromAI: Double?
+}
+
+/// BolusPro entry payload — emitted once when a BolusPro-tagged carb entry
+/// is saved alongside its primary, regardless of whether the user toggled
+/// per-entry coverage on or off (so we can also study non-adoption).
+///
+/// All 12 fields are intentional: enough to fully reconstruct the dosing
+/// decision at meal time and correlate with the existing Meal Debrief loop
+/// 2 hours later.
+struct DataLayer_BolusProPayload: Codable {
+    /// Per-entry toggle state at submit time.
+    let enabled: Bool
+    /// Whether the toggle was flipped on by FoodFinder auto-detection (true)
+    /// or by the user manually (false). nil when toggle was off.
+    let autoDetected: Bool?
+    /// Where the fat/protein values came from: `ai`, `product`, `favorite`,
+    /// `manual`, or nil when no macros entered.
+    let macrosSource: String?
+    /// Strict-Warsaw kcal-based FPU score (1 FPU = 100 kcal).
+    let fpuScore: Double
+    /// Carb-equivalent grams written to the secondary entry (post-coverage).
+    let bonusGrams: Double
+    /// Slider position 0.0…1.0 at submit time. nil when toggle was off.
+    let sliderPosition: Double?
+    /// Per-user coverage knob in effect at submit time (10–100).
+    let coverageFactorPercent: Int
+    /// Configured FPU delay (0–120 min).
+    let fpuDelayMinutes: Int
+    /// Configured FPU absorption (4–8 h).
+    let fpuAbsorptionHours: Int
+    /// Raw fat input that drove the calculation, for reproducibility.
+    let fatGramsInput: Double
+    /// Raw protein input that drove the calculation, for reproducibility.
+    let proteinGramsInput: Double
+    /// Primary carb entry size at submit time, for ratio analysis.
+    let primaryCarbGrams: Double
 }
 
 /// Barcode scanned payload.

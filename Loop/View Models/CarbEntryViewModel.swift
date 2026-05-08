@@ -86,6 +86,45 @@ final class CarbEntryViewModel: ObservableObject {
     @Published var selectedAnalysisHistoryIndex = -1
     @Published var restoredAnalysisResult: AIFoodAnalysisResult?
     @Published var restoredThumbnailID: String?
+
+    /// BolusPro per-entry state (toggle, macros, slider position).
+    /// Mutated by `BolusPro_CarbEntrySection` and the FoodFinder
+    /// auto-populate hook. Consumed in `setBolusViewModel()` to build
+    /// the optional secondary FPU carb entry.
+    @Published var bolusProState: BolusProEntryState = .off
+
+    /// Called from CarbEntryView every time FoodFinder resolves new macros —
+    /// initial AI analysis, item exclusion, item deletion, serving override,
+    /// product/favorite selection. Updates `bolusProState.macros` and
+    /// re-evaluates the auto-detection toggle:
+    ///
+    /// - Above threshold + currently off: auto-enable (mark `autoDetected`).
+    /// - Below threshold + currently on AND was auto-detected: auto-disable.
+    /// - Below threshold + currently on AND user toggled manually: leave on.
+    ///
+    /// `source` is `"ai"`, `"product"`, or `"favorite"` from FoodFinder.
+    func applyBolusProMacrosFromFoodFinder(fat: Double, protein: Double, source: String) {
+        guard BolusPro_FeatureFlags.isEnabled else { return }
+        bolusProState.macros = BolusProMacroInputs(fatGrams: fat, proteinGrams: protein)
+        bolusProState.macrosSource = BolusProMacrosSource(rawValue: source)
+
+        guard BolusPro_FeatureFlags.autoDetectFromFoodFinder else { return }
+
+        let result = BolusPro_FPUCalculator.calculate(from: bolusProState)
+
+        if result.crossesAutoTriggerThreshold {
+            if !bolusProState.enabled {
+                bolusProState.enabled = true
+                bolusProState.autoDetected = true
+            }
+        } else if bolusProState.enabled && bolusProState.autoDetected {
+            // FPU dropped below threshold (e.g. user excluded the high-fat
+            // side dish). Auto-detection should walk it back, but only when
+            // it was the one that turned it on in the first place.
+            bolusProState.enabled = false
+            bolusProState.autoDetected = false
+        }
+    }
     
     weak var delegate: CarbEntryViewModelDelegate?
     
@@ -203,13 +242,47 @@ final class CarbEntryViewModel: ObservableObject {
             potentialCarbEntry: updatedCarbEntry,
             selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji
         )
+
+        // BolusPro — attach optional secondary FPU entry + analytics
+        // snapshot. Snapshot fires on every save when the master flag is
+        // on (even when the per-entry toggle is off) so we can study
+        // adoption vs. non-adoption.
+        if BolusPro_FeatureFlags.isEnabled,
+           let primary = updatedCarbEntry {
+            // Compute snapshot regardless of per-entry toggle state.
+            let fpu = BolusPro_FPUCalculator.calculate(from: bolusProState)
+            let primaryGrams = primary.quantity.doubleValue(for: preferredCarbUnit)
+            viewModel.bolusProAnalyticsSnapshot = BolusProAnalyticsSnapshot(
+                enabled: bolusProState.enabled,
+                autoDetected: bolusProState.enabled ? bolusProState.autoDetected : nil,
+                macrosSource: bolusProState.macrosSource,
+                fpuScore: fpu.fpuScore,
+                bonusGrams: bolusProState.enabled ? fpu.bonusGrams : 0,
+                sliderPosition: bolusProState.enabled ? bolusProState.sliderCoverage : nil,
+                coverageFactorPercent: BolusPro_FeatureFlags.coverageFactorPercent,
+                fpuDelayMinutes: BolusPro_FeatureFlags.fpuDelayMinutes,
+                fpuAbsorptionHours: BolusPro_FeatureFlags.fpuAbsorptionHours,
+                fatGramsInput: bolusProState.macros.fatGrams,
+                proteinGramsInput: bolusProState.macros.proteinGrams,
+                primaryCarbGrams: primaryGrams
+            )
+
+            // Secondary entry only when toggle is on AND bonus ≥1g.
+            if let secondary = BolusPro_FPUCalculator.makeSecondaryEntry(
+                primaryStartDate: primary.startDate,
+                state: bolusProState
+            ) {
+                viewModel.bolusProSecondaryEntry = secondary
+            }
+        }
+
         Task {
             await viewModel.generateRecommendationAndStartObserving()
         }
-        
+
         viewModel.analyticsServicesManager = delegate?.analyticsServicesManager
         bolusViewModel = viewModel
-        
+
         delegate?.analyticsServicesManager.didDisplayBolusScreen()
     }
     
