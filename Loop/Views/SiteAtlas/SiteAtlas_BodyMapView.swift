@@ -36,11 +36,16 @@ private struct DraggablePin: View {
 
         Image(systemName: entry.type.iconName)
             .font(.system(size: isDragging ? 110 : 22))
-            .foregroundColor(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced))
+            .foregroundColor(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced, type: entry.type))
+            // Fade pins from full opacity at placement to 0 over the
+            // type-specific safe-reuse window (pump: 10d, sensor: 5d).
+            // Force full visibility while dragging so the user can see
+            // what they're moving even if the pin is mid-fade.
+            .opacity(isDragging ? 1.0 : SiteAtlas_Theme.ageOpacity(daysSincePlaced: entry.daysSincePlaced, type: entry.type))
             .shadow(color: .black.opacity(isDragging ? 0.7 : 0.3), radius: isDragging ? 8 : 2, x: 0, y: isDragging ? 5 : 1)
             .background(
                 Circle()
-                    .fill(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced).opacity(0.2))
+                    .fill(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced, type: entry.type).opacity(0.2))
                     .frame(width: isDragging ? 130 : 0, height: isDragging ? 130 : 0)
             )
             .frame(width: 44, height: 44)
@@ -126,7 +131,8 @@ struct SiteAtlas_BodyMapView: View {
                     } else {
                         Image(systemName: entry.type.iconName)
                             .font(.system(size: 22))
-                            .foregroundColor(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced))
+                            .foregroundColor(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced, type: entry.type))
+                            .opacity(SiteAtlas_Theme.ageOpacity(daysSincePlaced: entry.daysSincePlaced, type: entry.type))
                             .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
                             .position(
                                 x: imageOrigin.x + entry.normalizedX * imageSize.width,
@@ -152,7 +158,11 @@ struct SiteAtlas_BodyMapView: View {
     // MARK: - Computed
 
     private var filteredEntries: [SiteAtlas_SiteEntry] {
-        entries.filter { $0.bodySide == selectedSide && !$0.isHidden }
+        entries.filter {
+            $0.bodySide == selectedSide
+                && !$0.isHidden
+                && SiteAtlas_Theme.shouldDisplayOnBodyMap(daysSincePlaced: $0.daysSincePlaced, type: $0.type)
+        }
     }
 
     /// Calculate the fitted image size within the container, preserving aspect ratio.
@@ -295,12 +305,16 @@ struct SiteAtlas_MapLegend: View {
             HStack(spacing: 4) {
                 Text("Recent")
                     .foregroundColor(.secondary)
+                // Sample the ramp at 0/33/66/100% of the pump window so
+                // the gradient renders the full red→green ramp. Sensor
+                // shares the same ramp on a shorter clock, so one
+                // gradient illustrates both.
                 LinearGradient(
                     colors: [
-                        SiteAtlas_Theme.ageColor(daysSincePlaced: 0),
-                        SiteAtlas_Theme.ageColor(daysSincePlaced: 5),
-                        SiteAtlas_Theme.ageColor(daysSincePlaced: 10),
-                        SiteAtlas_Theme.ageColor(daysSincePlaced: 14)
+                        SiteAtlas_Theme.ageColor(daysSincePlaced: 0,  type: .pump),
+                        SiteAtlas_Theme.ageColor(daysSincePlaced: 3,  type: .pump),
+                        SiteAtlas_Theme.ageColor(daysSincePlaced: 7,  type: .pump),
+                        SiteAtlas_Theme.ageColor(daysSincePlaced: 10, type: .pump)
                     ],
                     startPoint: .leading,
                     endPoint: .trailing

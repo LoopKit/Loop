@@ -209,10 +209,27 @@ enum SiteAtlas_Theme {
     static let sensorColor = Color(red: 41/255, green: 128/255, blue: 185/255)
     static let retentionDays: Int = 365
 
+    /// Days a placed site is considered "active" — i.e. should be visible
+    /// on the body map as a stay-away marker. Past this threshold the
+    /// underlying tissue is generally considered fully recovered and
+    /// the site is **safe to reuse**, so its body-map pin is hidden.
+    ///
+    /// **Pump/infusion sites: 10 days.** Cannula-induced microtrauma and
+    /// lipohypertrophy risk warrant a longer rotation window.
+    /// **CGM sensors: 5 days.** Smaller filament, less tissue impact —
+    /// sites recover faster and reuse can happen sooner.
+    static func safeReuseDays(for type: SiteAtlas_SiteType) -> Int {
+        switch type {
+        case .pump:   return 10
+        case .sensor: return 5
+        }
+    }
+
     /// Age-based pin color: red (fresh) → orange → yellow → green (oldest/safe to reuse).
-    /// Transition over 14 days — beyond that stays green.
-    static func ageColor(daysSincePlaced days: Int) -> Color {
-        let t = min(Double(days) / 14.0, 1.0) // 0 = just placed, 1 = 14+ days
+    /// Transitions over the type-specific safe-reuse window.
+    static func ageColor(daysSincePlaced days: Int, type: SiteAtlas_SiteType) -> Color {
+        let window = Double(safeReuseDays(for: type))
+        let t = min(Double(days) / window, 1.0)
         if t < 0.33 {
             // Red → Orange
             return Color(red: 1.0, green: 0.3 + t * 0.9, blue: 0.2)
@@ -225,5 +242,24 @@ enum SiteAtlas_Theme {
             let sub = (t - 0.66) / 0.34
             return Color(red: 1.0 - sub * 0.6, green: 0.8 + sub * 0.1, blue: 0.2)
         }
+    }
+
+    /// Body-map pin opacity that fades linearly from 1.0 at placement to
+    /// 0.0 at the safe-reuse threshold, signaling "this site is healing."
+    /// Combined with `shouldDisplayOnBodyMap`, pins quietly disappear
+    /// once the user can safely place a new site there.
+    static func ageOpacity(daysSincePlaced days: Int, type: SiteAtlas_SiteType) -> Double {
+        let window = Double(safeReuseDays(for: type))
+        let progress = max(0, min(Double(days) / window, 1.0))
+        return 1.0 - progress
+    }
+
+    /// Whether a body-map pin should still be drawn for a site of this
+    /// age. Past the type-specific safe-reuse window the pin is hidden
+    /// — the site is safe to reuse. The underlying entry is preserved
+    /// in the entries list for history; only the body-map marker
+    /// disappears.
+    static func shouldDisplayOnBodyMap(daysSincePlaced days: Int, type: SiteAtlas_SiteType) -> Bool {
+        days < safeReuseDays(for: type)
     }
 }

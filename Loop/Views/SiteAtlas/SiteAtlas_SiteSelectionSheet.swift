@@ -130,11 +130,21 @@ struct SiteAtlas_SiteSelectionSheet: View {
                         .allowsHitTesting(false)
                 }
 
-                // Show existing pins on same side (faded, non-interactive)
-                ForEach(existingEntries.filter { $0.bodySide == selectedSide && !$0.isHidden }) { entry in
+                // Show existing pins on same side (faded, non-interactive).
+                // Hide sites past the safe-reuse window — they're no longer
+                // a placement hazard so they shouldn't clutter the picker.
+                ForEach(existingEntries.filter {
+                    $0.bodySide == selectedSide
+                        && !$0.isHidden
+                        && SiteAtlas_Theme.shouldDisplayOnBodyMap(daysSincePlaced: $0.daysSincePlaced, type: $0.type)
+                }) { entry in
                     Image(systemName: entry.type.iconName)
                         .font(.system(size: 18))
-                        .foregroundColor(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced).opacity(0.5))
+                        // Combine the base 0.5 reference-pin dim with the
+                        // age fade so newer pins still read more strongly
+                        // than older ones during placement.
+                        .foregroundColor(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced, type: entry.type).opacity(0.5))
+                        .opacity(SiteAtlas_Theme.ageOpacity(daysSincePlaced: entry.daysSincePlaced, type: entry.type))
                         .position(
                             x: imageOrigin.x + entry.normalizedX * imageSize.width,
                             y: imageOrigin.y + entry.normalizedY * imageSize.height
@@ -331,8 +341,11 @@ struct SiteAtlas_SiteSelectionSheet: View {
             let dist = hypot(point.x - entry.normalizedX, point.y - entry.normalizedY)
             // Normalize: 0.15 in normalized coords (~body-width fraction) is "too close"
             let distanceThreat = max(0, 1.0 - dist / 0.15)
-            // Weight by recency: fresh sites (0 days) = full threat, 14+ days = no threat
-            let recencyWeight = max(0, 1.0 - Double(entry.daysSincePlaced) / 14.0)
+            // Weight by recency: fresh sites = full threat, sites past their
+            // type-specific safe-reuse window = no threat. Pumps decay
+            // over 10 days, sensors over 5.
+            let recencyWindow = Double(SiteAtlas_Theme.safeReuseDays(for: entry.type))
+            let recencyWeight = max(0, 1.0 - Double(entry.daysSincePlaced) / recencyWindow)
             let threat = distanceThreat * recencyWeight
             worstThreat = max(worstThreat, threat)
         }

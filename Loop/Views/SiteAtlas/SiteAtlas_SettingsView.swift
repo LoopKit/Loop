@@ -193,12 +193,12 @@ struct SiteAtlas_SettingsView: View {
                 ForEach(nextUpEntries.prefix(5)) { entry in
                     HStack(spacing: 12) {
                         Circle()
-                            .fill(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced))
+                            .fill(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced, type: entry.type))
                             .frame(width: 12, height: 12)
 
                         Image(systemName: entry.type.iconName)
                             .font(.title3)
-                            .foregroundColor(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced))
+                            .foregroundColor(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced, type: entry.type))
                             .frame(width: 28)
 
                         VStack(alignment: .leading, spacing: 2) {
@@ -214,8 +214,8 @@ struct SiteAtlas_SettingsView: View {
                         VStack(alignment: .trailing, spacing: 2) {
                             Text("\(entry.daysSincePlaced)d ago")
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundColor(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced))
-                            if entry.daysSincePlaced >= 3 {
+                                .foregroundColor(SiteAtlas_Theme.ageColor(daysSincePlaced: entry.daysSincePlaced, type: entry.type))
+                            if entry.daysSincePlaced >= SiteAtlas_Theme.safeReuseDays(for: entry.type) {
                                 Text("Ready")
                                     .font(.caption2.weight(.medium))
                                     .foregroundColor(.green)
