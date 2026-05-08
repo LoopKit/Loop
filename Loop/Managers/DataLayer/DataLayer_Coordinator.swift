@@ -230,6 +230,38 @@ final class DataLayer_Coordinator: ObservableObject {
         observeTherapySettingsNotifications()
         observeOverrideNotifications()
         observeActivityDetectedNotifications()
+        observeBolusProNotifications()
+    }
+
+    /// BolusPro broadcasts a snapshot every time a BolusPro-aware carb
+    /// entry is saved (toggle on or off). Translate to a DataLayer event
+    /// here so the BolusPro feature itself stays decoupled from DataLayer.
+    private func observeBolusProNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: BolusPro_DataLayerHook.notificationName,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self,
+                  let snapshot = notification.userInfo?[BolusPro_DataLayerHook.snapshotUserInfoKey] as? BolusProAnalyticsSnapshot
+            else { return }
+
+            let payload = DataLayer_BolusProPayload(
+                enabled: snapshot.enabled,
+                autoDetected: snapshot.autoDetected,
+                macrosSource: snapshot.macrosSource?.rawValue,
+                fpuScore: snapshot.fpuScore,
+                bonusGrams: snapshot.bonusGrams,
+                sliderPosition: snapshot.sliderPosition,
+                coverageFactorPercent: snapshot.coverageFactorPercent,
+                fpuDelayMinutes: snapshot.fpuDelayMinutes,
+                fpuAbsorptionHours: snapshot.fpuAbsorptionHours,
+                fatGramsInput: snapshot.fatGramsInput,
+                proteinGramsInput: snapshot.proteinGramsInput,
+                primaryCarbGrams: snapshot.primaryCarbGrams
+            )
+            self.collector.record(type: .bolusProEntry, payload: payload)
+        }
     }
 
     private func observeFoodFinderNotifications() {

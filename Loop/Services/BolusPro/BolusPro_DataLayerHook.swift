@@ -2,9 +2,11 @@
 //  BolusPro_DataLayerHook.swift
 //  Loop
 //
-//  BolusPro — Captures per-meal analytics snapshot at submit time and
-//  posts to DataLayer once the carb entries land. Also broadcasts a
-//  Notification consumed by LoopInsights' BehaviorInsightsAnalyzer.
+//  BolusPro — Broadcasts a per-meal analytics snapshot via
+//  NotificationCenter every time a BolusPro-aware carb entry is saved.
+//  Standalone — no external dependencies. Observers (DataLayer event
+//  recorder, LoopInsights BehaviorInsights, third-party plugins) wire
+//  onto `notificationName` from their own modules.
 //
 //  Idea by Taylor Patterson. Coded by Claude Code.
 //  Copyright © 2026 LoopKit Authors. All rights reserved.
@@ -41,40 +43,29 @@ struct BolusProAnalyticsSnapshot {
 }
 
 /// Static hook called by `BolusEntryViewModel` immediately after the
-/// primary (and optional secondary) carb entries are saved. Posts the
-/// DataLayer event AND the LoopInsights notification — single seam, both
-/// consumers wire onto it without BolusEntryViewModel knowing about either.
+/// primary (and optional secondary) carb entries are saved. Broadcasts
+/// the snapshot via `NotificationCenter` so any observer — analytics
+/// pipelines, behavior analyzers, third-party plugins — can consume
+/// without BolusEntryViewModel knowing about them.
+///
+/// **No external dependencies.** This file is safe to ship standalone
+/// in upstream Loop. Fork-only consumers (DataLayer event recording,
+/// LoopInsights BehaviorInsights, etc.) subscribe to `notificationName`
+/// in their own modules.
 enum BolusPro_DataLayerHook {
 
-    /// Notification name observed by LoopInsights_BehaviorInsightsAnalyzer.
-    /// `userInfo["snapshot"]` carries the `BolusProAnalyticsSnapshot`.
+    /// Posted whenever a BolusPro-aware carb entry is saved. UserInfo
+    /// carries the `BolusProAnalyticsSnapshot` under the `"snapshot"` key.
     static let notificationName = Notification.Name("com.loopkit.Loop.bolusProEntrySaved")
 
-    static func recordSavedEntry(_ snapshot: BolusProAnalyticsSnapshot) {
-        // 1) DataLayer event (gated by feature flag + consent inside the
-        //    collector — we don't need to check here).
-        let payload = DataLayer_BolusProPayload(
-            enabled: snapshot.enabled,
-            autoDetected: snapshot.autoDetected,
-            macrosSource: snapshot.macrosSource?.rawValue,
-            fpuScore: snapshot.fpuScore,
-            bonusGrams: snapshot.bonusGrams,
-            sliderPosition: snapshot.sliderPosition,
-            coverageFactorPercent: snapshot.coverageFactorPercent,
-            fpuDelayMinutes: snapshot.fpuDelayMinutes,
-            fpuAbsorptionHours: snapshot.fpuAbsorptionHours,
-            fatGramsInput: snapshot.fatGramsInput,
-            proteinGramsInput: snapshot.proteinGramsInput,
-            primaryCarbGrams: snapshot.primaryCarbGrams
-        )
-        DataLayer_EventCollector.shared.record(type: .bolusProEntry, payload: payload)
+    /// UserInfo key for the snapshot payload.
+    static let snapshotUserInfoKey = "snapshot"
 
-        // 2) Local broadcast for LoopInsights BehaviorInsights to learn
-        //    user adoption / slider drift / FPU distribution patterns.
+    static func recordSavedEntry(_ snapshot: BolusProAnalyticsSnapshot) {
         NotificationCenter.default.post(
             name: notificationName,
             object: nil,
-            userInfo: ["snapshot": snapshot]
+            userInfo: [snapshotUserInfoKey: snapshot]
         )
     }
 }
