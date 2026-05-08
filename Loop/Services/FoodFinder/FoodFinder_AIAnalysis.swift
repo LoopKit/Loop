@@ -134,12 +134,20 @@ FOR FOOD PHOTOS:
 ✅ ALWAYS provide net carbs adjustment when fiber >5g, safety alerts, and exercise timing considerations.
 ✅ ALWAYS include a pre-bolus timing recommendation in diabetes_considerations: state how many minutes before eating to bolus based on GI category and meal composition (high-GI/simple carbs with low fat = 15-20 min pre-bolus; mixed meals = 10-15 min; high-fat/protein-heavy or low-GI = bolus at first bite or 0-5 min before). If current glucose context is available and elevated, recommend longer pre-bolus; if low/dropping, recommend bolusing after starting to eat.
 
-FOR MENU AND RECIPE ITEMS:
+FOR PURE MENU/RECIPE TEXT (NO actual food visible in the image):
 ❌ NEVER assume plate sizes, visual portions, or cooking details from menu text alone.
 
 ✅ ALWAYS set image_type="menu_item", serving_multiplier=1.0, portion_estimate="CANNOT DETERMINE PORTIONS - menu text only", visual_cues="NO VISUAL CUES - menu text analysis only".
 ✅ ALWAYS use USDA standard serving sizes for nutrition, note estimates in assessment_notes, and translate foreign-language items to the user's language.
 ✅ ALWAYS include GI assessment and diabetes timing guidance even for menu items.
+
+FOR IMAGES WHERE BOTH FOOD AND MENU TEXT ARE VISIBLE:
+❌ NEVER default to image_type="menu_item" just because menu text is present.
+❌ NEVER pick a dish name off the menu while ignoring the food on the plate.
+
+✅ ALWAYS analyze the visible food as the primary subject (image_type="food_photo").
+✅ Use menu text ONLY to identify the dish name and restaurant — match the visible food to a specific menu item for more accurate nutrition.
+✅ Compute serving_multiplier from the visible portion on the plate, not from USDA standard servings.
 """
 
 /// Locale-aware measurement context injected into every AI prompt.
@@ -915,22 +923,30 @@ class ConfigurableAIService: ObservableObject {
 
         if ocr.isMenuOrRecipe {
             #if DEBUG
-            print("📝 [OCR] Menu/recipe detected: \(ocr.lineCount) lines, confidence \(String(format: "%.0f%%", ocr.averageConfidence * 100))")
+            print("📝 [OCR] Menu/recipe detected: \(ocr.lineCount) lines, confidence \(String(format: "%.0f%%", ocr.averageConfidence * 100)), text area \(String(format: "%.0f%%", ocr.textAreaFraction * 100))")
             print("📝 [OCR] Extracted text:\n\(ocr.text.prefix(500))")
             #endif
 
-            telemetryCallback?("📝 Menu/recipe detected (\(ocr.lineCount) text lines)")
+            telemetryCallback?("📝 Menu/recipe detected (\(ocr.lineCount) text lines, \(String(format: "%.0f%%", ocr.textAreaFraction * 100)) text coverage)")
             telemetryCallback?("🤖 Analyzing menu text with \(config.name)...")
 
             let basePrompt = getAnalysisPrompt()
             let locationContext = FoodFinder_LocationService.shared.locationContextForPrompt()
             let menuPrompt = """
-            \(basePrompt)\(locationContext)
+            \(locationContext)
+            \(basePrompt)
 
-            The following text was extracted via OCR from a photo of a menu, recipe, or food label. \
-            Analyze these food items and provide detailed nutritional information. \
-            Set "image_type" to "menu_item". \
-            If the text is in a foreign language, translate the food item names to English before analysis.
+            On-device OCR detected that this image is text-dominated (>75% of the \
+            frame is text), so it is most likely a menu, recipe, or food label. \
+            The OCR-extracted text is provided below.
+
+            HOW TO ANALYZE:
+            • If the image truly shows only menu/recipe/label text with no actual \
+              food visible: set image_type="menu_item", use USDA standard servings, \
+              and translate any foreign-language items to English.
+            • If actual food IS visible in the image despite the text coverage: \
+              set image_type="food_photo", analyze the visible food as primary, \
+              and use the OCR text only to identify the dish or restaurant.
 
             OCR-extracted text:
             \"""
@@ -954,7 +970,7 @@ class ConfigurableAIService: ObservableObject {
 
         #if DEBUG
         if !ocr.text.isEmpty {
-            print("📝 [OCR] Some text found but not enough for menu detection: \(ocr.lineCount) lines, confidence \(String(format: "%.0f%%", ocr.averageConfidence * 100))")
+            print("📝 [OCR] Text found but image is not text-dominated — using food photo path: \(ocr.lineCount) lines, confidence \(String(format: "%.0f%%", ocr.averageConfidence * 100)), text area \(String(format: "%.0f%%", ocr.textAreaFraction * 100))")
         }
         #endif
 
@@ -983,7 +999,10 @@ class ConfigurableAIService: ObservableObject {
 
         telemetryCallback?("🤖 Connecting to \(config.name)...")
 
-        var prompt = getAnalysisPrompt() + FoodFinder_LocationService.shared.locationContextForPrompt()
+        // Location context goes BEFORE the base prompt so the AI reads venue
+        // info first — keeps title/📍-prefix rules active even if the AI later
+        // commits to a specific image_type template.
+        var prompt = FoodFinder_LocationService.shared.locationContextForPrompt() + getAnalysisPrompt()
         if FoodFinder_FeatureFlags.carbTrackingEnabled,
            let snap = FoodFinder_CarbTrackingService.shared.snapshot {
             prompt += "\n\n[User Context: Today so far \(Int(snap.todayCarbs))g from \(snap.todayMealCount) meals"
@@ -1149,6 +1168,10 @@ class ConfigurableAIService: ObservableObject {
         let text: String
         let lineCount: Int
         let averageConfidence: Float
+        /// Fraction of image area covered by detected text bounding boxes (0–1).
+        /// Used to decide whether the image is text-dominated (menu/recipe) or
+        /// a food photo with incidental text in the background.
+        let textAreaFraction: Float
         let isMenuOrRecipe: Bool
     }
 
@@ -1178,50 +1201,59 @@ class ConfigurableAIService: ObservableObject {
     /// Returns extracted text and a flag indicating whether the image appears to be a menu/recipe.
     static func performOCR(on image: UIImage) async -> OCRResult {
         guard let cgImage = image.cgImage else {
-            return OCRResult(text: "", lineCount: 0, averageConfidence: 0, isMenuOrRecipe: false)
+            return OCRResult(text: "", lineCount: 0, averageConfidence: 0, textAreaFraction: 0, isMenuOrRecipe: false)
         }
 
         // Fast gate: skip expensive OCR if image doesn't contain enough text regions
         let hasText = await hasSignificantText(in: cgImage)
         guard hasText else {
-            return OCRResult(text: "", lineCount: 0, averageConfidence: 0, isMenuOrRecipe: false)
+            return OCRResult(text: "", lineCount: 0, averageConfidence: 0, textAreaFraction: 0, isMenuOrRecipe: false)
         }
 
         // Passed the gate — run full accurate OCR
         return await withCheckedContinuation { continuation in
             let request = VNRecognizeTextRequest { request, error in
                 guard let observations = request.results as? [VNRecognizedTextObservation], error == nil else {
-                    continuation.resume(returning: OCRResult(text: "", lineCount: 0, averageConfidence: 0, isMenuOrRecipe: false))
+                    continuation.resume(returning: OCRResult(text: "", lineCount: 0, averageConfidence: 0, textAreaFraction: 0, isMenuOrRecipe: false))
                     return
                 }
 
-                var lines: [(String, Float)] = []
+                var lines: [(text: String, confidence: Float, box: CGRect)] = []
                 for observation in observations {
                     if let candidate = observation.topCandidates(1).first {
-                        lines.append((candidate.string, candidate.confidence))
+                        lines.append((candidate.string, candidate.confidence, observation.boundingBox))
                     }
                 }
 
-                let allText = lines.map { $0.0 }.joined(separator: "\n")
-                let avgConfidence = lines.isEmpty ? 0 : lines.map { $0.1 }.reduce(0, +) / Float(lines.count)
+                let allText = lines.map { $0.text }.joined(separator: "\n")
+                let avgConfidence = lines.isEmpty ? 0 : lines.map { $0.confidence }.reduce(0, +) / Float(lines.count)
+                let significantLines = lines.filter { $0.confidence >= 0.5 }
 
-                // Heuristic: treat as text-heavy image (menu/recipe) ONLY when
-                // there is strong OCR evidence. Thresholds must be strict because
-                // food photos often contain incidental text (packaging, labels,
-                // brand names on cutting boards) and a false positive here means
-                // the image is sent alongside the OCR text to the AI — we always
-                // include the image now, but the prompt framing changes.
-                //
-                // A real menu/recipe typically has 5+ lines of readable text at
-                // high confidence. A food photo with a brand label might have 1-2.
-                let significantLines = lines.filter { $0.1 >= 0.5 }
-                let isMenu = (significantLines.count >= 5 && allText.count >= 40 && avgConfidence >= 0.7)
-                    || (significantLines.count >= 8 && avgConfidence >= 0.5)
+                // Compute fraction of image area covered by significant text
+                // bounding boxes. Vision returns boxes in normalized [0,1]
+                // coords; OCR lines rarely overlap, so a simple sum is a
+                // reasonable approximation of total text coverage.
+                let textAreaFraction: Float = significantLines
+                    .map { Float($0.box.width * $0.box.height) }
+                    .reduce(0, +)
+
+                // A pizza on a paper menu shouldn't trigger menu mode. Only
+                // route through the text-analysis path when the image is
+                // genuinely text-dominated — text bounding boxes covering
+                // >75% of the image. Anything less is treated as a food photo
+                // with incidental text (the OCR text is still surfaced to the
+                // AI as context to help identify the dish/restaurant, but the
+                // image stays the primary subject).
+                let isMenu = significantLines.count >= 5
+                    && allText.count >= 40
+                    && avgConfidence >= 0.7
+                    && textAreaFraction > 0.75
 
                 continuation.resume(returning: OCRResult(
                     text: allText,
                     lineCount: significantLines.count,
                     averageConfidence: avgConfidence,
+                    textAreaFraction: textAreaFraction,
                     isMenuOrRecipe: isMenu
                 ))
             }
@@ -1236,7 +1268,7 @@ class ConfigurableAIService: ObservableObject {
             do {
                 try handler.perform([request])
             } catch {
-                continuation.resume(returning: OCRResult(text: "", lineCount: 0, averageConfidence: 0, isMenuOrRecipe: false))
+                continuation.resume(returning: OCRResult(text: "", lineCount: 0, averageConfidence: 0, textAreaFraction: 0, isMenuOrRecipe: false))
             }
         }
     }

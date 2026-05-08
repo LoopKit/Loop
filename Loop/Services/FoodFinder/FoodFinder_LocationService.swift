@@ -101,7 +101,7 @@ final class FoodFinder_LocationService: NSObject, ObservableObject, CLLocationMa
         // Need at least one piece of location info
         guard venueName != nil || region != nil else { return "" }
 
-        var ctx = "\n\nLOCATION CONTEXT:\n"
+        var ctx = "LOCATION CONTEXT (read first — applies regardless of image_type):\n"
 
         if let venue = venueName, let reg = region {
             ctx += "The user's GPS places them at or near \"\(venue)\" in \(reg).\n"
@@ -112,7 +112,8 @@ final class FoodFinder_LocationService: NSObject, ObservableObject, CLLocationMa
         }
 
         ctx += """
-        Use this location to improve your analysis:
+        Use this location to improve your analysis. The following rules apply \
+        whether image_type is "food_photo" or "menu_item":
         1. REGIONAL CUISINE: Identify the food using local/regional dish names and preparation styles \
         typical of this area. A pastry in Athens is more likely tiropita or bougatsa than a generic phyllo roll.
         2. RESTAURANT MATCH: If the GPS venue name matches a known restaurant, reference their menu \
@@ -120,11 +121,17 @@ final class FoodFinder_LocationService: NSObject, ObservableObject, CLLocationMa
         3. CROSS-REFERENCE: Also look for restaurant names, logos, or branding visible in the image \
         (on napkins, plates, menus, receipts, signage). If you find a name that matches or confirms \
         the GPS location, use that restaurant's known menu items for identification and nutrition.
-        4. TITLE FORMAT: Include the restaurant/venue name in the food title, e.g.: \
-        "Carne Asada (grilled) – Casa de Bandini" so the user can see where it came from at a glance.
-        5. LOCATION NOTE: Begin your "diabetes_considerations" field with a brief location line, e.g.: \
-        "📍 \(buildLocationLabel()). " \
-        Then continue with your normal diabetes guidance.
+        4. TITLE FORMAT (REQUIRED): Include the restaurant/venue name in the food title, e.g.: \
+        "Carne Asada (grilled) – Casa de Bandini" so the user can see where it came from at a glance. \
+        Apply this even for image_type="menu_item".
+        5. LOCATION NOTE (REQUIRED): Begin your "diabetes_considerations" field with this exact \
+        location line, then continue with your normal guidance: \
+        "📍 \(buildLocationLabel()). "
+        6. ASSESSMENT NOTES: Mention the GPS-based identification in assessment_notes, e.g.: \
+        "GPS placed user at \(buildLocationLabel()) — matched the visible pizza to their pepperoni pie."
+
+        END LOCATION CONTEXT
+
         """
 
         return ctx
