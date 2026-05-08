@@ -527,8 +527,25 @@ extension FoodFinder_EntryPoint {
                         numberOfServings: searchVM.numberOfServings,
                         excluded: searchVM.excludedAIItemIndices
                     )
-                    let carbsValue = valuesTuple.carbs
-                    let caloriesValue = valuesTuple.calories
+                    // When the user has fine-tuned carbs via the AI carb
+                    // confidence range slider, the bound `carbsQuantity`
+                    // diverges from the AI's computed value. Honor the
+                    // slider's value in the visible carbs circle so the
+                    // user sees what will actually be saved.
+                    let aiCarbsValue = valuesTuple.carbs
+                    let carbsValue: Double = {
+                        if let user = carbsQuantity, user > 0 { return user }
+                        return aiCarbsValue
+                    }()
+                    // Adjust calories by the carb delta so the calorie circle
+                    // stays consistent with the displayed carbs (each gram
+                    // of carb = 4 kcal). Fat/protein/fiber are independent
+                    // of the carb slider and stay at AI values.
+                    let carbsDeltaKcal = (carbsValue - aiCarbsValue) * 4.0
+                    let caloriesValue: Double? = {
+                        guard let ai = valuesTuple.calories else { return nil }
+                        return max(0, ai + carbsDeltaKcal)
+                    }()
                     let fatValue = valuesTuple.fat
                     let fiberValue = valuesTuple.fiber
                     let proteinValue = valuesTuple.protein
@@ -634,7 +651,7 @@ extension FoodFinder_EntryPoint {
                 Spacer()
             }
             .frame(height: 90)
-            .id("nutrition-circles-\(searchVM.numberOfServings)-\(searchVM.itemServingOverrides.values.map { $0 }.description)-\(searchVM.excludedAIItemIndices.count)")
+            .id("nutrition-circles-\(searchVM.numberOfServings)-\(searchVM.itemServingOverrides.values.map { $0 }.description)-\(searchVM.excludedAIItemIndices.count)-\(carbsQuantity ?? -1)")
 
             // Confidence line with ± range (AI only)
             Group {
