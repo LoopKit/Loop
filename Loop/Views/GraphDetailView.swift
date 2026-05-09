@@ -50,6 +50,27 @@ struct GraphDetailView: View {
                 .stroke(Color(.separator).opacity(0.3), lineWidth: 0.5)
         )
         .fixedSize(horizontal: true, vertical: true)
+        .onAppear { postOpenedNotification() }
+    }
+
+    /// Broadcast that the detail popup just appeared so DataLayer can record
+    /// a `graphDetailViewOpened` event with which data series were inspected.
+    /// Decoupled via NotificationCenter so this view has zero DataLayer deps.
+    private func postOpenedNotification() {
+        NotificationCenter.default.post(
+            name: Notification.Name("com.loopkit.Loop.graphDetailViewOpened"),
+            object: nil,
+            userInfo: [
+                "hasGlucose":    data.glucoseValue   != nil,
+                "hasIOB":        data.insulinOnBoard != nil,
+                "hasCOB":        data.carbsOnBoard   != nil,
+                "hasBolus":      data.recentBolus    != nil,
+                "hasBasalRate":  data.basalRate      != nil,
+                "hasPreset":     data.activePreset   != nil,
+                "hasAutoPreset": data.activeAutoPreset != nil,
+                "hasHeartRate":  data.heartRate      != nil
+            ]
+        )
     }
 
     // MARK: - Header
