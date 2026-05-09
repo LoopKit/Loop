@@ -64,6 +64,16 @@ public struct GlucoseRangeValue: Identifiable, Codable, Hashable {
     public let maxValue: Double
     public let startDate: Date
     public let endDate: Date
+    public let isOverride: Bool
+
+    public init(id: UUID, minValue: Double, maxValue: Double, startDate: Date, endDate: Date, isOverride: Bool = false) {
+        self.id = id
+        self.minValue = minValue
+        self.maxValue = maxValue
+        self.startDate = startDate
+        self.endDate = endDate
+        self.isOverride = isOverride
+    }
 }
 
 public struct BottomRowItem: Codable, Hashable {

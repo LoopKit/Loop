@@ -121,7 +121,7 @@ struct ChartView: View {
                         yEnd: .value("Glucose range", rangeMax)
                     )
                     .foregroundStyle(.primary)
-                    .opacity(0.3)
+                    .opacity(item.isOverride ? 0.6 : 0.3)
                 }
                 
                 ForEach(glucoseSampleData) { item in

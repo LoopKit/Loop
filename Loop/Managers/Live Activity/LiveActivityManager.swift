@@ -156,7 +156,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
             if let glucoseRangeSchedule = self.loopSettings.glucoseTargetRangeSchedule, let start = glucoseSamples.first?.startDate {
                 glucoseRanges = getGlucoseRanges(
                     glucoseRangeSchedule: glucoseRangeSchedule,
-                    presetContext: presetContext?.minValue == 0 && presetContext?.maxValue == 0 ? nil : presetContext,
+                    presetContext: presetContext,
                     start: start,
                     end: endDateChart,
                     unit: unit
@@ -358,8 +358,9 @@ class LiveActivityManager : LiveActivityManagerProxy {
             let endDate = min(item.endDate, end)
             
             if let presetContext = presetContext {
+                let noTargetRange = presetContext.minValue == 0 && presetContext.maxValue == 0
                 if presetContext.startDate > startDate, presetContext.endDate < endDate {
-                    // A preset is active during this schedule
+                    // Override entirely within this schedule segment
                     glucoseRanges.append(GlucoseRangeValue(
                         id: UUID(),
                         minValue: minValue,
@@ -367,6 +368,16 @@ class LiveActivityManager : LiveActivityManagerProxy {
                         startDate: startDate,
                         endDate: presetContext.startDate
                     ))
+                    if noTargetRange {
+                        glucoseRanges.append(GlucoseRangeValue(
+                            id: UUID(),
+                            minValue: minValue,
+                            maxValue: maxValue,
+                            startDate: presetContext.startDate,
+                            endDate: presetContext.endDate,
+                            isOverride: true
+                        ))
+                    }
                     glucoseRanges.append(GlucoseRangeValue(
                         id: UUID(),
                         minValue: minValue,
@@ -375,7 +386,17 @@ class LiveActivityManager : LiveActivityManagerProxy {
                         endDate: endDate
                     ))
                 } else if presetContext.endDate > startDate, presetContext.endDate < endDate {
-                    // Cut off the start of the glucose target
+                    // Override ends within this segment (started before)
+                    if noTargetRange {
+                        glucoseRanges.append(GlucoseRangeValue(
+                            id: UUID(),
+                            minValue: minValue,
+                            maxValue: maxValue,
+                            startDate: startDate,
+                            endDate: presetContext.endDate,
+                            isOverride: true
+                        ))
+                    }
                     glucoseRanges.append(GlucoseRangeValue(
                         id: UUID(),
                         minValue: minValue,
@@ -384,7 +405,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
                         endDate: endDate
                     ))
                 } else if presetContext.startDate < endDate, presetContext.startDate > startDate {
-                    // Cut off the end of the glucose target
+                    // Override starts within this segment (ends after)
                     glucoseRanges.append(GlucoseRangeValue(
                         id: UUID(),
                         minValue: minValue,
@@ -392,8 +413,30 @@ class LiveActivityManager : LiveActivityManagerProxy {
                         startDate: startDate,
                         endDate: presetContext.startDate
                     ))
+                    if noTargetRange {
+                        glucoseRanges.append(GlucoseRangeValue(
+                            id: UUID(),
+                            minValue: minValue,
+                            maxValue: maxValue,
+                            startDate: presetContext.startDate,
+                            endDate: endDate,
+                            isOverride: true
+                        ))
+                    }
                     if presetContext.endDate == end {
                         break
+                    }
+                } else if presetContext.startDate <= startDate, presetContext.endDate >= endDate {
+                    // Override completely covers this segment
+                    if noTargetRange {
+                        glucoseRanges.append(GlucoseRangeValue(
+                            id: UUID(),
+                            minValue: minValue,
+                            maxValue: maxValue,
+                            startDate: startDate,
+                            endDate: endDate,
+                            isOverride: true
+                        ))
                     }
                 } else {
                     // No overlap with target and override
