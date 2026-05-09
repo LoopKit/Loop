@@ -156,7 +156,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
             if let glucoseRangeSchedule = self.loopSettings.glucoseTargetRangeSchedule, let start = glucoseSamples.first?.startDate {
                 glucoseRanges = getGlucoseRanges(
                     glucoseRangeSchedule: glucoseRangeSchedule,
-                    presetContext: presetContext,
+                    presetContext: presetContext?.minValue == 0 && presetContext?.maxValue == 0 ? nil : presetContext,
                     start: start,
                     end: endDateChart,
                     unit: unit

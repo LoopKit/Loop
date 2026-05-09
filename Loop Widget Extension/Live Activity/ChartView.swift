@@ -100,7 +100,7 @@ struct ChartView: View {
     var body: some View {
         ZStack(alignment: Alignment(horizontal: .trailing, vertical: .top)){
             Chart {
-                if let preset = self.preset, predicatedData.count > 0, preset.endDate > Date.now.addingTimeInterval(.hours(-6)) {
+                if let preset = self.preset, (preset.minValue > 0 || preset.maxValue > 0), predicatedData.count > 0, preset.endDate > Date.now.addingTimeInterval(.hours(-6)) {
                     let (presetMin, presetMax) = adjustedRange(min: preset.minValue, max: preset.maxValue)
                     RectangleMark(
                         xStart: .value("Start", preset.startDate),
