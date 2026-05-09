@@ -20,6 +20,11 @@ final class GraphDetailViewModel: ObservableObject {
 
     private let deviceManager: DeviceDataManager
     private var scrubThrottleTimer: Timer?
+    private var lastReloadAt: Date = .distantPast
+    /// Throttle window for scrub-driven reloads. 150ms gives ~6 updates/sec
+    /// during continuous scrub — fast enough to feel live, slow enough to
+    /// avoid flooding HealthKit/DoseStore with overlapping queries.
+    private let scrubThrottleInterval: TimeInterval = 0.15
 
     init(date: Date, glucoseUnit: HKUnit, deviceManager: DeviceDataManager) {
         self.deviceManager = deviceManager
@@ -27,20 +32,53 @@ final class GraphDetailViewModel: ObservableObject {
         loadData()
     }
 
-    /// Update to a new date and reload all data (throttled during scrub/drag)
+    /// Update to a new date and reload all data.
+    ///
+    /// Uses a **leading-edge throttle**: the first scrub call (or any call
+    /// after a quiet period ≥ `scrubThrottleInterval`) fires immediately so
+    /// the popup updates live as the user drags. Subsequent calls inside
+    /// the window are coalesced into a single trailing reload that fires
+    /// once the throttle window closes — guarantees the popup always
+    /// settles on the user's final position even if they stop mid-window.
+    ///
+    /// This replaces the previous pure-debounce behavior, which suppressed
+    /// every reload until the user lifted their finger.
     func update(for date: Date) {
-        // Update the date immediately — keep existing data values visible until new ones arrive
+        // Update the date display immediately so the timestamp tracks the
+        // user's finger even between data refreshes.
         data.date = date
 
-        // Throttle the expensive data queries to avoid flooding HealthKit/DoseStore
-        scrubThrottleTimer?.invalidate()
-        scrubThrottleTimer = Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { [weak self] _ in
-            guard let self = self else { return }
-            // Clear stale values and reload for the current date
-            let currentDate = self.data.date
-            self.data = GraphDetailData(date: currentDate, glucoseUnit: self.data.glucoseUnit)
-            self.loadData()
+        let now = Date()
+        let elapsed = now.timeIntervalSince(lastReloadAt)
+
+        if elapsed >= scrubThrottleInterval {
+            // Leading edge — outside the throttle window, fire now.
+            scrubThrottleTimer?.invalidate()
+            scrubThrottleTimer = nil
+            lastReloadAt = now
+            reloadAtCurrentDate()
+        } else {
+            // Inside the window — coalesce into a trailing reload at the
+            // window's end so the user lands on accurate data even if
+            // they stop scrubbing right now.
+            scrubThrottleTimer?.invalidate()
+            let delay = scrubThrottleInterval - elapsed
+            scrubThrottleTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
+                guard let self = self else { return }
+                self.lastReloadAt = Date()
+                self.reloadAtCurrentDate()
+            }
         }
+    }
+
+    /// Wipe stale values and re-fetch every series for `data.date`.
+    /// Clearing is intentional — the load* methods only set a value when
+    /// they find a sample near the new date, so without the wipe the
+    /// previous date's values would linger when no nearby sample exists.
+    private func reloadAtCurrentDate() {
+        let currentDate = data.date
+        data = GraphDetailData(date: currentDate, glucoseUnit: data.glucoseUnit)
+        loadData()
     }
 
     // MARK: - Data Loading
