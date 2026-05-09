@@ -143,13 +143,21 @@ class LiveActivityManager : LiveActivityManagerProxy {
             
             var presetContext: Preset? = nil
             if let override = self.loopSettings.preMealOverride ?? self.loopSettings.scheduleOverride, let start = glucoseSamples.first?.startDate {
-                presetContext = Preset(
-                    title: override.getTitle(),
-                    startDate: max(override.startDate, start),
-                    endDate: override.duration.isInfinite ? endDateChart : min(override.actualEndDate, endDateChart),
-                    minValue: override.settings.targetRange?.lowerBound.doubleValue(for: unit) ?? 0,
-                    maxValue: override.settings.targetRange?.upperBound.doubleValue(for: unit) ?? 0
-                )
+                let presetStart = max(override.startDate, start)
+                let presetEnd = override.duration.isInfinite ? endDateChart : min(override.actualEndDate, endDateChart)
+                // Only create a preset if it overlaps the chart window. If the override ended
+                // before the chart window starts (e.g. spacious mode only shows 2h of history),
+                // presetEnd < presetStart and drawing a RectangleMark with those backwards dates
+                // forces SwiftUI Charts to expand the x-axis far into the past.
+                if presetStart <= presetEnd {
+                    presetContext = Preset(
+                        title: override.getTitle(),
+                        startDate: presetStart,
+                        endDate: presetEnd,
+                        minValue: override.settings.targetRange?.lowerBound.doubleValue(for: unit) ?? 0,
+                        maxValue: override.settings.targetRange?.upperBound.doubleValue(for: unit) ?? 0
+                    )
+                }
             }
             
             var glucoseRanges: [GlucoseRangeValue] = []
