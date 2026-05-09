@@ -39,11 +39,39 @@ final class SiteAtlas_Storage {
 
     /// Add a new site entry.
     func addEntry(_ entry: SiteAtlas_SiteEntry) {
+        var existingHadHidden = false
         queue.sync {
             var data = readFromDisk()
+            // Track whether we're replacing a recently-hidden entry of the
+            // same type — useful churn signal for the dashboard.
+            existingHadHidden = data.entries.contains { $0.type == entry.type && $0.isHidden }
             data.entries.append(entry)
             writeToDisk(data)
         }
+        postPlacedNotification(entry: entry, replacementOfHidden: existingHadHidden)
+    }
+
+    /// Broadcast that a new site was placed so DataLayer can record a
+    /// `siteAtlasPlaced` event. Decoupled via NotificationCenter — this
+    /// service has zero DataLayer deps.
+    private func postPlacedNotification(entry: SiteAtlas_SiteEntry, replacementOfHidden: Bool) {
+        let zoneID: String? = SiteAtlas_Zones.zones(for: entry.bodySide).first { zone in
+            // Point-in-ellipse test in normalized coords.
+            let dx = (entry.normalizedX - zone.centerX) / zone.radiusX
+            let dy = (entry.normalizedY - zone.centerY) / zone.radiusY
+            return (dx * dx + dy * dy) <= 1.0
+        }?.id
+
+        NotificationCenter.default.post(
+            name: Notification.Name("com.loopkit.Loop.siteAtlasPlaced"),
+            object: nil,
+            userInfo: [
+                "type": entry.type.rawValue,
+                "bodySide": entry.bodySide.rawValue,
+                "zoneID": zoneID as Any,
+                "replacementOfHidden": replacementOfHidden
+            ]
+        )
     }
 
     /// Delete entry by ID.
