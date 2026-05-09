@@ -261,7 +261,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "restant(s)"
+            "value" : " restant(s)"
           }
         },
         "he" : {
@@ -7454,7 +7454,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Măr"
+            "value" : "Apple"
           }
         },
         "zh-Hans" : {
@@ -7852,7 +7852,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sunteţi sigur/ă că vreți să ștergeţi toate datele %@.\n(Această acţiune nu este reversibilă)"
+            "value" : "Sunteți sigur/ă că vreți să ștergeți toate datele %@.\n(Această acțiune nu este reversibilă)"
           }
         },
         "ru" : {
@@ -10225,7 +10225,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Întrerupere bolus"
+            "value" : "Întrerupere Bolus"
           }
         },
         "ru" : {
@@ -10457,7 +10457,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Intrare carbohidrați"
+            "value" : "Intrare Carbohidrați"
           }
         },
         "ru" : {
@@ -11248,7 +11248,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Atenţie"
+            "value" : "Atenție"
           }
         }
       }
@@ -12482,7 +12482,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Buclă închisă necesită o sesiune activă de senzor CGM"
+            "value" : "Bucla închisă necesită o sesiune activă de senzor CGM"
           }
         },
         "ru" : {
@@ -13394,7 +13394,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Continuă"
+            "value" : "Continuați"
           }
         },
         "ru" : {
@@ -14932,7 +14932,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ștergeți „ %@ ”?"
+            "value" : "Ștergeți „%@”?"
           }
         },
         "zh-Hans" : {
@@ -15544,7 +15544,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ștergeți datele CGM de testare"
+            "value" : "Ștergeți date CGM de testare"
           }
         },
         "ru" : {
@@ -15732,7 +15732,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ștergere date pompă de testare"
+            "value" : "Ștergeți date pompă de testare"
           }
         },
         "ru" : {
@@ -16131,7 +16131,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ați intenționat să introduceți %1$@ grame ca cantitate de carbohidrați pentru această masă?"
+            "value" : "Ați intenționat să introduceți %1$@ grame drept cantitate de carbohidrați pentru această masă?"
           }
         },
         "ru" : {
@@ -16508,7 +16508,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Realizat"
+            "value" : "Gata"
           }
         },
         "ru" : {
@@ -17278,7 +17278,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Introdu bolusul"
+            "value" : "Introduceți bolusul"
           }
         },
         "ru" : {
@@ -19110,7 +19110,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Remediați acum activând Notificări, Alerte critice și Notificări sensibile la timp."
+            "value" : "Remediați acum activând Notificări, Alerte critice și Notificări urgente."
           }
         },
         "ru" : {
@@ -19407,7 +19407,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "În scopuri de siguranță, trebuie să permiteți alertele critice, sensibile la timp și permisiunile de notificare (alerte necritice) pe dispozitivul dumneavoastră pentru a continua să utilizați %1$@ și nu puteți dezactiva alarmele individuale."
+            "value" : "În scopuri de siguranță, trebuie să permiteți alertele critice, urgente și permisiunile de notificare (alerte necritice) pe dispozitivul dumneavoastră pentru a continua să utilizați %1$@ și nu puteți dezactiva alarmele individuale."
           }
         },
         "ru" : {
@@ -20652,7 +20652,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Programul intervalului țintă de glucoză"
+            "value" : "Programul intervalului țintă de glicemie"
           }
         },
         "ru" : {
@@ -20710,7 +20710,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SUNET HARDWARE"
+            "value" : "SUNETE HARDWARE"
           }
         },
         "ru" : {
@@ -20866,7 +20866,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cum pot dezactiva sunetul doar alertelor sensibile la timp și non-critice?"
+            "value" : "Cum pot dezactiva sunetul doar alertelor urgente și non-critice?"
           }
         },
         "ru" : {
@@ -21357,7 +21357,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Informaţii"
+            "value" : "Informații"
           }
         },
         "zh-Hans" : {
@@ -23228,7 +23228,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alertele critice iOS și alertele sensibile la timp sunt tipuri de notificări Apple. Sunt folosite pentru evenimente cu prioritate ridicată. Câteva exemple includ:"
+            "value" : "Alertele critice iOS și alertele urgente sunt tipuri de notificări Apple. Sunt folosite pentru evenimente cu prioritate ridicată. Câteva exemple includ:"
           }
         },
         "ru" : {
@@ -24493,7 +24493,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eșec Loop"
+            "value" : "Eșec Buclă"
           }
         },
         "ru" : {
@@ -25756,7 +25756,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bolus prandial"
+            "value" : "Bolus pentru masă"
           }
         },
         "ru" : {
@@ -25964,7 +25964,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notificări privind mesele pierdute"
+            "value" : "Notificări Mese Neanunțate"
           }
         },
         "ru" : {
@@ -27236,7 +27236,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nicio alertă nu va suna când este dezactivat sunetul. Odată ce această perioadă se încheie, alertele și alarmele dvs. vor relua normal."
+            "value" : "Nicio alertă nu va suna când este dezactivat sunetul. Odată ce această perioadă se încheie, alertele și alarmele dumneavoastră vor relua normal."
           }
         }
       }
@@ -28287,7 +28287,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Livrarea notificărilor este setată la Rezumat programat în setările telefonului dvs. \n\nPentru a evita întârzierea primirii notificărilor de la %1$@ , vă recomandăm ca livrarea notificărilor să fie setată la Livrare imediată."
+            "value" : "Livrarea notificărilor este setată la Rezumat programat în setările telefonului dumneavoastră. \n\nPentru a evita întârzierea primirii notificărilor de la %1$@, vă recomandăm ca livrarea notificărilor să fie setată la Livrare imediată."
           }
         },
         "ru" : {
@@ -28447,7 +28447,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notificări întârziate"
+            "value" : "Notificări Întârziate"
           }
         },
         "ru" : {
@@ -28607,7 +28607,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notificările vă oferă informații importante despre aplicația %1$@ fără a fi necesar să deschideți aplicația. \n\nPăstrați-le activate în setările telefonului pentru a vă asigura că primiți notificări %1$@ , alerte critice și notificări sensibile la timp."
+            "value" : "Notificările vă oferă informații importante despre aplicația %1$@ fără a fi necesar să deschideți aplicația. \n\nPăstrați-le activate în setările telefonului pentru a vă asigura că primiți notificări %1$@, alerte critice și notificări urgente."
           }
         },
         "ru" : {
@@ -33559,7 +33559,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Selectarea unui aliment preferat în ecranul de introducere a carbohidraților completează automat câmpurile pentru cantitatea de carbohidrați, tipul de aliment și timpul de absorbție! Apăsați butonul de adăugare de mai jos pentru a crea primul dvs. aliment preferat!"
+            "value" : "Selectarea unui aliment preferat în ecranul de introducere a carbohidraților completează automat câmpurile pentru cantitatea de carbohidrați, tipul de aliment și timpul de absorbție! Apăsați butonul de adăugare de mai jos pentru a crea primul dumneavoastră aliment preferat!"
           }
         },
         "zh-Hans" : {
@@ -34027,7 +34027,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Afișează ultima eroare de loop"
+            "value" : "Afișează ultima eroare a buclei"
           }
         },
         "ru" : {
@@ -34128,7 +34128,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Calculator simplu de bolus"
+            "value" : "Calculator simplu bolus"
           }
         },
         "ru" : {
@@ -34217,7 +34217,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Calculator simplu al mesei"
+            "value" : "Calculator simplu masă"
           }
         },
         "ru" : {
@@ -34949,7 +34949,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Asistenţă"
+            "value" : "Asistență"
           }
         },
         "ru" : {
@@ -37127,7 +37127,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alerte sensibile la timp"
+            "value" : "Alerte Urgente"
           }
         },
         "ru" : {
@@ -37198,7 +37198,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notificări urgente"
+            "value" : "Notificări Urgente"
           }
         },
         "ru" : {
@@ -37410,7 +37410,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dezactivați volumul pe dispozitivul iOS sau adăugați %1$@ ca aplicație permisă pentru fiecare Mod de concentrare. Alertele sensibile la timp și cele critice vor suna în continuare, dar alertele non-critice vor fi dezactivate."
+            "value" : "Dezactivați volumul pe dispozitivul iOS sau adăugați %1$@ ca aplicație permisă pentru fiecare Mod de concentrare. Alertele urgente și cele critice vor suna în continuare, dar alertele non-critice vor fi dezactivate."
           }
         },
         "ru" : {
@@ -37778,7 +37778,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nu se poate conecta la pompă"
+            "value" : "Nu se poate accesa pompa"
           }
         },
         "ru" : {
@@ -37867,7 +37867,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nu se pot salva Carbohidrații"
+            "value" : "Nu se pot salva carbohidrații"
           }
         },
         "ru" : {
@@ -37962,7 +37962,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nu se poate salva glicemia manuala"
+            "value" : "Nu se poate salva glicemia manuală"
           }
         },
         "ru" : {
@@ -39218,7 +39218,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Folosește funcția Dezactivare sunet alerte. Aceasta îți permite să dezactivezi temporar toate alertele și alarmele prin intermediul aplicației %1$@, inclusiv alertele critice și alertele sensibile la timp."
+            "value" : "Folosește funcția Dezactivare sunet alerte. Aceasta îți permite să dezactivezi temporar toate alertele și alarmele prin intermediul aplicației %1$@, inclusiv alertele critice și alertele urgente."
           }
         },
         "ru" : {
@@ -39688,7 +39688,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Care sunt exemple de alerte critice și alerte sensibile la timp?"
+            "value" : "Care sunt exemple de alerte critice și alerte urgente?"
           }
         },
         "ru" : {
@@ -40127,7 +40127,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "În timp ce alertele dezactivate sunt activate, toate alertele de la aplicația %1$@ inclusiv alertele critice și cele sensibile la timp, se vor afișa temporar fără sunete și vor vibra doar."
+            "value" : "În timp ce alertele dezactivate sunt activate, toate alertele de la aplicația %1$@ inclusiv alertele critice și cele urgente, se vor afișa temporar fără sunete și vor vibra doar."
           }
         },
         "ru" : {
@@ -40238,7 +40238,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "În timp ce încercam să repornesc %1$@ a apărut o eroare. \n \n %2$@"
+            "value" : "În timp încercării repornirii %1$@ a apărut o eroare. \n \n %2$@"
           }
         },
         "ru" : {
@@ -40695,7 +40695,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Este posibil să nu primiți alerte sonore, vizuale sau cu vibrații referitoare la informații critice de siguranță. \n\nPentru a remedia problema, atingeți „Setări” și asigurați-vă că notificările, alertele critice și notificările sensibile la timp sunt activate."
+            "value" : "Este posibil să nu primiți alerte sonore, vizuale sau cu vibrații referitoare la informații critice de siguranță. \n\nPentru a remedia problema, atingeți „Setări” și asigurați-vă că notificările, alertele critice și notificările urgente sunt activate."
           }
         },
         "ru" : {

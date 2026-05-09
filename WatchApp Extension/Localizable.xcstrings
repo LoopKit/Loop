@@ -1226,7 +1226,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Continuă"
+            "value" : "Continuați"
           }
         },
         "ru" : {
@@ -3702,7 +3702,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salvează & Bolus"
+            "value" : "Salvează & Bolusează"
           }
         },
         "ru" : {
