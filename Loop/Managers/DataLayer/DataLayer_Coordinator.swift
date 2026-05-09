@@ -231,6 +231,59 @@ final class DataLayer_Coordinator: ObservableObject {
         observeOverrideNotifications()
         observeActivityDetectedNotifications()
         observeBolusProNotifications()
+        observeGraphDetailViewNotifications()
+        observeSiteAtlasNotifications()
+    }
+
+    /// GraphDetailView broadcasts when its long-press detail popup appears.
+    /// Translate to a DataLayer event so the dashboard's Feature Adoption
+    /// block sees real GraphDetailView usage data.
+    private func observeGraphDetailViewNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.loopkit.Loop.graphDetailViewOpened"),
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self,
+                  let info = notification.userInfo
+            else { return }
+
+            let payload = DataLayer_GraphDetailViewOpenedPayload(
+                hasGlucose:    (info["hasGlucose"]    as? Bool) ?? false,
+                hasIOB:        (info["hasIOB"]        as? Bool) ?? false,
+                hasCOB:        (info["hasCOB"]        as? Bool) ?? false,
+                hasBolus:      (info["hasBolus"]      as? Bool) ?? false,
+                hasBasalRate:  (info["hasBasalRate"]  as? Bool) ?? false,
+                hasPreset:     (info["hasPreset"]     as? Bool) ?? false,
+                hasAutoPreset: (info["hasAutoPreset"] as? Bool) ?? false,
+                hasHeartRate:  (info["hasHeartRate"]  as? Bool) ?? false
+            )
+            self.collector.record(type: .graphDetailViewOpened, payload: payload)
+        }
+    }
+
+    /// SiteAtlas broadcasts when a new site entry is added. Translate to
+    /// a DataLayer event with type/bodySide/zone for the dashboard.
+    private func observeSiteAtlasNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.loopkit.Loop.siteAtlasPlaced"),
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self,
+                  let info = notification.userInfo,
+                  let type = info["type"] as? String,
+                  let bodySide = info["bodySide"] as? String
+            else { return }
+
+            let payload = DataLayer_SiteAtlasPlacedPayload(
+                type: type,
+                bodySide: bodySide,
+                zoneID: info["zoneID"] as? String,
+                replacementOfHidden: (info["replacementOfHidden"] as? Bool) ?? false
+            )
+            self.collector.record(type: .siteAtlasPlaced, payload: payload)
+        }
     }
 
     /// BolusPro broadcasts a snapshot every time a BolusPro-aware carb

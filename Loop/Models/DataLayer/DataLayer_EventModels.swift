@@ -87,6 +87,12 @@ enum DataLayer_EventType: String, Codable, CaseIterable {
     case sessionStart
     case sessionEnd
 
+    // GraphDetailView
+    case graphDetailViewOpened
+
+    // SiteAtlas
+    case siteAtlasPlaced
+
     /// The consent category this event type belongs to.
     var consentCategory: DataLayer_ConsentCategory {
         switch self {
@@ -107,6 +113,9 @@ enum DataLayer_EventType: String, Codable, CaseIterable {
              .overrideActivated, .overrideDeactivated:
             return .activityAndPresets
         case .sessionStart, .sessionEnd:
+            return .activityAndPresets
+        case .graphDetailViewOpened, .siteAtlasPlaced:
+            // Lightweight feature-usage signals; no glucose/insulin payload.
             return .activityAndPresets
         }
     }
@@ -298,4 +307,34 @@ struct DataLayer_MealDebriefPayload: Codable {
 struct DataLayer_SessionPayload: Codable {
     let timezone: String
     let localeRegion: String?
+}
+
+/// GraphDetailView opened — fired when the long-press detail popup appears
+/// on the glucose chart. Captures *what* data the user inspected so we can
+/// learn which series users actually look at (signal beyond raw count).
+struct DataLayer_GraphDetailViewOpenedPayload: Codable {
+    let hasGlucose: Bool
+    let hasIOB: Bool
+    let hasCOB: Bool
+    let hasBolus: Bool
+    let hasBasalRate: Bool
+    let hasPreset: Bool
+    let hasAutoPreset: Bool
+    let hasHeartRate: Bool
+}
+
+/// SiteAtlas site placed — fired when a user logs a new pump or sensor site.
+/// Captures type + body side + zone so we can study placement preferences,
+/// rotation discipline, and (later) outcome correlation.
+struct DataLayer_SiteAtlasPlacedPayload: Codable {
+    /// `"pump"` or `"sensor"`.
+    let type: String
+    /// `"front"` or `"back"`.
+    let bodySide: String
+    /// Recommended-zone identifier the placement falls inside, or nil if
+    /// the user placed outside any recommended zone.
+    let zoneID: String?
+    /// True when the placement replaces a recently-hidden entry —
+    /// signals churn / rapid replacement vs. fresh rotation.
+    let replacementOfHidden: Bool
 }
