@@ -165,8 +165,8 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 glucoseRanges = getGlucoseRanges(
                     glucoseRangeSchedule: glucoseRangeSchedule,
                     presetContext: presetContext,
-                    start: start,
-                    end: endDateChart,
+                    start: adjustedChartStart(start),
+                    end: adjustedChartEnd(endDateChart),
                     unit: unit
                 )
             }
@@ -339,7 +339,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
         // In compact mode, we only want to show the history
         let timeInterval: TimeInterval = self.settings.addPredictiveLine ? .hours(-2) : .hours(-6)
         self.glucoseStore.getGlucoseSamples(
-            start: Date.now.addingTimeInterval(timeInterval),
+            start: adjustedChartStart(Date.now.addingTimeInterval(timeInterval)),
             end: Date.now
         ) { result in
             switch (result) {
@@ -357,6 +357,26 @@ class LiveActivityManager : LiveActivityManagerProxy {
         return samples
     }
     
+    // If the chart start falls past the half-hour mark (HH:31–HH:59), pull it back to HH:30
+    // so that the nearest hour label is never truncated at the left edge.
+    private func adjustedChartStart(_ date: Date) -> Date {
+        let calendar = Calendar.current
+        let minute = calendar.component(.minute, from: date)
+        guard minute > 30 else { return date }
+        let startOfHour = calendar.dateInterval(of: .hour, for: date)!.start
+        return startOfHour.addingTimeInterval(.minutes(30))
+    }
+
+    // If the chart end falls before the half-hour mark (HH:00–HH:29), push it forward to HH:30
+    // so that the nearest hour label is never truncated at the right edge.
+    private func adjustedChartEnd(_ date: Date) -> Date {
+        let calendar = Calendar.current
+        let minute = calendar.component(.minute, from: date)
+        guard minute < 30 else { return date }
+        let startOfHour = calendar.dateInterval(of: .hour, for: date)!.start
+        return startOfHour.addingTimeInterval(.minutes(30))
+    }
+
     private func getGlucoseRanges(glucoseRangeSchedule: GlucoseRangeSchedule, presetContext: Preset?, start: Date, end: Date, unit: HKUnit) -> [GlucoseRangeValue] {
         var glucoseRanges: [GlucoseRangeValue] = []
         for item in glucoseRangeSchedule.quantityBetween(start: start, end: end) {

@@ -194,10 +194,10 @@ struct ChartValues: Identifiable {
     }
     
     static func convert(data: [Double], startDate: Date, interval: TimeInterval, useLimits: Bool, lowerLimit: Double, upperLimit: Double) -> [ChartValues] {
-        let twoHours = Date.now.addingTimeInterval(.hours(4))
-        
+        let cutoff = adjustedChartEnd(startDate.addingTimeInterval(.hours(4)))
+
         return data.enumerated().filter { (index, item) in
-            return startDate.addingTimeInterval(interval * Double(index)) < twoHours
+            return startDate.addingTimeInterval(interval * Double(index)) < cutoff
         }.map { (index, item) in
             return ChartValues(
                 x: startDate.addingTimeInterval(interval * Double(index)),
@@ -205,6 +205,13 @@ struct ChartValues: Identifiable {
                 color: "Default" // Color is handled by the gradient
             )
         }
+    }
+
+    private static func adjustedChartEnd(_ date: Date) -> Date {
+        let minute = Calendar.current.component(.minute, from: date)
+        guard minute < 30 else { return date }
+        let startOfHour = Calendar.current.dateInterval(of: .hour, for: date)!.start
+        return startOfHour.addingTimeInterval(.minutes(30))
     }
     
     static func convert(data: [GlucoseSampleAttributes], useLimits: Bool, lowerLimit: Double, upperLimit: Double) -> [ChartValues] {
