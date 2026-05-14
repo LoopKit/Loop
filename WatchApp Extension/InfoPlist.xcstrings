@@ -1,0 +1,450 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp-udvidelse"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp-Erweiterung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "WatchApp Extension"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extensión de WatchApp"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp-laajennus"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp Extension"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estensione WatchApp"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp-utvidelse"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp Extensie"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp Extension"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extensie WatchApp"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расширение WatchApp"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp Extension"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp Uzantısı"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp-udvidelse"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp-Erweiterung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "WatchApp Extension"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extensión de WatchApp"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp-laajennus"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp Extension"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estensione WatchApp"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp-utvidelse"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp Extensie"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp Extension"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extensie WatchApp"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расширение WatchApp"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp Extension"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchApp Uzantısı"
+          }
+        }
+      }
+    },
+    "NSHealthShareUsageDescription" : {
+      "comment" : "Privacy - Health Share Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يتم استخدام بيانات الوجبات من قواعد بيانات تطبيق صحتي لتحديد تأثيرات سكر الدم. يتم استخدام بيانات سكر الدم منقواعد بيانات تطبيق صحتي للرسم البياني والتحليل. تُستخدم بيانات النوم من قواعد بيانات تطبيق صحتي لتحسين توصيل تحديثات تعقيدات ساعة أبل أثناء فترة استيقاظك."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mad-data fra Health-databasen bruges til at bestemme blodsukkereffekten. Blodsukkerdata fra Health-databasen bruges til graftegning og momentumberegning. Søvndata fra sundhedsdatabasen bruges til at optimere leveringen af opdateringer om komplikationer af Apple Watch i den tid, du er vågen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mahlzeitendaten aus der Health Datenbank werden verwendet, um die Glukoseeffekte zu bestimmen. Glukosedaten aus der Health Datenbank werden zur grafischen Darstellung und Impulsberechnung verwendet. Schlafdaten aus der Health-Datenbank werden verwendet, um die Bereitstellung von Apple Watch-Komplikationsupdates während Deiner Wachzeit zu optimieren."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation. Sleep data from the Health database is used to optimize delivery of Apple Watch complication updates during the time you are awake."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los datos de alimentos de la base de datos de Salud se utilizan para determinar los efectos en el nivel de glucosa. Los datos de glucosa de la base de datos de Salud se utilizan para graficar y determinar cálculos de momento. Los datos de Sueño de la base de datos de Salud se utilizan para optimizar la entrega de actualizaciones de las complicaciones del Apple Watch durante el tiempo que está despierto."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terveys-sovelluksen ateriatietoja käytetään glukoosivaikutusten määrittämiseen. Terveys-sovelluksen glukoositietoja käytetään graafeissa ja laskelmissa. Unitietoja käytetään Apple Watch -komplikaation toiminnan optimointiin hereillä olon aikana."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les données sur les repas provenant de la base de données Santé sont utilisées pour déterminer les effets du glucose. Les données relatives au glucose provenant de la base de données Santé sont utilisées pour la création de graphiques et le calcul de l'élan. Les données relatives au sommeil provenant de la base de données Santé sont utilisées pour optimiser l'envoi des mises à jour des complications de l'Apple Watch pendant la période où vous êtes éveillé(e)."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נתוני ארוחות ממאגר Health משמשים לקביעת השפעות הגלוקוז. נתוני הגלוקוז ממסד Health הבריאות משמשים לגרפים ולחישוב מגמה. נתוני שינה ממסד Health משפרים את הנראות ב-Apple Watch."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I dati sui pasti del database Salute vengono utilizzati per determinare gli effetti del glucosio. I dati sul glucosio del database Salute vengono utilizzati per la rappresentazione grafica e il calcolo del momento. I dati sul sonno del database Salute vengono utilizzati per ottimizzare la consegna degli aggiornamenti delle complicazioni di Apple Watch durante il periodo di veglia."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリに入力された炭水化物の食事データは、健康データベースに保存されます。 グルコースデータはHealthKitに安全に保存されます"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Måltidsdata fra helsedatabasen brukes til å bestemme glukoseeffekter. Glukosedata fra helsedatabasen brukes til grafer og momentumberegning. Søvndata fra helsedatabasen brukes til å optimalisere leveringen av Apple Watch-komplikasjonsoppdateringer når du er våken."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maaltijdgegevens uit de database Gezondheid worden gebruikt om glucose-effecenten te bepalen. Glucosegegevens uit de database Gezondheid worden gebruikt voor grafieken en het berekenen van trendlijnen. Slaapgegevens uit de database Gezondheid worden gebruikt om de Apple Watch complicatie bij te werken wanneer je wakker bent."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dane posiłków z bazy danych aplikacji Zdrowie służą do określania wpływu glukozy. Dane dotyczące glukozy z bazy danych aplikacji Zdrowie są wykorzystywane do tworzenia wykresów i wyznaczania trendu. Dane dotyczące snu z bazy danych aplikacji Zdrowie służą do optymalizacji dostarczania aktualizacji komplikacji Apple Watch w czasie, gdy nie śpisz."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dados de refeições do banco de dados de saúde são utilizados para definir os efeitos da glicose para a representação gráfica e cálculo da aceleração."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datele mesei din baza de date din aplicația Sănătate sunt folosite pentru a determina efectele glicemice. Datele despre glicemie din baza de date Sănătate sunt folosite pentru construirea graficelor și calcularea influențelor glicemice. Datele de somn din baza de date Sănătate sunt folosite pentru a optimiza livrarea de actualizări de date pentru ceasul Apple pe perioada când sunteți treaz."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Данные о приеме пищи из базы данных Health используются для определения влияния глюкозы. Данные о глюкозе из базы данных Health используются для построения графиков и расчетов. Данные о сне из базы данных Health используются для оптимизации доставки обновлений усложнений Apple Watch во время вашего бодрствования."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Údaje o jedle z databázy Health sa používajú na určenie účinkov glukózy. Údaje o glukóze z databázy Health sa používajú na vytváranie grafov a výpočet hybnosti. Údaje o spánku z databázy Health sa používajú na optimalizáciu doručovania aktualizácií komplikácií Apple Watch v čase, keď ste hore."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kolhydratdata från Apple Health-databasen används för att avgöra blodsockereffekt. Blodsockervärden från Apple Health-databasen används i diagram och för beräkning av förändring."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağlık veri tabanından alınan yemek verileri, KŞ etkilerini belirlemek için kullanılır. Sağlık veri tabanından alınan KŞ verileri, grafik ve momentum hesaplaması için kullanılır. Sağlık veritabanındaki uyku verileri, uyanık olduğunuz süre boyunca Apple Watch komplikasyon güncellemelerinin teslimini optimize etmek için kullanılır."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thông số bữa ăn từ app Health được sử dụng để xác định tác động của glucose. Thông số glucose từ app Health được sử dụng cho các tính toán vẽ đồ thị và chuyển động của đường huyết."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "数据库中的膳食数据用于确定葡萄糖影响。健康数据库中的葡萄糖数据用于绘图和动量计算。"
+          }
+        }
+      }
+    },
+    "NSHealthUpdateUsageDescription" : {
+      "comment" : "Privacy - Health Update Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بيانات كربوهيدرات الوجبة المدخلة للتطبيق و الساعة محفوظة في قواعد بيانات تطبيق صحتي. يتم تخزين بيانات سكر الدم المستردة من نظام متابعة سكر الدم المستمرة بشكل آمن في تطبيق صحتي."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data om kulhydratmåltider, der indtastes i appen og på uret, gemmes i Apples Health-database. Glukosedata, der hentes fra CGM'en, gemmes sikkert i HealthKit."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In der App und auf der Uhr eingegebene Daten zu Kohlenhydratmahlzeiten werden in der HealthKit-Datenbank gespeichert. Vom CGM abgerufene Glukosewerte werden sicher in HealthKit-Datenbank gespeichert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Carbohydrate meal data entered in the app and on the watch is stored in the Health database. Glucose data retrieved from the CGM is stored securely in HealthKit."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datos de alimentos ingresados en la aplicación y en el reloj son almacenados en la base de datos de Salud. Los datos de glucosa extraídos del monitor continuo de glucosa se almacenan de manera segura en HealthKit."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sovelluksen ja kellon kautta tallennetut hiilihydraattitiedot tallennetaan Terveys-sovellukseen. Glukoosiseurannan kautta saadut glukoositiedot tallennetaan turvallisesti HealthKitiin."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les données de glucides des repas entrées dans l'application ou la montre sont enregistrées dans la base de donnée Santé. Les données de taux de glucose provenant du CGM sont enregistrées de manière sécurisée dans HealthKit."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carbohydrate meal data entered in the app and on the watch is stored in the Health database. Glucose data retrieved from the CGM is stored securely in HealthKit."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I dati sui carboidrati dei pasti inseriti nell'app e sull'orologio sono trasferiti nel database di Salute. I dati recuperati dal sensore CGM sono storati nel database di HealthKit."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "健康データベースからの食事データは、グルコース効果を決定するために使用される。 グルコースデータはグラフ作成と解析のためにHealthKitから検索されます"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karbohydratmåltidsdata som legges inn i appen og på klokken lagres i Helsedatabasen. Glukosedata hentet fra CGM lagres sikkert i HealthKit."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maaltijdkoolhydraten die worden ingevoerd in de app en met de watch worden opgeslagen in de database Gezondheid. Ontvangen glucosegegevens van de CGM worden veilig opgeslagen in HealthKit."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posiłek węglowodanowy wprowadzony w aplikacji i na zegarku oraz dane o poziomie cukru pobrane z ciągłego monitoringu glukozy są bezpiecznie przechowywane w aplikacji Zdrowie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dados de carboidratos inseridos no aplicativo e no  Apple Watch são armazenados no banco de dados de saúde. Dados de glicemia recebidos do CGM são armazenados de modo seguro no HealthKit."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carbohidrații introduși în aplicație și pe ceas sunt stocați în baza de date Sănătate. Glicemiile din GCM sunt stocate în siguranță în HealthKit."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Данные об углеводах в приложении и на смарт-часах хранятся в базе данных Здоровье. Данные о гликемии полученные от систем непрерывного мониторинга хранятся в безопасности в Комплексе Здоровья HealthKit "
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Údaje o uhlohydrátoch zadané v aplikácii a na hodinkách sú uložené v databáze Health. Údaje o glukóze získané z CGM sú bezpečne uložené v HealthKit."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kolhydratvärden inmatade i appen i klockan lagras i Apple Health-databasen. Glukosvärden mottagna från CGM lagras krypterat i HealthKit."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamaya ve saate girilen öğün karbonhidrat verileri Sağlık veritabanında saklanır. CGM'den alınan KŞ verileri, HealthKit'te güvenli bir şekilde saklanır."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dữ liệu Carbohydrate của bữa ăn được nhập trên phần mềm và trên đồng hồ thông minh sẽ được lưu trữ tại app Health. Các thông số glucose được lấy từ thiết bị theo dõi đường huyết liên tục/CGM sẽ được lưu trữ an toàn trong HealthKit."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在应用程序和手表中输入的碳水化合物膳食数据存储在健康数据库中。从CGM检索的葡萄糖数据安全地存储在HealthKit中。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

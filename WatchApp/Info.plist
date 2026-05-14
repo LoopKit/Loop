@@ -33,6 +33,10 @@
 	</array>
 	<key>WKCompanionAppBundleIdentifier</key>
 	<string>$(MAIN_APP_BUNDLE_IDENTIFIER)</string>
+	<key>WKSupportsLiveActivityLaunchAttributeTypes</key>
+	<array>
+		<string>GlucoseActivityAttributes</string>
+	</array>
 	<key>WKWatchKitApp</key>
 	<true/>
 </dict>

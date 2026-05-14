@@ -10,9 +10,11 @@ import LoopUI
 import SwiftUI
 import WidgetKit
 
+@available(iOS 16.1, *)
 struct SystemStatusWidgetEntryView : View {
     
     @Environment(\.widgetFamily) private var widgetFamily
+    @Environment(\.widgetRenderingMode) private var widgetRenderingMode
     
     var entry: StatusWidgetTimelineProvider.Entry
 
@@ -27,17 +29,21 @@ struct SystemStatusWidgetEntryView : View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 .padding(5)
                 .background(
-                    ContainerRelativeShape()
-                        .fill(Color("WidgetSecondaryBackground"))
+                    widgetRenderingMode == .accented
+                        ? Color(UIColor.systemBackground).opacity(0.15)
+                        : Color("WidgetSecondaryBackground")
                 )
+                .clipShape(ContainerRelativeShape())
                 
                 PumpView(entry: entry)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                     .padding(5)
                     .background(
-                        ContainerRelativeShape()
-                            .fill(Color("WidgetSecondaryBackground"))
+                        widgetRenderingMode == .accented
+                            ? Color(UIColor.systemBackground).opacity(0.15)
+                            : Color("WidgetSecondaryBackground")
                     )
+                    .clipShape(ContainerRelativeShape())
             }
             
             if widgetFamily != .systemSmall {
@@ -66,6 +72,7 @@ struct SystemStatusWidgetEntryView : View {
     }
 }
 
+@available(iOS 16.1, *)
 struct SystemStatusWidget: Widget {
     let kind: String = "SystemStatusWidget"
 

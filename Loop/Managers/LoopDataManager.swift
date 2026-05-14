@@ -68,6 +68,8 @@ final class LoopDataManager {
     private var timeBasedDoseApplicationFactor: Double = 1.0
 
     private var insulinOnBoard: InsulinValue?
+    
+    private var liveActivityManager: LiveActivityManagerProxy?
 
     deinit {
         for observer in notificationObservers {
@@ -124,6 +126,14 @@ final class LoopDataManager {
         self.automaticDosingStatus = automaticDosingStatus
 
         self.trustedTimeOffset = trustedTimeOffset
+        
+        if #available(iOS 16.2, *) {
+            self.liveActivityManager = LiveActivityManager(
+                glucoseStore: self.glucoseStore,
+                doseStore: self.doseStore,
+                loopSettings: self.settings
+            )
+        }
 
         overrideIntentObserver = UserDefaults.appGroup?.observe(\.intentExtensionOverrideToSet, options: [.new], changeHandler: {[weak self] (defaults, change) in
             guard let name = change.newValue??.lowercased(), let appGroup = UserDefaults.appGroup else {
@@ -144,12 +154,14 @@ final class LoopDataManager {
                         }
                     }
                 }
+                
                 settings.scheduleOverride = preset.createOverride(enactTrigger: .remote("Siri"))
                 if let observers = self?.presetActivationObservers {
                     for observer in observers {
                         observer.presetActivated(context: .preset(preset), duration: preset.duration)
                     }
                 }
+                self?.liveActivityManager?.update(loopSettings: settings)
             }
             // Remove the override from UserDefaults so we don't set it multiple times
             appGroup.intentExtensionOverrideToSet = nil
@@ -167,6 +179,7 @@ final class LoopDataManager {
             ) { (note) -> Void in
                 self.dataAccessQueue.async {
                     self.logger.default("Received notification of carb entries changing")
+                    self.liveActivityManager?.update(loopSettings: self.settings)
 
                     self.carbEffect = nil
                     self.carbsOnBoard = nil
@@ -182,7 +195,8 @@ final class LoopDataManager {
             ) { (note) in
                 self.dataAccessQueue.async {
                     self.logger.default("Received notification of glucose samples changing")
-
+                    self.liveActivityManager?.update(loopSettings: self.settings)
+                    
                     self.glucoseMomentumEffect = nil
                     self.remoteRecommendationNeedsUpdating = true
 
@@ -196,6 +210,7 @@ final class LoopDataManager {
             ) { (note) in
                 self.dataAccessQueue.async {
                     self.logger.default("Received notification of dosing changing")
+                    self.liveActivityManager?.update(loopSettings: self.settings)
 
                     self.clearCachedInsulinEffects()
                     self.remoteRecommendationNeedsUpdating = true
@@ -247,6 +262,8 @@ final class LoopDataManager {
         if newValue.preMealOverride != oldValue.preMealOverride {
             // The prediction isn't actually invalid, but a target range change requires recomputing recommended doses
             predictedGlucose = nil
+            
+            self.liveActivityManager?.update(loopSettings: newValue)
         }
 
         if newValue.scheduleOverride != oldValue.scheduleOverride {
@@ -256,12 +273,14 @@ final class LoopDataManager {
                 for observer in self.presetActivationObservers {
                     observer.presetDeactivated(context: oldPreset.context)
                 }
-
+                self.liveActivityManager?.update(loopSettings: newValue)
             }
             if let newPreset = newValue.scheduleOverride {
                 for observer in self.presetActivationObservers {
                     observer.presetActivated(context: newPreset.context, duration: newPreset.duration)
                 }
+                
+                self.liveActivityManager?.update(loopSettings: newValue)
             }
 
             // Invalidate cached effects affected by the override

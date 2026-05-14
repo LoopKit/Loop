@@ -206,7 +206,7 @@ class SimpleBolusViewModel: ObservableObject {
                 recommendedBolus = Self.doseAmountFormatter.string(from: recommendation)!
                 enteredBolusString = Self.doseAmountFormatter.string(from: min(recommendation, delegate.maximumBolus))!
             } else {
-                recommendedBolus = NSLocalizedString("–", comment: "String denoting lack of a recommended bolus amount in the simple bolus calculator")
+                recommendedBolus = ("–") // do not localize this, comment: "String denoting lack of a recommended bolus amount in the simple bolus calculator"
                 enteredBolusString = Self.doseAmountFormatter.string(from: 0.0)!
             }
         }

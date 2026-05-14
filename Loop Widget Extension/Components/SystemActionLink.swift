@@ -9,7 +9,11 @@
 import Foundation
 import SwiftUI
 
+@available(iOS 16.1, *)
 struct SystemActionLink: View {
+    
+    @Environment(\.widgetRenderingMode) private var widgetRenderingMode
+    
     enum Destination: String, CaseIterable {
         case carbEntry = "carb-entry"
         case bolus = "manual-bolus"
@@ -36,22 +40,26 @@ struct SystemActionLink: View {
         case .bolus:
             return Color("insulin")
         case .preMeal:
-            return active ? .white : Color("fresh")
+            return active ? Color("WidgetBackground") : Color("fresh")
         case .customPreset:
-            return active ? .white : Color("glucose")
+            return active ? Color("WidgetBackground") : Color("glucose")
         }
     }
     
     private func backgroundColor(active: Bool) -> Color {
-        switch destination {
-        case .carbEntry:
-            return active ? Color("fresh") : Color("WidgetSecondaryBackground")
-        case .bolus:
-            return active ? Color("insulin") : Color("WidgetSecondaryBackground")
-        case .preMeal:
-            return active ? Color("fresh") : Color("WidgetSecondaryBackground")
-        case .customPreset:
-            return active ? Color("glucose") : Color("WidgetSecondaryBackground")
+        if widgetRenderingMode == .accented {
+            Color(UIColor.systemBackground).opacity(active ? 0.45 : 0.15)
+        } else {
+            switch destination {
+            case .carbEntry:
+                active ? Color("fresh") : Color("WidgetSecondaryBackground")
+            case .bolus:
+                active ? Color("insulin") : Color("WidgetSecondaryBackground")
+            case .preMeal:
+                active ? Color("fresh") : Color("WidgetSecondaryBackground")
+            case .customPreset:
+                active ? Color("glucose") : Color("WidgetSecondaryBackground")
+            }
         }
     }
     
@@ -73,10 +81,8 @@ struct SystemActionLink: View {
             icon
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 .foregroundColor(foregroundColor(active: active))
-                .background(
-                    ContainerRelativeShape()
-                        .fill(backgroundColor(active: active))
-                )
+                .background(backgroundColor(active: active))
+                .clipShape(ContainerRelativeShape())
         }
     }
 }
