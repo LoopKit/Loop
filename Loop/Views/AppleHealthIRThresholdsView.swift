@@ -6,14 +6,14 @@
 import SwiftUI
 
 struct AppleHealthIRThresholdsView: View {
-    private let service: AppleHealthIRServiceProtocol
+    private let service: AppleHealthIRServiceProtocol?
     @State private var draft: AppleHealthIRThresholds
     @State private var validationError: String?
     @State private var showResetConfirmation = false
 
-    init(service: AppleHealthIRServiceProtocol) {
+    init(service: AppleHealthIRServiceProtocol? = nil) {
         self.service = service
-        _draft = State(initialValue: service.thresholds)
+        _draft = State(initialValue: service?.thresholds ?? AppleHealthIRThresholds.load())
     }
 
     var body: some View {
@@ -107,7 +107,7 @@ struct AppleHealthIRThresholdsView: View {
         do {
             try draft.validate()
             draft.save()
-            service.thresholds = draft
+            service?.thresholds = draft
             validationError = nil
         } catch {
             validationError = error.localizedDescription
