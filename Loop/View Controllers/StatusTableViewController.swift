@@ -54,6 +54,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
         tableView.register(AlertPermissionsDisabledWarningCell.self, forCellReuseIdentifier: AlertPermissionsDisabledWarningCell.className)
         tableView.register(MuteAlertsWarningCell.self, forCellReuseIdentifier: MuteAlertsWarningCell.className)
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "BiometricsCell")
 
         if FeatureFlags.predictedGlucoseChartClampEnabled {
             statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBoundClamped
@@ -686,6 +687,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case biometrics
     }
 
+    private var biometricsHostController: UIHostingController<BiometricHomePanel>?
+
     // MARK: Glucose
 
     private var eventualGlucoseDescription: String?
@@ -1004,6 +1007,34 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
             return cell
         case .charts:
+            // Biometrics uses its own non-chart cell — handle before the ChartTableViewCell dequeue
+            if ChartRow(rawValue: indexPath.row) == .biometrics {
+                let cell = tableView.dequeueReusableCell(withIdentifier: "BiometricsCell", for: indexPath)
+                cell.selectionStyle = .none
+                if biometricsHostController == nil,
+                   let dm = deviceManager,
+                   let irSvc = dm.irService,
+                   let bioSvc = dm.biometricsService {
+                    let panel = BiometricHomePanel(irService: irSvc, biometricsService: bioSvc)
+                    let host = UIHostingController(rootView: panel)
+                    biometricsHostController = host
+                }
+                if let host = biometricsHostController {
+                    addChild(host)
+                    host.view.translatesAutoresizingMaskIntoConstraints = false
+                    cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+                    cell.contentView.addSubview(host.view)
+                    NSLayoutConstraint.activate([
+                        host.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
+                        host.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+                        host.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+                        host.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+                    ])
+                    host.didMove(toParent: self)
+                }
+                return cell
+            }
+
             let cell = tableView.dequeueReusableCell(withIdentifier: ChartTableViewCell.className, for: indexPath) as! ChartTableViewCell
 
             switch ChartRow(rawValue: indexPath.row)! {
@@ -1029,26 +1060,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 })
                 cell.setTitleLabelText(label: NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph"))
             case .biometrics:
-                let cell = UITableViewCell()
-                cell.selectionStyle = .none
-                guard let dm = deviceManager,
-                      let irSvc = dm.irService,
-                      let bioSvc = dm.biometricsService else {
-                    return cell
-                }
-                let panel = BiometricHomePanel(irService: irSvc, biometricsService: bioSvc)
-                let host = UIHostingController(rootView: panel)
-                addChild(host)
-                host.view.translatesAutoresizingMaskIntoConstraints = false
-                cell.contentView.addSubview(host.view)
-                NSLayoutConstraint.activate([
-                    host.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 8),
-                    host.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -8),
-                    host.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
-                    host.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
-                ])
-                host.didMove(toParent: self)
-                return cell
+                break
             }
 
             self.tableView(tableView, updateSubtitleFor: cell, at: indexPath)
@@ -1234,7 +1246,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             case .iob, .dose, .cob:
                 return max(106, 0.21 * availableSize)
             case .biometrics:
-                return 210
+                return 180
             }
         case .hud, .status, .alertWarning:
             return UITableView.automaticDimension
