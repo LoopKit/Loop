@@ -305,6 +305,7 @@ extension SettingsView {
             if FeatureFlags.allowAlgorithmExperiments {
                 algorithmExperimentsSection
             }
+            biometricIRSection
         }
     }
 

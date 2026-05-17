@@ -133,6 +133,18 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
             .store(in: &cancellables)
 
+        deviceManager?.biometricsService?.snapshotPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                let row = IndexPath(row: ChartRow.biometrics.rawValue,
+                                    section: Section.charts.rawValue)
+                if self.tableView.numberOfRows(inSection: Section.charts.rawValue) > row.row {
+                    self.tableView.reloadRows(at: [row], with: .none)
+                }
+            }
+            .store(in: &cancellables)
+
         if let gestureRecognizer = charts.gestureRecognizer {
             tableView.addGestureRecognizer(gestureRecognizer)
         }
@@ -671,6 +683,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case iob
         case dose
         case cob
+        case biometrics
     }
 
     // MARK: Glucose
@@ -1015,6 +1028,26 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     return self?.statusCharts.cobChart(withFrame: frame)?.view
                 })
                 cell.setTitleLabelText(label: NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph"))
+            case .biometrics:
+                let cell = UITableViewCell()
+                cell.selectionStyle = .none
+                let irService = deviceManager?.biometricsService
+                let panel = BiometricHomePanel(
+                    multiplier: irService?.currentMultiplier ?? 1.0,
+                    entries: irService?.currentEntries ?? []
+                )
+                let host = UIHostingController(rootView: panel)
+                addChild(host)
+                host.view.translatesAutoresizingMaskIntoConstraints = false
+                cell.contentView.addSubview(host.view)
+                NSLayoutConstraint.activate([
+                    host.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 8),
+                    host.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -8),
+                    host.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+                    host.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+                ])
+                host.didMove(toParent: self)
+                return cell
             }
 
             self.tableView(tableView, updateSubtitleFor: cell, at: indexPath)

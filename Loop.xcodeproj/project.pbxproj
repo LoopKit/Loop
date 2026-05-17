@@ -508,6 +508,15 @@
 		DDC389F82A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */; };
 		DDC389FA2A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */; };
 		DDC389FC2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */; };
+		F511D9CB8F68D9D9B0341314 /* AppleHealthIRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043BAE1603803A839C0CB52 /* AppleHealthIRService.swift */; };
+		E5A6E743849E63F8101AC616 /* BiometricsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5534EA92B26FA8ADC30543F /* BiometricsService.swift */; };
+		C8C8050EED40EF171CC2784D /* AppleHealthIREntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8FD0BA84A167FE482ED4A92 /* AppleHealthIREntry.swift */; };
+		32E97CC31667BAF165D33764 /* AppleHealthIRThresholds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638B34FA781359331A3ED13A /* AppleHealthIRThresholds.swift */; };
+		8B24F98B098D2F129A31E399 /* AppleHealthIRThresholdsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7D80FDFED273606F4C76FF /* AppleHealthIRThresholdsView.swift */; };
+		DB9FA0D4AF211849B3A47ED1 /* BiometricHomePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698E3B36A45C17FF134EEE52 /* BiometricHomePanel.swift */; };
+		31CE692EDFCE0B5ECDC4C1DD /* BiometricIRDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 640CA4B8601EE8D9224ECDE3 /* BiometricIRDetailView.swift */; };
+		B598694B0E8BBA51A55DB446 /* AppleHealthIRServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D74C3035DF4A6F8F1F2F416 /* AppleHealthIRServiceTests.swift */; };
+		A5DCA33037D16A3B73A0CC16 /* AppleHealthIRThresholdsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6426FAE9480469A7737EC218 /* AppleHealthIRThresholdsTests.swift */; };
 		DDC389FE2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */; };
 		E90909D124E34AC500F963D2 /* high_and_rising_with_cob_momentum_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E90909CC24E34AC500F963D2 /* high_and_rising_with_cob_momentum_effect.json */; };
 		E90909D224E34AC500F963D2 /* high_and_rising_with_cob_insulin_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E90909CD24E34AC500F963D2 /* high_and_rising_with_cob_insulin_effect.json */; };
@@ -1327,6 +1336,15 @@
 		DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorStrategy.swift; sourceTree = "<group>"; };
 		DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstantApplicationFactorStrategy.swift; sourceTree = "<group>"; };
 		DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+algorithmExperimentsSection.swift"; sourceTree = "<group>"; };
+		A043BAE1603803A839C0CB52 /* AppleHealthIRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthIRService.swift; sourceTree = "<group>"; };
+		A5534EA92B26FA8ADC30543F /* BiometricsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricsService.swift; sourceTree = "<group>"; };
+		F8FD0BA84A167FE482ED4A92 /* AppleHealthIREntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthIREntry.swift; sourceTree = "<group>"; };
+		638B34FA781359331A3ED13A /* AppleHealthIRThresholds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthIRThresholds.swift; sourceTree = "<group>"; };
+		3E7D80FDFED273606F4C76FF /* AppleHealthIRThresholdsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthIRThresholdsView.swift; sourceTree = "<group>"; };
+		698E3B36A45C17FF134EEE52 /* BiometricHomePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricHomePanel.swift; sourceTree = "<group>"; };
+		640CA4B8601EE8D9224ECDE3 /* BiometricIRDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricIRDetailView.swift; sourceTree = "<group>"; };
+		3D74C3035DF4A6F8F1F2F416 /* AppleHealthIRServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthIRServiceTests.swift; sourceTree = "<group>"; };
+		6426FAE9480469A7737EC218 /* AppleHealthIRThresholdsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleHealthIRThresholdsTests.swift; sourceTree = "<group>"; };
 		DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorSelectionView.swift; sourceTree = "<group>"; };
 		E90909CC24E34AC500F963D2 /* high_and_rising_with_cob_momentum_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_rising_with_cob_momentum_effect.json; sourceTree = "<group>"; };
 		E90909CD24E34AC500F963D2 /* high_and_rising_with_cob_insulin_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_rising_with_cob_insulin_effect.json; sourceTree = "<group>"; };
@@ -1661,6 +1679,8 @@
 				DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */,
 				B4E2022F2661063E009421B5 /* AutomaticDosingStatus.swift */,
 				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
+				F8FD0BA84A167FE482ED4A92 /* AppleHealthIREntry.swift */,
+				638B34FA781359331A3ED13A /* AppleHealthIRThresholds.swift */,
 				DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */,
 				C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */,
 				DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */,
@@ -1990,6 +2010,9 @@
 				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
 				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
 				DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */,
+				3E7D80FDFED273606F4C76FF /* AppleHealthIRThresholdsView.swift */,
+				698E3B36A45C17FF134EEE52 /* BiometricHomePanel.swift */,
+				640CA4B8601EE8D9224ECDE3 /* BiometricIRDetailView.swift */,
 				C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */,
 				43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */,
 				4311FB9A1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift */,
@@ -2012,6 +2035,8 @@
 				A977A2F324ACFECF0059C207 /* CriticalEventLogExportManager.swift */,
 				C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */,
 				43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */,
+				A043BAE1603803A839C0CB52 /* AppleHealthIRService.swift */,
+				A5534EA92B26FA8ADC30543F /* BiometricsService.swift */,
 				C16B983D26B4893300256B05 /* DoseEnactor.swift */,
 				89CA2B3C226E6B13004D9350 /* LocalTestingScenariosManager.swift */,
 				A9C62D862331703000535612 /* LoggingServicesManager.swift */,
@@ -2056,6 +2081,8 @@
 				A9DF02CA24F72B9E00B7C988 /* CriticalEventLogTests.swift */,
 				A96DAC292838EF8A00D94E38 /* DiagnosticLogTests.swift */,
 				A9DAE7CF2332D77F006AE942 /* LoopTests.swift */,
+				3D74C3035DF4A6F8F1F2F416 /* AppleHealthIRServiceTests.swift */,
+				6426FAE9480469A7737EC218 /* AppleHealthIRThresholdsTests.swift */,
 				8968B113240C55F10074BB48 /* LoopSettingsTests.swift */,
 				E93E86AC24DDE02C00FF40C8 /* Mock Stores */,
 			);
@@ -3426,6 +3453,13 @@
 				1DA649A9244126DA00F61E75 /* InAppModalAlertScheduler.swift in Sources */,
 				43B260491ED248FB008CAA77 /* CarbEntryTableViewCell.swift in Sources */,
 				142CB75B2A60BFC30075748A /* FavoriteFoodsView.swift in Sources */,
+				F511D9CB8F68D9D9B0341314 /* AppleHealthIRService.swift in Sources */,
+				E5A6E743849E63F8101AC616 /* BiometricsService.swift in Sources */,
+				C8C8050EED40EF171CC2784D /* AppleHealthIREntry.swift in Sources */,
+				32E97CC31667BAF165D33764 /* AppleHealthIRThresholds.swift in Sources */,
+				8B24F98B098D2F129A31E399 /* AppleHealthIRThresholdsView.swift in Sources */,
+				DB9FA0D4AF211849B3A47ED1 /* BiometricHomePanel.swift in Sources */,
+				31CE692EDFCE0B5ECDC4C1DD /* BiometricIRDetailView.swift in Sources */,
 				A9D5C5B625DC6C6A00534873 /* LoopAppManager.swift in Sources */,
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
 				1452F4AB2A851EDF00F8B9E4 /* AddEditFavoriteFoodView.swift in Sources */,
@@ -3752,6 +3786,8 @@
 				C165756F2534C468004AE16E /* SimpleBolusViewModelTests.swift in Sources */,
 				A96DAC2A2838EF8A00D94E38 /* DiagnosticLogTests.swift in Sources */,
 				A9DAE7D02332D77F006AE942 /* LoopTests.swift in Sources */,
+				B598694B0E8BBA51A55DB446 /* AppleHealthIRServiceTests.swift in Sources */,
+				A5DCA33037D16A3B73A0CC16 /* AppleHealthIRThresholdsTests.swift in Sources */,
 				E93E86B024DDE1BD00FF40C8 /* MockGlucoseStore.swift in Sources */,
 				1DFE9E172447B6270082C280 /* UserNotificationAlertSchedulerTests.swift in Sources */,
 				E9B3552F2935968E0076AB04 /* HKHealthStoreMock.swift in Sources */,
