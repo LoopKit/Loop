@@ -55,44 +55,54 @@ struct AppleHealthIRThresholdsView: View {
     }
 
     private var sleepSection: some View {
-        Section(header: Text(NSLocalizedString("Sleep", comment: "Section header"))) {
-            DecimalField(label: "Severe threshold (hours)", value: $draft.sleepSevereThreshold)
-            DecimalField(label: "Mild threshold (hours)", value: $draft.sleepMildThreshold)
-            DecimalField(label: "Severe effect (%)", value: $draft.sleepSevereEffect)
+        Section(header: Text(NSLocalizedString("Sleep (hours)", comment: "Section header"))) {
+            DecimalField(label: "T1 threshold (hr)", value: $draft.sleepT1)
+            DecimalField(label: "T2 threshold (hr)", value: $draft.sleepT2)
+            DecimalField(label: "T3 threshold (hr)", value: $draft.sleepT3)
+            DecimalField(label: "T4 threshold (hr)", value: $draft.sleepT4)
+            DecimalField(label: "Zone 1 effect (%)", value: $draft.sleepE1)
+            DecimalField(label: "Zone 2 effect (%)", value: $draft.sleepE2)
+            DecimalField(label: "Zone 3 effect (%)", value: $draft.sleepE3)
+            DecimalField(label: "Zone 4 effect (%)", value: $draft.sleepE4)
         }
     }
 
     private var stepsSection: some View {
         Section(header: Text(NSLocalizedString("Steps", comment: "Section header"))) {
-            DecimalField(label: "Low min (steps)", value: $draft.stepsLowMin)
-            DecimalField(label: "Medium min (steps)", value: $draft.stepsMediumMin)
-            DecimalField(label: "High min (steps)", value: $draft.stepsHighMin)
-            DecimalField(label: "Low effect (%)", value: $draft.stepsLowEffect)
-            DecimalField(label: "Medium effect (%)", value: $draft.stepsMediumEffect)
-            DecimalField(label: "High effect (%)", value: $draft.stepsHighEffect)
+            DecimalField(label: "T1 threshold (steps)", value: $draft.stepsT1)
+            DecimalField(label: "T2 threshold (steps)", value: $draft.stepsT2)
+            DecimalField(label: "T3 threshold (steps)", value: $draft.stepsT3)
+            DecimalField(label: "T4 threshold (steps)", value: $draft.stepsT4)
+            DecimalField(label: "Zone 1 effect (%)", value: $draft.stepsE1)
+            DecimalField(label: "Zone 2 effect (%)", value: $draft.stepsE2)
+            DecimalField(label: "Zone 3 effect (%)", value: $draft.stepsE3)
+            DecimalField(label: "Zone 4 effect (%)", value: $draft.stepsE4)
         }
     }
 
     private var hrvSection: some View {
-        Section(header: Text(NSLocalizedString("HRV", comment: "Section header"))) {
-            DecimalField(label: "Very low max (ms)", value: $draft.hrvVeryLowMax)
-            DecimalField(label: "Low max (ms)", value: $draft.hrvLowMax)
-            DecimalField(label: "Normal max (ms)", value: $draft.hrvNormalMax)
-            DecimalField(label: "Very low effect (%)", value: $draft.hrvVeryLowEffect)
-            DecimalField(label: "Low effect (%)", value: $draft.hrvLowEffect)
-            DecimalField(label: "Normal effect (%)", value: $draft.hrvNormalEffect)
-            DecimalField(label: "High effect (%)", value: $draft.hrvHighEffect)
+        Section(header: Text(NSLocalizedString("HRV (ms)", comment: "Section header"))) {
+            DecimalField(label: "T1 threshold (ms)", value: $draft.hrvT1)
+            DecimalField(label: "T2 threshold (ms)", value: $draft.hrvT2)
+            DecimalField(label: "T3 threshold (ms)", value: $draft.hrvT3)
+            DecimalField(label: "T4 threshold (ms)", value: $draft.hrvT4)
+            DecimalField(label: "Zone 1 effect (%)", value: $draft.hrvE1)
+            DecimalField(label: "Zone 2 effect (%)", value: $draft.hrvE2)
+            DecimalField(label: "Zone 3 effect (%)", value: $draft.hrvE3)
+            DecimalField(label: "Zone 4 effect (%)", value: $draft.hrvE4)
         }
     }
 
     private var exerciseSection: some View {
-        Section(header: Text(NSLocalizedString("Exercise", comment: "Section header"))) {
-            DecimalField(label: "Min threshold (min)", value: $draft.exerciseMinThreshold)
-            DecimalField(label: "Moderate max (min)", value: $draft.exerciseModerateMax)
-            DecimalField(label: "Substantial max (min)", value: $draft.exerciseSubstantialMax)
-            DecimalField(label: "Moderate effect (%)", value: $draft.exerciseModerateEffect)
-            DecimalField(label: "Substantial effect (%)", value: $draft.exerciseSubstantialEffect)
-            DecimalField(label: "Heavy effect (%)", value: $draft.exerciseHeavyEffect)
+        Section(header: Text(NSLocalizedString("Exercise (minutes)", comment: "Section header"))) {
+            DecimalField(label: "T1 threshold (min)", value: $draft.exerciseT1)
+            DecimalField(label: "T2 threshold (min)", value: $draft.exerciseT2)
+            DecimalField(label: "T3 threshold (min)", value: $draft.exerciseT3)
+            DecimalField(label: "T4 threshold (min)", value: $draft.exerciseT4)
+            DecimalField(label: "Zone 1 effect (%)", value: $draft.exerciseE1)
+            DecimalField(label: "Zone 2 effect (%)", value: $draft.exerciseE2)
+            DecimalField(label: "Zone 3 effect (%)", value: $draft.exerciseE3)
+            DecimalField(label: "Zone 4 effect (%)", value: $draft.exerciseE4)
         }
     }
 

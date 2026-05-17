@@ -1234,7 +1234,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             case .iob, .dose, .cob:
                 return max(106, 0.21 * availableSize)
             case .biometrics:
-                return 140
+                return 210
             }
         case .hud, .status, .alertWarning:
             return UITableView.automaticDimension

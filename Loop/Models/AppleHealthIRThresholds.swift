@@ -15,13 +15,13 @@ enum AppleHealthIRThresholdsError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidSleepOrdering:
-            return "Sleep severe threshold must be less than mild threshold."
+            return "Sleep thresholds must be in ascending order (T1 < T2 < T3 < T4)."
         case .invalidStepsOrdering:
-            return "Steps thresholds must be in ascending order."
+            return "Steps thresholds must be in ascending order (T1 < T2 < T3 < T4)."
         case .invalidHRVOrdering:
-            return "HRV thresholds must be in ascending order."
+            return "HRV thresholds must be in ascending order (T1 < T2 < T3 < T4)."
         case .invalidExerciseOrdering:
-            return "Exercise thresholds must be in ascending order."
+            return "Exercise thresholds must be in ascending order (T1 < T2 < T3 < T4)."
         case .invalidClampRange:
             return "Multiplier minimum must be less than maximum and both must be positive."
         }
@@ -32,49 +32,67 @@ struct AppleHealthIRThresholds: Codable, Equatable {
 
     static let userDefaultsKey = "appleHealthIRThresholds"
 
-    var sleepSevereThreshold: Double = 5.0
-    var sleepMildThreshold: Double = 7.0
-    var sleepSevereEffect: Double = 20.0
-    var sleepMildEffect: Double = 0.0
+    // MARK: - Sleep (hours)
+    // Zone logic: < T1 → E1; < T2 → E2; < T3 → E3; < T4 → E4; else → 0
+    var sleepT1: Double = 4.0
+    var sleepT2: Double = 5.5
+    var sleepT3: Double = 6.5
+    var sleepT4: Double = 7.5
+    var sleepE1: Double = 30.0
+    var sleepE2: Double = 20.0
+    var sleepE3: Double = 10.0
+    var sleepE4: Double = 5.0
 
-    var stepsLowMin: Double = 2000
-    var stepsMediumMin: Double = 5000
-    var stepsHighMin: Double = 10000
-    var stepsLowEffect: Double = -3.0
-    var stepsMediumEffect: Double = -5.0
-    var stepsHighEffect: Double = -8.0
+    // MARK: - Steps (count)
+    // Zone logic: < T1 → E1; < T2 → E2; < T3 → E3; < T4 → E4; else → 0
+    var stepsT1: Double = 2000
+    var stepsT2: Double = 5000
+    var stepsT3: Double = 8000
+    var stepsT4: Double = 12000
+    var stepsE1: Double = 5.0
+    var stepsE2: Double = 0.0
+    var stepsE3: Double = -3.0
+    var stepsE4: Double = -6.0
 
-    var hrvVeryLowMax: Double = 20.0
-    var hrvLowMax: Double = 40.0
-    var hrvNormalMax: Double = 60.0
-    var hrvVeryLowEffect: Double = 15.0
-    var hrvLowEffect: Double = 8.0
-    var hrvNormalEffect: Double = 0.0
-    var hrvHighEffect: Double = -5.0
+    // MARK: - HRV SDNN (ms)
+    // Zone logic: < T1 → E1; < T2 → E2; < T3 → E3; < T4 → E4; else → 0
+    var hrvT1: Double = 20.0
+    var hrvT2: Double = 35.0
+    var hrvT3: Double = 50.0
+    var hrvT4: Double = 70.0
+    var hrvE1: Double = 20.0
+    var hrvE2: Double = 10.0
+    var hrvE3: Double = 5.0
+    var hrvE4: Double = 0.0
 
-    var exerciseMinThreshold: Double = 20.0
-    var exerciseModerateMax: Double = 60.0
-    var exerciseSubstantialMax: Double = 120.0
-    var exerciseModerateEffect: Double = -5.0
-    var exerciseSubstantialEffect: Double = -10.0
-    var exerciseHeavyEffect: Double = -15.0
+    // MARK: - Exercise (minutes)
+    // Zone logic: < T1 → E1; < T2 → E2; < T3 → E3; < T4 → E4; else → 0
+    var exerciseT1: Double = 10.0
+    var exerciseT2: Double = 30.0
+    var exerciseT3: Double = 60.0
+    var exerciseT4: Double = 120.0
+    var exerciseE1: Double = 5.0
+    var exerciseE2: Double = -3.0
+    var exerciseE3: Double = -8.0
+    var exerciseE4: Double = -12.0
 
+    // MARK: - Multiplier clamp
     var multiplierMin: Double = 0.5
     var multiplierMax: Double = 2.0
 
     static let `default` = AppleHealthIRThresholds()
 
     func validate() throws {
-        guard sleepSevereThreshold < sleepMildThreshold else {
+        guard sleepT1 < sleepT2 && sleepT2 < sleepT3 && sleepT3 < sleepT4 else {
             throw AppleHealthIRThresholdsError.invalidSleepOrdering
         }
-        guard stepsLowMin < stepsMediumMin && stepsMediumMin < stepsHighMin else {
+        guard stepsT1 < stepsT2 && stepsT2 < stepsT3 && stepsT3 < stepsT4 else {
             throw AppleHealthIRThresholdsError.invalidStepsOrdering
         }
-        guard hrvVeryLowMax < hrvLowMax && hrvLowMax < hrvNormalMax else {
+        guard hrvT1 < hrvT2 && hrvT2 < hrvT3 && hrvT3 < hrvT4 else {
             throw AppleHealthIRThresholdsError.invalidHRVOrdering
         }
-        guard exerciseMinThreshold < exerciseModerateMax && exerciseModerateMax < exerciseSubstantialMax else {
+        guard exerciseT1 < exerciseT2 && exerciseT2 < exerciseT3 && exerciseT3 < exerciseT4 else {
             throw AppleHealthIRThresholdsError.invalidExerciseOrdering
         }
         guard multiplierMin > 0 && multiplierMin < multiplierMax else {

@@ -137,30 +137,39 @@ struct BiometricIRDetailView: View {
         switch tileType {
         case .sleep:
             return [
-                BandInfo(label: "Severe", range: "< \(Int(t.sleepSevereThreshold))h", effect: t.sleepSevereEffect),
-                BandInfo(label: "Mild", range: "\(Int(t.sleepSevereThreshold))–\(Int(t.sleepMildThreshold))h", effect: (t.sleepSevereEffect + t.sleepMildEffect) / 2),
-                BandInfo(label: "Normal", range: "> \(Int(t.sleepMildThreshold))h", effect: t.sleepMildEffect),
+                BandInfo(label: "Zone 1", range: "< \(format(t.sleepT1))h", effect: t.sleepE1),
+                BandInfo(label: "Zone 2", range: "\(format(t.sleepT1))–\(format(t.sleepT2))h", effect: t.sleepE2),
+                BandInfo(label: "Zone 3", range: "\(format(t.sleepT2))–\(format(t.sleepT3))h", effect: t.sleepE3),
+                BandInfo(label: "Zone 4", range: "\(format(t.sleepT3))–\(format(t.sleepT4))h", effect: t.sleepE4),
             ]
         case .steps:
             return [
-                BandInfo(label: "Low", range: "\(Int(t.stepsLowMin))–\(Int(t.stepsMediumMin))", effect: t.stepsLowEffect),
-                BandInfo(label: "Medium", range: "\(Int(t.stepsMediumMin))–\(Int(t.stepsHighMin))", effect: t.stepsMediumEffect),
-                BandInfo(label: "High", range: "> \(Int(t.stepsHighMin))", effect: t.stepsHighEffect),
+                BandInfo(label: "Zone 1", range: "< \(Int(t.stepsT1))", effect: t.stepsE1),
+                BandInfo(label: "Zone 2", range: "\(Int(t.stepsT1))–\(Int(t.stepsT2))", effect: t.stepsE2),
+                BandInfo(label: "Zone 3", range: "\(Int(t.stepsT2))–\(Int(t.stepsT3))", effect: t.stepsE3),
+                BandInfo(label: "Zone 4", range: "\(Int(t.stepsT3))–\(Int(t.stepsT4))", effect: t.stepsE4),
             ]
         case .hrv:
             return [
-                BandInfo(label: "Very Low", range: "< \(Int(t.hrvVeryLowMax))ms", effect: t.hrvVeryLowEffect),
-                BandInfo(label: "Low", range: "\(Int(t.hrvVeryLowMax))–\(Int(t.hrvLowMax))ms", effect: t.hrvLowEffect),
-                BandInfo(label: "Normal", range: "\(Int(t.hrvLowMax))–\(Int(t.hrvNormalMax))ms", effect: t.hrvNormalEffect),
-                BandInfo(label: "High", range: "> \(Int(t.hrvNormalMax))ms", effect: t.hrvHighEffect),
+                BandInfo(label: "Zone 1", range: "< \(Int(t.hrvT1))ms", effect: t.hrvE1),
+                BandInfo(label: "Zone 2", range: "\(Int(t.hrvT1))–\(Int(t.hrvT2))ms", effect: t.hrvE2),
+                BandInfo(label: "Zone 3", range: "\(Int(t.hrvT2))–\(Int(t.hrvT3))ms", effect: t.hrvE3),
+                BandInfo(label: "Zone 4", range: "\(Int(t.hrvT3))–\(Int(t.hrvT4))ms", effect: t.hrvE4),
             ]
         case .exercise:
             return [
-                BandInfo(label: "Moderate", range: "\(Int(t.exerciseMinThreshold))–\(Int(t.exerciseModerateMax))min", effect: t.exerciseModerateEffect),
-                BandInfo(label: "Substantial", range: "\(Int(t.exerciseModerateMax))–\(Int(t.exerciseSubstantialMax))min", effect: t.exerciseSubstantialEffect),
-                BandInfo(label: "Heavy", range: "> \(Int(t.exerciseSubstantialMax))min", effect: t.exerciseHeavyEffect),
+                BandInfo(label: "Zone 1", range: "< \(Int(t.exerciseT1))min", effect: t.exerciseE1),
+                BandInfo(label: "Zone 2", range: "\(Int(t.exerciseT1))–\(Int(t.exerciseT2))min", effect: t.exerciseE2),
+                BandInfo(label: "Zone 3", range: "\(Int(t.exerciseT2))–\(Int(t.exerciseT3))min", effect: t.exerciseE3),
+                BandInfo(label: "Zone 4", range: "\(Int(t.exerciseT3))–\(Int(t.exerciseT4))min", effect: t.exerciseE4),
             ]
         }
+    }
+
+    private func format(_ value: Double) -> String {
+        value.truncatingRemainder(dividingBy: 1) == 0
+            ? String(Int(value))
+            : String(format: "%.1f", value)
     }
 
     private struct ThresholdRow: View {

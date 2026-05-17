@@ -94,67 +94,49 @@ final class AppleHealthIRService: AppleHealthIRServiceProtocol {
     }
 
     // MARK: - Private delta calculators
+    // Each uses 5-zone logic: if < T1 → E1; elif < T2 → E2; elif < T3 → E3; elif < T4 → E4; else → 0.0
 
     private func sleepDelta(hours: Double?) -> Double {
         guard let hours = hours else { return 0.0 }
         let t = thresholds
-        if hours >= t.sleepMildThreshold {
-            return t.sleepMildEffect
-        }
-        if hours <= t.sleepSevereThreshold {
-            return t.sleepSevereEffect
-        }
-        // Guard against equal thresholds producing divide-by-zero (safety invariant)
-        guard t.sleepMildThreshold != t.sleepSevereThreshold else { return t.sleepSevereEffect }
-        return linearInterpolate(
-            value: hours,
-            low: t.sleepSevereThreshold,
-            high: t.sleepMildThreshold,
-            lowEffect: t.sleepSevereEffect,
-            highEffect: t.sleepMildEffect
-        )
+        if hours < t.sleepT1 { return t.sleepE1 }
+        if hours < t.sleepT2 { return t.sleepE2 }
+        if hours < t.sleepT3 { return t.sleepE3 }
+        if hours < t.sleepT4 { return t.sleepE4 }
+        return 0.0
     }
 
     private func stepsDelta(count: Double?) -> Double {
         guard let count = count else { return 0.0 }
         let t = thresholds
-        if count < t.stepsLowMin { return 0.0 }
-        if count >= t.stepsHighMin { return t.stepsHighEffect }
-        if count >= t.stepsMediumMin { return t.stepsMediumEffect }
-        return t.stepsLowEffect
+        if count < t.stepsT1 { return t.stepsE1 }
+        if count < t.stepsT2 { return t.stepsE2 }
+        if count < t.stepsT3 { return t.stepsE3 }
+        if count < t.stepsT4 { return t.stepsE4 }
+        return 0.0
     }
 
     private func hrvDelta(sdnn: Double?) -> Double {
         guard let sdnn = sdnn else { return 0.0 }
         let t = thresholds
-        if sdnn <= t.hrvVeryLowMax { return t.hrvVeryLowEffect }
-        if sdnn <= t.hrvLowMax { return t.hrvLowEffect }
-        if sdnn <= t.hrvNormalMax { return t.hrvNormalEffect }
-        return t.hrvHighEffect
+        if sdnn < t.hrvT1 { return t.hrvE1 }
+        if sdnn < t.hrvT2 { return t.hrvE2 }
+        if sdnn < t.hrvT3 { return t.hrvE3 }
+        if sdnn < t.hrvT4 { return t.hrvE4 }
+        return 0.0
     }
 
     private func exerciseDelta(minutes: Double?) -> Double {
         guard let minutes = minutes else { return 0.0 }
         let t = thresholds
-        if minutes < t.exerciseMinThreshold { return 0.0 }
-        if minutes >= t.exerciseSubstantialMax { return t.exerciseHeavyEffect }
-        if minutes >= t.exerciseModerateMax { return t.exerciseSubstantialEffect }
-        return t.exerciseModerateEffect
+        if minutes < t.exerciseT1 { return t.exerciseE1 }
+        if minutes < t.exerciseT2 { return t.exerciseE2 }
+        if minutes < t.exerciseT3 { return t.exerciseE3 }
+        if minutes < t.exerciseT4 { return t.exerciseE4 }
+        return 0.0
     }
 
     private func clamp(_ value: Double) -> Double {
         min(thresholds.multiplierMax, max(thresholds.multiplierMin, value))
-    }
-
-    private func linearInterpolate(
-        value: Double,
-        low: Double,
-        high: Double,
-        lowEffect: Double,
-        highEffect: Double
-    ) -> Double {
-        // Guard checked by all callers; this is the only place interpolation occurs
-        let fraction = (value - low) / (high - low)
-        return lowEffect + fraction * (highEffect - lowEffect)
     }
 }

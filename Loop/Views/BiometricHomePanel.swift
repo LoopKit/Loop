@@ -39,6 +39,7 @@ struct BiometricHomePanel: View {
                 }
             }
         }
+        .frame(minHeight: 210)
         .padding()
         .onAppear(perform: subscribe)
         .onDisappear(perform: unsubscribe)
