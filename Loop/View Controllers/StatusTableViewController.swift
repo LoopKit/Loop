@@ -1031,11 +1031,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
             case .biometrics:
                 let cell = UITableViewCell()
                 cell.selectionStyle = .none
-                let irService = deviceManager?.biometricsService
-                let panel = BiometricHomePanel(
-                    multiplier: irService?.currentMultiplier ?? 1.0,
-                    entries: irService?.currentEntries ?? []
-                )
+                guard let dm = deviceManager,
+                      let irSvc = dm.irService,
+                      let bioSvc = dm.biometricsService else {
+                    return cell
+                }
+                let panel = BiometricHomePanel(irService: irSvc, biometricsService: bioSvc)
                 let host = UIHostingController(rootView: panel)
                 addChild(host)
                 host.view.translatesAutoresizingMaskIntoConstraints = false
@@ -1209,6 +1210,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 } else {
                     cell.setSubtitleLabel(label: nil)
                 }
+            case .biometrics:
+                break
             }
         case .hud, .status, .alertWarning:
             break
@@ -1230,6 +1233,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 return max(106, 0.37 * availableSize)
             case .iob, .dose, .cob:
                 return max(106, 0.21 * availableSize)
+            case .biometrics:
+                return 140
             }
         case .hud, .status, .alertWarning:
             return UITableView.automaticDimension
@@ -1318,6 +1323,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: indexPath)
             case .cob:
                 performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: indexPath)
+            case .biometrics:
+                break
             }
         }
     }

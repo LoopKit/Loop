@@ -65,6 +65,14 @@ struct BiometricIRDetailView: View {
     let allEntries: [AppleHealthIREntry]
 
     var body: some View {
+        if #available(iOS 16, *) {
+            baseView.presentationDetents([.medium, .large])
+        } else {
+            baseView
+        }
+    }
+
+    @ViewBuilder private var baseView: some View {
         NavigationView {
             List {
                 currentValueSection
@@ -75,7 +83,6 @@ struct BiometricIRDetailView: View {
             .navigationTitle(tileType.displayName)
             .navigationBarTitleDisplayMode(.inline)
         }
-        .presentationDetents([.medium, .large])
     }
 
     private var currentValueSection: some View {

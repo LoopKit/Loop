@@ -122,12 +122,17 @@ final class BiometricsService: BiometricsServiceProtocol {
                     return
                 }
                 // Exclude .inBed — it includes wakefulness; only count confirmed asleep stages
-                let asleepValues: Set<Int> = [
-                    HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,
-                    HKCategoryValueSleepAnalysis.asleepCore.rawValue,
-                    HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
-                    HKCategoryValueSleepAnalysis.asleepREM.rawValue,
-                ]
+                let asleepValues: Set<Int>
+                if #available(iOS 16, *) {
+                    asleepValues = [
+                        HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,
+                        HKCategoryValueSleepAnalysis.asleepCore.rawValue,
+                        HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
+                        HKCategoryValueSleepAnalysis.asleepREM.rawValue,
+                    ]
+                } else {
+                    asleepValues = [HKCategoryValueSleepAnalysis.asleep.rawValue]
+                }
                 let totalSeconds = samples
                     .filter { asleepValues.contains($0.value) }
                     .reduce(0.0) { $0 + $1.endDate.timeIntervalSince($1.startDate) }
