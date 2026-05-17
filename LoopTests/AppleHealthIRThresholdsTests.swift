@@ -17,101 +17,145 @@ final class AppleHealthIRThresholdsTests: XCTestCase {
         super.tearDown()
     }
 
-    // MARK: - Default values match spec
+    // MARK: - Default values: Sleep
 
-    func testDefaults_sleepSevereThreshold_is5h() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.sleepSevereThreshold, 5.0, accuracy: accuracy)
+    func testDefaults_sleepT1_is4h() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.sleepT1, 4.0, accuracy: accuracy)
     }
 
-    func testDefaults_sleepMildThreshold_is7h() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.sleepMildThreshold, 7.0, accuracy: accuracy)
+    func testDefaults_sleepT2_is5_5h() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.sleepT2, 5.5, accuracy: accuracy)
     }
 
-    func testDefaults_sleepSevereEffect_is20percent() {
-        // AC1: documented default +20% for severe sleep deprivation
-        XCTAssertEqual(AppleHealthIRThresholds.default.sleepSevereEffect, 20.0, accuracy: accuracy)
+    func testDefaults_sleepT3_is6_5h() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.sleepT3, 6.5, accuracy: accuracy)
     }
 
-    func testDefaults_sleepMildEffect_is0percent() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.sleepMildEffect, 0.0, accuracy: accuracy)
+    func testDefaults_sleepT4_is7_5h() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.sleepT4, 7.5, accuracy: accuracy)
     }
 
-    func testDefaults_stepsLowMin_is2000() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.stepsLowMin, 2000, accuracy: accuracy)
+    func testDefaults_sleepE1_is30percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.sleepE1, 30.0, accuracy: accuracy)
     }
 
-    func testDefaults_stepsMediumMin_is5000() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.stepsMediumMin, 5000, accuracy: accuracy)
+    func testDefaults_sleepE2_is20percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.sleepE2, 20.0, accuracy: accuracy)
     }
 
-    func testDefaults_stepsHighMin_is10000() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.stepsHighMin, 10000, accuracy: accuracy)
+    func testDefaults_sleepE3_is10percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.sleepE3, 10.0, accuracy: accuracy)
     }
 
-    func testDefaults_stepsHighEffect_isNeg8percent() {
-        // AC2: documented default -8% for high activity
-        XCTAssertEqual(AppleHealthIRThresholds.default.stepsHighEffect, -8.0, accuracy: accuracy)
+    func testDefaults_sleepE4_is5percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.sleepE4, 5.0, accuracy: accuracy)
     }
 
-    func testDefaults_stepsMediumEffect_isNeg5percent() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.stepsMediumEffect, -5.0, accuracy: accuracy)
+    // MARK: - Default values: Steps
+
+    func testDefaults_stepsT1_is2000() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.stepsT1, 2000, accuracy: accuracy)
     }
 
-    func testDefaults_stepsLowEffect_isNeg3percent() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.stepsLowEffect, -3.0, accuracy: accuracy)
+    func testDefaults_stepsT2_is5000() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.stepsT2, 5000, accuracy: accuracy)
     }
 
-    func testDefaults_hrvVeryLowMax_is20ms() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.hrvVeryLowMax, 20.0, accuracy: accuracy)
+    func testDefaults_stepsT3_is8000() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.stepsT3, 8000, accuracy: accuracy)
     }
 
-    func testDefaults_hrvLowMax_is40ms() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.hrvLowMax, 40.0, accuracy: accuracy)
+    func testDefaults_stepsT4_is12000() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.stepsT4, 12000, accuracy: accuracy)
     }
 
-    func testDefaults_hrvNormalMax_is60ms() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.hrvNormalMax, 60.0, accuracy: accuracy)
+    func testDefaults_stepsE1_is5percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.stepsE1, 5.0, accuracy: accuracy)
     }
 
-    func testDefaults_hrvVeryLowEffect_is15percent() {
-        // AC3: documented default +15% for very low HRV
-        XCTAssertEqual(AppleHealthIRThresholds.default.hrvVeryLowEffect, 15.0, accuracy: accuracy)
+    func testDefaults_stepsE2_is0percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.stepsE2, 0.0, accuracy: accuracy)
     }
 
-    func testDefaults_hrvLowEffect_is8percent() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.hrvLowEffect, 8.0, accuracy: accuracy)
+    func testDefaults_stepsE3_isNeg3percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.stepsE3, -3.0, accuracy: accuracy)
     }
 
-    func testDefaults_hrvHighEffect_isNeg5percent() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.hrvHighEffect, -5.0, accuracy: accuracy)
+    func testDefaults_stepsE4_isNeg6percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.stepsE4, -6.0, accuracy: accuracy)
     }
 
-    func testDefaults_exerciseMinThreshold_is20min() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseMinThreshold, 20.0, accuracy: accuracy)
+    // MARK: - Default values: HRV
+
+    func testDefaults_hrvT1_is20ms() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.hrvT1, 20.0, accuracy: accuracy)
     }
 
-    func testDefaults_exerciseModerateMax_is60min() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseModerateMax, 60.0, accuracy: accuracy)
+    func testDefaults_hrvT2_is35ms() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.hrvT2, 35.0, accuracy: accuracy)
     }
 
-    func testDefaults_exerciseSubstantialMax_is120min() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseSubstantialMax, 120.0, accuracy: accuracy)
+    func testDefaults_hrvT3_is50ms() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.hrvT3, 50.0, accuracy: accuracy)
     }
 
-    func testDefaults_exerciseModerateEffect_isNeg5percent() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseModerateEffect, -5.0, accuracy: accuracy)
+    func testDefaults_hrvT4_is70ms() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.hrvT4, 70.0, accuracy: accuracy)
     }
 
-    func testDefaults_exerciseSubstantialEffect_isNeg10percent() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseSubstantialEffect, -10.0, accuracy: accuracy)
+    func testDefaults_hrvE1_is20percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.hrvE1, 20.0, accuracy: accuracy)
     }
 
-    func testDefaults_exerciseHeavyEffect_isNeg15percent() {
-        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseHeavyEffect, -15.0, accuracy: accuracy)
+    func testDefaults_hrvE2_is10percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.hrvE2, 10.0, accuracy: accuracy)
     }
+
+    func testDefaults_hrvE3_is5percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.hrvE3, 5.0, accuracy: accuracy)
+    }
+
+    func testDefaults_hrvE4_is0percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.hrvE4, 0.0, accuracy: accuracy)
+    }
+
+    // MARK: - Default values: Exercise
+
+    func testDefaults_exerciseT1_is10min() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseT1, 10.0, accuracy: accuracy)
+    }
+
+    func testDefaults_exerciseT2_is30min() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseT2, 30.0, accuracy: accuracy)
+    }
+
+    func testDefaults_exerciseT3_is60min() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseT3, 60.0, accuracy: accuracy)
+    }
+
+    func testDefaults_exerciseT4_is120min() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseT4, 120.0, accuracy: accuracy)
+    }
+
+    func testDefaults_exerciseE1_is5percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseE1, 5.0, accuracy: accuracy)
+    }
+
+    func testDefaults_exerciseE2_isNeg3percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseE2, -3.0, accuracy: accuracy)
+    }
+
+    func testDefaults_exerciseE3_isNeg8percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseE3, -8.0, accuracy: accuracy)
+    }
+
+    func testDefaults_exerciseE4_isNeg12percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.exerciseE4, -12.0, accuracy: accuracy)
+    }
+
+    // MARK: - Default values: Multiplier clamp
 
     func testDefaults_multiplierBounds() {
-        // AC4/AC5: hard-coded clamp values
         XCTAssertEqual(AppleHealthIRThresholds.default.multiplierMin, 0.5, accuracy: accuracy)
         XCTAssertEqual(AppleHealthIRThresholds.default.multiplierMax, 2.0, accuracy: accuracy)
     }
@@ -127,10 +171,10 @@ final class AppleHealthIRThresholdsTests: XCTestCase {
 
     func testCodable_roundTrip_mutatedValues() throws {
         var t = AppleHealthIRThresholds.default
-        t.sleepSevereEffect = 25.0
-        t.stepsHighEffect = -10.0
-        t.hrvVeryLowEffect = 18.0
-        t.exerciseHeavyEffect = -12.0
+        t.sleepE1 = 35.0
+        t.stepsE4 = -10.0
+        t.hrvE1 = 22.0
+        t.exerciseE4 = -15.0
         let data = try JSONEncoder().encode(t)
         let decoded = try JSONDecoder().decode(AppleHealthIRThresholds.self, from: data)
         XCTAssertEqual(decoded, t)
@@ -146,12 +190,12 @@ final class AppleHealthIRThresholdsTests: XCTestCase {
 
     func testSaveAndLoad_roundTrips() {
         var t = AppleHealthIRThresholds.default
-        t.sleepSevereEffect = 25.0
-        t.stepsHighEffect = -10.0
+        t.sleepE1 = 35.0
+        t.stepsE4 = -10.0
         t.save()
         let loaded = AppleHealthIRThresholds.load()
-        XCTAssertEqual(loaded.sleepSevereEffect, 25.0, accuracy: accuracy)
-        XCTAssertEqual(loaded.stepsHighEffect, -10.0, accuracy: accuracy)
+        XCTAssertEqual(loaded.sleepE1, 35.0, accuracy: accuracy)
+        XCTAssertEqual(loaded.stepsE4, -10.0, accuracy: accuracy)
     }
 
     func testLoad_missingKey_returnsDefaults() {
@@ -160,16 +204,12 @@ final class AppleHealthIRThresholdsTests: XCTestCase {
         XCTAssertEqual(loaded, AppleHealthIRThresholds.default)
     }
 
-    // AC7: "Resetting to defaults in Settings restores all values to their documented defaults."
     func testResetToDefaults_restoresAllDocumentedValues() {
         var t = AppleHealthIRThresholds.default
-        t.sleepSevereEffect = 99.0
-        t.stepsHighEffect = -99.0
+        t.sleepE1 = 99.0
+        t.stepsE4 = -99.0
         t.save()
-
-        // Simulate "Reset to Defaults": overwrite with the default struct
         AppleHealthIRThresholds.default.save()
-
         let loaded = AppleHealthIRThresholds.load()
         XCTAssertEqual(loaded, AppleHealthIRThresholds.default)
     }
@@ -180,28 +220,33 @@ final class AppleHealthIRThresholdsTests: XCTestCase {
         XCTAssertNoThrow(try AppleHealthIRThresholds.default.validate())
     }
 
-    func testValidate_invalidSleepOrdering_throws() {
+    func testValidate_invalidSleepOrdering_T1T2_throws() {
         var t = AppleHealthIRThresholds.default
-        t.sleepSevereThreshold = 8.0
-        t.sleepMildThreshold = 5.0
+        t.sleepT2 = t.sleepT1 - 0.5
+        XCTAssertThrowsError(try t.validate())
+    }
+
+    func testValidate_invalidSleepOrdering_T3T4_throws() {
+        var t = AppleHealthIRThresholds.default
+        t.sleepT4 = t.sleepT3 - 0.5
         XCTAssertThrowsError(try t.validate())
     }
 
     func testValidate_invalidStepsOrdering_throws() {
         var t = AppleHealthIRThresholds.default
-        t.stepsMediumMin = t.stepsHighMin + 1
+        t.stepsT2 = t.stepsT3 + 1
         XCTAssertThrowsError(try t.validate())
     }
 
     func testValidate_invalidHRVOrdering_throws() {
         var t = AppleHealthIRThresholds.default
-        t.hrvLowMax = t.hrvVeryLowMax - 1
+        t.hrvT2 = t.hrvT1 - 1
         XCTAssertThrowsError(try t.validate())
     }
 
     func testValidate_invalidExerciseOrdering_throws() {
         var t = AppleHealthIRThresholds.default
-        t.exerciseModerateMax = t.exerciseSubstantialMax + 1
+        t.exerciseT3 = t.exerciseT4 + 1
         XCTAssertThrowsError(try t.validate())
     }
 
@@ -220,23 +265,26 @@ final class AppleHealthIRThresholdsTests: XCTestCase {
 
     // MARK: - Physiological ordering
 
-    func testOrdering_exerciseEffects_magnitudeIncreasesWithIntensity() {
+    func testOrdering_exerciseEffects_worsenWithLessActivity() {
         let t = AppleHealthIRThresholds.default
-        XCTAssertLessThanOrEqual(t.exerciseModerateEffect, 0.0)
-        XCTAssertLessThanOrEqual(t.exerciseSubstantialEffect, 0.0)
-        XCTAssertLessThanOrEqual(t.exerciseHeavyEffect, 0.0)
-        XCTAssertLessThanOrEqual(t.exerciseModerateEffect, t.exerciseSubstantialEffect + 1e-9)
-        XCTAssertLessThanOrEqual(t.exerciseSubstantialEffect, t.exerciseHeavyEffect + 1e-9)
+        XCTAssertGreaterThan(t.exerciseE1, t.exerciseE2)
+        XCTAssertGreaterThan(t.exerciseE2, t.exerciseE3)
+        XCTAssertGreaterThan(t.exerciseE3, t.exerciseE4)
+        XCTAssertLessThanOrEqual(t.exerciseE4, 0.0)
     }
 
-    func testOrdering_hrvEffects_veryLowExceedsLow() {
+    func testOrdering_sleepEffects_worsenWithLessSleep() {
         let t = AppleHealthIRThresholds.default
-        XCTAssertGreaterThan(t.hrvVeryLowEffect, t.hrvLowEffect)
-        XCTAssertGreaterThan(t.hrvLowEffect, 0.0)
+        XCTAssertGreaterThan(t.sleepE1, t.sleepE2)
+        XCTAssertGreaterThan(t.sleepE2, t.sleepE3)
+        XCTAssertGreaterThan(t.sleepE3, t.sleepE4)
+        XCTAssertGreaterThan(t.sleepE1, 0.0)
     }
 
-    func testOrdering_sleepEffect_severeExceedsMild() {
+    func testOrdering_hrvEffects_worsenWithLowerHRV() {
         let t = AppleHealthIRThresholds.default
-        XCTAssertGreaterThan(t.sleepSevereEffect, t.sleepMildEffect)
+        XCTAssertGreaterThanOrEqual(t.hrvE1, t.hrvE2)
+        XCTAssertGreaterThanOrEqual(t.hrvE2, t.hrvE3)
+        XCTAssertGreaterThanOrEqual(t.hrvE3, t.hrvE4)
     }
 }
