@@ -71,6 +71,11 @@ final class LoopDataManager {
     
     private var liveActivityManager: LiveActivityManagerProxy?
 
+    // IR multiplier is always 1.0 until a HealthKit poll completes (identity, no-op)
+    var biometricIRService: AppleHealthIRServiceProtocol?
+    private var currentIRMultiplier: Double = 1.0
+    private var irMultiplierCancellable: AnyCancellable?
+
     deinit {
         for observer in notificationObservers {
             NotificationCenter.default.removeObserver(observer)
@@ -234,6 +239,15 @@ final class LoopDataManager {
                 self.cancelActiveTempBasal(for: .automaticDosingDisabled)
             } }
             .store(in: &cancellables)
+    }
+
+    /// Call after setting biometricIRService to begin tracking the IR multiplier.
+    func configureBiometricIRService() {
+        irMultiplierCancellable = biometricIRService?.multiplierPublisher
+            .receive(on: dataAccessQueue)
+            .sink { [weak self] multiplier in
+                self?.currentIRMultiplier = multiplier
+            }
     }
 
     /// Loop-related settings
@@ -570,6 +584,20 @@ extension LoopDataManager {
     /// The insulin sensitivity schedule, applying recent overrides relative to the current moment in time.
     var insulinSensitivityScheduleApplyingOverrideHistory: InsulinSensitivitySchedule? {
         return carbStore.insulinSensitivityScheduleApplyingOverrideHistory
+    }
+
+    /// Returns the IR-adjusted insulin sensitivity schedule for the dosing algorithm.
+    /// Dividing ISF by the multiplier is correct: IR=2.0 means the patient needs twice as much
+    /// insulin to move glucose by the same amount, so the effective ISF is halved.
+    /// The multiplier is clamped [0.5, 2.0] by AppleHealthIRService so divide-by-zero is impossible.
+    func insulinSensitivityScheduleWithIRAdjustment() -> InsulinSensitivitySchedule? {
+        guard let base = insulinSensitivityScheduleApplyingOverrideHistory else { return nil }
+        let multiplier = currentIRMultiplier
+        guard multiplier != 1.0 else { return base }
+        let adjustedItems = base.items.map { item in
+            RepeatingScheduleValue(startTime: item.startTime, value: item.value / multiplier)
+        }
+        return InsulinSensitivitySchedule(unit: base.unit, dailyItems: adjustedItems, timeZone: base.timeZone)
     }
 
     /// Sets a new time zone for a the schedule-based settings
@@ -1733,7 +1761,7 @@ extension LoopDataManager {
             errors.append(.configurationError(.basalRateSchedule))
         }
 
-        let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory
+        let insulinSensitivity = insulinSensitivityScheduleWithIRAdjustment()
         if insulinSensitivity == nil {
             errors.append(.configurationError(.insulinSensitivitySchedule))
         }

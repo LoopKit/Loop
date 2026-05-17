@@ -473,6 +473,26 @@ final class DeviceDataManager {
                 }
             }
         }
+
+        setupBiometricsService()
+    }
+
+    // MARK: - Biometrics
+
+    private(set) var irService: AppleHealthIRService?
+    private(set) var biometricsService: BiometricsService?
+
+    private func setupBiometricsService() {
+        let ir = AppleHealthIRService()
+        let biometrics = BiometricsService(healthStore: healthStore, irService: ir)
+        irService = ir
+        biometricsService = biometrics
+        loopManager.biometricIRService = ir
+        loopManager.configureBiometricIRService()
+        Task {
+            try? await biometrics.requestAuthorization()
+            biometrics.startPolling(interval: 900)
+        }
     }
 
     var availablePumpManagers: [PumpManagerDescriptor] {
