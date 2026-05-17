@@ -22,6 +22,7 @@ struct AppleHealthIRThresholdsView: View {
             stepsSection
             hrvSection
             exerciseSection
+            rhrSection
             clampSection
             if let error = validationError {
                 Section {
@@ -103,6 +104,19 @@ struct AppleHealthIRThresholdsView: View {
             DecimalField(label: "Zone 2 effect (%)", value: $draft.exerciseE2)
             DecimalField(label: "Zone 3 effect (%)", value: $draft.exerciseE3)
             DecimalField(label: "Zone 4 effect (%)", value: $draft.exerciseE4)
+        }
+    }
+
+    private var rhrSection: some View {
+        Section(header: Text(NSLocalizedString("Resting Heart Rate (bpm)", comment: "Section header"))) {
+            DecimalField(label: "T1 threshold (bpm)", value: $draft.rhrT1)
+            DecimalField(label: "T2 threshold (bpm)", value: $draft.rhrT2)
+            DecimalField(label: "T3 threshold (bpm)", value: $draft.rhrT3)
+            DecimalField(label: "T4 threshold (bpm)", value: $draft.rhrT4)
+            DecimalField(label: "Zone 1 effect (%)", value: $draft.rhrE1)
+            DecimalField(label: "Zone 2 effect (%)", value: $draft.rhrE2)
+            DecimalField(label: "Zone 3 effect (%)", value: $draft.rhrE3)
+            DecimalField(label: "Zone 4 effect (%)", value: $draft.rhrE4)
         }
     }
 

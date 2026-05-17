@@ -361,7 +361,8 @@ final class AppleHealthIRServiceTests: XCTestCase {
         let old = AppleHealthIREntry(
             id: UUID(), timestamp: Date().addingTimeInterval(-90_000),
             sleepHours: nil, stepCount: nil, hrvSDNN: nil, exerciseMinutes: nil,
-            sleepDelta: 0, stepsDelta: 0, hrvDelta: 0, exerciseDelta: 0,
+            heartRate: nil,
+            sleepDelta: 0, stepsDelta: 0, hrvDelta: 0, exerciseDelta: 0, rhrDelta: 0,
             combinedDelta: 0, multiplier: 1.0, thresholdsSnapshot: .default)
         AppleHealthIREntry.append(old)
         AppleHealthIREntry.pruneToWindow(86_400)
@@ -372,5 +373,75 @@ final class AppleHealthIRServiceTests: XCTestCase {
         service.updateBiometrics(sleepHours: 7.0, stepCount: nil, hrvSDNN: nil, exerciseMinutes: nil)
         AppleHealthIREntry.pruneToWindow(86_400)
         XCTAssertFalse(AppleHealthIREntry.load().isEmpty, "Recent entry must survive pruning")
+    }
+
+    // MARK: - RHR zone tests
+
+    func testRHR_belowT1_isNeutral() {
+        let m = service.computeMultiplier(
+            sleepHours: nil, stepCount: nil, hrvSDNN: nil, exerciseMinutes: nil,
+            heartRate: thresholds.rhrT1 - 5.0)
+        XCTAssertEqual(m, 1.0, accuracy: 0.001,
+            "RHR < T1 (very low/athlete) must contribute 0% to multiplier")
+    }
+
+    func testRHR_betweenT1andT2_appliesE1() {
+        let bpm = (thresholds.rhrT1 + thresholds.rhrT2) / 2.0
+        let m = service.computeMultiplier(
+            sleepHours: nil, stepCount: nil, hrvSDNN: nil, exerciseMinutes: nil,
+            heartRate: bpm)
+        XCTAssertEqual(m, 1.0 + thresholds.rhrE1 / 100.0, accuracy: 0.001,
+            "RHR T1–T2 must apply E1 (-2%)")
+        XCTAssertLessThan(m, 1.0, "E1 is protective, multiplier must be < 1.0")
+    }
+
+    func testRHR_betweenT2andT3_appliesE2_neutral() {
+        let bpm = (thresholds.rhrT2 + thresholds.rhrT3) / 2.0
+        let m = service.computeMultiplier(
+            sleepHours: nil, stepCount: nil, hrvSDNN: nil, exerciseMinutes: nil,
+            heartRate: bpm)
+        XCTAssertEqual(m, 1.0 + thresholds.rhrE2 / 100.0, accuracy: 0.001,
+            "RHR T2–T3 (normal) must apply E2 (0% → multiplier 1.0)")
+        XCTAssertEqual(m, 1.0, accuracy: 0.001)
+    }
+
+    func testRHR_betweenT3andT4_appliesE3() {
+        let bpm = (thresholds.rhrT3 + thresholds.rhrT4) / 2.0
+        let m = service.computeMultiplier(
+            sleepHours: nil, stepCount: nil, hrvSDNN: nil, exerciseMinutes: nil,
+            heartRate: bpm)
+        XCTAssertEqual(m, 1.0 + thresholds.rhrE3 / 100.0, accuracy: 0.001,
+            "RHR T3–T4 (mildly elevated) must apply E3 (+5%)")
+        XCTAssertGreaterThan(m, 1.0)
+        XCTAssertEqual(m, 1.05, accuracy: 0.001)
+    }
+
+    func testRHR_atOrAboveT4_appliesE4() {
+        let m = service.computeMultiplier(
+            sleepHours: nil, stepCount: nil, hrvSDNN: nil, exerciseMinutes: nil,
+            heartRate: thresholds.rhrT4)
+        XCTAssertEqual(m, 1.0 + thresholds.rhrE4 / 100.0, accuracy: 0.001,
+            "RHR >= T4 (significantly elevated) must apply E4 (+10%)")
+        XCTAssertGreaterThan(m, 1.0)
+        XCTAssertEqual(m, 1.10, accuracy: 0.001)
+    }
+
+    func testRHR_nil_contributesNothing() {
+        let m = service.computeMultiplier(
+            sleepHours: nil, stepCount: nil, hrvSDNN: nil, exerciseMinutes: nil,
+            heartRate: nil)
+        XCTAssertEqual(m, 1.0, accuracy: 0.001, "nil heartRate must contribute 0%")
+    }
+
+    func testRHR_highCombinedWithBadSleep_clampedToMax() {
+        var t = AppleHealthIRThresholds.default
+        t.sleepE1 = 80.0
+        t.rhrE4 = 80.0
+        service.thresholds = t
+        let m = service.computeMultiplier(
+            sleepHours: 0.0, stepCount: nil, hrvSDNN: nil, exerciseMinutes: nil,
+            heartRate: t.rhrT4)
+        XCTAssertEqual(m, t.multiplierMax, accuracy: 0.001,
+            "Combined sleep+RHR penalty must be clamped to multiplierMax")
     }
 }

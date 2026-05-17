@@ -15,10 +15,12 @@ struct AppleHealthIREntry: Codable, Identifiable {
     let stepCount: Double?
     let hrvSDNN: Double?
     let exerciseMinutes: Double?
+    let heartRate: Double?
     let sleepDelta: Double
     let stepsDelta: Double
     let hrvDelta: Double
     let exerciseDelta: Double
+    let rhrDelta: Double
     let combinedDelta: Double
     let multiplier: Double
     let thresholdsSnapshot: AppleHealthIRThresholds

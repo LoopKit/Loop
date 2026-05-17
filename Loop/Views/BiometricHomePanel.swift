@@ -108,6 +108,7 @@ struct BiometricHomePanel: View {
             case .steps: return snapshot.stepCount
             case .hrv: return snapshot.hrvSDNN
             case .exercise: return snapshot.exerciseMinutes
+            case .rhr: return snapshot.heartRate
             }
         }
 
@@ -118,6 +119,7 @@ struct BiometricHomePanel: View {
             case .steps: return entry.stepsDelta
             case .hrv: return entry.hrvDelta
             case .exercise: return entry.exerciseDelta
+            case .rhr: return entry.rhrDelta
             }
         }
 

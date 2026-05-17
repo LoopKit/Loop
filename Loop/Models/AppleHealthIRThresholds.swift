@@ -10,6 +10,7 @@ enum AppleHealthIRThresholdsError: LocalizedError {
     case invalidStepsOrdering
     case invalidHRVOrdering
     case invalidExerciseOrdering
+    case invalidRHROrdering
     case invalidClampRange
 
     var errorDescription: String? {
@@ -22,6 +23,8 @@ enum AppleHealthIRThresholdsError: LocalizedError {
             return "HRV thresholds must be in ascending order (T1 < T2 < T3 < T4)."
         case .invalidExerciseOrdering:
             return "Exercise thresholds must be in ascending order (T1 < T2 < T3 < T4)."
+        case .invalidRHROrdering:
+            return "RHR thresholds must be in ascending order (T1 < T2 < T3 < T4)."
         case .invalidClampRange:
             return "Multiplier minimum must be less than maximum and both must be positive."
         }
@@ -76,6 +79,17 @@ struct AppleHealthIRThresholds: Codable, Equatable {
     var exerciseE3: Double = -8.0
     var exerciseE4: Double = -12.0
 
+    // MARK: - RHR (bpm)
+    // Zone logic: < T1 → 0; < T2 → E1; < T3 → E2; < T4 → E3; ≥ T4 → E4
+    var rhrT1: Double = 50.0
+    var rhrT2: Double = 65.0
+    var rhrT3: Double = 75.0
+    var rhrT4: Double = 85.0
+    var rhrE1: Double = -2.0
+    var rhrE2: Double = 0.0
+    var rhrE3: Double = 5.0
+    var rhrE4: Double = 10.0
+
     // MARK: - Multiplier clamp
     var multiplierMin: Double = 0.5
     var multiplierMax: Double = 2.0
@@ -94,6 +108,9 @@ struct AppleHealthIRThresholds: Codable, Equatable {
         }
         guard exerciseT1 < exerciseT2 && exerciseT2 < exerciseT3 && exerciseT3 < exerciseT4 else {
             throw AppleHealthIRThresholdsError.invalidExerciseOrdering
+        }
+        guard rhrT1 < rhrT2 && rhrT2 < rhrT3 && rhrT3 < rhrT4 else {
+            throw AppleHealthIRThresholdsError.invalidRHROrdering
         }
         guard multiplierMin > 0 && multiplierMin < multiplierMax else {
             throw AppleHealthIRThresholdsError.invalidClampRange

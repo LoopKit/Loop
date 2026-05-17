@@ -106,7 +106,8 @@ final class BiometricsService: BiometricsServiceProtocol {
                 sleepHours: snapshot.sleepHours,
                 stepCount: snapshot.stepCount,
                 hrvSDNN: snapshot.hrvSDNN,
-                exerciseMinutes: snapshot.exerciseMinutes
+                exerciseMinutes: snapshot.exerciseMinutes,
+                heartRate: snapshot.heartRate
             )
         }
     }

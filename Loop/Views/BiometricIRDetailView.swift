@@ -10,6 +10,7 @@ enum BiometricTileType: String, CaseIterable, Identifiable {
     case steps
     case hrv
     case exercise
+    case rhr
 
     var id: String { rawValue }
 
@@ -19,6 +20,7 @@ enum BiometricTileType: String, CaseIterable, Identifiable {
         case .steps: return NSLocalizedString("Steps", comment: "Biometric tile label")
         case .hrv: return NSLocalizedString("HRV", comment: "Biometric tile label")
         case .exercise: return NSLocalizedString("Exercise", comment: "Biometric tile label")
+        case .rhr: return NSLocalizedString("Resting HR", comment: "Biometric tile label")
         }
     }
 
@@ -28,6 +30,7 @@ enum BiometricTileType: String, CaseIterable, Identifiable {
         case .steps: return "figure.walk"
         case .hrv: return "waveform.path.ecg"
         case .exercise: return "heart.fill"
+        case .rhr: return "heart.circle.fill"
         }
     }
 
@@ -37,6 +40,7 @@ enum BiometricTileType: String, CaseIterable, Identifiable {
         case .steps: return NSLocalizedString("steps", comment: "Steps unit")
         case .hrv: return NSLocalizedString("ms", comment: "Milliseconds unit abbreviation")
         case .exercise: return NSLocalizedString("min", comment: "Minutes unit abbreviation")
+        case .rhr: return NSLocalizedString("bpm", comment: "Beats per minute unit")
         }
     }
 
@@ -46,6 +50,7 @@ enum BiometricTileType: String, CaseIterable, Identifiable {
         case .steps: return entry.stepCount
         case .hrv: return entry.hrvSDNN
         case .exercise: return entry.exerciseMinutes
+        case .rhr: return entry.heartRate
         }
     }
 
@@ -55,6 +60,7 @@ enum BiometricTileType: String, CaseIterable, Identifiable {
         case .steps: return entry.stepsDelta
         case .hrv: return entry.hrvDelta
         case .exercise: return entry.exerciseDelta
+        case .rhr: return entry.rhrDelta
         }
     }
 }
@@ -162,6 +168,14 @@ struct BiometricIRDetailView: View {
                 BandInfo(label: "Zone 2", range: "\(Int(t.exerciseT1))–\(Int(t.exerciseT2))min", effect: t.exerciseE2),
                 BandInfo(label: "Zone 3", range: "\(Int(t.exerciseT2))–\(Int(t.exerciseT3))min", effect: t.exerciseE3),
                 BandInfo(label: "Zone 4", range: "\(Int(t.exerciseT3))–\(Int(t.exerciseT4))min", effect: t.exerciseE4),
+            ]
+        case .rhr:
+            return [
+                BandInfo(label: "Zone 1", range: "< \(Int(t.rhrT1))bpm", effect: 0.0),
+                BandInfo(label: "Zone 2", range: "\(Int(t.rhrT1))–\(Int(t.rhrT2))bpm", effect: t.rhrE1),
+                BandInfo(label: "Zone 3", range: "\(Int(t.rhrT2))–\(Int(t.rhrT3))bpm", effect: t.rhrE2),
+                BandInfo(label: "Zone 4", range: "\(Int(t.rhrT3))–\(Int(t.rhrT4))bpm", effect: t.rhrE3),
+                BandInfo(label: "Zone 5", range: "≥ \(Int(t.rhrT4))bpm", effect: t.rhrE4),
             ]
         }
     }

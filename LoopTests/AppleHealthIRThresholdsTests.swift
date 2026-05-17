@@ -287,4 +287,60 @@ final class AppleHealthIRThresholdsTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(t.hrvE2, t.hrvE3)
         XCTAssertGreaterThanOrEqual(t.hrvE3, t.hrvE4)
     }
+
+    // MARK: - Default values: RHR
+
+    func testDefaults_rhrT1_is50bpm() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.rhrT1, 50.0, accuracy: accuracy)
+    }
+
+    func testDefaults_rhrT2_is65bpm() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.rhrT2, 65.0, accuracy: accuracy)
+    }
+
+    func testDefaults_rhrT3_is75bpm() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.rhrT3, 75.0, accuracy: accuracy)
+    }
+
+    func testDefaults_rhrT4_is85bpm() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.rhrT4, 85.0, accuracy: accuracy)
+    }
+
+    func testDefaults_rhrE1_isNeg2percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.rhrE1, -2.0, accuracy: accuracy)
+    }
+
+    func testDefaults_rhrE2_is0percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.rhrE2, 0.0, accuracy: accuracy)
+    }
+
+    func testDefaults_rhrE3_is5percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.rhrE3, 5.0, accuracy: accuracy)
+    }
+
+    func testDefaults_rhrE4_is10percent() {
+        XCTAssertEqual(AppleHealthIRThresholds.default.rhrE4, 10.0, accuracy: accuracy)
+    }
+
+    // MARK: - Validate: RHR ordering
+
+    func testValidate_invalidRHROrdering_throws() {
+        var t = AppleHealthIRThresholds.default
+        t.rhrT2 = t.rhrT1 - 1
+        XCTAssertThrowsError(try t.validate())
+    }
+
+    func testValidate_validRHR_doesNotThrow() {
+        XCTAssertNoThrow(try AppleHealthIRThresholds.default.validate())
+    }
+
+    // MARK: - Physiological ordering: RHR
+
+    func testOrdering_rhrEffects_increaseWithHigherBPM() {
+        let t = AppleHealthIRThresholds.default
+        XCTAssertLessThan(t.rhrE1, t.rhrE2)
+        XCTAssertLessThan(t.rhrE2, t.rhrE3)
+        XCTAssertLessThan(t.rhrE3, t.rhrE4)
+        XCTAssertGreaterThan(t.rhrE4, 0.0)
+    }
 }

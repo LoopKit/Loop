@@ -15,14 +15,29 @@ protocol AppleHealthIRServiceProtocol: AnyObject {
         sleepHours: Double?,
         stepCount: Double?,
         hrvSDNN: Double?,
-        exerciseMinutes: Double?
+        exerciseMinutes: Double?,
+        heartRate: Double?
     ) -> Double
     func updateBiometrics(
         sleepHours: Double?,
         stepCount: Double?,
         hrvSDNN: Double?,
-        exerciseMinutes: Double?
+        exerciseMinutes: Double?,
+        heartRate: Double?
     )
+}
+
+extension AppleHealthIRServiceProtocol {
+    func computeMultiplier(sleepHours: Double?, stepCount: Double?,
+                           hrvSDNN: Double?, exerciseMinutes: Double?) -> Double {
+        computeMultiplier(sleepHours: sleepHours, stepCount: stepCount,
+                          hrvSDNN: hrvSDNN, exerciseMinutes: exerciseMinutes, heartRate: nil)
+    }
+    func updateBiometrics(sleepHours: Double?, stepCount: Double?,
+                          hrvSDNN: Double?, exerciseMinutes: Double?) {
+        updateBiometrics(sleepHours: sleepHours, stepCount: stepCount,
+                         hrvSDNN: hrvSDNN, exerciseMinutes: exerciseMinutes, heartRate: nil)
+    }
 }
 
 final class AppleHealthIRService: AppleHealthIRServiceProtocol {
@@ -48,13 +63,15 @@ final class AppleHealthIRService: AppleHealthIRServiceProtocol {
         sleepHours: Double?,
         stepCount: Double?,
         hrvSDNN: Double?,
-        exerciseMinutes: Double?
+        exerciseMinutes: Double?,
+        heartRate: Double?
     ) -> Double {
         let sd = sleepDelta(hours: sleepHours)
         let stpd = stepsDelta(count: stepCount)
         let hd = hrvDelta(sdnn: hrvSDNN)
         let ed = exerciseDelta(minutes: exerciseMinutes)
-        let combined = sd + stpd + hd + ed
+        let rd = rhrDelta(bpm: heartRate)
+        let combined = sd + stpd + hd + ed + rd
         let raw = 1.0 + combined / 100.0
         return clamp(raw)
     }
@@ -63,13 +80,15 @@ final class AppleHealthIRService: AppleHealthIRServiceProtocol {
         sleepHours: Double?,
         stepCount: Double?,
         hrvSDNN: Double?,
-        exerciseMinutes: Double?
+        exerciseMinutes: Double?,
+        heartRate: Double?
     ) {
         let sd = sleepDelta(hours: sleepHours)
         let stpd = stepsDelta(count: stepCount)
         let hd = hrvDelta(sdnn: hrvSDNN)
         let ed = exerciseDelta(minutes: exerciseMinutes)
-        let combined = sd + stpd + hd + ed
+        let rd = rhrDelta(bpm: heartRate)
+        let combined = sd + stpd + hd + ed + rd
         let raw = 1.0 + combined / 100.0
         let multiplier = clamp(raw)
 
@@ -80,10 +99,12 @@ final class AppleHealthIRService: AppleHealthIRServiceProtocol {
             stepCount: stepCount,
             hrvSDNN: hrvSDNN,
             exerciseMinutes: exerciseMinutes,
+            heartRate: heartRate,
             sleepDelta: sd,
             stepsDelta: stpd,
             hrvDelta: hd,
             exerciseDelta: ed,
+            rhrDelta: rd,
             combinedDelta: combined,
             multiplier: multiplier,
             thresholdsSnapshot: thresholds
@@ -134,6 +155,16 @@ final class AppleHealthIRService: AppleHealthIRServiceProtocol {
         if minutes < t.exerciseT3 { return t.exerciseE3 }
         if minutes < t.exerciseT4 { return t.exerciseE4 }
         return 0.0
+    }
+
+    private func rhrDelta(bpm: Double?) -> Double {
+        guard let bpm = bpm else { return 0.0 }
+        let t = thresholds
+        if bpm < t.rhrT1 { return 0.0 }
+        if bpm < t.rhrT2 { return t.rhrE1 }
+        if bpm < t.rhrT3 { return t.rhrE2 }
+        if bpm < t.rhrT4 { return t.rhrE3 }
+        return t.rhrE4
     }
 
     private func clamp(_ value: Double) -> Double {
