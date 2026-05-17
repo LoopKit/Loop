@@ -38,6 +38,8 @@ fi
 
 DERIVED_ASSETS="${DIRECTORY}/DerivedAssets.xcassets"
 DERIVED_ASSETS_BASE="${DIRECTORY}/DerivedAssetsBase.xcassets"
+APP_ICON_NAME="${APPICON_NAME:-AppIcon}"
+APP_ICON_FILE="${DIRECTORY}/../${APP_ICON_NAME}.icon"
 
 # Assets can be overridden by a DerivedAssetsOverride.xcassets in ${DIRECTORY}, or
 # By a file named ${DIRECTORY}/../../OverrideAssets${EXECUTABLE_NAME}.xcassets
@@ -57,6 +59,10 @@ if [ -e "${DERIVED_ASSETS_OVERRIDE}" ]; then
   info "Copying derived assets override to derived assets..."
   for ASSET_PATH in "${DERIVED_ASSETS_OVERRIDE}"/*; do
     ASSET_FILE="$(basename "${ASSET_PATH}")"
+    if [ -d "${APP_ICON_FILE}" ] && [ "${ASSET_FILE}" = "${APP_ICON_NAME}.appiconset" ]; then
+      info "Skipping legacy app icon override ${ASSET_FILE}; using ${APP_ICON_NAME}.icon"
+      continue
+    fi
     rm -rf "${DERIVED_ASSETS}/${ASSET_FILE}"
     cp -av "${ASSET_PATH}" "${DERIVED_ASSETS}/${ASSET_FILE}"
   done
