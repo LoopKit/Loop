@@ -4,7 +4,6 @@
 //
 
 import SwiftUI
-import Combine
 
 struct BiometricHomePanel: View {
     private let irService: AppleHealthIRServiceProtocol
@@ -18,10 +17,6 @@ struct BiometricHomePanel: View {
         self.irService = irService
         self.biometricsService = biometricsService
     }
-
-    // Subscriptions are managed with a class-level reference stored externally
-    // to avoid SwiftUI re-creating the Set on each body evaluation.
-    @State private var _cancellables = Set<AnyCancellable>()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -58,8 +53,8 @@ struct BiometricHomePanel: View {
         .cornerRadius(10)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-        .onAppear(perform: subscribe)
-        .onDisappear(perform: unsubscribe)
+        .onReceive(biometricsService.snapshotPublisher.receive(on: DispatchQueue.main)) { latestSnapshot = $0 }
+        .onReceive(irService.multiplierPublisher.receive(on: DispatchQueue.main)) { currentMultiplier = $0 }
         .sheet(item: $selectedTile) { tile in
             BiometricIRDetailView(
                 tileType: tile,
@@ -178,18 +173,4 @@ struct BiometricHomePanel: View {
         }
     }
 
-    private func subscribe() {
-        biometricsService.snapshotPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [self] snapshot in latestSnapshot = snapshot }
-            .store(in: &_cancellables)
-        irService.multiplierPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [self] m in currentMultiplier = m }
-            .store(in: &_cancellables)
-    }
-
-    private func unsubscribe() {
-        _cancellables.removeAll()
-    }
 }

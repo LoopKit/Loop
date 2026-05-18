@@ -63,7 +63,17 @@ final class BiometricsService: BiometricsServiceProtocol {
 
     func requestAuthorization() async throws {
         try await healthStore.requestAuthorization(toShare: [], read: Self.readTypes)
-        authorizationStatus = .authorized
+        // HealthKit does not reveal per-type denial for privacy reasons; use the
+        // aggregate authorizationStatus for any readable type to detect denial.
+        let anyType = HKObjectType.quantityType(forIdentifier: .heartRate)!
+        switch healthStore.authorizationStatus(for: anyType) {
+        case .sharingDenied:
+            authorizationStatus = .denied
+        case .notDetermined:
+            authorizationStatus = .notDetermined
+        default:
+            authorizationStatus = .authorized
+        }
     }
 
     func startPolling(interval: TimeInterval = 900) {

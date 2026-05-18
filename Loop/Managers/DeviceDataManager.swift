@@ -491,6 +491,7 @@ final class DeviceDataManager {
         loopManager.configureBiometricIRService()
         Task {
             try? await biometrics.requestAuthorization()
+            guard biometrics.authorizationStatus == .authorized else { return }
             biometrics.startPolling(interval: 900)
         }
     }
