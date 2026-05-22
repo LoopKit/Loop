@@ -12,7 +12,7 @@ enum DevelopmentBranchAlerter {
     // The LoopWorkspace superproject branch this warning applies to.
     private static let developmentBranchName = "dev"
 
-    private static let switchToMainURL = URL(string: "https://loopkit.github.io/loopdocs/version/development/?h=branch#what-are-git-branches")!
+    private static let switchToMainURL = URL(string: "https://loopkit.github.io/loopdocs/browser/build-dev-browser/#build-development-version")!
 
     /// Presents a blocking warning when this is a build from the development branch.
     /// Shown on every launch; the alert can only be dismissed by an explicit choice.
