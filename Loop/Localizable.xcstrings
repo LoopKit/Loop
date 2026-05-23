@@ -21019,6 +21019,9 @@
         }
       }
     },
+    "I'm a tester" : {
+      "comment" : "Button that dismisses the development build warning"
+    },
     "If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered and non-Critical Alerts will be silenced until %1$@ is added to each Focus mode as an Allowed App." : {
       "comment" : "Focus modes descriptive text (1: app name)",
       "localizations" : {
@@ -35139,6 +35142,9 @@
         }
       }
     },
+    "Switch to main" : {
+      "comment" : "Button on the development build warning that opens documentation about switching branches"
+    },
     "Tap here to set up a CGM" : {
       "comment" : "Descriptive text for button to add CGM device",
       "localizations" : {
@@ -37014,6 +37020,9 @@
           }
         }
       }
+    },
+    "This is the development version of Loop, built from the dev branch. Any updates on this branch may contain new, untested features, and may be unsafe. If you are not a tester, please do not use this branch, and switch to main." : {
+      "comment" : "Body of the warning shown at launch on development builds"
     },
     "This option only applies when Loop's Dosing Strategy is set to Automatic Bolus." : {
       "comment" : "String shown when glucose based partial application cannot be enabled because dosing strategy is not set to Automatic Bolus",
@@ -39557,6 +39566,9 @@
           }
         }
       }
+    },
+    "Warning" : {
+      "comment" : "Title of the warning shown at launch on development builds"
     },
     "Warning! Safety notifications are turned OFF" : {
       "comment" : "Alert Permissions Need Attention alert title",
