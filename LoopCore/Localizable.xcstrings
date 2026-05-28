@@ -165,6 +165,12 @@
             "state" : "translated",
             "value" : "Carbohidrați activi (COB)"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活性碳水 (COB)"
+          }
         }
       }
     },
@@ -237,6 +243,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Insulină activă (IOB)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活性胰岛素(IOB)"
           }
         }
       }
@@ -449,6 +461,12 @@
             "state" : "translated",
             "value" : "Glicemia curentă (Valoare și tendință)"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前血糖（数值和箭头）"
+          }
         }
       }
     },
@@ -637,6 +655,12 @@
             "state" : "translated",
             "value" : "Parcelă și rând"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图表和数据行"
+          }
         }
       }
     },
@@ -658,6 +682,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Doar rând"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅数据行"
           }
         }
       }
@@ -804,6 +834,12 @@
             "state" : "translated",
             "value" : "Actualizat"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
+          }
         }
       }
     },
@@ -820,6 +856,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Actualizat (la)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新(更新于)"
           }
         }
       }

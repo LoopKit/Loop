@@ -643,7 +643,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Data"
+            "value" : "Dată"
           }
         }
       }
@@ -784,7 +784,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Închidere"
+            "value" : "Sfârșit"
           }
         }
       }
@@ -1099,7 +1099,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Widgetul de stare Loop"
+            "value" : "Widget de stare Loop"
           }
         },
         "ru" : {
@@ -1384,7 +1384,13 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deschideți aplicația pentru a actualiza widget-ul"
+            "value" : "Deschideți aplicația pentru a actualiza widgetul"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开应用以更新小部件"
           }
         }
       }
@@ -1406,7 +1412,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Suprascriere presetare"
+            "value" : "Suprascriere presetată"
           }
         }
       }
@@ -1630,7 +1636,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pornește"
+            "value" : "Start"
           }
         }
       }

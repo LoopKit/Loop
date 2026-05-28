@@ -1016,7 +1016,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Glicemia este estimată prin combinarea unui număr de date sursă. Folosiți acest instrument pentru a controla diverse surse de date și a felului în care influențează estimarea."
+            "value" : "Nivelul viitor al glicemiei este prezis prin combinarea efectelor mai multor factori de intrare. Utilizați acest instrument pentru a comuta diversele date de intrare și pentru a vedea cum se compară acestea cu predicția finală."
           }
         },
         "ru" : {
@@ -2444,7 +2444,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Glicemie estimată"
+            "value" : "Glicemie prognozată"
           }
         },
         "ru" : {
@@ -2804,12 +2804,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Glucose"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "शुगर"
           }
         },
         "it" : {

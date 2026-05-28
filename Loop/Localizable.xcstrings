@@ -95,7 +95,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : " (urmează a fi administrate: %@)"
+            "value" : " (în așteptare: %@)"
           }
         },
         "ru" : {
@@ -228,12 +228,6 @@
     " remaining" : {
       "comment" : "remaining time in setting's profile expiration section",
       "localizations" : {
-        "ce" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "remaining"
-          }
-        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1916,7 +1910,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ operează cu bucla închisă în poziția OFF. Pompa și CGM-ul vor continua să funcționeze, dar aplicația nu va ajusta automat dozarea."
+            "value" : "%1$@ operează cu bucla închisă în poziția OFF. Pompa și senzorul CGM vor continua să funcționeze, dar aplicația nu va ajusta automat dozarea."
           }
         },
         "ru" : {
@@ -4189,7 +4183,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O pompă trebuie configurată înainte ca un bolus să poată fi livrat."
+            "value" : "O pompă trebuie configurată înainte ca un bolus să poată fi administrat."
           }
         },
         "ru" : {
@@ -4350,7 +4344,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AcceptRecommendedBolus"
+            "value" : "AcceptațiBolusRecomandat"
           }
         },
         "ru" : {
@@ -5179,7 +5173,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adaugă carbohidrați"
+            "value" : "Adăugați carbohidrați"
           }
         },
         "ru" : {
@@ -5304,7 +5298,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adaugă CGM"
+            "value" : "Adăugați CGM"
           }
         },
         "ru" : {
@@ -5375,7 +5369,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adăugați elementul la ecranul de blocare / afișajul CarPlay"
+            "value" : "Adăugați element la ecranul de blocare / afișajul CarPlay"
           }
         }
       }
@@ -5464,7 +5458,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adaugă masă"
+            "value" : "Adăugați masă"
           }
         },
         "ru" : {
@@ -5524,7 +5518,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adăugați o linie predictivă"
+            "value" : "Adăugați linie predictivă"
           }
         }
       }
@@ -5613,7 +5607,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adaugă pompă"
+            "value" : "Adăugați pompă"
           }
         },
         "ru" : {
@@ -5720,7 +5714,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adaugă Serviciu"
+            "value" : "Adăugați Serviciu"
           }
         },
         "ru" : {
@@ -7048,7 +7042,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已有更新的大剂量推荐值。"
+            "value" : "有新的大剂量推荐值可用"
           }
         }
       }
@@ -7241,12 +7235,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "API Secret"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "एपीआई पास्वर्ड"
           }
         },
         "it" : {
@@ -7852,7 +7840,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sunteți sigur/ă că vreți să ștergeți toate datele %@.\n(Această acțiune nu este reversibilă)"
+            "value" : "Sunteți sigur că vreți să ștergeți toate datele %@.\n(Această acțiune nu este reversibilă)"
           }
         },
         "ru" : {
@@ -7965,7 +7953,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sunteți sigur/ă că vreți să ștergeți acest CGM?"
+            "value" : "Sunteți sigur că vreți să ștergeți acest CGM?"
           }
         },
         "ru" : {
@@ -8047,7 +8035,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sunteți sigur/ă că vreți să ștergeți acest aliment?"
+            "value" : "Sunteți sigur că vreți să ștergeți acest aliment?"
           }
         },
         "zh-Hans" : {
@@ -8131,7 +8119,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sunteți sigur/ă că vreți să ștergeți acest serviciu?"
+            "value" : "Sunteți sigur că vreți să ștergeți acest serviciu?"
           }
         },
         "ru" : {
@@ -10055,12 +10043,6 @@
             "value" : "בטל"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "निरस्त"
-          }
-        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10100,7 +10082,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renunță"
+            "value" : "Anulați"
           }
         },
         "ru" : {
@@ -10731,7 +10713,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "碳水化合物吸收率"
+            "value" : "碳水化合物系数"
           }
         }
       }
@@ -10827,7 +10809,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adaugă carbohidrați"
+            "value" : "Adăugați carbohidrați"
           }
         },
         "ru" : {
@@ -13289,6 +13271,12 @@
             "state" : "translated",
             "value" : "Configurați afișajul"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示设置"
+          }
         }
       }
     },
@@ -13347,12 +13335,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Continue"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "जारी"
           }
         },
         "it" : {
@@ -13722,7 +13704,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nu s-a putut reporni %1$@"
+            "value" : "Eșec la reporni %1$@"
           }
         }
       }
@@ -14274,7 +14256,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "当前葡萄糖%1$@低于校正范围"
+            "value" : "当前血糖%1$@低于校正范围"
           }
         }
       }
@@ -15028,7 +15010,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Șterge cont"
+            "value" : "Ștergeți cont"
           }
         },
         "ru" : {
@@ -15147,7 +15129,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Șterge tot"
+            "value" : "Ștergeți tot"
           }
         },
         "ru" : {
@@ -15438,7 +15420,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Șterge serviciul"
+            "value" : "Ștergeți serviciul"
           }
         },
         "ru" : {
@@ -15953,7 +15935,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limite de livrare"
+            "value" : "Limite de administrare"
           }
         },
         "ru" : {
@@ -16357,7 +16339,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renunță"
+            "value" : "Anulați"
           }
         },
         "ru" : {
@@ -16398,7 +16380,13 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Culori de afișare pentru glicemie"
+            "value" : "Afișați culorile pentru glicemie"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "血糖颜色显示"
           }
         }
       }
@@ -16410,7 +16398,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opțiuni de control al afișajului"
+            "value" : "Afișați opțiunile de control"
           }
         }
       }
@@ -16423,6 +16411,12 @@
             "state" : "translated",
             "value" : "Afișați predicția în grafic"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在图中显示预测结果"
+          }
         }
       }
     },
@@ -16433,6 +16427,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Afișați până la 4 elemente. Eticheta de afișare este în paranteze."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最多显示4个项目。括号内为显示标签。"
           }
         }
       }
@@ -16686,7 +16686,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Strategie de dozare"
+            "value" : "Strategie dozare"
           }
         },
         "ru" : {
@@ -16852,7 +16852,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activează Bluetooth"
+            "value" : "Activați Bluetooth"
           }
         },
         "ru" : {
@@ -16923,7 +16923,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activează aplicarea parțială pe bază de glicemie"
+            "value" : "Activați aplicarea parțială pe bază de glicemie"
           }
         }
       }
@@ -16970,7 +16970,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activează corecția retrospectivă integrală"
+            "value" : "Activați corecția retrospectivă integrală"
           }
         }
       }
@@ -17088,7 +17088,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activează"
+            "value" : "Activați"
           }
         },
         "ru" : {
@@ -18154,7 +18154,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajunge la %@"
+            "value" : "În cele din urmă %@"
           }
         },
         "ru" : {
@@ -18516,7 +18516,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Exportă jurnalul de evenimente critice"
+            "value" : "Exportați jurnalul de evenimente critice"
           }
         },
         "ru" : {
@@ -18605,7 +18605,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Export-%1$@"
+            "value" : "Exportați-%1$@"
           }
         },
         "ru" : {
@@ -18688,7 +18688,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nu s-a reușit reluarea administrării de insulină"
+            "value" : "Eșec la reluarea administrării de insulină"
           }
         },
         "ru" : {
@@ -19205,7 +19205,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tip de alimente"
+            "value" : "Tip aliment"
           }
         },
         "ru" : {
@@ -19881,12 +19881,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Glucose"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "शुगर"
           }
         },
         "it" : {
@@ -21025,6 +21019,9 @@
         }
       }
     },
+    "I'm a tester" : {
+      "comment" : "Button that dismisses the development build warning"
+    },
     "If iOS Focus Mode is ON and Mute Alerts is OFF, Critical Alerts will still be delivered and non-Critical Alerts will be silenced until %1$@ is added to each Focus mode as an Allowed App." : {
       "comment" : "Focus modes descriptive text (1: app name)",
       "localizations" : {
@@ -22012,7 +22009,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modelul de insulină"
+            "value" : "Model insulină"
           }
         },
         "ru" : {
@@ -22328,7 +22325,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Programul  Factorului de Sensibilitate la Insulină"
+            "value" : "Orarul Factorului de Sensibilitate la Insulină"
           }
         },
         "ru" : {
@@ -23375,7 +23372,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Generează raport"
+            "value" : "Generați raport"
           }
         },
         "ru" : {
@@ -24088,7 +24085,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Înregistrează Doză"
+            "value" : "Înregistrați Doză"
           }
         },
         "ru" : {
@@ -24837,7 +24834,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "În mod normal, Loop furnizează 40% din necesarul de insulină estimat pentru fiecare ciclu de dozare. \n \nCând experimentul Aplicare parțială bazată pe glicemie este activat, Loop va varia procentul de bolus recomandat administrat pentru fiecare ciclu în funcție de nivelul glicemiei. \n \nÎn apropierea intervalului de corecție, va utiliza 20% (similar cu o bazală temporar) și va crește treptat până la maximum 80% la glicemie ridicată (200 mg/dl, 11,1 mmol/l). \n \nVă rugăm să rețineți că în timpul creșterii rapide a glicemiei, cum ar fi după o masă neanunțată, această funcție, combinată cu efectele vitezei și ale corecției retrospective, poate duce la o doză mai mare decât ar necesita ISF-ul dumneavoastră."
+            "value" : "În mod normal, Loop furnizează 40% din necesarul de insulină estimat pentru fiecare ciclu de dozare. \n \nCând experimentul Aplicare parțială bazată pe glicemie este activat, Loop o să varieze procentul de bolus recomandat administrat pentru fiecare ciclu în funcție de nivelul glicemiei.\n \nÎn apropierea intervalului de corecție, va utiliza 20% (similar cu o bazală temporar) și va crește treptat până la maximum 80% la glicemie ridicată (200 mg/dl, 11,1 mmol/l). \n \nVă rugăm să rețineți că în timpul creșterii rapide a glicemiei, cum ar fi după o masă neanunțată, această funcție, combinată cu efectele vitezei și ale corecției retrospective, poate duce la o doză mai mare decât ar necesita ISF-ul dumneavoastră."
           }
         },
         "zh-Hans" : {
@@ -25080,7 +25077,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loop va stabili ratele bazale temporare pentru a crește și reduce cantitatea de insulina livrată."
+            "value" : "Loop va stabili ratele bazale temporare pentru a crește și reduce cantitatea de insulina administrată."
           }
         },
         "ru" : {
@@ -26756,12 +26753,6 @@
             "value" : "שם"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "नाम"
-          }
-        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27711,7 +27702,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nu există date recente despre glicemie"
+            "value" : "Lipsă glicemie recentă"
           }
         },
         "ru" : {
@@ -27806,7 +27797,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nu există date recente despre glicemie"
+            "value" : "Lipsă date recente glicemie"
           }
         },
         "ru" : {
@@ -27901,7 +27892,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nu există date recente despre pompă"
+            "value" : "Lipsă date recente pompă"
           }
         },
         "ru" : {
@@ -28791,7 +28782,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oh nu! Loop s-a blocat în timpul administrării, iar ajustările insulinei au fost întrerupte până la închiderea acestui dialog. Istoricul administrării poate să nu fie exact. Vă rugăm să consultați graficele de livrare a insulinei și să vă monitorizați cu atenție glicemia."
+            "value" : "Oh nu! Loop s-a blocat în timpul administrării, iar ajustările insulinei au fost întrerupte până la închiderea acestui dialog. Istoricul administrării poate să nu fie exact. Vă rugăm să consultați graficele de administrare a insulinei și să vă monitorizați cu atenție glicemia."
           }
         },
         "ru" : {
@@ -32655,7 +32646,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Introducere de la distanță a bolusului: %@ U"
+            "value" : "Intrare de la distanță a bolusului: %@ U"
           }
         },
         "ru" : {
@@ -32738,7 +32729,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Introducere de la distanță a carbohidraților: %d grame"
+            "value" : "Intrare de la distanță a carbohidraților: %d grame"
           }
         },
         "ru" : {
@@ -33141,7 +33132,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reîncearcă"
+            "value" : "Reîncercați"
           }
         },
         "ru" : {
@@ -33223,7 +33214,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salvează"
+            "value" : "Salvați"
           }
         }
       }
@@ -33317,7 +33308,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salvați carbohidrații și livrați"
+            "value" : "Salvați carbohidrații și administrați"
           }
         },
         "zh-Hans" : {
@@ -33394,7 +33385,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salvează fără bolusare"
+            "value" : "Salvați fără bolusare"
           }
         },
         "ru" : {
@@ -35151,6 +35142,9 @@
         }
       }
     },
+    "Switch to main" : {
+      "comment" : "Button on the development build warning that opens documentation about switching branches"
+    },
     "Tap here to set up a CGM" : {
       "comment" : "Descriptive text for button to add CGM device",
       "localizations" : {
@@ -35217,7 +35211,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apăsați aici pentru a configura un CGM"
+            "value" : "Atingeți aici pentru a configura un CGM"
           }
         },
         "ru" : {
@@ -35312,7 +35306,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apăsați aici pentru a configura o pompă de insulină"
+            "value" : "Atingeți aici pentru a configura o pompă de insulină"
           }
         },
         "ru" : {
@@ -35407,7 +35401,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apăsați aici pentru a configura un Serviciu"
+            "value" : "Atingeți aici pentru a configura un Serviciu"
           }
         },
         "ru" : {
@@ -35502,7 +35496,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Atinge pentru a adăuga"
+            "value" : "Atingeți pentru a adăuga"
           }
         },
         "ru" : {
@@ -35615,7 +35609,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apăsați pentru a relua"
+            "value" : "Atingeți pentru a relua"
           }
         },
         "ru" : {
@@ -36212,7 +36206,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Algoritmul de dozare al bolusurilor folosește o estimare mai conservatoare a glicemiei prognozate decât cea utilizată pentru a ajusta rata bazală. \n\n Ca rezultat, glicemia estimată după un bolus poate fi în continuare mai mare decât intervalul țintă."
+            "value" : "Algoritmul de dozare al bolusurilor folosește o estimare mai conservatoare a glicemiei prognozate decât cea utilizată pentru a ajusta rata bazală. \n\nCa rezultat, glicemia estimată după un bolus poate fi în continuare mai mare decât intervalul țintă."
           }
         },
         "ru" : {
@@ -36295,7 +36289,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recomandarea pentru bolus a fost actualizată. Vă rugăm să reconfirmaţi valoarea bolusului."
+            "value" : "Recomandarea pentru bolus a fost actualizată. Vă rugăm să reconfirmați valoarea bolusului."
           }
         },
         "ru" : {
@@ -36903,7 +36897,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trebuie sa configurați o valoare maximă pentru bolus înainte ca acesta să poată fi livrat."
+            "value" : "Trebuie sa configurați o valoare maximă pentru bolus înainte ca acesta să poată fi administrat."
           }
         },
         "ru" : {
@@ -37026,6 +37020,9 @@
           }
         }
       }
+    },
+    "This is the development version of Loop, built from the dev branch. Any updates on this branch may contain new, untested features, and may be unsafe. If you are not a tester, please do not use this branch, and switch to main." : {
+      "comment" : "Body of the warning shown at launch on development builds"
     },
     "This option only applies when Loop's Dosing Strategy is set to Automatic Bolus." : {
       "comment" : "String shown when glucose based partial application cannot be enabled because dosing strategy is not set to Automatic Bolus",
@@ -38051,7 +38048,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nu s-a putut opri livrarea bolusului. Mutați iPhone-ul mai aproape de pompă și încercați din nou. Verificați istoricul administrării insulinei pentru detalii și monitorizați îndeaproape glicemia."
+            "value" : "Eșec la opri administrarea bolusului. Mutați telefonul mai aproape de pompă și încercați din nou. Verificați istoricul administrării insulinei pentru detalii și monitorizați îndeaproape glicemia."
           }
         },
         "ru" : {
@@ -38496,7 +38493,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activează sunetul"
+            "value" : "Activați sunetul"
           }
         },
         "ru" : {
@@ -39569,6 +39566,9 @@
           }
         }
       }
+    },
+    "Warning" : {
+      "comment" : "Title of the warning shown at launch on development builds"
     },
     "Warning! Safety notifications are turned OFF" : {
       "comment" : "Alert Permissions Need Attention alert title",
@@ -41039,7 +41039,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Glicemia ta este sub limita de siguranță, %1$@."
+            "value" : "Glicemia dumneavoastră este sub limita de siguranță, %1$@."
           }
         },
         "ru" : {

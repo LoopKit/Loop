@@ -360,12 +360,6 @@
             "value" : "---"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "– – –"
-          }
-        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2002,12 +1996,6 @@
             "value" : "גבוה"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "HIGH"
-          }
-        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2511,12 +2499,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "נמוך"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LOW"
           }
         },
         "it" : {

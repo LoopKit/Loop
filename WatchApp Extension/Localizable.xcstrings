@@ -135,12 +135,6 @@
             "value" : "---"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "– – –"
-          }
-        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -762,7 +756,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adaugă carbohidrați"
+            "value" : "Adăugați carbohidrați"
           }
         },
         "ru" : {
@@ -1181,12 +1175,6 @@
             "value" : "Continue"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "जारी"
-          }
-        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1470,7 +1458,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renunță"
+            "value" : "Renunțați"
           }
         },
         "ru" : {
@@ -1714,7 +1702,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Asigurați-vă că iPhone-ul este în apropiere, după care încercați din nou"
+            "value" : "Asigurați-vă că telefonul este în apropiere, după care încercați din nou"
           }
         },
         "ru" : {
@@ -1809,7 +1797,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Asigurați-vă că iPhone-ul este în apropiere, după care încercați din nou."
+            "value" : "Asigurați-vă că telefonul este în apropiere, după care încercați din nou."
           }
         },
         "ru" : {
@@ -3601,7 +3589,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salvează"
+            "value" : "Salvați"
           }
         },
         "ru" : {
@@ -3702,7 +3690,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salvează & Bolusează"
+            "value" : "Salvați & bolusați"
           }
         },
         "ru" : {
@@ -4237,7 +4225,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nu se poate accesa iPhone-ul"
+            "value" : "Nu se poate accesa iPhone"
           }
         },
         "ru" : {
