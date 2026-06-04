@@ -6453,6 +6453,9 @@
         }
       }
     },
+    "Always active when no pump is connected" : {
+      "comment" : "Subtitle for suspend prediction input when no pump is connected"
+    },
     "Amount Consumed" : {
       "comment" : "Label for carb quantity entry row on carb entry screen",
       "localizations" : {
@@ -27636,6 +27639,12 @@
         }
       }
     },
+    "No Pump Connected" : {
+      "comment" : "Title for bolus screen notice when no pump is connected"
+    },
+    "No pump is connected. Bolus delivery is unavailable." : {
+      "comment" : "Caption for bolus screen notice when no pump is connected"
+    },
     "No Recent Glucose" : {
       "comment" : "The title of the cell indicating that there is no recent glucose",
       "localizations" : {
@@ -41319,6 +41328,7 @@
     },
     "Your pump data is stale. %1$@ cannot recommend a bolus amount." : {
       "comment" : "Caption for bolus screen notice when pump data is missing or stale",
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -41399,6 +41409,9 @@
           }
         }
       }
+    },
+    "Your pump data is stale. Bolus delivery may be unavailable." : {
+      "comment" : "Caption for bolus screen notice when pump data is stale"
     },
     "Your pump is delivering a manual temporary basal rate." : {
       "comment" : "The description text for the looping enabled switch cell when closed loop is not allowed because the pump is delivering a manual temp basal.",

@@ -75,6 +75,10 @@ extension DeviceDataManager: BolusEntryViewModelDelegate, ManualDoseViewModelDel
         return pumpManager != nil
     }
     
+    var shouldModelAsNoDelivery: Bool {
+        return pumpManager?.status.shouldModelAsNoDelivery ?? false
+    }
+
     var preferredGlucoseUnit: HKUnit {
         return displayGlucosePreference.unit
     }
