@@ -61,6 +61,8 @@
 	<string>The app needs to use Bluetooth to send and receive data from your diabetes devices.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>The app needs to use Bluetooth to send and receive data from your diabetes devices.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Loop uses calendar access only for features that may create or manage diabetes-related schedule events for the user.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera is used to scan barcodes of devices.</string>
 	<key>NSFaceIDUsageDescription</key>
@@ -69,6 +71,8 @@
 	<string>Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation. Sleep data from the Health database is used to optimize delivery of Apple Watch complication updates during the time you are awake.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Carbohydrate meal data entered in the app and on the watch is stored in the Health database. Glucose data retrieved from the CGM is stored securely in HealthKit.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Loop uses motion data to support app features and improve the user experience when motion-related APIs are available.</string>
 	<key>NSSiriUsageDescription</key>
 	<string>Loop uses Siri to allow you to enact presets with your voice.</string>
 	<key>NSSupportsLiveActivities</key>
