@@ -837,7 +837,17 @@ extension DeviceDataManager {
     }
 
     func updatePumpManagerBLEHeartbeatPreference() {
-        pumpManager?.setMustProvideBLEHeartbeat(pumpManagerMustProvideBLEHeartbeat)
+        guard pumpManagerMustProvideBLEHeartbeat else {
+            pumpManager?.setBLEHeartbeatRequest(nil)
+            return
+        }
+        // Tell the pump when the last CGM reading landed and how often readings are expected, so it can
+        // schedule its next heartbeat to arrive just after the next reading is due (the pump adds its own
+        // buffer for the remote CGM value to be fetched and stored).
+        let request = PumpHeartbeatRequest(
+            lastCGMReadingDate: glucoseStore.latestGlucose?.startDate,
+            expectedCGMReadingInterval: cgmManager?.expectedGlucoseSampleInterval ?? .minutes(5))
+        pumpManager?.setBLEHeartbeatRequest(request)
     }
 }
 
