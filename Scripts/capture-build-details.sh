@@ -126,6 +126,8 @@ fi
 # Gather submodule details.
 # We use git submodule foreach to output lines in the form:
 #   submodule_name|branch_or_tag|commit_sha
+# Tolerate failures here (e.g. a stale gitlink in the index that is no longer
+# mapped in .gitmodules) so that gathering build metadata never fails the build.
 submodules_info=$(git submodule foreach --quiet '
   sub_git_branch=$(git symbolic-ref --short -q HEAD || echo "")
   sub_git_tag=$(git describe --tags --exact-match 2>/dev/null || echo "")
@@ -135,10 +137,12 @@ submodules_info=$(git submodule foreach --quiet '
     sub_git_branch_or_tag="detached"
   fi
   echo "$name|$sub_git_branch_or_tag|$sub_git_commit_sha"
-')
+' 2>/dev/null) || warn "Unable to fully enumerate submodules for build details"
 
 # For each line, add a dictionary entry for that submodule.
 echo "${submodules_info}" | while IFS="|" read -r submodule_name sub_branch sub_sha; do
+    # Skip empty lines (e.g. when submodule enumeration produced no output)
+    [ -z "${submodule_name}" ] && continue
     # Create a dictionary for this submodule
     /usr/libexec/PlistBuddy -c "Add :${submodules_key}:${submodule_name} dict" "${info_plist_path}"
     /usr/libexec/PlistBuddy -c "Add :${submodules_key}:${submodule_name}:branch string ${sub_branch}" "${info_plist_path}"
