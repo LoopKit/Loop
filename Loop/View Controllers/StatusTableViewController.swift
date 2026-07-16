@@ -1815,15 +1815,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     @objc private func pumpStatusTapped(_ sender: UIGestureRecognizer) {
         if let pumpStatusView = sender.view as? PumpStatusHUDView {
-            executeHUDTapAction(deviceManager.didTapOnPumpStatus(pumpStatusView.pumpManagerProvidedHUD), zoomingFrom: pumpStatusView)
+            executeHUDTapAction(deviceManager.didTapOnPumpStatus(pumpStatusView.pumpManagerProvidedHUD))
         }
     }
 
     @objc private func cgmStatusTapped( _ sender: UIGestureRecognizer) {
-        executeHUDTapAction(deviceManager.didTapOnCGMStatus(), zoomingFrom: sender.view)
+        executeHUDTapAction(deviceManager.didTapOnCGMStatus())
     }
 
-    private func executeHUDTapAction(_ action: HUDTapAction?, zoomingFrom sourceView: UIView? = nil) {
+    private func executeHUDTapAction(_ action: HUDTapAction?) {
         guard let action = action else {
             return
         }
@@ -2077,9 +2077,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
 }
 
 private extension UIButton {
-    /// Keeps a custom-view toolbar button tight to its icon by refusing to stretch. Without
-    /// this the toolbar expands the button to fill its distributed slot, and the zoom
-    /// transition then originates from that full-width slot (the bar) rather than the icon.
     func constrainToToolbarIconSize() {
         setContentHuggingPriority(.required, for: .horizontal)
         setContentHuggingPriority(.required, for: .vertical)
