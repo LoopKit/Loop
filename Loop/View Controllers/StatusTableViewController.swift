@@ -1578,7 +1578,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
         } else {
             if FeatureFlags.sensitivityOverridesEnabled {
-                performSegue(withIdentifier: OverrideSelectionViewController.className, sender: toolbarItems![6])
+                let overridesIndex: Int
+                if #available(iOS 26, *) {
+                    overridesIndex = 3
+                } else {
+                    overridesIndex = 6
+                }
+                performSegue(withIdentifier: OverrideSelectionViewController.className, sender: toolbarItems![overridesIndex])
             } else {
                 presentWorkoutModeAlertController()
             }
