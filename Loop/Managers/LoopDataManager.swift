@@ -44,7 +44,10 @@ protocol DeliveryDelegate: AnyObject {
     var pumpInsulinType: InsulinType? { get }
     var basalDeliveryState: PumpManagerStatus.BasalDeliveryState? { get }
     var isPumpConfigured: Bool { get }
-    
+    var pumpManagerStatus: PumpManagerStatus? { get }
+    var pumpStatusHighlight: DeviceStatusHighlight? { get }
+    var cgmManagerStatus: CGMManagerStatus? { get }
+
     func enact(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?) async throws
     func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws
     func roundBasalRate(unitsPerHour: Double) -> Double
@@ -897,6 +900,18 @@ final class LoopDataManager: ObservableObject {
             }
 
             dosingDecision.controllerStatus = UIDevice.current.controllerStatus
+
+            // Device status for the Nightscout devicestatus.pump payload.
+            dosingDecision.pumpManagerStatus = deliveryDelegate?.pumpManagerStatus
+            if let pumpStatusHighlight = deliveryDelegate?.pumpStatusHighlight {
+                dosingDecision.pumpStatusHighlight = StoredDosingDecision.StoredDeviceHighlight(
+                    localizedMessage: pumpStatusHighlight.localizedMessage,
+                    imageName: pumpStatusHighlight.imageName,
+                    state: pumpStatusHighlight.state)
+            }
+            dosingDecision.cgmManagerStatus = deliveryDelegate?.cgmManagerStatus
+            dosingDecision.lastReservoirValue = StoredDosingDecision.LastReservoirValue(doseStore.lastReservoirValue)
+
             self.logger.debug("Manual bolus rec = %{public}@", String(describing: dosingDecision.manualBolusRecommendation))
             await self.dosingDecisionStore.storeDosingDecision(dosingDecision)
         }
@@ -1010,6 +1025,8 @@ extension LoopDataManager {
                                                   settings: StoredDosingDecision.Settings(settingsProvider.settings),
                                                   scheduleOverride: bolusDosingDecision.scheduleOverride,
                                                   controllerStatus: UIDevice.current.controllerStatus,
+                                                  pumpManagerStatus: deliveryDelegate?.pumpManagerStatus,
+                                                  cgmManagerStatus: deliveryDelegate?.cgmManagerStatus,
                                                   lastReservoirValue: StoredDosingDecision.LastReservoirValue(doseStore.lastReservoirValue),
                                                   historicalGlucose: bolusDosingDecision.historicalGlucose,
                                                   originalCarbEntry: bolusDosingDecision.originalCarbEntry,
