@@ -118,24 +118,14 @@ struct SettingsView: View {
             .insetGroupedListStyle()
             .navigationBarTitle(Text(NSLocalizedString("Settings", comment: "Settings screen title")))
             .navigationBarItems(trailing: dismissButton)
-            .actionSheet(item: $actionSheet) { actionSheet in
-                switch actionSheet {
-                case .cgmPicker:
-                    return ActionSheet(
-                        title: Text("Add CGM", comment: "The title of the CGM chooser in settings"),
-                        buttons: cgmChoices
-                    )
-                case .pumpPicker:
-                    return ActionSheet(
-                        title: Text("Add Pump", comment: "The title of the pump chooser in settings"),
-                        buttons: pumpChoices
-                    )
-                case .servicePicker:
-                    return ActionSheet(
-                        title: Text("Add Service", comment: "The title of the add service action sheet in settings"),
-                        buttons: serviceChoices
-                    )
-                }
+            .alert(NSLocalizedString("Add CGM", comment: "The title of the CGM chooser in settings"), isPresented: pickerBinding(.cgmPicker)) {
+                cgmChoices
+            }
+            .alert(NSLocalizedString("Add Pump", comment: "The title of the pump chooser in settings"), isPresented: pickerBinding(.pumpPicker)) {
+                pumpChoices
+            }
+            .alert(NSLocalizedString("Add Service", comment: "The title of the add service action sheet in settings"), isPresented: pickerBinding(.servicePicker)) {
+                serviceChoices
             }
             .alert(item: $alert) { alert in
                 switch alert {
@@ -480,14 +470,25 @@ extension SettingsView {
         }
     }
     
-    private var pumpChoices: [ActionSheet.Button] {
-        var result = viewModel.pumpManagerSettingsViewModel.availableDevices.map { availableDevice in
-            ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
+    private func pickerBinding(_ destination: Destination.ActionSheet) -> Binding<Bool> {
+        Binding(
+            get: { actionSheet == destination },
+            set: { isPresented in
+                if !isPresented, actionSheet == destination {
+                    actionSheet = nil
+                }
+            }
+        )
+    }
+
+    @ViewBuilder
+    private var pumpChoices: some View {
+        ForEach(viewModel.pumpManagerSettingsViewModel.availableDevices, id: \.identifier) { availableDevice in
+            Button(availableDevice.localizedTitle) {
                 self.viewModel.pumpManagerSettingsViewModel.didTapAdd(availableDevice)
             }
         }
-        result.append(.cancel())
-        return result
+        Button(NSLocalizedString("Cancel", comment: "The title of the cancel action in an action sheet"), role: .cancel) {}
     }
     
     @ViewBuilder
@@ -517,16 +518,14 @@ extension SettingsView {
         }
     }
     
-    private var cgmChoices: [ActionSheet.Button] {
-        var result = viewModel.cgmManagerSettingsViewModel.availableDevices
-            .sorted(by: {$0.localizedTitle < $1.localizedTitle})
-            .map { availableDevice in
-                ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
-                    self.viewModel.cgmManagerSettingsViewModel.didTapAdd(availableDevice)
+    @ViewBuilder
+    private var cgmChoices: some View {
+        ForEach(viewModel.cgmManagerSettingsViewModel.availableDevices.sorted(by: {$0.localizedTitle < $1.localizedTitle}), id: \.identifier) { availableDevice in
+            Button(availableDevice.localizedTitle) {
+                self.viewModel.cgmManagerSettingsViewModel.didTapAdd(availableDevice)
             }
         }
-        result.append(.cancel())
-        return result
+        Button(NSLocalizedString("Cancel", comment: "The title of the cancel action in an action sheet"), role: .cancel) {}
     }
     
     private var servicesSection: some View {
@@ -548,14 +547,14 @@ extension SettingsView {
         }
     }
     
-    private var serviceChoices: [ActionSheet.Button] {
-        var result = viewModel.servicesViewModel.inactiveServices().map { availableService in
-            ActionSheet.Button.default(Text(availableService.localizedTitle)) {
+    @ViewBuilder
+    private var serviceChoices: some View {
+        ForEach(viewModel.servicesViewModel.inactiveServices(), id: \.identifier) { availableService in
+            Button(availableService.localizedTitle) {
                 self.viewModel.servicesViewModel.didTapAddService(availableService)
             }
         }
-        result.append(.cancel())
-        return result
+        Button(NSLocalizedString("Cancel", comment: "The title of the cancel action in an action sheet"), role: .cancel) {}
     }
     
     private var deleteDataSection: some View {

@@ -138,9 +138,9 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         }
 
         if let lastPoint = self.glucoseChart.alternatePredictedGlucosePoints?.last?.y {
-            let valueAttributedString = NSMutableAttributedString(string: String(describing: lastPoint.copy), attributes: [.font: UIFont.systemFont(ofSize: 22, weight: .semibold), .foregroundColor: ChartColorPalette.primary.glucoseTint])
+            let valueAttributedString = NSMutableAttributedString(string: lastPoint.valueLabel ?? lastPoint.label, attributes: [.font: UIFont.systemFont(ofSize: 22, weight: .semibold), .foregroundColor: ChartColorPalette.primary.glucoseTint])
             let spacer = NSAttributedString(string: "\u{00a0}")
-            let unitAttributedString =  NSAttributedString(string: String(describing: lastPoint).replacingOccurrences(of: String(describing: lastPoint.copy), with: "").trimmingCharacters(in: .whitespacesAndNewlines), attributes: [.font: UIFont.systemFont(ofSize: 15, weight: .regular), .foregroundColor: ChartColorPalette.primary.glucoseTint])
+            let unitAttributedString =  NSAttributedString(string: lastPoint.unitLabel ?? "", attributes: [.font: UIFont.systemFont(ofSize: 15, weight: .regular), .foregroundColor: ChartColorPalette.primary.glucoseTint])
             
             valueAttributedString.append(spacer)
             valueAttributedString.append(unitAttributedString)
@@ -222,7 +222,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
             let cell = tableView.dequeueReusableCell(withIdentifier: ChartTableViewCell.className, for: indexPath) as! ChartTableViewCell
             cell.contentView.layoutMargins.left = tableView.separatorInset.left
             cell.setChartGenerator(generator: { [weak self] (frame) in
-                return self?.charts.chart(atIndex: 0, frame: frame)?.view
+                return self?.charts.chart(atIndex: 0, frame: frame)
             })
 
             self.tableView(tableView, updateTitleFor: cell, at: indexPath)

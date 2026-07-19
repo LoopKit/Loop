@@ -9,10 +9,12 @@
 import UIKit
 import LoopKit
 
-final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
-    var window: UIWindow?
+final class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    private let loopAppManager = LoopAppManager()
+    let loopAppManager = LoopAppManager()
+
+    private(set) var launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+
     private let log = DiagnosticLog(category: "AppDelegate")
 
     // MARK: - UIApplicationDelegate - Initialization
@@ -22,45 +24,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
 
         setenv("CFNETWORK_DIAGNOSTICS", "3", 1)
 
-        log.default("lastPathComponent = %{public}@", String(describing: Bundle.main.appStoreReceiptURL?.lastPathComponent))
+        self.launchOptions = launchOptions
 
-        loopAppManager.initialize(windowProvider: self, launchOptions: launchOptions)
-        loopAppManager.launch()
-        return loopAppManager.isLaunchComplete
-        // Avoid doing full initialization when running tests
-        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
-            loopAppManager.initialize(windowProvider: self, launchOptions: launchOptions)
-            loopAppManager.launch()
-            return loopAppManager.isLaunchComplete
-        } else {
-            return true
-        }
-    }
-
-    // MARK: - UIApplicationDelegate - Life Cycle
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        log.default(#function)
-
-        loopAppManager.didBecomeActive()
-    }
-
-    func applicationWillResignActive(_ application: UIApplication) {
-        log.default(#function)
-    }
-
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        log.default(#function)
-    }
-
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        log.default(#function)
-        
-        loopAppManager.askUserToConfirmLoopReset()
-    }
-
-    func applicationWillTerminate(_ application: UIApplication) {
-        log.default(#function)
+        return true
     }
 
     // MARK: - UIApplicationDelegate - Environment
@@ -90,20 +56,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
         log.default(#function)
 
         completionHandler(loopAppManager.handleRemoteNotification(userInfo as? [String: AnyObject]) ? .noData : .failed)
-    }
-    
-    // MARK: - UIApplicationDelegate - Deeplinking
-    
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        loopAppManager.handle(url)
-    }
-
-    // MARK: - UIApplicationDelegate - Continuity
-
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        log.default(#function)
-
-        return loopAppManager.userActivity(userActivity, restorationHandler: restorationHandler)
     }
 
     // MARK: - UIApplicationDelegate - Interface

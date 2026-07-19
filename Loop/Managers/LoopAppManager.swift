@@ -161,6 +161,8 @@ class LoopAppManager: NSObject {
 
     var isLaunchComplete: Bool { state == .launchComplete }
 
+    var isInInitialState: Bool { state == .initialize }
+
     private func resumeLaunch() async {
         if state == .checkProtectedDataAvailable {
             checkProtectedDataAvailable()

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CAFE10000000000000000009 /* LoopChartUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE10000000000000000008 /* LoopChartUITests.swift */; };
 		1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
 		142CB7592A60BF2E0075748A /* EditMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142CB7582A60BF2E0075748A /* EditMode.swift */; };
@@ -158,6 +159,7 @@
 		4374B5EF209D84BF00D17AA8 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4374B5EE209D84BE00D17AA8 /* OSLog.swift */; };
 		4374B5F0209D857E00D17AA8 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4374B5EE209D84BE00D17AA8 /* OSLog.swift */; };
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
+		C9SCENED0000000000000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9SCENED0000000000000002 /* SceneDelegate.swift */; };
 		43776F971B8022E90074EA36 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F951B8022E90074EA36 /* Main.storyboard */; };
 		43785E932120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43785E922120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift */; };
 		43785E972120E4500057DED1 /* INRelevantShortcutStore+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43785E952120E4010057DED1 /* INRelevantShortcutStore+Loop.swift */; };
@@ -270,7 +272,6 @@
 		8446319F2F5A2AB3003825AE /* PresetsPerformanceHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8446319E2F5A2AA9003825AE /* PresetsPerformanceHistoryViewModel.swift */; };
 		847F23432E4543140035C864 /* ActivePresetBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847F23422E4543140035C864 /* ActivePresetBanner.swift */; };
 		8496F7312B5711C4003E672C /* ContentMargin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496F7302B5711C4003E672C /* ContentMargin.swift */; };
-		84A7B5502D2D972C00B6D202 /* Image+Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7B54F2D2D972C00B6D202 /* Image+Optional.swift */; };
 		84AA81D32A4A27A3000B658B /* LoopWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D22A4A27A3000B658B /* LoopWidgets.swift */; };
 		84AA81D62A4A28AF000B658B /* WidgetBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D52A4A28AF000B658B /* WidgetBackground.swift */; };
 		84AA81D82A4A2910000B658B /* StatusWidgetTimelimeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D72A4A2910000B658B /* StatusWidgetTimelimeEntry.swift */; };
@@ -459,7 +460,6 @@
 		C10C57FE2E71E87D00A4825C /* ActiveOverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10C57FD2E71E87400A4825C /* ActiveOverrideView.swift */; };
 		C110888D2A3913C600BA4898 /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = C110888C2A3913C600BA4898 /* BuildDetails.swift */; };
 		C11445B22DA98A3400034864 /* CorrectionRangeInformationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11445B12DA98A2D00034864 /* CorrectionRangeInformationView.swift */; };
-		C11B9D5B286778A800500CF8 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C11B9D5A286778A800500CF8 /* SwiftCharts */; };
 		C11B9D5E286778D000500CF8 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D5D286778D000500CF8 /* LoopKitUI.framework */; };
 		C11B9D62286779C000500CF8 /* MockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D60286779C000500CF8 /* MockKit.framework */; };
 		C11B9D63286779C000500CF8 /* MockKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D60286779C000500CF8 /* MockKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -487,7 +487,6 @@
 		C152B9F72C9C7EF100ACBC06 /* AutomationHistoryEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C152B9F62C9C7EF100ACBC06 /* AutomationHistoryEntryTests.swift */; };
 		FEEDB0000000000000000005 /* GlucoseStatisticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */; };
 		C1550B0C2E6F249A009369DC /* LoopCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1550B0B2E6F249A009369DC /* LoopCircleView.swift */; };
-		C15A8C492A7305B1009D736B /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1E3DC4628595FAA00CA19FF /* SwiftCharts */; };
 		C165756F2534C468004AE16E /* SimpleBolusViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C165756E2534C468004AE16E /* SimpleBolusViewModelTests.swift */; };
 		C16575712538A36B004AE16E /* CGMStalenessMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16575702538A36B004AE16E /* CGMStalenessMonitor.swift */; };
 		C16575732538AFF6004AE16E /* CGMStalenessMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16575722538AFF6004AE16E /* CGMStalenessMonitorTests.swift */; };
@@ -554,7 +553,6 @@
 		C1DE5D23251BFC4D00439E49 /* SimpleBolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */; };
 		C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2773D224177C000354103 /* ClockKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		C1E3862628247C6100F561A4 /* StoredLoopNotRunningNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E3862428247B7100F561A4 /* StoredLoopNotRunningNotification.swift */; };
-		C1E3DC4928595FAA00CA19FF /* SwiftCharts in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C1E3DC4628595FAA00CA19FF /* SwiftCharts */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C1ED6C612E79BBA5002F91C2 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1ED6C602E79BB9C002F91C2 /* NotificationManager.swift */; };
 		C1ED6C622E79BBA5002F91C2 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1ED6C602E79BB9C002F91C2 /* NotificationManager.swift */; };
 		C1ED6C642E7C6DB9002F91C2 /* SettingsRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10C57E82E705CCB00A4825C /* SettingsRequestUserInfo.swift */; };
@@ -588,8 +586,6 @@
 		C1ED6C832E7D8E3D002F91C2 /* AcknowledgeAlertUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1ED6C812E7D8E36002F91C2 /* AcknowledgeAlertUserInfo.swift */; };
 		C1EE9E812A38D0FB0064784A /* BuildDetails.plist in Resources */ = {isa = PBXBuildFile; fileRef = C1EE9E802A38D0FB0064784A /* BuildDetails.plist */; };
 		C1EF747228D6A44A00C8C083 /* CrashRecoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */; };
-		C1F00C60285A802A006302C5 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1F00C5F285A802A006302C5 /* SwiftCharts */; };
-		C1F00C78285A8256006302C5 /* SwiftCharts in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C1F00C5F285A802A006302C5 /* SwiftCharts */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C1F2075C26D6F9B0007AB7EB /* AppExpirationAlerter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F2075B26D6F9B0007AB7EB /* AppExpirationAlerter.swift */; };
 		C1F2CAAA2B76B3EE00D7F581 /* TempBasalRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F2CAA92B76B3EE00D7F581 /* TempBasalRecommendation.swift */; };
 		C1F2CAAC2B7A980600D7F581 /* BasalRelativeDose.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F2CAAB2B7A980600D7F581 /* BasalRelativeDose.swift */; };
@@ -654,6 +650,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CAFE1000000000000000000B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43776F8B1B8022E90074EA36;
+			remoteInfo = Loop;
+		};
 		1481F9BD28DA26F4004C5AEB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -743,7 +746,6 @@
 				C11B9D63286779C000500CF8 /* MockKit.framework in Embed Frameworks */,
 				C19C8BBB28651DFB0056D5E4 /* TrueTime.framework in Embed Frameworks */,
 				C11B9D65286779C000500CF8 /* MockKitUI.framework in Embed Frameworks */,
-				C1F00C78285A8256006302C5 /* SwiftCharts in Embed Frameworks */,
 				C19C8BBF28651E3D0056D5E4 /* LoopKit.framework in Embed Frameworks */,
 				43D9FFD721EAE05D00AF44BF /* LoopCore.framework in Embed Frameworks */,
 			);
@@ -780,7 +782,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				C1E3DC4928595FAA00CA19FF /* SwiftCharts in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -788,6 +789,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CAFE10000000000000000002 /* LoopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LoopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CAFE10000000000000000008 /* LoopChartUITests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopChartUITests.swift; sourceTree = "<group>"; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
 		1452F4A82A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodAddEditViewModel.swift; sourceTree = "<group>"; };
@@ -927,6 +930,7 @@
 		4374B5F3209D89A900D17AA8 /* TextFieldTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewCell.swift; sourceTree = "<group>"; };
 		43776F8C1B8022E90074EA36 /* Loop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Loop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43776F8F1B8022E90074EA36 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AppDelegate.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		C9SCENED0000000000000002 /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		43776F961B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		43776F9B1B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		43785E922120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NewCarbEntryIntent+Loop.swift"; sourceTree = "<group>"; };
@@ -1071,7 +1075,6 @@
 		8446319E2F5A2AA9003825AE /* PresetsPerformanceHistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsPerformanceHistoryViewModel.swift; sourceTree = "<group>"; };
 		847F23422E4543140035C864 /* ActivePresetBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePresetBanner.swift; sourceTree = "<group>"; };
 		8496F7302B5711C4003E672C /* ContentMargin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentMargin.swift; sourceTree = "<group>"; };
-		84A7B54F2D2D972C00B6D202 /* Image+Optional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+Optional.swift"; sourceTree = "<group>"; };
 		84AA81D22A4A27A3000B658B /* LoopWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopWidgets.swift; sourceTree = "<group>"; };
 		84AA81D52A4A28AF000B658B /* WidgetBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBackground.swift; sourceTree = "<group>"; };
 		84AA81D72A4A2910000B658B /* StatusWidgetTimelimeEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusWidgetTimelimeEntry.swift; sourceTree = "<group>"; };
@@ -1458,6 +1461,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		CAFE10000000000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		14B1735928AED9EC006CCD7C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1493,7 +1503,6 @@
 				C11B9D62286779C000500CF8 /* MockKit.framework in Frameworks */,
 				C19C8BBE28651E3D0056D5E4 /* LoopKit.framework in Frameworks */,
 				C19C8BBA28651DFB0056D5E4 /* TrueTime.framework in Frameworks */,
-				C1F00C60285A802A006302C5 /* SwiftCharts in Frameworks */,
 				C19C8BC328651EAE0056D5E4 /* LoopTestingKit.framework in Frameworks */,
 				C1735B1E2A0809830082BB8A /* ZIPFoundation in Frameworks */,
 				C19C8BCE28651F520056D5E4 /* LoopKitUI.framework in Frameworks */,
@@ -1521,7 +1530,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C15A8C492A7305B1009D736B /* SwiftCharts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1530,7 +1538,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C1CCF1122858FA900035389C /* LoopCore.framework in Frameworks */,
-				C11B9D5B286778A800500CF8 /* SwiftCharts in Frameworks */,
 				C11B9D5E286778D000500CF8 /* LoopKitUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1772,6 +1779,7 @@
 				43F5C2D41B92A4A6003EB13D /* Info.plist */,
 				C1EE9E802A38D0FB0064784A /* BuildDetails.plist */,
 				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
+				C9SCENED0000000000000002 /* SceneDelegate.swift */,
 				1D12D3B82548EFDD00B53E8B /* main.swift */,
 				43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */,
 				43776F951B8022E90074EA36 /* Main.storyboard */,
@@ -1983,7 +1991,6 @@
 				C13DA2AF24F6C7690098BB29 /* UIViewController.swift */,
 				430B29922041F5B200BA9F93 /* UserDefaults+Loop.swift */,
 				A9B607AF247F000F00792BE4 /* UserNotifications+Loop.swift */,
-				84A7B54F2D2D972C00B6D202 /* Image+Optional.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2831,7 +2838,6 @@
 			);
 			name = Loop;
 			packageProductDependencies = (
-				C1F00C5F285A802A006302C5 /* SwiftCharts */,
 				C1D6EE9F2A06C7270047DE5C /* MKRingProgressView */,
 				C1735B1D2A0809830082BB8A /* ZIPFoundation */,
 			);
@@ -2911,7 +2917,6 @@
 			);
 			name = LoopTests;
 			packageProductDependencies = (
-				C1E3DC4628595FAA00CA19FF /* SwiftCharts */,
 			);
 			productName = LoopTests;
 			productReference = 43E2D90B1D20C581004DA55F /* LoopTests.xctest */;
@@ -2933,7 +2938,6 @@
 			);
 			name = LoopUI;
 			packageProductDependencies = (
-				C11B9D5A286778A800500CF8 /* SwiftCharts */,
 			);
 			productName = LoopUI;
 			productReference = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */;
@@ -3058,7 +3062,6 @@
 			);
 			mainGroup = 43776F831B8022E90074EA36;
 			packageReferences = (
-				C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */,
 				C1D6EE9E2A06C7270047DE5C /* XCRemoteSwiftPackageReference "MKRingProgressView" */,
 				C1735B1C2A0809830082BB8A /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
@@ -3390,6 +3393,7 @@
 				E9B355292935919E0076AB04 /* MissedMealSettings.swift in Sources */,
 				43A51E1F1EB6D62A000736CC /* CarbAbsorptionViewController.swift in Sources */,
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
+				C9SCENED0000000000000001 /* SceneDelegate.swift in Sources */,
 				4372E48B213CB5F00068E043 /* Double.swift in Sources */,
 				84DF48C12F6A0AED00BEDB40 /* Double+Closest.swift in Sources */,
 				430B29932041F5B300BA9F93 /* UserDefaults+Loop.swift in Sources */,
@@ -3612,7 +3616,6 @@
 				439706E622D2E84900C81566 /* PredictionSettingTableViewCell.swift in Sources */,
 				430D85891F44037000AF2D4F /* HUDViewTableViewCell.swift in Sources */,
 				43A51E211EB6DBDD000736CC /* LoopChartsTableViewController.swift in Sources */,
-				84A7B5502D2D972C00B6D202 /* Image+Optional.swift in Sources */,
 				8968B1122408B3520074BB48 /* UIFont.swift in Sources */,
 				1452F4A92A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift in Sources */,
 				438D42FB1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift in Sources */,
@@ -3912,6 +3915,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		CAFE1000000000000000000A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43776F8B1B8022E90074EA36 /* Loop */;
+			targetProxy = CAFE1000000000000000000B /* PBXContainerItemProxy */;
+		};
 		1481F9BE28DA26F4004C5AEB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4F75288A1DFE1DC600C322D6 /* LoopUI */;
@@ -5187,14 +5195,6 @@
 				revision = c67b7509ec82ee2b4b0ab3f97742b94ed9692494;
 			};
 		};
-		C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ivanschuetz/SwiftCharts";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 		C1D6EE9E2A06C7270047DE5C /* XCRemoteSwiftPackageReference "MKRingProgressView" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/maxkonovalov/MKRingProgressView.git";
@@ -5206,11 +5206,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		C11B9D5A286778A800500CF8 /* SwiftCharts */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */;
-			productName = SwiftCharts;
-		};
 		C1735B1D2A0809830082BB8A /* ZIPFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C1735B1C2A0809830082BB8A /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
@@ -5220,16 +5215,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C1D6EE9E2A06C7270047DE5C /* XCRemoteSwiftPackageReference "MKRingProgressView" */;
 			productName = MKRingProgressView;
-		};
-		C1E3DC4628595FAA00CA19FF /* SwiftCharts */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */;
-			productName = SwiftCharts;
-		};
-		C1F00C5F285A802A006302C5 /* SwiftCharts */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */;
-			productName = SwiftCharts;
 		};
 /* End XCSwiftPackageProductDependency section */
 

@@ -22,7 +22,7 @@ struct LoopChartView<Chart: ChartProviding>: UIViewRepresentable {
         
         let view = ChartContainerView()
         view.chartGenerator = { [chartManager] frame in
-            chartManager.chart(atIndex: chartIndex, frame: frame)?.view
+            chartManager.chart(atIndex: chartIndex, frame: frame)
         }
 
         let gestureRecognizer = UILongPressGestureRecognizer()

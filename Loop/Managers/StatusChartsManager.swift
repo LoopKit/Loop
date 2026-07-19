@@ -9,8 +9,8 @@ import Foundation
 import LoopKit
 import LoopUI
 import LoopKitUI
-import SwiftCharts
 import LoopAlgorithm
+import UIKit
 
 
 class StatusChartsManager: ChartsManager {
@@ -68,7 +68,7 @@ extension StatusChartsManager {
         invalidateChart(atIndex: ChartIndex.glucose.rawValue)
     }
 
-    func glucoseChart(withFrame frame: CGRect) -> Chart? {
+    func glucoseChart(withFrame frame: CGRect) -> UIView? {
         return chart(atIndex: ChartIndex.glucose.rawValue, frame: frame)
     }
 
@@ -109,7 +109,7 @@ extension StatusChartsManager {
         invalidateChart(atIndex: ChartIndex.iob.rawValue)
     }
 
-    func iobChart(withFrame frame: CGRect, highlightLabelOffsetY: CGFloat) -> Chart? {
+    func iobChart(withFrame frame: CGRect, highlightLabelOffsetY: CGFloat) -> UIView? {
         return chart(atIndex: ChartIndex.iob.rawValue, frame: frame, highlightLabelOffsetY: highlightLabelOffsetY)
     }
 }
@@ -121,7 +121,7 @@ extension StatusChartsManager {
         invalidateChart(atIndex: ChartIndex.dose.rawValue)
     }
 
-    func doseChart(withFrame frame: CGRect) -> Chart? {
+    func doseChart(withFrame frame: CGRect) -> UIView? {
         return chart(atIndex: ChartIndex.dose.rawValue, frame: frame)
     }
 }
@@ -133,7 +133,7 @@ extension StatusChartsManager {
         invalidateChart(atIndex: ChartIndex.cob.rawValue)
     }
 
-    func cobChart(withFrame frame: CGRect) -> Chart? {
+    func cobChart(withFrame frame: CGRect) -> UIView? {
         return chart(atIndex: ChartIndex.cob.rawValue, frame: frame)
     }
 }
