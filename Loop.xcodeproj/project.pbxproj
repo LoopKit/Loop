@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CAFE10000000000000000009 /* LoopChartUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE10000000000000000008 /* LoopChartUITests.swift */; };
 		1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
 		142CB7592A60BF2E0075748A /* EditMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142CB7582A60BF2E0075748A /* EditMode.swift */; };
@@ -650,13 +649,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		CAFE1000000000000000000B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 43776F8B1B8022E90074EA36;
-			remoteInfo = Loop;
-		};
 		1481F9BD28DA26F4004C5AEB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -789,8 +781,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		CAFE10000000000000000002 /* LoopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LoopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		CAFE10000000000000000008 /* LoopChartUITests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopChartUITests.swift; sourceTree = "<group>"; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
 		1452F4A82A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodAddEditViewModel.swift; sourceTree = "<group>"; };
@@ -1461,13 +1451,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		CAFE10000000000000000007 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		14B1735928AED9EC006CCD7C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -3915,11 +3898,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		CAFE1000000000000000000A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 43776F8B1B8022E90074EA36 /* Loop */;
-			targetProxy = CAFE1000000000000000000B /* PBXContainerItemProxy */;
-		};
 		1481F9BE28DA26F4004C5AEB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4F75288A1DFE1DC600C322D6 /* LoopUI */;
