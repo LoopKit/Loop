@@ -103,7 +103,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
             let statusContext = UserDefaults.appGroup?.statusExtensionContext
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
             
-            let glucoseSamples = self.getGlucoseSample(unit: unit)
+            let glucoseSamples = await self.getGlucoseSample(unit: unit)
             guard let currentGlucose = glucoseSamples.last else {
                 print("ERROR: No glucose sample found...")
                 return
@@ -118,7 +118,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 delta = "\(deltaValue < 0 ? "-" : "+")\(glucoseFormatter.string(from: abs(deltaValue)) ?? "??")"
             }
             
-            let bottomRow = self.getBottomRow(
+            let bottomRow = await self.getBottomRow(
                 currentGlucose: current,
                 delta: delta,
                 statusContext: statusContext,
@@ -308,53 +308,43 @@ class LiveActivityManager : LiveActivityManagerProxy {
         }
     }
     
-    private func getInsulinOnBoard() -> String {
-        let updateGroup = DispatchGroup()
-        var iob = "??"
-        
-        updateGroup.enter()
-        self.doseStore.insulinOnBoard(at: Date.now) { result in
-            switch (result) {
-            case .failure:
-                break
-            case .success(let iobValue):
-                iob = self.iobFormatter.string(from: iobValue.value) ?? "??"
-                break
+    private func getInsulinOnBoard() async -> String {
+        // NOTE: Do NOT bridge async→sync with DispatchGroup.wait(.distantFuture) here.
+        // update() runs on a Swift Concurrency cooperative-pool thread; blocking that
+        // thread starves the (core-count-sized) pool and can deadlock the whole
+        // concurrency runtime under repeated Live Activity updates. Suspend instead.
+        return await withCheckedContinuation { continuation in
+            self.doseStore.insulinOnBoard(at: Date.now) { result in
+                switch (result) {
+                case .failure:
+                    continuation.resume(returning: "??")
+                case .success(let iobValue):
+                    continuation.resume(returning: self.iobFormatter.string(from: iobValue.value) ?? "??")
+                }
             }
-            
-            updateGroup.leave()
         }
-        
-        _ = updateGroup.wait(timeout: .distantFuture)
-        return iob
     }
-    
-    private func getGlucoseSample(unit: HKUnit) -> [StoredGlucoseSample] {
-        let updateGroup = DispatchGroup()
-        var samples: [StoredGlucoseSample] = []
-        
-        updateGroup.enter()
-        
+
+    private func getGlucoseSample(unit: HKUnit) async -> [StoredGlucoseSample] {
         // When in spacious mode, we want to show the predictive line
         // In compact mode, we only want to show the history
         let timeInterval: TimeInterval = self.settings.addPredictiveLine ? .hours(-2) : .hours(-6)
-        self.glucoseStore.getGlucoseSamples(
-            start: adjustedChartStart(Date.now.addingTimeInterval(timeInterval)),
-            end: Date.now
-        ) { result in
-            switch (result) {
-            case .failure:
-                break
-            case .success(let data):
-                samples = data
-                break
+
+        // NOTE: See getInsulinOnBoard() — never block the cooperative pool with a
+        // DispatchGroup.wait here; suspend the async task instead.
+        return await withCheckedContinuation { continuation in
+            self.glucoseStore.getGlucoseSamples(
+                start: adjustedChartStart(Date.now.addingTimeInterval(timeInterval)),
+                end: Date.now
+            ) { result in
+                switch (result) {
+                case .failure:
+                    continuation.resume(returning: [])
+                case .success(let data):
+                    continuation.resume(returning: data)
+                }
             }
-            
-            updateGroup.leave()
         }
-        
-        _ = updateGroup.wait(timeout: .distantFuture)
-        return samples
     }
     
     // If the chart start falls past the half-hour mark (HH:31–HH:59), pull it back to HH:30
@@ -490,43 +480,45 @@ class LiveActivityManager : LiveActivityManagerProxy {
         return glucoseRanges
     }
     
-    private func getBottomRow(currentGlucose: Double, delta: String, statusContext: StatusExtensionContext?, glucoseFormatter: NumberFormatter) -> [BottomRowItem] {
-        return self.settings.bottomRowConfiguration.map { type in
+    private func getBottomRow(currentGlucose: Double, delta: String, statusContext: StatusExtensionContext?, glucoseFormatter: NumberFormatter) async -> [BottomRowItem] {
+        var items: [BottomRowItem] = []
+        for type in self.settings.bottomRowConfiguration {
             switch(type) {
             case .iob:
-                return BottomRowItem.generic(label: type.name(), value: getInsulinOnBoard(), unit: "U")
-                
+                items.append(BottomRowItem.generic(label: type.name(), value: await getInsulinOnBoard(), unit: "U"))
+
             case .cob:
                 var cob: String = "0"
                 if let cobValue = statusContext?.carbsOnBoard {
                     cob = self.cobFormatter.string(from: cobValue) ?? "??"
                 }
-                return BottomRowItem.generic(label: type.name(), value: cob, unit: "g")
-                
+                items.append(BottomRowItem.generic(label: type.name(), value: cob, unit: "g"))
+
             case .basal:
                 guard let netBasalContext = statusContext?.netBasal else {
-                    return BottomRowItem.basal(rate: 0, percentage: 0)
+                    items.append(BottomRowItem.basal(rate: 0, percentage: 0))
+                    continue
                 }
+                items.append(BottomRowItem.basal(rate: netBasalContext.rate, percentage: netBasalContext.percentage))
 
-                return BottomRowItem.basal(rate: netBasalContext.rate, percentage: netBasalContext.percentage)
-                
             case .currentBg:
-                return BottomRowItem.currentBg(label: type.name(), value: "\(glucoseFormatter.string(from: currentGlucose) ?? "??")", trend: statusContext?.glucoseDisplay?.trendType)
-                
+                items.append(BottomRowItem.currentBg(label: type.name(), value: "\(glucoseFormatter.string(from: currentGlucose) ?? "??")", trend: statusContext?.glucoseDisplay?.trendType))
+
             case .eventualBg:
                 guard let eventual = statusContext?.predictedGlucose?.values.last else {
-                    return BottomRowItem.generic(label: type.name(), value: "??", unit: "")
+                    items.append(BottomRowItem.generic(label: type.name(), value: "??", unit: ""))
+                    continue
                 }
-                
-                return BottomRowItem.generic(label: type.name(), value: glucoseFormatter.string(from: eventual) ?? "??", unit: "")
-                
+                items.append(BottomRowItem.generic(label: type.name(), value: glucoseFormatter.string(from: eventual) ?? "??", unit: ""))
+
             case .deltaBg:
-                return BottomRowItem.generic(label: type.name(), value: delta, unit: "")
-                
+                items.append(BottomRowItem.generic(label: type.name(), value: delta, unit: ""))
+
             case .updatedAt:
-                return BottomRowItem.generic(label: type.name(), value: timeFormatter.string(from: Date.now), unit: "")
+                items.append(BottomRowItem.generic(label: type.name(), value: timeFormatter.string(from: Date.now), unit: ""))
             }
-       }
+        }
+        return items
     }
     
     private func initEmptyActivity(settings: LiveActivitySettings) {
