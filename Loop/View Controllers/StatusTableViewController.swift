@@ -643,7 +643,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let statusRowMode = self.determineStatusRowMode()
 
         updateBannerAndHUDandStatusRows(statusRowMode: statusRowMode, newSize: currentContext.newSize, animated: animated)
-
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: ActionTabBarMetrics.tableContentInset, right: 0)
+        
         redrawCharts()
 
         reloading = false
