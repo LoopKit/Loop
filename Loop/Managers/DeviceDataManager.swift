@@ -310,26 +310,40 @@ final class DeviceDataManager {
 
     func instantiateDeviceManagers() {
         if let pumpManagerRawValue = rawPumpManager ?? UserDefaults.appGroup?.legacyPumpManagerRawValue {
-            pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
-            // Update lastPumpEventsReconciliation on DoseStore
-            if let lastSync = pumpManager?.lastSync {
-                Task {
-                    try? await doseStore.addPumpEvents([], lastReconciliation: lastSync)
+            if let restoredPumpManager = pumpManagerFromRawValue(pumpManagerRawValue) {
+                pumpManager = restoredPumpManager
+                // Update lastPumpEventsReconciliation on DoseStore
+                if let lastSync = pumpManager?.lastSync {
+                    Task {
+                        try? await doseStore.addPumpEvents([], lastReconciliation: lastSync)
+                    }
                 }
-            }
-            if let status = pumpManager?.status {
-                updatePumpIsAllowingAutomation(status: status)
+                if let status = pumpManager?.status {
+                    updatePumpIsAllowingAutomation(status: status)
+                }
+            } else {
+                // We have saved pump state, but its plugin couldn't be instantiated in this build (e.g.
+                // the app was built without that pump manager plugin). Do NOT assign pumpManager = nil —
+                // that fires the didSet, which writes rawPumpManager = nil and DELETES the persisted
+                // PumpManagerState, permanently losing the pod pairing/session keys. Leave the saved
+                // state on disk so a build that includes the plugin can restore it on a later launch.
+                log.error("Saved pump manager plugin unavailable; preserving persisted PumpManagerState for a future launch")
             }
         } else {
             pumpManager = nil
         }
 
         if let cgmManagerRawValue = rawCGMManager ?? UserDefaults.appGroup?.legacyCGMManagerRawValue {
-            cgmManager = cgmManagerFromRawValue(cgmManagerRawValue)
-
-            // Handle case of PumpManager providing CGM
-            if cgmManager == nil && pumpManagerTypeFromRawValue(cgmManagerRawValue) != nil {
+            if let restoredCGMManager = cgmManagerFromRawValue(cgmManagerRawValue) {
+                cgmManager = restoredCGMManager
+            } else if pumpManagerTypeFromRawValue(cgmManagerRawValue) != nil {
+                // Handle case of PumpManager providing CGM
                 cgmManager = pumpManager as? CGMManager
+            } else {
+                // Saved CGM state exists but its plugin couldn't be instantiated in this build. Don't
+                // assign cgmManager = nil — that would delete the persisted CGMManagerState (same
+                // footgun as the pump path above). Preserve it for a future launch with the plugin.
+                log.error("Saved CGM manager plugin unavailable; preserving persisted CGMManagerState for a future launch")
             }
         }
     }
@@ -837,7 +851,17 @@ extension DeviceDataManager {
     }
 
     func updatePumpManagerBLEHeartbeatPreference() {
-        pumpManager?.setMustProvideBLEHeartbeat(pumpManagerMustProvideBLEHeartbeat)
+        guard pumpManagerMustProvideBLEHeartbeat else {
+            pumpManager?.setBLEHeartbeatRequest(nil)
+            return
+        }
+        // Tell the pump when the last CGM reading landed and how often readings are expected, so it can
+        // schedule its next heartbeat to arrive just after the next reading is due (the pump adds its own
+        // buffer for the remote CGM value to be fetched and stored).
+        let request = PumpHeartbeatRequest(
+            lastCGMReadingDate: glucoseStore.latestGlucose?.startDate,
+            expectedCGMReadingInterval: cgmManager?.expectedGlucoseSampleInterval ?? .minutes(5))
+        pumpManager?.setBLEHeartbeatRequest(request)
     }
 }
 
