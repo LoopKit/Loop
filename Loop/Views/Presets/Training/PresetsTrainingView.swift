@@ -73,94 +73,93 @@ public struct PresetsTrainingView: View {
     private func close() {
         dismiss()
     }
+
+    @ViewBuilder
+    private func ctaButtons(for cta: PresetsTraining.CTA) -> some View {
+        switch cta {
+        case .start:
+            Button("Start Required Training") {
+                training.next()
+            }
+            .buttonStyle(ActionButtonStyle())
+        case .continue:
+            Button("Continue") {
+                training.next()
+            }
+            .buttonStyle(ActionButtonStyle())
+        case .close:
+            Button("Close") {
+                close()
+                training.trainingCompletion.completedChapters[.trainingComplete] = true
+                onComplete?()
+            }
+            .buttonStyle(ActionButtonStyle())
+        case .closeOrContinue(let continueTo, let chapter):
+            VStack(spacing: 12) {
+                Button("Close Training") {
+                    if training.trainingCompletion.completedChapters[chapter] != true {
+                        training.trainingCompletion.completedChapters[chapter] = true
+                    }
+
+                    close()
+                }
+                .buttonStyle(ActionButtonStyle(.secondary))
+
+                Button("Continue to \(continueTo)") {
+                    training.next()
+                }
+                .buttonStyle(ActionButtonStyle())
+            }
+        }
+    }
     
     @ViewBuilder
     private func stepView(_ step: PresetsTraining.Step) -> some View {
-        GeometryReader { proxy in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    VStack(spacing: 8) {
-                        Text(step.title(appName: appName))
-                            .font(.largeTitle.bold())
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.horizontal, 16)
-                            .onLongPressGesture {
-                                guard training.trainingCompletion.allowDebugFeatures else {
-                                    return
-                                }
-                                
-                                showSkipToChapterSelector = true
-                            }
-                        
-                        Divider()
-                    }
-                    .padding(.bottom, 24)
-                    
-                    step.content(
-                        appName: appName,
-                        displayGlucosePreference: displayGlucosePreference,
-                        colorPalette: colorPalette,
-                        dynamicTypeSize: dynamicTypeSize,
-                        trainingContent: trainingContent,
-                        next: training.next,
-                        onPlayMedia: { selectedMedia = $0 }
-                    )
-                    .padding(.bottom, 24)
-                    .padding(.horizontal, 16)
-                    
-                    if !step.references.isEmpty {
-                        ReferencesView(step.references)
-                            .padding(.bottom, 24)
-                            .padding(.horizontal, 16)
-                    }
-                    
-                    if let cta = step.cta {
-                        Spacer(minLength: 0)
-                        
-                        Group {
-                            switch cta {
-                            case .start:
-                                Button("Start Required Training") {
-                                    training.next()
-                                }
-                                .buttonStyle(ActionButtonStyle())
-                            case .continue:
-                                Button("Continue") {
-                                    training.next()
-                                }
-                                .buttonStyle(ActionButtonStyle())
-                            case .close:
-                                Button("Close") {
-                                    close()
-                                    training.trainingCompletion.completedChapters[.trainingComplete] = true
-                                    onComplete?()
-                                }
-                                .buttonStyle(ActionButtonStyle())
-                            case .closeOrContinue(let continueTo, let chapter):
-                                VStack(spacing: 12) {
-                                    Button("Close Training") {
-                                        if training.trainingCompletion.completedChapters[chapter] != true {
-                                            training.trainingCompletion.completedChapters[chapter] = true
-                                        }
-                                        
-                                        close()
-                                    }
-                                    .buttonStyle(ActionButtonStyle(.secondary))
-                                    
-                                    Button("Continue to \(continueTo)") {
-                                        training.next()
-                                    }
-                                    .buttonStyle(ActionButtonStyle())
-                                }
-                            }
-                        }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                VStack(spacing: 8) {
+                    Text(step.title(appName: appName))
+                        .font(.largeTitle.bold())
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 16)
-                    }
+                        .onLongPressGesture {
+                            guard training.trainingCompletion.allowDebugFeatures else {
+                                return
+                            }
+
+                            showSkipToChapterSelector = true
+                        }
+
+                    Divider()
                 }
-                .frame(maxWidth: .infinity)
-                .frame(minHeight: proxy.size.height, alignment: .top)
+                .padding(.bottom, 24)
+
+                step.content(
+                    appName: appName,
+                    displayGlucosePreference: displayGlucosePreference,
+                    colorPalette: colorPalette,
+                    dynamicTypeSize: dynamicTypeSize,
+                    trainingContent: trainingContent,
+                    next: training.next,
+                    onPlayMedia: { selectedMedia = $0 }
+                )
+                .padding(.bottom, 24)
+                .padding(.horizontal, 16)
+
+                if !step.references.isEmpty {
+                    ReferencesView(step.references)
+                        .padding(.bottom, 24)
+                        .padding(.horizontal, 16)
+                }
+
+                if let cta = step.cta {
+                    ctaButtons(for: cta)
+                        .padding(.top, 8)
+                        .padding(.horizontal, 16)
+                }
             }
+            .frame(maxWidth: .infinity)
         }
         .background(step.contentBackground.ignoresSafeArea(.all))
         .navigationBarTitleDisplayMode(.inline)
