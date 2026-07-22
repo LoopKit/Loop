@@ -152,16 +152,14 @@ public struct PresetsTrainingView: View {
                         .padding(.bottom, 24)
                         .padding(.horizontal, 16)
                 }
+
+                if let cta = step.cta {
+                    ctaButtons(for: cta)
+                        .padding(.top, 8)
+                        .padding(.horizontal, 16)
+                }
             }
             .frame(maxWidth: .infinity)
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            if let cta = step.cta {
-                ctaButtons(for: cta)
-                    .padding(16)
-                    .frame(maxWidth: .infinity)
-                    .background(step.contentBackground)
-            }
         }
         .background(step.contentBackground.ignoresSafeArea(.all))
         .navigationBarTitleDisplayMode(.inline)
