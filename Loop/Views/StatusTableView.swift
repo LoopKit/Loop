@@ -87,14 +87,7 @@ private struct WrappedStatusTableViewController: UIViewControllerRepresentable {
 }
 
 struct StatusTableView: View {
-    
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @Environment(\.verticalSizeClass) private var verticalSizeClass
-    
-    private var isLandscape: Bool {
-        UIScreen.main.bounds.size.width > UIScreen.main.bounds.size.height
-    }
-    
+
     private let wrapped: WrappedStatusTableViewController
     
     var viewController: StatusTableViewController {
@@ -194,19 +187,26 @@ struct ActionTab: Identifiable {
 struct ActionTabBar: UIViewRepresentable {
 
     let items: [ActionTab]
+    var isHidden: Bool = false
 
     func makeUIView(context: Context) -> UITabBar {
         let bar = UITabBar()
         bar.delegate = context.coordinator
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
+        let titleAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.label]
+        for layout in [appearance.stackedLayoutAppearance, appearance.inlineLayoutAppearance, appearance.compactInlineLayoutAppearance] {
+            for state in [layout.normal, layout.selected] {
+                state.titleTextAttributes = titleAttributes
+            }
+        }
         bar.standardAppearance = appearance
         bar.scrollEdgeAppearance = appearance
-        bar.tintColor = .label
         return bar
     }
 
     func updateUIView(_ uiView: UITabBar, context: Context) {
+        uiView.isHidden = isHidden
         context.coordinator.tabs = items
         uiView.items = items.enumerated().map { idx, item in
             UITabBarItem(
@@ -255,17 +255,56 @@ enum ActionTabBuilder {
     static func buildArray(_ components: [[ActionTab]]) -> [ActionTab] { components.flatMap { $0 } }
 }
 
+enum ActionTabBarMetrics {
+
+    static let barHeight: CGFloat = 49
+
+    static var bottomSafeAreaInset: CGFloat {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }?
+            .safeAreaInsets.bottom ?? 0
+    }
+
+    static var interfaceOrientation: UIInterfaceOrientation {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let scene = scenes.first { $0.windows.contains { $0.isKeyWindow } }
+            ?? scenes.first { $0.activationState == .foregroundActive }
+            ?? scenes.first
+        return scene?.interfaceOrientation ?? .portrait
+    }
+
+    static var tableContentInset: CGFloat {
+        guard !interfaceOrientation.isLandscape else { return 0 }
+        if #available(iOS 26.0, *), bottomSafeAreaInset == 0 {
+            return barHeight + 40
+        }
+        return 52
+    }
+}
+
 struct LegacyTabBarBackground: ViewModifier {
-    
-    private let isCompatibilityModeActive = Bundle.main.object(forInfoDictionaryKey: "UIDesignRequiresCompatibility") as? Bool ?? false
-    
+
+    var isVisible: Bool = true
+
     func body(content: Content) -> some View {
-        if #available(iOS 26.0, *), !isCompatibilityModeActive {
+        if !isVisible {
             content
                 .frame(height: 0)
+        } else if #available(iOS 26.0, *) {
+            if ActionTabBarMetrics.bottomSafeAreaInset == 0 {
+                content
+                    .frame(height: ActionTabBarMetrics.barHeight)
+                    .padding(.bottom, 16)
+            } else {
+                content
+                    .frame(height: 0)
+                    .padding(.bottom, 6)
+            }
         } else {
             content
-                .frame(height: 49)
+                .frame(height: ActionTabBarMetrics.barHeight)
                 .background(
                     Color(UIColor.systemBackground)
                         .ignoresSafeArea(edges: .bottom)
@@ -275,42 +314,36 @@ struct LegacyTabBarBackground: ViewModifier {
 }
 
 struct ActionTabView<Content: View>: View {
-    
-    @State private var orientation: UIDeviceOrientation
 
-    private let allowedOrientations: [UIDeviceOrientation]
+    @State private var orientation: UIInterfaceOrientation
+
     private let content: Content
     private let tabs: [ActionTab]
     
     init(
-        allowedOrientations: [UIDeviceOrientation] = [.portrait],
         @ViewBuilder content: @escaping () -> Content,
         @ActionTabBuilder tabs: @escaping () -> [ActionTab],
     ) {
         self.content = content()
         self.tabs = tabs()
-        
-        self.allowedOrientations = allowedOrientations
-        self.orientation = UIDevice.current.orientation
+        self.orientation = ActionTabBarMetrics.interfaceOrientation
     }
-    
+
     var body: some View {
         content
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                if orientation == .unknown || allowedOrientations.contains(orientation) {
-                    ActionTabBar(items: tabs)
-                        .modifier(LegacyTabBarBackground())
-                }
+                ActionTabBar(items: tabs, isHidden: !orientation.isPortrait)
+                    .modifier(LegacyTabBarBackground(isVisible: orientation.isPortrait))
+            }
+            .onAppear {
+                UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+                orientation = ActionTabBarMetrics.interfaceOrientation
+            }
+            .onDisappear {
+                UIDevice.current.endGeneratingDeviceOrientationNotifications()
             }
             .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
-                orientation = UIDevice.current.orientation
+                orientation = ActionTabBarMetrics.interfaceOrientation
             }
-    }
-
-    private static func currentOrientation() -> UIInterfaceOrientation {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first?
-            .interfaceOrientation ?? .portrait
     }
 }
