@@ -111,10 +111,17 @@ class LoopDataManager {
             loopSettings: LoopSettings(),
             scheduleOverride: nil
         )
-        
+
+        // Give GlucoseStore its own Core Data stack rather than sharing `cacheStore` with
+        // CarbStore. GlucoseStore drives its context exclusively with the async
+        // `context.perform` API, while CarbStore uses `performAndWait`. Sharing one serial
+        // context between the two mixes those concurrency models and can race, producing a
+        // torn read of a freshly-inserted CachedGlucoseObject (a nil required attribute).
+        // A dedicated context removes that cross-store contention.
+        let glucoseCacheStore = PersistenceController.controllerInLocalDirectory(named: "com.loopkit.LoopKit.Glucose")
         Task {
             glucoseStore = await GlucoseStore(
-                cacheStore: cacheStore,
+                cacheStore: glucoseCacheStore,
                 cacheLength: .hours(4)
             )
         }
