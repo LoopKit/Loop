@@ -57,7 +57,7 @@ protocol WindowProvider: AnyObject {
 
 class LoopAppManager: NSObject {
     private enum State: Int {
-        case initializing
+        case initialize
         case checkProtectedDataAvailable
         case launchManagers
         case launchOnboarding
@@ -87,7 +87,7 @@ class LoopAppManager: NSObject {
 
     private var overrideHistory = UserDefaults.appGroup?.overrideHistory ?? TemporaryScheduleOverrideHistory.init()
 
-    private var state: State = .initializing
+    private var state: State = .initialize
 
     private let log = DiagnosticLog(category: "LoopAppManager")
     private let widgetLog = DiagnosticLog(category: "LoopWidgets")
@@ -98,7 +98,7 @@ class LoopAppManager: NSObject {
 
     func initialize(windowProvider: WindowProvider, launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
         dispatchPrecondition(condition: .onQueue(.main))
-        precondition(state == .initializing)
+        precondition(state == .initialize)
 
         self.windowProvider = windowProvider
         self.launchOptions = launchOptions
@@ -128,7 +128,7 @@ class LoopAppManager: NSObject {
         resumeLaunch()
     }
 
-    var isInitialized: Bool { state != .initializing }
+    var isInInitialState: Bool { state == .initialize }
 
     var isLaunchPending: Bool { state == .checkProtectedDataAvailable }
 
