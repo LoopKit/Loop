@@ -22,7 +22,7 @@ extension UIAlertController {
         self.init(
             title: NSLocalizedString("Add Pump", comment: "Action sheet title selecting Pump"),
             message: nil,
-            preferredStyle: .alert
+            preferredStyle: .actionSheet
         )
 
         for availablePumpManager in availablePumpManagers {
@@ -48,7 +48,7 @@ extension UIAlertController {
         self.init(
             title: NSLocalizedString("Add CGM", comment: "Action sheet title selecting CGM"),
             message: nil,
-            preferredStyle: .alert
+            preferredStyle: .actionSheet
         )
         
         for availableCGMManager in availableCGMManagers.sorted(by: {$0.localizedTitle < $1.localizedTitle}) {
