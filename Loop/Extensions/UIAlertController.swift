@@ -88,6 +88,8 @@ extension UIAlertController {
                 }
             ))
         }
+
+        addCancelAction()
     }
 
     /// Initializes an action sheet-styled controller for selecting a CGMManager
@@ -112,6 +114,8 @@ extension UIAlertController {
             }
             ))
         }
+
+        addCancelAction()
     }
 
     internal convenience init(deleteCGMManagerHandler handler: @escaping (_ isDeleted: Bool) -> Void) {
@@ -141,10 +145,12 @@ extension UIAlertController {
     ///   - selectionHandler: A closure to execute when a service is selected.
     ///   - identifier: The identifier of the selected service.
     internal convenience init(availableServices: [ServiceDescriptor], selectionHandler: @escaping (_ identifier: String) -> Void) {
+        let preferredStyle: UIAlertController.Style = .alert
+
         self.init(
             title: NSLocalizedString("Add Service", comment: "Action sheet title selecting service"),
             message: nil,
-            preferredStyle: .actionSheet
+            preferredStyle: preferredStyle
         )
 
         for availableService in availableServices {
@@ -156,11 +162,15 @@ extension UIAlertController {
                 }
             ))
         }
+
+        if #available(iOS 26.0, *) {
+            addCancelAction()
+        }
     }
 
     internal func addCancelAction(handler: ((UIAlertAction) -> Void)? = nil) {
         let cancel = NSLocalizedString("Cancel", comment: "The title of the cancel action in an action sheet")
-        addAction(UIAlertAction(title: cancel, style: .cancel, handler: handler))
+        addAction(UIAlertAction(title: cancel, style: .destructive, handler: handler))
     }
 }
 

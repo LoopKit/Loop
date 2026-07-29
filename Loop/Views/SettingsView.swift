@@ -107,25 +107,6 @@ public struct SettingsView: View {
             .insetGroupedListStyle()
             .navigationBarTitle(Text(NSLocalizedString("Settings", comment: "Settings screen title")))
             .navigationBarItems(trailing: dismissButton)
-            .actionSheet(item: $actionSheet) { actionSheet in
-                switch actionSheet {
-                case .cgmPicker:
-                    return ActionSheet(
-                        title: Text("Add CGM", comment: "The title of the CGM chooser in settings"),
-                        buttons: cgmChoices
-                    )
-                case .pumpPicker:
-                    return ActionSheet(
-                        title: Text("Add Pump", comment: "The title of the pump chooser in settings"),
-                        buttons: pumpChoices
-                    )
-                case .servicePicker:
-                    return ActionSheet(
-                        title: Text("Add Service", comment: "The title of the add service action sheet in settings"),
-                        buttons: serviceChoices
-                    )
-                }
-            }
             .alert(item: $alert) { alert in
                 switch alert {
                 case .deleteCGMData:
@@ -337,17 +318,22 @@ extension SettingsView {
                         imageView: plusImage,
                         label: NSLocalizedString("Add Pump", comment: "Title text for button to add pump device"),
                         descriptiveText: NSLocalizedString("Tap here to set up a pump", comment: "Descriptive text for button to add pump device"))
+            .background(
+                PluginPopover(
+                    isPresented: actionSheetBinding(for: .pumpPicker),
+                    title: NSLocalizedString("Add Pump", comment: "The title of the pump chooser in settings"),
+                    actions: pumpChoices
+                )
+            )
         }
     }
-    
-    private var pumpChoices: [ActionSheet.Button] {
-        var result = viewModel.pumpManagerSettingsViewModel.availableDevices.map { availableDevice in
-            ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
+
+    private var pumpChoices: [PluginPopover.Action] {
+        viewModel.pumpManagerSettingsViewModel.availableDevices.map { availableDevice in
+            .init(title: availableDevice.localizedTitle) {
                 self.viewModel.pumpManagerSettingsViewModel.didTapAdd(availableDevice)
             }
         }
-        result.append(.cancel())
-        return result
     }
     
     @ViewBuilder
@@ -364,6 +350,13 @@ extension SettingsView {
                         imageView: plusImage,
                         label: NSLocalizedString("Add CGM", comment: "Title text for button to add CGM device"),
                         descriptiveText: NSLocalizedString("Tap here to set up a CGM", comment: "Descriptive text for button to add CGM device"))
+            .background(
+                PluginPopover(
+                    isPresented: actionSheetBinding(for: .cgmPicker),
+                    title: NSLocalizedString("Add CGM", comment: "The title of the CGM chooser in settings"),
+                    actions: cgmChoices
+                )
+            )
         }
     }
     
@@ -377,16 +370,14 @@ extension SettingsView {
         }
     }
     
-    private var cgmChoices: [ActionSheet.Button] {
-        var result = viewModel.cgmManagerSettingsViewModel.availableDevices
+    private var cgmChoices: [PluginPopover.Action] {
+        viewModel.cgmManagerSettingsViewModel.availableDevices
             .sorted(by: {$0.localizedTitle < $1.localizedTitle})
             .map { availableDevice in
-                ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
+                .init(title: availableDevice.localizedTitle) {
                     self.viewModel.cgmManagerSettingsViewModel.didTapAdd(availableDevice)
+                }
             }
-        }
-        result.append(.cancel())
-        return result
     }
     
     private var servicesSection: some View {
@@ -404,20 +395,36 @@ extension SettingsView {
                             imageView: plusImage,
                             label: NSLocalizedString("Add Service", comment: "The title of the add service button in settings"),
                             descriptiveText: NSLocalizedString("Tap here to set up a Service", comment: "The descriptive text of the add service button in settings"))
+                .background(
+                    PluginPopover(
+                        isPresented: actionSheetBinding(for: .servicePicker),
+                        title: NSLocalizedString("Add Service", comment: "The title of the add service action sheet in settings"),
+                        actions: serviceChoices
+                    )
+                )
             }
         }
     }
-    
-    private var serviceChoices: [ActionSheet.Button] {
-        var result = viewModel.servicesViewModel.inactiveServices().map { availableService in
-            ActionSheet.Button.default(Text(availableService.localizedTitle)) {
+
+    private var serviceChoices: [PluginPopover.Action] {
+        viewModel.servicesViewModel.inactiveServices().map { availableService in
+            .init(title: availableService.localizedTitle) {
                 self.viewModel.servicesViewModel.didTapAddService(availableService)
             }
         }
-        result.append(.cancel())
-        return result
     }
     
+    private func actionSheetBinding(for destination: Destination.ActionSheet) -> Binding<Bool> {
+        Binding(
+            get: { actionSheet == destination },
+            set: { isPresented in
+                if !isPresented && actionSheet == destination {
+                    actionSheet = nil
+                }
+            }
+        )
+    }
+
     private var deleteDataSection: some View {
         Section {
             if viewModel.pumpManagerSettingsViewModel.isTestingDevice {
@@ -611,6 +618,71 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
                 }
             }
             .padding(EdgeInsets(top: topBottomPadding, leading: 0, bottom: topBottomPadding, trailing: 0))
+        }
+    }
+}
+
+struct PluginPopover: UIViewControllerRepresentable {
+    struct Action {
+        let title: String
+        let handler: () -> Void
+    }
+
+    @Binding var isPresented: Bool
+    let title: String
+    let actions: [Action]
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        UIViewController()
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        context.coordinator.parent = self
+
+        guard isPresented else { return }
+        guard uiViewController.presentedViewController == nil else { return }
+
+        let alert = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
+        for action in actions {
+            alert.addAction(UIAlertAction(title: action.title, style: .default) { _ in
+                context.coordinator.setPresented(false)
+                action.handler()
+            })
+        }
+
+        alert.addAction(UIAlertAction(
+            title: NSLocalizedString("Cancel", comment: "The title of the cancel action in an action sheet"),
+            style: .destructive
+        ) { _ in
+            context.coordinator.setPresented(false)
+        })
+
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = uiViewController.view
+            popover.sourceRect = uiViewController.view.bounds
+            popover.delegate = context.coordinator
+        }
+
+        uiViewController.present(alert, animated: true)
+    }
+
+    final class Coordinator: NSObject, UIPopoverPresentationControllerDelegate {
+        var parent: PluginPopover
+
+        init(_ parent: PluginPopover) {
+            self.parent = parent
+        }
+
+        func setPresented(_ value: Bool) {
+            DispatchQueue.main.async { self.parent.isPresented = value }
+        }
+
+        func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+            setPresented(false)
         }
     }
 }

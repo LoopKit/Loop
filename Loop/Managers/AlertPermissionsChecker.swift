@@ -128,7 +128,7 @@ extension AlertPermissionsChecker {
                                                 message: Self.unsafeNotificationPermissionsAlertContent.body,
                                                 preferredStyle: .alert)
         let titleImageAttachment = NSTextAttachment()
-        titleImageAttachment.image = UIImage(systemName: "exclamationmark.triangle.fill")?.withTintColor(.critical)
+        titleImageAttachment.image = UIImage(systemName: "exclamationmark.triangle.fill")?.withTintColor(.critical, renderingMode: .alwaysOriginal)
         titleImageAttachment.bounds = CGRect(x: titleImageAttachment.bounds.origin.x, y: -10, width: 40, height: 35)
         let titleWithImage = NSMutableAttributedString(attachment: titleImageAttachment)
         titleWithImage.append(NSMutableAttributedString(string: "\n\n", attributes: [.font: UIFont.systemFont(ofSize: 8)]))
