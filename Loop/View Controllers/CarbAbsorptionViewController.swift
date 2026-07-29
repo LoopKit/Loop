@@ -275,7 +275,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             switch ChartRow(rawValue: indexPath.row)! {
             case .carbEffect:
                 cell.setChartGenerator(generator: { [weak self] (frame) in
-                    return self?.charts.chart(atIndex: 0, frame: frame)
+                    return self?.charts.chart(atIndex: 0, frame: frame)?.view
                 })
             }
 

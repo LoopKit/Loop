@@ -14,6 +14,7 @@ import LoopKit
 import LoopKitUI
 import LoopTestingKit
 import LoopUI
+import SwiftCharts
 import os.log
 import Combine
 import WidgetKit
@@ -540,9 +541,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
         if !FeatureFlags.predictedGlucoseChartClampEnabled,
             let lastPoint = self.statusCharts.glucose.predictedGlucosePoints.last?.y
         {
-            let valueAttributedString = NSMutableAttributedString(string: lastPoint.valueLabel ?? lastPoint.label, attributes: [.font: UIFont.systemFont(ofSize: 22, weight: .semibold), .foregroundColor: ChartColorPalette.primary.glucoseTint])
+            let valueAttributedString = NSMutableAttributedString(string: String(describing: lastPoint.copy), attributes: [.font: UIFont.systemFont(ofSize: 22, weight: .semibold), .foregroundColor: ChartColorPalette.primary.glucoseTint])
             let spacer = NSAttributedString(string: "\u{00a0}")
-            let unitAttributedString =  NSAttributedString(string: lastPoint.unitLabel ?? "", attributes: [.font: UIFont.systemFont(ofSize: 15, weight: .regular), .foregroundColor: ChartColorPalette.primary.glucoseTint])
+            let unitAttributedString =  NSAttributedString(string: String(describing: lastPoint).replacingOccurrences(of: String(describing: lastPoint.copy), with: "").trimmingCharacters(in: .whitespacesAndNewlines), attributes: [.font: UIFont.systemFont(ofSize: 15, weight: .regular), .foregroundColor: ChartColorPalette.primary.glucoseTint])
             
             valueAttributedString.append(spacer)
             valueAttributedString.append(unitAttributedString)
@@ -595,10 +596,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
             charts.setCOBValues(cobValues)
         }
         if let index = charts.cob.cobPoints.closestIndex(priorTo: Date()) {
-            let cobValue = charts.cob.cobPoints[index].y
-            let valueAttributedString = NSMutableAttributedString(string: cobValue.valueLabel ?? cobValue.label, attributes: [.font: UIFont.systemFont(ofSize: 22, weight: .semibold), .foregroundColor: ChartColorPalette.primary.carbTint])
+            let valueAttributedString = NSMutableAttributedString(string: String(describing: charts.cob.cobPoints[index].y.copy), attributes: [.font: UIFont.systemFont(ofSize: 22, weight: .semibold), .foregroundColor: ChartColorPalette.primary.carbTint])
             let spacer = NSAttributedString(string: "\u{00a0}")
-            let unitAttributedString =  NSAttributedString(string: cobValue.unitLabel ?? "", attributes: [.font: UIFont.systemFont(ofSize: 15, weight: .regular), .foregroundColor: ChartColorPalette.primary.carbTint])
+            let unitAttributedString =  NSAttributedString(string: String(describing: charts.cob.cobPoints[index].y).replacingOccurrences(of: String(describing: charts.cob.cobPoints[index].y.copy), with: "").trimmingCharacters(in: .whitespacesAndNewlines), attributes: [.font: UIFont.systemFont(ofSize: 15, weight: .regular), .foregroundColor: ChartColorPalette.primary.carbTint])
             
             valueAttributedString.append(spacer)
             valueAttributedString.append(unitAttributedString)
@@ -1009,25 +1009,25 @@ final class StatusTableViewController: LoopChartsTableViewController {
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
                 cell.setChartGenerator(generator: { [weak self] (frame) in
-                    return self?.statusCharts.glucoseChart(withFrame: frame)
+                    return self?.statusCharts.glucoseChart(withFrame: frame)?.view
                 })
                 cell.setTitleLabelText(label: NSLocalizedString("Glucose", comment: "The title of the glucose and prediction graph"))
                 cell.setTitleTextColor(color: ChartColorPalette.primary.glucoseTint)
                 cell.doesNavigate = settingsManager.dosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled
             case .iob:
                 cell.setSupplementalChartGenerator(generator: { [weak self] (frame) in
-                    return self?.statusCharts.doseChart(withFrame: frame)
+                    return self?.statusCharts.doseChart(withFrame: frame)?.view
                 })
                 
                 cell.setChartGenerator(generator: { [weak self] (frame) in
-                    return self?.statusCharts.iobChart(withFrame: frame, highlightLabelOffsetY: cell.supplementalChartContentView?.bounds.height ?? 0)
+                    return self?.statusCharts.iobChart(withFrame: frame, highlightLabelOffsetY: cell.supplementalChartContentView?.bounds.height ?? 0)?.view
                 })
                 cell.setTitleLabelText(label: NSLocalizedString("Active Insulin", comment: "The title of the Insulin On-Board graph"))
                 cell.setTitleTextColor(color: ChartColorPalette.primary.insulinTint)
                 cell.setFooterView(content: iobFooterViewContent)
             case .cob:
                 cell.setChartGenerator(generator: { [weak self] (frame) in
-                    return self?.statusCharts.cobChart(withFrame: frame)
+                    return self?.statusCharts.cobChart(withFrame: frame)?.view
                 })
                 cell.setTitleLabelText(label: NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph"))
                 cell.setTitleTextColor(color: ChartColorPalette.primary.carbTint)

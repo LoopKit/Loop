@@ -5,7 +5,7 @@
 //  Copyright © 2017 LoopKit Authors. All rights reserved.
 //
 
-import LoopKitUI
+import SwiftCharts
 
 extension ChartSettings {
     static var `default`: ChartSettings {

@@ -15,6 +15,7 @@ import LoopKit
 import LoopKitUI
 import LoopUI
 import SwiftUI
+import SwiftCharts
 import LoopAlgorithm
 
 @MainActor

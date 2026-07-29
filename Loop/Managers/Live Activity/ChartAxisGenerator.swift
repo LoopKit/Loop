@@ -9,6 +9,7 @@
 import Foundation
 import HealthKit
 import LoopAlgorithm
+import SwiftCharts
 import UIKit
 
 struct ChartAxisGenerator {
@@ -18,6 +19,7 @@ struct ChartAxisGenerator {
     
     private static let minSegmentCount: Double = 2
     private static let addPaddingSegmentIfEdge = false
+    private static let axisLabelSettings = ChartLabelSettings(font: .systemFont(ofSize: 14), fontColor: UIColor.secondaryLabel)
     
     // This logic is copied/ported from generateYAxisValuesUsingLinearSegmentStep
     static func getYAxis(points: [Double], isMmol: Bool) -> [Double] {
@@ -99,7 +101,7 @@ struct ChartAxisGenerator {
             {
                 scalar = 0
             }
-            return scalar
+            return ChartAxisValueDouble(scalar, labelSettings: axisLabelSettings).scalar
         }
     }
     
@@ -117,10 +119,7 @@ struct ChartAxisGenerator {
     }
 }
 
-infix operator >=~ : ComparisonPrecedence
-
 fileprivate extension Double {
-    // `=~` is declared in Common/Extensions/Double.swift
     static func >=~ (a: Double, b: Double) -> Bool {
         return a =~ b || a > b
     }
