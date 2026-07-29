@@ -22,6 +22,12 @@ class MockDeliveryDelegate: DeliveryDelegate {
     
     var isPumpConfigured: Bool = true
 
+    var pumpManagerStatus: PumpManagerStatus?
+
+    var pumpStatusHighlight: DeviceStatusHighlight?
+
+    var cgmManagerStatus: CGMManagerStatus?
+
     var lastEnact: (bolus: Double?, tempBasal: TempBasalRecommendation?)
 
     func enact(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?) async throws {

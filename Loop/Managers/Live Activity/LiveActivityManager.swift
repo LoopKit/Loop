@@ -115,7 +115,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
             let statusContext = UserDefaults.appGroup?.statusExtensionContext
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
             
-            let glucoseSamples = self.getGlucoseSample(unit: unit)
+            let glucoseSamples = await self.getGlucoseSample(unit: unit)
             guard let currentGlucose = glucoseSamples.last else {
                 print("ERROR: No glucose sample found...")
                 return
@@ -327,24 +327,20 @@ class LiveActivityManager : LiveActivityManagerProxy {
         return iobFormatter.string(from: iob) ?? "??"
     }
     
-    private func getGlucoseSample(unit: LoopUnit) -> [StoredGlucoseSample] {
-        let updateGroup = DispatchGroup()
-        var samples: [StoredGlucoseSample] = []
-        
+    private func getGlucoseSample(unit: LoopUnit) async -> [StoredGlucoseSample] {
         // When in spacious mode, we want to show the predictive line
         // In compact mode, we only want to show the history
         let timeInterval: TimeInterval = self.settings.addPredictiveLine ? .hours(-2) : .hours(-6)
-        updateGroup.enter()
-        Task {
-            samples = (try? await self.glucoseStore.getGlucoseSamples(
-                start: adjustedChartStart(Date.now.addingTimeInterval(timeInterval)),
-                end: Date.now
-            )) ?? []
-            updateGroup.leave()
-        }
-        
-        _ = updateGroup.wait(timeout: .distantFuture)
-        return samples
+
+        // NOTE: Do NOT bridge async→sync with DispatchGroup.wait(.distantFuture) here.
+        // update() runs on a Swift Concurrency cooperative-pool thread; blocking that
+        // thread starves the (core-count-sized) pool and can deadlock the whole
+        // concurrency runtime under repeated Live Activity updates (Loop stops looping).
+        // Suspend on the already-async store call instead. (LoopKit/Loop#2465)
+        return (try? await self.glucoseStore.getGlucoseSamples(
+            start: adjustedChartStart(Date.now.addingTimeInterval(timeInterval)),
+            end: Date.now
+        )) ?? []
     }
     
     // If the chart start falls past the half-hour mark (HH:31–HH:59), pull it back to HH:30

@@ -315,9 +315,14 @@ class AlertManagerTests: XCTestCase {
         
         let lastLoopDate = Date()
         await alertManager.loopDidComplete(lastLoopDate)
-        alertManager.alertMuter.configuration.startTime = Date()
-        alertManager.alertMuter.configuration.duration = .hours(4)
-        
+
+        // Turn on muting, then reschedule the loop-not-running alerts as muted.
+        // In production this reschedule is driven asynchronously by the
+        // alertMuter.$configuration sink (RunLoop.main hop + a detached Task), so
+        // await it directly here rather than racing that pipeline.
+        alertManager.alertMuter.configuration = AlertMuter.Configuration(startTime: Date(), duration: .hours(4))
+        await alertManager.rescheduleLoopNotRunningNotifications(lastLoopDate)
+
         let loopNotRunningRequests = await UNUserNotificationCenter.current().pendingNotificationRequests().filter({
             $0.content.categoryIdentifier == LoopNotificationCategory.loopNotRunning.rawValue
         })

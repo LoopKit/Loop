@@ -21,13 +21,13 @@ extension PersistenceController {
         return self.init(directoryURL: directoryURL.appendingPathComponent("com.loopkit.LoopKit", isDirectory: true), isReadOnly: isReadOnly)
     }
 
-    public class func controllerInLocalDirectory() -> PersistenceController {
+    public class func controllerInLocalDirectory(named name: String = "com.loopkit.LoopKit") -> PersistenceController {
         guard let directoryURL = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true) else {
             fatalError("Could not access the document directory of the current process")
         }
 
         let isReadOnly = Bundle.main.isAppExtension
 
-        return self.init(directoryURL: directoryURL.appendingPathComponent("com.loopkit.LoopKit"), isReadOnly: isReadOnly)
+        return self.init(directoryURL: directoryURL.appendingPathComponent(name), isReadOnly: isReadOnly)
     }
 }
