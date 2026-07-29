@@ -649,8 +649,10 @@ struct PluginPopover: UIViewControllerRepresentable {
         let alert = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
         for action in actions {
             alert.addAction(UIAlertAction(title: action.title, style: .default) { _ in
-                context.coordinator.setPresented(false)
-                action.handler()
+                context.coordinator.parent.isPresented = false
+                DispatchQueue.main.async {
+                    action.handler()
+                }
             })
         }
 
@@ -658,7 +660,7 @@ struct PluginPopover: UIViewControllerRepresentable {
             title: NSLocalizedString("Cancel", comment: "The title of the cancel action in an action sheet"),
             style: .destructive
         ) { _ in
-            context.coordinator.setPresented(false)
+            context.coordinator.parent.isPresented = false
         })
 
         if let popover = alert.popoverPresentationController {
@@ -677,12 +679,8 @@ struct PluginPopover: UIViewControllerRepresentable {
             self.parent = parent
         }
 
-        func setPresented(_ value: Bool) {
-            DispatchQueue.main.async { self.parent.isPresented = value }
-        }
-
         func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-            setPresented(false)
+            parent.isPresented = false
         }
     }
 }
