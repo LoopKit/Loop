@@ -23,6 +23,7 @@ extension UserDefaults {
         case allowSimulators = "com.loopkit.Loop.allowSimulators"
         case LastMissedMealNotification = "com.loopkit.Loop.lastMissedMealNotification"
         case userRequestedLoopReset = "com.loopkit.Loop.userRequestedLoopReset"
+        case liveActivity = "com.loopkit.Loop.liveActivity"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -163,6 +164,29 @@ extension UserDefaults {
         }
         set {
             setValue(newValue, forKey: Key.userRequestedLoopReset.rawValue)
+        }
+    }
+    
+    public var liveActivity: LiveActivitySettings? {
+        get {
+            let decoder = JSONDecoder()
+            guard let data = object(forKey: Key.liveActivity.rawValue) as? Data else {
+                return nil
+            }
+            return try? decoder.decode(LiveActivitySettings.self, from: data)
+        }
+        set {
+            do {
+                if let newValue = newValue {
+                    let encoder = JSONEncoder()
+                    let data = try encoder.encode(newValue)
+                    set(data, forKey: Key.liveActivity.rawValue)
+                } else {
+                    set(nil, forKey: Key.liveActivity.rawValue)
+                }
+            } catch {
+                assertionFailure("Unable to encode MissedMealNotification")
+            }
         }
     }
 

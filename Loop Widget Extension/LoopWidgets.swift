@@ -16,5 +16,8 @@ struct LoopWidgets: WidgetBundle {
         if #available(iOS 16.1, *) {
             SystemStatusWidget()
         }
+        if #available(iOS 16.2, *) {
+            GlucoseLiveActivityConfiguration()
+        }
     }
 }

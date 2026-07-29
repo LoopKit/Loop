@@ -306,8 +306,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     private lazy var timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
 
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
+        formatter.setLocalizedDateFormatFromTemplate("MMMdjmm")
 
         return formatter
     }()
@@ -546,11 +545,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 }
 
                 if let dose = entry.dose {
-                    description.append(String(describing: dose))
-                }
-
-                if let raw = entry.raw {
-                    description.append(raw.hexadecimalString)
+                    description.append(dose.formatted)
                 }
 
                 return description.joined(separator: "\n\n")

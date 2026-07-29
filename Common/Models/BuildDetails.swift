@@ -65,5 +65,20 @@ class BuildDetails {
     var workspaceGitBranch: String? {
         return dict["com-loopkit-LoopWorkspace-git-branch"] as? String
     }
+
+    /// Returns a dictionary of submodule details.
+    /// The keys are the submodule names, and the values are tuples (branch, commitSHA).
+    var submodules: [String: (branch: String, commitSHA: String)] {
+        guard let subs = dict["com-loopkit-Loop-submodules"] as? [String: [String: Any]] else {
+            return [:]
+        }
+        var result = [String: (branch: String, commitSHA: String)]()
+        for (name, info) in subs {
+            let branch = info["branch"] as? String ?? String(localized: "Unknown")
+            let commitSHA = info["commit_sha"] as? String ?? String(localized: "Unknown")
+            result[name] = (branch: branch, commitSHA: commitSHA)
+        }
+        return result
+    }
 }
 

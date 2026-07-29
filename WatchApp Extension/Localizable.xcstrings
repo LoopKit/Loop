@@ -135,12 +135,6 @@
             "value" : "---"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "– – –"
-          }
-        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -211,6 +205,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "---"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "– – –"
           }
         }
       }
@@ -542,7 +542,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "活性碳水化合物"
+            "value" : "活性碳水"
           }
         }
       }
@@ -756,7 +756,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adaugă carbohidrați"
+            "value" : "Adăugați carbohidrați"
           }
         },
         "ru" : {
@@ -792,7 +792,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "添加碳水化合物"
+            "value" : "添加碳水摄入"
           }
         }
       }
@@ -1101,7 +1101,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Actualizare Recomandare bolus"
+            "value" : "Actualizare recomandare de bolus"
           }
         },
         "ru" : {
@@ -1120,6 +1120,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bolus Önerisi Güncellendi"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大剂量推荐值已更新"
           }
         }
       }
@@ -1169,12 +1175,6 @@
             "value" : "Continue"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "जारी"
-          }
-        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1214,7 +1214,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Continuă"
+            "value" : "Continuați"
           }
         },
         "ru" : {
@@ -1458,7 +1458,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renunță"
+            "value" : "Renunțați"
           }
         },
         "ru" : {
@@ -1609,6 +1609,12 @@
             "state" : "translated",
             "value" : "g"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "克"
+          }
         }
       }
     },
@@ -1696,7 +1702,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Asigurați-vă că iPhone-ul este în apropiere, după care încercați din nou"
+            "value" : "Asigurați-vă că telefonul este în apropiere, după care încercați din nou"
           }
         },
         "ru" : {
@@ -1791,7 +1797,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Asigurați-vă că iPhone-ul este în apropiere, după care încercați din nou."
+            "value" : "Asigurați-vă că telefonul este în apropiere, după care încercați din nou."
           }
         },
         "ru" : {
@@ -1930,6 +1936,12 @@
             "state" : "translated",
             "value" : "mg/dL"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mg/dL"
+          }
         }
       }
     },
@@ -2045,6 +2057,12 @@
           }
         },
         "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mmol/L"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mmol/L"
@@ -2393,6 +2411,12 @@
             "state" : "translated",
             "value" : "OK"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
         }
       }
     },
@@ -2733,6 +2757,12 @@
             "state" : "translated",
             "value" : "Lütfen bolus miktarını tekrar onaylayın."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请重新确认大剂量。"
+          }
         }
       }
     },
@@ -2820,7 +2850,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Preprandial"
+            "value" : "Înainte de masă"
           }
         },
         "ru" : {
@@ -2845,6 +2875,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Trước bữa ăn"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "餐前"
           }
         }
       }
@@ -3553,7 +3589,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salvează"
+            "value" : "Salvați"
           }
         },
         "ru" : {
@@ -3654,7 +3690,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salvează & Bolus"
+            "value" : "Salvați & bolusați"
           }
         },
         "ru" : {
@@ -3673,6 +3709,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kaydet & Bolus"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存并推注大剂量"
           }
         }
       }
@@ -3856,7 +3898,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rotiți pentru a confirma bolusul"
+            "value" : "Rotiți coroana digitală pentru bolus"
           }
         },
         "ru" : {
@@ -3875,6 +3917,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Digital Crown'u bolusa\nçevirin"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旋转数字表冠\n以推注大剂量"
           }
         }
       }
@@ -4177,7 +4225,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nu se poate conecta la iPhone"
+            "value" : "Nu se poate accesa iPhone"
           }
         },
         "ru" : {

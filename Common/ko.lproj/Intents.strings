@@ -2,7 +2,7 @@
 "9KhaIS" = "I've set the preset";
 
 /* (No Comment) */
-"80eo5o" = "添加碳水摄入";
+"80eo5o" = "Add Carb Entry";
 
 /* (No Comment) */
 "b085BW" = "I wasn't able to set the preset.";
@@ -17,7 +17,7 @@
 "nDKAmn" = "What's the name of the override you'd like to set?";
 
 /* (No Comment) */
-"OcNxIj" = "添加碳水摄入";
+"OcNxIj" = "Add Carb Entry";
 
 /* (No Comment) */
 "oLQSsJ" = "Enable '${overrideName}' Override Preset";
@@ -29,7 +29,7 @@
 "yBzwCL" = "Override Selection";
 
 /* (No Comment) */
-"yc02Yq" = "将碳水化合物添加到Loop";
+"yc02Yq" = "Add a carb entry to Loop";
 
 /* (No Comment) */
 "ZZ3mtM" = "Enable an override preset in Loop";

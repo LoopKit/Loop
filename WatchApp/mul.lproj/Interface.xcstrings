@@ -309,12 +309,6 @@
             "value" : "---"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "– – –"
-          }
-        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
@@ -486,7 +480,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Preprandial"
+            "value" : "Înainte de masă"
           }
         },
         "ru" : {
@@ -516,7 +510,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "餐前模式"
+            "value" : "餐前"
           }
         }
       }
@@ -996,6 +990,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выполнение"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Running"
           }
         },
         "sv" : {
@@ -2296,7 +2296,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ACTIVE CARBS"
+            "value" : "活性碳水"
           }
         }
       }
@@ -2356,12 +2356,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "---"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "– – –"
           }
         },
         "it" : {

@@ -248,7 +248,11 @@ struct BolusEntryView: View {
                     .multilineTextAlignment(.trailing)
                     .foregroundColor(.loopAccent)
                     .focused($bolusFieldFocused)
-                    .onTapGesture { didBeginEditing() }
+                    .onChange(of: bolusFieldFocused) { focused in
+                        if focused {
+                            didBeginEditing()
+                        }
+                    }
                     .onChange(of: enteredBolusString) { newValue in
                         if newValue.count > 5 {
                             enteredBolusString = String(newValue.prefix(5))

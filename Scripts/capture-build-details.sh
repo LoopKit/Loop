@@ -100,3 +100,49 @@ then
     fi
     popd . > /dev/null
 fi
+
+# --- Root repo details ---
+# Retrieve current branch (or tag) and commit SHA.
+git_branch=$(git symbolic-ref --short -q HEAD || echo "")
+git_tag=$(git describe --tags --exact-match 2>/dev/null || echo "")
+git_commit_sha=$(git log -1 --format="%h" --abbrev=7)
+git_branch_or_tag="${git_branch:-${git_tag}}"
+if [ -z "${git_branch_or_tag}" ]; then
+    git_branch_or_tag="detached"
+fi
+
+plutil -replace com-loopkit-Loop-branch -string "${git_branch_or_tag}" "${info_plist_path}"
+plutil -replace com-loopkit-Loop-commit-sha -string "${git_commit_sha}" "${info_plist_path}"
+
+# --- Submodule details ---
+# Remove an existing submodules key if it exists, then create an empty dictionary.
+# (Using PlistBuddy, which is available on macOS)
+submodules_key="com-loopkit-Loop-submodules"
+if /usr/libexec/PlistBuddy -c "Print :${submodules_key}" "${info_plist_path}" 2>/dev/null; then
+    /usr/libexec/PlistBuddy -c "Delete :${submodules_key}" "${info_plist_path}"
+fi
+/usr/libexec/PlistBuddy -c "Add :${submodules_key} dict" "${info_plist_path}"
+
+# Gather submodule details.
+# We use git submodule foreach to output lines in the form:
+#   submodule_name|branch_or_tag|commit_sha
+submodules_info=$(git submodule foreach --quiet '
+  sub_git_branch=$(git symbolic-ref --short -q HEAD || echo "")
+  sub_git_tag=$(git describe --tags --exact-match 2>/dev/null || echo "")
+  sub_git_commit_sha=$(git log -1 --format="%h" --abbrev=7)
+  sub_git_branch_or_tag="${sub_git_branch:-${sub_git_tag}}"
+  if [ -z "${sub_git_branch_or_tag}" ]; then
+    sub_git_branch_or_tag="detached"
+  fi
+  echo "$name|$sub_git_branch_or_tag|$sub_git_commit_sha"
+')
+
+# For each line, add a dictionary entry for that submodule.
+echo "${submodules_info}" | while IFS="|" read -r submodule_name sub_branch sub_sha; do
+    # Create a dictionary for this submodule
+    /usr/libexec/PlistBuddy -c "Add :${submodules_key}:${submodule_name} dict" "${info_plist_path}"
+    /usr/libexec/PlistBuddy -c "Add :${submodules_key}:${submodule_name}:branch string ${sub_branch}" "${info_plist_path}"
+    /usr/libexec/PlistBuddy -c "Add :${submodules_key}:${submodule_name}:commit_sha string ${sub_sha}" "${info_plist_path}"
+done
+
+echo "BuildDetails.plist has been updated at: ${info_plist_path}"

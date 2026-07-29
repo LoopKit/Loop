@@ -1,0 +1,32 @@
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Computes the percentage of glucose measurements within a specified range";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "Continue";
+
+/* Placeholder for upper range entry */
+"Maximum" = "Maximum";
+
+/* Placeholder for lower range entry */
+"Minimum" = "Minimum";
+
+/* Lesson title */
+"Modal Day" = "Modal Day";
+
+/* Lesson result text for no data */
+"No data available" = "No data available";
+
+/* Section title for glucose range */
+"Range" = "Range";
+
+/* Title of config entry */
+"Start Date" = "Start Date";
+
+/* Lesson title */
+"Time in Range" = "Time in Range";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "Visualizes the most frequent glucose values by time of day";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "Weeks";

@@ -50,7 +50,6 @@ public struct SettingsView: View {
             }
             
             case favoriteFoods
-            case therapySettings
         }
     }
     
@@ -137,24 +136,6 @@ public struct SettingsView: View {
             }
             .sheet(item: $sheet) { sheet in
                 switch sheet {
-                case .therapySettings:
-                    TherapySettingsView(
-                        mode: .settings,
-                        viewModel: TherapySettingsViewModel(
-                            therapySettings: viewModel.therapySettings(),
-                            sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
-                            adultChildInsulinModelSelectionEnabled: FeatureFlags.adultChildInsulinModelSelectionEnabled,
-                            delegate: viewModel.therapySettingsViewModelDelegate
-                        )
-                    )
-                    .environmentObject(displayGlucosePreference)
-                    .environment(\.dismissAction, self.dismiss)
-                    .environment(\.appName, self.appName)
-                    .environment(\.chartColorPalette, .primary)
-                    .environment(\.carbTintColor, self.carbTintColor)
-                    .environment(\.glucoseTintColor, self.glucoseTintColor)
-                    .environment(\.guidanceColors, self.guidanceColors)
-                    .environment(\.insulinTintColor, self.insulinTintColor)
                 case .favoriteFoods:
                     FavoriteFoodsView()
                 }
@@ -286,15 +267,37 @@ extension SettingsView {
             }
         }
     }
-        
+
+    private var therapySettingsView: some View {
+        TherapySettingsView(
+            mode: .settings,
+            viewModel: TherapySettingsViewModel(
+                therapySettings: viewModel.therapySettings(),
+                sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
+                adultChildInsulinModelSelectionEnabled: FeatureFlags.adultChildInsulinModelSelectionEnabled,
+                delegate: viewModel.therapySettingsViewModelDelegate
+            )
+        )
+        .environmentObject(displayGlucosePreference)
+        .environment(\.dismissAction, self.dismiss)
+        .environment(\.appName, self.appName)
+        .environment(\.chartColorPalette, .primary)
+        .environment(\.carbTintColor, self.carbTintColor)
+        .environment(\.glucoseTintColor, self.glucoseTintColor)
+        .environment(\.guidanceColors, self.guidanceColors)
+        .environment(\.insulinTintColor, self.insulinTintColor)
+    }
+
     private var configurationSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
-            LargeButton(action: { sheet = .therapySettings },
-                            includeArrow: true,
+            NavigationLink(destination: therapySettingsView) {
+                LargeButton(action: { },
+                            includeArrow: false,
                             imageView: Image("Therapy Icon"),
                             label: NSLocalizedString("Therapy Settings", comment: "Title text for button to Therapy Settings"),
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
-            
+            }
+
             ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in
                 item.view
             }
