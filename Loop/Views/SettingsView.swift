@@ -633,7 +633,7 @@ struct PluginPopover: UIViewControllerRepresentable {
     let actions: [Action]
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+        Coordinator()
     }
 
     func makeUIViewController(context: Context) -> UIViewController {
@@ -641,18 +641,24 @@ struct PluginPopover: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        context.coordinator.parent = self
+        let coordinator = context.coordinator
 
-        guard isPresented else { return }
+        if !isPresented {
+            coordinator.didPresent = false
+            return
+        }
+
+        guard !coordinator.didPresent else { return }
         guard uiViewController.presentedViewController == nil else { return }
+
+        coordinator.didPresent = true
+        coordinator.onDismiss = { self.isPresented = false }
 
         let alert = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
         for action in actions {
             alert.addAction(UIAlertAction(title: action.title, style: .default) { _ in
-                context.coordinator.parent.isPresented = false
-                DispatchQueue.main.async {
-                    action.handler()
-                }
+                self.isPresented = false
+                action.handler()
             })
         }
 
@@ -660,27 +666,24 @@ struct PluginPopover: UIViewControllerRepresentable {
             title: NSLocalizedString("Cancel", comment: "The title of the cancel action in an action sheet"),
             style: .destructive
         ) { _ in
-            context.coordinator.parent.isPresented = false
+            self.isPresented = false
         })
 
         if let popover = alert.popoverPresentationController {
             popover.sourceView = uiViewController.view
             popover.sourceRect = uiViewController.view.bounds
-            popover.delegate = context.coordinator
+            popover.delegate = coordinator
         }
 
         uiViewController.present(alert, animated: true)
     }
 
     final class Coordinator: NSObject, UIPopoverPresentationControllerDelegate {
-        var parent: PluginPopover
-
-        init(_ parent: PluginPopover) {
-            self.parent = parent
-        }
+        var didPresent = false
+        var onDismiss: (() -> Void)?
 
         func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-            parent.isPresented = false
+            onDismiss?()
         }
     }
 }
