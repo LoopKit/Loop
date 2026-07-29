@@ -1382,7 +1382,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let manualEntryDoseView = ManualEntryDoseView(viewModel: viewModel)
         let hostingController = DismissibleHostingController(rootView: manualEntryDoseView, isModalInPresentation: false)
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
-        hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
+        hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(title: NSLocalizedString("Cancel", comment: ""), style: .plain, target: navigationWrapper, action: #selector(dismissWithAnimation))
         present(navigationWrapper, animated: true)
     }
 
@@ -1476,7 +1476,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let bolusEntryView = SimpleBolusView(viewModel: viewModel).environmentObject(deviceManager.displayGlucosePreference)
             let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
             navigationWrapper = UINavigationController(rootViewController: hostingController)
-            hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
+            hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(title: NSLocalizedString("Cancel", comment: ""), style: .plain, target: navigationWrapper, action: #selector(dismissWithAnimation))
             present(navigationWrapper, animated: true)
         } else {
             let viewModel = CarbEntryViewModel(delegate: loopManager)
@@ -1536,7 +1536,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         )
         
         let navigationWrapper = UINavigationController(rootViewController: hostingController)
-        hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
+        hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(title: NSLocalizedString("Cancel", comment: ""), style: .plain, target: navigationWrapper, action: #selector(dismissWithAnimation))
         present(navigationWrapper, animated: true)
         analyticsServicesManager?.didDisplayBolusScreen()
     }
@@ -1745,15 +1745,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     @objc private func pumpStatusTapped(_ sender: UIGestureRecognizer) {
         if let pumpStatusView = sender.view as? PumpStatusHUDView {
-            executeHUDTapAction(deviceManager.didTapOnPumpStatus(pumpStatusView.pumpManagerProvidedHUD))
+            executeHUDTapAction(deviceManager.didTapOnPumpStatus(pumpStatusView.pumpManagerProvidedHUD), from: sender.view)
         }
     }
 
     @objc private func cgmStatusTapped( _ sender: UIGestureRecognizer) {
-        executeHUDTapAction(deviceManager.didTapOnCGMStatus())
+        executeHUDTapAction(deviceManager.didTapOnCGMStatus(), from: sender.view)
     }
 
-    private func executeHUDTapAction(_ action: HUDTapAction?) {
+    private func executeHUDTapAction(_ action: HUDTapAction?, from sourceView: UIView?) {
         guard let action = action else {
             return
         }
@@ -1766,15 +1766,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .openAppURL(let url):
             UIApplication.shared.open(url)
         case .setupNewCGM:
-            addNewCGMManager()
+            addNewCGMManager(from: sourceView)
         case .setupNewPump:
-            addNewPumpManager()
+            addNewPumpManager(from: sourceView)
         default:
             return
         }
     }
 
-    private func addNewPumpManager() {
+    private func addNewPumpManager(from sourceView: UIView?) {
         let availablePumpManagers = deviceManager.availablePumpManagers
 
         switch availablePumpManagers.count {
@@ -1786,11 +1786,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let alert = UIAlertController(availablePumpManagers: availablePumpManagers) { [weak self] (identifier) in
                 self?.addPumpManager(withIdentifier: identifier)
             }
+            alert.popoverPresentationController?.sourceView = sourceView ?? view
+            alert.popoverPresentationController?.sourceRect = sourceView?.bounds ?? view.bounds
             present(alert, animated: true, completion: nil)
         }
     }
 
-    private func addNewCGMManager() {
+    private func addNewCGMManager(from sourceView: UIView?) {
         let availableCGMManagers = deviceManager.availableCGMManagers
 
         switch availableCGMManagers.count {
@@ -1802,6 +1804,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let alert = UIAlertController(availableCGMManagers: availableCGMManagers) { [weak self] identifier in
                 self?.addCGMManager(withIdentifier: identifier)
             }
+            alert.popoverPresentationController?.sourceView = sourceView ?? view
+            alert.popoverPresentationController?.sourceRect = sourceView?.bounds ?? view.bounds
             present(alert, animated: true, completion: nil)
         }
     }

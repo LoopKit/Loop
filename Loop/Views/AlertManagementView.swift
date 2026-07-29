@@ -129,7 +129,7 @@ struct AlertManagementView: View {
                 muteAlertsButton
             } else {
                 unmuteAlertsButton
-                    .listRowSeparator(.visible, edges: .all)
+                    .listRowSeparator(.visible, edges: .bottom)
                 muteAlertsSummary
             }
         }
