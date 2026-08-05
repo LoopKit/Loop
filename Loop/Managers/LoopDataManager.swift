@@ -1549,7 +1549,10 @@ extension LoopDataManager: FavoriteFoodInsightsViewModelDelegate {
             .annotated(with: basalWithOverrides)
             .sorted { $0.startDate < $1.startDate }
 
-        let insulinEffects = annotatedDoses.glucoseEffects(
+        // Standard mid-absorption ISF model, matching LoopAlgorithm's prediction
+        // path — keeps this review's carb absorption consistent with the
+        // algorithm (dose-time `glucoseEffects` is legacy backwards-compat).
+        let insulinEffects = annotatedDoses.glucoseEffectsMidAbsorptionISF(
             insulinSensitivityHistory: sensitivityWithOverrides,
             from: start.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval).dateFlooredToTimeInterval(GlucoseMath.defaultDelta),
             to: nil)
