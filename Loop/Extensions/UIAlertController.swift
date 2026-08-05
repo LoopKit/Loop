@@ -12,27 +12,6 @@ import LoopKitUI
 
 
 extension UIAlertController {    
-    /**
-     Initializes an ActionSheet-styled controller for selecting a pre-meal preset duration
-     
-     - parameter handler: A closure to execute when the sheet is dismissed after selection. The closure has a single argument:
-        - duration: The duration for which the pre-meal preset is to be enabled
-     */
-    internal convenience init(premealDurationSelectionHandler handler: @escaping (_ duration: TimeInterval) -> Void) {
-        self.init(
-            title: NSLocalizedString("Use Pre-Meal Preset", comment: "The title of the alert controller used to select a duration for pre-meal targets"),
-            message: nil,
-            preferredStyle: .actionSheet
-        )
-
-        let distantFuture = NSLocalizedString("Until I enter carbs", comment: "The title of a target alert action specifying pre-meal targets duration for 1 hour or until the user enters carbs (whichever comes first).")
-        addAction(UIAlertAction(title: distantFuture, style: .default) { _ in
-            handler(.hours(1))
-        })
-
-        addCancelAction()
-    }
-
     /// Initializes an action sheet-styled controller for selecting a PumpManager
     ///
     /// - Parameters:
@@ -55,6 +34,8 @@ extension UIAlertController {
                 }
             ))
         }
+
+        addCancelAction()
     }
 
     /// Initializes an action sheet-styled controller for selecting a CGMManager
@@ -79,6 +60,8 @@ extension UIAlertController {
             }
             ))
         }
+
+        addCancelAction()
     }
 
     internal convenience init(deleteCGMManagerHandler handler: @escaping (_ isDeleted: Bool) -> Void) {
@@ -108,10 +91,12 @@ extension UIAlertController {
     ///   - selectionHandler: A closure to execute when a service is selected.
     ///   - identifier: The identifier of the selected service.
     internal convenience init(availableServices: [ServiceDescriptor], selectionHandler: @escaping (_ identifier: String) -> Void) {
+        let preferredStyle: UIAlertController.Style = .alert
+
         self.init(
             title: NSLocalizedString("Add Service", comment: "Action sheet title selecting service"),
             message: nil,
-            preferredStyle: .actionSheet
+            preferredStyle: preferredStyle
         )
 
         for availableService in availableServices {
@@ -123,11 +108,15 @@ extension UIAlertController {
                 }
             ))
         }
+
+        if #available(iOS 26.0, *) {
+            addCancelAction()
+        }
     }
 
     internal func addCancelAction(handler: ((UIAlertAction) -> Void)? = nil) {
         let cancel = NSLocalizedString("Cancel", comment: "The title of the cancel action in an action sheet")
-        addAction(UIAlertAction(title: cancel, style: .cancel, handler: handler))
+        addAction(UIAlertAction(title: cancel, style: .destructive, handler: handler))
     }
 }
 

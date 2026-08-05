@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01414522FC033F2B7A9B223A /* Loop/Resources/Sounds/crying.caf in Resources */ = {isa = PBXBuildFile; fileRef = 85203550670F2E9BE92F27D8 /* Loop/Resources/Sounds/crying.caf */; };
+		0A02E77AD7536C322933D49B /* Loop/Resources/Sounds/minimal.caf in Resources */ = {isa = PBXBuildFile; fileRef = 74145BE3C46270883D295A1F /* Loop/Resources/Sounds/minimal.caf */; };
+		124B300527D84BE2A1233A91 /* Loop/Resources/Sounds/urgent_low.caf in Resources */ = {isa = PBXBuildFile; fileRef = C9EA3F48338B49BD9C6BD0F9 /* Loop/Resources/Sounds/urgent_low.caf */; };
 		1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
 		142CB7592A60BF2E0075748A /* EditMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142CB7582A60BF2E0075748A /* EditMode.swift */; };
@@ -56,6 +59,7 @@
 		14C970862C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C970852C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift */; };
 		14D906F42A846510006EB79A /* FavoriteFoodsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */; };
 		14ED83F62C6421F9008B4A5C /* FavoriteFoodInsightsCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14ED83F52C6421F9008B4A5C /* FavoriteFoodInsightsCardView.swift */; };
+		16E5A3BC4D931CE6AED18518 /* Loop/Resources/Sounds/trill.caf in Resources */ = {isa = PBXBuildFile; fileRef = 21F13EB666EBFDD03F99CB7E /* Loop/Resources/Sounds/trill.caf */; };
 		1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
 		1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219C2469F1F5000EBBDE /* AlertStore.swift */; };
 		1D080CBD2473214A00356610 /* AlertStore.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */; };
@@ -76,38 +80,15 @@
 		1DA7A84224476EAD008257F0 /* AlertManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA7A84124476EAD008257F0 /* AlertManagerTests.swift */; };
 		1DA7A84424477698008257F0 /* InAppModalAlertSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA7A84324477698008257F0 /* InAppModalAlertSchedulerTests.swift */; };
 		1DB1065124467E18005542BD /* AlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB1065024467E18005542BD /* AlertManager.swift */; };
-		C9A47B0180AAB1FC572D3EFE /* CriticalAlertAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0175B13A9543390BC5 /* CriticalAlertAudioPlayer.swift */; };
-		C1A1A00001000000000000A1 /* CriticalAlertAlarmScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A1A00001000000000000A2 /* CriticalAlertAlarmScheduler.swift */; };
-		C9A47B0280AAB1FC572D3EFF /* GlucoseAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0275B13A9543390BC6 /* GlucoseAlertManager.swift */; };
-		C9A47B0380AAB1FC572D3F00 /* GlucoseAlertSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0375B13A9543390BC7 /* GlucoseAlertSettingsView.swift */; };
-		C9A47B0480AAB1FC572D3F01 /* critical.caf in Resources */ = {isa = PBXBuildFile; fileRef = C9A47B0475B13A9543390BC8 /* critical.caf */; };
-		DE965737FE2DAE9FE692769E /* alarm.caf in Resources */ = {isa = PBXBuildFile; fileRef = 0FC34B523FE5A50C920506D5 /* alarm.caf */; };
-		A413B305CB4C4009DA09BE57 /* bloom.caf in Resources */ = {isa = PBXBuildFile; fileRef = 8FB2394478FF679F436E8EF1 /* bloom.caf */; };
-		230BE095719B8D8969B32A9C /* bloop.caf in Resources */ = {isa = PBXBuildFile; fileRef = AF16A5EDEB9DF756890E0C09 /* bloop.caf */; };
-		9B8FCBDD6E3A9E603C4AABAD /* bright_alarm.caf in Resources */ = {isa = PBXBuildFile; fileRef = 270F994CD56D566028B3CB25 /* bright_alarm.caf */; };
-		9960C6964DD51D81093FAD5D /* chime.caf in Resources */ = {isa = PBXBuildFile; fileRef = 3F7A1D72697082DC3A14587E /* chime.caf */; };
-		824A01CBE97A4F7A9D32F7D6 /* clear_chimes.caf in Resources */ = {isa = PBXBuildFile; fileRef = 4A645E0E2DDA534A635C9201 /* clear_chimes.caf */; };
-		01414522FC033F2B7A9B223A /* crying.caf in Resources */ = {isa = PBXBuildFile; fileRef = 85203550670F2E9BE92F27D8 /* crying.caf */; };
-		2C694BFD5806E573AFAB5E2E /* dings.caf in Resources */ = {isa = PBXBuildFile; fileRef = 62F7CB5D5DC337E705032AC7 /* dings.caf */; };
-		A4574F416AD62A1FCDE36D7D /* high_chimes.caf in Resources */ = {isa = PBXBuildFile; fileRef = 491F8F0D89972E9D8903CFA7 /* high_chimes.caf */; };
-		FA37F6EC10FF02D4F985D724 /* honk.caf in Resources */ = {isa = PBXBuildFile; fileRef = 6D5FCC7207E50ACC682E9E6E /* honk.caf */; };
-		0A02E77AD7536C322933D49B /* minimal.caf in Resources */ = {isa = PBXBuildFile; fileRef = 74145BE3C46270883D295A1F /* minimal.caf */; };
-		33644743F20B3706E3107FAC /* mood_synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = BEC0BA802BE613F144AC3A70 /* mood_synth.caf */; };
-		A2779286E117BD3627DA0618 /* simple.caf in Resources */ = {isa = PBXBuildFile; fileRef = 5181B60CBF3CB2DA537F0475 /* simple.caf */; };
-		D6E28676C2C7751C77C7F2FB /* spring.caf in Resources */ = {isa = PBXBuildFile; fileRef = 9471E156FC10D6D0FF219C77 /* spring.caf */; };
-		CB1AF8155B1761A30ACA5591 /* synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = 83081FFB0497A4596F597830 /* synth.caf */; };
-		16E5A3BC4D931CE6AED18518 /* trill.caf in Resources */ = {isa = PBXBuildFile; fileRef = 21F13EB666EBFDD03F99CB7E /* trill.caf */; };
-		124B300527D84BE2A1233A91 /* urgent_low.caf in Resources */ = {isa = PBXBuildFile; fileRef = C9EA3F48338B49BD9C6BD0F9 /* urgent_low.caf */; };
 		1DB1CA4D24A55F0000B3B94C /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB1CA4C24A55F0000B3B94C /* Image.swift */; };
 		1DB619AC270BAD3D006C9D07 /* VersionUpdateViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB619AB270BAD3D006C9D07 /* VersionUpdateViewModel.swift */; };
 		1DDE273D24AEA4B000796622 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */; };
-		FEEDB0000000000000000001 /* StatisticsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000001 /* StatisticsViewModel.swift */; };
 		1DDE273E24AEA4B000796622 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */; };
-		FEEDB0000000000000000004 /* TimeInRangeBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000004 /* TimeInRangeBar.swift */; };
-		FEEDB0000000000000000003 /* AGPChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000003 /* AGPChartView.swift */; };
-		FEEDB0000000000000000002 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000002 /* StatisticsView.swift */; };
 		1DDE274024AEA4F200796622 /* NotificationsCriticalAlertPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */; };
 		1DFE9E172447B6270082C280 /* UserNotificationAlertSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFE9E162447B6270082C280 /* UserNotificationAlertSchedulerTests.swift */; };
+		230BE095719B8D8969B32A9C /* Loop/Resources/Sounds/bloop.caf in Resources */ = {isa = PBXBuildFile; fileRef = AF16A5EDEB9DF756890E0C09 /* Loop/Resources/Sounds/bloop.caf */; };
+		2C694BFD5806E573AFAB5E2E /* Loop/Resources/Sounds/dings.caf in Resources */ = {isa = PBXBuildFile; fileRef = 62F7CB5D5DC337E705032AC7 /* Loop/Resources/Sounds/dings.caf */; };
+		33644743F20B3706E3107FAC /* Loop/Resources/Sounds/mood_synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = BEC0BA802BE613F144AC3A70 /* Loop/Resources/Sounds/mood_synth.caf */; };
 		3ED3198A2EB659E600820BCF /* GlucoseLiveActivityConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319882EB659E600820BCF /* GlucoseLiveActivityConfiguration.swift */; };
 		3ED3198B2EB659E600820BCF /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319872EB659E600820BCF /* ChartView.swift */; };
 		3ED3198C2EB659E600820BCF /* BasalViewActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319862EB659E600820BCF /* BasalViewActivity.swift */; };
@@ -252,6 +233,7 @@
 		4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
 		7D23667D21250C7E0028B67D /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D23667C21250C7E0028B67D /* LocalizedString.swift */; };
 		7E69CFFC2A16A77E00203CBD /* ResetLoopManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */; };
+		824A01CBE97A4F7A9D32F7D6 /* Loop/Resources/Sounds/clear_chimes.caf in Resources */ = {isa = PBXBuildFile; fileRef = 4A645E0E2DDA534A635C9201 /* Loop/Resources/Sounds/clear_chimes.caf */; };
 		841306BB2F7F0D9C00AF0320 /* ReferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841306BA2F7F0D9C00AF0320 /* ReferencesView.swift */; };
 		84213C752D932F0F00642E78 /* InsulinDeliveryLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84213C742D932F0F00642E78 /* InsulinDeliveryLog.swift */; };
 		84213C892D94941000642E78 /* InsulinDeliveryLogEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84213C882D94941000642E78 /* InsulinDeliveryLogEvent.swift */; };
@@ -270,7 +252,6 @@
 		8446319F2F5A2AB3003825AE /* PresetsPerformanceHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8446319E2F5A2AA9003825AE /* PresetsPerformanceHistoryViewModel.swift */; };
 		847F23432E4543140035C864 /* ActivePresetBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847F23422E4543140035C864 /* ActivePresetBanner.swift */; };
 		8496F7312B5711C4003E672C /* ContentMargin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496F7302B5711C4003E672C /* ContentMargin.swift */; };
-		84A7B5502D2D972C00B6D202 /* Image+Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7B54F2D2D972C00B6D202 /* Image+Optional.swift */; };
 		84AA81D32A4A27A3000B658B /* LoopWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D22A4A27A3000B658B /* LoopWidgets.swift */; };
 		84AA81D62A4A28AF000B658B /* WidgetBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D52A4A28AF000B658B /* WidgetBackground.swift */; };
 		84AA81D82A4A2910000B658B /* StatusWidgetTimelimeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA81D72A4A2910000B658B /* StatusWidgetTimelimeEntry.swift */; };
@@ -348,6 +329,12 @@
 		89F9119424358E4500ECCAF3 /* CarbAbsorptionTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F9119324358E4500ECCAF3 /* CarbAbsorptionTime.swift */; };
 		89F9119624358E6900ECCAF3 /* BolusPickerValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */; };
 		89FE21AD24AC57E30033F501 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FE21AC24AC57E30033F501 /* Collection.swift */; };
+		9960C6964DD51D81093FAD5D /* Loop/Resources/Sounds/chime.caf in Resources */ = {isa = PBXBuildFile; fileRef = 3F7A1D72697082DC3A14587E /* Loop/Resources/Sounds/chime.caf */; };
+		9B8FCBDD6E3A9E603C4AABAD /* Loop/Resources/Sounds/bright_alarm.caf in Resources */ = {isa = PBXBuildFile; fileRef = 270F994CD56D566028B3CB25 /* Loop/Resources/Sounds/bright_alarm.caf */; };
+		A1B2C3D40000000000000002 /* GlucoseAlertManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */; };
+		A2779286E117BD3627DA0618 /* Loop/Resources/Sounds/simple.caf in Resources */ = {isa = PBXBuildFile; fileRef = 5181B60CBF3CB2DA537F0475 /* Loop/Resources/Sounds/simple.caf */; };
+		A413B305CB4C4009DA09BE57 /* Loop/Resources/Sounds/bloom.caf in Resources */ = {isa = PBXBuildFile; fileRef = 8FB2394478FF679F436E8EF1 /* Loop/Resources/Sounds/bloom.caf */; };
+		A4574F416AD62A1FCDE36D7D /* Loop/Resources/Sounds/high_chimes.caf in Resources */ = {isa = PBXBuildFile; fileRef = 491F8F0D89972E9D8903CFA7 /* Loop/Resources/Sounds/high_chimes.caf */; };
 		A91D2A3F26CF0FF80023B075 /* IconTitleSubtitleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91D2A3E26CF0FF80023B075 /* IconTitleSubtitleTableViewCell.swift */; };
 		A91E4C2124F867A700BE9213 /* StoredAlertTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91E4C2024F867A700BE9213 /* StoredAlertTests.swift */; };
 		A91E4C2324F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */; };
@@ -485,7 +472,6 @@
 		C151634E2FA2C9C800FEECE8 /* RequiredVersionUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C151634D2FA2C9C800FEECE8 /* RequiredVersionUpdateView.swift */; };
 		C152B9F52C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C152B9F42C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift */; };
 		C152B9F72C9C7EF100ACBC06 /* AutomationHistoryEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C152B9F62C9C7EF100ACBC06 /* AutomationHistoryEntryTests.swift */; };
-		FEEDB0000000000000000005 /* GlucoseStatisticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */; };
 		C1550B0C2E6F249A009369DC /* LoopCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1550B0B2E6F249A009369DC /* LoopCircleView.swift */; };
 		C15A8C492A7305B1009D736B /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C1E3DC4628595FAA00CA19FF /* SwiftCharts */; };
 		C165756F2534C468004AE16E /* SimpleBolusViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C165756E2534C468004AE16E /* SimpleBolusViewModelTests.swift */; };
@@ -533,6 +519,7 @@
 		C19E23B62E83513400C20D83 /* PresetActivateCrownConfirm.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E23B52E83512A00C20D83 /* PresetActivateCrownConfirm.swift */; };
 		C19E23B82E83566700C20D83 /* CircularProgressWithCheckmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E23B72E83566300C20D83 /* CircularProgressWithCheckmark.swift */; };
 		C19F48742560ABFB003632D7 /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
+		C1A1A00001000000000000A1 /* CriticalAlertAlarmScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A1A00001000000000000A2 /* CriticalAlertAlarmScheduler.swift */; };
 		C1AD4200256D61E500164DDD /* Comparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1AD41FF256D61E500164DDD /* Comparable.swift */; };
 		C1AF062329426300002C1B19 /* ManualGlucoseEntryRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1AF062229426300002C1B19 /* ManualGlucoseEntryRow.swift */; };
 		C1B80D632AF97D7200AB7705 /* LoopDataManager+CarbAbsorption.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B80D622AF97D7200AB7705 /* LoopDataManager+CarbAbsorption.swift */; };
@@ -598,13 +585,20 @@
 		C1FAD5192E7E0C3400F7FAD9 /* ChartPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FAD5182E7E0C3100F7FAD9 /* ChartPageView.swift */; };
 		C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428B217806A300FAB378 /* StateColorPalette.swift */; };
 		C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
+		C9A47B0180AAB1FC572D3EFE /* CriticalAlertAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0175B13A9543390BC5 /* CriticalAlertAudioPlayer.swift */; };
+		C9A47B0280AAB1FC572D3EFF /* GlucoseAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0275B13A9543390BC6 /* GlucoseAlertManager.swift */; };
+		C9A47B0380AAB1FC572D3F00 /* GlucoseAlertSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0375B13A9543390BC7 /* GlucoseAlertSettingsView.swift */; };
+		C9A47B0480AAB1FC572D3F01 /* Loop/Resources/Sounds/critical.caf in Resources */ = {isa = PBXBuildFile; fileRef = C9A47B0475B13A9543390BC8 /* Loop/Resources/Sounds/critical.caf */; };
+		C9SCENED0000000000000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9SCENED0000000000000002 /* SceneDelegate.swift */; };
+		CB1AF8155B1761A30ACA5591 /* Loop/Resources/Sounds/synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = 83081FFB0497A4596F597830 /* Loop/Resources/Sounds/synth.caf */; };
+		D6E28676C2C7751C77C7F2FB /* Loop/Resources/Sounds/spring.caf in Resources */ = {isa = PBXBuildFile; fileRef = 9471E156FC10D6D0FF219C77 /* Loop/Resources/Sounds/spring.caf */; };
 		DD3DBD292A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */; };
 		DDC389F62A2B61750066E2E8 /* ApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */; };
-		FEEDB0000000000000000000 /* GlucoseStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000000 /* GlucoseStatistics.swift */; };
 		DDC389F82A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */; };
 		DDC389FA2A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */; };
 		DDC389FC2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */; };
 		DDC389FE2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */; };
+		DE965737FE2DAE9FE692769E /* Loop/Resources/Sounds/alarm.caf in Resources */ = {isa = PBXBuildFile; fileRef = 0FC34B523FE5A50C920506D5 /* Loop/Resources/Sounds/alarm.caf */; };
 		E93E865424DB6CBA00FF40C8 /* retrospective_output.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E865324DB6CBA00FF40C8 /* retrospective_output.json */; };
 		E93E865624DB731900FF40C8 /* predicted_glucose_without_retrospective.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E865524DB731900FF40C8 /* predicted_glucose_without_retrospective.json */; };
 		E93E865824DB75BE00FF40C8 /* predicted_glucose_very_negative.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E865724DB75BD00FF40C8 /* predicted_glucose_very_negative.json */; };
@@ -644,13 +638,19 @@
 		E9C00EF324C6222400628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
 		E9C00EF524C623EF00628F35 /* LoopSettings+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */; };
 		E9C58A7324DB4A2700487A17 /* LoopDataManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */; };
-		A1B2C3D40000000000000002 /* GlucoseAlertManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */; };
 		E9C58A7C24DB529A00487A17 /* momentum_effect_bouncing.json in Resources */ = {isa = PBXBuildFile; fileRef = E9C58A7724DB529A00487A17 /* momentum_effect_bouncing.json */; };
 		E9C58A7D24DB529A00487A17 /* basal_profile.json in Resources */ = {isa = PBXBuildFile; fileRef = E9C58A7824DB529A00487A17 /* basal_profile.json */; };
 		E9C58A7E24DB529A00487A17 /* dynamic_glucose_effect_partially_observed.json in Resources */ = {isa = PBXBuildFile; fileRef = E9C58A7924DB529A00487A17 /* dynamic_glucose_effect_partially_observed.json */; };
 		E9C58A7F24DB529A00487A17 /* counteraction_effect_falling_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = E9C58A7A24DB529A00487A17 /* counteraction_effect_falling_glucose.json */; };
 		E9C58A8024DB529A00487A17 /* insulin_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9C58A7B24DB529A00487A17 /* insulin_effect.json */; };
+		FA37F6EC10FF02D4F985D724 /* Loop/Resources/Sounds/honk.caf in Resources */ = {isa = PBXBuildFile; fileRef = 6D5FCC7207E50ACC682E9E6E /* Loop/Resources/Sounds/honk.caf */; };
 		FADE0001000000000000DE02 /* DevelopmentBranchAlerter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADE0001000000000000DE01 /* DevelopmentBranchAlerter.swift */; };
+		FEEDB0000000000000000000 /* GlucoseStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000000 /* GlucoseStatistics.swift */; };
+		FEEDB0000000000000000001 /* StatisticsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000001 /* StatisticsViewModel.swift */; };
+		FEEDB0000000000000000002 /* Statistics/StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000002 /* Statistics/StatisticsView.swift */; };
+		FEEDB0000000000000000003 /* Statistics/AGPChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000003 /* Statistics/AGPChartView.swift */; };
+		FEEDB0000000000000000004 /* Statistics/TimeInRangeBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */; };
+		FEEDB0000000000000000005 /* GlucoseStatisticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -788,6 +788,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0FC34B523FE5A50C920506D5 /* Loop/Resources/Sounds/alarm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/alarm.caf; sourceTree = SOURCE_ROOT; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
 		1452F4A82A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodAddEditViewModel.swift; sourceTree = "<group>"; };
@@ -841,38 +842,14 @@
 		1DA7A84124476EAD008257F0 /* AlertManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManagerTests.swift; sourceTree = "<group>"; };
 		1DA7A84324477698008257F0 /* InAppModalAlertSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppModalAlertSchedulerTests.swift; sourceTree = "<group>"; };
 		1DB1065024467E18005542BD /* AlertManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertManager.swift; sourceTree = "<group>"; };
-		C9A47B0175B13A9543390BC5 /* CriticalAlertAudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CriticalAlertAudioPlayer.swift; sourceTree = "<group>"; };
-		C1A1A00001000000000000A2 /* CriticalAlertAlarmScheduler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CriticalAlertAlarmScheduler.swift; sourceTree = "<group>"; };
-		C9A47B0275B13A9543390BC6 /* GlucoseAlertManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseAlertManager.swift; sourceTree = "<group>"; };
-		C9A47B0375B13A9543390BC7 /* GlucoseAlertSettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseAlertSettingsView.swift; sourceTree = "<group>"; };
-		C9A47B0475B13A9543390BC8 /* critical.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/critical.caf"; sourceTree = SOURCE_ROOT; };
-		0FC34B523FE5A50C920506D5 /* alarm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/alarm.caf"; sourceTree = SOURCE_ROOT; };
-		8FB2394478FF679F436E8EF1 /* bloom.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/bloom.caf"; sourceTree = SOURCE_ROOT; };
-		AF16A5EDEB9DF756890E0C09 /* bloop.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/bloop.caf"; sourceTree = SOURCE_ROOT; };
-		270F994CD56D566028B3CB25 /* bright_alarm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/bright_alarm.caf"; sourceTree = SOURCE_ROOT; };
-		3F7A1D72697082DC3A14587E /* chime.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/chime.caf"; sourceTree = SOURCE_ROOT; };
-		4A645E0E2DDA534A635C9201 /* clear_chimes.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/clear_chimes.caf"; sourceTree = SOURCE_ROOT; };
-		85203550670F2E9BE92F27D8 /* crying.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/crying.caf"; sourceTree = SOURCE_ROOT; };
-		62F7CB5D5DC337E705032AC7 /* dings.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/dings.caf"; sourceTree = SOURCE_ROOT; };
-		491F8F0D89972E9D8903CFA7 /* high_chimes.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/high_chimes.caf"; sourceTree = SOURCE_ROOT; };
-		6D5FCC7207E50ACC682E9E6E /* honk.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/honk.caf"; sourceTree = SOURCE_ROOT; };
-		74145BE3C46270883D295A1F /* minimal.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/minimal.caf"; sourceTree = SOURCE_ROOT; };
-		BEC0BA802BE613F144AC3A70 /* mood_synth.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/mood_synth.caf"; sourceTree = SOURCE_ROOT; };
-		5181B60CBF3CB2DA537F0475 /* simple.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/simple.caf"; sourceTree = SOURCE_ROOT; };
-		9471E156FC10D6D0FF219C77 /* spring.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/spring.caf"; sourceTree = SOURCE_ROOT; };
-		83081FFB0497A4596F597830 /* synth.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/synth.caf"; sourceTree = SOURCE_ROOT; };
-		21F13EB666EBFDD03F99CB7E /* trill.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/trill.caf"; sourceTree = SOURCE_ROOT; };
-		C9EA3F48338B49BD9C6BD0F9 /* urgent_low.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop/Resources/Sounds/urgent_low.caf"; sourceTree = SOURCE_ROOT; };
 		1DB1CA4C24A55F0000B3B94C /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
-		FEEDF0000000000000000001 /* StatisticsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StatisticsViewModel.swift"; sourceTree = "<group>"; };
 		1DB619AB270BAD3D006C9D07 /* VersionUpdateViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionUpdateViewModel.swift; sourceTree = "<group>"; };
 		1DC63E7325351BDF004605DA /* TrueTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TrueTime.framework; path = Carthage/Build/iOS/TrueTime.framework; sourceTree = "<group>"; };
 		1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		FEEDF0000000000000000004 /* TimeInRangeBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Statistics/TimeInRangeBar.swift"; sourceTree = "<group>"; };
-		FEEDF0000000000000000003 /* AGPChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Statistics/AGPChartView.swift"; sourceTree = "<group>"; };
-		FEEDF0000000000000000002 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Statistics/StatisticsView.swift"; sourceTree = "<group>"; };
 		1DFE9E162447B6270082C280 /* UserNotificationAlertSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserNotificationAlertSchedulerTests.swift; sourceTree = "<group>"; };
+		21F13EB666EBFDD03F99CB7E /* Loop/Resources/Sounds/trill.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/trill.caf; sourceTree = SOURCE_ROOT; };
+		270F994CD56D566028B3CB25 /* Loop/Resources/Sounds/bright_alarm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/bright_alarm.caf; sourceTree = SOURCE_ROOT; };
 		3ED319862EB659E600820BCF /* BasalViewActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalViewActivity.swift; sourceTree = "<group>"; };
 		3ED319872EB659E600820BCF /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 		3ED319882EB659E600820BCF /* GlucoseLiveActivityConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseLiveActivityConfiguration.swift; sourceTree = "<group>"; };
@@ -886,6 +863,7 @@
 		3ED3199E2EB65AFE00820BCF /* LocalizedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
 		3ED319A02EB65B4100820BCF /* Bootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bootstrap.swift; sourceTree = "<group>"; };
 		3ED319A22EB65DA300820BCF /* LiveActivityManagerProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManagerProxy.swift; sourceTree = "<group>"; };
+		3F7A1D72697082DC3A14587E /* Loop/Resources/Sounds/chime.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/chime.caf; sourceTree = SOURCE_ROOT; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
 		430B29892041F54A00BA9F93 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
@@ -1020,6 +998,8 @@
 		43F89CA222BDFBBC006BB54E /* UIActivityIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIActivityIndicatorView.swift; sourceTree = "<group>"; };
 		43FCEEA8221A615B0013DD30 /* StatusChartsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusChartsManager.swift; sourceTree = "<group>"; };
 		43FCEEAC221A66780013DD30 /* DateFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatter.swift; sourceTree = "<group>"; };
+		491F8F0D89972E9D8903CFA7 /* Loop/Resources/Sounds/high_chimes.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/high_chimes.caf; sourceTree = SOURCE_ROOT; };
+		4A645E0E2DDA534A635C9201 /* Loop/Resources/Sounds/clear_chimes.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/clear_chimes.caf; sourceTree = SOURCE_ROOT; };
 		4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = G4ShareSpy.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CollectionType+Loop.swift"; sourceTree = "<group>"; };
 		4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBackfillRequestUserInfo.swift; sourceTree = "<group>"; };
@@ -1043,6 +1023,10 @@
 		4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+StatusExtension.swift"; sourceTree = "<group>"; };
 		4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopDataManager.swift; sourceTree = "<group>"; };
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
+		5181B60CBF3CB2DA537F0475 /* Loop/Resources/Sounds/simple.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/simple.caf; sourceTree = SOURCE_ROOT; };
+		62F7CB5D5DC337E705032AC7 /* Loop/Resources/Sounds/dings.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/dings.caf; sourceTree = SOURCE_ROOT; };
+		6D5FCC7207E50ACC682E9E6E /* Loop/Resources/Sounds/honk.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/honk.caf; sourceTree = SOURCE_ROOT; };
+		74145BE3C46270883D295A1F /* Loop/Resources/Sounds/minimal.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/minimal.caf; sourceTree = SOURCE_ROOT; };
 		7D23667C21250C7E0028B67D /* LocalizedString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LocalizedString.swift; path = LoopUI/Common/LocalizedString.swift; sourceTree = SOURCE_ROOT; };
 		7D9BEF132335EC4B005DCFD6 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Intents.strings; sourceTree = "<group>"; };
 		7D9BEF292335EC58005DCFD6 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/Intents.strings"; sourceTree = "<group>"; };
@@ -1052,6 +1036,7 @@
 		7D9BEF812335EC8B005DCFD6 /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/Intents.strings; sourceTree = "<group>"; };
 		7D9BF13A23370E8B005DCFD6 /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/Intents.strings; sourceTree = "<group>"; };
 		7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetLoopManager.swift; sourceTree = "<group>"; };
+		83081FFB0497A4596F597830 /* Loop/Resources/Sounds/synth.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/synth.caf; sourceTree = SOURCE_ROOT; };
 		840A2F0D2C0F978E003D5E90 /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		841306BA2F7F0D9C00AF0320 /* ReferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferencesView.swift; sourceTree = "<group>"; };
 		84213C742D932F0F00642E78 /* InsulinDeliveryLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryLog.swift; sourceTree = "<group>"; };
@@ -1071,7 +1056,6 @@
 		8446319E2F5A2AA9003825AE /* PresetsPerformanceHistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsPerformanceHistoryViewModel.swift; sourceTree = "<group>"; };
 		847F23422E4543140035C864 /* ActivePresetBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePresetBanner.swift; sourceTree = "<group>"; };
 		8496F7302B5711C4003E672C /* ContentMargin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentMargin.swift; sourceTree = "<group>"; };
-		84A7B54F2D2D972C00B6D202 /* Image+Optional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+Optional.swift"; sourceTree = "<group>"; };
 		84AA81D22A4A27A3000B658B /* LoopWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopWidgets.swift; sourceTree = "<group>"; };
 		84AA81D52A4A28AF000B658B /* WidgetBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBackground.swift; sourceTree = "<group>"; };
 		84AA81D72A4A2910000B658B /* StatusWidgetTimelimeEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusWidgetTimelimeEntry.swift; sourceTree = "<group>"; };
@@ -1096,6 +1080,7 @@
 		84EC162D2C9115CA00D220C5 /* DIYLoopUnitTestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = DIYLoopUnitTestPlan.xctestplan; sourceTree = "<group>"; };
 		84F20DFC2D0B9C3A0089DF02 /* EditPresetDurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPresetDurationView.swift; sourceTree = "<group>"; };
 		84FA9D322CF7FD0D004162B4 /* PresetsHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsHistoryView.swift; sourceTree = "<group>"; };
+		85203550670F2E9BE92F27D8 /* Loop/Resources/Sounds/crying.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/crying.caf; sourceTree = SOURCE_ROOT; };
 		891B508424342BE1005DA578 /* CarbAndBolusFlowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbAndBolusFlowViewModel.swift; sourceTree = "<group>"; };
 		892A5D29222EF60A008961AB /* MockKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = MockKit.framework; path = Carthage/Build/iOS/MockKit.framework; sourceTree = SOURCE_ROOT; };
 		892A5D2B222EF60A008961AB /* MockKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = MockKitUI.framework; path = Carthage/Build/iOS/MockKitUI.framework; sourceTree = SOURCE_ROOT; };
@@ -1153,6 +1138,9 @@
 		89F9119324358E4500ECCAF3 /* CarbAbsorptionTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbAbsorptionTime.swift; sourceTree = "<group>"; };
 		89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusPickerValues.swift; sourceTree = "<group>"; };
 		89FE21AC24AC57E30033F501 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
+		8FB2394478FF679F436E8EF1 /* Loop/Resources/Sounds/bloom.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/bloom.caf; sourceTree = SOURCE_ROOT; };
+		9471E156FC10D6D0FF219C77 /* Loop/Resources/Sounds/spring.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/spring.caf; sourceTree = SOURCE_ROOT; };
+		A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseAlertManagerTests.swift; sourceTree = "<group>"; };
 		A900531A28D60862000BC15B /* Loop.shortcut */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop.shortcut; sourceTree = "<group>"; };
 		A900531B28D608CA000BC15B /* Cancel Override.shortcut */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Cancel Override.shortcut"; sourceTree = "<group>"; };
 		A900531C28D6090D000BC15B /* Loop Remote Overrides.shortcut */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Loop Remote Overrides.shortcut"; sourceTree = "<group>"; };
@@ -1203,6 +1191,7 @@
 		A9F703742489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GlucoseStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A9F703762489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PersistentDeviceLog+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusDosingDecision.swift; sourceTree = "<group>"; };
+		AF16A5EDEB9DF756890E0C09 /* Loop/Resources/Sounds/bloop.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/bloop.caf; sourceTree = SOURCE_ROOT; };
 		B4001CED28CBBC82002FB414 /* AlertManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManagementView.swift; sourceTree = "<group>"; };
 		B40D07C6251A89D500C1C6D7 /* GlucoseDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseDisplay.swift; sourceTree = "<group>"; };
 		B429CAB22E97C7F300FA988E /* LoopStatusModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopStatusModalView.swift; sourceTree = "<group>"; };
@@ -1260,6 +1249,7 @@
 		B66D1F422E6A5D6600471149 /* mul */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = mul; path = mul.lproj/Main.xcstrings; sourceTree = "<group>"; };
 		B6F22EF72E95A03800CCA05F /* hu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hu; path = hu.lproj/Intents.strings; sourceTree = "<group>"; };
 		B6F22EF92E95A03C00CCA05F /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Intents.strings; sourceTree = "<group>"; };
+		BEC0BA802BE613F144AC3A70 /* Loop/Resources/Sounds/mood_synth.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/mood_synth.caf; sourceTree = SOURCE_ROOT; };
 		C1004DEF2981F5B700B8CF94 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1004DFD2981F67A00B8CF94 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1004E052981F6A100B8CF94 /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -1313,7 +1303,6 @@
 		C151634D2FA2C9C800FEECE8 /* RequiredVersionUpdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequiredVersionUpdateView.swift; sourceTree = "<group>"; };
 		C152B9F42C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationHistoryEntry.swift; sourceTree = "<group>"; };
 		C152B9F62C9C7EF100ACBC06 /* AutomationHistoryEntryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationHistoryEntryTests.swift; sourceTree = "<group>"; };
-		FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GlucoseStatisticsTests.swift"; sourceTree = "<group>"; };
 		C1550B0B2E6F249A009369DC /* LoopCircleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopCircleView.swift; sourceTree = "<group>"; };
 		C159C8192867857000A86EC0 /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C159C8212867859800A86EC0 /* MockKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MockKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1361,6 +1350,7 @@
 		C19E23B72E83566300C20D83 /* CircularProgressWithCheckmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressWithCheckmark.swift; sourceTree = "<group>"; };
 		C19E23B92E83607C00C20D83 /* DerivedAssetsBase.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssetsBase.xcassets; sourceTree = "<group>"; };
 		C19F496225630504003632D7 /* Minizip.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Minizip.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1A1A00001000000000000A2 /* CriticalAlertAlarmScheduler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CriticalAlertAlarmScheduler.swift; sourceTree = "<group>"; };
 		C1ABA1602E281D330049DF41 /* NotificationActionSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationActionSelection.swift; sourceTree = "<group>"; };
 		C1AD41FF256D61E500164DDD /* Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Comparable.swift; sourceTree = "<group>"; };
 		C1AF062229426300002C1B19 /* ManualGlucoseEntryRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualGlucoseEntryRow.swift; sourceTree = "<group>"; };
@@ -1402,9 +1392,14 @@
 		C1FAD5182E7E0C3100F7FAD9 /* ChartPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartPageView.swift; sourceTree = "<group>"; };
 		C1FB428B217806A300FAB378 /* StateColorPalette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateColorPalette.swift; sourceTree = "<group>"; };
 		C1FB428E217921D600FAB378 /* PumpManagerUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerUI.swift; sourceTree = "<group>"; };
+		C9A47B0175B13A9543390BC5 /* CriticalAlertAudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CriticalAlertAudioPlayer.swift; sourceTree = "<group>"; };
+		C9A47B0275B13A9543390BC6 /* GlucoseAlertManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseAlertManager.swift; sourceTree = "<group>"; };
+		C9A47B0375B13A9543390BC7 /* GlucoseAlertSettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseAlertSettingsView.swift; sourceTree = "<group>"; };
+		C9A47B0475B13A9543390BC8 /* Loop/Resources/Sounds/critical.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/critical.caf; sourceTree = SOURCE_ROOT; };
+		C9EA3F48338B49BD9C6BD0F9 /* Loop/Resources/Sounds/urgent_low.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/urgent_low.caf; sourceTree = SOURCE_ROOT; };
+		C9SCENED0000000000000002 /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegralRetrospectiveCorrectionSelectionView.swift; sourceTree = "<group>"; };
 		DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationFactorStrategy.swift; sourceTree = "<group>"; };
-		FEEDF0000000000000000000 /* GlucoseStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GlucoseStatistics.swift"; sourceTree = "<group>"; };
 		DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorStrategy.swift; sourceTree = "<group>"; };
 		DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstantApplicationFactorStrategy.swift; sourceTree = "<group>"; };
 		DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+algorithmExperimentsSection.swift"; sourceTree = "<group>"; };
@@ -1446,7 +1441,6 @@
 		E9C00EEF24C620EF00628F35 /* LoopSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettings.swift; sourceTree = "<group>"; };
 		E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopSettings+Loop.swift"; sourceTree = "<group>"; };
 		E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopDataManagerTests.swift; sourceTree = "<group>"; };
-		A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseAlertManagerTests.swift; sourceTree = "<group>"; };
 		E9C58A7724DB529A00487A17 /* momentum_effect_bouncing.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = momentum_effect_bouncing.json; sourceTree = "<group>"; };
 		E9C58A7824DB529A00487A17 /* basal_profile.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = basal_profile.json; sourceTree = "<group>"; };
 		E9C58A7924DB529A00487A17 /* dynamic_glucose_effect_partially_observed.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = dynamic_glucose_effect_partially_observed.json; sourceTree = "<group>"; };
@@ -1455,6 +1449,12 @@
 		F5D9C01727DABBE0002E48F6 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Intents.strings; sourceTree = "<group>"; };
 		F5E0BDD327E1D71C0033557E /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Intents.strings; sourceTree = "<group>"; };
 		FADE0001000000000000DE01 /* DevelopmentBranchAlerter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevelopmentBranchAlerter.swift; sourceTree = "<group>"; };
+		FEEDF0000000000000000000 /* GlucoseStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseStatistics.swift; sourceTree = "<group>"; };
+		FEEDF0000000000000000001 /* StatisticsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsViewModel.swift; sourceTree = "<group>"; };
+		FEEDF0000000000000000002 /* Statistics/StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics/StatisticsView.swift; sourceTree = "<group>"; };
+		FEEDF0000000000000000003 /* Statistics/AGPChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics/AGPChartView.swift; sourceTree = "<group>"; };
+		FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics/TimeInRangeBar.swift; sourceTree = "<group>"; };
+		FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseStatisticsTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1744,6 +1744,7 @@
 				B4C6D2412EA7E38C006F5755 /* LocalizablePlural.xcstrings */,
 				437D9BA11D7B5203007245E8 /* Loop.xcconfig */,
 				A951C5FF23E8AB51003E26DC /* Version.xcconfig */,
+				84957A16300D5CDF0040E2EF /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1772,6 +1773,7 @@
 				43F5C2D41B92A4A6003EB13D /* Info.plist */,
 				C1EE9E802A38D0FB0064784A /* BuildDetails.plist */,
 				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
+				C9SCENED0000000000000002 /* SceneDelegate.swift */,
 				1D12D3B82548EFDD00B53E8B /* main.swift */,
 				43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */,
 				43776F951B8022E90074EA36 /* Main.storyboard */,
@@ -1983,7 +1985,6 @@
 				C13DA2AF24F6C7690098BB29 /* UIViewController.swift */,
 				430B29922041F5B200BA9F93 /* UserDefaults+Loop.swift */,
 				A9B607AF247F000F00792BE4 /* UserNotifications+Loop.swift */,
-				84A7B54F2D2D972C00B6D202 /* Image+Optional.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2042,9 +2043,9 @@
 				B43B5C532EAFBF110096A6AE /* RecentGlucoseTableViewCell.xib */,
 				C151634D2FA2C9C800FEECE8 /* RequiredVersionUpdateView.swift */,
 				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
-				FEEDF0000000000000000004 /* TimeInRangeBar.swift */,
-				FEEDF0000000000000000003 /* AGPChartView.swift */,
-				FEEDF0000000000000000002 /* StatisticsView.swift */,
+				FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */,
+				FEEDF0000000000000000003 /* Statistics/AGPChartView.swift */,
+				FEEDF0000000000000000002 /* Statistics/StatisticsView.swift */,
 				E4854073AAE5C2CB97167F63 /* HealthAccessView.swift */,
 				DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */,
 				C1DE5D22251BFC4D00439E49 /* SimpleBolusView.swift */,
@@ -2298,6 +2299,31 @@
 				842E40A52F22F7E2000CCCE0 /* PresetsTrainingContent.swift */,
 			);
 			path = Training;
+			sourceTree = "<group>";
+		};
+		84957A16300D5CDF0040E2EF /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				C9A47B0475B13A9543390BC8 /* Loop/Resources/Sounds/critical.caf */,
+				0FC34B523FE5A50C920506D5 /* Loop/Resources/Sounds/alarm.caf */,
+				8FB2394478FF679F436E8EF1 /* Loop/Resources/Sounds/bloom.caf */,
+				AF16A5EDEB9DF756890E0C09 /* Loop/Resources/Sounds/bloop.caf */,
+				270F994CD56D566028B3CB25 /* Loop/Resources/Sounds/bright_alarm.caf */,
+				3F7A1D72697082DC3A14587E /* Loop/Resources/Sounds/chime.caf */,
+				4A645E0E2DDA534A635C9201 /* Loop/Resources/Sounds/clear_chimes.caf */,
+				85203550670F2E9BE92F27D8 /* Loop/Resources/Sounds/crying.caf */,
+				62F7CB5D5DC337E705032AC7 /* Loop/Resources/Sounds/dings.caf */,
+				491F8F0D89972E9D8903CFA7 /* Loop/Resources/Sounds/high_chimes.caf */,
+				6D5FCC7207E50ACC682E9E6E /* Loop/Resources/Sounds/honk.caf */,
+				74145BE3C46270883D295A1F /* Loop/Resources/Sounds/minimal.caf */,
+				BEC0BA802BE613F144AC3A70 /* Loop/Resources/Sounds/mood_synth.caf */,
+				5181B60CBF3CB2DA537F0475 /* Loop/Resources/Sounds/simple.caf */,
+				9471E156FC10D6D0FF219C77 /* Loop/Resources/Sounds/spring.caf */,
+				83081FFB0497A4596F597830 /* Loop/Resources/Sounds/synth.caf */,
+				21F13EB666EBFDD03F99CB7E /* Loop/Resources/Sounds/trill.caf */,
+				C9EA3F48338B49BD9C6BD0F9 /* Loop/Resources/Sounds/urgent_low.caf */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		84AA81D12A4A2778000B658B /* Components */ = {
@@ -3099,24 +3125,24 @@
 				C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */,
 				C1EE9E812A38D0FB0064784A /* BuildDetails.plist in Resources */,
 				43FCBBC21E51710B00343C1B /* LaunchScreen.storyboard in Resources */,
-				C9A47B0480AAB1FC572D3F01 /* critical.caf in Resources */,
-				DE965737FE2DAE9FE692769E /* alarm.caf in Resources */,
-				A413B305CB4C4009DA09BE57 /* bloom.caf in Resources */,
-				230BE095719B8D8969B32A9C /* bloop.caf in Resources */,
-				9B8FCBDD6E3A9E603C4AABAD /* bright_alarm.caf in Resources */,
-				9960C6964DD51D81093FAD5D /* chime.caf in Resources */,
-				824A01CBE97A4F7A9D32F7D6 /* clear_chimes.caf in Resources */,
-				01414522FC033F2B7A9B223A /* crying.caf in Resources */,
-				2C694BFD5806E573AFAB5E2E /* dings.caf in Resources */,
-				A4574F416AD62A1FCDE36D7D /* high_chimes.caf in Resources */,
-				FA37F6EC10FF02D4F985D724 /* honk.caf in Resources */,
-				0A02E77AD7536C322933D49B /* minimal.caf in Resources */,
-				33644743F20B3706E3107FAC /* mood_synth.caf in Resources */,
-				A2779286E117BD3627DA0618 /* simple.caf in Resources */,
-				D6E28676C2C7751C77C7F2FB /* spring.caf in Resources */,
-				CB1AF8155B1761A30ACA5591 /* synth.caf in Resources */,
-				16E5A3BC4D931CE6AED18518 /* trill.caf in Resources */,
-				124B300527D84BE2A1233A91 /* urgent_low.caf in Resources */,
+				C9A47B0480AAB1FC572D3F01 /* Loop/Resources/Sounds/critical.caf in Resources */,
+				DE965737FE2DAE9FE692769E /* Loop/Resources/Sounds/alarm.caf in Resources */,
+				A413B305CB4C4009DA09BE57 /* Loop/Resources/Sounds/bloom.caf in Resources */,
+				230BE095719B8D8969B32A9C /* Loop/Resources/Sounds/bloop.caf in Resources */,
+				9B8FCBDD6E3A9E603C4AABAD /* Loop/Resources/Sounds/bright_alarm.caf in Resources */,
+				9960C6964DD51D81093FAD5D /* Loop/Resources/Sounds/chime.caf in Resources */,
+				824A01CBE97A4F7A9D32F7D6 /* Loop/Resources/Sounds/clear_chimes.caf in Resources */,
+				01414522FC033F2B7A9B223A /* Loop/Resources/Sounds/crying.caf in Resources */,
+				2C694BFD5806E573AFAB5E2E /* Loop/Resources/Sounds/dings.caf in Resources */,
+				A4574F416AD62A1FCDE36D7D /* Loop/Resources/Sounds/high_chimes.caf in Resources */,
+				FA37F6EC10FF02D4F985D724 /* Loop/Resources/Sounds/honk.caf in Resources */,
+				0A02E77AD7536C322933D49B /* Loop/Resources/Sounds/minimal.caf in Resources */,
+				33644743F20B3706E3107FAC /* Loop/Resources/Sounds/mood_synth.caf in Resources */,
+				A2779286E117BD3627DA0618 /* Loop/Resources/Sounds/simple.caf in Resources */,
+				D6E28676C2C7751C77C7F2FB /* Loop/Resources/Sounds/spring.caf in Resources */,
+				CB1AF8155B1761A30ACA5591 /* Loop/Resources/Sounds/synth.caf in Resources */,
+				16E5A3BC4D931CE6AED18518 /* Loop/Resources/Sounds/trill.caf in Resources */,
+				124B300527D84BE2A1233A91 /* Loop/Resources/Sounds/urgent_low.caf in Resources */,
 				B405E35A24D2B1A400DD058D /* HUDAssets.xcassets in Resources */,
 				A966152623EA5A26005D8B29 /* DefaultAssets.xcassets in Resources */,
 				A966152723EA5A26005D8B29 /* DerivedAssets.xcassets in Resources */,
@@ -3390,6 +3416,7 @@
 				E9B355292935919E0076AB04 /* MissedMealSettings.swift in Sources */,
 				43A51E1F1EB6D62A000736CC /* CarbAbsorptionViewController.swift in Sources */,
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
+				C9SCENED0000000000000001 /* SceneDelegate.swift in Sources */,
 				4372E48B213CB5F00068E043 /* Double.swift in Sources */,
 				84DF48C12F6A0AED00BEDB40 /* Double+Closest.swift in Sources */,
 				430B29932041F5B300BA9F93 /* UserDefaults+Loop.swift in Sources */,
@@ -3553,9 +3580,9 @@
 				1D12D3B92548EFDD00B53E8B /* main.swift in Sources */,
 				A9DCF32A25B0FABF00C89088 /* LoopUIColorPalette+Default.swift in Sources */,
 				1DDE273E24AEA4B000796622 /* SettingsView.swift in Sources */,
-				FEEDB0000000000000000004 /* TimeInRangeBar.swift in Sources */,
-				FEEDB0000000000000000003 /* AGPChartView.swift in Sources */,
-				FEEDB0000000000000000002 /* StatisticsView.swift in Sources */,
+				FEEDB0000000000000000004 /* Statistics/TimeInRangeBar.swift in Sources */,
+				FEEDB0000000000000000003 /* Statistics/AGPChartView.swift in Sources */,
+				FEEDB0000000000000000002 /* Statistics/StatisticsView.swift in Sources */,
 				BAF043BF0BC70EC99AE79F71 /* HealthAccessView.swift in Sources */,
 				A9B607B0247F000F00792BE4 /* UserNotifications+Loop.swift in Sources */,
 				43F89CA322BDFBBD006BB54E /* UIActivityIndicatorView.swift in Sources */,
@@ -3612,7 +3639,6 @@
 				439706E622D2E84900C81566 /* PredictionSettingTableViewCell.swift in Sources */,
 				430D85891F44037000AF2D4F /* HUDViewTableViewCell.swift in Sources */,
 				43A51E211EB6DBDD000736CC /* LoopChartsTableViewController.swift in Sources */,
-				84A7B5502D2D972C00B6D202 /* Image+Optional.swift in Sources */,
 				8968B1122408B3520074BB48 /* UIFont.swift in Sources */,
 				1452F4A92A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift in Sources */,
 				438D42FB1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift in Sources */,

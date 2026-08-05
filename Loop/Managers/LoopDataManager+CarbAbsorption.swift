@@ -70,7 +70,13 @@ extension LoopDataManager {
         // Overlay basal history on basal doses, splitting doses to get amount delivered relative to basal
         let annotatedDoses = doses.annotated(with: basalWithOverrides)
 
-        let insulinEffects = annotatedDoses.glucoseEffects(
+        // Use the standard mid-absorption ISF model — matching LoopAlgorithm's
+        // prediction path (useMidAbsorptionISF) — so this review's carb
+        // absorption agrees with the home-screen COB. Dose-time `glucoseEffects`
+        // is kept only for backwards compatibility; when it and the algorithm
+        // disagreed, an ISF-changing override made the carb screen and the
+        // home screen show different COB.
+        let insulinEffects = annotatedDoses.glucoseEffectsMidAbsorptionISF(
             insulinSensitivityHistory: sensitivityWithOverrides,
             from: start.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval).dateFlooredToTimeInterval(GlucoseMath.defaultDelta),
             to: nil)
