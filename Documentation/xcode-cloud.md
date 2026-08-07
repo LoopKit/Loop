@@ -26,28 +26,22 @@ xed .
 
 Xcode Cloud builds from the remote repository, not from your working copy, so anything the build needs has to be committed and pushed to your fork.
 
-### Step 2 — Set your development team
+### Step 2 — Set your development team (optional)
 
-Select `LoopConfigOverride.xcconfig` in Xcode's project navigator (it's in the root of the workspace) and uncomment the last line, replacing the value with your own Team ID from [developer.apple.com](https://developer.apple.com):
+Xcode Cloud applies your development team automatically when it signs, so cloud builds need no source changes at all — `Loop.xcconfig` builds the bundle ID as `com.${DEVELOPMENT_TEAM}.loopkit`, so your app and all of its extensions get identifiers that are unique to your team without any edits.
+
+If you also want to build locally (see Step 3), select `LoopConfigOverride.xcconfig` in Xcode's project navigator (it's in the root of the workspace) and uncomment the last line, replacing the value with your own Team ID from [developer.apple.com](https://developer.apple.com):
 
 ```
 // Put your team id here for signing
 LOOP_DEVELOPMENT_TEAM = ABCDE12345
 ```
 
-Then commit and push it:
-
-```bash
-git add LoopConfigOverride.xcconfig
-git commit -m "Set development team"
-git push
-```
-
-This is the only required edit. Everything else — bundle identifiers, entitlements, app groups, signing style — is derived from it. `Loop.xcconfig` builds the bundle ID as `com.${DEVELOPMENT_TEAM}.loopkit`, so your app and all of its extensions get identifiers that are unique to your team automatically.
+Only local builds read this, so there's no need to commit it.
 
 ### Step 3 — Build locally once
 
-Select the **LoopWorkspace** scheme (not the `Loop` scheme) and build to a real device.
+Select the **LoopWorkspace** scheme (not the `Loop` scheme) and build to a real device. This requires the team ID from Step 2.
 
 This is not strictly part of Xcode Cloud setup, but it's the cheapest way to get Xcode's automatic signing to register your App IDs, the `group.com.<TEAMID>.loopkit.LoopGroup` app group, and the rest of the capabilities in the developer portal. Doing it locally surfaces identifier and entitlement problems in seconds instead of in a cloud build several minutes long.
 
@@ -56,7 +50,7 @@ This is not strictly part of Xcode Cloud setup, but it's the cheapest way to get
 In Xcode, choose **Integrate → Create Workflow** (or **Product → Xcode Cloud → Create Workflow**).
 
 1. **Product:** pick the Loop app from the workspace.
-2. **Grant source access:** connect your GitHub account and authorize your `LoopWorkspace` fork.
+2. **Grant source access:** connect your GitHub account and authorize your `LoopWorkspace` fork. The sheet also lists the workspace's public package dependencies (`apple/swift-log`, `Kitura/*`, and so on) — leave them "Not connected." Public repositories need no access grant, and clicking **Connect…** on a repository you don't administer fails with an admin-permissions error.
 3. **Workflow settings:**
    - **Scheme:** `LoopWorkspace`. It's a shared scheme in the repository, so Xcode Cloud can see it.
    - **Environment:** pick an Xcode version that can build the branch you're on.
@@ -89,9 +83,9 @@ Xcode Cloud has no equivalent of the browser build's "keep alive" and auto-updat
 | --- | --- | --- |
 | Mac required | No | Yes, for initial workflow creation |
 | Signing | `fastlane match`, certificates in a private repo you manage | Managed by Apple |
-| Secrets to configure | Team ID, App Store Connect API key, match password, PAT | Team ID only |
+| Secrets to configure | Team ID, App Store Connect API key, match password, PAT | None |
 | Cost | Free tier of GitHub Actions | 25 compute hours/month included with the developer program |
 | Auto-update / keep-alive | Built into the workflows | Manual merges, or a scheduled start condition |
 | Where builds land | TestFlight | TestFlight |
 
-Both paths require a paid Apple Developer Program membership. Neither replaces the other — the point of the code change is that all three options (browser build, local Xcode build, Xcode Cloud) remain available from the same source tree.
+Both paths require a paid Apple Developer Program membership. Neither replaces the other — all three options (browser build, local Xcode build, Xcode Cloud) work from the same, unmodified source tree.
