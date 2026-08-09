@@ -2,38 +2,64 @@ name: Build Loop iOS Only
 on:
   push:
     branches: [ dev ]
-
 jobs:
   build:
     runs-on: macos-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Xcode
+      - uses: actions/checkout@v4
+      - name: Xcode环境
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
 
-      - name: 归档项目（仅编译主App，关闭签名）
+      # 编译时仅包含主App目标，强制跳过所有Extension
+      - name: 编译项目
+        run: |
+          xcodebuild build \
+          -scheme Loop \
+          -destination generic/platform=iOS \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
+          EXCLUDED_SOURCE_FILE_NAMES="*Watch*"
+
+      - name: 归档
         run: |
           mkdir -p ./build
           xcodebuild archive \
-            -scheme Loop \
-            -target Loop \
-            -destination generic/platform=iOS \
-            -archivePath ./build/Loop.xcarchive \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGN_STYLE=Manual
+          -scheme Loop \
+          -destination generic/platform=iOS \
+          -archivePath ./build/Loop.xcarchive \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
+          EXCLUDED_SOURCE_FILE_NAMES="*Watch*"
 
       - name: 导出无签名IPA
         run: |
           mkdir -p ./ipa
+          cat > export.plist << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>method</key>
+  <string>development</string>
+  <key>signingStyle</key>
+  <string>manual</string>
+  <key>stripSwiftSymbols</key>
+  <true/>
+</dict>
+</plist>
+EOF
           xcodebuild -exportArchive \
-            -archivePath ./build/Loop.xcarchive \
-            -exportPath ./ipa \
+          -archivePath ./build/Loop.xcarchive \
+          -exportPath ./ipa \
+          -exportOptionsPlist export.plist
+
+      - name: 上传包
+        uses: actions/upload-artifact@v4
+        with:
+          name: Loop-无签名IPA
+          path: ./ipa/*.ipa
             -exportOptionsPlist <(echo '<?xml version="1.0" encoding="UTF-8"?>
             <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
             <plist version="1.0">
