@@ -1,4 +1,5 @@
 name: Build Loop IPA
+
 on:
   workflow_dispatch:
   push:
@@ -8,17 +9,6 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
-            - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
-
-      - name: Setup Match Secrets
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-          FASTLANE_KEY_ID: ${{ secrets.FASTLANE_KEY_ID }}
-          FASTLANE_ISSUER_ID: ${{ secrets.FASTLANE_ISSUER_ID }}
-          FASTLANE_KEY: ${{ secrets.FASTLANE_KEY }}
-        run: echo "配置证书密钥"
-
-      - name: Build IPA
-        run: fastlane build
