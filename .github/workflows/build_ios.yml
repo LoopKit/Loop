@@ -14,17 +14,24 @@ jobs:
           xcode-version: latest-stable
 
       - name: 编译主App
-        run: xcodebuild build -target Loop -scheme Loop -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+        run: >
+          xcodebuild build
+          -project Loop.xcodeproj
+          -scheme Loop
+          -destination generic/platform=iOS
+          CODE_SIGN_IDENTITY=""
+          CODE_SIGNING_REQUIRED=NO
+          CODE_SIGNING_ALLOWED=NO
 
       - name: 归档打包
         run: |
           mkdir -p ./build
           xcodebuild archive \
-            -target Loop \
+            -project Loop.xcodeproj \
             -scheme Loop \
             -destination generic/platform=iOS \
             -archivePath ./build/Loop.xcarchive \
-            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
       - name: 导出IPA
         run: |
