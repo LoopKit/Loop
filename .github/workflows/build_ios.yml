@@ -7,99 +7,34 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Xcode环境
+
+      - name: 配置Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
 
-      # 编译时仅包含主App目标，强制跳过所有Extension
-      - name: 编译项目
-        run: |
-          xcodebuild build \
-          -scheme Loop \
-          -destination generic/platform=iOS \
-          CODE_SIGNING_ALLOWED=NO \
-          CODE_SIGNING_REQUIRED=NO \
-          EXCLUDED_SOURCE_FILE_NAMES="*Watch*"
+      - name: 编译主App
+        run: xcodebuild build -target Loop -scheme Loop -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
 
-      - name: 归档
+      - name: 归档打包
         run: |
           mkdir -p ./build
           xcodebuild archive \
-          -scheme Loop \
-          -destination generic/platform=iOS \
-          -archivePath ./build/Loop.xcarchive \
-          CODE_SIGNING_ALLOWED=NO \
-          CODE_SIGNING_REQUIRED=NO \
-          EXCLUDED_SOURCE_FILE_NAMES="*Watch*"
+            -target Loop \
+            -scheme Loop \
+            -destination generic/platform=iOS \
+            -archivePath ./build/Loop.xcarchive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
 
-      - name: 导出无签名IPA
+      - name: 导出IPA
         run: |
           mkdir -p ./ipa
-          cat > export.plist << EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>method</key>
-  <string>development</string>
-  <key>signingStyle</key>
-  <string>manual</string>
-  <key>stripSwiftSymbols</key>
-  <true/>
-</dict>
-</plist>
-EOF
           xcodebuild -exportArchive \
-          -archivePath ./build/Loop.xcarchive \
-          -exportPath ./ipa \
-          -exportOptionsPlist export.plist
+            -archivePath ./build/Loop.xcarchive \
+            -exportPath ./ipa \
+            -exportOptionsPlist <(echo '{"method":"development","signingStyle":"manual","stripSwiftSymbols":true}')
 
-      - name: 上传包
-        uses: actions/upload-artifact@v4
-        with:
-          name: Loop-无签名IPA
-          path: ./ipa/*.ipa
-            -exportOptionsPlist <(echo '<?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0">
-            <dict>
-              <key>method</key>
-              <string>development</string>
-              <key>signingStyle</key>
-              <string>manual</string>
-              <key>signingCertificate</key>
-              <string></string>
-              <key>provisioningProfiles</key>
-              <dict/>
-              <key>stripSwiftSymbols</key>
-              <true/>
-            </dict>
-            </plist>')
-
-      - name: 上传无签名安装包
-        uses: actions/upload-artifact@v4
-        with:
-          name: Loop-无签名IPA
-          path: ./ipa/*.ipa
-            -exportOptionsPlist <(echo '<?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0">
-            <dict>
-              <key>method</key>
-              <string>development</string>
-              <key>signingStyle</key>
-              <string>manual</string>
-              <key>signingCertificate</key>
-              <string></string>
-              <key>provisioningProfiles</key>
-              <dict/>
-              <key>stripSwiftSymbols</key>
-              <true/>
-            </dict>
-            </plist>')
-
-      - name: 上传无签名安装包
+      - name: 上传安装包
         uses: actions/upload-artifact@v4
         with:
           name: Loop-无签名IPA
