@@ -15,14 +15,14 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: 归档项目（关闭签名、跳过Watch）
+      - name: 归档项目（仅编译主App，关闭签名）
         run: |
           mkdir -p ./build
           xcodebuild archive \
             -scheme Loop \
+            -target Loop \
             -destination generic/platform=iOS \
             -archivePath ./build/Loop.xcarchive \
-            EXCLUDED_SOURCE_FILE_NAMES=*Watch* \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
@@ -34,6 +34,28 @@ jobs:
           xcodebuild -exportArchive \
             -archivePath ./build/Loop.xcarchive \
             -exportPath ./ipa \
+            -exportOptionsPlist <(echo '<?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+            <plist version="1.0">
+            <dict>
+              <key>method</key>
+              <string>development</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>signingCertificate</key>
+              <string></string>
+              <key>provisioningProfiles</key>
+              <dict/>
+              <key>stripSwiftSymbols</key>
+              <true/>
+            </dict>
+            </plist>')
+
+      - name: 上传无签名安装包
+        uses: actions/upload-artifact@v4
+        with:
+          name: Loop-无签名IPA
+          path: ./ipa/*.ipa
             -exportOptionsPlist <(echo '<?xml version="1.0" encoding="UTF-8"?>
             <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
             <plist version="1.0">
