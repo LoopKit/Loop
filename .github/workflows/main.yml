@@ -1,24 +1,28 @@
 name: Build Loop IPA
-
-on:
-  workflow_dispatch:
-  push:
-    branches: [ dev, main ]
+on: push
 
 jobs:
-  build:
+  build_task:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - name: 拉取源码
+        uses: actions/checkout@v4
 
-      - name: Build IPA
+      - name: 编译打包IPA
         run: |
-          xcodebuild archive -workspace Loop.xcworkspace -scheme Loop -archivePath build/Loop.xcarchive
-          xcodebuild -exportArchive -archivePath build/Loop.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath ./output
+          mkdir -p build output
+          xcodebuild archive \
+          -project Loop.xcodeproj \
+          -scheme Loop \
+          -configuration Release \
+          -archivePath ./build/Loop.xcarchive
 
-      - name: Upload IPA
+          xcodebuild -exportArchive \
+          -archivePath ./build/Loop.xcarchive \
+          -exportOptionsPlist ExportOptions.plist \
+          -exportPath ./output
+
+      - name: 上传安装包
         uses: actions/upload-artifact@v4
         with:
           name: Loop安装包
