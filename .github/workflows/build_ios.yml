@@ -15,38 +15,44 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Archive iOS App (跳过Watch编译)
+      - name: 归档项目（关闭签名、跳过Watch）
         run: |
+          mkdir -p ./build
           xcodebuild archive \
             -scheme Loop \
             -destination generic/platform=iOS \
             -archivePath ./build/Loop.xcarchive \
-            EXCLUDED_SOURCE_FILE_NAMES="*Watch*"
+            EXCLUDED_SOURCE_FILE_NAMES=*Watch* \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_STYLE=Manual
 
-      - name: 自动生成导出配置并打包IPA
+      - name: 导出无签名IPA
         run: |
-          cat > export.plist << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>development</string>
-            <key>signingStyle</key>
-            <string>automatic</string>
-            <key>stripSwiftSymbols</key>
-            <true/>
-          </dict>
-          </plist>
-          EOF
-          
+          mkdir -p ./ipa
           xcodebuild -exportArchive \
             -archivePath ./build/Loop.xcarchive \
-            -exportOptionsPlist export.plist \
-            -exportPath ./output
+            -exportPath ./ipa \
+            -exportOptionsPlist <(echo '<?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+            <plist version="1.0">
+            <dict>
+              <key>method</key>
+              <string>development</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>signingCertificate</key>
+              <string></string>
+              <key>provisioningProfiles</key>
+              <dict/>
+              <key>stripSwiftSymbols</key>
+              <true/>
+            </dict>
+            </plist>')
 
-      - name: 上传IPA安装包
+      - name: 上传无签名安装包
         uses: actions/upload-artifact@v4
         with:
-          name: Loop-iOS安装包
-          path: ./output/*.ipa
+          name: Loop-无签名IPA
+          path: ./ipa/*.ipa
