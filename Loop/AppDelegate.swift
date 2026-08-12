@@ -12,7 +12,7 @@ import LoopKit
 final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
     var window: UIWindow?
 
-    private let loopAppManager = LoopAppManager()
+    let loopAppManager = LoopAppManager()
     private let log = DiagnosticLog(category: "AppDelegate")
 
     // MARK: - UIApplicationDelegate - Initialization
@@ -24,17 +24,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, WindowProvider {
 
         log.default("lastPathComponent = %{public}@", String(describing: Bundle.main.appStoreReceiptURL?.lastPathComponent))
 
-        loopAppManager.initialize(windowProvider: self, launchOptions: launchOptions)
-        loopAppManager.launch()
-        return loopAppManager.isLaunchComplete
+        // SceneDelegate handles LoopAppManager initialization and launch.
+        return true
     }
 
     // MARK: - UIApplicationDelegate - Life Cycle
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         log.default(#function)
-
-        loopAppManager.didBecomeActive()
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
