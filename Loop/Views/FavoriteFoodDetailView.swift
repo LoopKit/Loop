@@ -23,10 +23,10 @@ public struct FavoriteFoodDetailView: View {
     public init(food: StoredFavoriteFood?, onFoodDelete: @escaping (StoredFavoriteFood) -> Void, isConfirmingDelete: Bool = false, carbFormatter: QuantityFormatter, absorptionTimeFormatter: DateComponentsFormatter, preferredCarbUnit: HKUnit = HKUnit.gram()) {
         self.food = food
         self.onFoodDelete = onFoodDelete
-        self.isConfirmingDelete = isConfirmingDelete
         self.carbFormatter = carbFormatter
         self.absorptionTimeFormatter = absorptionTimeFormatter
         self.preferredCarbUnit = preferredCarbUnit
+        self.isConfirmingDelete = isConfirmingDelete
     }
     
     public var body: some View {
