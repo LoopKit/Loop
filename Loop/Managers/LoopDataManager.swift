@@ -449,8 +449,15 @@ final class LoopDataManager: ObservableObject {
             recommendationEffectInterval: recommendationEffectInterval
         )
 
+        // Carb entries (and a backdated manual-bolus entry) can extend back to carbsStart, and
+        // CarbMath.map(to:) preconditionFailures if the ISF/carb-ratio timelines don't cover every
+        // carb entry's start date. timelineIntervalForSensitivity derives its window from dose and
+        // glucose history only — which can be more recent than carbsStart (e.g. after a CGM gap) —
+        // so extend the ISF (and override) window back to cover the carb window, matching carbRatio.
+        let sensitivityStart = min(neededSensitivityTimeline.start, carbsStart)
+
         let sensitivity = try await settingsProvider.getInsulinSensitivityHistory(
-            startDate: neededSensitivityTimeline.start,
+            startDate: sensitivityStart,
             endDate: neededSensitivityTimeline.end
         )
 
@@ -464,7 +471,7 @@ final class LoopDataManager: ObservableObject {
             throw LoopError.configurationError(.maximumBasalRatePerHour)
         }
 
-        var overrides = temporaryPresetsManager.presetHistory.getOverrideHistory(startDate: neededSensitivityTimeline.start, endDate: forecastEndTime)
+        var overrides = temporaryPresetsManager.presetHistory.getOverrideHistory(startDate: sensitivityStart, endDate: forecastEndTime)
 
         // For recommendation, we should consider preMeal override to be ending at time of dose
         if presumePresetEndingNow,
