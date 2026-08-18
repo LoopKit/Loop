@@ -215,6 +215,7 @@ struct ActionTabBar: UIViewRepresentable {
                 tag: idx
             )
         }
+        uiView.setNeedsLayout()
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -300,6 +301,8 @@ struct LegacyTabBarBackground: ViewModifier {
 
 struct ActionTabView<Content: View>: View {
 
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     private let content: Content
     private let tabs: [ActionTab]
     
@@ -312,8 +315,8 @@ struct ActionTabView<Content: View>: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            let isPortrait = geometry.size.height >= geometry.size.width
+        let isPortrait = verticalSizeClass != .compact
+        return GeometryReader { geometry in
             content
                 .safeAreaInset(edge: .bottom, spacing: 0) {
                     ActionTabBar(items: tabs, isHidden: !isPortrait)
