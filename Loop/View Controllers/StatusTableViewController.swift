@@ -643,7 +643,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let statusRowMode = self.determineStatusRowMode()
 
         updateBannerAndHUDandStatusRows(statusRowMode: statusRowMode, newSize: currentContext.newSize, animated: animated)
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: ActionTabBarMetrics.tableContentInset, right: 0)
+        updateTableBottomContentInset()
         
         redrawCharts()
 
@@ -777,6 +777,17 @@ final class StatusTableViewController: LoopChartsTableViewController {
     
     override func viewDidLayoutSubviews() {
         updateStatusBar()
+        updateTableBottomContentInset()
+    }
+
+    private func updateTableBottomContentInset() {
+        let bottomInset = ActionTabBarMetrics.tableContentInset(
+            isLandscape: view.bounds.width > view.bounds.height,
+            bottomSafeAreaInset: view.safeAreaInsets.bottom
+        )
+        if tableView.contentInset.bottom != bottomInset {
+            tableView.contentInset.bottom = bottomInset
+        }
     }
 
     private func updateBannerRow(animated: Bool) {
