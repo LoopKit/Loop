@@ -304,6 +304,8 @@ struct LegacyTabBarBackground: ViewModifier {
 
 struct ActionTabView<Content: View>: View {
 
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     private let content: (CGFloat) -> Content
     private let tabs: [ActionTab]
 
@@ -317,7 +319,7 @@ struct ActionTabView<Content: View>: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let isPortrait = geometry.size.height >= geometry.size.width
+            let isPortrait = verticalSizeClass != .compact
             let bottomSafeAreaInset = geometry.safeAreaInsets.bottom
 
             content(
