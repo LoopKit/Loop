@@ -73,10 +73,23 @@ final class StatusTableViewController: LoopChartsTableViewController {
     
     var statusBarBackgroundView: UIView?
 
+    var tableBottomContentInset: CGFloat = 0 {
+        didSet {
+            applyTableBottomContentInset()
+        }
+    }
+
+    private func applyTableBottomContentInset() {
+        guard isViewLoaded, tableView.contentInset.bottom != tableBottomContentInset else { return }
+        tableView.contentInset.bottom = tableBottomContentInset
+    }
+
     override func viewDidLoad() {
 
         super.viewDidLoad()
       
+        applyTableBottomContentInset()
+
         statusTableViewModel.settingsViewModel.delegate = self
         statusTableViewModel.settingsViewModel.servicesViewModel.delegate = self
         statusTableViewModel.settingsViewModel.pumpManagerSettingsViewModel.didTap = { [weak self] in
@@ -643,8 +656,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let statusRowMode = self.determineStatusRowMode()
 
         updateBannerAndHUDandStatusRows(statusRowMode: statusRowMode, newSize: currentContext.newSize, animated: animated)
-        updateTableBottomContentInset()
-        
+        applyTableBottomContentInset()
+
         redrawCharts()
 
         reloading = false
@@ -777,17 +790,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
     
     override func viewDidLayoutSubviews() {
         updateStatusBar()
-        updateTableBottomContentInset()
-    }
-
-    private func updateTableBottomContentInset() {
-        let bottomInset = ActionTabBarMetrics.tableContentInset(
-            isLandscape: view.bounds.width > view.bounds.height,
-            bottomSafeAreaInset: view.safeAreaInsets.bottom
-        )
-        if tableView.contentInset.bottom != bottomInset {
-            tableView.contentInset.bottom = bottomInset
-        }
     }
 
     private func updateBannerRow(animated: Bool) {

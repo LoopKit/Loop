@@ -125,9 +125,12 @@ struct StatusTableView: View {
     }
 
     var body: some View {
-        ActionTabView {
+        ActionTabView { tableBottomContentInset in
             wrappedView
                 .ignoresSafeArea(edges: .bottom)
+                .onChange(of: tableBottomContentInset, initial: true) { _, newValue in
+                    viewController.tableBottomContentInset = newValue
+                }
                 .onChange(of: viewModel.temporaryPresetsManager.activeOverride) { _, _ in
                     Task {
                         await viewController.reloadData(animated: true)
@@ -260,8 +263,8 @@ enum ActionTabBarMetrics {
 
     static let barHeight: CGFloat = 49
 
-    static func tableContentInset(isLandscape: Bool, bottomSafeAreaInset: CGFloat) -> CGFloat {
-        guard !isLandscape else { return 0 }
+    static func tableContentInset(isPortrait: Bool, bottomSafeAreaInset: CGFloat) -> CGFloat {
+        guard isPortrait else { return 0 }
         if #available(iOS 26.0, *), bottomSafeAreaInset == 0 {
             return barHeight + 40
         }
@@ -301,30 +304,35 @@ struct LegacyTabBarBackground: ViewModifier {
 
 struct ActionTabView<Content: View>: View {
 
-    @Environment(\.verticalSizeClass) private var verticalSizeClass
-
-    private let content: Content
+    private let content: (CGFloat) -> Content
     private let tabs: [ActionTab]
-    
+
     init(
-        @ViewBuilder content: @escaping () -> Content,
+        @ViewBuilder content: @escaping (CGFloat) -> Content,
         @ActionTabBuilder tabs: @escaping () -> [ActionTab],
     ) {
-        self.content = content()
+        self.content = content
         self.tabs = tabs()
     }
 
     var body: some View {
-        let isPortrait = verticalSizeClass != .compact
-        return GeometryReader { geometry in
-            content
-                .safeAreaInset(edge: .bottom, spacing: 0) {
-                    ActionTabBar(items: tabs, isHidden: !isPortrait)
-                        .modifier(LegacyTabBarBackground(
-                            isVisible: isPortrait,
-                            bottomSafeAreaInset: geometry.safeAreaInsets.bottom
-                        ))
-                }
+        GeometryReader { geometry in
+            let isPortrait = geometry.size.height >= geometry.size.width
+            let bottomSafeAreaInset = geometry.safeAreaInsets.bottom
+
+            content(
+                ActionTabBarMetrics.tableContentInset(
+                    isPortrait: isPortrait,
+                    bottomSafeAreaInset: bottomSafeAreaInset
+                )
+            )
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                ActionTabBar(items: tabs, isHidden: !isPortrait)
+                    .modifier(LegacyTabBarBackground(
+                        isVisible: isPortrait,
+                        bottomSafeAreaInset: bottomSafeAreaInset
+                    ))
+            }
         }
         .ignoresSafeArea(.keyboard)
     }
