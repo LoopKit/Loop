@@ -186,6 +186,18 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         XCTAssertEqual(1.40, recommendedTempBasal!.unitsPerHour, accuracy: defaultAccuracy)
     }
     
+    func getDosageRatioForHighAndStable() -> Double {
+        // ISF schedule switches at 09:00, dose is given at ~5:39.
+        // This means that 36.39/45 of a unit dose is given at ISF 45, and then the remainder is at 55
+        let weight = 36.393359243966223 / 45.0
+        return weight + (1 - weight) * 45.0 / 55
+    }
+    
+    func getDosageForHighAndStableTempBasal(_ value: Double) -> Double {
+        // the scheduled basal is 1 U/hr, therefore this part should not be adjusted
+        return 1.0 + getDosageRatioForHighAndStable() * (value - 1.0)
+    }
+    
     func testHighAndStable() {
         setUp(for: .highAndStable)
         let predictedGlucoseOutput = loadLocalDateGlucoseEffect("high_and_stable_predicted_glucose")
@@ -209,8 +221,10 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
             XCTAssertEqual(expected.startDate, calculated.startDate)
             XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: defaultAccuracy)
         }
+        
+        // ISF changes from
 
-        XCTAssertEqual(4.63, recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
+        XCTAssertEqual(getDosageForHighAndStableTempBasal(4.63), recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
     }
     
     func testHighAndFalling() {
@@ -442,7 +456,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         }
         loopDataManager.loop()
         wait(for: [exp], timeout: 1.0)
-        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.55, duration: .minutes(30)))
+        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: delegate.roundBasalRate(unitsPerHour: getDosageForHighAndStableTempBasal(4.57)), duration: .minutes(30)))
         XCTAssertEqual(delegate.recommendation, expectedAutomaticDoseRecommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
         if dosingDecisionStore.dosingDecisions.count == 1 {
@@ -466,7 +480,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
         }
         loopDataManager.loop()
         wait(for: [exp], timeout: 1.0)
-        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 4.55, duration: .minutes(30)))
+        let expectedAutomaticDoseRecommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: delegate.roundBasalRate( unitsPerHour: getDosageForHighAndStableTempBasal(4.57)), duration: .minutes(30)))
         XCTAssertNil(delegate.recommendation)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions.count, 1)
         XCTAssertEqual(dosingDecisionStore.dosingDecisions[0].reason, "loop")
@@ -485,7 +499,7 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
             exp.fulfill()
         }
         wait(for: [exp], timeout: 100000.0)
-        XCTAssertEqual(recommendedBolus!.amount, 1.82, accuracy: 0.01)
+        XCTAssertEqual(recommendedBolus!.amount, getDosageRatioForHighAndStable() * 1.8155, accuracy: 0.01)
     }
 
     func testLoopGetStateRecommendsManualBolusWithMomentum() {
@@ -645,3 +659,172 @@ class LoopDataManagerDosingTests: LoopDataManagerTests {
     }
 
 }
+
+
+
+// Tests for mmol/L unit handling in dosing calculations
+extension LoopDataManagerDosingTests {
+    
+    /// Helper to convert mg/dL ISF values to mmol/L
+    /// 1 mmol/L ≈ 18.0182 mg/dL for glucose
+    private func mgdLToMmolL(_ mgdL: Double) -> Double {
+        return mgdL / 18.0182
+    }
+    
+    /// Helper to convert mg/dL glucose values to mmol/L
+    private func glucoseMgdLToMmolL(_ mgdL: Double) -> Double {
+        return mgdL / 18.0182
+    }
+    
+    /// Setup test with mmol/L units instead of mg/dL
+    /// This mirrors the standard setUp but uses mmol/L for ISF and glucose target
+    func setUpMmolL(for test: DosingTestScenario,
+                    basalDeliveryState: PumpManagerStatus.BasalDeliveryState? = nil,
+                    maxBolus: Double = 10,
+                    maxBasalRate: Double = 5.0,
+                    dosingStrategy: AutomaticDosingStrategy = .tempBasalOnly)
+    {
+        let basalRateSchedule = loadBasalRateScheduleFixture("basal_profile")
+        
+        // Convert ISF from mg/dL to mmol/L
+        // Standard test uses 45 mg/dL and 55 mg/dL
+        let insulinSensitivitySchedule = InsulinSensitivitySchedule(
+            unit: .millimolesPerLiter,
+            dailyItems: [
+                RepeatingScheduleValue(startTime: 0, value: mgdLToMmolL(45)),      // ~2.5 mmol/L
+                RepeatingScheduleValue(startTime: 32400, value: mgdLToMmolL(55))   // ~3.05 mmol/L
+            ],
+            timeZone: .utcTimeZone
+        )!
+        
+        let carbRatioSchedule = CarbRatioSchedule(
+            unit: .gram(),
+            dailyItems: [
+                RepeatingScheduleValue(startTime: 0.0, value: 10.0),
+            ],
+            timeZone: .utcTimeZone
+        )!
+        
+        // Convert glucose target range to mmol/L
+        // Standard test uses 100-110 mg/dL
+        let glucoseTargetRangeScheduleMmolL = GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter, dailyItems: [
+                RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 100, maxValue: 110)),
+                RepeatingScheduleValue(startTime: TimeInterval(28800), value: DoubleRange(minValue: 90, maxValue: 100)),
+                RepeatingScheduleValue(startTime: TimeInterval(75600), value: DoubleRange(minValue: 100, maxValue: 110))
+        ], timeZone: .utcTimeZone)!.schedule(for: HKUnit.millimolesPerLiter)
+        
+        // Convert suspend threshold to mmol/L (standard is 75 mg/dL)
+        let suspendThresholdMmolL = GlucoseThreshold(unit: .millimolesPerLiter, value: glucoseMgdLToMmolL(75))  // ~4.16 mmol/L
+
+        let settings = LoopSettings(
+            dosingEnabled: false,
+            glucoseTargetRangeSchedule: glucoseTargetRangeScheduleMmolL,
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
+            basalRateSchedule: basalRateSchedule,
+            carbRatioSchedule: carbRatioSchedule,
+            maximumBasalRatePerHour: maxBasalRate,
+            maximumBolus: maxBolus,
+            suspendThreshold: suspendThresholdMmolL,
+            automaticDosingStrategy: dosingStrategy
+        )
+        
+        let doseStore = MockDoseStore(for: test)
+        doseStore.basalProfile = basalRateSchedule
+        doseStore.basalProfileApplyingOverrideHistory = doseStore.basalProfile
+        doseStore.sensitivitySchedule = insulinSensitivitySchedule
+        let glucoseStore = MockGlucoseStore(for: test)
+        let carbStore = MockCarbStore(for: test)
+        carbStore.insulinSensitivitySchedule = insulinSensitivitySchedule
+        carbStore.carbRatioSchedule = carbRatioSchedule
+        
+        let currentDate = glucoseStore.latestGlucose!.startDate
+        now = currentDate
+        
+        dosingDecisionStore = MockDosingDecisionStore()
+        automaticDosingStatus = AutomaticDosingStatus(automaticDosingEnabled: true, isAutomaticDosingAllowed: true)
+        loopDataManager = LoopDataManager(
+            lastLoopCompleted: currentDate,
+            basalDeliveryState: basalDeliveryState ?? .active(currentDate),
+            settings: settings,
+            overrideHistory: TemporaryScheduleOverrideHistory(),
+            analyticsServicesManager: AnalyticsServicesManager(),
+            localCacheDuration: .days(1),
+            doseStore: doseStore,
+            glucoseStore: glucoseStore,
+            carbStore: carbStore,
+            dosingDecisionStore: dosingDecisionStore,
+            latestStoredSettingsProvider: MockLatestStoredSettingsProvider(),
+            now: { currentDate },
+            pumpInsulinType: .novolog,
+            automaticDosingStatus: automaticDosingStatus,
+            trustedTimeOffset: { 0 }
+        )
+    }
+    
+    // MARK: - mmol/L Tests
+    // These tests should produce the same dosing recommendations as the mg/dL versions
+
+    func testHighAndStable_mmolL() {
+        setUpMmolL(for: .highAndStable)
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("high_and_stable_predicted_glucose")
+
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        var predictedGlucose: [PredictedGlucoseValue]?
+        var recommendedBasal: TempBasalRecommendation?
+        self.loopDataManager.getLoopState { _, state in
+            predictedGlucose = state.predictedGlucose
+            recommendedBasal = state.recommendedAutomaticDose?.recommendation.basalAdjustment
+            updateGroup.leave()
+        }
+        updateGroup.wait()
+
+        XCTAssertNotNil(predictedGlucose)
+        XCTAssertEqual(predictedGlucoseOutput.count, predictedGlucose!.count)
+        
+        // Verify predictions match (convert to common unit for comparison)
+        for (expected, calculated) in zip(predictedGlucoseOutput, predictedGlucose!) {
+            XCTAssertEqual(expected.startDate, calculated.startDate)
+            XCTAssertEqual(
+                expected.quantity.doubleValue(for: .milligramsPerDeciliter),
+                calculated.quantity.doubleValue(for: .milligramsPerDeciliter),
+                accuracy: defaultAccuracy
+            )
+        }
+        
+        // Verify basal recommendation matches mg/dL version
+        XCTAssertEqual(getDosageForHighAndStableTempBasal(4.63), recommendedBasal!.unitsPerHour, accuracy: defaultAccuracy)
+    }
+    
+    func testHighAndRisingWithCOB_mmolL() {
+        setUpMmolL(for: .highAndRisingWithCOB)
+        let predictedGlucoseOutput = loadLocalDateGlucoseEffect("high_and_rising_with_cob_predicted_glucose")
+
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        var predictedGlucose: [PredictedGlucoseValue]?
+        var recommendedBolus: ManualBolusRecommendation?
+        self.loopDataManager.getLoopState { _, state in
+            predictedGlucose = state.predictedGlucose
+            recommendedBolus = try? state.recommendBolus(consideringPotentialCarbEntry: nil, replacingCarbEntry: nil, considerPositiveVelocityAndRC: true)
+            updateGroup.leave()
+        }
+        updateGroup.wait()
+
+        XCTAssertNotNil(predictedGlucose)
+        XCTAssertEqual(predictedGlucoseOutput.count, predictedGlucose!.count)
+        
+        for (expected, calculated) in zip(predictedGlucoseOutput, predictedGlucose!) {
+            XCTAssertEqual(expected.startDate, calculated.startDate)
+            XCTAssertEqual(
+                expected.quantity.doubleValue(for: .milligramsPerDeciliter),
+                calculated.quantity.doubleValue(for: .milligramsPerDeciliter),
+                accuracy: defaultAccuracy
+            )
+        }
+
+        XCTAssertNotNil(recommendedBolus)
+        XCTAssertEqual(1.6, recommendedBolus!.amount, accuracy: defaultAccuracy)
+    }
+}
+
