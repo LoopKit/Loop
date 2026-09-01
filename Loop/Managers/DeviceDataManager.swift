@@ -494,7 +494,16 @@ final class DeviceDataManager {
     var availableCGMManagers: [CGMManagerDescriptor] {
         var availableCGMManagers = pluginManager.availableCGMManagers + availableStaticCGMManagers
         if let pumpManagerAsCGMManager = pumpManager as? CGMManager {
-            availableCGMManagers.append(CGMManagerDescriptor(identifier: pumpManagerAsCGMManager.pluginIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle))
+            let identifier = pumpManagerAsCGMManager.pluginIdentifier
+            let manufacturer = pluginManager.pluginBundle(forIdentifier: identifier)?.object(forInfoDictionaryKey: LoopPluginBundleKey.deviceManufacturer.rawValue) as? String
+            availableCGMManagers.append(
+                CGMManagerDescriptor(
+                    identifier: identifier,
+                    localizedTitle: pumpManagerAsCGMManager.localizedTitle,
+                    manufacturer: manufacturer,
+                    image: (type(of: pumpManagerAsCGMManager) as? CGMManagerUI.Type)?.pickerImage
+                )
+            )
         }
         
         availableCGMManagers = availableCGMManagers.filter({ cgmManager in

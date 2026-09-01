@@ -9,6 +9,7 @@
 import LoopKit
 import LoopKitUI
 import MockKit
+import MockKitUI
 
 let staticServices: [Service.Type] = [MockService.self]
 
@@ -19,7 +20,12 @@ let staticServicesByIdentifier: [String: Service.Type] = [
 var availableStaticServices: [ServiceDescriptor] {
     if FeatureFlags.allowSimulators {
         return [
-            ServiceDescriptor(identifier: MockService.serviceIdentifier, localizedTitle: MockService.localizedTitle)
+            ServiceDescriptor(
+                identifier: MockService.serviceIdentifier,
+                localizedTitle: MockService.localizedTitle,
+                category: "Simulator",
+                image: MockService.image
+            )
         ]
     } else {
         return []

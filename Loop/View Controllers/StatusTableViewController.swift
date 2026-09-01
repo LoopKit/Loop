@@ -1800,12 +1800,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 addPumpManager(withIdentifier: availablePumpManager.identifier)
             }
         default:
-            let alert = UIAlertController(availablePumpManagers: availablePumpManagers) { [weak self] (identifier) in
-                self?.addPumpManager(withIdentifier: identifier)
-            }
-            alert.popoverPresentationController?.sourceView = sourceView ?? view
-            alert.popoverPresentationController?.sourceRect = sourceView?.bounds ?? view.bounds
-            present(alert, animated: true, completion: nil)
+            presentPluginPicker(for: .pump)
         }
     }
 
@@ -1818,13 +1813,49 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 addCGMManager(withIdentifier: availableCGMManager.identifier)
             }
         default:
-            let alert = UIAlertController(availableCGMManagers: availableCGMManagers) { [weak self] identifier in
-                self?.addCGMManager(withIdentifier: identifier)
-            }
-            alert.popoverPresentationController?.sourceView = sourceView ?? view
-            alert.popoverPresentationController?.sourceRect = sourceView?.bounds ?? view.bounds
-            present(alert, animated: true, completion: nil)
+            presentPluginPicker(for: .cgm)
         }
+    }
+
+    private func presentPluginPicker(for pluginType: PluginPickerView.PluginType) {
+        let items: [PluginPickerView.Item] = {
+            switch pluginType {
+            case .cgm:
+                deviceManager.availableCGMManagers.map { PluginPickerView.Item($0) }
+            case .pump:
+                deviceManager.availablePumpManagers.map { PluginPickerView.Item($0) }
+            case .service:
+                servicesManager.availableServices.map { PluginPickerView.Item($0) }
+            }
+        }()
+        
+        let selectionHandler: ((_ identifier: String) -> Void) = { [weak self] identifier in
+            switch pluginType {
+            case .cgm:
+                self?.addCGMManager(withIdentifier: identifier)
+            case .pump:
+                self?.addPumpManager(withIdentifier: identifier)
+            case .service:
+                self?.addService(withIdentifier: identifier)
+            }
+        }
+        
+        let picker = PluginPickerView(
+            pluginType: pluginType,
+            items: items,
+            onSelect: { [weak self] item in
+                self?.dismiss(animated: true) {
+                    selectionHandler(item.id)
+                }
+            },
+            onCancel: { [weak self] in
+                self?.dismiss(animated: true, completion: nil)
+            }
+        )
+        
+        let hostingController = UIHostingController(rootView: picker)
+        hostingController.modalPresentationStyle = .fullScreen
+        present(hostingController, animated: true)
     }
     
     // MARK: - Debug Scenarios and Simulated Core Data
