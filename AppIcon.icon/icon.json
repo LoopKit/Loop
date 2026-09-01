@@ -1,0 +1,55 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "srgb:0.55686,0.56078,0.57647,1.00000",
+      "display-p3:0.46667,0.46667,0.47843,1.00000"
+    ]
+  },
+  "groups" : [
+    {
+      "blur-material" : null,
+      "hidden" : false,
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "fill" : {
+            "solid" : "display-p3:0.30588,0.84314,0.39608,1.00000"
+          },
+          "glass" : true,
+          "image-name" : "loop_circle.svg",
+          "name" : "loop_circle",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -24.51228078194679,
+              -161.10342738599306
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "position" : {
+        "scale" : 1,
+        "translation-in-points" : [
+          25,
+          155
+        ]
+      },
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 1
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
