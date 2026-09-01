@@ -125,9 +125,12 @@ struct StatusTableView: View {
     }
 
     var body: some View {
-        ActionTabView {
+        ActionTabView { tableBottomContentInset in
             wrappedView
                 .ignoresSafeArea(edges: .bottom)
+                .onChange(of: tableBottomContentInset, initial: true) { _, newValue in
+                    viewController.tableBottomContentInset = newValue
+                }
                 .onChange(of: viewModel.temporaryPresetsManager.activeOverride) { _, _ in
                     Task {
                         await viewController.reloadData(animated: true)
@@ -215,6 +218,7 @@ struct ActionTabBar: UIViewRepresentable {
                 tag: idx
             )
         }
+        uiView.setNeedsLayout()
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -259,24 +263,8 @@ enum ActionTabBarMetrics {
 
     static let barHeight: CGFloat = 49
 
-    static var bottomSafeAreaInset: CGFloat {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap { $0.windows }
-            .first { $0.isKeyWindow }?
-            .safeAreaInsets.bottom ?? 0
-    }
-
-    static var interfaceOrientation: UIInterfaceOrientation {
-        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
-        let scene = scenes.first { $0.windows.contains { $0.isKeyWindow } }
-            ?? scenes.first { $0.activationState == .foregroundActive }
-            ?? scenes.first
-        return scene?.interfaceOrientation ?? .portrait
-    }
-
-    static var tableContentInset: CGFloat {
-        guard !interfaceOrientation.isLandscape else { return 0 }
+    static func tableContentInset(isPortrait: Bool, bottomSafeAreaInset: CGFloat) -> CGFloat {
+        guard isPortrait else { return 0 }
         if #available(iOS 26.0, *), bottomSafeAreaInset == 0 {
             return barHeight + 40
         }
@@ -287,13 +275,14 @@ enum ActionTabBarMetrics {
 struct LegacyTabBarBackground: ViewModifier {
 
     var isVisible: Bool = true
+    var bottomSafeAreaInset: CGFloat = 0
 
     func body(content: Content) -> some View {
         if !isVisible {
             content
                 .frame(height: 0)
         } else if #available(iOS 26.0, *) {
-            if ActionTabBarMetrics.bottomSafeAreaInset == 0 {
+            if bottomSafeAreaInset == 0 {
                 content
                     .frame(height: ActionTabBarMetrics.barHeight)
                     .padding(.bottom, 16)
@@ -315,35 +304,38 @@ struct LegacyTabBarBackground: ViewModifier {
 
 struct ActionTabView<Content: View>: View {
 
-    @State private var orientation: UIInterfaceOrientation
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
-    private let content: Content
+    private let content: (CGFloat) -> Content
     private let tabs: [ActionTab]
-    
+
     init(
-        @ViewBuilder content: @escaping () -> Content,
+        @ViewBuilder content: @escaping (CGFloat) -> Content,
         @ActionTabBuilder tabs: @escaping () -> [ActionTab],
     ) {
-        self.content = content()
+        self.content = content
         self.tabs = tabs()
-        self.orientation = ActionTabBarMetrics.interfaceOrientation
     }
 
     var body: some View {
-        content
+        GeometryReader { geometry in
+            let isPortrait = verticalSizeClass != .compact
+            let bottomSafeAreaInset = geometry.safeAreaInsets.bottom
+
+            content(
+                ActionTabBarMetrics.tableContentInset(
+                    isPortrait: isPortrait,
+                    bottomSafeAreaInset: bottomSafeAreaInset
+                )
+            )
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                ActionTabBar(items: tabs, isHidden: !orientation.isPortrait)
-                    .modifier(LegacyTabBarBackground(isVisible: orientation.isPortrait))
+                ActionTabBar(items: tabs, isHidden: !isPortrait)
+                    .modifier(LegacyTabBarBackground(
+                        isVisible: isPortrait,
+                        bottomSafeAreaInset: bottomSafeAreaInset
+                    ))
             }
-            .onAppear {
-                UIDevice.current.beginGeneratingDeviceOrientationNotifications()
-                orientation = ActionTabBarMetrics.interfaceOrientation
-            }
-            .onDisappear {
-                UIDevice.current.endGeneratingDeviceOrientationNotifications()
-            }
-            .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
-                orientation = ActionTabBarMetrics.interfaceOrientation
-            }
+        }
+        .ignoresSafeArea(.keyboard)
     }
 }
