@@ -132,7 +132,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n%1$@\n\nAtingeți pictogramele de stare ale CGM și ale pompei de insulină pentru mai multe informații. %2$@ va continua să încerce să finalizeze o buclă, dar verificați eventualele probleme de comunicare cu pompa și CGM-ul dumneavoastră."
+            "value" : "\n%1$@\n\nAtingeți pictogramele de stare ale senzorului de glicemie și ale pompei de insulină pentru mai multe informații. %2$@ va continua să încerce să finalizeze o buclă, dar verificați eventualele probleme de comunicare cu pompa și senzorul dumneavoastră de glicemie."
           }
         },
         "ru" : {
@@ -209,7 +209,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n%1$@\n\n Atingeți pictogramele de stare pentru CGM și pompa de insulină pentru mai multe informații. %2$@ va continua să încerce să finalizeze o buclă, dar urmăriți eventualele probleme de comunicare cu pompa și CGM."
+            "value" : "\n%1$@\n\n Atingeți pictogramele de stare ale senzorului de glicemie și ale pompei de insulină pentru mai multe informații. %2$@ va continua să încerce să finalizeze o buclă, dar urmăriți eventualele probleme de comunicare cu pompa și cu senzorul de glicemie."
           }
         },
         "ru" : {
@@ -286,7 +286,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n%1$@ operează cu bucla închisă în poziția OFF. Pompa și CGM vor continua să funcționeze, dar aplicația nu va ajusta automat dozarea. \n\n %2$@"
+            "value" : "\n%1$@ operează cu bucla închisă în poziția OFF. Pompa și senzorul de glicemie vor continua să funcționeze, dar aplicația nu va ajusta automat dozarea. \n\n %2$@"
           }
         },
         "ru" : {
@@ -685,7 +685,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ 单位"
+            "value" : "%@ U"
           }
         }
       }
@@ -1823,6 +1823,12 @@
             "state" : "translated",
             "value" : "dB"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dB"
+          }
         }
       }
     },
@@ -2452,6 +2458,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Döngü Uyarısı"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop 警告"
           }
         }
       }
@@ -3378,6 +3390,12 @@
           }
         },
         "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "U"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "U"

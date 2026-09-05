@@ -398,7 +398,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "预计"
+            "value" : "预测"
           }
         }
       }
@@ -530,7 +530,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "详细"
+            "value" : "详情"
           }
         }
       }
@@ -2707,7 +2707,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "g CLB"
+            "value" : "g COB"
           }
         },
         "ru" : {

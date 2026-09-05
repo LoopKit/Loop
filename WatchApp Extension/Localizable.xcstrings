@@ -913,6 +913,12 @@
             "state" : "translated",
             "value" : "Bolus"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大剂量"
+          }
         }
       }
     },
@@ -1371,6 +1377,12 @@
             "state" : "translated",
             "value" : "dB"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dB"
+          }
         }
       }
     },
@@ -1816,6 +1828,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iPhone'unuzun yakında olduğundan emin olun ve tekrar deneyin."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请确保您的 iPhone 在附近，然后重试。"
           }
         }
       }
@@ -2286,6 +2304,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kapalı"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
           }
         }
       }
@@ -2965,6 +2989,12 @@
             "state" : "translated",
             "value" : "ön ayar"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预设"
+          }
         }
       }
     },
@@ -3300,6 +3330,12 @@
             "state" : "translated",
             "value" : "Önerilen: %@ Ü"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "推荐: %@ 单位"
+          }
         }
       }
     },
@@ -3382,6 +3418,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Önerilen: Hesaplanıyor..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "REC：正在计算……"
           }
         }
       }
@@ -4043,6 +4085,12 @@
             "state" : "translated",
             "value" : "U"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "U"
+          }
         }
       }
     },
@@ -4244,6 +4292,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iPhone'a Ulaşılamıyor"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法连接 iPhone"
           }
         }
       }

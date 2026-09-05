@@ -76,6 +76,12 @@
             "state" : "translated",
             "value" : "Loop Widgets"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop 小组件"
+          }
         }
       }
     },
