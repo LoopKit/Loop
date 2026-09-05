@@ -150,6 +150,12 @@
             "state" : "translated",
             "value" : "-Ü"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-U"
+          }
         }
       }
     },
@@ -216,6 +222,12 @@
           }
         },
         "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "??"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "??"
@@ -454,6 +466,12 @@
             "state" : "translated",
             "value" : "%1$@%2$@"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@%2$@"
+          }
         }
       }
     },
@@ -472,6 +490,12 @@
           }
         },
         "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@U"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@U"
@@ -629,6 +653,12 @@
             "state" : "translated",
             "value" : "Culoare"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "颜色"
+          }
         }
       }
     },
@@ -656,6 +686,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dată"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日期"
           }
         }
       }
@@ -776,6 +812,12 @@
             "state" : "translated",
             "value" : "dB"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dB"
+          }
         }
       }
     },
@@ -803,6 +845,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sfârșit"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "结束"
           }
         }
       }
@@ -879,6 +927,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nihai"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最终"
           }
         }
       }
@@ -1130,6 +1184,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Döngü Durumu Widget'ı"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop 状态小组件"
           }
         }
       }
@@ -1432,6 +1492,12 @@
             "state" : "translated",
             "value" : "Suprascriere presetată"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预设覆盖"
+          }
         }
       }
     },
@@ -1662,6 +1728,12 @@
             "state" : "translated",
             "value" : "Start"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开始"
+          }
         }
       }
     },
@@ -1777,6 +1849,12 @@
           }
         },
         "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "U"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "U"

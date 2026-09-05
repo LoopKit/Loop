@@ -890,6 +890,12 @@
             "state" : "translated",
             "value" : "dB"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dB"
+          }
         }
       }
     },
@@ -1764,6 +1770,12 @@
           }
         },
         "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "U"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "U"
