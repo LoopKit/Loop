@@ -37,6 +37,8 @@ protocol ManualDoseViewModelDelegate: AnyObject {
     
     var isPumpConfigured: Bool { get }
     
+    var shouldModelAsNoDelivery: Bool { get }
+
     var preferredGlucoseUnit: HKUnit { get }
     
     var pumpInsulinType: InsulinType? { get }
@@ -261,13 +263,18 @@ final class ManualEntryDoseViewModel: ObservableObject {
 
         let predictedGlucoseValues: [PredictedGlucoseValue]
         do {
+            var effectsToUse = PredictionInputEffect.all
+            if delegate?.shouldModelAsNoDelivery ?? false {
+                effectsToUse.insert(.suspend)  // no pump means no basal delivery. model it as suspension
+            }
             predictedGlucoseValues = try state.predictGlucose(
-                using: .all,
+                using: effectsToUse,
                 potentialBolus: enteredBolusDose,
                 potentialCarbEntry: nil,
                 replacingCarbEntry: nil,
                 includingPendingInsulin: true,
-                considerPositiveVelocityAndRC: true
+                considerPositiveVelocityAndRC: true,
+                requireRecentPumpData: false // visualization only — prediction chart does not require fresh pump data
             )
         } catch {
             predictedGlucoseValues = []

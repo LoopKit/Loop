@@ -45,6 +45,8 @@ protocol BolusEntryViewModelDelegate: AnyObject {
     
     var isPumpConfigured: Bool { get }
     
+    var shouldModelAsNoDelivery: Bool { get }
+    
     var pumpInsulinType: InsulinType? { get }
     
     var settings: LoopSettings { get }
@@ -78,6 +80,7 @@ final class BolusEntryViewModel: ObservableObject {
         case staleGlucoseData
         case futureGlucoseData
         case stalePumpData
+        case noPumpConnected
     }
 
     var authenticationHandler: (String) async -> Bool = { message in
@@ -580,13 +583,18 @@ final class BolusEntryViewModel: ObservableObject {
                     considerPositiveVelocityAndRC: true
                 )
             } else {
+                var effectsToUse = PredictionInputEffect.all
+                if delegate?.shouldModelAsNoDelivery ?? false {
+                    effectsToUse.insert(.suspend)  // no pump = no basal delivery, model it as suspension
+                }
                 predictedGlucoseValues = try state.predictGlucose(
-                    using: .all,
+                    using: effectsToUse,
                     potentialBolus: enteredBolusDose,
                     potentialCarbEntry: potentialCarbEntry,
                     replacingCarbEntry: originalCarbEntry,
                     includingPendingInsulin: true,
-                    considerPositiveVelocityAndRC: true
+                    considerPositiveVelocityAndRC: true,
+                    requireRecentPumpData: false // this is for visualization only
                 )
             }
         } catch {
@@ -657,7 +665,7 @@ final class BolusEntryViewModel: ObservableObject {
         let now = Date()
         var recommendation: ManualBolusRecommendation?
         let recommendedBolus: HKQuantity?
-        let notice: Notice?
+        var notice: Notice?
         do {
             recommendation = try computeBolusRecommendation(from: state)
 
@@ -695,6 +703,15 @@ final class BolusEntryViewModel: ObservableObject {
                 notice = .stalePumpData
             default:
                 notice = nil
+            }
+        }
+        
+        // Surface appropriate pump warning even when recommendation succeeded
+        if notice == nil || notice == .predictedGlucoseInRange {
+            if delegate.shouldModelAsNoDelivery {
+                notice = .noPumpConnected
+            } else if isPumpDataStale {
+                notice = .stalePumpData
             }
         }
 
