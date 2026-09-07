@@ -273,9 +273,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
         deviceManager.pumpManagerHUDProvider?.visible = active && onscreen
     }
 
-    private lazy var carbEntryButton = makeToolbarButton(imageNamed: "carbs", tintColor: .carbTintColor, action: #selector(userTappedAddCarbs))
-    private lazy var bolusButton = makeToolbarButton(imageNamed: "bolus", tintColor: .insulinTintColor, action: #selector(presentBolusScreen))
-    private lazy var settingsButton = makeToolbarButton(imageNamed: "settings", tintColor: .secondaryLabel, action: #selector(onSettingsTapped))
+    private lazy var carbEntryButton = makeToolbarButton(imageNamed: "carbs", tintColor: .carbTintColor, action: #selector(userTappedAddCarbs), ink: ToolbarLayout.Ink.carbs)
+    private lazy var bolusButton = makeToolbarButton(imageNamed: "bolus", tintColor: .insulinTintColor, action: #selector(presentBolusScreen), ink: ToolbarLayout.Ink.bolus)
+    private lazy var settingsButton = makeToolbarButton(imageNamed: "settings", tintColor: .secondaryLabel, action: #selector(onSettingsTapped), ink: ToolbarLayout.Ink.settings)
 
     private lazy var workoutButton: UIButton = {
         let button = UIButton(type: .system)
@@ -285,14 +285,53 @@ final class StatusTableViewController: LoopChartsTableViewController {
         return button
     }()
 
-    private func makeToolbarButton(imageNamed name: String, tintColor: UIColor, action: Selector) -> UIButton {
+    private func makeToolbarButton(imageNamed name: String, tintColor: UIColor, action: Selector, ink: CGSize) -> UIButton {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(named: name), for: .normal)
+        button.setImage(UIImage(named: name)?.toolbarIcon(ink: ink), for: .normal)
         button.tintColor = tintColor
         button.addTarget(self, action: action, for: .touchUpInside)
         button.constrainToToolbarIconSize()
         return button
     }
+
+    /// Sizing for the icons in the bottom toolbar.
+    ///
+    /// On iOS 26 the toolbar items share one Liquid Glass background, and any
+    /// space item between them splits that background into separate pills. So
+    /// the gaps here are transparent padding baked into each rendered icon,
+    /// which widens the spacing while leaving the shared pill intact.
+    ///
+    /// `fileprivate` so the UIImage helper at the bottom of this file can read it.
+    fileprivate enum ToolbarLayout {
+        /// Height every icon's *visible artwork* is scaled to, in points. The
+        /// stock assets pad their canvases by wildly different amounts, so
+        /// matching canvases (the obvious approach) leaves the glyphs uneven.
+        static let inkHeight: CGFloat = 30
+        /// Transparent space kept to each side of the artwork; this is what
+        /// separates the icons within the shared pill.
+        static let iconHorizontalPadding: CGFloat = 10
+        /// Transparent space kept above and below the artwork in each item.
+        static let iconVerticalMargin: CGFloat = 4
+
+        /// Bounding box of the visible artwork inside each asset, in the asset's
+        /// own points. Measured by rasterizing the PDFs at 600dpi and taking the
+        /// alpha bounding box; the artwork is centered in every one of them to
+        /// within 0.6pt, so scaling alone aligns them. If an upstream asset is
+        /// redrawn these go stale, and that icon renders slightly off-size --
+        /// remeasure rather than nudging `inkHeight`.
+        enum Ink {
+            static let carbs = CGSize(width: 25.52, height: 21.57)
+            static let bolus = CGSize(width: 20.33, height: 23.32)
+            static let preMeal = CGSize(width: 25.52, height: 21.57)
+            static let workout = CGSize(width: 27.72, height: 23.88)
+            /// 25x25 gear centered on a 25x40 canvas.
+            static let settings = CGSize(width: 25.00, height: 25.00)
+        }
+    }
+
+    /// Position of the pre-meal item within `toolbarItems`, recorded at setup
+    /// because it differs between the iOS 26 and legacy layouts.
+    private var preMealItemIndex: Int = 1
 
     private func setupToolbarItems() {
         let carbs = UIBarButtonItem(customView: carbEntryButton)
@@ -308,7 +347,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         func flexibleSpace() -> UIBarButtonItem {
             UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         }
-        
+
         if #available(iOS 26, *) {
             toolbarItems = [carbs, preMeal, bolus, workout, settings]
         } else {
@@ -324,6 +363,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 settings
             ]
         }
+
+        // The two layouts put pre-meal at different indices, so record where it
+        // actually landed rather than hardcoding it.
+        preMealItemIndex = toolbarItems?.firstIndex { $0 === preMeal } ?? 1
     }
 
     private func updateToolbarItems() {
@@ -335,13 +378,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         bolusButton.isEnabled = isPumpOnboarded
         settingsButton.accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
 
-        let preMealIndex: Int
-        if #available(iOS 26, *) {
-            preMealIndex = 1
-        } else {
-            preMealIndex = 2
-        }
-        toolbarItems![preMealIndex] = createPreMealButtonItem(selected: preMealMode == true && preMealModeAllowed, isEnabled: preMealModeAllowed)
+        toolbarItems![preMealItemIndex] = createPreMealButtonItem(selected: preMealMode == true && preMealModeAllowed, isEnabled: preMealModeAllowed)
         updateWorkoutButton(selected: workoutMode == true && workoutModeAllowed, isEnabled: workoutModeAllowed)
     }
 
@@ -1478,7 +1515,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func createPreMealButtonItem(selected: Bool, isEnabled: Bool) -> UIBarButtonItem {
-        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected), style: .plain, target: self, action: #selector(premealButtonTapped(_:)))
+        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected)?.toolbarIcon(ink: ToolbarLayout.Ink.preMeal), style: .plain, target: self, action: #selector(premealButtonTapped(_:)))
         item.accessibilityLabel = NSLocalizedString("Pre-Meal Targets", comment: "The label of the pre-meal mode toggle button")
 
         if selected {
@@ -1495,7 +1532,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
     
     private func updateWorkoutButton(selected: Bool, isEnabled: Bool) {
-        workoutButton.setImage(UIImage.workoutImage(selected: selected), for: .normal)
+        workoutButton.setImage(UIImage.workoutImage(selected: selected)?.toolbarIcon(ink: ToolbarLayout.Ink.workout), for: .normal)
         workoutButton.accessibilityLabel = NSLocalizedString("Workout Targets", comment: "The label of the workout mode toggle button")
 
         if selected {
@@ -2090,6 +2127,38 @@ private extension UIButton {
         setContentHuggingPriority(.required, for: .vertical)
         setContentCompressionResistancePriority(.required, for: .horizontal)
         setContentCompressionResistancePriority(.required, for: .vertical)
+    }
+}
+
+private extension UIImage {
+    /// Scales the image so its visible artwork is `inkHeight` tall, then centers
+    /// it on a canvas sized to that artwork plus uniform padding. Normalizing on
+    /// ink rather than canvas is what makes the five icons look the same size:
+    /// the assets pad themselves by anywhere from 0 to 7.5pt.
+    ///
+    /// The toolbar icons are vector PDFs with `preserves-vector-representation`,
+    /// so scaling up stays crisp. Transparent canvas that falls outside the
+    /// output is simply clipped.
+    ///
+    /// - Parameter ink: bounding box of the visible artwork, in the source
+    ///   image's own points. See `ToolbarLayout.Ink`.
+    func toolbarIcon(ink: CGSize) -> UIImage {
+        let layout = StatusTableViewController.ToolbarLayout.self
+        guard ink.height > 0, ink.width > 0 else { return self }
+
+        let scale = layout.inkHeight / ink.height
+        let drawSize = CGSize(width: size.width * scale, height: size.height * scale)
+        let canvas = CGSize(width: (ink.width * scale) + (layout.iconHorizontalPadding * 2),
+                            height: layout.inkHeight + (layout.iconVerticalMargin * 2))
+        let origin = CGPoint(x: (canvas.width - drawSize.width) / 2,
+                             y: (canvas.height - drawSize.height) / 2)
+
+        let format = UIGraphicsImageRendererFormat.preferred()
+        format.opaque = false
+        let rendered = UIGraphicsImageRenderer(size: canvas, format: format).image { _ in
+            draw(in: CGRect(origin: origin, size: drawSize))
+        }
+        return rendered.withRenderingMode(.alwaysTemplate)
     }
 }
 
