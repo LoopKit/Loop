@@ -377,8 +377,14 @@ struct GlucoseLiveActivityConfiguration: Widget {
                 .foregroundStyle(.primary)
                 .fontWeight(.heavy)
                 .font(Font.body.leading(.tight))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .allowsTightening(true)
             Text(title)
                 .font(.caption2)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .allowsTightening(true)
         }
     }
 
@@ -399,6 +405,9 @@ struct GlucoseLiveActivityConfiguration: Widget {
                     )
                     .fontWeight(.heavy)
                     .font(Font.body.leading(.tight))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .allowsTightening(true)
             }
         }
     }
