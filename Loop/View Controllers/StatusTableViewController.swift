@@ -294,27 +294,17 @@ final class StatusTableViewController: LoopChartsTableViewController {
         return button
     }
 
-    /// Sizing for the icons in the bottom toolbar.
+    /// Layout of the items in the bottom toolbar.
     ///
-    /// On iOS 26 the toolbar items share one Liquid Glass background, and any
-    /// space item between them splits that background into separate pills. So
-    /// the gaps here are transparent padding baked into each rendered icon,
-    /// which widens the spacing while leaving the shared pill intact.
+    /// The icon assets are all drawn on a 40x40pt canvas with their artwork 30pt tall, so
+    /// nothing here sizes them. The one thing left to do is pad each item out to the 44pt
+    /// minimum tap target, with horizontal room between items: on iOS 26 the items share one
+    /// Liquid Glass background and a space item between them would split it, so the gap is
+    /// transparent padding on the image itself.
     ///
     /// `fileprivate` so the UIImage helper at the bottom of this file can read it.
     fileprivate enum ToolbarLayout {
-        /// Height every icon's *visible artwork* is scaled to, in points. The
-        /// stock assets pad their canvases by wildly different amounts, so
-        /// matching canvases (the obvious approach) leaves the glyphs uneven.
-        static let inkHeight: CGFloat = 30
-        /// Transparent space kept to each side of the artwork; this is what
-        /// separates the icons within the shared pill.
-        static let iconHorizontalPadding: CGFloat = 10
-        /// Transparent space kept above and below the artwork in each item.
-        /// Sized so each item clears the 44pt minimum tap target: the rendered
-        /// canvas is `inkHeight` plus this margin top and bottom. Horizontally
-        /// the padding above already puts every item past 44pt.
-        static let iconVerticalMargin: CGFloat = 7
+        static let itemSize = CGSize(width: 60, height: 44)
     }
 
     /// Position of the pre-meal item within `toolbarItems`, recorded at setup
@@ -2119,78 +2109,15 @@ private extension UIButton {
 }
 
 private extension UIImage {
-    /// Bounds of the visible artwork within the image, in points, ignoring any
-    /// transparent margin around it.
-    ///
-    /// The stock assets pad themselves by wildly different amounts -- bolus has
-    /// essentially none, carbs has ~3.7pt top and bottom, and settings is a 25x25
-    /// gear centered on a 25x40 canvas -- so sizing on the canvas leaves the
-    /// glyphs visibly uneven. Measuring here rather than carrying a table of
-    /// constants keeps this correct if an asset is ever redrawn.
-    func inkBounds() -> CGRect? {
-        guard let cgImage = cgImage, cgImage.width > 0, cgImage.height > 0 else { return nil }
-
-        let width = cgImage.width
-        let height = cgImage.height
-        var pixels = [UInt8](repeating: 0, count: width * height * 4)
-        guard let context = CGContext(data: &pixels,
-                                      width: width,
-                                      height: height,
-                                      bitsPerComponent: 8,
-                                      bytesPerRow: width * 4,
-                                      space: CGColorSpaceCreateDeviceRGB(),
-                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
-        else { return nil }
-        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-
-        var minX = width, maxX = -1, minY = height, maxY = -1
-        for y in 0..<height {
-            for x in 0..<width where pixels[(y * width + x) * 4 + 3] > 0 {
-                minX = min(minX, x)
-                maxX = max(maxX, x)
-                minY = min(minY, y)
-                maxY = max(maxY, y)
-            }
-        }
-        guard maxX >= minX, maxY >= minY else { return nil }
-
-        // CGContext draws bottom-up; flip the vertical range into UIKit's coordinates.
-        let scaleX = size.width / CGFloat(width)
-        let scaleY = size.height / CGFloat(height)
-        return CGRect(x: CGFloat(minX) * scaleX,
-                      y: CGFloat(height - 1 - maxY) * scaleY,
-                      width: CGFloat(maxX - minX + 1) * scaleX,
-                      height: CGFloat(maxY - minY + 1) * scaleY)
-    }
-
-    /// Scales the image so its visible artwork is `inkHeight` tall, then centers
-    /// that artwork on a canvas sized to it plus uniform padding. Normalizing on
-    /// ink rather than canvas is what makes the five icons look the same size.
-    ///
-    /// The toolbar icons are vector PDFs with `preserves-vector-representation`,
-    /// so scaling up stays crisp. Transparent canvas that falls outside the
-    /// output is simply clipped.
+    /// Centers the icon on a transparent canvas of the toolbar item size. See `ToolbarLayout`.
     func toolbarIcon() -> UIImage {
-        let layout = StatusTableViewController.ToolbarLayout.self
-        let ink = inkBounds() ?? CGRect(origin: .zero, size: size)
-        guard ink.width > 0, ink.height > 0 else { return self }
-
-        let scale = layout.inkHeight / ink.height
-        let drawSize = CGSize(width: size.width * scale, height: size.height * scale)
-        let scaledInk = ink.applying(CGAffineTransform(scaleX: scale, y: scale))
-        let canvas = CGSize(width: scaledInk.width + (layout.iconHorizontalPadding * 2),
-                            height: layout.inkHeight + (layout.iconVerticalMargin * 2))
-
-        // Offset the whole image so that its ink, not its canvas, ends up centered.
-        let origin = CGPoint(x: (canvas.width - scaledInk.width) / 2 - scaledInk.minX,
-                             y: (canvas.height - scaledInk.height) / 2 - scaledInk.minY)
-
+        let canvas = StatusTableViewController.ToolbarLayout.itemSize
+        let origin = CGPoint(x: (canvas.width - size.width) / 2, y: (canvas.height - size.height) / 2)
         let format = UIGraphicsImageRendererFormat.preferred()
         format.opaque = false
-        let rendered = UIGraphicsImageRenderer(size: canvas, format: format).image { _ in
-            draw(in: CGRect(origin: origin, size: drawSize))
-        }
-        return rendered.withRenderingMode(.alwaysTemplate)
+        return UIGraphicsImageRenderer(size: canvas, format: format).image { _ in
+            draw(in: CGRect(origin: origin, size: size))
+        }.withRenderingMode(.alwaysTemplate)
     }
 }
 
