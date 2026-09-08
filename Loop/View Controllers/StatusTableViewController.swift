@@ -273,9 +273,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
         deviceManager.pumpManagerHUDProvider?.visible = active && onscreen
     }
 
-    private lazy var carbEntryButton = makeToolbarButton(imageNamed: "carbs", tintColor: .carbTintColor, action: #selector(userTappedAddCarbs), ink: ToolbarLayout.Ink.carbs)
-    private lazy var bolusButton = makeToolbarButton(imageNamed: "bolus", tintColor: .insulinTintColor, action: #selector(presentBolusScreen), ink: ToolbarLayout.Ink.bolus)
-    private lazy var settingsButton = makeToolbarButton(imageNamed: "settings", tintColor: .secondaryLabel, action: #selector(onSettingsTapped), ink: ToolbarLayout.Ink.settings)
+    private lazy var carbEntryButton = makeToolbarButton(imageNamed: "carbs", tintColor: .carbTintColor, action: #selector(userTappedAddCarbs))
+    private lazy var bolusButton = makeToolbarButton(imageNamed: "bolus", tintColor: .insulinTintColor, action: #selector(presentBolusScreen))
+    private lazy var settingsButton = makeToolbarButton(imageNamed: "settings", tintColor: .secondaryLabel, action: #selector(onSettingsTapped))
 
     private lazy var workoutButton: UIButton = {
         let button = UIButton(type: .system)
@@ -285,9 +285,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
         return button
     }()
 
-    private func makeToolbarButton(imageNamed name: String, tintColor: UIColor, action: Selector, ink: CGSize) -> UIButton {
+    private func makeToolbarButton(imageNamed name: String, tintColor: UIColor, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(named: name)?.toolbarIcon(ink: ink), for: .normal)
+        button.setImage(UIImage(named: name)?.toolbarIcon(), for: .normal)
         button.tintColor = tintColor
         button.addTarget(self, action: action, for: .touchUpInside)
         button.constrainToToolbarIconSize()
@@ -311,22 +311,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
         /// separates the icons within the shared pill.
         static let iconHorizontalPadding: CGFloat = 10
         /// Transparent space kept above and below the artwork in each item.
-        static let iconVerticalMargin: CGFloat = 4
-
-        /// Bounding box of the visible artwork inside each asset, in the asset's
-        /// own points. Measured by rasterizing the PDFs at 600dpi and taking the
-        /// alpha bounding box; the artwork is centered in every one of them to
-        /// within 0.6pt, so scaling alone aligns them. If an upstream asset is
-        /// redrawn these go stale, and that icon renders slightly off-size --
-        /// remeasure rather than nudging `inkHeight`.
-        enum Ink {
-            static let carbs = CGSize(width: 25.52, height: 21.57)
-            static let bolus = CGSize(width: 20.33, height: 23.32)
-            static let preMeal = CGSize(width: 25.52, height: 21.57)
-            static let workout = CGSize(width: 27.72, height: 23.88)
-            /// 25x25 gear centered on a 25x40 canvas.
-            static let settings = CGSize(width: 25.00, height: 25.00)
-        }
+        /// Sized so each item clears the 44pt minimum tap target: the rendered
+        /// canvas is `inkHeight` plus this margin top and bottom. Horizontally
+        /// the padding above already puts every item past 44pt.
+        static let iconVerticalMargin: CGFloat = 7
     }
 
     /// Position of the pre-meal item within `toolbarItems`, recorded at setup
@@ -1515,7 +1503,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func createPreMealButtonItem(selected: Bool, isEnabled: Bool) -> UIBarButtonItem {
-        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected)?.toolbarIcon(ink: ToolbarLayout.Ink.preMeal), style: .plain, target: self, action: #selector(premealButtonTapped(_:)))
+        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected)?.toolbarIcon(), style: .plain, target: self, action: #selector(premealButtonTapped(_:)))
         item.accessibilityLabel = NSLocalizedString("Pre-Meal Targets", comment: "The label of the pre-meal mode toggle button")
 
         if selected {
@@ -1532,7 +1520,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
     
     private func updateWorkoutButton(selected: Bool, isEnabled: Bool) {
-        workoutButton.setImage(UIImage.workoutImage(selected: selected)?.toolbarIcon(ink: ToolbarLayout.Ink.workout), for: .normal)
+        workoutButton.setImage(UIImage.workoutImage(selected: selected)?.toolbarIcon(), for: .normal)
         workoutButton.accessibilityLabel = NSLocalizedString("Workout Targets", comment: "The label of the workout mode toggle button")
 
         if selected {
@@ -2131,27 +2119,71 @@ private extension UIButton {
 }
 
 private extension UIImage {
+    /// Bounds of the visible artwork within the image, in points, ignoring any
+    /// transparent margin around it.
+    ///
+    /// The stock assets pad themselves by wildly different amounts -- bolus has
+    /// essentially none, carbs has ~3.7pt top and bottom, and settings is a 25x25
+    /// gear centered on a 25x40 canvas -- so sizing on the canvas leaves the
+    /// glyphs visibly uneven. Measuring here rather than carrying a table of
+    /// constants keeps this correct if an asset is ever redrawn.
+    func inkBounds() -> CGRect? {
+        guard let cgImage = cgImage, cgImage.width > 0, cgImage.height > 0 else { return nil }
+
+        let width = cgImage.width
+        let height = cgImage.height
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        guard let context = CGContext(data: &pixels,
+                                      width: width,
+                                      height: height,
+                                      bitsPerComponent: 8,
+                                      bytesPerRow: width * 4,
+                                      space: CGColorSpaceCreateDeviceRGB(),
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return nil }
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+
+        var minX = width, maxX = -1, minY = height, maxY = -1
+        for y in 0..<height {
+            for x in 0..<width where pixels[(y * width + x) * 4 + 3] > 0 {
+                minX = min(minX, x)
+                maxX = max(maxX, x)
+                minY = min(minY, y)
+                maxY = max(maxY, y)
+            }
+        }
+        guard maxX >= minX, maxY >= minY else { return nil }
+
+        // CGContext draws bottom-up; flip the vertical range into UIKit's coordinates.
+        let scaleX = size.width / CGFloat(width)
+        let scaleY = size.height / CGFloat(height)
+        return CGRect(x: CGFloat(minX) * scaleX,
+                      y: CGFloat(height - 1 - maxY) * scaleY,
+                      width: CGFloat(maxX - minX + 1) * scaleX,
+                      height: CGFloat(maxY - minY + 1) * scaleY)
+    }
+
     /// Scales the image so its visible artwork is `inkHeight` tall, then centers
-    /// it on a canvas sized to that artwork plus uniform padding. Normalizing on
-    /// ink rather than canvas is what makes the five icons look the same size:
-    /// the assets pad themselves by anywhere from 0 to 7.5pt.
+    /// that artwork on a canvas sized to it plus uniform padding. Normalizing on
+    /// ink rather than canvas is what makes the five icons look the same size.
     ///
     /// The toolbar icons are vector PDFs with `preserves-vector-representation`,
     /// so scaling up stays crisp. Transparent canvas that falls outside the
     /// output is simply clipped.
-    ///
-    /// - Parameter ink: bounding box of the visible artwork, in the source
-    ///   image's own points. See `ToolbarLayout.Ink`.
-    func toolbarIcon(ink: CGSize) -> UIImage {
+    func toolbarIcon() -> UIImage {
         let layout = StatusTableViewController.ToolbarLayout.self
-        guard ink.height > 0, ink.width > 0 else { return self }
+        let ink = inkBounds() ?? CGRect(origin: .zero, size: size)
+        guard ink.width > 0, ink.height > 0 else { return self }
 
         let scale = layout.inkHeight / ink.height
         let drawSize = CGSize(width: size.width * scale, height: size.height * scale)
-        let canvas = CGSize(width: (ink.width * scale) + (layout.iconHorizontalPadding * 2),
+        let scaledInk = ink.applying(CGAffineTransform(scaleX: scale, y: scale))
+        let canvas = CGSize(width: scaledInk.width + (layout.iconHorizontalPadding * 2),
                             height: layout.inkHeight + (layout.iconVerticalMargin * 2))
-        let origin = CGPoint(x: (canvas.width - drawSize.width) / 2,
-                             y: (canvas.height - drawSize.height) / 2)
+
+        // Offset the whole image so that its ink, not its canvas, ends up centered.
+        let origin = CGPoint(x: (canvas.width - scaledInk.width) / 2 - scaledInk.minX,
+                             y: (canvas.height - scaledInk.height) / 2 - scaledInk.minY)
 
         let format = UIGraphicsImageRendererFormat.preferred()
         format.opaque = false
