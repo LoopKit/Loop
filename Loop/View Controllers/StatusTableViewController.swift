@@ -309,16 +309,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 case .inProgress(let doseNew):
                     switch oldValue {
                     case .inProgress(let doseOld):
-                        guard doseNew.syncIdentifier != doseOld.syncIdentifier,
-                              doseNew.automatic != true
-                        else { break }
-                        // Different manual bolus is being delivered
+                        guard doseNew.syncIdentifier != doseOld.syncIdentifier else { break }
+                        // A different bolus is being delivered
                         bolusProgressReporter = deviceManager.pumpManager?.createBolusProgressReporter(reportingOn: DispatchQueue.main)
                     case .canceling:
                         break
                     default:
                         // Bolus starting
-                        guard doseNew.automatic != true else { break }
                         bolusProgressReporter = deviceManager.pumpManager?.createBolusProgressReporter(reportingOn: DispatchQueue.main)
                     }
                 default:
