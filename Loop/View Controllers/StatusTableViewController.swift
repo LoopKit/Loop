@@ -287,12 +287,29 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private func makeToolbarButton(imageNamed name: String, tintColor: UIColor, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(named: name), for: .normal)
+        button.setImage(UIImage(named: name)?.toolbarIcon(), for: .normal)
         button.tintColor = tintColor
         button.addTarget(self, action: action, for: .touchUpInside)
         button.constrainToToolbarIconSize()
         return button
     }
+
+    /// Layout of the items in the bottom toolbar.
+    ///
+    /// The icon assets are all drawn on a 40x40pt canvas with their artwork 30pt tall, so
+    /// nothing here sizes them. The one thing left to do is pad each item out to the 44pt
+    /// minimum tap target, with horizontal room between items: on iOS 26 the items share one
+    /// Liquid Glass background and a space item between them would split it, so the gap is
+    /// transparent padding on the image itself.
+    ///
+    /// `fileprivate` so the UIImage helper at the bottom of this file can read it.
+    fileprivate enum ToolbarLayout {
+        static let itemSize = CGSize(width: 60, height: 44)
+    }
+
+    /// Position of the pre-meal item within `toolbarItems`, recorded at setup
+    /// because it differs between the iOS 26 and legacy layouts.
+    private var preMealItemIndex: Int = 1
 
     private func setupToolbarItems() {
         let carbs = UIBarButtonItem(customView: carbEntryButton)
@@ -308,7 +325,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         func flexibleSpace() -> UIBarButtonItem {
             UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         }
-        
+
         if #available(iOS 26, *) {
             toolbarItems = [carbs, preMeal, bolus, workout, settings]
         } else {
@@ -324,6 +341,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 settings
             ]
         }
+
+        // The two layouts put pre-meal at different indices, so record where it
+        // actually landed rather than hardcoding it.
+        preMealItemIndex = toolbarItems?.firstIndex { $0 === preMeal } ?? 1
     }
 
     private func updateToolbarItems() {
@@ -335,13 +356,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         bolusButton.isEnabled = isPumpOnboarded
         settingsButton.accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
 
-        let preMealIndex: Int
-        if #available(iOS 26, *) {
-            preMealIndex = 1
-        } else {
-            preMealIndex = 2
-        }
-        toolbarItems![preMealIndex] = createPreMealButtonItem(selected: preMealMode == true && preMealModeAllowed, isEnabled: preMealModeAllowed)
+        toolbarItems![preMealItemIndex] = createPreMealButtonItem(selected: preMealMode == true && preMealModeAllowed, isEnabled: preMealModeAllowed)
         updateWorkoutButton(selected: workoutMode == true && workoutModeAllowed, isEnabled: workoutModeAllowed)
     }
 
@@ -1478,7 +1493,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func createPreMealButtonItem(selected: Bool, isEnabled: Bool) -> UIBarButtonItem {
-        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected), style: .plain, target: self, action: #selector(premealButtonTapped(_:)))
+        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected)?.toolbarIcon(), style: .plain, target: self, action: #selector(premealButtonTapped(_:)))
         item.accessibilityLabel = NSLocalizedString("Pre-Meal Targets", comment: "The label of the pre-meal mode toggle button")
 
         if selected {
@@ -1495,7 +1510,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
     
     private func updateWorkoutButton(selected: Bool, isEnabled: Bool) {
-        workoutButton.setImage(UIImage.workoutImage(selected: selected), for: .normal)
+        workoutButton.setImage(UIImage.workoutImage(selected: selected)?.toolbarIcon(), for: .normal)
         workoutButton.accessibilityLabel = NSLocalizedString("Workout Targets", comment: "The label of the workout mode toggle button")
 
         if selected {
@@ -2090,6 +2105,19 @@ private extension UIButton {
         setContentHuggingPriority(.required, for: .vertical)
         setContentCompressionResistancePriority(.required, for: .horizontal)
         setContentCompressionResistancePriority(.required, for: .vertical)
+    }
+}
+
+private extension UIImage {
+    /// Centers the icon on a transparent canvas of the toolbar item size. See `ToolbarLayout`.
+    func toolbarIcon() -> UIImage {
+        let canvas = StatusTableViewController.ToolbarLayout.itemSize
+        let origin = CGPoint(x: (canvas.width - size.width) / 2, y: (canvas.height - size.height) / 2)
+        let format = UIGraphicsImageRendererFormat.preferred()
+        format.opaque = false
+        return UIGraphicsImageRenderer(size: canvas, format: format).image { _ in
+            draw(in: CGRect(origin: origin, size: size))
+        }.withRenderingMode(.alwaysTemplate)
     }
 }
 
