@@ -143,6 +143,12 @@
             "value" : "Glucides actifs"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktive karbohydrater"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -178,6 +184,12 @@
             "value" : "Glucides actifs (COB)"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktive karbohydrater (COB)"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -207,6 +219,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Glucides actifs"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktive karboer"
           }
         },
         "nl" : {
@@ -246,6 +264,12 @@
             "value" : "Insuline active"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiv insulin"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -269,10 +293,22 @@
     "Active Insulin (IOB)" : {
       "comment" : "Description for the Insulin On Board selection for the Live Activity configuration",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktives Insulin (IOB)"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Insuline active (IOB)"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiv insulin (IOB)"
           }
         },
         "ro" : {
@@ -292,10 +328,22 @@
     "at" : {
       "comment" : "Label used for the Updated time value in the Live Activity view",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "um"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "à"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kl."
           }
         },
         "ro" : {
@@ -416,6 +464,12 @@
             "value" : "Basal"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basal"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -439,10 +493,22 @@
     "COB" : {
       "comment" : "Label used for the Carbohydrates On Board value in the Live Activity view",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "COB"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Glucides"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "COB"
           }
         },
         "ro" : {
@@ -472,6 +538,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Glycémie actuelle"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nåværende BG"
           }
         },
         "nl" : {
@@ -511,6 +583,12 @@
             "value" : "Glycémie actuelle"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nåværende glukoseverdi"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -534,10 +612,22 @@
     "Current Glucose (Value and Arrow)" : {
       "comment" : "Description for the Current Glucose selection for the Live Activity configuration",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aktueller BZ (Wert und Trend)"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Glycémie actuelle (valeur et flèche)"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nåværende Glukose (Verdi og Pil)"
           }
         },
         "ro" : {
@@ -569,6 +659,12 @@
             "value" : "Delta"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delta"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -586,10 +682,22 @@
     "Delta Glucose (Delta)" : {
       "comment" : "Description for the Delta Glucose selection for the Live Activity configuration",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delta-BZ (Delta)"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delta Glucose (Delta)"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delta Glukose (Delta)"
           }
         },
         "ro" : {
@@ -619,6 +727,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Glycémie éventuelle"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eventuell BG"
           }
         },
         "nl" : {
@@ -658,6 +772,12 @@
             "value" : "Éventuellement"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omsider"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -693,6 +813,12 @@
             "value" : "Glycémie prévue (glycémie finale)"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forutsagt glukoseverdi (eventuell BG)"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -721,6 +847,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dans quel mode voulez-vous afficher les Activités en direct"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I hvilken modus vil du vise Live activity"
           }
         },
         "nl" : {
@@ -756,6 +888,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Insuline"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IOB"
           }
         },
         "nl" : {
@@ -795,6 +933,12 @@
             "value" : "Grand"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stor"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -821,13 +965,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Diagramm und Zeile"
+            "value" : "Diagramm und Text"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ligne et graphique"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Felt og rad"
           }
         },
         "ro" : {
@@ -847,10 +997,22 @@
     "Relative Basal Rate (Basal)" : {
       "comment" : "Description for the Basal Rate plot selection for the Live Activity configuration",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relative Basalrate (Basal)"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Débit basal relatif (Basal)"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Netto basaldose (basal)"
           }
         },
         "ro" : {
@@ -870,10 +1032,22 @@
     "Row Only" : {
       "comment" : "Short name to choose the Lock Screen display without the plot",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nur Text"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ligne seule"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kun rad"
           }
         },
         "ro" : {
@@ -905,6 +1079,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Petit"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liten"
           }
         },
         "nl" : {
@@ -1033,6 +1213,12 @@
             "value" : "Mis à jour"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oppdatert"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1060,6 +1246,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mis à jour (à)"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oppdatert (sist)"
           }
         },
         "nl" : {
@@ -1097,6 +1289,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mis à jour à"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oppdatert sist"
           }
         },
         "ro" : {
