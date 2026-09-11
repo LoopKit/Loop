@@ -555,8 +555,13 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
                 startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5)
             {
                 deviceDataManager?.analyticsServicesManager.didRetryBolus()
-                
-                deviceDataManager?.enactBolus(units: units, activationType: activationType) { (_) in
+
+                // Restore the failed bolus's origin if the notification carried one; the retry is still
+                // user-initiated on the phone, so fall back to .manual.
+                let origin = (response.notification.request.content.userInfo[LoopNotificationUserInfoKey.bolusOrigin.rawValue] as? String)
+                    .flatMap(BolusOrigin.init(rawValue:)) ?? .manual
+
+                deviceDataManager?.enactBolus(units: units, activationType: activationType, origin: origin) { (_) in
                     DispatchQueue.main.async {
                         completionHandler()
                     }
