@@ -461,6 +461,12 @@
             "value" : "%1$@%2$@"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@%2$@"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -487,6 +493,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@U"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@E"
           }
         },
         "ro" : {
@@ -642,6 +654,12 @@
             "value" : "Couleur"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Farge"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -674,6 +692,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Date"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dato"
           }
         },
         "nl" : {
@@ -833,6 +857,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fin"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avslutt"
           }
         },
         "nl" : {
@@ -1076,6 +1106,12 @@
             "value" : "Niveau de glycémie"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukosenivå"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1102,6 +1138,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plage de glycémie"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukoseområde"
           }
         },
         "ro" : {
@@ -1459,6 +1501,12 @@
             "value" : "Ouvrez l'application pour mettre à jour le widget"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Åpne appen for å oppdatere widgeten"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1485,6 +1533,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annulation du préréglage"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forhåndsinnstilt overstyring"
           }
         },
         "ro" : {
@@ -1715,6 +1769,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Démarrer"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
           }
         },
         "nl" : {
