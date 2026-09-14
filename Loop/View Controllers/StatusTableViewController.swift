@@ -734,6 +734,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private var statusRowMode = StatusRowMode.hidden
 
     private var canceledDose: DoseEntry? = nil
+
+    private static let canceledBolusDisplayDuration: TimeInterval = 10
+
+    private static let canceledAutomaticBolusDisplayDuration: TimeInterval = 30
     
     private func determinePresetsRowMode() -> PresetsRowMode {
         if let preset = temporaryPresetsManager.scheduleOverride ?? temporaryPresetsManager.preMealOverride, !preset.hasFinished() {
@@ -1088,7 +1092,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 case .canceledBolus(let dose):
                     let progressCell = tableView.dequeueReusableCell(withIdentifier: BolusProgressTableViewCell.className, for: indexPath) as! BolusProgressTableViewCell
                     progressCell.selectionStyle = .none
-                    progressCell.configuration = .canceled(delivered: dose.deliveredUnits ?? 0, ofTotalVolume: dose.programmedUnits)
+                    progressCell.configuration = .canceled(delivered: dose.deliveredUnits ?? 0, ofTotalVolume: dose.programmedUnits, automatic: dose.automatic == true)
+                    progressCell.onInfoTapped = { [weak self] in
+                        self?.presentCanceledAutomaticBolusInfo()
+                    }
                     return progressCell
                 case .pumpSuspended(let resuming):
                     let cell = tableView.dequeueReusableCell(withIdentifier: InsulinSuspendedTableViewCell.className, for: indexPath) as! InsulinSuspendedTableViewCell
@@ -1293,8 +1300,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                     self.canceledDose = doseToReport
                                     self.updateBannerAndHUDandStatusRows(statusRowMode: .canceledBolus(dose: doseToReport), newSize: nil, animated: true)
                                     self.bolusState = .noBolus
+                                    let display = doseToReport.automatic == true ? Self.canceledAutomaticBolusDisplayDuration : Self.canceledBolusDisplayDuration
                                     Task {
-                                        try? await Task.sleep(nanoseconds: NSEC_PER_SEC * 10)
+                                        try? await Task.sleep(nanoseconds: UInt64(display * Double(NSEC_PER_SEC)))
                                         self.canceledDose = nil
                                         self.updateBannerAndHUDandStatusRows(statusRowMode: self.determineStatusRowMode(), newSize: nil, animated: true)
                                     }
@@ -1423,6 +1431,27 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let alert = UIAlertController(title: title, message: body, preferredStyle: .alert)
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
+    }
+
+    private func presentCanceledAutomaticBolusInfo() {
+        let title = NSLocalizedString("Automatic Bolus Canceled", comment: "The alert title shown from the info button on a canceled automatic bolus")
+        let body = NSLocalizedString("Loop delivers an automatic bolus when its forecast stays above your correction range. If this dose was not what you expected, an issue report captures the glucose, insulin and settings behind the decision, and is the fastest way for someone to tell you why it happened.\n\nCreate one soon — the data it needs ages out.", comment: "The alert body shown from the info button on a canceled automatic bolus")
+        let alert = UIAlertController(title: title, message: body, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(
+            title: NSLocalizedString("Create Issue Report", comment: "The title of the action that opens the issue report screen"),
+            style: .default) { [weak self] _ in
+                self?.presentIssueReport()
+            })
+        alert.addAction(UIAlertAction(
+            title: NSLocalizedString("Not Now", comment: "The title of the action that dismisses the canceled automatic bolus info alert"),
+            style: .cancel))
+        present(alert, animated: true, completion: nil)
+    }
+
+    private func presentIssueReport() {
+        let vc = CommandResponseViewController.generateDiagnosticReport(reportGenerator: diagnosticReportGenerator)
+        vc.title = NSLocalizedString("Issue Report", comment: "The view controller title for the issue report screen")
+        show(vc, sender: nil)
     }
 
     // MARK: - Actions
@@ -2189,9 +2218,7 @@ extension StatusTableViewController: SettingsViewModelDelegate {
         // TODO: this dismiss here is temporary, until we know exactly where
         // we want this screen to belong in the navigation flow
         dismiss(animated: true) {
-            let vc = CommandResponseViewController.generateDiagnosticReport(reportGenerator: self.diagnosticReportGenerator)
-            vc.title = NSLocalizedString("Issue Report", comment: "The view controller title for the issue report screen")
-            self.show(vc, sender: nil)
+            self.presentIssueReport()
         }
     }
 }
