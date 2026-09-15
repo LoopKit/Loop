@@ -19,8 +19,10 @@ public class BolusProgressTableViewCell: UITableViewCell {
         case starting
         case bolusing(delivered: Double?, ofTotalVolume: Double)
         case canceling
-        case canceled(delivered: Double, ofTotalVolume: Double)
+        case canceled(delivered: Double, ofTotalVolume: Double, automatic: Bool)
     }
+
+    public var onInfoTapped: (() -> Void)?
     
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var paddedView: UIView!
@@ -39,6 +41,21 @@ public class BolusProgressTableViewCell: UITableViewCell {
         }
     }
 
+    private lazy var infoButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "info.circle"), for: .normal)
+        button.accessibilityLabel = NSLocalizedString("About this canceled bolus", comment: "Accessibility label for the info button on a canceled automatic bolus")
+        button.accessibilityIdentifier = "button_CanceledBolusInfo"
+        button.setContentHuggingPriority(.required, for: .horizontal)
+        button.setContentCompressionResistancePriority(.required, for: .horizontal)
+        button.addTarget(self, action: #selector(infoTapped), for: .touchUpInside)
+        return button
+    }()
+
+    @objc private func infoTapped() {
+        onInfoTapped?()
+    }
+
     public var configuration: Configuration? {
         didSet {
             updateProgress()
@@ -53,6 +70,8 @@ public class BolusProgressTableViewCell: UITableViewCell {
 
     override public func awakeFromNib() {
         super.awakeFromNib()
+
+        (progressLabel.superview as? UIStackView)?.addArrangedSubview(infoButton)
 
         paddedView.layer.masksToBounds = true
         paddedView.layer.cornerRadius = 10
@@ -84,8 +103,11 @@ public class BolusProgressTableViewCell: UITableViewCell {
             progressIndicator.isHidden = true
             activityIndicator.isHidden = true
             tapToStopLabel.isHidden = true
+            infoButton.isHidden = true
             return
         }
+
+        infoButton.isHidden = true
         
         switch configuration {
         case .starting:
@@ -127,10 +149,11 @@ public class BolusProgressTableViewCell: UITableViewCell {
             
             progressLabel.text = NSLocalizedString("Canceling Bolus", comment: "The title of the cell indicating a bolus is being canceled")
             progressLabel.accessibilityIdentifier = "text_BolusCanceling"
-        case let .canceled(delivered, totalVolume):
+        case let .canceled(delivered, totalVolume, automatic):
             progressIndicator.isHidden = true
             activityIndicator.isHidden = true
             tapToStopLabel.isHidden = true
+            infoButton.isHidden = !automatic
             
             let totalUnitsQuantity = LoopQuantity(unit: .internationalUnit, doubleValue: totalVolume)
             let totalUnitsString = insulinFormatter.string(from: totalUnitsQuantity) ?? ""
@@ -145,6 +168,7 @@ public class BolusProgressTableViewCell: UITableViewCell {
 
     override public func prepareForReuse() {
         super.prepareForReuse()
+        onInfoTapped = nil
         configuration = nil
         progressIndicator.progress = 0
         CATransaction.flush()
