@@ -211,7 +211,7 @@ struct ActionTabBar: UIViewRepresentable {
         uiView.items = items.enumerated().map { idx, item in
             UITabBarItem(
                 title: item.title,
-                image: UIImage(named: item.icon)?.scaledToFit(height: 28).withTintColor(item.tintColor, renderingMode: .alwaysOriginal),
+                image: UIImage(named: item.icon)?.scaledToFit(height: ActionTabBarMetrics.iconHeight).withTintColor(item.tintColor, renderingMode: .alwaysOriginal),
                 tag: idx
             )
         }
@@ -258,6 +258,8 @@ enum ActionTabBuilder {
 enum ActionTabBarMetrics {
 
     static let barHeight: CGFloat = 49
+
+    static let iconHeight: CGFloat = 34
 
     static var bottomSafeAreaInset: CGFloat {
         UIApplication.shared.connectedScenes
