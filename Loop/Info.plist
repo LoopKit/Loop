@@ -48,6 +48,9 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>dexcomg6</string>
+		<string>dexcomg7</string>
+		<string>dexcomoneplus</string>
+		<string>stelo</string>
 		<string>dexcomcgm</string>
 		<string>dexcomshare</string>
 	</array>
