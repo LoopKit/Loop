@@ -227,6 +227,7 @@ final class GlucoseAlertManager: ObservableObject {
     private static let lowSoundKey = "GlucoseAlertLowSound"
     private static let highSoundKey = "GlucoseAlertHighSound"
     private static let predictedLowSoundKey = "GlucoseAlertPredictedLowSound"
+    private static let episodeStateKey = "GlucoseAlertEpisodeState"
 
     // Per-alarm sound defaults. Urgent low keeps the loud critical tone;
     // the rest get a gentler default the user can change.
@@ -436,17 +437,27 @@ final class GlucoseAlertManager: ObservableObject {
 
     // MARK: - Hysteresis
 
-    private struct AlertState: Equatable {
+    private struct AlertState: Equatable, Codable {
         var inBoundary: Bool = false
         var lastFiredAt: Date?
         /// When BG first crossed into the alert boundary this episode. Used to
         /// honor a configured first-alert delay. Reset on recovery.
         var boundaryEnteredAt: Date?
     }
-    private var lowState = AlertState()
-    private var urgentLowState = AlertState()
-    private var highState = AlertState()
-    private var predictedLowInEpisode = false
+
+    /// Episode state survives relaunch: without it a restart clears
+    /// `lastFiredAt` and the next in-boundary reading re-alerts something the
+    /// user already acknowledged, and defeats an active snooze.
+    private struct EpisodeState: Codable {
+        var low: AlertState
+        var urgentLow: AlertState
+        var high: AlertState
+        var predictedLowInEpisode: Bool
+    }
+    private var lowState = AlertState() { didSet { persistEpisodeState() } }
+    private var urgentLowState = AlertState() { didSet { persistEpisodeState() } }
+    private var highState = AlertState() { didSet { persistEpisodeState() } }
+    private var predictedLowInEpisode = false { didSet { persistEpisodeState() } }
     /// Most recent real CGM reading. Used to suppress a redundant predicted-low
     /// alert when glucose is already at/below the Low threshold.
     private var latestReading: (mgdl: Double, date: Date)?
@@ -525,6 +536,14 @@ final class GlucoseAlertManager: ObservableObject {
             for key in keysToRemove { userDefaults.removeObject(forKey: key) }
         }
 
+        if let data = userDefaults.data(forKey: Self.episodeStateKey),
+           let saved = try? JSONDecoder().decode(EpisodeState.self, from: data) {
+            lowState = saved.low
+            urgentLowState = saved.urgentLow
+            highState = saved.high
+            predictedLowInEpisode = saved.predictedLowInEpisode
+        }
+
         NotificationCenter.default.publisher(for: .LoopCycleCompleted)
             .sink { [weak self] notification in
                 guard let predicted = (notification.object as? LoopDataManager)?.predictedGlucose else { return }
@@ -547,6 +566,13 @@ final class GlucoseAlertManager: ObservableObject {
     private func persistProfiles() {
         guard let data = try? JSONEncoder().encode(profiles) else { return }
         userDefaults.set(data, forKey: Self.profilesKey)
+    }
+
+    private func persistEpisodeState() {
+        let state = EpisodeState(low: lowState, urgentLow: urgentLowState,
+                                 high: highState, predictedLowInEpisode: predictedLowInEpisode)
+        guard let data = try? JSONEncoder().encode(state) else { return }
+        userDefaults.set(data, forKey: Self.episodeStateKey)
     }
 
     // MARK: - Evaluation
