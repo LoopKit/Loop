@@ -628,13 +628,15 @@ final class DeviceDataManager {
 
         let storedNewGlucose = await self.processCGMReadingResult(cgmManager, readingResult: result)
 
-        // A heartbeat/refresh triggers a CGM check; only loop if that check produced a new value.
-        // Looping here on lastLoopCompleted alone dosed on a stale reading whenever the heartbeat
-        // fired between CGM readings, and — since it neither checked nor updated the push path's
-        // trigger timestamp — let a heartbeat loop and a fresh-reading loop both fire seconds apart.
-        // With both paths gated on a stored new sample, the glucose store's syncID dedup guarantees
-        // exactly one loop per new reading across both paths.
-        if storedNewGlucose {
+        // A heartbeat/refresh triggers a CGM check; only loop if that check produced a new value
+        // AND we haven't looped in the last 4.2 min. Both conditions matter:
+        //  - Requiring a new value stops the heartbeat dosing on a stale reading when it fires
+        //    between CGM readings (and, via the store's syncID dedup, stops the push path and this
+        //    path both firing on the same reading — whichever stores it first loops).
+        //  - Keeping the interval floor stops a fast CGM (or the irregular ~2 min heartbeat) from
+        //    looping more often than once per ~5 min, matching the push path's rate limit.
+        let lastLoopCompleted = self.loopControl.lastLoopCompleted
+        if storedNewGlucose, lastLoopCompleted == nil || lastLoopCompleted!.timeIntervalSinceNow < -.minutes(4.2) {
             self.log.default("Triggering Loop from refreshCGM() — new glucose stored")
             await self.checkPumpDataAndLoop()
         }
