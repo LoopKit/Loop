@@ -307,16 +307,17 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if oldValue != bolusState {
                 switch bolusState {
                 case .inProgress(let doseNew):
-                    switch oldValue {
-                    case .inProgress(let doseOld):
-                        guard doseNew.syncIdentifier != doseOld.syncIdentifier else { break }
-                        // A different bolus is being delivered
-                        bolusProgressReporter = deviceManager.pumpManager?.createBolusProgressReporter(reportingOn: DispatchQueue.main)
-                    case .canceling:
+                    if case .inProgress(let doseOld) = oldValue, doseNew.syncIdentifier == doseOld.syncIdentifier {
                         break
-                    default:
-                        // Bolus starting
-                        bolusProgressReporter = deviceManager.pumpManager?.createBolusProgressReporter(reportingOn: DispatchQueue.main)
+                    }
+                    // A different bolus is being delivered. This includes starting one straight out of
+                    // .canceling: the reporter still tracks the bolus that was just stopped, and reusing
+                    // it reports that bolus's delivered units against the new bolus's programmed units.
+                    bolusProgressReporter = deviceManager.pumpManager?.createBolusProgressReporter(reportingOn: DispatchQueue.main)
+                    // Seed any visible cell, which otherwise keeps the previous bolus's values until the
+                    // first progress callback — and gets none at all while the app is in the background.
+                    if let progressCell = tableView.cellForRow(at: IndexPath(row: StatusRow.status.rawValue, section: Section.status.rawValue)) as? BolusProgressTableViewCell {
+                        progressCell.configuration = .bolusing(delivered: 0, ofTotalVolume: doseNew.programmedUnits)
                     }
                 default:
                     break
