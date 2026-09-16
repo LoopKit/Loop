@@ -108,8 +108,7 @@ struct AlertManagementView: View {
                 HStack {
                     Text(NSLocalizedString("iOS Permissions", comment: "iOS Permissions button text"))
                     if checker.showWarning ||
-                        checker.notificationCenterSettings.scheduledDeliveryEnabled ||
-                        checker.notificationCenterSettings.alarmsDisabled {
+                        checker.notificationCenterSettings.scheduledDeliveryEnabled {
                         Spacer()
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundColor(.critical)
