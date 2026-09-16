@@ -33,6 +33,16 @@ final class CriticalAlertAlarmScheduler {
     /// alarm can be cancelled when the alert is acknowledged or retracted.
     private var alarmsByAlert: [Alert.Identifier: UUID] = [:]
 
+    /// Whether the user has allowed alarms. nil where AlarmKit doesn't exist (below iOS 26).
+    static var alarmsAuthorized: Bool? {
+        guard #available(iOS 26, *) else { return nil }
+        #if canImport(AlarmKit)
+        return AlarmManager.shared.authorizationState == .authorized
+        #else
+        return nil
+        #endif
+    }
+
     /// True only if AlarmKit is available (iOS 26+) AND the user authorized it.
     /// When false, callers should use the CriticalAlertAudioPlayer fallback.
     var isAuthorizedAndAvailable: Bool {

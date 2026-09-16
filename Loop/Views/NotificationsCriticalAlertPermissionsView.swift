@@ -56,7 +56,11 @@ public struct NotificationsCriticalAlertPermissionsView: View {
                 if !checker.notificationCenterSettings.notificationsDisabled {
                     notificationDelivery
                 }
-                criticalAlertsStatus
+                if FeatureFlags.criticalAlertsEnabled {
+                    criticalAlertsStatus
+                } else if CriticalAlertAlarmScheduler.alarmsAuthorized != nil {
+                    alarmsStatus
+                }
                 if !checker.notificationCenterSettings.notificationsDisabled {
                     timeSensitiveStatus
                 }
@@ -110,6 +114,15 @@ extension NotificationsCriticalAlertPermissionsView {
         !checker.notificationCenterSettings.criticalAlertsDisabled ? "settingsViewAlertManagementAlertPermissionsCriticalAlertsEnabled" : "settingsViewAlertManagementAlertPermissionsCriticalAlertsDisabled"
     }
         
+    private var alarmsStatus: some View {
+        HStack {
+            Text("Alarms", comment: "Alarms permission status text")
+            Spacer()
+            onOff(!checker.notificationCenterSettings.alarmsDisabled)
+                .accessibilityIdentifier(!checker.notificationCenterSettings.alarmsDisabled ? "settingsViewAlertManagementAlertPermissionsAlarmsEnabled" : "settingsViewAlertManagementAlertPermissionsAlarmsDisabled")
+        }
+    }
+
     private var criticalAlertsStatus: some View {
         HStack {
             Text("Critical Alerts", comment: "Critical Alerts Status text")

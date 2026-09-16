@@ -73,6 +73,9 @@ public class AlertPermissionsChecker: ObservableObject {
                 newSettings.notificationsDisabled = settings.alertSetting == .disabled
                 if FeatureFlags.criticalAlertsEnabled {
                     newSettings.criticalAlertsDisabled = settings.criticalAlertSetting == .disabled
+                } else if let alarmsAuthorized = CriticalAlertAlarmScheduler.alarmsAuthorized {
+                    // Without the Critical Alerts entitlement, AlarmKit is the audible channel.
+                    newSettings.alarmsDisabled = !alarmsAuthorized
                 }
                 newSettings.scheduledDeliveryEnabled = settings.scheduledDeliverySetting == .enabled
                 newSettings.timeSensitiveDisabled = settings.alertSetting != .disabled && settings.timeSensitiveSetting == .disabled
@@ -319,6 +322,7 @@ struct NotificationCenterSettingsFlags: OptionSet {
     static let criticalAlertsDisabled = NotificationCenterSettingsFlags(rawValue: 1 << 1)
     static let timeSensitiveDisabled = NotificationCenterSettingsFlags(rawValue: 1 << 2)
     static let scheduledDeliveryEnabled = NotificationCenterSettingsFlags(rawValue: 1 << 3)
+    static let alarmsDisabled = NotificationCenterSettingsFlags(rawValue: 1 << 4)
 
     static let requiresRiskMitigation: NotificationCenterSettingsFlags = [ .notificationsDisabled, .criticalAlertsDisabled, .timeSensitiveDisabled ]
 }
@@ -354,6 +358,14 @@ extension NotificationCenterSettingsFlags {
         }
         set {
             update(.scheduledDeliveryEnabled, newValue)
+        }
+    }
+    var alarmsDisabled: Bool {
+        get {
+            contains(.alarmsDisabled)
+        }
+        set {
+            update(.alarmsDisabled, newValue)
         }
     }
     var requiresRiskMitigation: Bool {
