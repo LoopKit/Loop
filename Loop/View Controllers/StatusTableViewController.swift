@@ -314,6 +314,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     // .canceling: the reporter still tracks the bolus that was just stopped, and reusing
                     // it reports that bolus's delivered units against the new bolus's programmed units.
                     bolusProgressReporter = deviceManager.pumpManager?.createBolusProgressReporter(reportingOn: DispatchQueue.main)
+                    // A bolus that starts while the previous one's "canceled" row is still showing must
+                    // take the row over, or there is nothing to tap to stop it.
+                    canceledDose = nil
                     // Seed any visible cell, which otherwise keeps the previous bolus's values until the
                     // first progress callback — and gets none at all while the app is in the background.
                     if let progressCell = tableView.cellForRow(at: IndexPath(row: StatusRow.status.rawValue, section: Section.status.rawValue)) as? BolusProgressTableViewCell {
