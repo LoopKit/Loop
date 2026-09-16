@@ -559,6 +559,13 @@ final class GlucoseAlertManager: ObservableObject {
             os_log("Skipping stale sample", log: log, type: .debug)
             return
         }
+        // CGMs deliver the live reading and then backfill. A batch whose newest
+        // sample is no newer than the one already evaluated must not re-decide
+        // — and in particular must not retract — the alert that reading raised.
+        if let evaluated = latestReading, latest.date <= evaluated.date {
+            os_log("Skipping batch older than the latest evaluated reading", log: log, type: .debug)
+            return
+        }
         latestReading = (latest.quantity.doubleValue(for: .milligramsPerDeciliter), latest.date)
         let config = activeConfiguration(at: now)
         let mgdl: Double
