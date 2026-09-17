@@ -177,6 +177,19 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 }
             }
             .store(in: &cancellables)
+
+        // A CGM's session starting or ending changes its status highlight
+        // without a glucose reading to refresh the HUD.
+        deviceManager.$cgmHasValidSensorSession
+            .removeDuplicates()
+            .dropFirst()
+            .sink { _ in
+                Task { @MainActor in
+                    self.refreshContext.update(with: .status)
+                    await self.reloadData(animated: true)
+                }
+            }
+            .store(in: &cancellables)
         
         loopManager.$lastLoopCompleted
             .receive(on: DispatchQueue.main)
