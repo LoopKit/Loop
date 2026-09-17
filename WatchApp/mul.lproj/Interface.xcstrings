@@ -456,7 +456,7 @@
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pre-måltid"
+            "value" : "Før måltid"
           }
         },
         "nl" : {
@@ -1342,7 +1342,7 @@
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overstyr"
+            "value" : "Overstyring"
           }
         },
         "nl" : {
