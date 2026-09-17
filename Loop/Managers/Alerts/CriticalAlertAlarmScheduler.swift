@@ -19,6 +19,7 @@ import LoopKit
 import os.log
 
 #if canImport(AlarmKit)
+import ActivityKit
 import AlarmKit
 import AppIntents
 import struct SwiftUI.Color   // Color only; `import SwiftUI` would make `Alert` ambiguous with LoopKit.Alert
@@ -31,6 +32,16 @@ final class CriticalAlertAlarmScheduler {
     /// Maps an issued alert to the AlarmKit alarm scheduled for it, so the
     /// alarm can be cancelled when the alert is acknowledged or retracted.
     private var alarmsByAlert: [Alert.Identifier: UUID] = [:]
+
+    /// Whether the user has allowed alarms. nil where AlarmKit doesn't exist (below iOS 26).
+    static var alarmsAuthorized: Bool? {
+        guard #available(iOS 26, *) else { return nil }
+        #if canImport(AlarmKit)
+        return AlarmManager.shared.authorizationState == .authorized
+        #else
+        return nil
+        #endif
+    }
 
     /// True only if AlarmKit is available (iOS 26+) AND the user authorized it.
     /// When false, callers should use the CriticalAlertAudioPlayer fallback.
@@ -92,14 +103,19 @@ final class CriticalAlertAlarmScheduler {
         let attributes = AlarmAttributes<EmptyAlarmMetadata>(presentation: presentation, tintColor: .red)
 
         // Fire immediately. No countdownDuration (preAlert nil) → alert-only,
-        // so no Widget Extension / Live Activity is required. Default alarm
-        // sound (our .caf alarm sounds aren't guaranteed AlarmKit-compatible).
-        // The stop button runs StopCriticalAlertIntent, which acknowledges the
-        // corresponding Loop alert (in addition to AlarmKit stopping the alarm).
+        // so no Widget Extension / Live Activity is required. The stop button
+        // runs StopCriticalAlertIntent, which acknowledges the corresponding
+        // Loop alert (in addition to AlarmKit stopping the alarm).
+        //
+        // The alert's configured sound is a bundled IMA4 .caf under 30s, which
+        // is the same constraint as a notification sound, so AlarmKit can play
+        // it by name from the main bundle.
+        let sound: AlertConfiguration.AlertSound = alert.sound?.filename.map { .named($0) } ?? .default
         let configuration = AlarmManager.AlarmConfiguration<EmptyAlarmMetadata>.alarm(
             schedule: .fixed(Date().addingTimeInterval(Self.immediateFireDelay)),
             attributes: attributes,
-            stopIntent: StopCriticalAlertIntent(identifier: alert.identifier)
+            stopIntent: StopCriticalAlertIntent(identifier: alert.identifier),
+            sound: sound
         )
 
         let id = UUID()

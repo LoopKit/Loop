@@ -73,6 +73,9 @@ public class AlertPermissionsChecker: ObservableObject {
                 newSettings.notificationsDisabled = settings.alertSetting == .disabled
                 if FeatureFlags.criticalAlertsEnabled {
                     newSettings.criticalAlertsDisabled = settings.criticalAlertSetting == .disabled
+                } else if let alarmsAuthorized = CriticalAlertAlarmScheduler.alarmsAuthorized {
+                    // Without the Critical Alerts entitlement, AlarmKit is the audible channel.
+                    newSettings.alarmsDisabled = !alarmsAuthorized
                 }
                 newSettings.scheduledDeliveryEnabled = settings.scheduledDeliverySetting == .enabled
                 newSettings.timeSensitiveDisabled = settings.alertSetting != .disabled && settings.timeSensitiveSetting == .disabled
@@ -107,9 +110,12 @@ extension AlertPermissionsChecker {
         case timeSensitiveDisabled
         case criticalAlertsAndNotificationDisabled
         case criticalAlertsAndTimeSensitiveDisabled
+        case alarmsDisabled
         
         var alertTitle: String {
             switch self {
+            case .alarmsDisabled:
+                NSLocalizedString("Turn On Alarms", comment: "Alarms disabled alert title")
             case .criticalAlertsAndNotificationDisabled, .criticalAlertsAndTimeSensitiveDisabled:
                 NSLocalizedString("Turn On Critical Alerts and Time Sensitive Notifications", comment: "Both Critical Alerts and Time Sensitive Notifications disabled alert title")
             case .criticalAlertsDisabled:
@@ -121,6 +127,8 @@ extension AlertPermissionsChecker {
         
         var notificationTitle: String {
             switch self {
+            case .alarmsDisabled:
+                NSLocalizedString("Turn On Alarms", comment: "Alarms disabled notification title")
             case .criticalAlertsAndNotificationDisabled, .criticalAlertsAndTimeSensitiveDisabled:
                 NSLocalizedString("Turn On Critical Alerts and Time Sensitive Notifications", comment: "Both Critical Alerts and Time Sensitive Notifications disabled notification title")
             case .criticalAlertsDisabled:
@@ -132,6 +140,8 @@ extension AlertPermissionsChecker {
         
         var bannerTitle: String {
             switch self {
+            case .alarmsDisabled:
+                NSLocalizedString("Alarms are turned OFF", comment: "Alarms disabled banner title")
             case .criticalAlertsAndNotificationDisabled, .criticalAlertsAndTimeSensitiveDisabled:
                 NSLocalizedString("Critical Alerts and Time Sensitive Notifications are turned OFF", comment: "Both Critical Alerts and Time Sensitive Notifications disabled banner title")
             case .criticalAlertsDisabled:
@@ -143,6 +153,8 @@ extension AlertPermissionsChecker {
         
         var alertBody: String {
             switch self {
+            case .alarmsDisabled:
+                NSLocalizedString("Alarms are turned OFF. Without Critical Alerts, Loop sounds urgent low and other critical safety alerts as alarms, so you may not hear them.\n\nTo fix the issue, tap ‘Settings’ and make sure Allow Alarms is turned ON.", comment: "Alarms disabled alert body")
             case .notificationsDisabled:
                 NSLocalizedString("Time Sensitive Notifications are turned OFF. You may not get sound, visual or vibration alerts regarding critical safety information.\n\nTo fix the issue, tap ‘Settings’ and make sure Notifications are turned ON.", comment: "Notifications disabled alert body")
             case .criticalAlertsAndNotificationDisabled:
@@ -158,6 +170,8 @@ extension AlertPermissionsChecker {
         
         var notificationBody: String {
             switch self {
+            case .alarmsDisabled:
+                NSLocalizedString("Alarms are turned OFF. Go to the App to fix the issue now.", comment: "Alarms disabled notification body")
             case .criticalAlertsAndNotificationDisabled, .criticalAlertsAndTimeSensitiveDisabled:
                 NSLocalizedString("Critical Alerts and Time Sensitive Notifications are turned OFF. Go to the App to fix the issue now.", comment: "Both Critical Alerts and Time Sensitive Notifications disabled notification body")
             case .criticalAlertsDisabled:
@@ -169,6 +183,8 @@ extension AlertPermissionsChecker {
         
         var bannerBody: String {
             switch self {
+            case .alarmsDisabled:
+                NSLocalizedString("Fix now by turning Alarms ON.", comment: "Alarms disabled banner body")
             case .notificationsDisabled:
                 NSLocalizedString("Fix now by turning Notifications ON.", comment: "Notifications disabled banner body")
             case .criticalAlertsAndNotificationDisabled:
@@ -184,6 +200,8 @@ extension AlertPermissionsChecker {
         
         var alertIdentifier: LoopKit.Alert.Identifier {
             switch self {
+            case .alarmsDisabled:
+                Alert.Identifier(managerIdentifier: "LoopAppManager", alertIdentifier: "unsafeAlarmsPermissionsAlert")
             case .notificationsDisabled:
                 Alert.Identifier(managerIdentifier: "LoopAppManager", alertIdentifier: "unsafeNotificationPermissionsAlert")
             case .criticalAlertsAndNotificationDisabled:
@@ -236,6 +254,12 @@ extension AlertPermissionsChecker {
         notificationsDisabled & criticalAlertsDisabled & timeSensitiveDisabled & scheduledDeliveryEnabled = 15 (Not Possible)
         */
         init?(permissions: NotificationCenterSettingsFlags) {
+            // Only set on builds without the Critical Alerts entitlement, where alarms are the
+            // audible channel; it outranks the notification flags there.
+            if permissions.contains(.alarmsDisabled) {
+                self = .alarmsDisabled
+                return
+            }
             switch permissions {
             case .notificationsDisabled, NotificationCenterSettingsFlags(rawValue: 9):
                 self = .notificationsDisabled
@@ -319,8 +343,9 @@ struct NotificationCenterSettingsFlags: OptionSet {
     static let criticalAlertsDisabled = NotificationCenterSettingsFlags(rawValue: 1 << 1)
     static let timeSensitiveDisabled = NotificationCenterSettingsFlags(rawValue: 1 << 2)
     static let scheduledDeliveryEnabled = NotificationCenterSettingsFlags(rawValue: 1 << 3)
+    static let alarmsDisabled = NotificationCenterSettingsFlags(rawValue: 1 << 4)
 
-    static let requiresRiskMitigation: NotificationCenterSettingsFlags = [ .notificationsDisabled, .criticalAlertsDisabled, .timeSensitiveDisabled ]
+    static let requiresRiskMitigation: NotificationCenterSettingsFlags = [ .notificationsDisabled, .criticalAlertsDisabled, .timeSensitiveDisabled, .alarmsDisabled ]
 }
 
 extension NotificationCenterSettingsFlags {
@@ -354,6 +379,14 @@ extension NotificationCenterSettingsFlags {
         }
         set {
             update(.scheduledDeliveryEnabled, newValue)
+        }
+    }
+    var alarmsDisabled: Bool {
+        get {
+            contains(.alarmsDisabled)
+        }
+        set {
+            update(.alarmsDisabled, newValue)
         }
     }
     var requiresRiskMitigation: Bool {
