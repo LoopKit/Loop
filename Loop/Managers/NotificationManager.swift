@@ -79,7 +79,7 @@ extension NotificationManager {
 
     // MARK: - Notifications
     
-    static func sendBolusFailureNotification(for error: PumpManagerError, units: Double, at startDate: Date, activationType: BolusActivationType) {
+    static func sendBolusFailureNotification(for error: PumpManagerError, units: Double, at startDate: Date, activationType: BolusActivationType, origin: BolusOrigin? = nil) {
         let notification = UNMutableNotificationContent()
 
         notification.title = NSLocalizedString("Bolus Issue", comment: "The notification title for a bolus issue")
@@ -99,11 +99,14 @@ extension NotificationManager {
             notification.categoryIdentifier = LoopNotificationCategory.bolusFailure.rawValue
         }
 
-        notification.userInfo = [
+        var userInfo: [String: Any] = [
             LoopNotificationUserInfoKey.bolusAmount.rawValue: units,
             LoopNotificationUserInfoKey.bolusStartDate.rawValue: startDate,
             LoopNotificationUserInfoKey.bolusActivationType.rawValue: activationType.rawValue
         ]
+        // Carry the origin so a retry from the notification keeps the bolus's provenance.
+        userInfo[LoopNotificationUserInfoKey.bolusOrigin.rawValue] = origin?.rawValue
+        notification.userInfo = userInfo
 
         let request = UNNotificationRequest(
             // Only support 1 bolus notification at once
