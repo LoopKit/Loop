@@ -306,6 +306,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 settingsItem
             ]
         }
+#if compiler(>=6.4)
+        if #available(iOS 27, *) {
+            for item in [carbsItem, preMealItem, bolusItem, workoutItem, settingsItem] {
+                item.isPaddingRemoved = true
+            }
+            settingsItem.visibilityPriority = .high
+        }
+#endif
     }
 
     private func updateToolbarItems() {
