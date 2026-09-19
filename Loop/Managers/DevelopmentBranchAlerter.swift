@@ -14,14 +14,22 @@ enum DevelopmentBranchAlerter {
 
     private static let switchToMainURL = URL(string: "https://loopkit.github.io/loopdocs/faqs/loop-faqs/#how-do-i-return-to-the-released-version")!
 
-    /// Presents a blocking warning when this is a build from the development branch.
-    /// Shown on every launch; the alert can only be dismissed by an explicit choice.
+    private static let acknowledgedDateKey = "com.loopkit.Loop.DevelopmentBranchAlerter.acknowledgedDate"
+    private static let reminderInterval: TimeInterval = 7 * 24 * 60 * 60
+
+    /// Presents a warning when this is a build from the development branch, at most once a week
+    /// once acknowledged.
     static func alertIfNeeded(viewControllerToPresentFrom: UIViewController) {
         guard FeatureFlags.devBranchWarningEnabled else {
             return
         }
 
         guard BuildDetails.default.workspaceGitBranch == developmentBranchName else {
+            return
+        }
+
+        if let acknowledged = UserDefaults.standard.object(forKey: acknowledgedDateKey) as? Date,
+           Date().timeIntervalSince(acknowledged) < reminderInterval {
             return
         }
 
@@ -34,7 +42,9 @@ enum DevelopmentBranchAlerter {
         alert.addAction(UIAlertAction(
             title: NSLocalizedString("I'm a tester", comment: "Button that dismisses the development build warning"),
             style: .default,
-            handler: nil
+            handler: { _ in
+                UserDefaults.standard.set(Date(), forKey: acknowledgedDateKey)
+            }
         ))
 
         alert.addAction(UIAlertAction(
