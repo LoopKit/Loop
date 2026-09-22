@@ -90,4 +90,48 @@ final class GlucoseAlertManagerTests: XCTestCase {
         await manager.evaluate(samples: [sample(50, at: now)], now: now)
         XCTAssertEqual(issuer.issuedIDs, [GlucoseAlertManager.lowAlertIdentifier])
     }
+
+    /// Simulates an app restart by building a second manager over the same
+    /// defaults.
+    private func relaunch() -> GlucoseAlertManager {
+        GlucoseAlertManager(alertIssuer: issuer, userDefaults: defaults)
+    }
+
+    func testHighAlertDoesNotRepeatAfterRelaunch() async {
+        let now = Date()
+        await manager.evaluate(samples: [sample(200, at: now)], now: now)
+        XCTAssertEqual(issuer.issuedIDs, [GlucoseAlertManager.highAlertIdentifier])
+
+        issuer.reset()
+        let restarted = relaunch()
+        let later = now.addingTimeInterval(5 * 60)
+        await restarted.evaluate(samples: [sample(205, at: later)], now: later)
+        XCTAssertEqual(issuer.issuedIDs, [], "Still the same episode; must not re-alert")
+    }
+
+    func testRecoveryAfterRelaunchRetractsHigh() async {
+        let now = Date()
+        await manager.evaluate(samples: [sample(200, at: now)], now: now)
+        issuer.reset()
+
+        let restarted = relaunch()
+        let later = now.addingTimeInterval(5 * 60)
+        await restarted.evaluate(samples: [sample(150, at: later)], now: later)
+        XCTAssertEqual(issuer.retractedIDs, [GlucoseAlertManager.highAlertIdentifier])
+    }
+
+    /// A new episode after recovery alerts again.
+    func testHighAlertsAgainInNewEpisodeAfterRelaunch() async {
+        let now = Date()
+        await manager.evaluate(samples: [sample(200, at: now)], now: now)
+
+        let restarted = relaunch()
+        let recovered = now.addingTimeInterval(5 * 60)
+        await restarted.evaluate(samples: [sample(150, at: recovered)], now: recovered)
+        issuer.reset()
+
+        let rising = now.addingTimeInterval(10 * 60)
+        await restarted.evaluate(samples: [sample(200, at: rising)], now: rising)
+        XCTAssertEqual(issuer.issuedIDs, [GlucoseAlertManager.highAlertIdentifier])
+    }
 }
