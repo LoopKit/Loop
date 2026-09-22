@@ -9,8 +9,8 @@ import UIKit
 
 enum DevelopmentBranchAlerter {
 
-    // The LoopWorkspace superproject branch this warning applies to.
-    private static let developmentBranchName = "dev"
+    // The LoopWorkspace superproject branches this warning applies to.
+    private static let developmentBranchNames: Set<String> = ["dev", "next-dev"]
 
     private static let switchToMainURL = URL(string: "https://loopkit.github.io/loopdocs/faqs/loop-faqs/#how-do-i-return-to-the-released-version")!
 
@@ -24,7 +24,8 @@ enum DevelopmentBranchAlerter {
             return
         }
 
-        guard BuildDetails.default.workspaceGitBranch == developmentBranchName else {
+        guard let branch = BuildDetails.default.workspaceGitBranch,
+              developmentBranchNames.contains(branch) else {
             return
         }
 
