@@ -56,7 +56,15 @@ public struct NotificationsCriticalAlertPermissionsView: View {
                 if !checker.notificationCenterSettings.notificationsDisabled {
                     notificationDelivery
                 }
-                criticalAlertsStatus
+                if FeatureFlags.criticalAlertsEnabled {
+                    criticalAlertsStatus
+                } else {
+                    if CriticalAlertAlarmScheduler.alarmsAuthorized != nil {
+                        alarmsStatus
+                    }
+                    criticalAlertsNotAvailable
+                    requestCriticalAlertsLink
+                }
                 if !checker.notificationCenterSettings.notificationsDisabled {
                     timeSensitiveStatus
                 }
@@ -110,6 +118,37 @@ extension NotificationsCriticalAlertPermissionsView {
         !checker.notificationCenterSettings.criticalAlertsDisabled ? "settingsViewAlertManagementAlertPermissionsCriticalAlertsEnabled" : "settingsViewAlertManagementAlertPermissionsCriticalAlertsDisabled"
     }
         
+    private var alarmsStatus: some View {
+        HStack {
+            Text("Alarms", comment: "Alarms permission status text")
+            Spacer()
+            onOff(!checker.notificationCenterSettings.alarmsDisabled)
+                .accessibilityIdentifier(!checker.notificationCenterSettings.alarmsDisabled ? "settingsViewAlertManagementAlertPermissionsAlarmsEnabled" : "settingsViewAlertManagementAlertPermissionsAlarmsDisabled")
+        }
+    }
+
+    /// Placeholder until the walkthrough lives on loopdocs; swap the URL, nothing else.
+    private static let requestCriticalAlertsURL = URL(string: "https://loopkit.github.io/loopdocs/")!
+
+    private var criticalAlertsNotAvailable: some View {
+        HStack {
+            Text("Critical Alerts", comment: "Critical Alerts Status text")
+            Spacer()
+            Text("Not Available", comment: "Critical Alerts status when the app was built without the entitlement")
+                .foregroundColor(.secondary)
+        }
+    }
+
+    private var requestCriticalAlertsLink: some View {
+        Button(action: { UIApplication.shared.open(Self.requestCriticalAlertsURL) }) {
+            HStack {
+                Text(NSLocalizedString("How to request Critical Alerts", comment: "Button text linking to instructions for requesting the Critical Alerts entitlement from Apple"))
+                Spacer()
+                Image(systemName: "arrow.up.right.square").foregroundColor(.gray).font(.footnote)
+            }
+        }
+    }
+
     private var criticalAlertsStatus: some View {
         HStack {
             Text("Critical Alerts", comment: "Critical Alerts Status text")
