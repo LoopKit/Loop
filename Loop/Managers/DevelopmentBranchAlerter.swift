@@ -36,7 +36,7 @@ enum DevelopmentBranchAlerter {
 
         let alert = UIAlertController(
             title: NSLocalizedString("Warning", comment: "Title of the warning shown at launch on development builds"),
-            message: NSLocalizedString("This is the development version of Loop, built from the dev branch. Any updates on this branch may contain new, untested features, and may be unsafe. If you are not a tester, please do not use this branch, and switch to main.", comment: "Body of the warning shown at launch on development builds"),
+            message: NSLocalizedString("This is the development version of Loop. Any updates on this branch may contain new, untested features, and may be unsafe. If you are not a tester, please switch to main.", comment: "Body of the warning shown at launch on development builds"),
             preferredStyle: .alert
         )
 
