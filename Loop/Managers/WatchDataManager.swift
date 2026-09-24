@@ -272,7 +272,7 @@ final class WatchDataManager: NSObject {
     }
 
     @MainActor
-    private func createWatchContext(recommendingBolusFor potentialCarbEntry: NewCarbEntry? = nil) async -> WatchContext {
+    private func createWatchContext(recommendingBolusFor potentialCarbEntry: NewCarbEntry? = nil, reason: String = "update") async -> WatchContext {
         var dosingDecision = BolusDosingDecision(for: .watchBolus)
 
         let glucose = loopDataManager.latestGlucose
@@ -315,6 +315,16 @@ final class WatchDataManager: NSObject {
                 recommendation: recommendedBolus,
                 date: Date())
             log.debug("watch bolus recommended: %{public}@ (with carb entry: %{public}@", String(describing: recommendedBolus.amount), String(describing: potentialCarbEntry))
+
+            // TEMP DIAGNOSTIC (watch bolus doubling investigation) — remove before merge.
+            let carbG = potentialCarbEntry.map { String(format: "%.0f", $0.quantity.doubleValue(for: .gram)) } ?? "nil"
+            let glucoseStr = glucose.map { "\(Int($0.quantity.doubleValue(for: .milligramsPerDeciliter)))@\($0.startDate)" } ?? "nil"
+            let iobStr = loopDataManager.activeInsulin?.value.description ?? "nil"
+            let cobStr = carbsOnBoard?.quantity.doubleValue(for: .gram).description ?? "nil"
+            let noticeStr = recommendedBolus.notice.map { String(describing: $0) } ?? "none"
+            let diag = "WATCH-BOLUS-DIAG reason=\(reason) now=\(Date()) lastLoop=\(String(describing: loopDataManager.lastLoopCompleted)) carbG=\(carbG) glucose=\(glucoseStr) iob=\(iobStr) cob=\(cobStr) rec=\(recommendedBolus.amount) notice=\(noticeStr)"
+            log.default("%{public}@", diag)
+            deviceManager.deviceLog.log(managerIdentifier: "WatchBolusDiag", deviceIdentifier: nil, type: .connection, message: diag, completion: nil)
         }
 
         var historicalGlucose: [HistoricalGlucoseValue]?
@@ -447,7 +457,7 @@ final class WatchDataManager: NSObject {
             return userInfo.rawValue
         case GetBolusRecommendationUserInfo.name?:
             if let request = GetBolusRecommendationUserInfo(rawValue: message) {
-                let context = await createWatchContext(recommendingBolusFor: request.carbEntry)
+                let context = await createWatchContext(recommendingBolusFor: request.carbEntry, reason: "fetchBolusRec")
                 return context.rawValue
             } else {
                 log.error("Could not recommend bolus from from unknown message: %{public}@", String(describing: message))
@@ -455,7 +465,7 @@ final class WatchDataManager: NSObject {
         case SetBolusUserInfo.name?:
             // Add carbs if applicable; start the bolus and reply when it's successfully requested
             try await addCarbEntryAndBolusFromWatchMessage(message)
-            let updatedContext = await createWatchContext()
+            let updatedContext = await createWatchContext(reason: "postBolus")
             lastComplicationContext = updatedContext // Watch will use this to update context
             return updatedContext.rawValue
 
@@ -478,7 +488,7 @@ final class WatchDataManager: NSObject {
                 return [:]
             }
 
-            let context = await createWatchContext()
+            let context = await createWatchContext(reason: "postSetPreset")
             return context.rawValue
         case AcknowledgeAlertUserInfo.name?:
             log.default("Acknowledge alert from watch: %{public}@", String(describing: message))
@@ -512,7 +522,7 @@ final class WatchDataManager: NSObject {
                 return [:]
             }
         case WatchContextRequestUserInfo.name?:
-            return await createWatchContext().rawValue
+            return await createWatchContext(reason: "contextRequest").rawValue
         case NotificationActionSelection.name?:
             if let selection = NotificationActionSelection(rawValue: message) {
                 let identifier = Alert.Identifier(
