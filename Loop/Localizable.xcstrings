@@ -19120,7 +19120,7 @@
       }
     },
     "Favorite Foods" : {
-      "comment" : "Title for Favorite Foods view",
+      "comment" : "Label for Favorite Foods icon in Settings\nTitle for Favorite Foods view",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -35078,6 +35078,9 @@
           }
         }
       }
+    },
+    "Simplify Carb Entry" : {
+      "comment" : "Subheading for Favorite Foods in Settings"
     },
     "since %@" : {
       "comment" : "Format fragment for a start time",
