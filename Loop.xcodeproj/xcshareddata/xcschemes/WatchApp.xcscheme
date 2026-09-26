@@ -94,7 +94,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
             BuildableName = "WatchApp.app"
-            BlueprintName = "WatchApp"
             ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -112,7 +111,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
             BuildableName = "WatchApp.app"
-            BlueprintName = "WatchApp"
             ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

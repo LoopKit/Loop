@@ -467,6 +467,12 @@
             "value" : "%1$@%2$@"
           }
         },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@%2$@"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -496,6 +502,12 @@
           }
         },
         "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@E"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@E"
@@ -1112,6 +1124,12 @@
             "value" : "Glukosenivå"
           }
         },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glucosewaarde"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1144,6 +1162,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Glukoseområde"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glucosebereik"
           }
         },
         "ro" : {
@@ -1507,6 +1531,12 @@
             "value" : "Åpne appen for å oppdatere widgeten"
           }
         },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open de app om de widget bij te werken"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1539,6 +1569,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Forhåndsinnstilt overstyring"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Override-programma"
           }
         },
         "ro" : {

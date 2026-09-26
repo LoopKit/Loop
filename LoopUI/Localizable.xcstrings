@@ -43,7 +43,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n%1$@\n\n%2$@ werkt met Gesloten Loop in de AAN stand"
+            "value" : "\n%1$@\n\n%2$@ werkt met Actieve loop AAN"
           }
         },
         "pl" : {
@@ -274,7 +274,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n%1$@ werkt met Gesloten Loop in de UIT stand. Je pomp en CGM blijven werken, maar de app past de dosering niet automatisch aan.\n\n%2$@"
+            "value" : "\n%1$@ werkt met Actieve loop UIT. Je pomp en CGM blijven werken, maar de app past de dosering niet automatisch aan.\n\n%2$@"
           }
         },
         "pl" : {
@@ -1476,7 +1476,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gesloten loop"
+            "value" : "Actieve loop"
           }
         },
         "pl" : {
@@ -1577,7 +1577,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gesloten Loop UIT"
+            "value" : "Actieve loop UIT"
           }
         },
         "pl" : {
@@ -1666,7 +1666,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gesloten Loop AAN"
+            "value" : "Actieve loop AAN"
           }
         },
         "pl" : {
@@ -3022,7 +3022,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open loop"
+            "value" : "Inactieve loop"
           }
         },
         "pl" : {
@@ -3243,7 +3243,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tik op Instellingen om Gesloten Loop AAN te zetten als je wilt dat de app je insulinetoediening automatiseert."
+            "value" : "Tik op Instellingen om Actieve loop AAN te zetten als je wilt dat de app je insulinetoediening automatiseert."
           }
         },
         "pl" : {
