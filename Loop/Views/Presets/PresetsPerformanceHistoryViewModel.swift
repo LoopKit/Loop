@@ -22,13 +22,13 @@ class PresetsPerformanceHistoryViewModel {
     
     private static var timeFormatter: DateFormatter = {
         let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "h:mm a"
+        timeFormatter.timeStyle = .short
         return timeFormatter
     }()
     
     private static var dayFormatter: DateFormatter = {
         let dayFormatter = DateFormatter()
-        dayFormatter.dateFormat = "EEE M/d"
+        dayFormatter.setLocalizedDateFormatFromTemplate("EEEMd")
         return dayFormatter
     }()
     

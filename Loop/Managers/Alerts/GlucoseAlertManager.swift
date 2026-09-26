@@ -378,7 +378,7 @@ final class GlucoseAlertManager: ObservableObject {
         guard let profile = profile(id: profileID), profile.scheduleSettings.enabled else { return nil }
         guard let transition = nextScheduledTransition(settings: profile.scheduleSettings, at: now) else { return nil }
         let fmt = DateFormatter()
-        fmt.dateFormat = "EEE h:mm a"
+        fmt.setLocalizedDateFormatFromTemplate("EEEjmm")
         let dateStr = fmt.string(from: transition.at)
         return transition.activating
             ? "Scheduled to turn on: \(dateStr)"
@@ -431,7 +431,7 @@ final class GlucoseAlertManager: ObservableObject {
         comps.minute = minuteOfDay % 60
         guard let date = Calendar.current.date(from: comps) else { return "" }
         let fmt = DateFormatter()
-        fmt.dateFormat = "h:mm a"
+        fmt.timeStyle = .short
         return fmt.string(from: date)
     }
 
