@@ -199,7 +199,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Totaal Koolhydraten"
+            "value" : "Totaal koolhydraten"
           }
         },
         "pl" : {
@@ -839,7 +839,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bolus Mislukt"
+            "value" : "Bolus mislukt"
           }
         },
         "pl" : {
@@ -1738,7 +1738,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etiket"
+            "value" : "Label"
           }
         },
         "pl" : {
@@ -2511,7 +2511,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etiket"
+            "value" : "Label"
           }
         },
         "pl" : {

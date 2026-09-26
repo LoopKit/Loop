@@ -608,7 +608,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etiket"
+            "value" : "Label"
           }
         },
         "pl" : {
@@ -866,7 +866,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "g Totaal"
+            "value" : "g totaal"
           }
         },
         "pl" : {
@@ -1130,7 +1130,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etiket"
+            "value" : "Label"
           }
         },
         "pl" : {
@@ -2042,7 +2042,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aanbevolen Basaal"
+            "value" : "Aanbevolen basaalstand"
           }
         },
         "pl" : {
@@ -2300,7 +2300,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etiket"
+            "value" : "Label"
           }
         },
         "pl" : {
@@ -2689,7 +2689,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "g Actieve Kh"
+            "value" : "g actieve kh"
           }
         },
         "pl" : {
@@ -2959,7 +2959,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etiket"
+            "value" : "Label"
           }
         },
         "pl" : {
@@ -3217,7 +3217,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aanbevolen Basaal"
+            "value" : "Aanbevolen basaalstand"
           }
         },
         "pl" : {

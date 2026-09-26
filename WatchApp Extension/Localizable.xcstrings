@@ -488,7 +488,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Actieve Koolhydraten"
+            "value" : "Actieve koolhydraten"
           }
         },
         "pl" : {
@@ -613,7 +613,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Actieve Insuline"
+            "value" : "Actieve insuline"
           }
         },
         "pl" : {
@@ -738,7 +738,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kh. Inv. Toevoegen"
+            "value" : "Koolhydraten toevoegen"
           }
         },
         "pl" : {
@@ -988,7 +988,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bolus Mislukt"
+            "value" : "Bolus mislukt"
           }
         },
         "pl" : {
@@ -1095,7 +1095,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aanbevolen Bolus Bijgewerkt"
+            "value" : "Bolusadvies bijgewerkt"
           }
         },
         "pl" : {
@@ -1202,7 +1202,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ga Verder"
+            "value" : "Ga verder"
           }
         },
         "pl" : {
@@ -2154,7 +2154,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Netto Basaalsnelheid"
+            "value" : "Netto basaalstand"
           }
         },
         "pl" : {
@@ -2385,7 +2385,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ok"
+            "value" : "OK"
           }
         },
         "pl" : {
@@ -3720,7 +3720,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opslaan & Bolussen"
+            "value" : "Opslaan & bolussen"
           }
         },
         "pl" : {
@@ -3827,7 +3827,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versturen Mislukt"
+            "value" : "Versturen mislukt"
           }
         },
         "pl" : {
