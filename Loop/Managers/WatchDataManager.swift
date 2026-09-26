@@ -296,7 +296,7 @@ final class WatchDataManager: NSObject {
 
             var insulinOnBoard: InsulinValue?
             updateGroup.enter()
-            self.deviceManager.doseStore.insulinOnBoard(at: Date()) { (result) in
+            self.deviceManager.doseStore.insulinOnBoard(at: Date(), basalDosingEnd: Date()) { (result) in
                 switch result {
                 case .success(let iobValue):
                     context.iob = iobValue.value

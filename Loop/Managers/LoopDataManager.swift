@@ -1125,7 +1125,7 @@ extension LoopDataManager {
             }
         }
         updateGroup.enter()
-        doseStore.insulinOnBoard(at: now()) { result in
+        doseStore.insulinOnBoard(at: now(), basalDosingEnd: nil) { result in
             switch result {
             case .failure(let error):
                 warnings.append(.fetchDataWarning(.insulinOnBoard(error: error)))
@@ -2148,7 +2148,7 @@ extension LoopDataManager {
         
         var activeInsulin: Double? = nil
         let semaphore = DispatchSemaphore(value: 0)
-        doseStore.insulinOnBoard(at: Date()) { (result) in
+        doseStore.insulinOnBoard(at: Date(), basalDosingEnd: nil) { (result) in
             if case .success(let iobValue) = result {
                 activeInsulin = iobValue.value
                 dosingDecision.insulinOnBoard = iobValue
