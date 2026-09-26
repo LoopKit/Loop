@@ -829,24 +829,34 @@ extension DeviceDataManager {
 
 // MARK: - Client API
 extension DeviceDataManager {
-    func enactBolus(units: Double, activationType: BolusActivationType, completion: @escaping (_ error: Error?) -> Void = { _ in }) {
+    func enactBolus(units: Double, activationType: BolusActivationType, origin: BolusOrigin? = nil, completion: @escaping (_ error: Error?) -> Void = { _ in }) {
         guard let pumpManager = pumpManager else {
             completion(LoopError.configurationError(.pumpManager))
             return
         }
 
+        // Mint the correlation reference only once the command is actually going to the pump, so the guard
+        // above cannot leave an orphaned origin mapping behind.
+        let bolusReference = origin.map { BolusOriginStore.shared.makeReference(for: $0) }
+
         self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units, isMutable: true)) {
-            pumpManager.enactBolus(units: units, activationType: activationType) { (error) in
+            pumpManager.enactBolus(units: units, activationType: activationType, bolusReference: bolusReference) { (error) in
                 if let error = error {
                     self.log.error("%{public}@", String(describing: error))
                     switch error {
                     case .uncertainDelivery:
-                        // Do not generate notification on uncertain delivery error
+                        // Do not generate notification on uncertain delivery error. Keep the origin mapping:
+                        // the dose may still be reported and reconciled later.
                         break
                     default:
+                        // Definite failure: drop the origin mapping for this request. The origin still rides
+                        // along on the failure notification so a retried bolus keeps its provenance.
+                        if let bolusReference = bolusReference {
+                            BolusOriginStore.shared.remove(reference: bolusReference)
+                        }
                         // Do not generate notifications for automatic boluses that fail.
                         if !activationType.isAutomatic {
-                            NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), activationType: activationType)
+                            NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), activationType: activationType, origin: origin)
                         }
                     }
                     
@@ -864,9 +874,9 @@ extension DeviceDataManager {
         }
     }
     
-    func enactBolus(units: Double, activationType: BolusActivationType) async throws {
+    func enactBolus(units: Double, activationType: BolusActivationType, origin: BolusOrigin? = nil) async throws {
         return try await withCheckedThrowingContinuation { continuation in
-            enactBolus(units: units, activationType: activationType) { error in
+            enactBolus(units: units, activationType: activationType, origin: origin) { error in
                 if let error = error {
                     continuation.resume(throwing: error)
                     return
@@ -1231,6 +1241,17 @@ extension DeviceDataManager: PumpManagerDelegate {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:%{public}@ hasNewPumpEvents (lastReconciliation = %{public}@)", String(describing: type(of: pumpManager)), String(describing: lastReconciliation))
 
+        // Re-key any tagged bolus origin from its request reference to the identifier the dose store will
+        // persist as the dose's syncIdentifier and that is looked up at Nightscout-upload time. The dose store
+        // always derives that identifier from the event's raw bytes (see PumpEvent.syncIdentifier), so key on
+        // those directly rather than on dose.syncIdentifier, which is only populated when the event was built
+        // through NewPumpEvent's designated init.
+        for event in events {
+            if let dose = event.dose, dose.type == .bolus, let reference = dose.bolusReference {
+                BolusOriginStore.shared.promoteReference(reference, toSyncIdentifier: event.raw.hexadecimalString)
+            }
+        }
+
         doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: replacePendingEvents) { (error) in
             if let error = error {
                 self.log.error("Failed to addPumpEvents to DoseStore: %{public}@", String(describing: error))
@@ -1460,7 +1481,7 @@ extension Notification.Name {
 extension DeviceDataManager: ServicesManagerDosingDelegate {
     
     func deliverBolus(amountInUnits: Double) async throws {
-        try await enactBolus(units: amountInUnits, activationType: .manualNoRecommendation)
+        try await enactBolus(units: amountInUnits, activationType: .manualNoRecommendation, origin: .remote)
     }
     
 }
