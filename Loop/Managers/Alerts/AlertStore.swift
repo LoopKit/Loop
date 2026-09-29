@@ -211,6 +211,20 @@ public class AlertStore {
         }
     }
 
+    /// Fetches recorded alerts for the alert history UI, most recently issued first.
+    /// - Parameters:
+    ///   - before: return only alerts issued strictly before this date; pass the oldest loaded alert's `issuedDate` to page backwards.
+    ///   - limit: the maximum number of alerts to return.
+    func lookupRecent(before: Date = .distantFuture, limit: Int) async throws -> [AlertHistoryEntry] {
+        try await managedObjectContext.perform {
+            let fetchRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "issuedDate < %@", before as NSDate)
+            fetchRequest.sortDescriptors = [ NSSortDescriptor(key: "issuedDate", ascending: false) ]
+            fetchRequest.fetchLimit = limit
+            return try self.managedObjectContext.fetch(fetchRequest).map { $0.historyEntry }
+        }
+    }
+
 }
 
 // MARK: Private functions
