@@ -147,8 +147,10 @@ class LoopAppManager: NSObject {
         if state == .launchHomeScreen {
             launchHomeScreen()
         }
-        
-        askUserToConfirmLoopReset()
+
+        if isLaunchComplete {
+            askUserToConfirmLoopReset()
+        }
     }
 
     private func checkProtectedDataAvailable() {
