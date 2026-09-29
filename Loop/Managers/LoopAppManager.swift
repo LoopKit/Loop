@@ -79,6 +79,7 @@ class LoopAppManager: NSObject {
     private var alertPermissionsChecker: AlertPermissionsChecker!
     private var supportManager: SupportManager!
     private var settingsManager: SettingsManager!
+    private var pendingRemoteNotificationRegistration: Result<Data, Error>?
     private var loggingServicesManager = LoggingServicesManager()
     private var analyticsServicesManager = AnalyticsServicesManager()
     private(set) var testingScenariosManager: TestingScenariosManager?
@@ -196,6 +197,10 @@ class LoopAppManager: NSObject {
         settingsManager = SettingsManager(cacheStore: cacheStore,
                                                expireAfter: localCacheDuration,
                                                alertMuter: alertManager.alertMuter)
+        if let result = pendingRemoteNotificationRegistration {
+            pendingRemoteNotificationRegistration = nil
+            settingsManager.remoteNotificationRegistrationDidFinish(result)
+        }
 
         deviceDataManager = DeviceDataManager(pluginManager: pluginManager,
                                               alertManager: alertManager,
@@ -344,6 +349,11 @@ class LoopAppManager: NSObject {
     func remoteNotificationRegistrationDidFinish(_ result: Result<Data,Error>) {
         if case .success(let token) = result {
             log.default("DeviceToken: %{public}@", token.hexadecimalString)
+        }
+        // Can arrive while the launch is deferred until protected data is available
+        guard let settingsManager else {
+            pendingRemoteNotificationRegistration = result
+            return
         }
         settingsManager.remoteNotificationRegistrationDidFinish(result)
     }
