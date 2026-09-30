@@ -318,7 +318,7 @@ extension WatchLoopManager: CGMManagerDelegate {
            let stored = defaults.dictionary(forKey: Self.cgmStateDefaultsKey),
            let storedID = stored["sensorID"] as? String {
             let activated = stored["activatedAt"] as? Date
-            let expired = Self.persistedSensorIsPastLife(activated, now: now())
+            let expired = Self.persistedSensorIsPastLife(activated, reportedEnd: Self.reportedEnd(of: G7CGMManager(rawState: stored)), now: now())
             if !expired {
                 if lastPersistedSensorID != nil {
                     SportLog.event("cgm", "G7 state: manager forgot sensor \(storedID) — KEEPING the persisted identity (#104: nil means unknown, not forget)")

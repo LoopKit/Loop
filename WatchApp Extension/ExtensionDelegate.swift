@@ -16,6 +16,7 @@ import os.log
 import UserNotifications
 import LoopKit
 import LoopCore
+import G7SensorKit
 import ClockKit
 
 class ExtensionDelegate: NSObject, WKApplicationDelegate {
@@ -84,6 +85,13 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     func applicationDidFinishLaunching() {
         podLoanDidFinishLaunching()
         UNUserNotificationCenter.current().delegate = self
+        NotificationCenter.default.addObserver(forName: G7WatchDirectRead.searchStateDidChange, object: nil, queue: .main) { _ in
+            if !G7WatchDirectRead.isSearching {
+                SensorSearchAlert.disarm()
+            } else if WKApplication.shared().applicationState != .active {
+                SensorSearchAlert.arm()
+            }
+        }
         if #available(watchOSApplicationExtension 5.0, *) {
             INRelevantShortcutStore.default.registerShortcuts()
         }
@@ -103,10 +111,14 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
         loopManager.requestGlucoseBackfillIfNecessary()
 
         podLoanDidBecomeActive()
+        SensorSearchAlert.disarm()
     }
 
     func applicationWillResignActive() {
         podLoanWillResignActive()
+        if G7WatchDirectRead.isSearching {
+            SensorSearchAlert.arm()
+        }
     }
 
     // NOT always the main thread. The Bluetooth alert task is delivered synchronously from

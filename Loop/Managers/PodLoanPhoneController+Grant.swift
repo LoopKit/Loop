@@ -146,12 +146,8 @@ extension PodLoanPhoneController {
         // setting. The watch doses by temp basal and refuses every cycle under automatic bolus.
         // Changing the real setting would need a restore that can fail — a relaunch, a force
         // reclaim, a dead watch — and would strand the user on temp-basal-only for good.
-        var loanSettings = settings
-        let strategyOverridden = settings.automaticDosingStrategy != .tempBasalOnly
-        loanSettings.automaticDosingStrategy = .tempBasalOnly
-        if strategyOverridden {
-            PhoneLog.event("loan", "dosing strategy overridden for the loan — phone \(settings.automaticDosingStrategy) → wrist tempBasalOnly; the phone's own setting is untouched")
-        }
+        let loanSettings = settings
+        PhoneLog.event("loan", "dosing strategy for the loan: \(settings.automaticDosingStrategy)")
         // Deny on anything missing — never substitute a default. Each of these is something the
         // watch would otherwise have to invent a value for, and it would dose on that value.
         guard settings.basalRateSchedule != nil,
@@ -445,8 +441,7 @@ extension PodLoanPhoneController {
             }
         }
 
-        var loanSettings = settings
-        loanSettings.automaticDosingStrategy = .tempBasalOnly
+        let loanSettings = settings
         let issuedAt = deps.now()
         let token = dormantSeizeToken()
         // A provisional epoch: the loan this copy would become if the watch ever starts one.

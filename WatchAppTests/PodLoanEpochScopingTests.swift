@@ -116,7 +116,8 @@ final class PodLoanBleIdentifierCacheTests: XCTestCase {
 /// of auth failures, zero direct readings).
 final class StrandedSensorIdentityTests: XCTestCase {
 
-    private let tenDaysTwelveHours: TimeInterval = .hours(10 * 24 + 12)
+    /// With no reported session length the bound is the longest G7 session.
+    private let lifeBound: TimeInterval = WatchLoopManager.longestSessionWithGrace
 
     func testAFreshSensorIsNotPastLife() {
         let activated = Date().addingTimeInterval(-.hours(24))
@@ -127,14 +128,30 @@ final class StrandedSensorIdentityTests: XCTestCase {
     /// re-open the false-forget #104 exists to prevent.
     func testJustInsideTheGraceWindowIsKept() {
         let now = Date()
-        let activated = now.addingTimeInterval(-(tenDaysTwelveHours - .minutes(30)))
+        let activated = now.addingTimeInterval(-(lifeBound - .minutes(30)))
         XCTAssertFalse(WatchLoopManager.persistedSensorIsPastLife(activated, now: now))
     }
 
-    func testPastTenDaysTwelveHoursIsDiscardable() {
+    func testPastTheLongestSessionIsDiscardable() {
         let now = Date()
-        let activated = now.addingTimeInterval(-(tenDaysTwelveHours + .minutes(1)))
+        let activated = now.addingTimeInterval(-(lifeBound + .minutes(1)))
         XCTAssertTrue(WatchLoopManager.persistedSensorIsPastLife(activated, now: now))
+    }
+
+    /// A 15-day sensor at 15 days is in its grace window and must survive a relaunch, even though
+    /// a 10-day session would be over (field 2026-09-29: a live sensor discarded at launch).
+    func testFifteenDaySensorInItsGraceWindowIsKept() {
+        let now = Date()
+        let activated = now.addingTimeInterval(-.hours(15 * 24 + 1))
+        XCTAssertFalse(WatchLoopManager.persistedSensorIsPastLife(activated, now: now))
+    }
+
+    /// When the sensor reported its own session end, that end decides.
+    func testReportedEndDecides() {
+        let now = Date()
+        let activated = now.addingTimeInterval(-.hours(11 * 24))
+        XCTAssertTrue(WatchLoopManager.persistedSensorIsPastLife(activated, reportedEnd: now.addingTimeInterval(-60), now: now))
+        XCTAssertFalse(WatchLoopManager.persistedSensorIsPastLife(activated, reportedEnd: now.addingTimeInterval(60), now: now))
     }
 
     /// Never discard on a guess. A blob with no activation date tells us nothing about age, and
@@ -148,7 +165,7 @@ final class StrandedSensorIdentityTests: XCTestCase {
     /// nothing asked.
     func testTheFieldCaseNineteenHoursPastExpiryIsDiscardable() {
         let now = Date()
-        let activated = now.addingTimeInterval(-(tenDaysTwelveHours + .hours(19)))
+        let activated = now.addingTimeInterval(-(lifeBound + .hours(19)))
         XCTAssertTrue(WatchLoopManager.persistedSensorIsPastLife(activated, now: now),
                       "a sensor 19h past its grace window must not be restored at launch — the manager will auto-connect to it and fail auth forever")
     }

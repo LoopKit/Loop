@@ -95,7 +95,8 @@ extension PodLoanWatchController {
         case .bolus:
             return LoanDoseRecord(kind: .bolus, startDate: dose.startDate, endDate: dose.endDate,
                                   amount: dose.programmedUnits, syncIdentifier: identity,
-                                  insulinType: dose.insulinType, deliveredUnits: dose.deliveredUnits)
+                                  insulinType: dose.insulinType, deliveredUnits: dose.deliveredUnits,
+                                  automatic: dose.automatic)
         case .tempBasal:
             return LoanDoseRecord(kind: .tempBasal, startDate: dose.startDate, endDate: dose.endDate,
                                   unitsPerHour: dose.unitsPerHour, syncIdentifier: identity,

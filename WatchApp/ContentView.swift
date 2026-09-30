@@ -49,8 +49,10 @@ struct ContentView: View {
                 // appears and disappears under the user renumbers the ones beside it, and the
                 // glance is also the only way to START a session, so it has to be reachable
                 // before there is anything to show.
-                GlanceView(model: glanceModel)
-                    .tag(Self.sportPage)
+                if FeatureFlags.sportModeEnabled {
+                    GlanceView(model: glanceModel)
+                        .tag(Self.sportPage)
+                }
 
                 // Diagnostics. Last, so a swipe never lands here by accident.
                 //
@@ -58,8 +60,10 @@ struct ContentView: View {
                 // reached by tapping through from the chart page — not on a page of its own. It
                 // is the same list either way; during a loan it reads the loan's store and gains
                 // swipe-to-delete.
-                LoanDebugView()
-                    .tag(Self.sportPage + 1)
+                if FeatureFlags.sportModeEnabled {
+                    LoanDebugView()
+                        .tag(Self.sportPage + 1)
+                }
             }
             .tabViewStyle(.page)
             .indexViewStyle(.page(backgroundDisplayMode: .automatic))

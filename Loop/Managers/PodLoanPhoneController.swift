@@ -272,7 +272,7 @@ final class PodLoanPhoneController {
         switch dose.type {
         case .bolus:
             return LoanDoseRecord(kind: .bolus, startDate: dose.startDate, endDate: dose.endDate, amount: dose.deliveredUnits ?? dose.programmedUnits,
-                                  syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType)
+                                  syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType, automatic: dose.automatic)
         // Rate records carry `deliveredUnits` explicitly. The pod delivers whole pulses and the
         // driver floors a superseded temp, so a watch left to re-derive from the programmed rate
         // over-states IOB on every elapsed slice.

@@ -117,7 +117,8 @@ enum LoanReconciler {
                         endDate: event.record.endDate ?? event.record.startDate,
                         value: units, unit: .units,
                         decisionId: nil,
-                        syncIdentifier: syncIdentifier(for: event)))
+                        syncIdentifier: syncIdentifier(for: event),
+                        automatic: event.record.automatic))
                 }
             case .tempBasal, .suspend:
 

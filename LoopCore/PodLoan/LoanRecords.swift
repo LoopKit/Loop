@@ -78,11 +78,14 @@ public struct LoanDoseRecord: Codable, Equatable {
     /// the user CLEARED the override. A payload that fails to decode must therefore never be
     /// treated as nil: cancelling a live override nobody asked to cancel is a therapy change.
     public let overrideRaw: Data?
+    /// Bolus only: enacted by the loop rather than confirmed by the user. Absent on older records.
+    public let automatic: Bool?
 
     public init(kind: Kind, startDate: Date, endDate: Date? = nil, unitsPerHour: Double? = nil,
                 amount: Double? = nil, absorptionTime: TimeInterval? = nil, note: String? = nil,
                 syncIdentifier: String? = nil, insulinType: InsulinType? = nil,
-                deliveredUnits: Double? = nil, overrideRaw: Data? = nil) {
+                deliveredUnits: Double? = nil, overrideRaw: Data? = nil, automatic: Bool? = nil) {
+        self.automatic = automatic
         self.kind = kind
         self.startDate = startDate
         self.endDate = endDate
@@ -145,7 +148,8 @@ extension LoanDoseRecord {
         case .bolus:
             guard let units = amount else { return nil }
             return DoseEntry(type: .bolus, startDate: startDate, endDate: endDate ?? startDate,
-                             value: units, unit: .units, decisionId: nil, syncIdentifier: syncIdentifier, insulinType: insulinType)
+                             value: units, unit: .units, decisionId: nil, syncIdentifier: syncIdentifier, insulinType: insulinType,
+                             automatic: automatic)
         case .tempBasal:
             guard let rate = unitsPerHour, let end = endDate else { return nil }
 
