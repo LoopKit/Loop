@@ -437,13 +437,16 @@ final class GlanceViewModel: ObservableObject {
         // early. A refresh that skipped it would leave the page with no way to notice ageing.
         defer { armFreshnessBoundaryRepaint() }
 
+        let cgm = session.stack.cgmManager
+        let sensorNote = G7WatchDirectRead.needsCodeNote(for: cgm.watchNeedsCodeFor) ?? G7WatchDirectRead.searchingNote(cgm.watchIsSearching)
+
         switch snap.phase {
         case .idle:
 
             // The note slot has one occupant. The controller's own note wins over the sensor-code
             // prompt: whatever just happened to a session matters more than a standing setup task.
             var idle = Self.idleState(context: ExtensionDelegate.sharedIfAvailable()?.loopManager.activeContext,
-                                      note: snap.lastIdleNote ?? G7WatchDirectRead.needsCodeNote ?? G7WatchDirectRead.searchingNote)
+                                      note: snap.lastIdleNote ?? sensorNote)
 
             if let issued = snap.seizeOfferIssuedAt {
                 let f = DateComponentsFormatter()
@@ -483,8 +486,7 @@ final class GlanceViewModel: ObservableObject {
 
             var restIdle = Self.idleState(context: ExtensionDelegate.sharedIfAvailable()?.loopManager.activeContext,
                                           note: snap.lastIdleNote
-                                            ?? G7WatchDirectRead.needsCodeNote
-                                            ?? G7WatchDirectRead.searchingNote
+                                            ?? sensorNote
                                             ?? NSLocalizedString("Records from the last session are waiting for your iPhone. You can still start.",
                                                                  comment: "Glance note while resting on a parked drain"))
             if let issued = snap.seizeOfferIssuedAt {

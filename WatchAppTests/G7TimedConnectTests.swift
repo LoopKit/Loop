@@ -48,10 +48,9 @@ final class G7AdoptedSensorActivationTests: XCTestCase {
 final class G7WatchAcquisitionTests: XCTestCase {
     private let anchor = Date(timeIntervalSince1970: 1_000_000)
 
-    // MARK: the re-lodge toggle (Diagnostics ▸ Sensor ▸ Re-lodge)
+    // MARK: the re-lodge arm
 
     func testTheProvenArmIsTheDefault() {
-        UserDefaults.standard.removeObject(forKey: G7WatchAcquisition.relodgeKey)
         XCTAssertEqual(G7WatchAcquisition.relodge, .holdApp, "33 in 33; Pete's formula measured 1 in 4")
         XCTAssertEqual(G7WatchAcquisition.Relodge(rawValue: "peteDelay"), .peteDelay)
         XCTAssertEqual(G7WatchAcquisition.Relodge(rawValue: "holdApp"), .holdApp)
@@ -149,13 +148,6 @@ final class G7WatchAcquisitionTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(G7WatchAcquisition.missedBursts(since: anchor, now: anchor.addingTimeInterval(3 * 300 + 8)),
                                     G7WatchAcquisition.missedBurstsBeforeBootstrap)
         XCTAssertEqual(G7WatchAcquisition.missedBursts(since: nil, now: anchor), 0, "nothing on record: nothing missed")
-    }
-
-    func testTheKeysSurviveTheTimedConnectEra() {
-        // Kept verbatim so the first build after the collapse re-adopts the remembered peripheral
-        // and keeps its last reading's grid without a scan.
-        XCTAssertEqual(G7WatchAcquisition.adoptedPeripheralKey, "G7Lab.timedConnect.adoptedPeripheral")
-        XCTAssertEqual(G7WatchAcquisition.lastReadingKey, "G7Lab.timedConnect.anchor")
     }
 }
 

@@ -85,8 +85,9 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     func applicationDidFinishLaunching() {
         podLoanDidFinishLaunching()
         UNUserNotificationCenter.current().delegate = self
-        NotificationCenter.default.addObserver(forName: G7WatchDirectRead.searchStateDidChange, object: nil, queue: .main) { _ in
-            if !G7WatchDirectRead.isSearching {
+        NotificationCenter.default.addObserver(forName: G7CGMManager.watchStatusDidChange, object: nil, queue: .main) { note in
+            guard let manager = note.object as? G7CGMManager else { return }
+            if !manager.watchIsSearching {
                 SensorSearchAlert.disarm()
             } else if WKApplication.shared().applicationState != .active {
                 SensorSearchAlert.arm()
@@ -116,7 +117,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
 
     func applicationWillResignActive() {
         podLoanWillResignActive()
-        if G7WatchDirectRead.isSearching {
+        if stockLoopSession?.stack.cgmManager.watchIsSearching == true {
             SensorSearchAlert.arm()
         }
     }

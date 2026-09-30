@@ -28,9 +28,13 @@ struct CGMHealth {
     let linkState: String
     let lifecycle: String
     let expiresIn: String
+    let needsCodeFor: String?
+    let isSearching: Bool
 
     init(_ manager: G7CGMManager) {
         sensorName = manager.sensorName
+        needsCodeFor = manager.watchNeedsCodeFor
+        isSearching = manager.watchIsSearching
         lastReadingAge = manager.latestReadingTimestamp.map { Date().timeIntervalSince($0) }
         if let g = manager.latestReading?.glucose, let t = manager.latestReadingTimestamp {
             let f = DateFormatter(); f.dateFormat = "HH:mm:ss"
@@ -59,11 +63,6 @@ struct LoanDebugView: View {
 
     @State private var dosing: WatchLoopManager.GlanceData?
     @State private var cobText: String = "—"
-
-    // Read by G7SensorKit's Bluetooth manager (`G7BluetoothManager.relodgeKey`), which is a
-    // different module — so this literal is the whole contract between them, and it is only
-    // consulted when the link next closes.
-    @AppStorage("G7Lab.relodge") private var relodge = "holdApp"
 
     // Same defaults key as `StockLoopSession.loanWorkoutKey`, spelled out twice. Change one and
     // the toggle silently stops reaching the thing it toggles.
@@ -146,28 +145,12 @@ struct LoanDebugView: View {
 
                 Text("SENSOR").font(.footnote).foregroundColor(.secondary)
 
-                if let needs = G7WatchDirectRead.needsCodeFor {
-                    Text("Sensor code needed for \(needs) — enter it in Loop ▸ Dexcom G7 on the phone (shown in the Dexcom app).")
-                        .font(.caption2).foregroundColor(.red)
+                if let needs = G7WatchDirectRead.needsCodeNote(for: cgm?.needsCodeFor) {
+                    Text(needs).font(.caption2).foregroundColor(.red)
                 }
-                if let searching = G7WatchDirectRead.searchingNote {
+                if let searching = G7WatchDirectRead.searchingNote(cgm?.isSearching ?? false) {
                     Text(searching).font(.caption2).foregroundColor(.orange)
                 }
-
-                Picker("Re-lodge", selection: $relodge) {
-                    Text("Pete's start delay").tag("peteDelay")
-                    Text("Hold the app 35 s").tag("holdApp")
-                }
-                .pickerStyle(.navigationLink)
-                .font(.caption2)
-                .onChange(of: relodge) { _, arm in
-                    SportLog.event("lab", "re-lodge = \(arm) — takes effect at the next close")
-                    lastAction = "re-lodge → \(arm) — next close"
-                }
-                Text(relodge == "peteDelay"
-                     ? "Pete's start delay, aimed at the next reading (≈298 s) — measured 1 in 4"
-                     : "Hold the app 35 s after link-up, then a plain connect — measured 33 in 33; 35 s of runtime per cycle")
-                    .font(.caption2).foregroundColor(.secondary)
 
                 Button("Reconnect sensor") {
                     SportLog.event("g7-ble", "*** USER RECONNECT *** dropping the G7 link and re-acquiring the same sensor")
