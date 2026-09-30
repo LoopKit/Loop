@@ -18,6 +18,15 @@ extension ExtensionDelegate {
     /// process was suspended under it): complete it and start a fresh hold.
     private static let bluetoothWakeStaleAfter: TimeInterval = 60
 
+    /// Tasks already completed this wake. WatchKit can hand the same task over again, and
+    /// completing one twice throws (crash 2026-09-29 22:21:48, mid certificate exchange).
+    private static var completedBluetoothTasks = Set<ObjectIdentifier>()
+
+    private func completeOnce(_ task: WKBluetoothAlertRefreshBackgroundTask) {
+        guard Self.completedBluetoothTasks.insert(ObjectIdentifier(task)).inserted else { return }
+        task.setTaskCompletedWithSnapshot(false)
+    }
+
     /// Called from `handle(_ backgroundTasks:)`, once per delivery.
     func podLoanNoteBackgroundTasks(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
         let bluetoothOnly = backgroundTasks.allSatisfy { $0 is WKBluetoothAlertRefreshBackgroundTask }
@@ -37,15 +46,19 @@ extension ExtensionDelegate {
     func holdBluetoothTask(_ task: WKBluetoothAlertRefreshBackgroundTask) {
         dispatchPrecondition(condition: .onQueue(.main))
         bluetoothDeliveriesThisWake += 1
+        if task === heldBluetoothTask {
+            return
+        }
         if let since = heldBluetoothTaskSince, heldBluetoothTask != nil {
             if Date().timeIntervalSince(since) < Self.bluetoothWakeStaleAfter {
-                task.setTaskCompletedWithSnapshot(false)   // same wake: coalesced
+                completeOnce(task)   // same wake: coalesced
                 return
             }
             completeHeldBluetoothTask("stale — a new wake arrived")
             bluetoothDeliveriesThisWake = 1
         }
         let delivered = Date()
+        Self.completedBluetoothTasks.removeAll()
         heldBluetoothTask = task
         heldBluetoothTaskSince = delivered
         SportLog.event("radio", "WOKEN BY BLUETOOTH — WKBluetoothAlertRefreshBackgroundTask; holding one task 25 s [bt-task]")
@@ -65,7 +78,7 @@ extension ExtensionDelegate {
         guard let task = heldBluetoothTask, let since = heldBluetoothTaskSince else { return }
         if let only = only, only !== task { return }
         SportLog.event("radio", String(format: "Bluetooth background task completed after %.1f s (%@) · %d deliveries coalesced this wake [bt-task]", Date().timeIntervalSince(since), why, bluetoothDeliveriesThisWake))
-        task.setTaskCompletedWithSnapshot(false)
+        completeOnce(task)
         heldBluetoothTask = nil
         heldBluetoothTaskSince = nil
         bluetoothDeliveriesThisWake = 0

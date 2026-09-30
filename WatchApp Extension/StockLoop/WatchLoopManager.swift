@@ -324,7 +324,7 @@ final class WatchLoopManager {
 
             guard wasEnabled, !enabled else { return }
             let recommendation = AutomaticDoseRecommendation(basalAdjustment: .cancel, direction: .decrease)
-            self.recommendedAutomaticDose = (recommendation: recommendation, date: self.now())
+            self.recommendedAutomaticDose = (recommendation: recommendation, enactTempBasal: true, date: self.now())
             if let error = self.enactRecommendedAutomaticDose() {
                 SportLog.event("loop", "OPEN: temp cancel FAILED — \(String(describing: error)); the pod keeps its current rate until the temp expires")
             } else {
@@ -534,13 +534,14 @@ final class WatchLoopManager {
     /// `sportModeStartGate` supplies the live arguments.
     static func startGateVerdict(sensorName: String?,
                                  sensorActivatedAt: Date?,
+                                 sensorReportedEnd: Date? = nil,
                                  lastDirectG7At: Date?,
                                  now: Date) -> StartGateVerdict {
         guard let name = sensorName else { return .noSensorEverEnrolled }
 
         // An identity past its life is not something to warn about: the stack discards it and
         // runs a fresh acquisition, so naming a dead sensor would give the user nothing to act on.
-        guard !persistedSensorIsPastLife(sensorActivatedAt, now: now) else { return .allowed }
+        guard !persistedSensorIsPastLife(sensorActivatedAt, reportedEnd: sensorReportedEnd, now: now) else { return .allowed }
         guard let lastDirect = lastDirectG7At else {
             return .waitingForFirstReading(sensorName: name)
         }
@@ -552,16 +553,29 @@ final class WatchLoopManager {
     func sportModeStartGate(now: Date = Date()) -> StartGateVerdict {
         Self.startGateVerdict(sensorName: g7Manager?.sensorName,
                               sensorActivatedAt: g7Manager?.sensorActivatedAt,
+                              sensorReportedEnd: Self.reportedEnd(of: g7Manager),
                               lastDirectG7At: lastGlucoseSourceStamps.direct,
                               now: now)
     }
 
-    /// A G7 session runs 10 days plus a 12-hour grace. Past that, a persisted identity is dead
-    /// and the escapes that depend on this may honour a cleared sensor. An unknown activation
-    /// date is NOT past its life — nil means unknown, and guessing would strand the sensor.
-    static func persistedSensorIsPastLife(_ activatedAt: Date?, now: Date = Date()) -> Bool {
+    /// The longest G7 session, 15 days plus the 12-hour grace: the bound when the sensor has not
+    /// reported its own session length.
+    static let longestSessionWithGrace: TimeInterval = .hours(15 * 24 + 12)
+
+    /// Past its end, a persisted identity is dead and the escapes that depend on this may honour a
+    /// cleared sensor. `reportedEnd` is the sensor's own end of session, when known. An unknown
+    /// activation date is NOT past its life — nil means unknown, and guessing would strand the sensor.
+    static func persistedSensorIsPastLife(_ activatedAt: Date?, reportedEnd: Date? = nil, now: Date = Date()) -> Bool {
         guard let activatedAt else { return false }
-        return now.timeIntervalSince(activatedAt) > .hours(10 * 24 + 12)
+        if let reportedEnd {
+            return now > reportedEnd
+        }
+        return now.timeIntervalSince(activatedAt) > longestSessionWithGrace
+    }
+
+    static func reportedEnd(of manager: G7CGMManager?) -> Date? {
+        guard let manager, manager.sensorSessionLengthIsKnown else { return nil }
+        return manager.sensorEndsAt
     }
 
     // MARK: - Glucose sources
@@ -667,7 +681,7 @@ final class WatchLoopManager {
 
     /// The pending command and WHEN it was decided. The date is not decoration — the enact path
     /// refuses a recommendation older than five minutes.
-    var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, date: Date)?
+    var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, enactTempBasal: Bool, date: Date)?
 
     /// The phone's prediction as of the grant, kept only so the log can compare the two devices
     /// over the one window where they ran on the same inputs. Nothing doses from it.

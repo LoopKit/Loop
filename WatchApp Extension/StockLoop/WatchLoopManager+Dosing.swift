@@ -350,17 +350,26 @@ extension WatchLoopManager {
 
         // Logged BEFORE the send, so a command that never comes back still leaves a record of
         // what was asked for.
-        let temp = recommendation.basalAdjustment
-        SportLog.event("dose", String(format: "enacting temp %.2f U/hr × %.0f min", temp.unitsPerHour, temp.duration / 60))
-        if let bolus = recommendation.bolusUnits, bolus > 0 {
-            SportLog.event("dose", String(format: "enacting bolus %.2f U", bolus))
+        let temp: TempBasalRecommendation? = recommendedDose.enactTempBasal ? recommendation.basalAdjustment : nil
+        if let temp {
+            SportLog.event("dose", String(format: "enacting temp %.2f U/hr × %.0f min", temp.unitsPerHour, temp.duration / 60))
+        }
+        let bolus: Double? = recommendation.bolusUnits.map { pumpManager.roundToSupportedBolusVolume(units: $0) }.flatMap { $0 > 0 ? $0 : nil }
+        if let bolus {
+            SportLog.event("dose", String(format: "enacting automatic bolus %.2f U", bolus))
         }
         do {
             try runBlocking {
-                try await self.doseEnactor.enact(decisionId: nil, bolus: recommendation.bolusUnits,
-                                                 tempBasal: recommendation.basalAdjustment, with: pumpManager)
+                try await self.doseEnactor.enact(decisionId: nil, bolus: bolus, tempBasal: temp, with: pumpManager)
             }
-            SportLog.event("dose", String(format: "temp %.2f U/hr ACCEPTED by pod", temp.unitsPerHour))
+            if let temp {
+                SportLog.event("dose", String(format: "temp %.2f U/hr ACCEPTED by pod", temp.unitsPerHour))
+            }
+            if let bolus {
+                SportLog.event("dose", String(format: "automatic bolus %.2f U ACCEPTED by pod", bolus))
+                let acceptedAt = now()
+                setManualBolusDelivering(units: bolus, from: acceptedAt, to: acceptedAt.addingTimeInterval(bolus / 1.5 * 60))
+            }
         } catch {
             SportLog.event("dose", "enact FAILED — \(String(describing: error))")
             enactError = .enactFailed(String(describing: error))

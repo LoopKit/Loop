@@ -150,6 +150,9 @@ struct LoanDebugView: View {
                     Text("Sensor code needed for \(needs) — enter it in Loop ▸ Dexcom G7 on the phone (shown in the Dexcom app).")
                         .font(.caption2).foregroundColor(.red)
                 }
+                if let searching = G7WatchDirectRead.searchingNote {
+                    Text(searching).font(.caption2).foregroundColor(.orange)
+                }
 
                 Picker("Re-lodge", selection: $relodge) {
                     Text("Pete's start delay").tag("peteDelay")

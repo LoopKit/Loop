@@ -443,7 +443,7 @@ final class GlanceViewModel: ObservableObject {
             // The note slot has one occupant. The controller's own note wins over the sensor-code
             // prompt: whatever just happened to a session matters more than a standing setup task.
             var idle = Self.idleState(context: ExtensionDelegate.sharedIfAvailable()?.loopManager.activeContext,
-                                      note: snap.lastIdleNote ?? G7WatchDirectRead.needsCodeNote)
+                                      note: snap.lastIdleNote ?? G7WatchDirectRead.needsCodeNote ?? G7WatchDirectRead.searchingNote)
 
             if let issued = snap.seizeOfferIssuedAt {
                 let f = DateComponentsFormatter()
@@ -484,6 +484,7 @@ final class GlanceViewModel: ObservableObject {
             var restIdle = Self.idleState(context: ExtensionDelegate.sharedIfAvailable()?.loopManager.activeContext,
                                           note: snap.lastIdleNote
                                             ?? G7WatchDirectRead.needsCodeNote
+                                            ?? G7WatchDirectRead.searchingNote
                                             ?? NSLocalizedString("Records from the last session are waiting for your iPhone. You can still start.",
                                                                  comment: "Glance note while resting on a parked drain"))
             if let issued = snap.seizeOfferIssuedAt {

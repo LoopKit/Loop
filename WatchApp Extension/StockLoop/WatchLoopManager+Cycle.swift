@@ -144,7 +144,9 @@ extension WatchLoopManager {
                 self.log.default("Loop ended (duration %.1fs)", self.now().timeIntervalSince(startDate))
                 let bg = self.glucoseStore.latestGlucose.map { String(format: "%.0f", $0.quantity.doubleValue(for: .milligramsPerDeciliter)) } ?? "—"
 
-                let rec = decided.map { String(format: "%.2f U/h", $0.basalAdjustment.unitsPerHour) } ?? "none"
+                let rec = decided.map { r in
+                    String(format: "%.2f U/h", r.basalAdjustment.unitsPerHour) + (r.bolusUnits.map { String(format: " + auto-bolus %.2f U", $0) } ?? "")
+                } ?? "none"
                 SportLog.event("loop", "cycle OK — BG \(bg), IOB \(self.activeInsulin.map { String(format: "%.2f", $0) } ?? "—"), temp \(rec)")
                 // Only on success, so `lastPredictionBreakdown` — and the debug screen that draws
                 // it — can be describing an older cycle while newer ones are failing. The verdict
@@ -356,13 +358,11 @@ extension WatchLoopManager {
         // quietly reinterpreted. Stock defaults to `.automaticBolus`; on the wrist every bolus is
         // human-confirmed, so a setting asking for automatic ones stops dosing instead of being
         // silently downgraded to something the user did not choose.
-        guard settings.automaticDosingStrategy == .tempBasalOnly else {
-            return .configurationError("automaticDosingStrategy: automaticBolus is not supported on the watch (temps only)")
-        }
+        let recommendationType: DoseRecommendationType = settings.automaticDosingStrategy == .automaticBolus ? .automaticBolus : .tempBasal
 
         let input: StoredDataAlgorithmInput
         do {
-            input = try runBlocking { try await self.fetchAlgorithmInput(at: startDate, recommendationType: .tempBasal) }
+            input = try runBlocking { try await self.fetchAlgorithmInput(at: startDate, recommendationType: recommendationType) }
         } catch let error as WatchLoopError {
             return error
         } catch {
@@ -415,15 +415,22 @@ extension WatchLoopManager {
             // instead of being satisfied by letting the pod's own schedule run.
             //
             // A nil result means no command is needed at all, and then none is sent.
-            guard let adjusted else {
+            let bolusUnits = automatic.bolusUnits.flatMap { $0 > 0 ? $0 : nil }
+            automatic.bolusUnits = bolusUnits
+
+            guard adjusted != nil || bolusUnits != nil else {
                 recommendedAutomaticDose = nil
                 SportLog.event("dosemath", String(format: "no command needed — pod already at %.2f U/hr", basal.unitsPerHour))
                 return nil
             }
-            automatic.basalAdjustment = adjusted
+            if let adjusted {
+                automatic.basalAdjustment = adjusted
+            }
 
-            recommendedAutomaticDose = (recommendation: automatic, date: startDate)
-            let derivation = algorithmSummary(input: input, output: output, enacting: adjusted)
+            recommendedAutomaticDose = (recommendation: automatic, enactTempBasal: adjusted != nil, date: startDate)
+            let derivation = algorithmSummary(input: input, output: output, enacting: adjusted ?? basal)
+                + (adjusted == nil ? " (temp unchanged)" : "")
+                + (bolusUnits.map { String(format: " + auto-bolus %.2f U", $0) } ?? "")
             SportLog.event("dosemath", derivation)
             return nil
         }

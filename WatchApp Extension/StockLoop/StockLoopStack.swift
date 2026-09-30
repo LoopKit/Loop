@@ -59,7 +59,7 @@ enum StockLoopStack {
         let cgmManager: G7CGMManager
         if let raw = UserDefaults.standard.dictionary(forKey: WatchLoopManager.cgmStateDefaultsKey),
            let restored = G7CGMManager(rawState: raw),
-           !WatchLoopManager.persistedSensorIsPastLife(restored.sensorActivatedAt) {
+           !WatchLoopManager.persistedSensorIsPastLife(restored.sensorActivatedAt, reportedEnd: WatchLoopManager.reportedEnd(of: restored)) {
             cgmManager = restored
             SportLog.event("cgm", "G7 state RESTORED — sensor \(restored.sensorName ?? "none"), activated \(restored.sensorActivatedAt.map { ISO8601DateFormatter().string(from: $0) } ?? "unknown")")
         } else {

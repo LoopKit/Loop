@@ -65,6 +65,33 @@ enum LoopStallWatchdog {
     }
 }
 
+/// Fires when the watch is still looking for a sensor it has never connected to and the app has
+/// been in the background for a while: discovery scans poorly with the app out of sight, and
+/// bringing it to the front is what gets the sensor found.
+enum SensorSearchAlert {
+    static let interval: TimeInterval = 10 * 60
+    private static let identifier = "g7.sensorSearch"
+
+    static func arm() {
+        let center = WristAlerts.scheduler
+        center.removePendingRequests(withIdentifiers: [identifier])
+        let content = UNMutableNotificationContent()
+        content.title = NSLocalizedString("Sensor Not Found", comment: "Watch sensor-search alert title")
+        content.body = NSLocalizedString("Loop on your watch is still looking for your sensor. Open Loop and keep it open until it connects.", comment: "Watch sensor-search alert body")
+        content.interruptionLevel = .timeSensitive
+        content.sound = .default
+        content.threadIdentifier = identifier
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
+        center.add(UNNotificationRequest(identifier: identifier, content: content, trigger: trigger))
+    }
+
+    static func disarm() {
+        let center = WristAlerts.scheduler
+        center.removePendingRequests(withIdentifiers: [identifier])
+        center.removeDeliveredRequests(withIdentifiers: [identifier])
+    }
+}
+
 /// Fires from outside the app when a hand-back never completes. The watch can be suspended
 /// through the whole wait, and a stuck hand-back leaves the pod on the wrist while the user
 /// believes Sport Mode has ended.
