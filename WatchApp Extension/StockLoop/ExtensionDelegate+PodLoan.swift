@@ -60,9 +60,9 @@ extension ExtensionDelegate {
     /// Called from `applicationDidFinishLaunching()`. With the flag off, nothing of Sport Mode starts.
     func podLoanDidFinishLaunching() {
         guard FeatureFlags.sportModeEnabled else { return }
-        NotificationCenter.default.addObserver(forName: G7CGMManager.watchStatusDidChange, object: nil, queue: .main) { note in
+        NotificationCenter.default.addObserver(forName: G7CGMManager.statusDidChange, object: nil, queue: .main) { note in
             guard let manager = note.object as? G7CGMManager else { return }
-            if !manager.watchIsSearching {
+            if !manager.isSearchingForSensor {
                 SensorSearchAlert.disarm()
             } else if WKApplication.shared().applicationState != .active {
                 SensorSearchAlert.arm()
@@ -105,7 +105,7 @@ extension ExtensionDelegate {
         // Lifecycle breadcrumb.
         SportLog.event("lifecycle", "willResignActive [lifecycle-crumb]")
         NotificationCenter.default.post(name: Self.willResignActiveNotification, object: self)
-        if (stockLoopSession?.stack.loopManager.cgmManager as? G7CGMManager)?.watchIsSearching == true {
+        if (stockLoopSession?.stack.loopManager.cgmManager as? G7CGMManager)?.isSearchingForSensor == true {
             SensorSearchAlert.arm()
         }
     }

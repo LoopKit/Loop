@@ -69,18 +69,21 @@ final class G7WatchAcquisitionTests: XCTestCase {
                        "a late connect failure counts from now: hold the full clearance")
     }
 
-    // MARK: refusals — back off, stop after two
+    // MARK: refusals — wait, then ask again
 
-    func testASynchronousRefusalBacksOffAndTwoStandDown() {
-        let first = G7WatchAcquisition.onConnectFailure(refusals: 0, sinceLodge: 0.4)
-        XCTAssertEqual(first.0, .backOff(G7WatchAcquisition.refusalBackoffSeconds)); XCTAssertEqual(first.refusals, 1)
-        let second = G7WatchAcquisition.onConnectFailure(refusals: 1, sinceLodge: 0.3)
-        XCTAssertEqual(second.0, .standDown); XCTAssertEqual(second.refusals, 2)
+    func testASynchronousRefusalWaitsBeforeAskingAgain() {
+        XCTAssertEqual(G7WatchAcquisition.onConnectFailure(sinceLodge: 0.4), .backOff(G7WatchAcquisition.refusalBackoffSeconds))
+        XCTAssertEqual(G7WatchAcquisition.onConnectFailure(sinceLodge: 0.3), .backOff(30), "every time: no stand-down")
     }
 
-    func testALateFailureRelodgesThroughTheArmAndClearsTheCount() {
-        let r = G7WatchAcquisition.onConnectFailure(refusals: 1, sinceLodge: 120)
-        XCTAssertEqual(r.0, .relodge); XCTAssertEqual(r.refusals, 0)
+    func testALateFailureRelodgesThroughTheArm() {
+        XCTAssertEqual(G7WatchAcquisition.onConnectFailure(sinceLodge: 120), .relodge)
+    }
+
+    // MARK: the arm is chosen by platform
+
+    func testTheWatchBluetoothManagerHasTheAcquisitionArm() {
+        XCTAssertNotNil(TestBluetoothManager().acquisitionArm)
     }
 
     // MARK: the 3-miss test

@@ -347,7 +347,7 @@ final class GlanceViewModel: ObservableObject {
         defer { armFreshnessBoundaryRepaint() }
 
         let cgm = session.stack.loopManager.cgmManager as? G7CGMManager
-        let sensorNote = G7WatchDirectRead.needsCodeNote(for: cgm?.watchNeedsCodeFor) ?? G7WatchDirectRead.searchingNote(cgm?.watchIsSearching ?? false)
+        let sensorNote = G7WatchDirectRead.needsCodeNote(for: cgm?.needsCodeForSensor) ?? G7WatchDirectRead.searchingNote(cgm?.isSearchingForSensor ?? false)
 
         switch snap.phase {
         case .idle:

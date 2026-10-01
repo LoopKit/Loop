@@ -14,13 +14,12 @@ import HealthKit
 import LoopKit
 import G7SensorKit
 
-/// The CGM's view of its sensor, taken whole at tick time.
+/// The CGM's view of its sensor, taken whole at tick time from what the manager publishes.
 struct CGMHealth {
     let sensorName: String?
     let lastReadingAge: TimeInterval?
 
     let bgLine: String
-    let linkState: String
     let lifecycle: String
     let expiresIn: String
     let needsCodeFor: String?
@@ -28,8 +27,8 @@ struct CGMHealth {
 
     init(_ manager: G7CGMManager) {
         sensorName = manager.sensorName
-        needsCodeFor = manager.watchNeedsCodeFor
-        isSearching = manager.watchIsSearching
+        needsCodeFor = manager.needsCodeForSensor
+        isSearching = manager.isSearchingForSensor
         lastReadingAge = manager.latestReadingTimestamp.map { Date().timeIntervalSince($0) }
         if let g = manager.latestReading?.glucose, let t = manager.latestReadingTimestamp {
             let f = DateFormatter(); f.dateFormat = "HH:mm:ss"
@@ -37,8 +36,6 @@ struct CGMHealth {
         } else {
             bgLine = "—"
         }
-
-        linkState = manager.isConnected ? "connected" : (manager.isScanning ? "scanning" : "idle")
         lifecycle = String(describing: manager.lifecycleState)
         if let expiry = manager.sensorExpiresAt {
             let hours = expiry.timeIntervalSinceNow / 3600
@@ -122,23 +119,14 @@ struct LoanDebugView: View {
                 row("sensor", cgm?.sensorName ?? "none")
                 row("last reading", cgm?.lastReadingAge.map { String(format: "%.0fs ago", $0) } ?? "never")
                 row("bg", cgm?.bgLine ?? "—")
-                row("link", cgm?.linkState ?? "—")
                 row("state", cgm?.lifecycle ?? "—")
                 row("expires", cgm?.expiresIn ?? "—")
-
-                Text("SENSOR").font(.footnote).foregroundColor(.secondary)
 
                 if let needs = G7WatchDirectRead.needsCodeNote(for: cgm?.needsCodeFor) {
                     Text(needs).font(.caption2).foregroundColor(.red)
                 }
                 if let searching = G7WatchDirectRead.searchingNote(cgm?.isSearching ?? false) {
                     Text(searching).font(.caption2).foregroundColor(.orange)
-                }
-
-                Button("Reconnect sensor") {
-                    SportLog.event("g7-ble", "*** USER RECONNECT *** dropping the G7 link and re-acquiring the same sensor")
-                    (ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager.cgmManager as? G7CGMManager)?.reconnectG7()
-                    lastAction = "sensor reconnect started"
                 }
 
                 Divider().padding(.vertical, 2)
