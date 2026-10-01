@@ -2,10 +2,7 @@
 //  SettingsProvider.swift
 //  Loop
 //
-//  Extracted from SettingsManager so that platforms other than the phone can serve therapy
-//  settings without pulling in the phone's settings store. The phone answers this from Core
-//  Data (settings change over time, so the history queries are real queries); a watch running
-//  a loan answers the same protocol from the single settings snapshot it was granted.
+//  Extracted from SettingsManager so a watch can serve therapy settings from its grant snapshot.
 //
 
 import Foundation

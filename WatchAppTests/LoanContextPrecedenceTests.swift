@@ -2,19 +2,8 @@
 //  LoanContextPrecedenceTests.swift
 //  WatchAppTests
 //
-//  During a loan the WATCH is the dosing controller, so the context it authors must outrank the
-//  phone's relay of the same reading. `WatchContext.shouldReplace` compares only `glucoseDate`,
-//  with `>=`, so a phone context carrying an EQUAL timestamp — which is the normal case, since it
-//  is relaying the same physical reading — replaces the watch's and takes its prediction, IOB,
-//  COB, temp and loop mode with it.
-//
-//  This is the intermittent-symptom bug: whether it bites depends on whether a phone context
-//  happens to arrive after the watch's, so the prediction goes blank in some cycles and not
-//  others. Field 2026-08-16: "it's not always the case the prediction is missing, just certain
-//  corner cases."
-//
-//  These tests pin the PRECEDENCE RULE itself rather than the plumbing around it — that rule is
-//  the thing that was wrong, and it is a pure predicate over two contexts.
+//  During a loan the watch's context outranks the phone's relay of the same reading
+//  (`shouldReplace` compares only `glucoseDate` with `>=`).
 //
 
 import XCTest
@@ -42,9 +31,7 @@ final class LoanContextPrecedenceTests: XCTestCase {
         return ctx
     }
 
-    /// THE EXACT FIELD CASE: same reading, same timestamp, relayed by the phone a moment after the
-    /// watch authored its own. `shouldReplace` says yes — which is why the loan-time refusal in
-    /// `updateContext` cannot be expressed as a timestamp comparison.
+    /// Equal timestamps: `shouldReplace` says yes, so the loan-time refusal cannot be a timestamp test.
     func testPhoneContextWithAnEqualTimestampClaimsItShouldReplaceTheWatchs() {
         let t = Date()
         let watch = context(glucose: 143, at: t, watchAuthored: true, eventual: 422)

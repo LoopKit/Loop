@@ -4,13 +4,7 @@
 //
 //  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
-//  The seam every pre-scheduled wrist alarm is armed and disarmed through.
-//
-//  Delivery itself can never be asserted: `UNUserNotificationCenter.add` is silently dropped when
-//  the process is not authorized, and a test host cannot obtain authorization. What routing
-//  through this protocol does keep testable is identifier discipline — re-arming an identifier
-//  defers that alarm rather than stacking a second one, and every alarm owns a distinct
-//  identifier so disarming one cannot cancel another.
+//  The seam wrist alarms are armed through; tests check identifier discipline, not delivery.
 //
 
 import Foundation

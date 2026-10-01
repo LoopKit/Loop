@@ -4,19 +4,12 @@
 //
 //  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
-//  Collapses a repeating device-log line instead of writing it.
-//
-//  A retrying radio can emit thousands of identical lines per second, and each one costs a
-//  synchronous NSLog plus a file append: main starves, and every piece of real evidence rotates
-//  out of the size-capped log inside a second. Repeats are counted rather than written, and the
-//  count is stated on the next line that differs — a suppressed line is never lost silently.
+//  Counts repeated device-log lines instead of writing them; the count rides the next distinct line.
 //
 
 import Foundation
 
-/// Shared by the CGM manager and the pump manager through one device-log delegate, which is
-/// called from several queues at once during exactly the storms this exists for — so all of the
-/// state is behind the lock.
+/// Called from several queues at once, so all state is behind the lock.
 final class DeviceLogThrottle {
     static let window: TimeInterval = 2.0
 

@@ -4,10 +4,7 @@
 //
 //  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
-//  While the watch holds the pod it is the only device that can hear the pump, so a pod fault or
-//  an occlusion has nowhere to go but the wrist. These tests pin that the alert reaches the
-//  notification centre at all — for months it reached only the system log — and that the pieces a
-//  user depends on survive the trip: the words, the urgency, and the ability to take it away again.
+//  Pump alerts reach the wrist's notification centre with their words, urgency and retraction.
 //
 
 import XCTest
@@ -55,10 +52,11 @@ final class WatchAlertPresenterTests: XCTestCase {
         XCTAssertNil(request?.trigger, "an immediate alert fires now, not on a timer")
     }
 
-    /// A pod fault is not something to sleep through.
+    /// A pod fault is not something to sleep through: the highest level the watch is entitled to.
     func testUrgencySurvivesTheTrip() {
         WatchAlertPresenter.present(alert(level: .critical))
-        XCTAssertEqual(scheduler.pending.first?.content.interruptionLevel, .critical)
+        XCTAssertEqual(scheduler.pending.first?.content.interruptionLevel, .timeSensitive,
+                       "no Critical Alerts entitlement on the watch; time-sensitive breaks through a Focus")
         XCTAssertNotNil(scheduler.pending.first?.content.sound, "a critical alert makes a noise")
 
         scheduler = RecordingWristAlertScheduler(); WristAlerts.scheduler = scheduler
@@ -106,6 +104,13 @@ final class WatchAlertPresenterTests: XCTestCase {
 
         XCTAssertTrue(ladder.isSubset(of: scheduler.identifiers),
                       "every dead-man rung survives a pod alert being taken back")
+    }
+
+    /// Every Loop-Failure rung breaks through a Focus, the stock critical ones included.
+    func testTheDeadManLadderIsTimeSensitive() {
+        LoopStallWatchdog.refresh()
+        XCTAssertEqual(scheduler.pending.count, LoopStallWatchdog.rungs.count)
+        XCTAssertTrue(scheduler.pending.allSatisfy { $0.content.interruptionLevel == .timeSensitive })
     }
 
     /// The notification centre silently drops a repeating trigger under a minute, so a driver

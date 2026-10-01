@@ -2,11 +2,8 @@
 //  PodLoanWatchController+Delegates.swift
 //  WatchApp Extension
 //
-//  Part of PodLoanWatchController (see PodLoanWatchController.swift). The pump-host duties: PumpManagerDelegate, PumpManagerStatusObserver, DeviceManagerDelegate.
-//
-//  For the length of a loan this controller is the pod's host: everything the phone's app would
-//  do for the pump manager, it does. The one duty with teeth is the pump-event report, which
-//  writes the insulin book AND mints the journal events, in that order.
+//  The controller as the pod's host during a loan: PumpManagerDelegate, status observer and
+//  DeviceManagerDelegate. The pump-event report writes the book, then the journal.
 //
 
 import Foundation
@@ -14,27 +11,25 @@ import HealthKit
 import LoopKit
 import LoopAlgorithm
 import LoopCore
-import OmnipodKit
 import WatchKit
 import os.log
 
 extension PodLoanWatchController: PumpManagerDelegate {
-    /// The pod's raw state is written to defaults on EVERY update. Its presence under
-    /// `Keys.pumpState` is what tells the next launch the loan was live, which is why clearing it
-    /// is part of `teardownPump` rather than an afterthought.
+    /// Saved on every update; its presence tells the next launch the loan was live.
     func pumpManagerDidUpdateState(_ pumpManager: PumpManager) {
-        defaults.set(pumpManager.rawState, forKey: Keys.pumpState)
+        pumpStateStore.wrappedValue = pumpManager.watchRawValue
+        reportPumpFaultOnce()
     }
 
-    /// Book first, complete, then journal.
-    ///
-    /// The completion must be called promptly: the stock storage path blocks its session queue on
-    /// it. On a failed write nothing is acked and nothing is journalled — the pod keeps the doses
-    /// and re-reports them on its next session, so refusing loses nothing, while journalling an
-    /// event whose dose is not in the book would put the wire ahead of the truth.
-    ///
-    /// An EMPTY report still goes through. It carries `lastReconciliation`, and a status read that
-    /// found nothing new is exactly what advances the recency gate dosing is allowed under.
+    /// The phone hears of a fault once per loan, without waiting to be asked.
+    func reportPumpFaultOnce() {
+        guard pumpFaultDescription != nil, phase == .active, let current = epoch, faultReportedEpoch != current else { return }
+        faultReportedEpoch = current
+        sendHoldsPodStatusReport(reason: "pump fault")
+    }
+
+    /// Book, complete, then journal. On a failed write nothing is acked or journaled; the pod
+    /// re-reports. An empty report still advances the recency gate.
     func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, replacePendingEvents: Bool, completion: @escaping (Error?) -> Void) {
         let loopManager = self.loopManager
         Task {
@@ -49,8 +44,7 @@ extension PodLoanWatchController: PumpManagerDelegate {
         }
     }
 
-    /// The wrist keeps no reservoir history, so the reading is handed straight back and declared
-    /// NOT continuous — nothing downstream may treat it as a series it can interpolate across.
+    /// No reservoir history on the wrist; declared not continuous.
     func pumpManager(_ pumpManager: PumpManager, didReadReservoirValue units: Double, at date: Date, completion: @escaping (Swift.Result<(newValue: ReservoirValue, lastValue: ReservoirValue?, areStoredValuesContinuous: Bool), Error>) -> Void) {
         struct SimpleReservoirValue: ReservoirValue {
             let startDate: Date
@@ -60,19 +54,16 @@ extension PodLoanWatchController: PumpManagerDelegate {
                              lastValue: nil, areStoredValuesContinuous: false)))
     }
 
-    /// The watch's own dose store decides how far back the pod should re-report from, exactly as
-    /// the phone's does — the loan seeds that store, so the boundary is already in the right place.
+    /// The loan-seeded dose store sets the boundary, as on the phone.
     func startDateToFilterNewPumpEvents(for manager: PumpManager) -> Date {
         return loopManager.doseStore.pumpEventQueryAfterDate
     }
 
-    /// Nothing to do: the wrist's cycle is driven by CGM readings and its own timers, not by the
-    /// pod's heartbeat.
+    /// Cycles run on CGM readings, not the pod's heartbeat.
     func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {
     }
 
-    /// No. Background runtime on the watch comes from the workout keepalive, not from pod BLE
-    /// wakes, so the pump is never asked to carry one.
+    /// Runtime comes from the workout keepalive.
     func pumpManagerMustProvideBLEHeartbeat(_ pumpManager: PumpManager) -> Bool {
         return false
     }
@@ -89,9 +80,7 @@ extension PodLoanWatchController: PumpManagerDelegate {
         os_log("Pump clock adjusted by %f", log: log, type: .default, adjustment)
     }
 
-    /// Refused. The basal schedule is frozen to the grant's snapshot for the whole loan, and the
-    /// phone's reconciliation of this loan computes expected insulin against that same frozen
-    /// schedule — a mid-loan change would make its arithmetic wrong with nothing to notice it.
+    /// Refused: the schedule is frozen to the grant, and the phone's audit uses the same one.
     func pumpManager(_ pumpManager: PumpManager, didRequestBasalRateScheduleChange basalRateSchedule: BasalRateSchedule, completion: @escaping (Error?) -> Void) {
         completion(WatchLoopError.configurationError("basal schedule changes are phone-only"))
     }
@@ -104,8 +93,7 @@ extension PodLoanWatchController: PumpManagerDelegate {
         os_log("Pump was replaced", log: log, type: .default)
     }
 
-    /// The wrist has no trusted second clock to compare against, so it never asserts an offset;
-    /// a pod clock adjustment is logged above rather than corrected here.
+    /// No trusted second clock on the wrist.
     var detectedSystemTimeOffset: TimeInterval {
         return 0
     }
@@ -115,9 +103,7 @@ extension PodLoanWatchController: PumpManagerDelegate {
         return phase == .active
     }
 
-    /// What the pod should say about the running program, judged against the OVERRIDE-APPLIED
-    /// basal schedule. Netting against the raw schedule while an override is up reports "neutral"
-    /// with the pod running well above the intended basal.
+    /// Judged against the override-applied schedule.
     var automatedTreatmentState: AutomatedTreatmentState? {
         guard phase == .active else { return nil }
         guard let dose = loopManager.runningTempBasal() else { return .neutralNoOverride }
@@ -129,16 +115,27 @@ extension PodLoanWatchController: PumpManagerDelegate {
     }
 }
 
+extension PodLoanWatchController {
+    /// The loaned pump, for an alert it raised, while the loan is live.
+    func pumpAlertResponder(for managerIdentifier: String) async -> AlertResponder? {
+        await withCheckedContinuation { continuation in
+            queue.async {
+                let pump = self.phase == .active ? self.pumpManager : nil
+                continuation.resume(returning: pump?.pluginIdentifier == managerIdentifier ? pump : nil)
+            }
+        }
+    }
+}
+
 extension PodLoanWatchController: PumpManagerStatusObserver {
     func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus, oldStatus: PumpManagerStatus) {
         os_log("Pump status: %{public}@", log: log, type: .default, String(describing: status.basalDeliveryState))
+        loopManager.bolusStateDidChange(to: status.bolusState, from: oldStatus.bolusState, pumpManager: pumpManager)
     }
 }
 
 extension PodLoanWatchController: DeviceManagerDelegate {
-    /// Forwards the `manager` itself, not just the device identifier: this delegate is shared by
-    /// the CGM and the pump, and attributing by device name alone files pod errors under a CGM
-    /// heading.
+    /// Forwards the manager: this delegate serves both the CGM and the pump.
     func deviceManager(_ manager: DeviceManager, logEventForDeviceIdentifier deviceIdentifier: String?, type: DeviceLogEntryType, message: String, completion: ((Error?) -> Void)?) {
         loopManager.deviceManager(manager, logEventForDeviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
     }
@@ -166,16 +163,18 @@ extension PodLoanWatchController: DeviceManagerDelegate {
     func recordRetractedAlert(_ alert: LoopKit.Alert, at date: Date) {
         loopManager.recordRetractedAlert(alert, at: date)
     }
+
+    /// The pump's link is up and it has answered; arrives on the controller's queue.
+    func deviceManagerControlDidBecomeReady(_ manager: DeviceManager) {
+        guard (manager as AnyObject) === (pumpManager as AnyObject?) else { return }
+        pumpControlDidBecomeReady()
+    }
 }
 
 extension LoanGrant {
-    /// Re-stamp a stored credential with a new epoch and a fresh lease, for a seize.
-    ///
-    /// A dormant grant is issued already expired — the phone sets its `expiresAt` to its issue
-    /// time by contract — so it can never be activated verbatim: its lease would be long gone by
-    /// the first ladder read. The lease bounds the HANDSHAKE, not the credential.
+    /// A dormant grant is issued expired; a seize re-stamps the epoch and lease.
     func withEpoch(_ newEpoch: Int, leaseUntil: Date) -> LoanGrant {
-        LoanGrant(epoch: newEpoch, expiresAt: leaseUntil, pumpManagerRawState: pumpManagerRawState,
+        LoanGrant(epoch: newEpoch, expiresAt: leaseUntil, pumpConfiguration: pumpConfiguration,
                   podAddress: podAddress, therapySettingsRaw: therapySettingsRaw,
                   settingsTimeZoneID: settingsTimeZoneID, doseHistory: doseHistory,
                   supportsInterimHandback: supportsInterimHandback,
@@ -185,6 +184,7 @@ extension LoanGrant {
                   glucoseHistory: glucoseHistory, predictionSnapshot: predictionSnapshot,
                   activeOverrideRaw: activeOverrideRaw,
                   therapySettingsSupplementRaw: therapySettingsSupplementRaw,
-                  lastLoopCompleted: lastLoopCompleted)
+                  lastLoopCompleted: lastLoopCompleted,
+                  glucoseAlertSettings: glucoseAlertSettings)
     }
 }

@@ -2,20 +2,8 @@
 //  AlertManager+PodLoan.swift
 //  Loop
 //
-//  The Loop-Failure ladder during a pod loan: clearing it when the watch takes the pod, and
-//  sweeping up the rungs that escape the clear.
-//
-//  The gate itself — `loopNotRunningSuppressionGate` — is a stored property and so stays on
-//  AlertManager. Its rationale, verbatim from where it was written:
-//
-//  True while a pod loan is active. Set by WatchDataManager at wiring time. The
-//  grant-time clear (clearLoopNotRunningNotificationsForLoanGrant) removes the QUEUED
-//  rungs, but .LoopCycleCompleted kept firing — the phone completes open-loop cycles all
-//  through a loan — and each completion re-armed the whole ladder ungated, so a
-//  "Loop Failure" about the phone's deliberately-idle loop fired mid-loan (field
-//  2026-08-24: 20-minute rung on the wrist while the WATCH held the pod; also the earlier
-//  sightings the grant-time clear was believed to have fixed). The clear handles the past;
-//  this gate handles the future; the reclaim-instant re-arm restores coverage at loan end.
+//  The Loop-Failure ladder during a loan: cleared at the grant, gated while the phone's loop
+//  is idle (`loopNotRunningSuppressionGate`), swept each minute, re-armed at the reclaim.
 //
 
 import Foundation
@@ -24,12 +12,7 @@ import UserNotifications
 
 extension AlertManager {
 
-    /// Belt-and-braces for the ladder's escape artists. A 1-hour rung fired mid-loan on
-    /// 2026-08-25 having survived BOTH the grant-time clear and the completion gate — anchored
-    /// pre-loan, mechanism unidentified. Rather than guess the escape path, sweep: once a
-    /// minute during a loan (riding the link census tick) any pending Loop-Failure rung is
-    /// removed and LOGGED with its count, so whatever queued it dies within a minute and the
-    /// log line convicts the original path.
+    /// Removes and logs any Loop-Failure rung found pending during a loan, once a minute.
     func sweepLoopNotRunningNotificationsDuringLoan() {
         guard loopNotRunningSuppressionGate?() == true else { return }
         Task {
@@ -44,11 +27,7 @@ extension AlertManager {
         }
     }
 
-    /// Clear the Loop Failure ladder because the WATCH has taken the pod.
-    ///
-    /// Phone-side silence is the normal state during a loan — leaving the phone behind is the
-    /// point of the feature — so the pre-scheduled ladder would fire on a healthy session.
-    /// Clears the persisted list too, so a relaunch mid-loan does not re-arm what was cleared.
+    /// The watch has the pod, so the phone's silence is expected; clears the persisted list too.
     func clearLoopNotRunningNotificationsForLoanGrant() {
         UserDefaults.appGroup?.loopNotRunningNotifications = []
         Task { await clearLoopNotRunningNotifications() }

@@ -43,7 +43,7 @@ protocol UploadEventListener {
 @MainActor
 final class DeviceDataManager {
 
-    /// PODLOAN: set by LoopAppManager, weak because the app manager owns it — read by `DeviceDataManager+PodLoan.swift`.
+    /// Pod loan: set by LoopAppManager, weak because the app manager owns it — read by `DeviceDataManager+PodLoan.swift`.
     weak var watchManager: WatchDataManager?
 
     private let log = DiagnosticLog(category: "DeviceDataManager")

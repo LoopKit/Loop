@@ -2,14 +2,8 @@
 //  PodLoanPhoneController+Hold.swift
 //  Loop
 //
-//  Noticing that the watch has gone quiet, and saying so.
-//
-//  Every cycle it completes, the watch sends a record batch — empty or not — stamped with the
-//  time it was sent. When those stop, nobody may be adjusting insulin, so the phone warns.
-//
-//  It never takes the pod back on a timer. A watch that is alive but unheard is still dosing,
-//  and a phone that reclaimed behind its back would dose beside a watch that knows nothing of
-//  the phone's insulin. Taking the pod back stays the user's act, through the pod tile.
+//  Noticing a silent watch and warning. The phone never takes the pod back on a timer: a
+//  live but unheard watch is still dosing, so taking it back stays the user's act.
 //
 
 import Foundation
@@ -19,61 +13,44 @@ extension PodLoanPhoneController {
     /// Three missed cycles. Shorter than this and an ordinary late report reads as silence.
     static let watchSilenceThreshold: TimeInterval = .minutes(15)
 
-    /// Between noticing the silence and the first warning: one more chance to report, which is
-    /// what a watch does within a cycle of coming back into range.
+    /// Grace before the first warning: one more cycle for a watch coming back into range.
     static let watchSilenceGrace: TimeInterval = .minutes(5)
 
     /// Warnings after the grace, then nothing. Repeating forever trains the user to ignore it.
     static let watchSilenceWarningOffsets: [TimeInterval] = [0, .minutes(20), .minutes(40)]
 
-    /// How fresh this phone's own sensor reading must be for it to count as near the user.
-    /// A phone left at home hears nothing from the watch AND nothing from the sensor, and must
-    /// not mistake its own absence for the watch's failure.
+    /// The phone warns only if its own sensor reading is this fresh, i.e. it is near the user.
     static let nearTheBodyWindow: TimeInterval = .minutes(11)
 
-    private enum HoldKeys {
-        static let renewedAt = "PodLoanPhoneController.holdRenewedAt"
-        static let noticedAt = "PodLoanPhoneController.holdLapseNoticedAt"
-        static let warningsIssued = "PodLoanPhoneController.watchSilenceWarningsIssued"
-    }
-
-    /// When the watch last told us it completed a cycle. Persisted: a phone relaunch mid-session
-    /// must not read as a fresh, silent watch.
+    /// When the watch last reported a cycle. Persisted, so a relaunch is not read as silence.
     var holdRenewedAt: Date? {
-        get { UserDefaults.standard.object(forKey: HoldKeys.renewedAt) as? Date }
-        set { UserDefaults.standard.set(newValue, forKey: HoldKeys.renewedAt) }
+        get { persisted.holdRenewedAt }
+        set { updateState { $0.holdRenewedAt = newValue } }
     }
 
-    /// When the silence was first noticed, which is what the warning offsets count from.
-    /// Clearing it also clears the warning count, so a watch that returns starts clean.
+    /// When the silence was noticed; clearing it also resets the warning count.
     var holdLapseNoticedAt: Date? {
-        get { UserDefaults.standard.object(forKey: HoldKeys.noticedAt) as? Date }
+        get { persisted.holdLapseNoticedAt }
         set {
-            UserDefaults.standard.set(newValue, forKey: HoldKeys.noticedAt)
-            if newValue == nil { UserDefaults.standard.removeObject(forKey: HoldKeys.warningsIssued) }
+            updateState {
+                $0.holdLapseNoticedAt = newValue
+                if newValue == nil { $0.watchSilenceWarningsIssued = 0 }
+            }
         }
     }
 
     /// How many of the warnings have gone out for this stretch of silence.
     private var watchSilenceWarningsIssued: Int {
-        get { UserDefaults.standard.integer(forKey: HoldKeys.warningsIssued) }
-        set { UserDefaults.standard.set(newValue, forKey: HoldKeys.warningsIssued) }
+        get { persisted.watchSilenceWarningsIssued }
+        set { updateState { $0.watchSilenceWarningsIssued = newValue } }
     }
 
-    /// Forget where this loan started. An audit describes ONE loan, so every path that ends a
-    /// loan calls this: anchors left behind make the next reclaim audit a session that already
-    /// closed, and report its insulin as unexplained.
+    /// An audit describes one loan, so every path that ends a loan clears its anchors.
     func clearAuditAnchors() {
-        checkpointsThisLoan = 0
-        auditBase = nil
-        loanStartedAt = nil
-        UserDefaults.standard.removeObject(forKey: Keys.loanStartedAt)
-        UserDefaults.standard.removeObject(forKey: Keys.deliveredAtTakeover)
-        UserDefaults.standard.removeObject(forKey: Keys.deliveredAtGrant)
+        updateState { $0.audit = .init() }
     }
 
-    /// Record that the watch reported, judged by the time the message was SENT rather than when
-    /// it arrived — a batch that sat in a queue for an hour renews nothing.
+    /// Judged by send time: a batch that sat in a queue renews nothing.
     func noteHoldRenewal(sentAt: Date?) {
         let now = deps.now()
         let stamp = min(sentAt ?? now, now)
@@ -86,15 +63,13 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// Called on every phone loop cycle. All the judgement lives below, so this is almost always
-    /// one enqueued no-op.
+    /// Called every phone cycle; almost always a no-op.
     func considerHoldLapse() {
         queue.async { self.queue_considerHoldLapse() }
     }
 
     func queue_considerHoldLapse() {
-        // A loan the watch announced (a phoneless start) counts too: this phone is standing
-        // aside for it, so its silence matters exactly as much as a loan we granted.
+        // A loan the watch announced (phoneless start) counts too.
         let told = state == .owner && yieldingToInferredLoan
         let renewedAt = told ? [holdRenewedAt, newestForeignLoanEvidence?.at].compactMap { $0 }.max() : holdRenewedAt
         guard state == .loaned || state == .grantOffered || told, let renewed = renewedAt else {
@@ -103,8 +78,7 @@ extension PodLoanPhoneController {
         }
         let now = deps.now()
         let silence = now.timeIntervalSince(renewed)
-        // Silent AND near the body. Away from the user the phone cannot tell a dead watch from
-        // a distant one, so it says nothing rather than warning about a session that is fine.
+        // Only near the body: away from the user a dead watch and a distant one look the same.
         guard silence > Self.watchSilenceThreshold,
               let reading = deps.latestGlucoseDate(), now.timeIntervalSince(reading) <= Self.nearTheBodyWindow else {
             if holdLapseNoticedAt != nil { holdLapseNoticedAt = nil }

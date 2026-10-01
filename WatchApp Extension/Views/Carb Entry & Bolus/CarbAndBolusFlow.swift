@@ -228,10 +228,7 @@ extension CarbAndBolusFlow {
             title: saveButtonText,
             color: bolusAmount > 0 || configuration == .manualBolus ? .insulin : .blue
         ) {
-            // Under a LOAN carbs get the bolus ceremony too: the wrist doses against COB, so a
-            // mistaken or doubled entry becomes insulin a few minutes later with nobody in the
-            // loop (deliberate, 2026-08-18). Off-loan this is stock: a carbs-only entry commits
-            // on a single tap and goes to the phone.
+            // During a loan carbs also need confirmation: the wrist doses against COB.
             if self.bolusAmount > 0 || loanIsActive {
                 withAnimation {
                     self.flowState = .bolusConfirmation

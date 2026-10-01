@@ -45,32 +45,13 @@ extension DeviceDataManager {
         } else if pumpManager == nil {
             return DeviceDataManager.addPumpStatusHighlight
         } else if isPodLoanReclaiming {
-            // Hand-back in flight — records draining and the radio re-arming take a few seconds;
-            // show movement, not a frozen "on watch", which reads as ownership ambiguity.
-            //
-            // The label follows the reclaim's phase, because "Reclaiming…" over a watch that is
-            // not answering implies progress that is not happening. The dead branch says the
-            // watch is silent from the first second, which is the whole point of deciding the
-            // branch before the wait starts rather than after it.
-            //
+            // Hand-back in flight; the label follows the reclaim's phase.
             return DeviceDataManager.podReclaimingStatusHighlight(phase: podReclaimProgress?.phase)
         } else if isPodTakeoverInProgress {
-            // The grant is out but the watch has NOT confirmed it has the pod. This branch MUST
-            // precede the one below: the grant releases the pod's BLE immediately, so
-            // `isConnectionReleased` is already true here and would otherwise claim "Pod on
-            // Watch" for a handover still in flight.
-            //
-            // ONE label for the whole window, by ruling (2026-08-23). A two-stage pill
-            // ("Handing over…" -> "Released — waiting for Watch…") shipped in 1087 and was
-            // reverted the same day: the stall it addressed was the OLD 5-6 s frozen window,
-            // and once takeovers dropped to ~5 s the stage-two label was clutter narrating a
-            // wait too short to read. If the window ever grows long again, fix the speed, not
-            // the copy.
+            // Grant out, not yet confirmed. Must precede the next branch: the link is already released.
             return DeviceDataManager.podHandingOverStatusHighlight
-        } else if (pumpManager as? PumpConnectionLendable)?.isConnectionReleased == true || isPodLoanedToWatch {
-            // While the pod is loaned to the watch, keying on the persisted release flag flips
-            // this tile the MOMENT of release/reclaim — instead of the stock signal-loss
-            // presentation aging in ~8 min later, which reads as a fault.
+        } else if (pumpManager as? ExclusiveDeviceControl)?.isControlReleased == true || isPodLoanedToWatch {
+            // On the watch: switch the tile at release rather than waiting for signal loss.
             return DeviceDataManager.podOnWatchStatusHighlight
         } else {
             return (pumpManager as? PumpManagerUI)?.pumpStatusHighlight

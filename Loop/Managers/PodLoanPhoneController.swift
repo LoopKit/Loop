@@ -2,18 +2,9 @@
 //  PodLoanPhoneController.swift
 //  Loop
 //
-//  The phone half of lending the pod to the watch: the state machine, the epoch that names a
-//  loan, and the shared stored properties the concern-split extensions work on.
-//
-//  The state is PERSISTED and everything else is derived from it. A phone that relaunches
-//  mid-loan must come back believing the watch still has the pod; a volatile flag would come
-//  back as owner and dose beside it.
-//
-//  An epoch names exactly one loan. Every record, ack, revoke and audit anchor carries one, and
-//  anything arriving under a different epoch belongs to a different session.
-//
-//  Dependencies are injected closures so the state machine and its ordering rules can be tested
-//  without the device stack; PodLoanPhoneController+Wiring builds the real ones.
+//  The phone half of lending the pod to the watch: the persisted state machine, the epoch
+//  that names each loan, and the stored properties the extensions share. Dependencies are
+//  injected (see +Wiring) so the ordering rules are testable.
 //
 
 import Foundation
@@ -24,41 +15,28 @@ import UserNotifications
 import os.log
 
 final class PodLoanPhoneController {
-    /// Where this phone stands with respect to the pod. Persisted by the raw value.
-    ///
-    /// The ordinary loan runs `owner → grantOffered → loaned → reconciling → owner`:
-    /// the pod is offered, the watch confirms it has it, the watch offers it back, and the
-    /// phone writes the records before returning to ownership. A take-back inserts
-    /// `reclaimPending` in place of the watch's own initiative, and either reaches
-    /// `reconciling` when the watch drains or `owner` directly when it is forced.
-    ///
-    /// `.owner` is the only state in which this phone doses — with one exception: an inferred
-    /// yield, where the state is `.owner` but the watch has told us it is running a session the
-    /// phone never granted. `podIsOnLoan` is the test that accounts for both.
+    /// Loan: owner → grantOffered → loaned → reconciling → owner. A take-back goes through
+    /// reclaimPending. The phone doses only at owner, and not while yielding to an inferred loan.
     enum State: String {
         case owner, grantOffered, loaned, reconciling, reclaimPending
     }
 
-    /// What the pump tile shows while the pod is coming home. Derived from a snapshot and a
-    /// clock, never held as state — see PodLoanPhoneController+UIReads.
+    /// Derived from a snapshot and a clock (see +UIReads).
     struct ReclaimProgress: Equatable {
         enum Phase: Equatable {
             /// The watch is being asked to hand back and is expected to answer.
             case draining
 
-            /// The drain overran its expectation. The tile stops predicting and shows the force
-            /// deadline instead.
+            /// The drain overran; the tile shows the force deadline.
             case watchNotAnswering
 
-            /// Taking it without the watch's cooperation. A dead-branch ladder starts here,
-            /// because nothing that lands on that branch can answer a revoke.
+            /// Taking the pod without the watch; where a dead-branch ladder starts.
             case forcing
 
             /// The settle after a hand-back: the phone re-establishing the pod link.
             case reconnectingToPod
 
-            /// The settle after a force reclaim — same wait, different words, because the user
-            /// did not hand the pod back.
+            /// The settle after a force reclaim.
             case forceReclaimingPod
         }
         let phase: Phase
@@ -67,23 +45,19 @@ final class PodLoanPhoneController {
 
         let expectedBy: Date
 
-        /// nil once a phase has overrun its expectation and has nothing honest to predict.
-        /// Otherwise capped below 1, so a bar never reads as finished before the thing is.
+        /// nil once overrun; otherwise capped below 1.
         let fraction: Double?
 
         let elapsed: TimeInterval
     }
 
-    /// Every door out of the state machine. Defaults are inert, so a test supplies only what it
-    /// exercises.
+    /// Defaults are inert, so a test supplies only what it exercises.
     struct Dependencies {
         var pumpManager: () -> PumpManager?
 
         var settings: () -> LoopSettings
 
-        /// The loan's own pause on automatic dosing, held for as long as the pod is elsewhere.
-        /// Distinct from the user's closed-loop setting, which only
-        /// `openLoopForUncertainReconciliation` touches.
+        /// The loan's dosing pause; distinct from the user's closed-loop setting.
         var setAutomaticDosingPaused: (Bool) -> Void
 
         var send: ([String: Any]) -> Void
@@ -94,12 +68,10 @@ final class PodLoanPhoneController {
 
         var deleteCarb: (LoanReconciler.DeletedCarb, @escaping (Error?) -> Void) -> Void = { _, done in done(nil) }
 
-        /// Diagnostic only. It must never gate a grant: the flag lags reality by a minute or
-        /// more, and its refusal would have to travel over the very link it claims is down.
+        /// Diagnostic only; it lags, so it never gates a grant.
         var watchAppInstalled: () -> Bool = { true }
 
-        /// The phone's active override, read and written. Both halves are needed — the reader
-        /// is what tells a clear arriving from the wrist whether there is anything to clear.
+        /// Read and write: the reader tells a clear from the wrist whether there is anything to clear.
         var scheduleOverride: () -> TemporaryScheduleOverride? = { nil }
         var applyScheduleOverride: (TemporaryScheduleOverride?) -> Void = { _ in }
 
@@ -115,6 +87,9 @@ final class PodLoanPhoneController {
 
         var glucoseHistory: (_ start: Date, _ completion: @escaping ([LoanGlucoseRecord]) -> Void) -> Void = { _, done in done([]) }
 
+        /// The glucose alert settings, encoded for the grant; nil leaves the wrist without them.
+        var glucoseAlertSettings: (_ completion: @escaping (Data?) -> Void) -> Void = { $0(nil) }
+
         var issueNotice: (_ title: String, _ body: String) -> Void
 
         var ownershipDidChange: () -> Void = {}
@@ -125,14 +100,10 @@ final class PodLoanPhoneController {
 
         var cancelTempBasalForGrant: (@escaping (Error?) -> Void) -> Void = { $0(nil) }
 
-        /// Turns the user's closed-loop setting OFF, and must not be implemented as the loan's
-        /// dosing pause. A pause would be matched by a resume at the end of the next loan and
-        /// would quietly re-close a loop this deliberately opened.
+        /// Turns the user's closed-loop setting off; not the loan pause, which a later resume would undo.
         var openLoopForUncertainReconciliation: () -> Void = {}
 
-        /// Time-sensitive delivery. Both directions of the reconciliation verdict use it, even
-        /// though only one stops dosing: a plain notice can be swallowed by a Focus mode,
-        /// leaving a recording failure with no witness.
+        /// Time-sensitive, so a Focus mode cannot swallow a recording failure.
         var issueUrgentNotice: (_ title: String, _ body: String) -> Void = { _, _ in }
 
         var bookGapDose: (_ entry: DoseEntry, _ completion: @escaping (Bool) -> Void) -> Void = { _, done in done(false) }
@@ -141,9 +112,7 @@ final class PodLoanPhoneController {
 
         var backfillDoses: (_ doses: [DoseEntry], _ completion: @escaping (Error?) -> Void) -> Void = { _, done in done(nil) }
 
-        /// Called after any back-dated insulin write, with the earliest dose start. The
-        /// algorithm's counteraction memo is append-only, so without this its bins go on
-        /// attributing the watch's insulin to unexplained glucose movement.
+        /// After a back-dated insulin write; the counteraction memo is append-only.
         var insulinHistoryRewritten: (_ earliestDoseStart: Date) -> Void = { _ in }
 
         /// Defers launch-time store work until after first unlock.
@@ -152,32 +121,35 @@ final class PodLoanPhoneController {
         var beginReclaimBackgroundTask: () -> Void = {}
         var endReclaimBackgroundTask: () -> Void = {}
 
-        /// A channel selector, and admissible as a POSITIVE signal only. It reads false for a
-        /// perfectly healthy backgrounded watch, so it may never be the reason to conclude one
-        /// is dead.
+        /// Channel selection, and a positive signal only: false for a healthy backgrounded watch.
         var isWatchReachable: () -> Bool = { false }
 
         var isBluetoothPoweredOff: () -> Bool = { false }
 
-        /// When this phone last heard anything from the watch. During a loan that cadence comes
-        /// from the record batch the watch sends on every completed cycle, which is what makes
-        /// silence a usable liveness signal.
+        /// During a loan the watch reports every cycle, so silence means something.
         var lastWatchContactAt: () -> Date? = { nil }
 
-        /// This phone's own newest sensor reading — a proxy for the phone being near the user,
-        /// so it does not mistake its own absence for the watch's failure.
+        /// Proxy for the phone being near the user.
         var latestGlucoseDate: () -> Date? = { nil }
         var now: () -> Date = { Date() }
+
+        /// Storage seam for tests. A nil directory keeps each file in its app location.
+        var stateDirectory: URL? = nil
+
+        /// The scheduled reminders' notification centre; tests replace both so nothing reaches the app.
+        var addNotification: (UNNotificationRequest) -> Void = { UNUserNotificationCenter.current().add($0) }
+        var removeNotifications: ([String]) -> Void = { ids in
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ids)
+        }
     }
 
-    /// Whether an unexplained positive residual after a force reclaim is booked as a placeholder
-    /// bolus as well as opening the loop.
+    /// Book a placeholder bolus for unexplained insulin after a force reclaim.
     static let bookUnattributedInsulinOnForceReclaim = true
 
     let log = OSLog(subsystem: "com.loopkit.Loop", category: "PodLoanPhoneController")
 
-    /// The controller's serial queue. Every mutation of the state below happens on it, and it is
-    /// the reason the UI reads a mirror rather than the state itself.
+    /// All state mutation happens here; the UI reads a mirror instead.
     let queue = DispatchQueue(label: "com.loopkit.Loop.PodLoanPhoneController", qos: .utility)
     var deps: Dependencies
 
@@ -190,15 +162,12 @@ final class PodLoanPhoneController {
         do {
             message = try LoanMessage.decode(fromTransport: userInfo)
         } catch {
-            // Never ack-and-drop something we could not read. The sender is told, loudly, and
-            // the user is told the builds may not match — a message silently discarded here
-            // could be a dose record or a hand-back.
+            // Never drop an undecodable message silently: nack it and warn about a build mismatch.
             sendMessage(.nack(ProtocolNack(seenVersion: nil)))
             warnProtocolMismatch()
             return
         }
-        // A message that decoded clears the warning latch, so a later stretch of skew is
-        // announced again rather than suppressed by an old one.
+        // A decoded message re-arms the mismatch warning.
         hasWarnedProtocolMismatch = false
         guard let message = message else { return }
 
@@ -215,9 +184,7 @@ final class PodLoanPhoneController {
             handleHandbackOffer(offer)
         case .statusReport(let report):
             handleStatusReport(report)
-        // The mirror image of the decode failure above: the WATCH could not read something this
-        // phone sent. Logged at fault level because it means a grant or a revoke may not have
-        // been understood.
+        // The watch could not read something this phone sent.
         case .nack:
 
             os_log("Loan protocol skew — the WATCH could not decode a message from this phone", log: log, type: .fault)
@@ -227,12 +194,8 @@ final class PodLoanPhoneController {
         }
     }
 
-    /// Abandon a loan and take the pod back into phone control, without a hand-back to commit.
-    ///
-    /// Used where the loan never really started — an aborted grant, a takeover the watch says
-    /// failed, a dead-man that expired. It clears the audit anchors because an audit describes
-    /// ONE loan: anchors left behind make the next take-back judge a session that already
-    /// closed, and report its insulin as unexplained.
+    /// Back to the phone without a hand-back, for a loan that never really started. Clears the
+    /// audit anchors, which describe one loan.
     func reclaimToOwner(alert: (title: String, body: String)?, reason: String) {
         handbackDiag(epoch, "loan ABANDONED — back to phone control: \(reason)")
 
@@ -247,35 +210,26 @@ final class PodLoanPhoneController {
         if let alert = alert { deps.issueNotice(alert.title, alert.body) }
     }
 
-    /// Adds records to the holding area, keyed by event ID so a resend replaces rather than
-    /// duplicates, and persists immediately. Tombstones are the watch retracting records it has
-    /// superseded; they accumulate and are never removed while the loan is open.
+    /// Keyed by event ID, so a resend replaces. Tombstones are the watch retracting superseded records.
     func stage(events: [LoanEvent], tombstones: [UUID]) {
         for event in events { staged[event.id] = event }
         stagedTombstones.formUnion(tombstones)
         persistStaged()
     }
 
-    /// A message that will not encode is dropped silently on purpose: there is nothing to tell
-    /// the other side with, and every caller here is best-effort with a retry above it.
+    /// An unencodable message is dropped: callers are best-effort with a retry.
     func sendMessage(_ message: LoanMessage) {
         guard let dictionary = try? message.transportDictionary() else { return }
         deps.send(dictionary)
     }
 
-    /// Converts one of the phone's own doses into a wire record for the grant's history seed.
-    ///
-    /// Scheduled basal and resume produce nothing: they are not deliveries the watch needs to
-    /// know about individually, and the watch reconstructs the profile from the basal schedule
-    /// it is given.
+    /// A phone dose as a wire record; scheduled basal and resume are omitted.
     static func loanRecord(from dose: DoseEntry) -> LoanDoseRecord? {
         switch dose.type {
         case .bolus:
             return LoanDoseRecord(kind: .bolus, startDate: dose.startDate, endDate: dose.endDate, amount: dose.deliveredUnits ?? dose.programmedUnits,
                                   syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType, automatic: dose.automatic)
-        // Rate records carry `deliveredUnits` explicitly. The pod delivers whole pulses and the
-        // driver floors a superseded temp, so a watch left to re-derive from the programmed rate
-        // over-states IOB on every elapsed slice.
+        // Rate records carry delivered units: the pod floors to whole pulses.
         case .tempBasal:
 
             return LoanDoseRecord(kind: .tempBasal, startDate: dose.startDate, endDate: dose.endDate, unitsPerHour: dose.unitsPerHour,
@@ -290,63 +244,33 @@ final class PodLoanPhoneController {
         }
     }
 
-    /// Restores the loan from disk and re-arms whatever the previous run left owing.
-    ///
-    /// Nothing here waits for a message to arrive: if the persisted state says the pod is
-    /// elsewhere, dosing is paused before anything else can happen.
+    /// Restores the loan and re-arms what was owed; a loaned state pauses dosing at once.
     init(dependencies: Dependencies) {
         self.deps = dependencies
-        self.state = State(rawValue: UserDefaults.standard.string(forKey: Keys.state) ?? "") ?? .owner
-        self.epoch = UserDefaults.standard.object(forKey: Keys.epoch) as? Int ?? 0
-
-        self.yieldingToInferredLoan = UserDefaults.standard.bool(forKey: Keys.yieldingToInferredLoan)
-        self.committedCursor = UserDefaults.standard.object(forKey: Keys.cursor) as? Int ?? 0
-        self.pendingRevoke = UserDefaults.standard.bool(forKey: Keys.pendingRevoke)
-        self.loanStartedAt = UserDefaults.standard.object(forKey: Keys.loanStartedAt) as? Date
-        if let raw = UserDefaults.standard.array(forKey: Keys.committedIDs) as? [String] {
-            self.committedIDs = Set(raw.compactMap(UUID.init(uuidString:)))
-        } else {
-            self.committedIDs = []
-        }
+        var store = dependencies.stateDirectory.map { PersistedProperty<[String: Any]>(key: Self.stateFileKey, directory: $0) }
+            ?? PersistedProperty(key: Self.stateFileKey)
+        self._persisted = store.wrappedValue.flatMap(PodLoanPhoneState.init(rawValue:)) ?? PodLoanPhoneState()
+        self.stateStore = store
         loadStaged()
 
-        // Epoch-guarded. A base persisted by some other loan would turn that whole loan's
-        // delivery into this loan's unexplained insulin.
-        if let d = UserDefaults.standard.dictionary(forKey: Keys.auditBase),
-           let units = d["units"] as? Double, let asOf = d["asOf"] as? Date,
-           (d["epoch"] as? Int) == self.epoch {
-            self.auditBase = AuditBase(units: units, asOf: asOf)
-            self.checkpointsThisLoan = d["count"] as? Int ?? 0
+        // Only a base from this epoch.
+        if _persisted.audit.baseEpoch != epoch, _persisted.audit.base != nil || _persisted.audit.checkpoints != 0 {
+            _persisted.audit.base = nil
+            _persisted.audit.checkpoints = 0
+            stateStore.wrappedValue = _persisted.rawValue
         }
         installPodLinkCensus()
 
-        // One-time cleanup of the diagnostic residual series: force-reclaim residuals were once
-        // banked alongside clean hand-backs, and they describe a watch whose records never
-        // arrived rather than a reconciliation error.
-        if !UserDefaults.standard.bool(forKey: Keys.residualHistoryPurged) {
-            if var history = UserDefaults.standard.array(forKey: Keys.residualHistory) as? [Double] {
-                let before = history.count
-                history.removeAll { $0 > 0.5 }
-                if history.count != before {
-                    UserDefaults.standard.set(history, forKey: Keys.residualHistory)
-                }
-            }
-            UserDefaults.standard.set(true, forKey: Keys.residualHistoryPurged)
-        }
-
-        // A force-reclaim audit that had not ruled when the app went away is re-armed here.
-        // Whether the loop closes again must depend on the pod's answer, never on whether the
-        // app happened to relaunch before that answer arrived.
-        if let saved = UserDefaults.standard.dictionary(forKey: Keys.pendingForceAudit),
-           let e = saved["epoch"] as? Int, let atStart = saved["atStart"] as? Double,
-           let expected = saved["expected"] as? Double, let loanMinutes = saved["loanMinutes"] as? Double {
+        // Re-arm an unruled force-reclaim audit.
+        if let saved = _persisted.pendingForceAudit {
+            let e = saved.epoch
             pendingHandbackAudit = PendingHandbackAudit(
-                epoch: e, deliveredAtStart: atStart, expected: expected,
-                loanMinutes: loanMinutes, cycles: 0,
+                epoch: e, deliveredAtStart: saved.deliveredAtStart, expected: saved.expected,
+                loanMinutes: saved.loanMinutes, cycles: 0,
                 watchLatest: nil, watchFreshened: false, flavor: .forceReclaim)
             queue.async { [weak self] in
                 guard let self = self else { return }
-                self.handbackDiag(e, "R37 audit RE-ARMED after relaunch — verdict still owed")
+                self.handbackDiag(e, "force-reclaim audit RE-ARMED after relaunch — verdict still owed")
                 self.beginReclaimSettleWindow()
             }
         }
@@ -363,10 +287,7 @@ final class PodLoanPhoneController {
         if podIsOnLoan {
             deps.setAutomaticDosingPaused(true)
 
-            // Heal only the TRANSIENT states. Relaunching into one of them means a hand-back was
-            // interrupted, and nothing else will finish it. `.loaned` is never healed on a
-            // timer: a relaunch during a real multi-hour loan is ordinary, and its recovery is a
-            // new request or the user's own take-back.
+            // Heal only transient states; a relaunch during a real loan is ordinary.
             if state == .reconciling || state == .reclaimPending {
                 let stranded = state
                 queue.asyncAfter(deadline: .now() + 120) { [weak self] in
@@ -379,16 +300,19 @@ final class PodLoanPhoneController {
         }
     }
 
-    /// The tile's view of the state, published under a lock. The UI never touches `queue`; a
-    /// stalled settle holds it for minutes and a waiting tile would freeze the app.
+    /// The persisted state (+State); written whole by `updateState`.
+    var stateStore: PersistedProperty<[String: Any]>
+    var _persisted: PodLoanPhoneState
+    let stateLock = NSLock()
+
+    /// The tile's lock-guarded view; the UI never touches `queue`.
     let uiMirrorLock = NSLock()
     var uiMirror = UISnapshot()
 
     var reclaimStartedAt: Date?
     var reclaimSettleWork: DispatchWorkItem?
 
-    /// When the pod last completed a round-trip after coming home. nil during a settle, and the
-    /// readiness test a new grant is refused against.
+    /// Last verified pod round-trip; a new grant waits for it.
     var reclaimVerifiedAt: Date?
     var reclaimVerifyInFlight = false
 
@@ -397,8 +321,7 @@ final class PodLoanPhoneController {
     var reclaimEscalated = false
     var reclaimStaleReads = 0
 
-    /// Where the tile counts the wait from. Separate from the settle's own start so that a
-    /// window re-opening moments later does not restart the bar in front of the user.
+    /// The tile's wait start, kept across a reopened window.
     var reclaimDisplayAnchor: Date?
 
     /// The last request answered, for suppressing transport redeliveries of the same one.
@@ -407,31 +330,18 @@ final class PodLoanPhoneController {
 
     var hasWarnedProtocolMismatch = false
 
-    var checkpointsThisLoan = 0
-
-    var worstWindowThisLoan: Double = 0
-
-    /// The one-write-at-a-time latch. Events enter `committedIDs` only in a write's completion,
-    /// so without it every duplicate arriving mid-write starts its own write against a set that
-    /// has not been updated yet, and each one makes the next more likely.
+    /// One write at a time: `committedIDs` updates only in a write's completion.
     var commitInFlight = false
 
-    /// Offers that arrived while a write was in flight, at most one per epoch. Coalesced, never
-    /// dropped.
+    /// Offers that arrived mid-write, at most one per epoch.
     var coalescedOffers: [Int: HandbackOffer] = [:]
 
     var grantInFlight = false
     /// A force reclaim that is waiting for the in-flight write to land.
     var pendingForceReclaimReason: String?
 
-    /// The exactly-once record: every event whose dose or carb is in the phone's books.
-    /// Persisted, and the ONLY dedup test — the ack cursor cannot serve, because the watch
-    /// withholds unclassified events and its cursor legitimately has gaps.
-    var committedIDs: Set<UUID>
-
     var staged: [UUID: LoanEvent] = [:]
     var stagedTombstones: Set<UUID> = []
-    var loanStartedAt: Date?
     var t1WorkItem: DispatchWorkItem?
     var reclaimTimeoutWork: DispatchWorkItem?
     var reclaimResendWork: DispatchWorkItem?
@@ -447,88 +357,27 @@ final class PodLoanPhoneController {
 
     var lastClosedSessionRevokeAt: Date?
     var lastDormantSettingsFingerprint: String?
+    /// The phone's glucose alert settings as last seen; part of the standing copy's fingerprint.
+    var glucoseAlertSettingsSeen: GlucoseAlertSettings?
 
-    /// The newest loan the watch has claimed to hold that this phone never granted, and when it
-    /// said so. Freshness is half the signal: an old sighting describes a session that has since
-    /// ended.
+    /// The newest loan the watch claimed that this phone never granted, and when.
     var newestForeignLoanEvidence: (epoch: Int, at: Date)?
 
-    /// When the current grant was offered. Per grant, and cleared wherever a loan is abandoned,
-    /// so a failed takeover's clock can never be quoted against the next grant.
+    /// Per grant; cleared wherever a loan is abandoned.
     var grantOfferedAt: Date?
 
-    /// The phone standing aside for a loan it did not grant. Persisted, because the blackout
-    /// this answers can include a phone reboot.
-    var yieldingToInferredLoan: Bool {
-        didSet { UserDefaults.standard.set(yieldingToInferredLoan, forKey: Keys.yieldingToInferredLoan) }
-    }
+    /// The pod fault already announced, as "epoch fault", so a repeated report stays quiet.
+    var podFaultNoticed: String?
 
-    /// Persisted on every write, and the single place a transition is published.
-    ///
-    /// The order inside is load-bearing. EVERY route back into `.owner` opens the settle window,
-    /// and it opens BEFORE the transition is announced: an observer must never see ownership
-    /// without its baseline, or the tile draws a pod that is home while the phone has not
-    /// reached it. The mirror is likewise written before observers are notified — the async
-    /// refresh alone loses the race and the re-render draws the previous state.
-    var state: State {
-        didSet {
-            UserDefaults.standard.set(state.rawValue, forKey: Keys.state)
-
-            if oldValue != state {
-                if oldValue != .owner, state == .owner {
-                    beginReclaimSettleWindow()
-                }
-
-                syncUIMirror()
-                deps.ownershipDidChange()
-            }
-        }
-    }
-
-    /// Names the current loan. Minted by incrementing at the grant, and monotonic — the watch
-    /// rejects anything at or below an epoch it has seen, which is what keeps a queued duplicate
-    /// grant from restarting a session that already ended.
-    var epoch: Int {
-        didSet { UserDefaults.standard.set(epoch, forKey: Keys.epoch) }
-    }
-
-    /// How far the watch may consider its journal acknowledged. Reported to the watch; never
-    /// used here to decide what has been committed.
-    var committedCursor: Int {
-        didSet { UserDefaults.standard.set(committedCursor, forKey: Keys.cursor) }
-    }
-
-    /// Persisted WITH the epoch that owns it, so a base can never be adopted by another loan.
-    var auditBase: AuditBase? {
-        didSet {
-            if let b = auditBase {
-                UserDefaults.standard.set(["units": b.units, "asOf": b.asOf, "epoch": epoch,
-                                           "count": checkpointsThisLoan],
-                                          forKey: Keys.auditBase)
-            } else {
-                UserDefaults.standard.removeObject(forKey: Keys.auditBase)
-            }
-        }
-    }
-
-    /// Only the force-reclaim flavour is written to disk. A clean hand-back's audit does not
-    /// need to survive a relaunch: the watch's records are already committed, and the loop was
-    /// never left closed on unverified books.
+    /// Only the force-reclaim flavour persists.
     var pendingHandbackAudit: PendingHandbackAudit? {
         didSet {
             if let p = pendingHandbackAudit, p.flavor == .forceReclaim {
-                UserDefaults.standard.set(["epoch": p.epoch, "atStart": p.deliveredAtStart,
-                                           "expected": p.expected, "loanMinutes": p.loanMinutes],
-                                          forKey: Keys.pendingForceAudit)
+                updateState { $0.pendingForceAudit = .init(epoch: p.epoch, deliveredAtStart: p.deliveredAtStart,
+                                                            expected: p.expected, loanMinutes: p.loanMinutes) }
             } else if oldValue?.flavor == .forceReclaim {
-                UserDefaults.standard.removeObject(forKey: Keys.pendingForceAudit)
+                updateState { $0.pendingForceAudit = nil }
             }
         }
-    }
-
-    /// A revoke this phone still owes the watch. Persisted so a relaunch mid-reclaim re-sends it
-    /// the moment the watch is reachable again.
-    var pendingRevoke: Bool {
-        didSet { UserDefaults.standard.set(pendingRevoke, forKey: Keys.pendingRevoke) }
     }
 }

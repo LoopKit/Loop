@@ -2,23 +2,8 @@
 //  InsulinBookTests.swift
 //  WatchAppTests
 //
-//  THE INSULIN BOOK THE ALGORITHM ACTUALLY READS.
-//
-//  On 2026-08-18 the wrist delivered three manual boluses totalling 3.40 U inside six minutes
-//  and reported `IOB 0.00` with `insulin +0` after every one of them, republishing
-//  `REC bolus 1.66 U` unchanged each time. A recommendation that cannot see the insulin already
-//  given cannot decrement, so the wrist kept asking for the same dose again.
-//
-//  The cause was a seam, not arithmetic: two books, and the algorithm read the empty one. Since
-//  2026-09-17 there is ONE book (R35 reversed): the watch's DoseStore, written by the watch's
-//  pump manager through `hasNewPumpEvents` exactly as on the phone, seeded at the grant with the
-//  phone's finished history through stock's remote-store door, and gated by stock's pump-data
-//  recency rule. These tests drive that book through the two seams the session uses — the seed
-//  and the pump manager's report — and ask whether delivered insulin reaches the input.
-//
-//  These tests pin the seam rather than the math. They ask the one question no existing test
-//  asked: does insulin that was DELIVERED reach the input the algorithm reasons from? That is
-//  pure computation — no pod, no BLE, no phone — so the simulator settles it.
+//  Does delivered insulin reach the algorithm's input? Drives the one book through its seed and
+//  the pump manager's report (the defect pinned: three boluses, dosing IOB stayed 0.00).
 //
 
 import XCTest
@@ -110,9 +95,7 @@ final class InsulinBookTests: XCTestCase {
         do { try await manager.seedInsulinHistory(doses) } catch { XCTFail("seed failed: \(error)") }
     }
 
-    /// The pump manager's report — the ONE writer of the book. An empty report is what a status
-    /// read with nothing new looks like, and it is what advances the recency clock the algorithm
-    /// is gated on.
+    /// The book's one writer; an empty report advances the recency clock.
     private func report(_ manager: WatchLoopManager, _ doses: [DoseEntry] = []) async {
         let events = doses.map {
             NewPumpEvent(date: $0.startDate, dose: $0, raw: Data(UUID().uuidString.utf8), title: "\($0.type)")
@@ -127,18 +110,7 @@ final class InsulinBookTests: XCTestCase {
         wait(for: [done], timeout: seconds + 5)
     }
 
-    /// The IOB **the algorithm dosed with** — not the one on the glance.
-    ///
-    /// These were two different numbers from two different books, which is the trap that made
-    /// the original defect so hard to see. `glanceData().iob` is evaluated live off the book and
-    /// so was right all along; the field log shows it
-    /// tracking every bolus (0.20 -> 1.85 -> 3.21) during the very session in which dosing
-    /// reported `IOB 0.00`. Asserting on the glance therefore proves nothing about dosing —
-    /// verified, not assumed: the first draft of these tests did exactly that and stayed GREEN
-    /// with the defect deliberately reintroduced.
-    ///
-    /// `predictionBreakdown.iobUnits` carries `activeInsulin`, which is LoopAlgorithm's own
-    /// output, so it is the figure that actually sized the dose.
+    /// The IOB the algorithm dosed with (`predictionBreakdown.iobUnits`), not the glance's.
     private func dosingIOB(_ manager: WatchLoopManager) -> Double? {
         manager.refreshPredictionForGlance()
         settle()
@@ -147,11 +119,7 @@ final class InsulinBookTests: XCTestCase {
 
     // MARK: -
 
-    /// THE REGRESSION. A bolus in the book must appear as insulin on board.
-    ///
-    /// This is the whole defect in one assertion: before the fix the ledger held the dose, the
-    /// algorithm read the store, and the answer came back 0.00 — for a bolus given two minutes
-    /// earlier, of which essentially none has acted yet.
+    /// A bolus in the book appears as insulin on board.
     func testASeededBolusBecomesInsulinOnBoard() async {
         let manager = await makeManager()
         await seedGlucose(manager)
@@ -180,11 +148,7 @@ final class InsulinBookTests: XCTestCase {
                              "delivering 1.5 U must move IOB — this is the seam between the book that records doses and the input the algorithm reasons from")
     }
 
-    /// THE OVERBOLUS PATH, stated directly.
-    ///
-    /// The field symptom was not a wrong IOB in the abstract — it was `REC bolus 1.66 U`
-    /// republished unchanged after each of three boluses. Insulin already on board must reduce
-    /// what the wrist asks for next, or following the recommendation stacks doses.
+    /// Insulin on board reduces the next recommendation.
     func testARecommendationDecrementsAfterInsulinIsGiven() async {
         let manager = await makeManager()
         await seedGlucose(manager)
@@ -210,16 +174,10 @@ final class InsulinBookTests: XCTestCase {
             return XCTFail("the second recommendation must compute")
         }
         XCTAssertLessThan(nextAmount, firstAmount - 0.1,
-                          "taking \(firstAmount) U must reduce the next recommendation; an unchanged figure is the stacking path the wrist showed in the field")
+                          "taking \(firstAmount) U must reduce the next recommendation; an unchanged figure is the stacking path")
     }
 
-    /// ONE WRIST, ONE IOB.
-    ///
-    /// The defect's real signature was not a wrong number but two numbers: the glance read the
-    /// ledger and showed 1.85 U while the algorithm read the empty store and dosed on 0.00, on
-    /// the same screen in the same second. Whatever else changes, these two must not diverge —
-    /// a wrist that displays one IOB and doses with another is worse than one that is simply
-    /// wrong, because the displayed figure vouches for the hidden one.
+    /// The displayed and dosing IOB are the same number.
     func testTheDisplayedIOBAndTheDosingIOBAreTheSameNumber() async {
         let manager = await makeManager()
         await seedGlucose(manager)
@@ -234,21 +192,11 @@ final class InsulinBookTests: XCTestCase {
             return XCTFail("both IOB figures must exist before they can be compared")
         }
         XCTAssertEqual(shown, dosed, accuracy: 0.05,
-                       "the glance showed \(shown) U and the algorithm dosed on \(dosed) U — that is the 2026-08-18 defect exactly")
+                       "the glance showed \(shown) U and the algorithm dosed on \(dosed) U — the defect this file pins")
     }
 
-    /// A RUNNING TEMP MUST NOT BREAK THE AUTOMATIC CYCLE.
-    ///
-    /// The pump manager reports a running temp as a MUTABLE full-span row (endDate = programmed
-    /// end), so for the whole life of a temp the book holds a basal dose ending in the FUTURE. LoopAlgorithm
-    /// refuses that outright on the automated path — `guard !input.recommendationType.automated ||
-    /// basalEnd <= input.predictionStart else { throw AlgorithmError.futureBasalNotAllowed }`
-    /// (LoopAlgorithm.swift:700-703) — and `.tempBasal.automated` is true.
-    ///
-    /// So an untrimmed book read makes EVERY automatic cycle decline for as long as a temp is
-    /// running: the watch stops adjusting basal entirely while believing it is looping. This case
-    /// was invisible to the first version of these tests because they all drove the .manualBolus
-    /// path, where `automated` is false and the guard never fires.
+    /// A running temp is a future-ending row; untrimmed, LoopAlgorithm throws `futureBasalNotAllowed`
+    /// on every automatic cycle.
     func testARunningTempDoesNotBreakTheAutomaticCycle() async {
         let manager = await makeManager()
         await seedGlucose(manager)
@@ -273,19 +221,7 @@ final class InsulinBookTests: XCTestCase {
                        "a temp still running must not make the automatic cycle decline; got: \(error)")
     }
 
-    /// AN OVERRIDE MUST REACH DOSING, NOT JUST THE DISPLAY.
-    ///
-    /// `applyWristOverride` existed with ZERO call sites, so the dosing override had exactly one
-    /// writer for a loan's lifetime — the grant intake — while the displayed override was driven
-    /// independently off the WCSession round-trip. Activating a preset mid-loan redrew the chart
-    /// band and printed the new insulin-needs percentage while `applyBasal`/`applySensitivity`/
-    /// `applyCarbRatio` stayed identity maps: full-strength insulin toward the pre-exercise
-    /// target, during exercise, with every screen saying otherwise.
-    ///
-    /// Asserted through the RECOMMENDATION rather than by reading the property back, because the
-    /// property being set proves nothing about whether the schedules resolved through it. An
-    /// override halving insulin needs doubles ISF, so the same excess glucose needs materially
-    /// less insulin.
+    /// A wrist override changes the recommendation, not just the display.
     func testAnOverrideChangesWhatDosingRecommends() async {
         let manager = await makeManager()
         await seedGlucose(manager)
@@ -300,12 +236,7 @@ final class InsulinBookTests: XCTestCase {
             return XCTFail("a flat 250 mg/dL must recommend a correction to compare against; got \(String(describing: before))")
         }
 
-        // "Insulin needs 50%" — the exercise shape. Basal x0.5, ISF and CR /0.5.
-        //
-        // INDEFINITE deliberately. A finite override scales only the part of the forecast it
-        // covers, so a 1-hour override against a 6-hour insulin tail moves the recommendation by
-        // ~14% rather than ~50% — correct behaviour, and a threshold written against the naive
-        // halving fails on working code. Indefinite makes the assertion unambiguous.
+        // Insulin needs 50%, indefinite so the effect is unambiguous.
         let override = TemporaryScheduleOverride(
             context: .custom,
             settings: TemporaryPresetSettings(unit: .milligramsPerDeciliter,
@@ -328,12 +259,7 @@ final class InsulinBookTests: XCTestCase {
                           "halving insulin needs doubles ISF, so the correction must fall well below \(baseline) U; got \(overridden) U — an unchanged figure means the override reached the display and not the dosing")
     }
 
-    /// No pump report means NO DOSING — never a silent empty book.
-    ///
-    /// Stock's pump-data recency gate is the one-book form of R35's rule: an empty history and
-    /// "no insulin on board" are the same number, and the second one licenses a full dose. A
-    /// book the pod has not written to — however much history it was seeded with — cannot
-    /// license a dose.
+    /// With no pump report the algorithm refuses rather than assuming zero IOB.
     func testWithoutAPumpReportTheAlgorithmRefusesRatherThanAssumingZero() async {
         let manager = await makeManager()
         await seedGlucose(manager)

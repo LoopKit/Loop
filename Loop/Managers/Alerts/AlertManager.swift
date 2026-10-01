@@ -181,7 +181,7 @@ public final class AlertManager {
 
     // MARK: - Loop Not Running alerts
 
-    /// PODLOAN: true while a pod loan is active; set by WatchDataManager at wiring time — see `AlertManager+PodLoan.swift`.
+    /// True while a pod loan is active; set by WatchDataManager at wiring time — see `AlertManager+PodLoan.swift`.
     var loopNotRunningSuppressionGate: (() -> Bool)?
 
     func loopDidComplete(_ lastLoopDate: Date? = nil) async {
@@ -195,8 +195,7 @@ public final class AlertManager {
 
     private func rescheduleLoopNotRunningNotifications() {
         Task {
-            // Same gate as loopDidComplete — this path serves the alert-muter config change,
-            // which can land mid-loan just as easily.
+            // Same gate as loopDidComplete: a muter config change can land mid-loan.
             guard loopNotRunningSuppressionGate?() != true else { return }
             guard let lastLoopDate = getLastLoopDate() else { return }
             await rescheduleLoopNotRunningNotifications(lastLoopDate)

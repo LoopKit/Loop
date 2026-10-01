@@ -16,7 +16,6 @@ import os.log
 import UserNotifications
 import LoopKit
 import LoopCore
-import G7SensorKit
 import ClockKit
 
 class ExtensionDelegate: NSObject, WKApplicationDelegate {
@@ -85,14 +84,6 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     func applicationDidFinishLaunching() {
         podLoanDidFinishLaunching()
         UNUserNotificationCenter.current().delegate = self
-        NotificationCenter.default.addObserver(forName: G7CGMManager.watchStatusDidChange, object: nil, queue: .main) { note in
-            guard let manager = note.object as? G7CGMManager else { return }
-            if !manager.watchIsSearching {
-                SensorSearchAlert.disarm()
-            } else if WKApplication.shared().applicationState != .active {
-                SensorSearchAlert.arm()
-            }
-        }
         if #available(watchOSApplicationExtension 5.0, *) {
             INRelevantShortcutStore.default.registerShortcuts()
         }
@@ -112,27 +103,16 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
         loopManager.requestGlucoseBackfillIfNecessary()
 
         podLoanDidBecomeActive()
-        SensorSearchAlert.disarm()
     }
 
     func applicationWillResignActive() {
         podLoanWillResignActive()
-        if stockLoopSession?.stack.cgmManager.watchIsSearching == true {
-            SensorSearchAlert.arm()
-        }
     }
 
-    // NOT always the main thread. The Bluetooth alert task is delivered synchronously from
-    // CoreBluetooth's delegate queue: bluetoothd's "peripheral usage" notification (fired the
-    // moment the app subscribes to a characteristic) is posted on that queue, WatchKit observes
-    // it there and calls this delegate on the spot. 2026-09-14: four Bluetooth relaunches in a row
-    // died 0.25 s after subscribing, on the `dispatchPrecondition(.onQueue(.main))` inside
-    // `requestGlucoseBackfillIfNecessary()` (crash reports WatchApp-2026-09-14-16{4956,5640,5641,5645}).
+    // Not always main: the Bluetooth task arrives on CoreBluetooth's queue (crash 2026-09-14).
     func handle(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
         guard Thread.isMainThread else {
-            // Silent hop: WatchKit delivers the Bluetooth task once per GATT event (~55 per
-            // handshake on 2026-09-14), so the hop is not worth a log line each; the held-task
-            // summary below counts them.
+            // Silent hop: the task is delivered once per GATT event.
             DispatchQueue.main.async { self.handle(backgroundTasks) }
             return
         }
@@ -323,6 +303,7 @@ extension ExtensionDelegate: WCSessionDelegate {
 
 extension ExtensionDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        if await podLoanHandleAlertResponse(response) { return }
 
         log.default("UNNotificationResponse rootInterfaceController = %{public}@", String(describing: WKApplication.shared().rootInterfaceController))
         log.default("UNNotificationResponse visibleInterfaceController = %{public}@", String(describing: WKApplication.shared().visibleInterfaceController))
@@ -406,9 +387,3 @@ extension ExtensionDelegate {
         WKApplication.shared().rootInterfaceController?.presentAlert(withTitle: error.localizedDescription, message: (error as NSError).localizedRecoverySuggestion ?? (error as NSError).localizedFailureReason, preferredStyle: .alert, actions: [WKAlertAction.dismissAction()])
     }
 }
-
-
-// `WKApplication.extensionDelegate` (which was `delegate as? ExtensionDelegate`) was deleted
-// rather than left unused. Under the SwiftUI lifecycle that lookup always yields nil, so keeping
-// it around is keeping a loaded gun: it reads like the obvious way to reach the delegate and
-// silently returns nothing. Use `ExtensionDelegate.sharedIfAvailable()`.

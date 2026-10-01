@@ -2669,6 +2669,9 @@
         }
       }
     },
+    "%1$@ U was not delivered — the pod is on the watch. Bolus from the watch, or end Sport Mode first." : {
+      "comment" : "Notification body when a bolus is refused because the pod is on loan (1: units)"
+    },
     "%1$@ U/hour @ %2$@" : {
       "comment" : "The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time)",
       "extractionState" : "manual",
@@ -7749,6 +7752,12 @@
     "Apple Health" : {
       "comment" : "Apple Health settings button text\nTitle of the Apple Health access screen"
     },
+    "Apple Watch is controlling the pod. Tap to reclaim." : {
+      "comment" : "The subtitle of the banner indicating the pod is controlled by the watch"
+    },
+    "Apple Watch is running the loop and controlling the pod. %1$@ on this phone will resume automation when the pod is reclaimed." : {
+      "comment" : "message when the pod is loaned to the watch (1: app name)"
+    },
     "Are you sure you want to delete all history entries?" : {
       "comment" : "Action sheet confirmation message for pump history deletion",
       "localizations" : {
@@ -9806,6 +9815,9 @@
           }
         }
       }
+    },
+    "Bolus Not Delivered" : {
+      "comment" : "Notification title when a bolus is refused because the pod is on loan"
     },
     "Bolus Recommendation Updated" : {
       "comment" : "Alert title for an updated bolus recommendation",
@@ -21453,6 +21465,9 @@
     "Handing over…" : {
       "comment" : "Title text for the pump tile while the pod is being handed over to the watch"
     },
+    "Handing the pod to Apple Watch…" : {
+      "comment" : "The subtitle of the banner while the watch is taking over the pod"
+    },
     "HARDWARE SOUNDS" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -24203,6 +24218,9 @@
     },
     "iOS Permissions and Mute All App Sounds" : {
       "comment" : "Alert Permissions descriptive text"
+    },
+    "iPhone Bluetooth is off — still running" : {
+      "comment" : "Hand-back refused: shown on the watch glance"
     },
     "ISF" : {
 
@@ -30361,8 +30379,14 @@
     "Please go to the App Store now to update the app." : {
       "comment" : "Required update modal paragraph 3"
     },
+    "Pod Fault" : {
+      "comment" : "Phone notice title when the watch reports a pod fault during a loan"
+    },
     "Pod Is on the Watch" : {
       "comment" : "Title of the reclaim prompt when tapping the pump tile during a loan"
+    },
+    "Pod Looks Controlled by the Watch" : {
+      "comment" : "Phone notice title when the phone yields to an inferred watch loan"
     },
     "Pod on Watch" : {
       "comment" : "Title text for the pump tile while the pod is loaned to the watch"
@@ -33268,6 +33292,9 @@
     "Reclaim the pod to this phone? The watch's Sport Mode session will end and its records will be collected." : {
       "comment" : "Message of the reclaim prompt"
     },
+    "Reclaiming the pod…" : {
+      "comment" : "The subtitle of the banner while the phone is reclaiming the pod"
+    },
     "Reclaiming…" : {
       "comment" : "Title text for the pump tile while the pod is coming back from the watch"
     },
@@ -35903,6 +35930,9 @@
     "Sound" : {
 
     },
+    "Sport Mode Active" : {
+      "comment" : "The title of the banner indicating the pod is controlled by the watch\ntitle for when the watch is running the loop"
+    },
     "Sport Mode has ended and this phone is back in control, but it is still reconnecting to the pod. Try again in a moment." : {
       "comment" : "Message shown while the phone is re-establishing the pod connection after a reclaim"
     },
@@ -38371,8 +38401,14 @@
     "The sound played when this alarm fires." : {
 
     },
-    "The watch is reporting Sport Mode as not installed — usually a Bluetooth glitch, not a real uninstall. On the watch: swipe up for Control Center, turn Bluetooth off and back on." : {
-      "comment" : "Notification body: remedy for the appInstalled=false glitch"
+    "The watch hasn't confirmed taking the pod. The phone will take it back." : {
+      "comment" : "Phone notification body: the watch never confirmed a takeover"
+    },
+    "The watch hasn't reported a loop for %1$.0f minutes. The pod is still assigned to it. If the watch is off or out of battery, tap the pod tile to bring the pod back to this phone." : {
+      "comment" : "Phone warning body: watch silent mid-session (1: minutes)"
+    },
+    "The watch reports a pod fault: %1$@. Insulin delivery has stopped — replace the pod." : {
+      "comment" : "Phone notice body when the watch reports a pod fault during a loan (1: the pump's own fault text)"
     },
     "Therapy Settings" : {
       "comment" : "Title text for button to Therapy Settings",
@@ -38542,6 +38578,9 @@
           }
         }
       }
+    },
+    "This phone has paused automatic dosing because the pod appears to be in use by the watch. Tap the pod tile to take it back." : {
+      "comment" : "Phone notice body when the phone yields to an inferred watch loan"
     },
     "This range is usually higher than your correction range when you are not exercising." : {
 
@@ -41271,11 +41310,14 @@
         }
       }
     },
-    "Watch Link Glitch" : {
-      "comment" : "Notification title for the persistent appInstalled=false glitch"
+    "Watch Loan Not Confirmed" : {
+      "comment" : "Phone notification title: the watch never confirmed a takeover"
     },
     "Watch Message Unreadable" : {
       "comment" : "Phone notice title when a loan message cannot be decoded"
+    },
+    "Watch Not Reporting" : {
+      "comment" : "Phone warning title: the watch has stopped reporting loop cycles during a session"
     },
     "Watch Session Ended Without Hand-Back" : {
       "comment" : "Phone notice title after a force reclaim salvaged staged records"

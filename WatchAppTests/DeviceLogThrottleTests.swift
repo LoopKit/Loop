@@ -2,13 +2,7 @@
 //  DeviceLogThrottleTests.swift
 //  WatchAppTests
 //
-//  The device-log storm guard, tested for the first time. It was four fields and a lock inline
-//  on WatchLoopManager, reachable only by driving a real CGM or pump manager's delegate — so the
-//  thing that protects the log during an incident had never been exercised outside one.
-//
-//  Its failure modes are both quiet and both bad: throttle too little and a retry storm starves
-//  MAIN and rotates the evidence out of the log; throttle too much and lines vanish with no
-//  record that anything was dropped.
+//  The device-log storm guard: too little starves main, too much loses lines silently.
 //
 
 import XCTest
@@ -48,9 +42,7 @@ final class DeviceLogThrottleTests: XCTestCase {
 
     // MARK: - The count must not be lost
 
-    /// The property that makes suppression honest. A suppressed run is only acceptable because
-    /// the NEXT line states how many were dropped; without this the log has a silent hole
-    /// exactly where the storm was.
+    /// The next distinct line states how many were suppressed.
     func testSuppressedCountIsFlushedOntoTheNextDifferentLine() {
         let throttle = DeviceLogThrottle()
         _ = throttle.admit("storm", at: t0)

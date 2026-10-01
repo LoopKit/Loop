@@ -2,17 +2,9 @@
 //  PodLoanWatchController+Handback.swift
 //  StockLoop
 //
-//  Part of PodLoanWatchController (see PodLoanWatchController.swift). Split by concern; stored properties live in the core class.
-//
-//  Giving the pod back — and every other way a loan ends.
-//
-//  Hand-back is two-phase. The watch keeps dosing while it drains its journal through interim
-//  offers, and only a fully-acked drain reaches `finalizeHandback`; until then End is cancellable.
-//  The pod is released ONLY after the phone acknowledges the final offer.
-//
-//  Released means released. Once that offer has gone out the watch stays stopped whatever happens
-//  next: it cannot know whether the phone took the pod, and a watch that resumed on a timer would
-//  be the second controller on one pod.
+//  Giving the pod back, and every other way a loan ends. Two-phase: the watch keeps dosing
+//  while interim offers drain the journal; the pod is released only after the final offer's
+//  ack. Once released, the watch stays stopped.
 //
 
 import Foundation
@@ -20,21 +12,16 @@ import HealthKit
 import LoopKit
 import LoopAlgorithm
 import LoopCore
-import OmnipodKit
 import WatchKit
 import os.log
 
 extension PodLoanWatchController {
 
-    /// The user's End. Starts the drain and arms the stuck alert, but changes nothing about
-    /// dosing: the watch keeps looping until every record is acked.
-    ///
-    /// A phone that does not understand interim offers takes the single-phase path instead — its
-    /// decoder drops the `released` key and would read the first interim offer as a completed
-    /// hand-back, reclaiming the pod while this watch is still dosing.
+    /// The user's End: starts the drain; dosing continues until everything is acked. A phone
+    /// without interim-offer support gets the single-phase path.
     func beginHandback() {
         #if targetEnvironment(simulator)
-        if defaults.bool(forKey: "sim.fakeLoanFlow") { simDriveHandback(); return }
+        if simFakeLoanFlow { simDriveHandback(); return }
         #endif
         queue.async {
             guard self.phase == .active, self.pumpManager != nil else { return }
@@ -47,8 +34,7 @@ extension PodLoanWatchController {
             self.handbackSawUrgentSendError = false
             self.urgentSendWedged = false
 
-            // One budget for both: the deadline this code gives up at, and the pre-scheduled
-            // alert that fires if the app is not running to give up for itself.
+            // One budget for the give-up deadline and the pre-scheduled stuck alert.
             self.handbackDeadline = self.now().addingTimeInterval(HandbackStuckAlert.interval)
             self.handbackStartedAt = self.now()
             HandbackStuckAlert.arm()
@@ -62,8 +48,7 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Cancellable right up to `finalizeHandback`. The stuck alert goes with it — that alert is
-    /// about an End the user is still waiting on.
+    /// Cancellable until `finalizeHandback`.
     func cancelHandback() {
         queue.async {
             guard self.phase == .active, self.handbackRequested else { return }
@@ -76,13 +61,8 @@ extension PodLoanWatchController {
         }
     }
 
-    /// A hand-back that will not get its acknowledgement: the budget expired, the phone refused,
-    /// or a live offer found no phone to send to.
-    ///
-    /// What happens next turns entirely on whether the FINAL offer had already gone out. Before
-    /// it, the loan simply continues and the watch keeps dosing. After it, the watch has already
-    /// told the phone it is released: it stays stopped, tears the pod down, and becomes a parked
-    /// drain that keeps offering its records until somebody takes them.
+    /// No ack is coming. Before the final offer the loan simply continues; after it the watch
+    /// stays stopped and becomes a parked drain.
     func handbackTimedOut(unreachable: Bool = false, refusal: String? = nil) {
         let why: String
         if let refusal { why = "REFUSED by the phone — \(refusal)" }
@@ -94,8 +74,7 @@ extension PodLoanWatchController {
         resendWorkItem?.cancel()
         handbackDeadline = nil
         handbackStartedAt = nil
-        // Both are read before the phase and the hand-back flags are unwound below — after that
-        // nothing here still describes this hand-back.
+        // Read before the flags are unwound.
         let wasFinal = (phase == .handingBack)
         let wedge = HandbackWedge.classify(resendCount: handbackResendCount,
                                            sawUnreachable: handbackSawUnreachable,
@@ -104,9 +83,9 @@ extension PodLoanWatchController {
         let wedgeSuffix: String
         switch wedge {
         case .sessionReestablishing:
-            wedgeSuffix = " · ** \(handbackResendCount) offers, phone reachable, zero acks — but the sends themselves ERRORED: session re-establishing (#113 variant B), usually self-heals in 1-2 min **"
+            wedgeSuffix = " · ** \(handbackResendCount) offers, phone reachable, zero acks — but the sends themselves ERRORED: session re-establishing, usually self-heals in 1-2 min **"
         case .oneWay:
-            wedgeSuffix = " · ** \(handbackResendCount) offers, phone REACHABLE throughout, zero acks — transport wedge (#113 variant A); restarting the WATCH app is the known recovery **"
+            wedgeSuffix = " · ** \(handbackResendCount) offers, phone REACHABLE throughout, zero acks — transport wedge; restarting the WATCH app is the known recovery **"
         case .none:
             wedgeSuffix = ""
         }
@@ -131,11 +110,11 @@ extension PodLoanWatchController {
             // Self-heals in a minute or two, so it is logged and never alerted.
             SportLog.event("loan", "hand-back wedge variant B (session re-establishing) — no alert; expected to clear on its own")
         case .oneWay:
-            // Only while the loan is still live. A released drain raised its own alert above, and
-            // protocol alerts share one identifier, so a second would merely replace it.
+            // Only while the loan is still live, so the watch is still dosing: a normal alert.
             if !wasFinal {
                 issueProtocolAlert(title: "End Not Confirmed",
-                                   body: "Your iPhone is reachable but hasn't confirmed. Reopening Loop on both devices usually clears this.")
+                                   body: "Your iPhone is reachable but hasn't confirmed. Reopening Loop on both devices usually clears this.",
+                                   identifier: "handbackOneWay", interruptionLevel: .active)
             }
         case .none:
             break
@@ -144,21 +123,12 @@ extension PodLoanWatchController {
         HandbackStuckAlert.disarm()
     }
 
-    /// The point of no return: dosing stops here and the released offer goes out.
-    ///
-    /// The interim resend is cancelled FIRST. A stale interim firing after the phase flip would
-    /// send `released = true` early, and the phone would reclaim while this watch was still
-    /// commanding the pod.
-    ///
-    /// The watch does NOT cancel its running temp. It is about to have no link to cancel over; the
-    /// pod keeps delivering the last automatic rate, which is continuous therapy rather than a
-    /// gap, and the phone issues the cancel at its verified reclaim. No automatic program outlives
-    /// the controller that set it — only the device that enforces that moved.
+    /// Dosing stops and the released offer goes out. The interim resend is cancelled first. The
+    /// running temp is left for the phone to cancel at its verified reclaim.
     func finalizeHandback() {
         resendWorkItem?.cancel()
         finalOfferSent = false
-        // No pump manager left — a revoke or a teardown got here first — so there is nothing to
-        // read and the released offer goes straight out.
+        // No pump manager left: send the released offer straight away.
         guard let manager = pumpManager else {
             handbackRequested = false
             phase = .handingBack
@@ -180,7 +150,7 @@ extension PodLoanWatchController {
         loopManager.pumpManager = nil
 
         if runningTemp != nil {
-            SportLog.event("loan", String(format: "hand-back: our temp (%.2f U/hr until %@) stays live until the phone cancels it on reclaim (R33, phone-enforced)",
+            SportLog.event("loan", String(format: "hand-back: our temp (%.2f U/hr until %@) stays live until the phone cancels it on reclaim (phone-enforced)",
                                           runningTemp?.unitsPerHour ?? 0,
                                           runningTemp.map { ISO8601DateFormatter().string(from: $0.endDate) } ?? "—"))
         }
@@ -192,17 +162,13 @@ extension PodLoanWatchController {
                     self.sendHandbackOffer(freshened: freshened, recovered: false)
                 }
             }
-            // Freshen the odometer only over a link that is ALREADY up. Under connect-on-demand a
-            // read DIALS — scan, connect, the pod hangs up on the idle link — and burns its whole
-            // timeout for a reading the phone discards anyway, since its own reclaim round-trip is
-            // the authoritative one.
-            if manager.isConnectionReady {
-                manager.podLoanReadStatus { first in
-                    let delivered = manager.podLoanInsulinDelivered
-                    // A total identical to the takeover reading is far more likely a stale answer
-                    // than a loan that delivered nothing at all; read once more before committing.
+            // Read the odometer only over a link already up; otherwise a read dials the pod.
+            if let odometer = manager as? PumpDeliveryOdometer, (manager as? ExclusiveDeviceControl)?.isControlReady == true {
+                odometer.refreshDeliveredUnits { first in
+                    let delivered = odometer.deliveredUnits?.units
+                    // A total equal to the takeover reading is probably stale: read once more.
                     if first, delivered != nil, delivered == self.deliveredAtTakeover {
-                        manager.podLoanReadStatus { second in finalize(second) }
+                        odometer.refreshDeliveredUnits { second in finalize(second) }
                     } else {
                         finalize(first)
                     }
@@ -214,23 +180,16 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Send one offer and arm the next. Four situations come through here — an interim drain, the
-    /// final released offer, a revoke's drain and a relaunch-recovered drain — and `live` below is
-    /// what separates them.
-    ///
-    /// A LIVE offer is NEVER queued. If the phone is unreachable the hand-back fails now and the
-    /// loan continues, because a queued offer is accepted whenever the link returns — possibly
-    /// hours later, with the phone nowhere near the pod and the loan long since moved on. Drains
-    /// from a loan that is already over do queue: the pod has changed hands either way.
+    /// Sends one offer and arms the next. A live offer is never queued: accepted late it would
+    /// split the pod. Drains from a loan that is already over may queue.
     func sendHandbackOffer(freshened: Bool, recovered: Bool) {
         guard let epoch = epoch ?? journal.activeEpoch else { return }
-        // The revoke path has already torn the pump down, so it falls back to the total captured
-        // before that teardown: an offer without an odometer skips the phone's reconcile entirely.
+        // After a revoke's teardown, use the total captured before it.
         var odometer: LoanOdometerSnapshot?
         if let start = deliveredAtTakeover,
-           let latest = pumpManager?.podLoanInsulinDelivered ?? revokeCapturedDelivered {
+           let latest = pumpOdometer?.deliveredUnits?.units ?? revokeCapturedDelivered {
             odometer = LoanOdometerSnapshot(deliveredAtStart: start, deliveredLatest: latest, freshenSucceeded: freshened,
-                                            asOf: pumpManager?.podLoanInsulinDeliveredAt ?? revokeCapturedDeliveredAt)
+                                            asOf: pumpOdometer?.deliveredUnits?.at ?? revokeCapturedDeliveredAt)
         }
         let offerEvents = journal.unackedEvents()
         let offer = HandbackOffer(
@@ -243,16 +202,11 @@ extension PodLoanWatchController {
             recovered: recovered,
             released: phase != .active,
 
-            // Built from the NON-BLOCKING mirror: reading the real flag syncs onto the loop's
-            // queue from this one, which is the deadlock direction. A RECOVERED offer sends nil
-            // instead — a relaunch reads a freshly booted manager whose flag is a boot default,
-            // and overwriting the user's captured mode with it leaves the phone resuming in the
-            // wrong one.
+            // From the non-blocking mirror. A recovered offer sends nil: a rebooted flag is not the user's.
             watchClosedLoopEnabled: recovered ? nil : loopManager.closedLoopEnabledNonBlocking,
 
-            // Echoed on every offer: it is how the phone retro-acknowledges a loan it never
-            // granted.
-            seizeToken: defaults.string(forKey: DormantKeys.activeToken).flatMap(UUID.init(uuidString:)),
+            // Lets the phone retro-acknowledge a loan it never granted.
+            seizeToken: persisted.seizeToken,
 
             lastLoopCompleted: loopManager.lastLoopCompleted)
         if offer.released == true, finalOfferSentAt == nil { finalOfferSentAt = self.now() }
@@ -263,9 +217,7 @@ extension PodLoanWatchController {
             SportLog.event("loan", "hand-back offer attempt \(handbackResendCount) — waiting for iPhone ack")
         }
 
-        // "Live" means this watch still holds the pod and the loan can still be kept: an interim
-        // drain or the final offer. A revoked or recovered drain is not live — the pod has already
-        // changed hands — so those may queue and wait for the link.
+        // Live: this watch still holds the pod (interim or final offer).
         let live = !recovered && phase != .revoked && phase != .recoveredDrain
         let reachableNow = isPhoneReachable()
         if !reachableNow { handbackSawUnreachable = true }
@@ -285,17 +237,14 @@ extension PodLoanWatchController {
         let work = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
 
-            // The budget is checked HERE rather than by a timer of its own, so a suspended app
-            // discovers the expiry on its next resend instead of firing it long after the fact.
+            // Checked on each resend, so a suspended app still notices.
             if let deadline = self.handbackDeadline, self.now() >= deadline,
                self.phase == .handingBack || (self.phase == .active && self.handbackRequested) {
                 self.handbackTimedOut()
                 return
             }
 
-            // The drain's ceiling. Giving up loses nothing: the phone owns the pod and has
-            // already committed these records, whereas a one-way session otherwise leaves the
-            // watch resending across relaunches indefinitely.
+            // The drain's ceiling; the phone already has the records.
             let drain = self.phase == .revoked || self.phase == .recoveredDrain
             if drain, self.handbackResendCount >= Self.maxDrainResends {
                 let wedge = HandbackWedge.classify(resendCount: self.handbackResendCount,
@@ -306,26 +255,23 @@ extension PodLoanWatchController {
                 self.resendWorkItem?.cancel()
                 self.teardownPump()
                 self.journal.end()
-                self.phase = .idle
-                self.epoch = nil
-                self.deliveredAtTakeover = nil
+                // Closed in one save; the token goes too, or the next loan is mistaken for a seized one.
+                self.updateState {
+                    $0.phase = .idle
+                    $0.epoch = nil
+                    $0.deliveredAtTakeover = nil
+                    $0.seizeToken = nil
+                }
                 self.handbackDeadline = nil
                 self.handbackStartedAt = nil
                 self.finalOfferSentAt = nil
                 self.handbackRequested = false
                 self.finalOfferSent = false
-                // Everything this session accumulated goes with it. The resend count and the two
-                // wedge flags are per-session: carried into the next one they start it already
-                // spent, so the NEXT drain gives up after a single offer and its wedge verdict
-                // describes a session that is over. Only `beginHandback` used to clear them,
-                // which a drain never runs through.
+                // Per-session counters and wedge flags reset with the session.
                 self.handbackResendCount = 0
                 self.handbackSawUnreachable = false
                 self.handbackSawUrgentSendError = false
                 self.urgentSendWedged = false
-                // Same reason the ordinary close clears it: left set, the next ordinary loan is
-                // mistaken for one grown from the standing copy.
-                self.defaults.removeObject(forKey: DormantKeys.activeToken)
                 HandbackStuckAlert.disarm()
                 self.onLoanActiveChanged?(false)
                 SportLog.event("loan", "CLOSED — drain abandoned, pod already the phone's")
@@ -340,22 +286,14 @@ extension PodLoanWatchController {
         schedule(after: 15, label: "handback-resend", execute: work)
     }
 
-    /// The phone's commit acknowledgement. It advances the journal's cursor always, and moves the
-    /// loan along only once nothing is left unacked.
-    ///
-    /// The pod is released only from here, after the FINAL offer's ack. The `finalOfferSent` gate
-    /// is what stops a duplicate interim ack, arriving in the window before that offer goes out,
-    /// from closing a loan the phone still believes it has lent — which would strand it there.
+    /// Advances the cursor on every ack; only the final offer's ack releases the pod.
     func handleAck(_ ack: HandbackAck) {
-        // The journal's epoch is the fallback because a parked drain has no controller epoch left
-        // — it was cleared when its loan ended — and its records still need acking.
+        // A parked drain has no controller epoch; use the journal's.
         guard let current = epoch ?? journal.activeEpoch, ack.epoch == current else {
             SportLog.event("loan", "ack IGNORED ev=\(ack.epoch) — ours ev=\(epoch.map(String.init) ?? "nil") journal ev=\(journal.activeEpoch.map(String.init) ?? "nil"); stale redelivery or epoch mismatch")
             return
         }
-        // The cursor moves on every ack, and an empty backlog is the finalize gate. The phone
-        // ACKS the still-open temp without committing it for exactly this reason: the gate can
-        // clear while that temp is still running, and it comes home clamped on the final drain.
+        // An empty backlog is the finalize gate.
         journal.applyAck(committedCursor: ack.committedCursor)
         guard journal.unackedEvents().isEmpty else { return }
 
@@ -373,35 +311,30 @@ extension PodLoanWatchController {
         let ackWait = finalOfferSentAt.map { self.now().timeIntervalSince($0) }
         SportLog.event("loan", String(format: "ack RECEIVED %@ after the final offer — releasing the pod now",
                                       ackWait.map { String(format: "+%.1fs", $0) } ?? "(no offer stamp)"))
-        // Timed, because this is the moment the pod starts advertising again and the phone's
-        // standing connect can land on it.
+        // Timed: the pod advertises again from here.
         let releaseBegan = self.now()
         teardownPump()
         SportLog.event("loan", String(format: "pod BLE teardown returned in %.2fs — the phone's standing connect can land from here",
                                       self.now().timeIntervalSince(releaseBegan)))
-        // CLOSED: the epoch, the journal, the takeover odometer and the seize token all go. The
-        // high-water epoch deliberately does not.
+        // Closed: epoch, journal, takeover odometer and seize token go; the high-water epoch stays.
         finalOfferSentAt = nil
         journal.end()
-        phase = .idle
-        epoch = nil
-        deliveredAtTakeover = nil
+        updateState {
+            $0.phase = .idle
+            $0.epoch = nil
+            $0.deliveredAtTakeover = nil
+            $0.seizeToken = nil
+        }
         handbackDeadline = nil
         handbackStartedAt = nil
         HandbackStuckAlert.disarm()
         onLoanActiveChanged?(false)
-        defaults.removeObject(forKey: DormantKeys.activeToken)
         reunionPromptActive = false
         SportLog.event("loan", "CLOSED — records drained, pod released, cursor \(ack.committedCursor)")
     }
 
-    /// The phone asking for the pod back.
-    ///
-    /// `lastRevokedEpoch` is recorded BEFORE the epoch is matched, so even a revoke that names no
-    /// live session closes the split-brain hole: any grant at or below it is refused from here on.
-    /// A revoke for a stale epoch is answered with what this watch holds rather than with silence
-    /// — silence reads to the phone as a dead watch, and its ladder then force-steals a live
-    /// loan's pod.
+    /// The phone asking for the pod back. `lastRevokedEpoch` is recorded first, closing the
+    /// split-brain hole; a stale revoke is answered with what this watch holds.
     func handleRevoke(_ revoke: Revoke) {
         if revoke.epoch > (lastRevokedEpoch ?? Int.min) {
             lastRevokedEpoch = revoke.epoch
@@ -421,11 +354,9 @@ extension PodLoanWatchController {
         handbackStartedAt = nil
         HandbackStuckAlert.disarm()
 
-        // Capture the odometer BEFORE the teardown. Teardown comes first on purpose — it frees
-        // the pod's BLE for the reclaiming phone — but it leaves no pump to ask, and an offer
-        // without an odometer skips the phone's authoritative reconcile of this loan entirely.
-        revokeCapturedDelivered = pumpManager?.podLoanInsulinDelivered
-        revokeCapturedDeliveredAt = pumpManager?.podLoanInsulinDeliveredAt
+        // Capture the odometer before the teardown frees the pod for the phone.
+        revokeCapturedDelivered = pumpOdometer?.deliveredUnits?.units
+        revokeCapturedDeliveredAt = pumpOdometer?.deliveredUnits?.at
         loopManager.pumpManager = nil
         teardownPump()
         phase = .revoked
@@ -434,10 +365,7 @@ extension PodLoanWatchController {
         sendHandbackOffer(freshened: false, recovered: true)
     }
 
-    /// Run once the transport is up after a launch. It tells the phone about a takeover that was
-    /// in flight when the app died — otherwise the phone waits out its own dead-man for a loan
-    /// that never started — and re-kicks a parked drain's resend chain, which is what makes a
-    /// parked drain startable ground rather than a wall.
+    /// After launch: report a takeover that died mid-flight, and restart a parked drain's resends.
     func drainRecoveredIfNeeded() {
         queue.async {
             if let epoch = self.pendingInterruptedTakeoverEpoch {
@@ -450,16 +378,12 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Answer the phone's probe about a specific epoch. Two guards before claiming ignorance:
-    /// never while `.active`, and only when our epoch is BEHIND the one being asked about. A phone
-    /// probing for a grant that never arrived, against a watch running a newer loan, got silence
-    /// and parked its hand-over until somebody forced it by hand.
+    /// Claims ignorance of an epoch only when not active and behind it.
     func handleStatusQuery(_ query: StatusQuery) {
         guard let current = epoch, query.epoch == current else {
             if phase != .active, (epoch ?? Int.min) < query.epoch {
-                // An explicit "we never heard of this grant" is what lets the phone give up
-                // early. Silence is not "no": an unreachable watch mid-takeover looks identical.
-                SportLog.event("loan", "status query for epoch \(query.epoch) — we have \(epoch.map(String.init) ?? "none") and hold no pod: the grant never reached us (#108)")
+                // An explicit no lets the phone give up early.
+                SportLog.event("loan", "status query for epoch \(query.epoch) — we have \(epoch.map(String.init) ?? "none") and hold no pod: the grant never reached us")
                 sendMessage(.statusReport(StatusReport(
                     epoch: query.epoch,
                     mode: currentMode(),
@@ -479,7 +403,7 @@ extension PodLoanWatchController {
             mode: currentMode(),
             lastDirectGlucoseAge: loopManager.latestGlucoseAge,
             lastEventSeq: journal.lastEventSeq,
-            podFault: pumpManager?.podLoanFaultDescription,
+            podFault: pumpFaultDescription,
             holdsPod: phase == .active,
             knowsGrant: true)
         sendMessage(.statusReport(report))
@@ -490,15 +414,14 @@ extension PodLoanWatchController {
         return .closedDirect
     }
 
-    /// What the phone is told about the pod. Reservoir level is not read and suspension is not
-    /// tracked on the wrist; the phone establishes both from its own reclaim round-trip.
+    /// The phone reads reservoir and suspension itself at reclaim.
     func currentPodStatus() -> LoanPodStatus {
         LoanPodStatus(
             timestamp: self.now(),
-            deliveredUnits: pumpManager?.podLoanInsulinDelivered,
+            deliveredUnits: pumpOdometer?.deliveredUnits?.units,
             reservoirLevel: nil,
             isSuspended: false,
-            faultCode: pumpManager?.podLoanFaultDescription)
+            faultCode: pumpFaultDescription)
     }
 
 }

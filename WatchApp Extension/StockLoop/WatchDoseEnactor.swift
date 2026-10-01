@@ -2,10 +2,7 @@
 //  WatchDoseEnactor.swift
 //  WatchApp Extension
 //
-//  A labelled COPY of Loop/Managers/DoseEnactor.swift. Two incidental differences: the logger
-//  is os.log, because stock's DiagnosticLog would pull the phone's SharedLogging into this
-//  target, and stock's unused `dosingQueue` property is not carried over. Same API, same order
-//  — temp first, then bolus. Keep it in step with the original.
+//  Copy of Loop/Managers/DoseEnactor.swift, logging via os.log. Keep in step with the original.
 //
 
 import Foundation

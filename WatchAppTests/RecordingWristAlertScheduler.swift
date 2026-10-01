@@ -9,18 +9,8 @@ import Foundation
 import UserNotifications
 @testable import WatchApp
 
-/// Records what the dead-man alerts ask for, instead of asking the notification daemon.
-///
-/// It models the ONE platform behaviour these tests depend on: adding a request whose identifier
-/// already exists REPLACES it rather than stacking. That is the mechanism the whole suite is about
-/// — every completed loop cycle re-adds under the same identifier, so a healthy loop perpetually
-/// defers its own alarm — and modelling it here is what lets the identifier assertions mean
-/// something without a live daemon.
-///
-/// Deliberately synchronous. The real API is async because a separate process owns the store; that
-/// asynchrony is what forced the old suite's `pending()` / `settledPending()` polling helpers, and
-/// it bought nothing but flakiness once the daemon was answering from an unauthorized app with an
-/// empty array.
+/// Records alert requests synchronously, modelling the one platform rule the tests need:
+/// re-adding an identifier replaces it.
 final class RecordingWristAlertScheduler: WristAlertScheduling {
 
     /// Pending requests, newest write wins per identifier, insertion order preserved.

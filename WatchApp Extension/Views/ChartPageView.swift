@@ -224,14 +224,7 @@ struct ChartPageView: View {
             updateGlucoseChart()
         }
         .sheet(isPresented: $isShowingCarbList) {
-            // ONE list, loan-aware. During a loan it reads the loan stack's carb store — the
-            // authoritative one while the wrist holds the pod — and gains swipe-to-delete, because
-            // the phone is not there to edit on. That branch lives inside `CarbList` rather than
-            // here: two lists meant two places to keep the presentation right, and this is the
-            // screen the user already knows.
-            //
-            // It also matters that this used `ExtensionDelegate.shared()`, which force-unwraps.
-            // `CarbList` reads the session through `sharedIfAvailable()` instead.
+            // The stock list, loan-aware inside `CarbList` (loan store, swipe-to-delete).
             CarbList()
         }
     }

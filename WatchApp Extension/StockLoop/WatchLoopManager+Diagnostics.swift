@@ -2,11 +2,8 @@
 //  WatchLoopManager+Diagnostics.swift
 //  WatchApp Extension
 //
-//  Log surfaces. NOTHING HERE DOSES, and no dosing path reads any of these numbers back: they
-//  exist so a log recovered from the wrist can be read without the watch in front of you.
-//
-//  The one product that outlives its log line is `lastPredictionBreakdown`, which the debug
-//  screen renders; `logPredictionBreakdown` is its only writer.
+//  Log surfaces only; no dosing path reads them. `lastPredictionBreakdown` is also rendered
+//  by the debug screen.
 //
 
 import Foundation
@@ -14,26 +11,17 @@ import HealthKit
 import LoopKit
 import LoopAlgorithm
 import LoopCore
-import G7SensorKit
 import WatchConnectivity
 import os.log
 
 extension WatchLoopManager {
 
-    /// Write the per-cycle prediction line and refresh `lastPredictionBreakdown`.
-    ///
-    /// Every component is the FORWARD DIFFERENCE of one effect array — its last value minus its
-    /// first value at or after `now()` — and the start is the latest stored glucose. That is an
-    /// arithmetic that reads well, not `LoopMath.predictGlucose`'s own accounting: the arrays are
-    /// differenced independently, the momentum blend's taper is not applied, and nothing is
-    /// anchored to the starting sample's date. So `residualMgdl` is whatever the four named
-    /// effects fail to explain and is NOT zero by construction — a big one is a thing to look at,
-    /// not a bug in this function.
+    /// The per-cycle prediction line: each effect's forward difference from the latest glucose.
+    /// `residualMgdl` is what the named effects do not explain; not zero by construction.
     func logPredictionBreakdown(decided: AutomaticDoseRecommendation? = nil) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
-        // `net` (formatted, for the log line) and `delta` (numeric, for the struct) are the SAME
-        // forward difference. Change one and the log and the debug screen stop agreeing.
+        // `net` and `delta` are the same difference; keep them in step.
         func net(_ effects: [GlucoseEffect]?) -> String {
             guard let effects, !effects.isEmpty else { return "—" }
             let forward = effects.filter { $0.startDate >= now() }
@@ -47,8 +35,7 @@ extension WatchLoopManager {
 
         let rec: String
 
-        // `decided` is passed in because a SUCCESSFUL enact clears `recommendedAutomaticDose`.
-        // Without it this line would print "none" for exactly the cycles that dosed.
+        // `decided` because a successful enact clears `recommendedAutomaticDose`.
         if let r = decided ?? recommendedAutomaticDose?.recommendation {
             let basal = String(format: "%.2f U/h", r.basalAdjustment.unitsPerHour)
             let bolus = r.bolusUnits.map { String(format: " + auto-bolus %.2f U", $0) } ?? ""
@@ -57,9 +44,7 @@ extension WatchLoopManager {
             rec = "none"
         }
 
-        // The forecast MINIMUM, printed beside the suspend threshold on purpose: the correction
-        // is driven by the lowest forward point, and any point below the threshold turns the whole
-        // cycle into a suspend. A small temp under a high eventual is read off this pair.
+        // The forecast minimum beside the suspend threshold: it drives the correction.
         let minPredicted: String = {
             guard let fwd = predictedGlucose?.filter({ $0.startDate >= now() }), !fwd.isEmpty,
                   let m = fwd.min(by: { $0.quantity.doubleValue(for: mgdlU) < $1.quantity.doubleValue(for: mgdlU) })
@@ -110,12 +95,7 @@ extension WatchLoopManager {
         logPredictionDiffAgainstPhone(effects: e)
     }
 
-    /// Watch-vs-phone column diff against the prediction the phone stamped into the grant — the
-    /// one moment the two devices ran on the same inputs, so a divergence here is the wrist's
-    /// own, not the clock's.
-    ///
-    /// Stops after 20 minutes: past that the snapshot describes glucose, carbs and doses the
-    /// watch has moved on from, and the columns would be comparing two different questions.
+    /// Column diff against the prediction the phone stamped into the grant, for 20 minutes.
     func logPredictionDiffAgainstPhone(effects e: LoopAlgorithmEffects<StoredCarbEntry>?) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
         guard let snap = phonePredictionSnapshotAtGrant else { return }
@@ -156,14 +136,8 @@ extension WatchLoopManager {
             e?.retrospectiveGlucoseDiscrepancies.count ?? 0, snap.rcDiscrepancyCount))
     }
 
-    /// Dose-by-dose decomposition of the insulin book at one instant, labelled by the moment
-    /// that asked for it. Called at both ends of a loan (seed-in and hand-back) so the two dumps
-    /// can be read side by side when an IOB figure is disputed.
-    ///
-    /// Net basal is the number that matters — delivery ABOVE or BELOW the schedule, which is what
-    /// IOB is built from — so rows whose net rounds to zero are omitted, boluses always kept. The
-    /// annotated dose type carries no sync identity, hence the placeholder id column; rows are
-    /// matched across dumps by time.
+    /// The insulin book dose by dose at one instant, for seed-in and hand-back. Rows with zero
+    /// net basal are omitted.
     func dumpIOBDecomp(_ label: String, at t: Date) {
         dataAccessQueue.async {
             guard let basal = self.basalRateScheduleApplyingOverrideHistory else {
@@ -204,10 +178,7 @@ extension WatchLoopManager {
         }
     }
 
-    /// The forecast in one line: its lowest forward point, then the curve sampled every 30
-    /// minutes out to two hours. When no point is still in the future — a prediction that has
-    /// aged out — the minimum falls back to the whole array, so the summary can be describing a
-    /// curve that has already been overtaken. The sample marks are always taken from `now()`.
+    /// Forecast minimum, then the curve every 30 minutes to two hours.
     func curveSummary(_ predicted: [PredictedGlucoseValue]?) -> String {
         guard let predicted, !predicted.isEmpty else { return "—" }
         let mgdl = LoopUnit.milligramsPerDeciliter
@@ -225,9 +196,7 @@ extension WatchLoopManager {
         return "min \(minV)@\(minOff)m · t0–120: \(samples)"
     }
 
-    /// Every input that produced a temp, on the same line as the temp. Built at the moment of
-    /// the decision and from that cycle's own input, so reading the log never requires re-running
-    /// the algorithm against settings that may since have changed.
+    /// Every input behind a temp, on the same line.
     func algorithmSummary(input: StoredDataAlgorithmInput,
                                   output: AlgorithmOutput<StoredCarbEntry>,
                                   enacting: TempBasalRecommendation) -> String {

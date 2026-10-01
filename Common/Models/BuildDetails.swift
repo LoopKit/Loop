@@ -25,27 +25,14 @@ class BuildDetails {
         dict = parsed
     }
 
-    /// The one string that unambiguously identifies the code on a device.
-    ///
-    /// WHY. `CFBundleVersion` is pinned in `VersionOverride.xcconfig`, so every local build renders the
-    /// SAME number and the on-wrist tag cannot detect staleness at all. TestFlight assigns its own
-    /// numbers (109, 111, 112...) on a different sequence again, so "build 58" on the wrist and
-    /// "build 115" in TestFlight could be the same code or six hours apart and nothing on screen says
-    /// which. Two devices that must run compatible code had no way to be compared by looking at them.
-    ///
-    /// The superproject SHA has none of those problems: it is the same identifier on both halves when
-    /// they were built together, and visibly different when they were not. `capture-build-details.sh`
-    /// already wrote it; nothing read it.
+    /// The workspace commit plus build date and time: the same on phone and watch when built
+    /// together. CFBundleVersion is pinned, so it cannot tell builds apart.
     var codeIdentity: String {
         let sha = (dict["com-loopkit-Loop-commit-sha"] as? String)
             ?? (dict["com-loopkit-LoopWorkspace-git-revision"] as? String)
             ?? gitRevision
         guard let sha else { return "sha?" }
-        // Build date AND time disambiguate two installs of the same commit — the case where a rebuild
-        // is the only difference, which is most of them during a debugging session. The DATE is not
-        // optional detail: a build left on the wrist overnight reads as plausibly current from the time
-        // alone, and "is this yesterday's?" is exactly the question the tag exists to answer.
-        // Source format: "Wed Aug 19 15:59:38 EDT 2026" -> "Aug19 15:59".
+        // "Wed Aug 19 15:59:38 EDT 2026" -> "Aug19 15:59".
         let parts = (dict["com-loopkit-Loop-build-date"] as? String)?
             .split(separator: " ").map(String.init) ?? []
         let stamp = parts.count >= 4 ? " \(parts[1])\(parts[2]) \(parts[3].prefix(5))" : ""

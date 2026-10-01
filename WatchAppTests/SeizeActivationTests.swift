@@ -2,25 +2,8 @@
 //  SeizeActivationTests.swift
 //  WatchAppTests
 //
-//  Ported by content from her line (reclaim-lean-bench-pm); harness adapted to this
-//  line's async store APIs and single-target WatchApp module.
-//
-//  R40 seize: the first field activation (2026-08-30) died 900 ms after the user's
-//  confirm — the dormant credential's expiresAt is issuedAt BY CONTRACT ("meaningless
-//  dormant"), the activation rebuild carried it verbatim, and the ladder's mid-takeover
-//  lease guard aborted at read 1, twice, before the un-restamped lease was identified.
-//  These tests pin the activation contract so it cannot regress silently:
-//
-//    · the rebuild mints the LIVE lease alongside the fresh epoch (the root-cause fix),
-//    · a timed-out request offers the offline start only when a credential is stored,
-//    · an unreachable phone shortens the request timeout (accelerate, never gate — R40(b)),
-//    · a confirm alone never persists the reunion token — promotion happens only at
-//      .active, which no failed activation reaches, so nothing stale can ever match the
-//      phone's retro-ack.
-//
-//  Same harness recipe as PodLoanTimerSeamTests: real stores against a temp directory,
-//  the scheduler seam for virtual time, and debugSnapshot() (queue.sync) as the fence
-//  that drains the controller's serial queue before each assertion.
+//  The phoneless-start (seize) activation contract: live lease on rebuild, offer only with a
+//  stored credential, reachability shortens the timeout, token persisted only at `.active`.
 //
 
 import XCTest
@@ -73,27 +56,23 @@ final class SeizeActivationTests: XCTestCase {
             cacheLength: .hours(24),
             provenanceIdentifier: "SeizeActivationTests"
         )
-        let manager = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore)
+        let manager = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
+                                       defaults: defaults, stateDirectory: journalDir)
         return PodLoanWatchController(loopManager: manager,
                                       journal: LoanEventJournal(directory: journalDir),
-                                      defaults: defaults)
+                                      stateDirectory: journalDir)
     }
 
-    /// A credential exactly as the phone builds it dormant: expiresAt == issuedAt
-    /// ("meaningless dormant"), minimal-but-valid everything else. With
-    /// `completeSettings`, the therapy snapshot decodes fully so an activation gets past
-    /// settings validation and into the journal step (it still dies at the pump rebuild —
-    /// the bytes aren't a pod — which is exactly far enough to observe the fold).
+    /// A dormant credential as the phone builds it (expiresAt == issuedAt). `completeSettings` gets
+    /// an activation as far as the journal; it still dies at the pump rebuild.
     private func fixtureDormant(issuedAt: Date, epoch: Int = 3, token: UUID = UUID(),
                                 completeSettings: Bool = false) -> DormantGrant {
         let grant = LoanGrant(epoch: epoch, expiresAt: issuedAt,
-                              pumpManagerRawState: Data([1, 2, 3]), podAddress: 0x1F0A2B3C,
+                              pumpConfiguration: Data([1, 2, 3]), podAddress: 0x1F0A2B3C,
                               therapySettingsRaw: completeSettings ? Self.completeTherapySettingsRaw() : Data([4, 5]),
                               settingsTimeZoneID: "GMT",
                               doseHistory: [],
-                              // THIS LINE'S delta from her fixture: LoopSettings.rawValue drops
-                              // the three schedules on next-dev, so a complete grant must carry
-                              // the settings SUPPLEMENT — exactly as the phone's assembly does.
+                              // `LoopSettings.rawValue` drops the schedules, so a complete grant carries the supplement.
                               therapySettingsSupplementRaw: completeSettings ? Self.settingsSupplementRaw() : nil)
         return DormantGrant(grant: grant, issuedAt: issuedAt, seizeToken: token)
     }
@@ -134,10 +113,8 @@ final class SeizeActivationTests: XCTestCase {
 
     // MARK: - The root-cause pin
 
-    /// The activation rebuild must mint BOTH rewritten fields: the forced-fresh epoch and
-    /// the live lease. Field 2026-08-30: only the epoch was rewritten, so the credential
-    /// walked into the ladder wearing its issue-time expiresAt and the mid-takeover lease
-    /// guard killed it at read 1 — "grant lease expired mid-takeover", 900 ms after confirm.
+    /// The rebuild mints both the fresh epoch and the live lease (without the lease,
+    /// the lease guard kills the takeover at its first read).
     func testActivationRebuildMintsTheEpochAndTheLiveLease() {
         let issuedAt = Date().addingTimeInterval(-3600)   // an hour-old credential, routine for seize
         let dormant = fixtureDormant(issuedAt: issuedAt, epoch: 3)
@@ -152,7 +129,7 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertGreaterThan(rebuilt.expiresAt.timeIntervalSinceNow, 240,
                              "an hour-old credential must still enter the ladder with (almost) the full 5-minute budget")
         // Every other field carries verbatim.
-        XCTAssertEqual(rebuilt.pumpManagerRawState, dormant.grant.pumpManagerRawState)
+        XCTAssertEqual(rebuilt.pumpConfiguration, dormant.grant.pumpConfiguration)
         XCTAssertEqual(rebuilt.podAddress, dormant.grant.podAddress)
         XCTAssertEqual(rebuilt.therapySettingsRaw, dormant.grant.therapySettingsRaw)
         XCTAssertEqual(rebuilt.settingsTimeZoneID, dormant.grant.settingsTimeZoneID)
@@ -160,8 +137,29 @@ final class SeizeActivationTests: XCTestCase {
 
     // MARK: - The entry gate
 
+    /// A seized loan's phase and reunion token are saved together: a kill right after the phase
+    /// lands can no longer leave an active seized loan the phone cannot retro-acknowledge.
+    func testTheReunionTokenIsSavedWithTheActivePhase() async {
+        let controller = await makeController()
+        let token = UUID()
+        controller.pendingSeizeToken = token
+        let dir = journalDir!
+        var savedAtActive: PodLoanWatchState?
+        let observer = NotificationCenter.default.addObserver(forName: .podLoanPhaseDidChange, object: nil, queue: nil) { _ in
+            let file = PersistedProperty<[String: Any]>(key: "PodLoanWatchState", directory: dir)
+            if let state = file.wrappedValue.flatMap(PodLoanWatchState.init(rawValue:)), state.phase == .active, savedAtActive == nil {
+                savedAtActive = state
+            }
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+        controller.queue.sync { controller.recordTakeoverActive(delivered: 10) }
+        XCTAssertEqual(savedAtActive?.seizeToken, token, "the first save that reads active already holds the token")
+        XCTAssertEqual(savedAtActive?.deliveredAtTakeover, 10)
+        XCTAssertNil(controller.pendingSeizeToken)
+    }
+
     /// No credential stored: the timeout keeps its pre-seize behavior (idle note, no offer).
-    /// With a stored credential: the offer appears. R40(b): offered, never auto-taken.
+    /// With a stored credential: the offer appears: offered, never auto-taken.
     func testTimedOutRequestOffersOfflineStartOnlyWithACredential() async {
         let controller = await makeController()
         controller.send = { _ in }
@@ -178,16 +176,13 @@ final class SeizeActivationTests: XCTestCase {
         snap = controller.debugSnapshot()
         XCTAssertNotNil(snap.seizeOfferIssuedAt, "credential stored → the timeout offers the offline start")
         XCTAssertEqual(snap.seizeOfferIssuedAt.map { abs($0.timeIntervalSince(issuedAt)) < 1 }, true,
-                       "the offer carries the credential's issue stamp (R40(d): age shown)")
+                       "the offer carries the credential's issue stamp, so its age can be shown")
         XCTAssertNil(snap.lastIdleNote, "the offer replaces the failure note")
     }
 
     // MARK: - The shortened timeout
 
-    /// R40(b): advisory reachability ACCELERATES the offer, never gates the attempt. A
-    /// session already reporting unreachable gets an 8 s timeout instead of 25 s — the
-    /// field seize spent 25 s twice against a powered-off phone. The request itself must
-    /// still be sent (the phone might answer anyway; the short timer is the only change).
+    /// Unreachable shortens the timeout to 8 s but the request is still sent.
     func testUnreachablePhoneShortensTheRequestTimeout() async {
         let controller = await makeController()
         controller.isPhoneReachable = { false }
@@ -208,14 +203,10 @@ final class SeizeActivationTests: XCTestCase {
 
     // MARK: - Reunion-token hygiene
 
-    /// A confirm alone must never persist the reunion token. This activation dies inside
-    /// handleGrant (the fixture's pump/settings bytes don't decode — any failed activation
-    /// exercises the same property): the controller returns to idle, and the persisted
-    /// active-token slot stays empty. Promotion happens only at .active — so an aborted
-    /// seize leaves nothing a later offer could echo into the phone's retro-ack, which
-    /// would otherwise acknowledge a loan that never ran.
+    /// A failed activation leaves no persisted token for the phone's retro-ack to match.
     func testConfirmAloneNeverPersistsTheReunionToken() async {
         let controller = await makeController()
+        controller.isPhoneReachable = { false }   // an offline start is one the phone isn't answering
         controller.send = { _ in }
         controller.scheduler = { _, _, work in work.perform() }
 
@@ -229,11 +220,11 @@ final class SeizeActivationTests: XCTestCase {
 
         XCTAssertNil(snap.seizeOfferIssuedAt, "the confirm consumed the offer")
         XCTAssertEqual(snap.phase, .idle, "the fixture activation fails and returns to idle (startable again)")
-        XCTAssertNil(defaults.string(forKey: "PodLoanWatchController.activeSeizeToken"),
+        XCTAssertNil(controller.persisted.seizeToken,
                      "no .active, no persisted token — a failed activation must leave nothing to echo")
     }
 
-    // MARK: - Re-entry over a parked drain (R40, field 2026-08-30)
+    // MARK: - Re-entry over a parked drain
 
     /// The journal fold: adoptEpoch re-tags the epoch and keeps every event, seq, cursor,
     /// and tombstone — the one sanctioned way past begin()'s refuse-to-clobber.
@@ -256,11 +247,8 @@ final class SeizeActivationTests: XCTestCase {
         _ = a
     }
 
-    /// The full re-entry: a controller that woke up on a parked drain (the reboot case)
-    /// must accept Start, rest back on the drain when the request times out — with the
-    /// resend chain re-kicked — offer the seize, and on confirm FOLD the drain into the
-    /// new loan (epoch above the parked one, token persisted at fold so the drain keeps
-    /// the retro-ack door even though this activation dies at the pump rebuild).
+    /// A rebooted watch on a parked drain accepts Start, rests back on the drain at timeout, offers
+    /// the seize, and folds the drain into the new loan.
     func testStartAndSeizeOverAParkedDrainFoldsIt() async throws {
         // Park a drain: a prior loan (epoch 5) with one unacked event, as a reboot leaves it.
         let seeded = LoanEventJournal(directory: journalDir)
@@ -268,6 +256,7 @@ final class SeizeActivationTests: XCTestCase {
         let parked = try seeded.mintEvent(record: LoanDoseRecord(kind: .bolus, startDate: Date(), amount: 0.5), provenance: .confirmed)
 
         let controller = await makeController()                          // loads the same journal file
+        controller.isPhoneReachable = { false }   // an offline start is one the phone isn't answering
         var sent = 0
         controller.send = { _ in sent += 1 }
         var labels: [String] = []
@@ -286,7 +275,7 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertNotNil(snap.seizeOfferIssuedAt, "…and the offline offer is up")
         XCTAssertTrue(labels.contains("handback-resend"), "the resend chain was re-kicked on return to the drain")
         XCTAssertGreaterThanOrEqual(sent, 2, "the request went out and so did a recovered offer")
-        XCTAssertNil(defaults.string(forKey: "PodLoanWatchController.activeSeizeToken"),
+        XCTAssertNil(controller.persisted.seizeToken,
                      "before the confirm the token is pending-only")
 
         controller.confirmSeize()
@@ -295,21 +284,17 @@ final class SeizeActivationTests: XCTestCase {
         let after = LoanEventJournal(directory: journalDir)        // fresh instance = the persisted truth
         XCTAssertEqual(after.activeEpoch, 6, "folded to max(credential 3, journal 5 + 1)")
         XCTAssertEqual(after.unackedEvents().map(\.id), [parked.id], "the parked record rides the new loan's stream")
-        XCTAssertEqual(defaults.string(forKey: "PodLoanWatchController.activeSeizeToken"), token.uuidString,
+        XCTAssertEqual(controller.persisted.seizeToken, token,
                        "token persisted at FOLD — a tokenless future-epoch offer would be dropped by the phone")
         XCTAssertEqual(snap.phase, .recoveredDrain, "the failed activation rests back on the drain, still startable")
     }
 
-    // MARK: - R40 reunion: the phone's return ends a seized loan
+    // MARK: - Reunion: the phone's return ends a seized loan
 
-    /// Drives the sim fake-flow to .active (the scheduler seam fires the sim timers
-    /// inline), marks the loan seized (persisted reunion token), then delivers the
-    /// reachability transition. R40(f), ruled 2026-08-31: the debounce fire raises a
-    /// PROMPT — the loan continues untouched — and only the user's Hand Back choice runs
-    /// the normal hand-back. (Jeremy overruled auto: reachability is not presence.)
+    /// The phone returning during a seized loan raises a prompt; only the user's choice ends it.
     func testPhoneReturnPromptsAndOnlyTheUsersChoiceEndsASeizedLoan() async {
-        defaults.set(true, forKey: "sim.fakeLoanFlow")
         let controller = await makeController()
+        controller.simFakeLoanFlow = true
         controller.send = { _ in }
         controller.isPhoneReachable = { true }
         var pendingDebounce: [DispatchWorkItem] = []
@@ -323,7 +308,7 @@ final class SeizeActivationTests: XCTestCase {
 
         controller.requestLoan(watchBuild: "reunion-test")
         XCTAssertEqual(controller.debugSnapshot().phase, .active, "precondition: sim flow reached the live loan")
-        defaults.set(UUID().uuidString, forKey: "PodLoanWatchController.activeSeizeToken")   // mark it SEIZED
+        controller.updateState { $0.seizeToken = UUID() }   // mark it SEIZED
 
         controller.noteReachabilityChanged(true)
         _ = controller.debugSnapshot()                              // fence the arming block
@@ -336,7 +321,7 @@ final class SeizeActivationTests: XCTestCase {
         pendingDebounce[0].perform()                                // 30 s later, phone still reachable
         var snap = controller.debugSnapshot()
         XCTAssertTrue(snap.reunionPromptVisible, "the fire raises the PROMPT")
-        XCTAssertEqual(snap.phase, .active, "…and the loan continues — never auto-ended (R40(f))")
+        XCTAssertEqual(snap.phase, .active, "…and the loan continues — never auto-ended")
 
         // KEEP dismisses; a fresh reachability transition may prompt again later.
         controller.dismissReunionPrompt()
@@ -362,8 +347,8 @@ final class SeizeActivationTests: XCTestCase {
     /// The three gates that must each keep the debounce unarmed: no reunion token (a
     /// NORMAL loan never prompts), the kill switch, and a reachability LOSS.
     func testReunionDebounceRespectsItsGates() async {
-        defaults.set(true, forKey: "sim.fakeLoanFlow")
         let controller = await makeController()
+        controller.simFakeLoanFlow = true
         controller.send = { _ in }
         controller.isPhoneReachable = { true }
         var pendingDebounce: [DispatchWorkItem] = []
@@ -381,13 +366,7 @@ final class SeizeActivationTests: XCTestCase {
         _ = controller.debugSnapshot()
         XCTAssertTrue(pendingDebounce.isEmpty, "a normal loan must never arm the reunion prompt")
 
-        defaults.set(UUID().uuidString, forKey: "PodLoanWatchController.activeSeizeToken")
-        defaults.set(true, forKey: "PodLoanWatchController.seizeAutoHandbackDisabled")
-        controller.noteReachabilityChanged(true)
-        _ = controller.debugSnapshot()
-        XCTAssertTrue(pendingDebounce.isEmpty, "the kill switch must hold it off")
-
-        defaults.removeObject(forKey: "PodLoanWatchController.seizeAutoHandbackDisabled")
+        controller.updateState { $0.seizeToken = UUID() }
         controller.noteReachabilityChanged(false)
         _ = controller.debugSnapshot()
         XCTAssertTrue(pendingDebounce.isEmpty, "a reachability LOSS is not a reunion")
@@ -404,14 +383,11 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertEqual(snap.phase, .active, "and must not touch the loan")
     }
 
-    /// Fix 4a (field 2026-08-31, five reuse lines + four revoke-bricks on tape): the
-    /// seize epoch must clear EVERY mark the watch itself enforces — the persisted
-    /// high-water epoch (CLOSED wipes `epoch` and the journal, the amnesia behind
-    /// 270→270) and the split-brain guard's recorded revoke (a credential at-or-below it
-    /// was rejected outright, bricking seize until the 30-min credential floor).
+    /// A seize epoch clears the high-water mark and the recorded revoke.
     func testSeizeEpochClearsHighWaterAndRevokeMarks() async throws {
         defaults.set(5, forKey: "PodLoanWatchController.highWaterEpoch")
         let controller = await makeController()
+        controller.isPhoneReachable = { false }   // an offline start is one the phone isn't answering
         var sentEpochs: [Int] = []
         controller.send = { dict in
             if let message = try? LoanMessage.decode(fromTransport: dict), case .takeoverFailed(let f) = message {
@@ -438,8 +414,8 @@ final class SeizeActivationTests: XCTestCase {
     /// Detector C (fix 2): the reunion prompt and Keep each SEND a holdsPod status
     /// report, so the phone's yield never waits on dose-stream evidence.
     func testReunionPromptAndKeepSendHoldsPodReports() async {
-        defaults.set(true, forKey: "sim.fakeLoanFlow")
         let controller = await makeController()
+        controller.simFakeLoanFlow = true
         var holdsPodEpochs: [Int] = []
         controller.send = { dict in
             if let message = try? LoanMessage.decode(fromTransport: dict),
@@ -458,7 +434,7 @@ final class SeizeActivationTests: XCTestCase {
         }
         controller.requestLoan(watchBuild: "reunion-test")
         XCTAssertEqual(controller.debugSnapshot().phase, .active)
-        defaults.set(UUID().uuidString, forKey: "PodLoanWatchController.activeSeizeToken")
+        controller.updateState { $0.seizeToken = UUID() }
 
         controller.noteReachabilityChanged(true)
         _ = controller.debugSnapshot()
@@ -472,10 +448,7 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertEqual(holdsPodEpochs.last, controller.debugSnapshot().epoch, "for the live loan's epoch")
     }
 
-    /// A late queued grant arriving while resting on a parked drain gets an ANSWER (the
-    /// undrained-prior-loan denial the phone recovers from), not the silent wrong-phase
-    /// ignore that cost a tap — the resting phase replaced plain .idle, which always
-    /// accepted late grants.
+    /// A late grant while resting on a parked drain is answered, not ignored.
     func testLateGrantWhileRestingOnAParkedDrainIsAnsweredNotIgnored() async throws {
         let seeded = LoanEventJournal(directory: journalDir)
         try seeded.begin(epoch: 5)
@@ -502,13 +475,10 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertEqual(snap.phase, .recoveredDrain, "and the watch rests back on its drain")
     }
 
-    /// The three silences that built the 2026-08-31 21:21 wedge, each now an answer: a live
-    /// loan refusing a stale status query, a stale revoke, or a stale (ghost) grant says
-    /// WHAT IT HOLDS instead of going quiet. The phone's mirror abandons its ghost on any
-    /// one of them; before, it parked on "Handing over…" until a manual force-steal.
+    /// Stale status queries, revokes and grants during a live loan answer with what the watch holds.
     func testStaleTrafficWhileActiveAnswersHoldsPod() async throws {
-        defaults.set(true, forKey: "sim.fakeLoanFlow")
         let controller = await makeController()
+        controller.simFakeLoanFlow = true
         var holdsPodEpochs: [Int] = []
         controller.send = { dict in
             if let message = try? LoanMessage.decode(fromTransport: dict),
@@ -524,17 +494,17 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertEqual(live.phase, .active, "precondition: a live loan")
         guard let ours = live.epoch else { return XCTFail("active loan has no epoch") }
 
-        // A ghost-grant probe (#108) for an older epoch — the tape's 21:21:31 silence.
+        // A ghost-grant probe for an older epoch — once left unanswered.
         controller.handleIncoming(userInfo: try LoanMessage.statusQuery(StatusQuery(epoch: ours - 1)).transportDictionary(), channel: .queued)
         _ = controller.debugSnapshot()
         XCTAssertEqual(holdsPodEpochs, [ours], "the stale query is answered with the loan we hold")
 
-        // A stale revoke — the tape's 21:24 'RECORDED' twice while the phone heard nothing.
+        // A stale revoke — once 'RECORDED' twice while the phone heard nothing.
         controller.handleIncoming(userInfo: try LoanMessage.revoke(Revoke(epoch: ours - 1)).transportDictionary(), channel: .queued)
         _ = controller.debugSnapshot()
         XCTAssertEqual(holdsPodEpochs, [ours, ours], "the refused revoke says what it refused FOR")
 
-        // The ghost grant itself — the tape's 21:21:13 'grant ignored — wrong phase'.
+        // The ghost grant itself — once 'grant ignored — wrong phase' with no reply.
         let ghost = fixtureDormant(issuedAt: Date(), epoch: max(ours - 1, 1), completeSettings: true).grant
             .withEpoch(max(ours - 1, 1), leaseUntil: Date().addingTimeInterval(300))
         controller.handleIncoming(userInfo: try LoanMessage.grant(ghost).transportDictionary(), channel: .queued)
@@ -544,12 +514,10 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertEqual(snap.epoch, ours)
     }
 
-    /// The detonator itself, defused at the source: a request that outlives the watch's
-    /// patience is cancelled from the transfer queue at the timeout, and again (belt) at
-    /// seize confirm — so no queued copy can reach a returning phone inside its 90 s
-    /// freshness window and re-grant over the loan this watch is running by then.
+    /// Timeout and seize confirm both cancel queued requests, so none re-grants later.
     func testTimeoutAndSeizeCancelQueuedRequestTransfers() async {
         let controller = await makeController()
+        controller.isPhoneReachable = { false }   // an offline start is one the phone isn't answering
         controller.send = { _ in }
         var cancelCalls = 0
         controller.cancelQueuedLoanRequests = { cancelCalls += 1; return 1 }
@@ -565,5 +533,79 @@ final class SeizeActivationTests: XCTestCase {
         controller.confirmSeize()
         _ = controller.debugSnapshot()
         XCTAssertEqual(cancelCalls, 2, "seize confirm cancels again — the strongest statement that no queued request should ever land")
+    }
+
+    // MARK: - The offer answers one unanswered request
+
+    /// With the phone reachable at confirm, an ordinary request goes out.
+    func testConfirmWithThePhoneBackSendsAnOrdinaryRequest() async {
+        let controller = await makeController()
+        controller.isPhoneReachable = { false }
+        var requests = 0
+        controller.send = { dict in
+            if let message = try? LoanMessage.decode(fromTransport: dict), case .request(_) = message { requests += 1 }
+        }
+        var timeoutsFired = 0
+        controller.scheduler = { _, label, work in
+            // Only the first timeout runs: it is the one that puts the offer up.
+            if label == "request-timeout" && timeoutsFired == 0 { timeoutsFired += 1; work.perform() }
+        }
+
+        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-600), completeSettings: true))
+        controller.requestLoan(watchBuild: "reachable-confirm")
+        XCTAssertNotNil(controller.debugSnapshot().seizeOfferIssuedAt, "precondition: the offline offer is up")
+
+        controller.isPhoneReachable = { true }
+        controller.confirmSeize()
+        _ = controller.debugSnapshot()          // drains the confirm, which queues the request behind itself
+        let snap = controller.debugSnapshot()   // drains the request
+
+        XCTAssertEqual(requests, 2, "the confirm went to the phone as a second ordinary request")
+        XCTAssertEqual(snap.phase, .requested, "waiting on the phone's grant, not activating the stored credential")
+        XCTAssertNil(snap.seizeOfferIssuedAt, "the offer was consumed")
+        XCTAssertNil(controller.persisted.seizeToken)
+    }
+
+    /// An accepted grant withdraws the offline offer.
+    func testALateGrantWithdrawsTheOfflineOffer() async throws {
+        let controller = await makeController()
+        controller.isPhoneReachable = { false }
+        controller.send = { _ in }
+        var timeoutsFired = 0
+        controller.scheduler = { _, label, work in
+            if label == "request-timeout" && timeoutsFired == 0 { timeoutsFired += 1; work.perform() }
+        }
+
+        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-120), epoch: 3))
+        controller.requestLoan(watchBuild: "late-grant")
+        XCTAssertNotNil(controller.debugSnapshot().seizeOfferIssuedAt, "precondition: the timeout put the offer up")
+
+        let late = fixtureDormant(issuedAt: Date(), epoch: 9, completeSettings: true).grant
+            .withEpoch(9, leaseUntil: Date().addingTimeInterval(300))
+        controller.handleIncoming(userInfo: try LoanMessage.grant(late).transportDictionary(), channel: .queued)
+        let snap = controller.debugSnapshot()
+
+        XCTAssertEqual(snap.phase, .idle, "precondition: the takeover ran and ended back at idle")
+        XCTAssertNil(snap.seizeOfferIssuedAt, "the accepted grant withdrew the offline offer")
+    }
+
+    /// A new Start supersedes an offer left from an earlier unanswered request; its own timeout
+    /// re-offers if the phone is still silent.
+    func testANewStartWithdrawsTheOfflineOffer() async {
+        let controller = await makeController()
+        controller.send = { _ in }
+        var timeoutsFired = 0
+        controller.scheduler = { _, label, work in
+            if label == "request-timeout" && timeoutsFired == 0 { timeoutsFired += 1; work.perform() }
+        }
+
+        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-120), epoch: 3))
+        controller.requestLoan(watchBuild: "first")
+        XCTAssertNotNil(controller.debugSnapshot().seizeOfferIssuedAt, "precondition: the offer is up")
+
+        controller.requestLoan(watchBuild: "second")
+        let snap = controller.debugSnapshot()
+        XCTAssertEqual(snap.phase, .requested)
+        XCTAssertNil(snap.seizeOfferIssuedAt, "the new request withdrew the stale offer")
     }
 }

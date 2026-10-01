@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		01414522FC033F2B7A9B223A /* crying.caf in Resources */ = {isa = PBXBuildFile; fileRef = 85203550670F2E9BE92F27D8 /* crying.caf */; };
 		0514DEEA3C0A404FBA775CD7 /* SettingsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CB27CFCF9F0424FBB930CFF /* SettingsProvider.swift */; };
+		B20CD77F806353E80916E596 /* GlucoseAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0275B13A9543390BC6 /* GlucoseAlertManager.swift */; };
+		D1C318442145F5A2652A5DD6 /* GlucoseAlertManager+Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C71A6661AA828EAFD63C8F08 /* GlucoseAlertManager+Sharing.swift */; };
 		0580A71C73134CBC9DE309C5 /* LoopStallWatchdog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8B06DC011B54C348CC2A48F /* LoopStallWatchdog.swift */; };
 		0929161C5DEB4DFB9F0826AE /* SettingsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A28F30399B460CABF4EDD2 /* SettingsProvider.swift */; };
 		0A02E77AD7536C322933D49B /* minimal.caf in Resources */ = {isa = PBXBuildFile; fileRef = 74145BE3C46270883D295A1F /* minimal.caf */; };
@@ -102,6 +104,7 @@
 		E9CE4D34237D89A408479D12 /* GlanceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00E9C192B33D5FC41E45E7A9 /* GlanceModel.swift */; };
 		2F17426EF105437983CDF0BC /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42BE0808089545E7BE6AE359 /* NSBundle.swift */; };
 		335CB5BBEBED4922B20C0CEC /* StockLoopStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23412C23E024F9A9399C435 /* StockLoopStack.swift */; };
+		C0D6128D55F7237079C42112 /* WatchDeviceManagers.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD49ED34A3CE3A86BEFB048E /* WatchDeviceManagers.swift */; };
 		33644743F20B3706E3107FAC /* mood_synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = BEC0BA802BE613F144AC3A70 /* mood_synth.caf */; };
 		37F9E89015084C8ABF4404FB /* LoanProtocolV2Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1368A70B6E347BCB432DF4D /* LoanProtocolV2Tests.swift */; };
 		3BD58D425AE24815B134F3E1 /* LoanBooksHarnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF6006BAC6EA4034BFD67C0E /* LoanBooksHarnessTests.swift */; };
@@ -223,6 +226,8 @@
 		4DDC23AB11E8E215F41D2E42 /* WatchLoopManager+Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9198C65DD7145352022F9854 /* WatchLoopManager+Diagnostics.swift */; };
 		7BE5EC4CA7BFBB16E8018091 /* WatchLoopManager+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5744C796822627F1C74D802F /* WatchLoopManager+Display.swift */; };
 		C5247AB8EBF91BAC440F95DC /* WatchLoopManager+Glucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = C286C2D1E18B35177E020E34 /* WatchLoopManager+Glucose.swift */; };
+		99A92794C3DBB3888B340AE6 /* GlucoseAlertManager+Watch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446048F44BAE9C66B12394F4 /* GlucoseAlertManager+Watch.swift */; };
+		A9DE3D1E90432124BB5738B2 /* WatchLoopManager+GlucoseAlerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6E574D826158B33EE53EF6 /* WatchLoopManager+GlucoseAlerts.swift */; };
 		3DAF0D06E678E7616137C84A /* WatchLoopManager+Dosing.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89D20C8E12BA79EEB440570 /* WatchLoopManager+Dosing.swift */; };
 		344ABCF8A638888D8C0AC47B /* WatchLoopManager+Cycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4975B7BB91A91CB21F89ED6 /* WatchLoopManager+Cycle.swift */; };
 		4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */; };
@@ -373,12 +378,15 @@
 		9960C6964DD51D81093FAD5D /* chime.caf in Resources */ = {isa = PBXBuildFile; fileRef = 3F7A1D72697082DC3A14587E /* chime.caf */; };
 		9A7CE028302D82A800A03F53 /* DeviceLogThrottleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE014302D82A800A03F53 /* DeviceLogThrottleTests.swift */; };
 		9A7CE029302D82A800A03F53 /* HandbackWedgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE015302D82A800A03F53 /* HandbackWedgeTests.swift */; };
-		9A7CE02B302D82A800A03F53 /* PodLoanEpochScopingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE017302D82A800A03F53 /* PodLoanEpochScopingTests.swift */; };
 		9A7CE02C302D82A800A03F53 /* PodLoanTimerCharacterizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE018302D82A800A03F53 /* PodLoanTimerCharacterizationTests.swift */; };
 		9A7CE02D302D82A800A03F53 /* PodLoanTimerSeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE019302D82A800A03F53 /* PodLoanTimerSeamTests.swift */; };
 		9A7CE02E302D82A800A03F53 /* WatchAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE01A302D82A800A03F53 /* WatchAppTests.swift */; };
 		9A7CE02F302D82A800A03F53 /* WatchdogArmingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE01B302D82A800A03F53 /* WatchdogArmingTests.swift */; };
 		18606676A16D24BF383CCCF8 /* WatchAlertPresenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */; };
+		DB66EB0397D54C94B49ADEF8 /* FirstContactNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */; };
+		73E0AA9C0C5503C0A38FDCA6 /* WristAlertAcknowledgementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */; };
+		8077722BF812D34BDD35AEE6 /* WristOverrideRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */; };
+		5FDDEC8709A17CE196A2F202 /* WristGlucoseAlertTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94E05C050AF4C0CC0B314040 /* WristGlucoseAlertTests.swift */; };
 		9A7CE031302D82A800A03F53 /* LoanContextPrecedenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE030302D82A800A03F53 /* LoanContextPrecedenceTests.swift */; };
 		9A7CE061302D82A800A03F53 /* WristAlertScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE060302D82A800A03F53 /* WristAlertScheduler.swift */; };
 		C4811779E54B6B2608BF2998 /* WatchAlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579C199D790911890AE3F3A /* WatchAlertPresenter.swift */; };
@@ -660,6 +668,7 @@
 		92CB2ECEF758B2D9FAC62194 /* ExtensionDelegate+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00510AC06A2395BC0C763323 /* ExtensionDelegate+PodLoan.swift */; };
 		3BEA49797B7BE2FE39B469BC /* PodLoanWatchController+Records.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4DFD0C69E0F5207A50AF31 /* PodLoanWatchController+Records.swift */; };
 		0EE6A52982C12F583328F4B5 /* PodLoanWatchController+Resume.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727FD8CB90ED29ACFF9A82F /* PodLoanWatchController+Resume.swift */; };
+		8F62A31C76E02015BD7A34A9 /* PodLoanWatchController+State.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C662F8AB0873870BB565A8 /* PodLoanWatchController+State.swift */; };
 		7AFDDD6816520284C24C42F5 /* PodLoanWatchController+Seize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189DC312230FC44AEA615F04 /* PodLoanWatchController+Seize.swift */; };
 		D1A4C5329F40C4F2C404F2BC /* PodLoanWatchController+Start.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18AE34D2EC6C2320D8244D5 /* PodLoanWatchController+Start.swift */; };
 		447D9AEE9B70527210F55CBD /* PodLoanWatchController+Delegates.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF3B2F4493A5ABB7435DFD0 /* PodLoanWatchController+Delegates.swift */; };
@@ -668,6 +677,7 @@
 		2497B7839C12276E55320CFF /* PodLoanWatchController+Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = A113A845D5DDEEDA9A76D9AD /* PodLoanWatchController+Debug.swift */; };
 		C9A47B0180AAB1FC572D3EFE /* CriticalAlertAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0175B13A9543390BC5 /* CriticalAlertAudioPlayer.swift */; };
 		C9A47B0280AAB1FC572D3EFF /* GlucoseAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0275B13A9543390BC6 /* GlucoseAlertManager.swift */; };
+		0CC007AD18915A53154250B6 /* GlucoseAlertManager+Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C71A6661AA828EAFD63C8F08 /* GlucoseAlertManager+Sharing.swift */; };
 		C9A47B0380AAB1FC572D3F00 /* GlucoseAlertSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0375B13A9543390BC7 /* GlucoseAlertSettingsView.swift */; };
 		C9A47B0480AAB1FC572D3F01 /* critical.caf in Resources */ = {isa = PBXBuildFile; fileRef = C9A47B0475B13A9543390BC8 /* critical.caf */; };
 		C9SCENED0000000000000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9SCENED0000000000000002 /* SceneDelegate.swift */; };
@@ -692,6 +702,7 @@
 		3AA2F2EB3EA44C712FCEF51E /* PodLoanPhoneController+Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74D589BFE7B5D4BD6BED3D3 /* PodLoanPhoneController+Notifications.swift */; };
 		5E12EA750000000000000050 /* PodLoanPhoneController+Hold.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E12EA760000000000000050 /* PodLoanPhoneController+Hold.swift */; };
 		B6B80446C9117B34FEA7329E /* PodLoanPhoneController+Staging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF82B359AC5A6738CEBD729 /* PodLoanPhoneController+Staging.swift */; };
+		B18A390A68A8C03E20643F4C /* PodLoanPhoneController+State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0817A2A6F276A886CA6A15 /* PodLoanPhoneController+State.swift */; };
 		D6A12EF6F5AD4B4CAABDD49B /* RileyLinkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACC381BA270149C9B0DDCB01 /* RileyLinkKit.framework */; };
 		D6E28676C2C7751C77C7F2FB /* spring.caf in Resources */ = {isa = PBXBuildFile; fileRef = 9471E156FC10D6D0FF219C77 /* spring.caf */; };
 		D96C7D3C9C4B414AAEAB3339 /* RileyLinkBLEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C03823C4CE664226A1EDAF41 /* RileyLinkBLEKit.framework */; };
@@ -919,6 +930,7 @@
 		00510AC06A2395BC0C763323 /* ExtensionDelegate+PodLoan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ExtensionDelegate+PodLoan.swift"; path = "WatchApp Extension/StockLoop/ExtensionDelegate+PodLoan.swift"; sourceTree = SOURCE_ROOT; };
 		ED4DFD0C69E0F5207A50AF31 /* PodLoanWatchController+Records.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanWatchController+Records.swift"; path = "WatchApp Extension/StockLoop/PodLoanWatchController+Records.swift"; sourceTree = SOURCE_ROOT; };
 		3727FD8CB90ED29ACFF9A82F /* PodLoanWatchController+Resume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanWatchController+Resume.swift"; path = "WatchApp Extension/StockLoop/PodLoanWatchController+Resume.swift"; sourceTree = SOURCE_ROOT; };
+		A5C662F8AB0873870BB565A8 /* PodLoanWatchController+State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanWatchController+State.swift"; path = "WatchApp Extension/StockLoop/PodLoanWatchController+State.swift"; sourceTree = SOURCE_ROOT; };
 		189DC312230FC44AEA615F04 /* PodLoanWatchController+Seize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanWatchController+Seize.swift"; path = "WatchApp Extension/StockLoop/PodLoanWatchController+Seize.swift"; sourceTree = SOURCE_ROOT; };
 		E18AE34D2EC6C2320D8244D5 /* PodLoanWatchController+Start.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanWatchController+Start.swift"; path = "WatchApp Extension/StockLoop/PodLoanWatchController+Start.swift"; sourceTree = SOURCE_ROOT; };
 		DEF3B2F4493A5ABB7435DFD0 /* PodLoanWatchController+Delegates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanWatchController+Delegates.swift"; path = "WatchApp Extension/StockLoop/PodLoanWatchController+Delegates.swift"; sourceTree = SOURCE_ROOT; };
@@ -1178,6 +1190,8 @@
 		9198C65DD7145352022F9854 /* WatchLoopManager+Diagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+Diagnostics.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+Diagnostics.swift"; sourceTree = SOURCE_ROOT; };
 		5744C796822627F1C74D802F /* WatchLoopManager+Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+Display.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+Display.swift"; sourceTree = SOURCE_ROOT; };
 		C286C2D1E18B35177E020E34 /* WatchLoopManager+Glucose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+Glucose.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+Glucose.swift"; sourceTree = SOURCE_ROOT; };
+		446048F44BAE9C66B12394F4 /* GlucoseAlertManager+Watch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GlucoseAlertManager+Watch.swift"; path = "WatchApp Extension/StockLoop/GlucoseAlertManager+Watch.swift"; sourceTree = SOURCE_ROOT; };
+		DC6E574D826158B33EE53EF6 /* WatchLoopManager+GlucoseAlerts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+GlucoseAlerts.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+GlucoseAlerts.swift"; sourceTree = SOURCE_ROOT; };
 		F89D20C8E12BA79EEB440570 /* WatchLoopManager+Dosing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+Dosing.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+Dosing.swift"; sourceTree = SOURCE_ROOT; };
 		C4975B7BB91A91CB21F89ED6 /* WatchLoopManager+Cycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+Cycle.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+Cycle.swift"; sourceTree = SOURCE_ROOT; };
 		7C9DDCE80C384964BDDF1C8B /* PhoneLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PhoneLog.swift; path = Loop/Managers/PhoneLog.swift; sourceTree = SOURCE_ROOT; };
@@ -1300,13 +1314,15 @@
 		9A7CE002302D82A800A03F53 /* WatchAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WatchAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A7CE014302D82A800A03F53 /* DeviceLogThrottleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceLogThrottleTests.swift; sourceTree = "<group>"; };
 		9A7CE015302D82A800A03F53 /* HandbackWedgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandbackWedgeTests.swift; sourceTree = "<group>"; };
-		9A7CE016302D82A800A03F53 /* LowGlucoseWarningTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowGlucoseWarningTests.swift; sourceTree = "<group>"; };
-		9A7CE017302D82A800A03F53 /* PodLoanEpochScopingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodLoanEpochScopingTests.swift; sourceTree = "<group>"; };
 		9A7CE018302D82A800A03F53 /* PodLoanTimerCharacterizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodLoanTimerCharacterizationTests.swift; sourceTree = "<group>"; };
 		9A7CE019302D82A800A03F53 /* PodLoanTimerSeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodLoanTimerSeamTests.swift; sourceTree = "<group>"; };
 		9A7CE01A302D82A800A03F53 /* WatchAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAppTests.swift; sourceTree = "<group>"; };
 		9A7CE01B302D82A800A03F53 /* WatchdogArmingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchdogArmingTests.swift; sourceTree = "<group>"; };
 		29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAlertPresenterTests.swift; sourceTree = "<group>"; };
+		7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirstContactNoteTests.swift"; sourceTree = "<group>"; };
+		98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WristAlertAcknowledgementTests.swift"; sourceTree = "<group>"; };
+		295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WristOverrideRecordTests.swift"; sourceTree = "<group>"; };
+		94E05C050AF4C0CC0B314040 /* WristGlucoseAlertTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WristGlucoseAlertTests.swift"; sourceTree = "<group>"; };
 		9A7CE030302D82A800A03F53 /* LoanContextPrecedenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanContextPrecedenceTests.swift; sourceTree = "<group>"; };
 		9A7CE060302D82A800A03F53 /* WristAlertScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WristAlertScheduler.swift; path = "WatchApp Extension/StockLoop/WristAlertScheduler.swift"; sourceTree = SOURCE_ROOT; };
 		B579C199D790911890AE3F3A /* WatchAlertPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchAlertPresenter.swift"; path = "WatchApp Extension/StockLoop/WatchAlertPresenter.swift"; sourceTree = SOURCE_ROOT; };
@@ -1443,6 +1459,7 @@
 		B74D589BFE7B5D4BD6BED3D3 /* PodLoanPhoneController+Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Notifications.swift"; path = "Loop/Managers/PodLoanPhoneController+Notifications.swift"; sourceTree = SOURCE_ROOT; };
 		5E12EA760000000000000050 /* PodLoanPhoneController+Hold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Hold.swift"; path = "Loop/Managers/PodLoanPhoneController+Hold.swift"; sourceTree = SOURCE_ROOT; };
 		1FF82B359AC5A6738CEBD729 /* PodLoanPhoneController+Staging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Staging.swift"; path = "Loop/Managers/PodLoanPhoneController+Staging.swift"; sourceTree = SOURCE_ROOT; };
+		3E0817A2A6F276A886CA6A15 /* PodLoanPhoneController+State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+State.swift"; path = "Loop/Managers/PodLoanPhoneController+State.swift"; sourceTree = SOURCE_ROOT; };
 		BEC0BA802BE613F144AC3A70 /* mood_synth.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/mood_synth.caf; sourceTree = SOURCE_ROOT; };
 		C03823C4CE664226A1EDAF41 /* RileyLinkBLEKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RileyLinkBLEKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1004DEF2981F5B700B8CF94 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -1592,6 +1609,7 @@
 		C940C6F431E6435B971D98B2 /* SportLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SportLog.swift; path = "WatchApp Extension/StockLoop/SportLog.swift"; sourceTree = SOURCE_ROOT; };
 		C9A47B0175B13A9543390BC5 /* CriticalAlertAudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CriticalAlertAudioPlayer.swift; sourceTree = "<group>"; };
 		C9A47B0275B13A9543390BC6 /* GlucoseAlertManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseAlertManager.swift; sourceTree = "<group>"; };
+		C71A6661AA828EAFD63C8F08 /* GlucoseAlertManager+Sharing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GlucoseAlertManager+Sharing.swift"; sourceTree = "<group>"; };
 		C9A47B0375B13A9543390BC7 /* GlucoseAlertSettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseAlertSettingsView.swift; sourceTree = "<group>"; };
 		C9A47B0475B13A9543390BC8 /* critical.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/critical.caf; sourceTree = SOURCE_ROOT; };
 		C9EA3F48338B49BD9C6BD0F9 /* urgent_low.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/urgent_low.caf; sourceTree = SOURCE_ROOT; };
@@ -1658,6 +1676,7 @@
 		F0ABB040AC55431083B36492 /* GlanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GlanceView.swift; path = "WatchApp Extension/StockLoop/GlanceView.swift"; sourceTree = SOURCE_ROOT; };
 		00E9C192B33D5FC41E45E7A9 /* GlanceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GlanceModel.swift"; path = "WatchApp Extension/StockLoop/GlanceModel.swift"; sourceTree = SOURCE_ROOT; };
 		F23412C23E024F9A9399C435 /* StockLoopStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StockLoopStack.swift; path = "WatchApp Extension/StockLoop/StockLoopStack.swift"; sourceTree = SOURCE_ROOT; };
+		AD49ED34A3CE3A86BEFB048E /* WatchDeviceManagers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchDeviceManagers.swift"; path = "WatchApp Extension/StockLoop/WatchDeviceManagers.swift"; sourceTree = SOURCE_ROOT; };
 		F3F9328E659A49159A47F646 /* WatchDoseEnactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WatchDoseEnactor.swift; path = "WatchApp Extension/StockLoop/WatchDoseEnactor.swift"; sourceTree = SOURCE_ROOT; };
 		F520419E66CD453A809324D1 /* RuntimeStateLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RuntimeStateLog.swift; path = "WatchApp Extension/StockLoop/RuntimeStateLog.swift"; sourceTree = SOURCE_ROOT; };
 		F5D9C01727DABBE0002E48F6 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Intents.strings; sourceTree = "<group>"; };
@@ -1824,6 +1843,7 @@
 				C9A47B0175B13A9543390BC5 /* CriticalAlertAudioPlayer.swift */,
 				C1A1A00001000000000000A2 /* CriticalAlertAlarmScheduler.swift */,
 				C9A47B0275B13A9543390BC6 /* GlucoseAlertManager.swift */,
+				C71A6661AA828EAFD63C8F08 /* GlucoseAlertManager+Sharing.swift */,
 				1D05219C2469F1F5000EBBDE /* AlertStore.swift */,
 				1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */,
 				1DA649A8244126DA00F61E75 /* InAppModalAlertScheduler.swift */,
@@ -2574,6 +2594,7 @@
 				B74D589BFE7B5D4BD6BED3D3 /* PodLoanPhoneController+Notifications.swift */,
 				5E12EA760000000000000050 /* PodLoanPhoneController+Hold.swift */,
 				1FF82B359AC5A6738CEBD729 /* PodLoanPhoneController+Staging.swift */,
+				3E0817A2A6F276A886CA6A15 /* PodLoanPhoneController+State.swift */,
 				DD0291A8F31C4B68ACE34BFC /* LoopUpdateContext.swift */,
 				0CB27CFCF9F0424FBB930CFF /* SettingsProvider.swift */,
 				C03823C4CE664226A1EDAF41 /* RileyLinkBLEKit.framework */,
@@ -2602,6 +2623,8 @@
 				9198C65DD7145352022F9854 /* WatchLoopManager+Diagnostics.swift */,
 				5744C796822627F1C74D802F /* WatchLoopManager+Display.swift */,
 				C286C2D1E18B35177E020E34 /* WatchLoopManager+Glucose.swift */,
+				446048F44BAE9C66B12394F4 /* GlucoseAlertManager+Watch.swift */,
+				DC6E574D826158B33EE53EF6 /* WatchLoopManager+GlucoseAlerts.swift */,
 				F89D20C8E12BA79EEB440570 /* WatchLoopManager+Dosing.swift */,
 				C4975B7BB91A91CB21F89ED6 /* WatchLoopManager+Cycle.swift */,
 				C940C6F431E6435B971D98B2 /* SportLog.swift */,
@@ -2617,6 +2640,7 @@
 				00510AC06A2395BC0C763323 /* ExtensionDelegate+PodLoan.swift */,
 				ED4DFD0C69E0F5207A50AF31 /* PodLoanWatchController+Records.swift */,
 				3727FD8CB90ED29ACFF9A82F /* PodLoanWatchController+Resume.swift */,
+				A5C662F8AB0873870BB565A8 /* PodLoanWatchController+State.swift */,
 				189DC312230FC44AEA615F04 /* PodLoanWatchController+Seize.swift */,
 				E18AE34D2EC6C2320D8244D5 /* PodLoanWatchController+Start.swift */,
 				DEF3B2F4493A5ABB7435DFD0 /* PodLoanWatchController+Delegates.swift */,
@@ -2625,6 +2649,7 @@
 				A113A845D5DDEEDA9A76D9AD /* PodLoanWatchController+Debug.swift */,
 				4D15E99F644E4E50A306CA01 /* StockLoopSession.swift */,
 				F23412C23E024F9A9399C435 /* StockLoopStack.swift */,
+				AD49ED34A3CE3A86BEFB048E /* WatchDeviceManagers.swift */,
 				D0861EE8E371426287E4542F /* LoanTransport.swift */,
 				8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */,
 				FBC4D5290F0F35E6B66B7227 /* LoanRecords.swift */,
@@ -2908,8 +2933,6 @@
 				9A7CE030302D82A800A03F53 /* LoanContextPrecedenceTests.swift */,
 				9A7CE014302D82A800A03F53 /* DeviceLogThrottleTests.swift */,
 				9A7CE015302D82A800A03F53 /* HandbackWedgeTests.swift */,
-				9A7CE016302D82A800A03F53 /* LowGlucoseWarningTests.swift */,
-				9A7CE017302D82A800A03F53 /* PodLoanEpochScopingTests.swift */,
 				9A7CE018302D82A800A03F53 /* PodLoanTimerCharacterizationTests.swift */,
 				9A7CE019302D82A800A03F53 /* PodLoanTimerSeamTests.swift */,
 				5E12EA01302D82A800A03F53 /* SeizeActivationTests.swift */,
@@ -2923,6 +2946,10 @@
 				BB7CE080302D82A800A03F53 /* InsulinBookTests.swift */,
 				9A7CE01B302D82A800A03F53 /* WatchdogArmingTests.swift */,
 				29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */,
+				7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */,
+				98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */,
+				295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */,
+				94E05C050AF4C0CC0B314040 /* WristGlucoseAlertTests.swift */,
 			);
 			path = WatchAppTests;
 			sourceTree = "<group>";
@@ -3796,6 +3823,7 @@
 				3AA2F2EB3EA44C712FCEF51E /* PodLoanPhoneController+Notifications.swift in Sources */,
 				5E12EA750000000000000050 /* PodLoanPhoneController+Hold.swift in Sources */,
 				B6B80446C9117B34FEA7329E /* PodLoanPhoneController+Staging.swift in Sources */,
+				B18A390A68A8C03E20643F4C /* PodLoanPhoneController+State.swift in Sources */,
 				7DF84FAADBC24ABEA2C0829E /* LoopUpdateContext.swift in Sources */,
 				0514DEEA3C0A404FBA775CD7 /* SettingsProvider.swift in Sources */,
 				C17824A51E1AD4D100D9D25C /* ManualBolusRecommendation.swift in Sources */,
@@ -3901,6 +3929,7 @@
 				C9A47B0180AAB1FC572D3EFE /* CriticalAlertAudioPlayer.swift in Sources */,
 				C1A1A00001000000000000A1 /* CriticalAlertAlarmScheduler.swift in Sources */,
 				C9A47B0280AAB1FC572D3EFF /* GlucoseAlertManager.swift in Sources */,
+				0CC007AD18915A53154250B6 /* GlucoseAlertManager+Sharing.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
 				149A28E42A8A63A700052EDF /* FavoriteFoodDetailView.swift in Sources */,
 				1DDE274024AEA4F200796622 /* NotificationsCriticalAlertPermissionsView.swift in Sources */,
@@ -4062,6 +4091,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B20CD77F806353E80916E596 /* GlucoseAlertManager.swift in Sources */,
+				D1C318442145F5A2652A5DD6 /* GlucoseAlertManager+Sharing.swift in Sources */,
 				DDBD0001000000000000BD01 /* BuildDetails.swift in Sources */,
 				8C844DFDB7274EB6A6B0A09E /* LoanEventJournal.swift in Sources */,
 				D4E5F6A7B8C9D0E1F2A3B4C5 /* G7SilenceHint.swift in Sources */,
@@ -4085,6 +4116,8 @@
 				4DDC23AB11E8E215F41D2E42 /* WatchLoopManager+Diagnostics.swift in Sources */,
 				7BE5EC4CA7BFBB16E8018091 /* WatchLoopManager+Display.swift in Sources */,
 				C5247AB8EBF91BAC440F95DC /* WatchLoopManager+Glucose.swift in Sources */,
+				99A92794C3DBB3888B340AE6 /* GlucoseAlertManager+Watch.swift in Sources */,
+				A9DE3D1E90432124BB5738B2 /* WatchLoopManager+GlucoseAlerts.swift in Sources */,
 				3DAF0D06E678E7616137C84A /* WatchLoopManager+Dosing.swift in Sources */,
 				344ABCF8A638888D8C0AC47B /* WatchLoopManager+Cycle.swift in Sources */,
 				F06FDE1F67AF4011937B1529 /* SportLog.swift in Sources */,
@@ -4100,6 +4133,7 @@
 				92CB2ECEF758B2D9FAC62194 /* ExtensionDelegate+PodLoan.swift in Sources */,
 				3BEA49797B7BE2FE39B469BC /* PodLoanWatchController+Records.swift in Sources */,
 				0EE6A52982C12F583328F4B5 /* PodLoanWatchController+Resume.swift in Sources */,
+				8F62A31C76E02015BD7A34A9 /* PodLoanWatchController+State.swift in Sources */,
 				7AFDDD6816520284C24C42F5 /* PodLoanWatchController+Seize.swift in Sources */,
 				D1A4C5329F40C4F2C404F2BC /* PodLoanWatchController+Start.swift in Sources */,
 				5E12EA770000000000000051 /* LoanReconciler.swift in Sources */,
@@ -4109,6 +4143,7 @@
 				2497B7839C12276E55320CFF /* PodLoanWatchController+Debug.swift in Sources */,
 				BC5C47547CCB49F9BA618108 /* StockLoopSession.swift in Sources */,
 				335CB5BBEBED4922B20C0CEC /* StockLoopStack.swift in Sources */,
+				C0D6128D55F7237079C42112 /* WatchDeviceManagers.swift in Sources */,
 				C1275DD62E808E2F0013B99D /* LoopWatchApp.swift in Sources */,
 				894F6DDD243C0A2300CCE676 /* CarbAmountLabel.swift in Sources */,
 				B455C7352BD14E30002B847E /* Comparable.swift in Sources */,
@@ -4390,7 +4425,6 @@
 				9A7CE031302D82A800A03F53 /* LoanContextPrecedenceTests.swift in Sources */,
 				9A7CE028302D82A800A03F53 /* DeviceLogThrottleTests.swift in Sources */,
 				9A7CE029302D82A800A03F53 /* HandbackWedgeTests.swift in Sources */,
-				9A7CE02B302D82A800A03F53 /* PodLoanEpochScopingTests.swift in Sources */,
 				9A7CE02C302D82A800A03F53 /* PodLoanTimerCharacterizationTests.swift in Sources */,
 				9A7CE02D302D82A800A03F53 /* PodLoanTimerSeamTests.swift in Sources */,
 				5E12EA02302D82A800A03F53 /* SeizeActivationTests.swift in Sources */,
@@ -4404,6 +4438,10 @@
 				BB7CE081302D82A800A03F53 /* InsulinBookTests.swift in Sources */,
 				9A7CE02F302D82A800A03F53 /* WatchdogArmingTests.swift in Sources */,
 				18606676A16D24BF383CCCF8 /* WatchAlertPresenterTests.swift in Sources */,
+				DB66EB0397D54C94B49ADEF8 /* FirstContactNoteTests.swift in Sources */,
+				73E0AA9C0C5503C0A38FDCA6 /* WristAlertAcknowledgementTests.swift in Sources */,
+				8077722BF812D34BDD35AEE6 /* WristOverrideRecordTests.swift in Sources */,
+				5FDDEC8709A17CE196A2F202 /* WristGlucoseAlertTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4730,10 +4768,8 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				EAGER_LINKING = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				"EXCLUDED_ARCHS[sdk=watchsimulator*]" = x86_64;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -4849,10 +4885,8 @@
 				COPY_PHASE_STRIP = NO;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				EAGER_LINKING = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				"EXCLUDED_ARCHS[sdk=watchsimulator*]" = x86_64;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -4910,7 +4944,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 687ZSJ6WD3;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -4938,7 +4972,7 @@
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 687ZSJ6WD3;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -4966,7 +5000,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 687ZSJ6WD3;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = WatchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -4991,7 +5025,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 687ZSJ6WD3;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = WatchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -5318,11 +5352,9 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				EAGER_LINKING = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				"EXCLUDED_ARCHS[sdk=watchsimulator*]" = x86_64;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -5380,7 +5412,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 687ZSJ6WD3;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -5408,7 +5440,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 687ZSJ6WD3;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = WatchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

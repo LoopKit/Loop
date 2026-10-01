@@ -2,17 +2,8 @@
 //  PodLoanPhoneController+UIReads.swift
 //  Loop
 //
-//  Part of PodLoanPhoneController (see PodLoanPhoneController.swift). Split by concern; stored
-//  properties live in the core class.
-//
-//  Everything the pump tile reads about a loan, and the one rule that governs it: the UI takes a
-//  lock-guarded snapshot and NEVER `queue.sync`s onto the controller's serial queue. A settle
-//  that stalls holds that queue for minutes, and a tile waiting behind it freezes the whole app
-//  on the main thread.
-//
-//  The snapshot therefore stores the reclaim's INPUTS, not a rendered progress value, and
-//  `reclaimProgress(from:now:)` re-derives against a fresh clock. The elapsed counter keeps
-//  ticking truthfully even while the queue is wedged.
+//  What the pump tile reads about a loan. The UI reads a lock-guarded snapshot and never
+//  `queue.sync`s: a stalled settle can hold the queue for minutes.
 //
 
 import Foundation
@@ -23,8 +14,7 @@ import UserNotifications
 import os.log
 
 extension PodLoanPhoneController {
-    /// A plain value copy of the loan state the tile draws. No dates are pre-differenced here;
-    /// holding the anchors instead lets a stale snapshot still render a correct elapsed time.
+    /// Holds anchors, not elapsed values, so a stale snapshot still renders the right time.
     struct UISnapshot: Equatable {
         var isLoanedOut = false
         var isTakeoverInProgress = false
@@ -44,8 +34,7 @@ extension PodLoanPhoneController {
     func uiSnapshot() -> UISnapshot {
         var s = UISnapshot()
 
-        // A yield counts as loaned out even though the state is .owner: the phone has stood
-        // aside for a loan it did not grant, and the tile must say so.
+        // A yield counts as loaned out.
         s.isLoanedOut = state != .owner || yieldingToInferredLoan
         s.isTakeoverInProgress = state == .grantOffered
         s.isSettlingOnly = state == .owner && reclaimStartedAt != nil && reclaimVerifiedAt == nil
@@ -63,9 +52,7 @@ extension PodLoanPhoneController {
         return s
     }
 
-    /// Publish the mirror synchronously. Every transition the tile draws calls this BEFORE it
-    /// notifies observers: the async refresh alone loses the race, so the re-render reads the
-    /// previous state and nothing renders again afterwards.
+    /// Synchronous publish; transitions call it before notifying observers.
     func syncUIMirror() {
         let s = uiSnapshot()
         uiMirrorLock.lock()
@@ -73,9 +60,7 @@ extension PodLoanPhoneController {
         uiMirrorLock.unlock()
     }
 
-    /// Asynchronous republish, for reads that arrive from outside the queue. It updates the
-    /// mirror for the NEXT read, which is why every state transition also publishes
-    /// synchronously.
+    /// Updates the mirror for the next read.
     func refreshUIMirror() {
         queue.async { [weak self] in
             guard let self else { return }
@@ -86,8 +71,7 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// The UI's only door. It kicks off a refresh for next time and returns what is already
-    /// published, so a caller on main never waits on the controller's queue.
+    /// The UI's only entry point; never waits on the controller's queue.
     var uiState: UISnapshot {
         refreshUIMirror()
         uiMirrorLock.lock()
@@ -95,22 +79,14 @@ extension PodLoanPhoneController {
         return uiMirror
     }
 
-    /// Derives what the tile shows from a snapshot plus a clock, and nothing else. Static and
-    /// value-only on purpose: the settle predicate is restated inline below rather than calling
-    /// `isReclaimSettling`, which would dispatch onto the controller's serial queue.
-    ///
-    /// Two stretches can be in progress. The ladder covers the watch draining and handing back;
-    /// the settle afterwards covers the phone re-establishing the pod link and reading it.
+    /// Pure: snapshot plus clock. Covers the drain (ladder) and the settle after it.
     static func reclaimProgress(from s: UISnapshot, now: Date) -> ReclaimProgress? {
         if s.ladderIsRunning, let ladderStartedAt = s.ladderStartedAt {
             let elapsed = max(now.timeIntervalSince(ladderStartedAt), 0)
 
             var phase = s.ladderPhase
             var fraction: Double?
-            // Only the drain has an expectation to measure against. Once it is overrun the bar
-            // stops pretending to know: the phase becomes "watch not answering" and the UI shows
-            // the force deadline instead. Fractions cap below 1 so nothing reads as finished
-            // before it is.
+            // Only the drain has an expectation; overrun shows the force deadline instead.
             if phase == .draining {
                 fraction = min(elapsed / Self.liveHandoverExpectation, 0.95)
                 if elapsed >= Self.liveHandoverExpectation { phase = .watchNotAnswering }
@@ -123,15 +99,12 @@ extension PodLoanPhoneController {
                                    elapsed: elapsed)
         }
 
-        // The settle: .owner again, but the pod round-trip that proves it has not landed yet.
-        // Past the ceiling the controller has given up, so the tile stops showing progress too.
+        // The settle: owner again, round-trip not yet verified.
         if s.isOwner, let started = s.reclaimStartedAt, !s.reclaimVerified,
            now.timeIntervalSince(started) < Self.reclaimSettleTimeout {
             let elapsed = max(now.timeIntervalSince(started), 0)
 
-            // Same one-stage expectation either way; only the wording differs, because after a
-            // force reclaim the user did not hand the pod back and should be told the phone is
-            // taking it.
+            // A force reclaim is worded as the phone taking the pod.
             if s.auditIsForceReclaim {
                 return ReclaimProgress(
                     phase: .forceReclaimingPod, startedAt: started,
@@ -140,9 +113,7 @@ extension PodLoanPhoneController {
                     elapsed: elapsed)
             }
 
-            // Measure from the display anchor, which survives a settle window re-opening a
-            // moment after the last one closed. Restarting the bar there would tell the user
-            // the wait had begun again when it had not.
+            // The display anchor survives a reopened window, so the bar does not restart.
             let anchor = s.displayAnchor ?? started
             let waitElapsed = max(now.timeIntervalSince(anchor), 0)
             return ReclaimProgress(
@@ -156,8 +127,7 @@ extension PodLoanPhoneController {
 
     var isLoanedOutForUI: Bool { return uiState.isLoanedOut }
 
-    /// True through both halves of a take-back — the ladder and the settle after it — so the
-    /// tile does not flicker back to a finished state in the gap between them.
+    /// True across the ladder and the settle, so the tile does not flicker between them.
     var isReclaimActivityForUI: Bool {
         let s = uiState
         return s.isSettlingOnly || s.ladderIsRunning

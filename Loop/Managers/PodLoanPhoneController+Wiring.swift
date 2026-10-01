@@ -2,15 +2,8 @@
 //  PodLoanPhoneController+Wiring.swift
 //  Loop
 //
-//  How the phone's loan controller is wired to the stock managers. The controller takes injected
-//  closures so its state machine is testable without the app; this is the one place those
-//  closures are built from the real DeviceDataManager, LoopDataManager, SettingsManager and the
-//  WatchConnectivity session.
-//
-//  Two rules run through the whole file. Every write to therapy settings hops to MAIN — one
-//  writer, one thread, or the settings screen and the algorithm disagree about what is enabled.
-//  And nothing here calls back into the controller synchronously: these closures run on its
-//  serial queue, and several of the managers below dispatch back onto it.
+//  Builds the controller's injected closures from the real managers. Settings writes hop to
+//  main; nothing here calls back into the controller synchronously.
 //
 
 import HealthKit
@@ -30,20 +23,14 @@ extension WatchDataManager {
                 if paused {
                     self.deviceManager.alertManager?.clearLoopNotRunningNotificationsForLoanGrant()
                 } else {
-                    // Must hop to main. This closure runs on the controller's serial queue, and
-                    // rescheduling reads a gate that dispatches synchronously back onto that
-                    // same queue — called inline it deadlocks.
+                    // Hop to main: the reschedule reads a gate that dispatches back onto this queue.
                     DispatchQueue.main.async { [weak self] in
 
                         Task { await self?.deviceManager.alertManager?.rescheduleLoopNotRunningNotifications(Date()) }
                     }
                 }
             },
-            // The transport. Interactive moments ride `sendMessage`, which is delivered now or
-            // not at all; background bookkeeping rides `transferUserInfo`, which is explicitly
-            // non-urgent and may sit until the phone wakes. Size and path go to the log FILE on
-            // both channels — a send that fails for size leaves nothing else to correlate
-            // against.
+            // Interactive messages ride sendMessage; bookkeeping rides transferUserInfo.
             send: { [weak self] dictionary in
                 guard let session = self?.watchSession else { return }
 
@@ -51,8 +38,7 @@ extension WatchDataManager {
 
                 let size = (dictionary[LoanProtocol.userInfoKey] as? Data)?.count ?? 0
 
-                // Keep at most one dormant grant queued. It is whole-book and latest-only, so an
-                // unreachable watch is owed one copy, not one per refresh.
+                // At most one dormant grant queued: it is latest-only.
                 if kind == "dormantGrant" {
                     for transfer in session.outstandingUserInfoTransfers
                     where LoanMessage.peekKind(transport: transfer.userInfo) == "dormantGrant" {
@@ -69,10 +55,7 @@ extension WatchDataManager {
                     return
                 }
 
-                // A grant rides BOTH channels. The urgent send can report success and still
-                // never arrive when the wrist goes down moments later, and no error means no
-                // fallback; the queued copy is the insurance. The watch rejects whichever
-                // duplicate arrives second by epoch.
+                // A grant rides both channels; the watch drops the later duplicate by epoch.
                 let grantRidesBothChannels = (kind == "grant")
                 self?.log.default("Loan send kind=%{public}@ path=urgent bytes=%{public}d", kind ?? "?", size)
                 PhoneLog.event("wc", "send \(kind ?? "?") path=urgent\(grantRidesBothChannels ? "+queued" : "") bytes=\(size)")
@@ -90,9 +73,7 @@ extension WatchDataManager {
             addPumpEvents: { [weak self] events, lastReconciliation, completion in
                 guard let self = self else { completion(nil); return }
 
-                // `replacePendingEvents: false`. Every loan dose is immutable by the time it
-                // reaches here — the still-open one is held back — so replacing would purge the
-                // phone's own in-flight temp whenever a post-reclaim write lands.
+                // No replacement: loan doses are immutable here, and replacing would purge the phone's own temp.
                 Task {
                     do {
                         try await self.deviceManager.doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: false)
@@ -105,8 +86,7 @@ extension WatchDataManager {
             addCarb: { [weak self] entry, syncIdentifier, completion in
                 guard let self = self else { completion(nil); return }
 
-                // The identity-accepting ingestion path. Plain `addCarbEntry` mints a fresh
-                // identity on every call, so a resent record becomes a second meal.
+                // Identity-accepting add, so a resent record is not a second meal.
                 Task {
                     do {
                         _ = try await withCheckedThrowingContinuation { (c: CheckedContinuation<StoredCarbEntry, Error>) in
@@ -119,11 +99,8 @@ extension WatchDataManager {
                 }
             },
 
-            // Deletes through the same door swipe-to-delete uses, so the entry leaves every
-            // store that knows about it. Identity first; failing that, start date within a
-            // second and matching grams. Deleting the WRONG carb is far worse than failing to
-            // delete, so a miss reports the whole candidate set rather than guessing — an
-            // unreported miss resurrects the carb in the next grant.
+            // Deletes as swipe-to-delete does: by identity, else start date and grams. A miss logs the
+            // candidates instead of guessing.
             deleteCarb: { [weak self] gone, completion in
                 guard let self = self else { completion(nil); return }
                 let window = gone.startDate.addingTimeInterval(-.hours(1))
@@ -140,7 +117,7 @@ extension WatchDataManager {
                                    DateFormatter.localizedString(from: e.startDate, dateStyle: .none, timeStyle: .medium),
                                    e.syncIdentifier.map { String($0.prefix(8)) } ?? "nil")
                         }.joined(separator: " | ")
-                        self.log.default("PODLOAN carb delete: no match for %.0f g @ %{public}@ · candidates: %{public}@",
+                        self.log.default("Pod loan carb delete: no match for %.0f g @ %{public}@ · candidates: %{public}@",
                                          gone.grams, String(describing: gone.startDate), lineup)
                         completion(NSError(domain: "PodLoan.carbDelete", code: 404, userInfo: [
                             NSLocalizedDescriptionKey: "no match among \(entries.count) candidate(s): \(lineup)"]))
@@ -156,9 +133,7 @@ extension WatchDataManager {
             },
 
             watchAppInstalled: { WCSession.isSupported() && WCSession.default.isWatchAppInstalled },
-            // The READER matters as much as the writer. Unwired it answers "the phone holds no
-            // override" forever, which inverts a clear arriving from the wrist: a preset the
-            // user switched off there never switches off here and outlives the loan.
+            // Without the reader, a clear from the wrist could never switch the phone's override off.
             scheduleOverride: { [weak self] in
                 self?.temporaryPresetsManager.scheduleOverride
             },
@@ -167,9 +142,7 @@ extension WatchDataManager {
                 self?.temporaryPresetsManager.scheduleOverride = override
             },
 
-            // The wrist's loop mode coming home. A therapy-settings write, so it goes through
-            // main like every other one — written from the controller's queue, the settings
-            // screen goes on showing the mode the user left behind.
+            // The wrist's loop mode coming home; a settings write, so via main.
             noteWatchClosedLoop: { [weak self] closed in
                 DispatchQueue.main.async {
                     self?.settingsManager.mutateLoopSettings { $0.dosingEnabled = closed }
@@ -190,9 +163,7 @@ extension WatchDataManager {
                     completion((try? await self.deviceManager.doseStore.getNormalizedDoseEntries(start: start)) ?? [])
                 }
             },
-            // History seeds are converted into the loan's OWN wire types here, at the store
-            // boundary. The wire format is ours, so it versions independently of how LoopKit's
-            // own types evolve.
+            // History seeds become the loan's own wire types at the store boundary.
             carbHistory: { [weak self] start, completion in
                 guard let self = self else { completion([]); return }
 
@@ -228,6 +199,9 @@ extension WatchDataManager {
                     })
                 }
             },
+            glucoseAlertSettings: { [weak self] completion in
+                Task { @MainActor in completion(self?.deviceManager.glucoseAlertManager.sharedSettings.encoded) }
+            },
             issueNotice: { [weak self] title, body in
                 self?.log.error("PodLoan notice: %{public}@ - %{public}@", title, body)
                 let content = UNMutableNotificationContent()
@@ -236,9 +210,7 @@ extension WatchDataManager {
                 content.sound = .default
                 UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "podloan.notice.\(UUID().uuidString)", content: content, trigger: nil))
             },
-            // What makes the pump tile re-render. Posted on main, and after the controller has
-            // already published its mirror — the observer reads that mirror, so publishing
-            // afterwards would draw the state the phone has just left.
+            // Posted on main after the mirror is published.
             ownershipDidChange: { [weak self] in
 
                 DispatchQueue.main.async {
@@ -246,14 +218,12 @@ extension WatchDataManager {
                     NotificationCenter.default.post(name: .PumpManagerChanged, object: deviceManager)
                 }
             },
-            // Defaults to true for a pump that cannot be lent at all: such a pump never enters a
-            // settle, and reporting its link as down would stall one that had no reason to run.
+            // True for a pump that cannot be lent, which never settles.
             isConnectionReady: { [weak self] in
 
-                (self?.deviceManager.pumpManager as? PumpConnectionLendable)?.isConnectionReady ?? true
+                (self?.deviceManager.pumpManager as? ExclusiveDeviceControl)?.isControlReady ?? true
             },
-            // The cancel at the END of a loan: the watch left a temp running and had no link to
-            // stop it, so the phone does it once the pod answers.
+            // End of a loan: cancel the temp the watch left running.
             cancelTempBasalAfterPodReturn: { [weak self] completion in
 
                 guard let self = self else { return completion(nil) }
@@ -266,25 +236,20 @@ extension WatchDataManager {
                     }
                 }
             },
-            // The cancel at the START of one, and the grant waits on its completion — the pod
-            // must acknowledge it before the link is released, or a program crosses the
-            // boundary and the phone's books hold a temp that never finished.
+            // Start of a loan: the pod must acknowledge the cancel before the link is released.
             cancelTempBasalForGrant: { [weak self] completion in
 
                 guard let self = self else { return completion(nil) }
                 Task {
                     do {
-                        try await self.loopDataManager.cancelTempBasalForPodLoan(reason: .podLoanGrant)
+                        try await self.loopDataManager.cancelTempBasalForPodLoan(reason: .pumpControlReleased)
                         completion(nil)
                     } catch {
                         completion(error)
                     }
                 }
             },
-            // Opening the loop turns the user's own setting OFF, deliberately — it is not the
-            // loan's dosing pause. A pause would be matched by a resume at the end of the next
-            // loan and would silently re-close a loop the audit opened. Turning it back on is
-            // the user's act.
+            // Turns the user's setting off (not the loan pause); turning it back on is the user's act.
             openLoopForUncertainReconciliation: { [weak self] in
                 guard let self = self else { return }
 
@@ -302,8 +267,7 @@ extension WatchDataManager {
                 content.interruptionLevel = .timeSensitive
                 UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "podloan.urgent.\(UUID().uuidString)", content: content, trigger: nil))
             },
-            // The manual-dose door, not the pump-event one. It is what lets the placeholder keep
-            // the identifier it was given, which is the only handle the delete above has.
+            // Manual-dose path, so the placeholder keeps the identifier used to delete it.
             bookGapDose: { [weak self] entry, completion in
 
                 guard let self = self else { return completion(false) }
@@ -316,8 +280,7 @@ extension WatchDataManager {
                     }
                 }
             },
-            // The store finds the dose by its identifier alone, so this stub exists only to
-            // carry one. Its dates and value are never read.
+            // Found by identifier alone; the other fields are unused.
             deleteGapDose: { [weak self] syncIdentifier, completion in
                 guard let self = self else { return completion(false) }
 
@@ -328,9 +291,7 @@ extension WatchDataManager {
                     completion(error == nil)
                 }
             },
-            // The upsert door, by store identity. It is the only way to land a rate record
-            // behind the delivery store's immutable boundary, and it bypasses the store's own
-            // reconciliation — the caller truncates and stamps delivered units before this.
+            // Identified upsert: lands rate records behind the immutable boundary. Caller pre-truncates.
             backfillDoses: { [weak self] doses, completion in
 
                 guard let self = self else { completion(nil); return }
@@ -348,9 +309,7 @@ extension WatchDataManager {
                 guard let self = self else { return }
 
                 DispatchQueue.main.async {
-                    // Skipped, not deferred, when the device is still locked: this is a display
-                    // refresh, the next cycle repaints anyway, and reaching the stores before
-                    // first unlock is what traps a background launch.
+                    // Skipped while locked: a display refresh, and touching stores before first unlock traps.
                     guard UIApplication.shared.isProtectedDataAvailable else {
                         PhoneLog.event("loan", "insulinHistoryRewritten display refresh SKIPPED — protected data locked (pre-first-unlock launch); the next cycle repaints [locked-launch]")
                         return
@@ -359,9 +318,7 @@ extension WatchDataManager {
 
                 }
             },
-            // Launch-time store work waits for first unlock. A reboot mid-loan relaunches Loop
-            // in the background with every store file still locked, and touching them there
-            // traps seconds into the launch.
+            // Store work at launch waits for first unlock.
             whenProtectedDataAvailable: { work in
                 DispatchQueue.main.async {
                     if UIApplication.shared.isProtectedDataAvailable {
@@ -379,9 +336,7 @@ extension WatchDataManager {
                 }
             },
 
-            // `beginBackgroundTask` is one of the few UIKit calls that is safe off the main
-            // thread, which is why the reclaim hold can run straight from the controller's queue
-            // instead of hopping and losing the moments it exists to protect.
+            // beginBackgroundTask is safe off main, so no hop.
             beginReclaimBackgroundTask: { [weak self] in self?.beginReclaimBackgroundTask() },
             endReclaimBackgroundTask: { [weak self] in self?.endReclaimBackgroundTask() },
             isWatchReachable: { [weak self] in self?.watchSession?.isReachable ?? false },

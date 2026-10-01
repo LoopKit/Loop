@@ -2,16 +2,8 @@
 //  WatchLoopManager+Cycle.swift
 //  WatchApp Extension
 //
-//  The cycle: stock Loop's `loop()`, running on the wrist while the watch holds the pod.
-//
-//  A CGM reading — or a carb entry, or the takeover itself — calls `checkPumpDataAndLoop`, which
-//  refreshes the pod's data and then runs `loop()`: compute, enact if the loop is closed,
-//  publish. The whole thing is a SYNCHRONOUS state machine on `dataAccessQueue`, bridged over
-//  the stores' async API by `runBlocking`. Stock is async throughout; making this async too
-//  would restructure the loan's ordering guarantees for no behavioural gain.
-//
-//  Exactly one CYCLE VERDICT line is written per cycle, whatever happens, and it reports the
-//  compute stage and the enact stage separately. See `loop()`.
+//  Stock's `loop()` on the wrist, synchronous on `dataAccessQueue` (`runBlocking` bridges the
+//  stores' async API). One CYCLE VERDICT line per cycle.
 //
 
 import Foundation
@@ -19,20 +11,13 @@ import HealthKit
 import LoopKit
 import LoopAlgorithm
 import LoopCore
-import G7SensorKit
 import WatchConnectivity
 import os.log
 
 extension WatchLoopManager {
 
-    /// Mirrors stock `DeviceDataManager.checkPumpDataAndLoop`, except for what happens with no
-    /// pump: stock runs the cycle anyway so it can store a dosing decision, and this RETURNS.
-    /// Between loans there is no pod, no decision to store and nothing to enact, so a cycle would
-    /// do nothing but log a failure every five minutes for a watch that is behaving correctly.
-    ///
-    /// It still records that a reading arrived while a pump was being awaited — the resume path
-    /// asks for that with `endAwaitingPumpManager`, so a reading that landed mid-rebuild is not
-    /// lost — and it says "idle" once rather than once per reading.
+    /// Stock `DeviceDataManager.checkPumpDataAndLoop`, but returns with no pump (between loans
+    /// there is nothing to decide), noting a reading awaited by a rebuild.
     func checkPumpDataAndLoop() {
         guard let pumpManager = pumpManager else {
             awaitedPumpLock.lock()
@@ -47,30 +32,13 @@ extension WatchLoopManager {
         }
         loggedIdleNoPump = false
 
-        // The ONLY entry point that refreshes the pod before computing. `loop()` is also called
-        // directly — after a carb entry, after a manual bolus is accepted, at takeover — and
-        // those paths judge the recency gate against whatever the last pod report left behind.
+        // The only entry point that refreshes the pod before computing.
         pumpManager.ensureCurrentPumpData { _ in self.loop() }
     }
 
-    /// One cycle. Mirrors stock `LoopDataManager.loop()`, with four deliberate differences.
-    ///
-    /// 1. The enact gate is the WATCH's `_closedLoopEnabled`. Stock gates on
-    ///    `settingsProvider.dosingEnabled`, which is the phone's flag; once the pod is lent, the
-    ///    watch is sovereign over its own loop mode and the therapy settings frozen into the
-    ///    grant are the only limits it answers to.
-    /// 2. `lastLoopCompleted` advances on ANY error-free cycle, including an open-loop one, where
-    ///    stock advances it only on a cycle that actually dosed. On the wrist it means "a cycle
-    ///    completed", which is what the freshness ring is asking.
-    /// 3. The dead-man watchdog is re-deferred on a NARROWER condition than that: the cycle must
-    ///    have computed AND, if it owed the pod a command, landed it. A run of failed enacts must
-    ///    hold the alarm, not keep pushing it away.
-    /// 4. No `StoredDosingDecision`: there is no decision store on the wrist, and the loan
-    ///    journal is what carries the record home.
-    ///
-    /// The verdict line is written UNCONDITIONALLY. A cycle that logs nothing is
-    /// indistinguishable from a cycle that never ran, and that ambiguity is what let a quarter of
-    /// an hour of a disconnected pod read as a quiet, healthy night.
+    /// Stock `LoopDataManager.loop()`, except: enact is gated on the watch's loop mode;
+    /// `lastLoopCompleted` advances on any error-free cycle; the dead-man watchdog is deferred
+    /// only when any owed command landed; no `StoredDosingDecision`. The verdict is always logged.
     func loop() {
         dataAccessQueue.async {
             self.log.default("Loop running")
@@ -96,11 +64,7 @@ extension WatchLoopManager {
 
             self.lastLoopError = error
 
-            // Open loop is tested FIRST and that ordering is load-bearing: with the loop open a
-            // recommendation is still computed and `error` stays nil, so any later arm would
-            // report a command that was never sent. The rest name a reason apiece — "no-change"
-            // (the pod is already at the right rate) and "nothing-decided" (the algorithm
-            // declined) look alike from outside and mean opposite things.
+            // Open loop first: it still computes with no error, so later arms would report an unsent command.
             let enactVerdict: String
             if !self._closedLoopEnabled { enactVerdict = "none(open-loop)" }
             else if decided?.basalAdjustment == nil && decided != nil { enactVerdict = "none(no-change)" }
@@ -113,11 +77,7 @@ extension WatchLoopManager {
             if watchdogRefreshed { LoopStallWatchdog.refresh(); self.onCycleLanded?() }
             let sinceCompleted = self.lastLoopCompleted.map { Int(self.now().timeIntervalSince($0)) }
 
-            // COMPUTE and ENACT are judged separately: a pod that refused the command still
-            // produced a good prediction, and reporting that as a compute failure hides which
-            // half is broken. This is why an enact failure must never be typed as
-            // `.missingDataError` — it would be counted here as a failed compute and described
-            // in the line above as a missing prediction, and the refusal itself would vanish.
+            // Compute and enact judged separately; never type an enact failure as `.missingDataError`.
             let computeSucceeded: Bool = {
                 switch error {
                 case .none: return true
@@ -148,22 +108,19 @@ extension WatchLoopManager {
                     String(format: "%.2f U/h", r.basalAdjustment.unitsPerHour) + (r.bolusUnits.map { String(format: " + auto-bolus %.2f U", $0) } ?? "")
                 } ?? "none"
                 SportLog.event("loop", "cycle OK — BG \(bg), IOB \(self.activeInsulin.map { String(format: "%.2f", $0) } ?? "—"), temp \(rec)")
-                // Only on success, so `lastPredictionBreakdown` — and the debug screen that draws
-                // it — can be describing an older cycle while newer ones are failing. The verdict
-                // line above is the one that is always current.
+                // Success only, so the debug screen may describe an older cycle.
                 self.logPredictionBreakdown(decided: decided)
             }
 
-            // On BOTH arms, matching stock's `updateDisplayState()` after the do/catch: a failed
-            // cycle still has to move the display, or the wrist shows the last good numbers as
-            // though they were current.
+            // Stock runs predicted low on each completed cycle's forecast.
+            if computeSucceeded { self.evaluatePredictedLowAlert(self.predictedGlucose) }
+
+            // Both arms, as stock's `updateDisplayState()`.
             self.publishHUDContext()
         }
     }
 
-    /// Compute and publish WITHOUT enacting — the only path that does. Takeover runs a full
-    /// `loop()` instead, because a full cycle reuses every gate and mints a journal event; this
-    /// remains the seam for driving a compute in isolation.
+    /// Compute and publish without enacting.
     func refreshPredictionForGlance() {
         dataAccessQueue.async {
             var error: WatchLoopError? = nil
@@ -181,9 +138,7 @@ extension WatchLoopManager {
         }
     }
 
-    /// Run async store work from the synchronous cycle. Safe ONLY because it never runs on main:
-    /// it blocks the calling thread on a semaphore until the Task signals. Every caller is on
-    /// `dataAccessQueue`; call it from main and the app deadlocks.
+    /// Blocks on a semaphore; call only from `dataAccessQueue`, never main.
     func runBlocking<T>(_ work: @escaping () async throws -> T) throws -> T {
         let semaphore = DispatchSemaphore(value: 0)
         var result: Result<T, Error>!
@@ -196,11 +151,7 @@ extension WatchLoopManager {
         return try result.get()
     }
 
-    /// Rounds to the NEAREST supported rate. Stock rounds DOWN — `DeviceDataManager`'s
-    /// `roundBasalRate` calls the pump manager, and OmnipodKit's implementation takes the last
-    /// supported rate at or below the value. So an algorithm output of 1.03 U/h becomes 1.05 here
-    /// and 1.00 on the phone: a divergence of at most one increment, in the direction of more
-    /// insulin. An unforced difference from stock, not a deliberate dosing choice.
+    /// Rounds to nearest; stock rounds down, so this can be one increment higher.
     func roundedBasalRate(_ unitsPerHour: Double) -> Double {
         guard let supported = pumpManager?.supportedBasalRates, !supported.isEmpty else { return unitsPerHour }
         return supported.enumerated().min(by: {
@@ -208,34 +159,10 @@ extension WatchLoopManager {
         })?.element ?? unitsPerHour
     }
 
-    /// Mirrors stock `LoopDataManager.fetchData` — same queries, same order — and every
-    /// difference from it is listed here.
-    ///
-    /// 1. The PUMP-DATA RECENCY GATE lives here rather than in `loop()`, so it also refuses the
-    ///    manual-bolus recommendation and the display run. An empty book and "no insulin on
-    ///    board" are the same number, and a book the pod has not written to must not license a
-    ///    dose of any kind.
-    /// 2. Doses are trimmed PER DOSE with LoopKit's `DoseEntry.trimmed`, which pro-rates
-    ///    anything — including a bolus still being delivered. Stock trims in `loop()` with the
-    ///    `[SimpleInsulinDose]` extension, which leaves boluses whole. The effect is no forward
-    ///    credit for insulin the pod has not delivered yet: a temp keeps its rate and loses its
-    ///    remaining window, a bolus in flight counts only for the fraction already given.
-    /// 3. The carb and glucose window is 10 hours back (`CarbMath.maximumAbsorptionTimeInterval`)
-    ///    where stock reaches 12 hours 1 minute.
-    /// 4. The ISF and override windows start at `neededSensitivityTimeline.start`. Stock widens
-    ///    both to `min(that, carbsStart)`, because `CarbMath` traps when a carb entry starts
-    ///    before the sensitivity timeline — reachable whenever the dose and glucose history are
-    ///    more recent than the carb window, i.e. after a CGM gap. That widening is not
-    ///    reproduced here.
-    /// 5. Absent from this copy: `presumePresetEndingNow` and pre-meal handling, the
-    ///    `veryHighInsulinNeeds` suspend-threshold raise, and `ensureDosingCoverageStart` /
-    ///    `projectOngoingDoses` — so the display run cannot project an ongoing suspend.
-    /// 6. The recommendation's insulin model comes from the pod's insulin type and falls back to
-    ///    the settings default; stock falls back to novolog.
-    ///
-    /// MISSING SETTINGS DENY DOSING. Every configuration element throws `configurationError`
-    /// rather than substituting a default — a wrist that invents a basal rate is worse than a
-    /// wrist that refuses.
+    /// Stock `LoopDataManager.fetchData`, except: the pump-data recency gate lives here; doses
+    /// are trimmed per dose (no forward credit); 10 h carb/glucose window; ISF/override windows
+    /// are not widened to the carb start; no preset-ending, high-needs threshold or ongoing-dose
+    /// projection; missing settings throw rather than default.
     func fetchAlgorithmInput(at baseTime: Date, recommendationType: DoseRecommendationType) async throws -> StoredDataAlgorithmInput {
         // Dose history reaches back a full carb absorption PLUS a full insulin duration, as in
         // stock: dynamic carb absorption is derived from glucose the older insulin also moved.
@@ -251,18 +178,14 @@ extension WatchLoopManager {
         // Difference 2: the per-dose trim, which pro-rates a bolus in flight.
         let doses: [DoseEntry] = try await doseStore.getNormalizedDoseEntries(start: dosesStart, end: baseTime)
             .compactMap { $0.trimmed(to: baseTime) }
-        // Widen the window to whatever came back: a dose can begin before the query start and
-        // still be included, and its basal must be covered. Same on the far end for one that ends
-        // after `baseTime`.
+        // Widen to cover doses that straddle the window.
         dosesStart = min(dosesStart, doses.map { $0.startDate }.min() ?? dosesStart)
         let dosesEnd = max(baseTime, doses.map { $0.endDate }.max() ?? baseTime)
 
         let rawBasal = try await settingsProvider.getBasalHistory(startDate: dosesStart, endDate: dosesEnd)
         guard !rawBasal.isEmpty else { throw WatchLoopError.configurationError("basalRateSchedule") }
 
-        // Collapse contiguous same-rate entries, as stock does: the history projects the daily
-        // schedule onto absolute time and splits at every local midnight even when the rate does
-        // not change, and the IOB integrator does not rejoin the sub-doses across the boundary.
+        // Collapse same-rate entries split at midnight, as stock does.
         let basal: [AbsoluteScheduleValue<Double>] = rawBasal.reduce(into: []) { acc, entry in
             if let last = acc.last, last.value == entry.value, last.endDate == entry.startDate {
                 acc[acc.count - 1] = AbsoluteScheduleValue(startDate: last.startDate, endDate: entry.endDate, value: last.value)
@@ -307,9 +230,7 @@ extension WatchLoopManager {
         // Same window as the sensitivity query, and stock widens this one too — see difference 4.
         let overrides = overrideHistory.getOverrideHistory(startDate: neededSensitivityTimeline.start, endDate: forecastEndTime)
 
-        // An active override replaces the target for the WHOLE forecast, as stock does. Stock
-        // also raises the suspend threshold for a `veryHighInsulinNeeds` override; that is not
-        // reproduced, so the threshold here is always the grant's.
+        // An override replaces the target for the whole forecast; the suspend threshold is the grant's.
         var target: [AbsoluteScheduleValue<ClosedRange<LoopQuantity>>]
         if let activeOverride = scheduleOverride, activeOverride.isActive(at: baseTime) {
             guard let schedule = settings.glucoseTargetRangeSchedule else {
@@ -322,9 +243,7 @@ extension WatchLoopManager {
         }
         guard !target.isEmpty else { throw WatchLoopError.configurationError("glucoseTargetRangeSchedule") }
 
-        // The override reaches dosing through the HISTORY, and it scales the TIMELINES — basal,
-        // sensitivity and carb ratio — not only the target. Moving the target alone would leave
-        // every "neutral" temp reading as a high temp in override terms.
+        // The override scales basal, ISF and carb ratio through the history, not only the target.
         return StoredDataAlgorithmInput(
             glucoseHistory: glucose,
             doses: dosesWithModel,
@@ -345,19 +264,13 @@ extension WatchLoopManager {
         )
     }
 
-    /// Mirrors the body of stock `LoopDataManager.loop()`: fetch, run, round, decide whether a
-    /// command is needed. Differences are noted at each site below, plus one that is not visible
-    /// here — stock's `invalidFutureGlucose` gate has no equivalent. The missing-glucose and
-    /// too-old-glucose gates are inside `LoopAlgorithm.run` and do apply.
+    /// The body of stock `loop()`: fetch, run, round, decide. No `invalidFutureGlucose` gate.
     func updatePredictedGlucoseAndRecommendedDose() -> WatchLoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         let startDate = now()
 
-        // TEMP BASAL ONLY, and an `automaticBolus` setting is refused OUT LOUD rather than
-        // quietly reinterpreted. Stock defaults to `.automaticBolus`; on the wrist every bolus is
-        // human-confirmed, so a setting asking for automatic ones stops dosing instead of being
-        // silently downgraded to something the user did not choose.
+        // The phone's dosing strategy, carried in the grant.
         let recommendationType: DoseRecommendationType = settings.automaticDosingStrategy == .automaticBolus ? .automaticBolus : .tempBasal
 
         let input: StoredDataAlgorithmInput
@@ -405,16 +318,8 @@ extension WatchLoopManager {
                 neutralBasalRateMatchesPump: scheduleOverride == nil
             )
 
-            // Argument for argument stock's call, and both of the interesting arguments earn
-            // their place. `continuationInterval` leaves a MATCHING temp alone while it still has
-            // more than eleven minutes to run, so an unchanged rate is re-commanded only as its
-            // window runs down — that is where the radio saving comes from.
-            // `neutralBasalRateMatchesPump` asks whether the neutral rate we just computed is the
-            // one the POD is programmed with. Under an override it is not: ours is scaled and the
-            // pod's schedule is not, so a "neutral" recommendation must still be sent as a temp
-            // instead of being satisfied by letting the pod's own schedule run.
-            //
-            // A nil result means no command is needed at all, and then none is sent.
+            // Stock's call: `continuationInterval` leaves a matching temp alone; `neutralBasalRateMatchesPump`
+            // is false under an override. Nil means no command.
             let bolusUnits = automatic.bolusUnits.flatMap { $0 > 0 ? $0 : nil }
             automatic.bolusUnits = bolusUnits
 
@@ -436,9 +341,7 @@ extension WatchLoopManager {
         }
     }
 
-    /// Republish both display surfaces without running a cycle. Note that it is not free:
-    /// `publishHUDContext` runs a `.manualBolus` pass to fill the recommended bolus, so the
-    /// prediction, IOB and COB it publishes are recomputed rather than replayed.
+    /// Republish without a cycle; `publishHUDContext` still runs a manual-bolus pass.
     func updateDisplayState() {
         dataAccessQueue.async {
             self.publishHUDContext()

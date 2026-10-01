@@ -2,19 +2,14 @@
 //  HandbackWedgeTests.swift
 //  WatchAppTests
 //
-//  The hand-back wedge discriminator's full truth table. This shipped with no tests, and it
-//  decides which of two OPPOSITE instructions the user gets when a hand-back hangs: force-quit
-//  the watch app, or wait a minute. Getting it backwards sends them to the wrong device.
-//
-//  Testable because the decision is now a pure function. Before that it was two separate
-//  if/else-if chains inside handbackTimedOut() — evaluated twice, so the log line and the alert
-//  could disagree — behind a path that needs a live pump manager.
+//  The hand-back wedge classifier's truth table: force-quit the watch app, or wait.
 //
 
 import XCTest
 import LoopKit
 import LoopAlgorithm
 import LoopCore
+import UserNotifications
 @testable import WatchApp
 
 final class HandbackWedgeTests: XCTestCase {
@@ -29,9 +24,7 @@ final class HandbackWedgeTests: XCTestCase {
             .oneWay)
     }
 
-    /// Variant B: same picture, except the sends ERRORED. That is a session tearing down and
-    /// re-establishing, and the queued fallback delivers when it returns — so the advice is
-    /// "wait", not "force-quit".
+    /// Errored sends mean a re-establishing session: wait.
     func testErroringSendsAreTheReestablishingSessionNotTheWedge() {
         XCTAssertEqual(
             HandbackWedge.classify(resendCount: 3, sawUnreachable: false, reachableNow: true, sendsErrored: true),
@@ -39,10 +32,7 @@ final class HandbackWedgeTests: XCTestCase {
     }
 
     // MARK: - Everything that must NOT be called a wedge
-    //
-    // These matter more than the positives. A false wedge tells the user to force-quit the
-    // watch app during a hand-back — the most disruptive advice the app can give — for what is
-    // usually an ordinary phone-out-of-range hang that would have healed on its own.
+    // A false wedge gives the most disruptive advice for an ordinary out-of-range hang.
 
     /// Under three offers there is not enough evidence yet, whatever else is true.
     func testTooFewOffersIsNeverAWedge() {
@@ -56,9 +46,7 @@ final class HandbackWedgeTests: XCTestCase {
         }
     }
 
-    /// A phone that went away even ONCE explains the hang innocently. This is the sticky flag:
-    /// it must veto the wedge even though the phone is reachable again right now, which is the
-    /// common case by the time the timeout fires.
+    /// The sticky flag vetoes a wedge even when the phone is reachable again.
     func testAPhoneThatWasEverUnreachableVetoesTheWedge() {
         XCTAssertEqual(
             HandbackWedge.classify(resendCount: 9, sawUnreachable: true, reachableNow: true, sendsErrored: false),
@@ -87,9 +75,7 @@ final class HandbackWedgeTests: XCTestCase {
             .oneWay)
     }
 
-    /// Exhaustive over the whole input space that matters, so no combination is unspecified.
-    /// A wedge requires ALL THREE of: enough offers, never unreachable, reachable now — and
-    /// only then does `sendsErrored` choose between the variants.
+    /// A wedge needs enough offers, never unreachable, and reachable now; `sendsErrored` picks the variant.
     func testFullTruthTable() {
         for count in [0, 2, 3, 10] {
             for sawUnreachable in [false, true] {
@@ -116,14 +102,8 @@ final class HandbackWedgeTests: XCTestCase {
 
 // MARK: - The counter that fed it
 
-/// The wedge verdict and the drain's give-up rule both read `handbackResendCount`, and it used to
-/// be reset in exactly one place: `beginHandback`. A drain reaches the give-up path without ever
-/// running through that, so the count survived the session that earned it.
-///
-/// The consequence is the detector switching itself off: the next drain starts already at the
-/// ceiling, gives up after a single offer, and its wedge verdict describes a session that ended.
-/// The two flags feeding `classify` had the same lifetime problem, and the seize marker left
-/// standing makes the next ordinary loan look like one grown from the standing copy.
+/// Drain state (resend count, classifier flags, seize marker) resets per session, so the next
+/// drain does not start at the ceiling.
 final class HandbackDrainStateTests: XCTestCase {
 
     private var defaults: UserDefaults!
@@ -152,10 +132,11 @@ final class HandbackDrainStateTests: XCTestCase {
                                               cacheLength: .hours(4), provenanceIdentifier: "HandbackDrainStateTests")
         let carbStore = CarbStore(healthKitSampleStore: nil, cacheStore: cacheStore,
                                   cacheLength: .hours(24), provenanceIdentifier: "HandbackDrainStateTests")
-        let manager = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore)
+        let manager = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
+                                       defaults: defaults, stateDirectory: journalDir)
         return PodLoanWatchController(loopManager: manager,
                                       journal: LoanEventJournal(directory: journalDir),
-                                      defaults: defaults)
+                                      stateDirectory: journalDir)
     }
 
     /// A drain that gives up must leave nothing behind for the next session to inherit.
@@ -172,7 +153,7 @@ final class HandbackDrainStateTests: XCTestCase {
             c.phase = .recoveredDrain
             c.epoch = 5          // an offer without a session number returns before it sends
         }
-        c.defaults.set(UUID().uuidString, forKey: PodLoanWatchController.DormantKeys.activeToken)
+        c.updateState { $0.seizeToken = UUID() }
 
         // The give-up check lives in the resend timer, not in the send. Firing the work item
         // inline is a jump past its deadline, on the queue it would really run on.
@@ -188,7 +169,7 @@ final class HandbackDrainStateTests: XCTestCase {
             XCTAssertFalse(c.urgentSendWedged)
             XCTAssertEqual(c.phase, .idle, "the drain closed")
         }
-        XCTAssertNil(c.defaults.string(forKey: PodLoanWatchController.DormantKeys.activeToken),
+        XCTAssertNil(c.persisted.seizeToken,
                      "left set, the next ordinary loan is mistaken for a seized one")
     }
 
@@ -203,5 +184,115 @@ final class HandbackDrainStateTests: XCTestCase {
         XCTAssertEqual(HandbackWedge.classify(resendCount: PodLoanWatchController.maxDrainResends,
                                               sawUnreachable: false, reachableNow: true, sendsErrored: false),
                        .oneWay)
+    }
+}
+
+// MARK: - Interruption levels of the loan's own alerts
+
+/// Pod unattended → time-sensitive; the watch still dosing → normal.
+final class LoanAlertLevelTests: XCTestCase {
+
+    private var defaults: UserDefaults!
+    private var journalDir: URL!
+    private var scheduler: RecordingWristAlertScheduler!
+
+    override func setUp() {
+        super.setUp()
+        defaults = UserDefaults(suiteName: "LoanAlertLevelTests-\(UUID().uuidString)")!
+        journalDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try? FileManager.default.createDirectory(at: journalDir, withIntermediateDirectories: true)
+        scheduler = RecordingWristAlertScheduler()
+        WristAlerts.scheduler = scheduler
+    }
+
+    override func tearDown() {
+        WristAlerts.scheduler = UNUserNotificationCenter.current()
+        try? FileManager.default.removeItem(at: journalDir)
+        scheduler = nil
+        defaults = nil
+        journalDir = nil
+        super.tearDown()
+    }
+
+    private func makeController() async -> PodLoanWatchController {
+        let cacheStore = PersistenceController(directoryURL: journalDir.appendingPathComponent("cache"))
+        let doseStore = await DoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                        longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
+                                        provenanceIdentifier: "LoanAlertLevelTests")
+        let glucoseStore = await GlucoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                              cacheLength: .hours(4), provenanceIdentifier: "LoanAlertLevelTests")
+        let carbStore = CarbStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                  cacheLength: .hours(24), provenanceIdentifier: "LoanAlertLevelTests")
+        let manager = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
+                                       defaults: defaults, stateDirectory: journalDir)
+        let controller = PodLoanWatchController(loopManager: manager,
+                                                journal: LoanEventJournal(directory: journalDir),
+                                                stateDirectory: journalDir)
+        controller.scheduler = { _, _, _ in }
+        controller.isPhoneReachable = { true }
+        return controller
+    }
+
+    /// Alerts are issued from a main-actor task.
+    private func alert(titled title: String, other: String? = nil) async throws -> UNNotificationRequest {
+        for _ in 0..<100 {
+            let scheduler = self.scheduler!
+            if let request = await MainActor.run(body: {
+                scheduler.pending.first { $0.content.title == title && $0.identifier != other }
+            }) {
+                return request
+            }
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        return try XCTUnwrap(nil, "no alert titled \(title)")
+    }
+
+    /// One-way wedge while the loan is live: the watch is still dosing.
+    func testEndNotConfirmedWhileStillDosingIsNormal() async throws {
+        let c = await makeController()
+        c.queue.sync {
+            c.phase = .active
+            c.handbackResendCount = 3
+            c.handbackTimedOut()
+        }
+        let request = try await alert(titled: "End Not Confirmed")
+        XCTAssertEqual(request.content.interruptionLevel, .active)
+    }
+
+    /// The watch has let go of the pod and the phone has not confirmed: nobody is dosing.
+    func testEndNotConfirmedAfterTheFinalOfferIsTimeSensitive() async throws {
+        let c = await makeController()
+        c.queue.sync {
+            c.phase = .handingBack
+            c.handbackTimedOut()
+        }
+        let request = try await alert(titled: "End Not Confirmed")
+        XCTAssertEqual(request.content.interruptionLevel, .timeSensitive)
+    }
+
+    /// The two variants never replace each other.
+    func testTheTwoEndNotConfirmedVariantsHaveTheirOwnIdentifiers() async throws {
+        let c = await makeController()
+        c.queue.sync {
+            c.phase = .active
+            c.handbackResendCount = 3
+            c.handbackTimedOut()
+        }
+        let stillDosing = try await alert(titled: "End Not Confirmed")
+        c.queue.sync {
+            c.phase = .handingBack
+            c.handbackTimedOut()
+        }
+        let final = try await alert(titled: "End Not Confirmed", other: stillDosing.identifier)
+        XCTAssertNotEqual(stillDosing.identifier, final.identifier)
+        XCTAssertEqual(scheduler.pending.filter { $0.content.title == "End Not Confirmed" }.count, 2)
+    }
+
+    /// The phone's return during a seized loan is a routine prompt; the watch keeps dosing.
+    func testIPhoneIsBackIsNormal() async throws {
+        let c = await makeController()
+        c.issueReunionPromptAlert()
+        let request = try await alert(titled: "iPhone Is Back")
+        XCTAssertEqual(request.content.interruptionLevel, .active)
     }
 }

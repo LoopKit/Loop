@@ -2,15 +2,8 @@
 //  PodLoanWatchController+Debug.swift
 //  StockLoop
 //
-//  Part of PodLoanWatchController (see PodLoanWatchController.swift). Split by concern; stored properties live in the core class.
-//
-//  Read-only views of the controller, for the glance and the debug page.
-//
-//  MAIN MUST NEVER SYNC ONTO THE LOAN QUEUE. That queue is also the pump manager's delegate
-//  queue, so anything waiting on it waits for the length of a bolus, a takeover or a reclaim —
-//  long enough for watchOS to kill the app for a wedged main thread. Main reads the lock-guarded
-//  mirrors here, which are published FROM the queue; the blocking variants are for callers that
-//  are already off main.
+//  Read-only views of the controller for the glance and debug page. Main never syncs onto the
+//  loan queue (also the pump's delegate queue); it reads the mirrors published from it.
 //
 
 import Foundation
@@ -18,14 +11,11 @@ import HealthKit
 import LoopKit
 import LoopAlgorithm
 import LoopCore
-import OmnipodKit
 import WatchKit
 import os.log
 
 extension PodLoanWatchController {
-    /// One consistent reading of the controller, taken on its queue. Everything the debug page
-    /// and the glance need is captured here rather than fetched field by field, so what they draw
-    /// cannot mix two different moments.
+    /// One consistent reading, taken on the queue.
     struct DebugSnapshot {
         let phase: Phase
         let epoch: Int?
@@ -53,6 +43,12 @@ extension PodLoanWatchController {
         let seizeOfferIssuedAt: Date?
 
         let reunionPromptVisible: Bool
+
+        /// The wrist-up hint under the takeover bar, or nil; and whether it reports the pod reached.
+        let takeoverHint: String?
+        let takeoverPodReached: Bool
+        /// Resting: the next Start must find a pump this watch has never met.
+        let pumpFirstContactExpected: Bool
     }
 
     /// Blocking. Not for main — `isLoanActiveNonBlocking` is main's answer.
@@ -62,38 +58,28 @@ extension PodLoanWatchController {
         return queue.sync { phase == .active }
     }
 
-    /// Whether the pod will beep for a manual bolus. The glance suppresses its own success haptic
-    /// when it will: the pod's acknowledgement fires at the same instant and says the same thing.
-    var podBeepsOnManualBolus: Bool {
-        pumpManager?.podLoanBeepsOnManualBolus ?? false
-    }
-
-    /// Safe on main at any time. Mirrored synchronously inside `phase.didSet`, so a UI action
-    /// taken immediately after a transition sees the value that transition set.
+    /// Safe on main; mirrored in `phase.didSet`.
     var isLoanActiveNonBlocking: Bool {
         loanActiveMirrorLock.lock()
         defer { loanActiveMirrorLock.unlock() }
         return _loanActiveMirror
     }
 
-    /// True between a launch discovering a saved loan and the rebuild finishing. The stock pages
-    /// use it to distinguish "no loan" from "a loan that is still being rebuilt".
+    /// A saved loan is still being rebuilt.
     var isResumingNonBlocking: Bool {
         loanActiveMirrorLock.lock()
         defer { loanActiveMirrorLock.unlock() }
         return _resumingMirror
     }
 
-    /// The last snapshot published from the loan queue, or nil before the first refresh. It can
-    /// be one refresh stale; that is the price of never blocking main.
+    /// The last published snapshot; may be one refresh stale.
     var mirroredDebugSnapshot: DebugSnapshot? {
         snapshotMirrorLock.lock()
         defer { snapshotMirrorLock.unlock() }
         return _snapshotMirror
     }
 
-    /// Build a snapshot on the queue and publish it. The debug page ticks this and then reads
-    /// the mirror on the next pass; it never waits for the queue.
+    /// Builds and publishes a snapshot; the caller reads the mirror next pass.
     func refreshDebugSnapshot() {
         queue.async { [weak self] in
             guard let self = self else { return }
@@ -118,8 +104,8 @@ extension PodLoanWatchController {
                 epoch: epoch ?? journal.activeEpoch,
                 mode: currentMode(),
                 hasPumpManager: pumpManager != nil,
-                deliveredUnits: pumpManager?.podLoanInsulinDelivered,
-                podFault: pumpManager?.podLoanFaultDescription,
+                deliveredUnits: pumpOdometer?.deliveredUnits?.units,
+                podFault: pumpFaultDescription,
                 lastEventSeq: journal.lastEventSeq,
                 unackedCount: journal.unackedEvents().count,
                 lastIdleNote: lastIdleNote,
@@ -132,15 +118,19 @@ extension PodLoanWatchController {
                 startNoteAt: startNote?.at,
                 startNoteText: startNote?.text,
                 seizeOfferIssuedAt: seizeOffer?.issuedAt,
-                reunionPromptVisible: reunionPromptActive)
+                reunionPromptVisible: reunionPromptActive,
+                takeoverHint: phase == .takingOver
+                    ? Self.takeoverHint(firstContact: takeoverFirstContact, podReached: takeoverPodReached, nudged: takeoverNudges > 0)
+                    : nil,
+                takeoverPodReached: phase == .takingOver && takeoverPodReached,
+                pumpFirstContactExpected: pumpFirstContactExpected())
     }
 
-    /// Force a pod status read from the debug page. nil means there is no pump manager at all,
-    /// which is a different answer from a read that was attempted and failed.
+    /// nil: no pump manager, as opposed to a failed read.
     func debugReadStatus(completion: @escaping (Bool?) -> Void) {
         queue.async {
-            guard let manager = self.pumpManager else { completion(nil); return }
-            manager.podLoanReadStatus { ok in completion(ok) }
+            guard let odometer = self.pumpOdometer else { completion(nil); return }
+            odometer.refreshDeliveredUnits { ok in completion(ok) }
         }
     }
 

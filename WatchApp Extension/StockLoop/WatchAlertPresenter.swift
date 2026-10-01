@@ -2,49 +2,41 @@
 //  WatchAlertPresenter.swift
 //  WatchApp Extension
 //
-//  Putting a LoopKit alert on the wrist.
-//
-//  While the watch holds the pod it is the only device that can hear the pump. A pod fault, an
-//  occlusion or an empty reservoir arrives here as a `LoopKit.Alert`, and the wearer has to be
-//  told: the phone's own alert manager is not watching a pump it does not have.
-//
-//  Delivery goes through `WristAlerts.scheduler`, the same seam the dead-man ladder uses, so
-//  arming is visible to tests. Delivery itself can never be asserted — the notification centre
-//  drops a request silently when the process is not authorised — but identifier discipline can:
-//  an alert re-issued under the same identifier replaces its pending copy instead of stacking a
-//  second one, and retracting one alert cannot cancel another.
+//  LoopKit alerts on the wrist: while the watch holds the pod it is the only device that
+//  hears the pump. Delivered through `WristAlerts.scheduler`, one identifier per alert.
 //
 
 import Foundation
 import LoopKit
+import LoopCore
 import UserNotifications
 
 enum WatchAlertPresenter {
-    /// Namespaced so a retraction cannot reach the dead-man ladder's identifiers, which are
-    /// owned by `LoopStallWatchdog` and live in a different family.
+    /// Namespaced apart from the dead-man ladder's identifiers.
     static func requestIdentifier(for identifier: LoopKit.Alert.Identifier) -> String {
-        return "sportmode.alert.\(identifier.value)"
+        return "\(requestPrefix)\(identifier.value)"
     }
 
-    /// Present an alert on the wrist now, or at its scheduled moment.
-    ///
-    /// `backgroundContent` is the text used: the wrist has no foreground alert presentation of
-    /// its own, so what the user sees is always the notification. A `.repeating` trigger is
-    /// honoured as a repeating notification — the pod alerts that use it are the ones the user
-    /// must not be able to sleep through.
+    private static let requestPrefix = "sportmode.alert."
+
+    static func isWristAlert(_ requestIdentifier: String) -> Bool {
+        requestIdentifier.hasPrefix(requestPrefix)
+    }
+
+    /// Uses `backgroundContent`; a `.repeating` trigger becomes a repeating notification.
     static func present(_ alert: LoopKit.Alert) {
         let content = UNMutableNotificationContent()
         content.title = alert.backgroundContent.title
         content.body = alert.backgroundContent.body
         content.threadIdentifier = alert.identifier.managerIdentifier
+        // Stock's keys and acknowledge category, so an OK on the wrist reaches the alert's manager.
+        content.categoryIdentifier = alert.categoryIdentifier ?? LoopNotificationCategory.alert.rawValue
+        content.userInfo = [LoopNotificationUserInfoKey.managerIDForAlert.rawValue: alert.identifier.managerIdentifier,
+                            LoopNotificationUserInfoKey.alertTypeID.rawValue: alert.identifier.alertIdentifier]
 
-        // Without the Critical Alerts entitlement watchOS delivers a .critical request as
-        // time-sensitive instead, which is the acceptable floor rather than a failure.
+        // The watch has the time-sensitive entitlement, not Critical Alerts: that is its highest level.
         switch alert.interruptionLevel {
-        case .critical:
-            content.interruptionLevel = .critical
-            content.sound = .defaultCritical
-        case .timeSensitive:
+        case .critical, .timeSensitive:
             content.interruptionLevel = .timeSensitive
             content.sound = .default
         case .active:
@@ -59,8 +51,7 @@ enum WatchAlertPresenter {
         case .delayed(let interval):
             trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
         case .repeating(let repeatInterval):
-            // The notification centre refuses a repeating trigger under 60 s and drops the
-            // request silently, so a shorter interval is raised to the floor rather than lost.
+            // Repeating triggers under 60 s are silently dropped.
             trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(60, repeatInterval), repeats: true)
         }
 
@@ -69,12 +60,73 @@ enum WatchAlertPresenter {
                                                         trigger: trigger))
     }
 
-    /// Withdraw an alert, pending or already delivered. A driver retracts when the condition
-    /// clears — an occlusion alarm left standing on the wrist after the pod recovered is worse
-    /// than one that never fired, because the next one carries no weight.
+    /// Withdraws a pending or delivered alert when the condition clears.
     static func retract(_ identifier: LoopKit.Alert.Identifier) {
         let request = requestIdentifier(for: identifier)
         WristAlerts.scheduler.removePendingRequests(withIdentifiers: [request])
         WristAlerts.scheduler.removeDeliveredRequests(withIdentifiers: [request])
+    }
+
+    // MARK: - Acknowledgement
+
+    /// Stock's device-alert category: OK, and a dismissal that also acknowledges.
+    static func registerCategory() {
+        let ok = UNNotificationAction(identifier: NotificationManager.Action.acknowledgeAlert.rawValue,
+                                      title: NSLocalizedString("OK", comment: "The title of the notification action to acknowledge a device alert"),
+                                      options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([
+            UNNotificationCategory(identifier: LoopNotificationCategory.alert.rawValue, actions: [ok],
+                                   intentIdentifiers: [], options: .customDismissAction)
+        ])
+    }
+
+    /// OK and dismissal acknowledge, as on the phone; opening the alert does not.
+    static func acknowledges(_ actionIdentifier: String) -> Bool {
+        actionIdentifier == NotificationManager.Action.acknowledgeAlert.rawValue
+            || actionIdentifier == UNNotificationDismissActionIdentifier
+    }
+
+    static func alertIdentifier(in userInfo: [AnyHashable: Any]) -> LoopKit.Alert.Identifier? {
+        guard let manager = userInfo[LoopNotificationUserInfoKey.managerIDForAlert.rawValue] as? String,
+              let alert = userInfo[LoopNotificationUserInfoKey.alertTypeID.rawValue] as? String else { return nil }
+        return LoopKit.Alert.Identifier(managerIdentifier: manager, alertIdentifier: alert)
+    }
+
+    /// Through the alert's own manager, as stock's `AlertManager` does; a failure puts it back.
+    static func acknowledge(_ identifier: LoopKit.Alert.Identifier, with responder: AlertResponder,
+                            content: UNNotificationContent) async {
+        do {
+            try await responder.acknowledgeAlert(alertIdentifier: identifier.alertIdentifier)
+            SportLog.event("alert", "ACKNOWLEDGED \(identifier.value) on the wrist — passed to its manager")
+            retract(identifier)
+        } catch {
+            SportLog.event("alert", "acknowledge FAILED for \(identifier.value) — \(error) — alert put back")
+            WristAlerts.scheduler.add(UNNotificationRequest(identifier: requestIdentifier(for: identifier),
+                                                            content: content, trigger: nil))
+        }
+    }
+
+    /// What the wrist may present with, logged at loan start: during a loan it is the only alarm.
+    static func logAuthorization(_ context: String) {
+        UNUserNotificationCenter.current().getNotificationSettings { s in
+            func name(_ setting: UNNotificationSetting) -> String {
+                switch setting {
+                case .enabled: return "on"
+                case .disabled: return "OFF"
+                case .notSupported: return "n/a"
+                @unknown default: return "?"
+                }
+            }
+            let status: String
+            switch s.authorizationStatus {
+            case .authorized: status = "authorized"
+            case .denied: status = "DENIED"
+            case .notDetermined: status = "NOT DETERMINED"
+            case .provisional: status = "provisional"
+            case .ephemeral: status = "ephemeral"
+            @unknown default: status = "unknown"
+            }
+            SportLog.event("alert", "notification authorization (\(context)): \(status) · alerts \(name(s.alertSetting)) · sound \(name(s.soundSetting)) · time-sensitive \(name(s.timeSensitiveSetting)) · critical \(name(s.criticalAlertSetting))")
+        }
     }
 }

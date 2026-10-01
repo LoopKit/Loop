@@ -2,12 +2,8 @@
 //  PodLoanWatchController+SimulatorDriver.swift
 //  StockLoop
 //
-//  Part of PodLoanWatchController (see PodLoanWatchController.swift). Split by concern; stored properties live in the core class.
-//
-//  A simulator-only stand-in for the loan protocol: it walks the phase machine on timers with no
-//  phone, no grant, no journal and no pod, so the glance and the carb/bolus flow can be driven on
-//  a Mac. Compiled out of every device build, and gated again at runtime by the `sim.fakeLoanFlow`
-//  default so a simulator can still exercise the REAL protocol against a paired phone.
+//  Simulator-only fake of the loan phases, for driving the UI without a phone or pod.
+//  Gated by `simFakeLoanFlow`.
 //
 
 import Foundation
@@ -15,16 +11,13 @@ import HealthKit
 import LoopKit
 import LoopAlgorithm
 import LoopCore
-import OmnipodKit
 import WatchKit
 import os.log
 
 extension PodLoanWatchController {
     #if targetEnvironment(simulator)
 
-    /// Fakes idle → requested → takingOver → active on two timers. An epoch is bumped so the UI
-    /// has one to render; no journal is begun and no pump manager is built, so nothing here can
-    /// dose or be handed back for real.
+    /// Fakes idle → requested → takingOver → active; nothing here can dose.
     func simDriveStart() {
         queue.async {
             guard self.phase == .idle else { return }

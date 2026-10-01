@@ -150,23 +150,10 @@ extension LoopDataManager {
         dispatchPrecondition(condition: .onQueue(.main))
 
         podLoanNotePhoneRelayContext(context)
-        podLoanReadPairingCode(from: context)
+        podLoanAdoptCGMConfiguration(from: context)
 
-        // DURING A LOAN THE PHONE'S CONTEXT MUST NOT BECOME `activeContext`.
-        //
-        // `shouldReplace` compares ONLY glucoseDate, with `>=`. The phone relays the same
-        // physical reading the watch just took, so its context arrives carrying an EQUAL
-        // timestamp and wins — silently discarding the watch-authored prediction, IOB, COB, temp
-        // and loop mode. Whether that happens depends on whether a phone context lands after the
-        // watch's, which is why the symptom is intermittent rather than constant: the prediction
-        // goes missing in certain corner cases and not others.
-        //
-        // One cause, several symptoms that read as separate bugs — a blank prediction line, the
-        // ring showing the PHONE's loop mode, a blank recommended bolus.
-        //
-        // The watch is the dosing controller here, so its context is authoritative and the
-        // phone's is stale by construction. Refuse it outright rather than merging: there is no
-        // field on it the watch does not know better.
+        // During a loan the phone's context never replaces the watch's: `shouldReplace` compares only
+        // glucoseDate with `>=`, so an equal-timestamp relay would discard the watch's prediction.
         let onLoan = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController.isLoanActiveNonBlocking ?? false
         if onLoan, !context.isWatchAuthored {
             podLoanAbsorbPhoneContextDuringLoan(context)
@@ -288,8 +275,8 @@ extension LoopDataManager {
     func clearOverride() async throws {
         var watchInfoUpdate = self.watchInfo
         watchInfoUpdate.scheduleOverride = nil
-        if let manager = loanDosingManagerIfActive {
-            return await applyOverrideDuringLoan(manager, TemporaryScheduleOverride?.none, watchInfoUpdate,
+        if let loan = loanControllerIfActive {
+            return await applyOverrideDuringLoan(loan, TemporaryScheduleOverride?.none, watchInfoUpdate,
                                                  presetId: String?.none, alertIdentifier: String?.none)
         }
         try await WCSession.default.sendSetPreset(presetIdentifier: nil, alertIdentifier: nil)
@@ -299,8 +286,8 @@ extension LoopDataManager {
     func activateOverride(_ override: TemporaryScheduleOverride, alertIdentifierToAcknowledge: String? = nil) async throws {
         var watchInfoUpdate = self.watchInfo
         watchInfoUpdate.scheduleOverride = override
-        if let manager = loanDosingManagerIfActive {
-            return await applyOverrideDuringLoan(manager, override, watchInfoUpdate,
+        if let loan = loanControllerIfActive {
+            return await applyOverrideDuringLoan(loan, override, watchInfoUpdate,
                                                  presetId: override.presetId,
                                                  alertIdentifier: alertIdentifierToAcknowledge)
         }
@@ -393,13 +380,8 @@ extension LoopDataManager {
             correctionRange: self.watchInfo.loopSettings.glucoseTargetRangeSchedule,
             scheduleOverride: self.watchInfo.scheduleOverride,
             historicalGlucose: historicalGlucose,
-            // DRAW THE PREDICTION WHATEVER THE LOOP MODE, matching the phone — which assigns
-            // `predictedGlucoseValues = state.output?.predictedGlucose` with no mode gate at all.
-            // The gate here blanked the chart on an OPEN loop, and a loan INHERITS the phone's
-            // mode at grant, so a wrist holding the pod in advisory mode showed no forecast — the
-            // situation where you most need one, because you are deciding by hand. The number was
-            // computed every cycle regardless; we were simply declining to draw it.
-            predictedGlucose: activeContext.predictedGlucose?.values
+            // With Sport Mode, draw the prediction in any loop mode, as the phone does.
+            predictedGlucose: (FeatureFlags.sportModeEnabled || (activeContext.isClosedLoop ?? false)) ? activeContext.predictedGlucose?.values : nil
         )
         return chartData
     }

@@ -2,16 +2,8 @@
 //  LoanProtocolV2Tests.swift
 //  LoopTests
 //
-//  Loan protocol v2 unit coverage (DESIGN_LOAN_PROTOCOL_V2.md §10): wire-format
-//  round-trip + version skew (never-silently-discard), and the fingerprints-only
-//  allocation properties (never reduce confirmed, exact-match preference with
-//  latest-on-tie, skipped-reduction window fit, ambiguity touches nothing, one-way
-//  valve). Controller-level flows (epoch race D22, resend/ack ordering) are exercised
-//  as bench drills Part E; the state machines' UserDefaults/UNNotification coupling
-//  keeps them out of unit scope deliberately.
-//
-//  NOTE: run via Xcode (Cmd-U). CLI test execution fails signing in this environment;
-//  the CLI gate is compile-only.
+//  Loan protocol v2: wire round-trips and version skew, the pulse-accurate expected-insulin
+//  model, the reconciler's reroute through addPumpEvents, and dose identity.
 //
 
 import XCTest
@@ -40,7 +32,7 @@ final class LoanProtocolV2Tests: XCTestCase {
         let messages: [LoanMessage] = [
             .request(LoanRequest(watchBuild: "77")),
             .grant(LoanGrant(epoch: 5, expiresAt: now.addingTimeInterval(300),
-                             pumpManagerRawState: Data([1, 2, 3]), podAddress: 0x1F0A2B3C,
+                             pumpConfiguration: Data([1, 2, 3]), podAddress: 0x1F0A2B3C,
                              therapySettingsRaw: Data([4, 5]), settingsTimeZoneID: "America/New_York",
                              doseHistory: [LoanDoseRecord(kind: .tempBasal, startDate: now, endDate: now.addingTimeInterval(1800), unitsPerHour: 0.8)])),
             .takeoverComplete(TakeoverComplete(epoch: 5, firstPodStatus: status)),
@@ -68,7 +60,7 @@ final class LoanProtocolV2Tests: XCTestCase {
                                   syncVersion: 1, startDate: now, grams: 25, absorptionTime: .hours(3),
                                   foodType: "🍕", userCreatedDate: now, userUpdatedDate: nil)
         let grant = LoanGrant(epoch: 7, expiresAt: now.addingTimeInterval(300),
-                              pumpManagerRawState: Data([1]), podAddress: 0,
+                              pumpConfiguration: Data([1]), podAddress: 0,
                               therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC",
                               doseHistory: [], carbHistory: [carb])
         guard case .grant(let g) = try roundTrip(.grant(grant)) else { return XCTFail("not a grant") }
@@ -76,7 +68,7 @@ final class LoanProtocolV2Tests: XCTestCase {
 
         // Backward compat: an older phone sends no carbHistory; it must decode as nil, not [].
         let old = LoanGrant(epoch: 7, expiresAt: now.addingTimeInterval(300),
-                            pumpManagerRawState: Data([1]), podAddress: 0,
+                            pumpConfiguration: Data([1]), podAddress: 0,
                             therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC",
                             doseHistory: [])
         guard case .grant(let g2) = try roundTrip(.grant(old)) else { return XCTFail("not a grant") }
@@ -88,7 +80,7 @@ final class LoanProtocolV2Tests: XCTestCase {
         let sample = LoanGlucoseRecord(syncIdentifier: "g-1", startDate: now, valueMgdl: 120,
                                        trendRateMgdlPerMin: 1.5, isDisplayOnly: false, wasUserEntered: false)
         let grant = LoanGrant(epoch: 8, expiresAt: now.addingTimeInterval(300),
-                              pumpManagerRawState: Data([1]), podAddress: 0,
+                              pumpConfiguration: Data([1]), podAddress: 0,
                               therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC",
                               doseHistory: [], glucoseHistory: [sample])
         guard case .grant(let g) = try roundTrip(.grant(grant)) else { return XCTFail("not a grant") }
@@ -96,7 +88,7 @@ final class LoanProtocolV2Tests: XCTestCase {
 
         // Backward compat: an older phone sends no glucoseHistory; it must decode as nil, not [].
         let old = LoanGrant(epoch: 8, expiresAt: now.addingTimeInterval(300),
-                            pumpManagerRawState: Data([1]), podAddress: 0,
+                            pumpConfiguration: Data([1]), podAddress: 0,
                             therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC",
                             doseHistory: [])
         guard case .grant(let g2) = try roundTrip(.grant(old)) else { return XCTFail("not a grant") }
@@ -112,7 +104,7 @@ final class LoanProtocolV2Tests: XCTestCase {
             iobUnits: 1.5, iobDate: now.addingTimeInterval(-60), cobGrams: 0,
             momentumPointCount: 5, rcDiscrepancyCount: 7, enabledEffectsRaw: 15)
         let grant = LoanGrant(epoch: 9, expiresAt: now.addingTimeInterval(300),
-                              pumpManagerRawState: Data([1]), podAddress: 0,
+                              pumpConfiguration: Data([1]), podAddress: 0,
                               therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC",
                               doseHistory: [], predictionSnapshot: snap)
         guard case .grant(let g) = try roundTrip(.grant(grant)) else { return XCTFail("not a grant") }
@@ -120,11 +112,65 @@ final class LoanProtocolV2Tests: XCTestCase {
 
         // Backward compat: an older phone sends no snapshot; it must decode as nil, not a default.
         let old = LoanGrant(epoch: 9, expiresAt: now.addingTimeInterval(300),
-                            pumpManagerRawState: Data([1]), podAddress: 0,
+                            pumpConfiguration: Data([1]), podAddress: 0,
                             therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC",
                             doseHistory: [])
         guard case .grant(let g2) = try roundTrip(.grant(old)) else { return XCTFail("not a grant") }
         XCTAssertNil(g2.predictionSnapshot)
+    }
+
+    /// The grant carries the pump's exported configuration whole; the watch reads only its header.
+    func testGrantCarriesThePumpsSharedConfiguration() throws {
+        let asOf = Date(timeIntervalSince1970: 1_784_338_000)
+        let configuration = SharedDeviceConfiguration(managerIdentifier: "Pump", asOf: asOf, deliveredUnits: 41.25,
+                                                      state: ["opaque": ["nested": Data([9])]])
+        let data = try PropertyListSerialization.data(fromPropertyList: configuration.rawValue, format: .binary, options: 0)
+        let grant = LoanGrant(epoch: 4, expiresAt: asOf.addingTimeInterval(300), pumpConfiguration: data, podAddress: 0,
+                              therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC", doseHistory: [])
+        guard case .grant(let received) = try roundTrip(.grant(grant)) else { return XCTFail("not a grant") }
+
+        let decoded = try XCTUnwrap(received.sharedPumpConfiguration)
+        XCTAssertEqual(decoded.managerIdentifier, "Pump")
+        XCTAssertEqual(decoded.asOf, asOf)
+        XCTAssertEqual(decoded.deliveredUnits, 41.25)
+        XCTAssertEqual((decoded.state["opaque"] as? [String: Any])?["nested"] as? Data, Data([9]))
+    }
+
+    /// The glucose alert settings ride the grant; a grant from an older phone has none.
+    func testGrantGlucoseAlertSettingsRoundTripAndAreOptional() throws {
+        var profile = GlucoseAlertProfile.makePrimary()
+        profile.configuration.lowThresholdMgDL = 75
+        let settings = GlucoseAlertSettings(profiles: [profile], activeProfileID: profile.id,
+                                            cgmProvidesOwnAlerts: false, loopAlertsOverrideForOwnAlertingCGM: false)
+        let grant = LoanGrant(epoch: 4, expiresAt: Date(), pumpConfiguration: Data([1]), podAddress: 0,
+                              therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC", doseHistory: [],
+                              glucoseAlertSettings: settings.encoded)
+        guard case .grant(let received) = try roundTrip(.grant(grant)) else { return XCTFail("not a grant") }
+        XCTAssertEqual(GlucoseAlertSettings(encoded: received.glucoseAlertSettings), settings)
+
+        let older = LoanGrant(epoch: 4, expiresAt: Date(), pumpConfiguration: Data([1]), podAddress: 0,
+                              therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC", doseHistory: [])
+        guard case .grant(let fromOlder) = try roundTrip(.grant(older)) else { return XCTFail("not a grant") }
+        XCTAssertNil(fromOlder.glucoseAlertSettings)
+    }
+
+    func testAGrantWithoutAConfigurationDecodesToNil() {
+        let grant = LoanGrant(epoch: 4, expiresAt: Date(), pumpConfiguration: Data([1, 2, 3]), podAddress: 0,
+                              therapySettingsRaw: Data(), settingsTimeZoneID: "UTC", doseHistory: [])
+        XCTAssertNil(grant.sharedPumpConfiguration)
+    }
+
+    /// Version 3 changed the grant's pump field; a version-2 peer is refused, never guessed at.
+    func testAVersion2PeerIsRefused() throws {
+        XCTAssertEqual(LoanProtocol.version, 3)
+        var dict = try LoanMessage.revoke(Revoke(epoch: 1)).transportDictionary()
+        var json = try JSONSerialization.jsonObject(with: dict[LoanProtocol.userInfoKey] as! Data) as! [String: Any]
+        json["protocolVersion"] = 2
+        dict[LoanProtocol.userInfoKey] = try JSONSerialization.data(withJSONObject: json)
+        XCTAssertThrowsError(try LoanMessage.decode(fromTransport: dict)) { error in
+            guard case LoanProtocolError.undecodable(let seen) = error else { return XCTFail() }
+            XCTAssertEqual(seen, 2)
+        }
     }
 
     func testForeignPayloadIsNotOurs() throws {
@@ -150,14 +196,7 @@ final class LoanProtocolV2Tests: XCTestCase {
         XCTAssertThrowsError(try LoanMessage.decode(fromTransport: dict))
     }
 
-    /// KNOWN_RESIDUALS §16 (test debt): released-flag decode with the key ABSENT.
-    ///
-    /// A legacy watch only ever offered after it had stopped dosing and released the pod,
-    /// so its payload carries no `released` key at all. Passing `released: nil` in Swift is
-    /// NOT the same wire shape — the encoder can still emit an explicit null — so this test
-    /// strips the key from the encoded JSON to produce the genuine legacy payload. `nil`
-    /// must mean FINAL; reading it as "interim" would leave such a watch's loan stranded in
-    /// .loaned forever, since a legacy sender never sends anything more definitive.
+    /// An offer with the `released` key absent (older watch) decodes as nil, meaning final.
     func testLegacyOfferWithoutReleasedKeyDecodesAsNil() throws {
         let offer = HandbackOffer(epoch: 7, handedBackAt: Date(), finalStatus: nil, odometer: nil,
                                   events: [], tombstones: [], recovered: false, released: true)
@@ -175,14 +214,8 @@ final class LoanProtocolV2Tests: XCTestCase {
 
     // MARK: - Pulse model
 
-    /// The pod delivers whole 0.05 U pulses spaced 3600×0.05/rate apart, and restarts that clock
-    /// on every new command — so a temp truncated before its next pulse loses it. `expectedInsulin`
-    /// must model that, or it systematically over-predicts.
-    ///
-    /// 2.15 U/hr → a pulse every 83.7 s. Over 302 s the pod fires at 83.7/167.4/251.2 s = 3 pulses
-    /// = 0.150 U, while rate×time says 0.180 U. The 0.030 U difference is the partial pulse that
-    /// never happened, and it recurs on EVERY replacement — which is what put the first field
-    /// residual 6.8 pulses adrift (epoch 5: delivered 2.250 vs expected 2.592).
+    /// Pulses restart on every command, so a truncated temp loses its partial pulse: 2.15 U/hr
+    /// over 302 s is 3 pulses (0.150 U), not 0.180 U.
     func testExpectedInsulinModelsPodPulsesNotRateTimesTime() {
         let start = loanStart
         let temp = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
@@ -237,10 +270,7 @@ final class LoanProtocolV2Tests: XCTestCase {
         let choppedTotal = LoanReconciler.expectedInsulin(events: chopped, schedule: nil, from: start, to: end)
         let wholeTotal = LoanReconciler.expectedInsulin(events: whole, schedule: nil, from: start, to: end)
 
-        // 1.15 U/hr → a pulse every 156.5 s. Ten 300 s segments each fire once (10 × 0.05 = 0.50 U);
-        // one continuous 3000 s segment fires floor(3000/156.5) = 19 times (0.95 U). The chopping
-        // costs 9 pulses — and that is the whole point: the loss is per-replacement, so it grows
-        // with loan length rather than staying within any fixed tolerance.
+        // The loss is per replacement, so it grows with loan length.
         XCTAssertLessThan(choppedTotal, wholeTotal,
                           "replacing the temp every 5 min delivers strictly less than leaving it alone")
         XCTAssertEqual(wholeTotal - choppedTotal, 0.45, accuracy: 0.0001,
@@ -316,10 +346,7 @@ final class LoanProtocolV2Tests: XCTestCase {
     }
 
     // MARK: - Pump-event reroute
-    // The reconciler no longer truncates overlaps — routing through DoseStore.addPumpEvents
-    // runs stock InsulinMath.reconciled() at the store, which collapses them. The reconciler
-    // now only finalizes/clamps for a final hand-back and WITHHOLDS the interim open temp
-    // (written on the final drain). See docs/DESIGN_LOAN_ADDPUMPEVENTS.md.
+    // Overlaps are collapsed by stock `reconciled()` at the store; the reconciler only finalizes and withholds.
 
     private func temps(count: Int, spacingSeconds: Double = 300, windowSeconds: Double = 1800,
                        rate: Double = 2.0) -> [LoanEvent] {
@@ -332,10 +359,7 @@ final class LoanProtocolV2Tests: XCTestCase {
         }
     }
 
-    /// Final hand-back: every dose is finalized — immutable and clamped to loanEnd, so a
-    /// full-window trailing temp isn't deferred by addPumpEvents' save filter. Overlap
-    /// truncation is intentionally NOT done here (stock reconciled() collapses them at the
-    /// store), so the doses may still overlap.
+    /// Final hand-back: every dose finalized and clamped to loanEnd; overlaps left to the store.
     func testFinalHandbackFinalizesAndClampsToLoanEnd() {
         let events = temps(count: 3)  // 30-min windows, 5 min apart
         let loanEnd = loanStart.addingTimeInterval(1500)  // 25 min: every window overruns it
@@ -351,11 +375,7 @@ final class LoanProtocolV2Tests: XCTestCase {
         }
     }
 
-    /// Interim drain: the still-open trailing temp is reported via openEventID and
-    /// WITHHELD from the write (it re-drains and is written on the final drain). The
-    /// controller still acks its seq so the watch can finalize; keeping it out of the write
-    /// and committedIDs is what lets it re-drain. The superseded temps are written immutable
-    /// for stock reconciled() to collapse.
+    /// Interim drain: the open temp is acked but withheld from the write and committed IDs.
     func testInterimDrainWithholdsOpenTempFromWrite() {
         let events = temps(count: 3)
         // Drain 12 min in — all three 30-min windows still extend past it; temp[2] is open.
@@ -386,9 +406,7 @@ final class LoanProtocolV2Tests: XCTestCase {
 
     // MARK: - LoanSeedIdentity (double-hex fix)
 
-    /// The seed's raw must round-trip the phone's hex syncIdentifier back to the ORIGINAL bytes,
-    /// so the watch row's derived syncIdentifier (hex of raw) equals the phone's — one identity
-    /// end-to-end, and the pod's deterministic re-reports collide instead of duplicating.
+    /// The seed's raw round-trips the phone's hex syncIdentifier, so re-reports collide.
     func testLoanSeedIdentityRawRoundTripAndFallbacks() {
         let podRaw = Data("tempBasal 2.35 2026-07-28T21:38:02Z".utf8)   // OmniBLE uniqueKey shape
         let phoneSyncId = podRaw.map { String(format: "%02hhx", $0) }.joined()
@@ -417,7 +435,7 @@ final class LoanProtocolV2Tests: XCTestCase {
                                           endDate: now.addingTimeInterval(-1800), unitsPerHour: 2.0)
         let runningTemp = LoanDoseRecord(kind: .tempBasal, startDate: now.addingTimeInterval(-600),
                                          endDate: now.addingTimeInterval(1200), unitsPerHour: 2.0)
-        let grant = LoanGrant(epoch: 9, expiresAt: now.addingTimeInterval(60), pumpManagerRawState: Data(),
+        let grant = LoanGrant(epoch: 9, expiresAt: now.addingTimeInterval(60), pumpConfiguration: Data(),
                               podAddress: 0x1F0F, therapySettingsRaw: Data(), settingsTimeZoneID: "UTC",
                               doseHistory: [finishedBolus, finishedTemp, runningTemp])
 
@@ -433,12 +451,7 @@ final class LoanProtocolV2Tests: XCTestCase {
 
     // MARK: - Channel classification
 
-    /// `.takeoverComplete` MUST ride the immediate channel. It moved there on 2026-08-12 because
-    /// the pump tile now shows "Taking over…" until it arrives — on `transferUserInfo` that label
-    /// outlives the takeover by tens of seconds to minutes and reads as a hang. Measured on build
-    /// 268 epoch 10: pod taken at +10.2 s, phone still in `.grantOffered` at +20 s.
-    ///
-    /// This test exists so that a future "tidy up the switch" cannot quietly revert the UI.
+    /// `.takeoverComplete` rides the immediate channel, or "Taking over…" outlives the takeover.
     func testTakeoverCompleteRidesTheImmediateChannel() {
         let status = LoanPodStatus(timestamp: Date(), deliveredUnits: 1, reservoirLevel: nil, isSuspended: false, faultCode: nil)
         XCTAssertTrue(LoanMessage.takeoverComplete(TakeoverComplete(epoch: 1, firstPodStatus: status)).isInteractiveHandshake,
@@ -455,10 +468,7 @@ final class LoanProtocolV2Tests: XCTestCase {
 
     // MARK: - Transport kind peek
 
-    /// The watch's queued-offer supersede cancels ONLY hand-back offers, identified by this
-    /// peek. A false positive cancels a one-shot message (a record stream is not resent until
-    /// the next cycle); a false negative just leaves a duplicate in the queue to be
-    /// coalesced. So: exact kind for an offer, nil for everything not ours.
+    /// The peek names hand-back offers exactly and returns nil for anything else.
     func testPeekKindIdentifiesOffersAndRejectsForeignPayloads() throws {
         let offer = HandbackOffer(epoch: 3, handedBackAt: Date(), finalStatus: nil, odometer: nil,
                                   events: [], tombstones: [], recovered: false, released: false)

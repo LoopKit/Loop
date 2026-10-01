@@ -1,16 +1,8 @@
-// WorkoutKeepalive.swift — the background-runtime vehicle for the watch loop.
+// WorkoutKeepalive.swift — background runtime for the watch loop.
 //
-// watchOS suspends a backgrounded third-party app within seconds, and there is NO CoreBluetooth
-// state restoration on watchOS — so a suspended app cannot be woken by a BLE event. An
-// HKWorkoutSession is the only self-service API that keeps our process (and its BLE links) alive.
-// That is what lets the loop keep dosing and lets stock G7SensorKit keep receiving with the wrist
-// down. Riding the Dexcom watch app's authenticated session buys us DATA, not RUNTIME:
-// entitlements are not inheritable by a co-resident app.
-//
-// More than one subsystem can want the keepalive at once, so holds are REFCOUNTED BY REASON —
-// "loanWorkout" for the duration of a loan, plus "takeover" and "handback" for the two bounded windows
-// that need runtime of their own. Releasing one can never stop a session another still wants.
-// Owned by StockLoopSession, which drives all three.
+// watchOS suspends a backgrounded app within seconds; an HKWorkoutSession is the only
+// self-service way to keep the process and its BLE links alive. Holds are refcounted by reason
+// ("takeover", "handback"). Owned by StockLoopSession.
 //
 import Foundation
 import HealthKit
@@ -25,9 +17,7 @@ final class WorkoutKeepalive: NSObject, HKWorkoutSessionDelegate {
     private var recoveryProbed = false
     private var recoverGeneration: UInt64 = 0
 
-    // Everything above is MAIN-only — every entry point funnels through `onMain`. The tag and the
-    // held flag below are lock-guarded because the runtime heartbeat samples them from its own
-    // queue while this class is mid-callback.
+    // Entry points run on main; these two are lock-guarded for the heartbeat's reads.
     private let tagLock = NSLock()
     private var _tag = "keepalive off"
 
@@ -43,22 +33,16 @@ final class WorkoutKeepalive: NSObject, HKWorkoutSessionDelegate {
         RuntimeStateLog.keepaliveProbe = { [weak self] in self?.stateTag ?? "keepalive ?" }
     }
 
-    /// Take a hold under `reason`. Holds are refcounted BY REASON, so releasing one can never
-    /// stop a session another subsystem still wants. The whole-loan holder is off unless its
-    /// diagnostics default is set, so in an ordinary loan only the takeover and hand-back windows
-    /// hold runtime and the app sleeps between bursts.
+    /// Take a hold under `reason`; releasing one never stops a session another still wants.
     func acquire(_ reason: String) { setHeld(true); onMain { self.holders.insert(reason); self.startSessionIfNeeded() } }
 
     /// Drop this reason's hold. The session ends only when the last holder goes.
     func release(_ reason: String) { onMain { self.holders.remove(reason); if self.holders.isEmpty { self.setHeld(false); self.endSession() } } }
 
-    /// Re-drive the start path without taking a hold — for a wake that finds holders but no
-    /// session, which is how a session lost while suspended is noticed.
+    /// Restart a session lost while suspended, without taking a hold.
     func ensureRunning() { onMain { self.startSessionIfNeeded() } }
 
-    /// Adopt a session that outlived us before starting a new one: after a relaunch mid-loan
-    /// watchOS can still be holding ours, and starting a second on top of it fails. Probed once
-    /// per process — after that, straight to authorisation and start.
+    /// Adopt a session that outlived a relaunch before starting one; probed once per process.
     private func startSessionIfNeeded() {
         guard session == nil, !authInFlight, !recoverInFlight else { return }
         guard !holders.isEmpty else { return }
@@ -78,8 +62,7 @@ final class WorkoutKeepalive: NSObject, HKWorkoutSessionDelegate {
                     SportLog.event("keepalive", "recoverActiveWorkoutSession error: \(error)")
                 }
 
-                // Holders can all have gone away while the probe was out. End what was found
-                // rather than adopting a session nothing wants.
+                // Nothing wants a session any more: end what was found.
                 guard !self.holders.isEmpty, self.session == nil else {
                     if let recovered { recovered.end() }
                     return
@@ -100,8 +83,7 @@ final class WorkoutKeepalive: NSObject, HKWorkoutSessionDelegate {
             }
         }
 
-        // The recovery probe does not always call back. Two seconds, then start fresh — and the
-        // generation counter stops a late callback from cancelling the session that replaced it.
+        // The probe may never call back: start fresh after 2 s; the generation stops a late callback.
         recoverGeneration &+= 1
         let generation = recoverGeneration
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
@@ -112,9 +94,7 @@ final class WorkoutKeepalive: NSObject, HKWorkoutSessionDelegate {
         }
     }
 
-    /// Request workout-share authorisation, then read the status back rather than trusting the
-    /// request's own success flag. Without the grant there is no background runtime at all, so the
-    /// denial is stated in the log and in the state tag instead of surfacing later as a dead loop.
+    /// Reads the authorisation status back instead of trusting the request's result.
     private func authoriseThenStart() {
         if authOK { startSession(); return }
         authInFlight = true
@@ -154,16 +134,14 @@ final class WorkoutKeepalive: NSObject, HKWorkoutSessionDelegate {
         } catch {
             session = nil
 
-            // A failed start re-opens the recovery probe: the usual cause is a session already
-            // running that we did not manage to adopt.
+            // A failed start re-opens the probe: usually a session we failed to adopt.
             recoveryProbed = false
             setTag("keepalive START-FAILED")
             SportLog.event("keepalive", "HKWorkoutSession start FAILED: \(error)")
         }
     }
 
-    /// Ends the session outright. Background runtime stops here, so it is reached only when the
-    /// last holder has gone.
+    /// Only when the last holder has gone.
     private func endSession() {
         session?.end()
         session = nil
@@ -180,8 +158,7 @@ final class WorkoutKeepalive: NSObject, HKWorkoutSessionDelegate {
                         from: HKWorkoutSessionState, date: Date) {
         SportLog.event("keepalive", "state \(from.rawValue) -> \(to.rawValue)")
     }
-    /// A failed session is dropped rather than retried in place: the next `acquire` or
-    /// `ensureRunning` rebuilds one, which is also what a wake after a suspension does.
+    /// Dropped, not retried: the next acquire or ensureRunning rebuilds one.
     func workoutSession(_ s: HKWorkoutSession, didFailWithError error: Error) {
         SportLog.event("keepalive", "session FAILED: \(error)")
         setTag("keepalive FAILED")

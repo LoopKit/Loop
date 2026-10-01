@@ -38,10 +38,7 @@ final class G7SilenceHintTests: XCTestCase {
 
 extension G7SilenceHintTests {
 
-    /// The defect this rule exists for. A sensor change leaves the last direct reading with the
-    /// EXPIRING sensor, then hours of warm-up silence — the exact picture of a parked radio. The
-    /// hint told the user to toggle Bluetooth at a sensor they had just put on, for the whole
-    /// warm-up, and the minutes it quoted were counted across the change.
+    /// A new sensor's warm-up is not a parked radio.
     func testANewSensorsWarmUpIsNotAParkedRadio() {
         XCTAssertNil(G7SilenceHint.text(directAge: .hours(1), relayAge: nil, sensorAge: .minutes(20)),
                      "a sensor twenty minutes old is quiet because it is warming up")

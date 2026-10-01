@@ -22,20 +22,20 @@ enum WatchDataManagerError: Error {
 @MainActor
 final class WatchDataManager: NSObject {
 
-    unowned let deviceManager: DeviceDataManager   // PODLOAN: read by the wiring extension
-    unowned let settingsManager: SettingsManager   // PODLOAN: read by the wiring extension
-    unowned let loopDataManager: LoopDataManager   // PODLOAN: read by the wiring extension
+    unowned let deviceManager: DeviceDataManager   // read by the pod-loan wiring extension
+    unowned let settingsManager: SettingsManager   // read by the pod-loan wiring extension
+    unowned let loopDataManager: LoopDataManager   // read by the pod-loan wiring extension
     private unowned let carbStore: CarbStore
     private unowned let glucoseStore: GlucoseStore
     private unowned let analyticsServicesManager: AnalyticsServicesManager?
-    unowned let temporaryPresetsManager: TemporaryPresetsManager   // PODLOAN: read by the wiring extension
+    unowned let temporaryPresetsManager: TemporaryPresetsManager   // read by the pod-loan wiring extension
     private unowned let alertManager: AlertManager
 
     // MARK: - Pod loan (stored state only — the behaviour is in WatchDataManager+PodLoan.swift)
 
-    var reclaimBackgroundTask: UIBackgroundTaskIdentifier = .invalid   // PODLOAN: held across the reclaim ladder's wall-clock rungs
-    let lockedLastWatchContact = Locked<Date?>(nil)   // PODLOAN: when the watch was last heard from — the loan's liveness signal
-    private(set) lazy var podLoanController: PodLoanPhoneController = makePodLoanController()   // PODLOAN: dependency wiring in PodLoanPhoneController+Wiring.swift
+    var reclaimBackgroundTask: UIBackgroundTaskIdentifier = .invalid   // held across the pod-loan reclaim ladder's wall-clock rungs
+    let lockedLastWatchContact = Locked<Date?>(nil)   // when the watch was last heard from — the pod loan's liveness signal
+    private(set) lazy var podLoanController: PodLoanPhoneController = makePodLoanController()   // pod-loan dependency wiring in PodLoanPhoneController+Wiring.swift
 
     init(
         deviceManager: DeviceDataManager,
@@ -307,6 +307,7 @@ final class WatchDataManager: NSObject {
         dosingDecision.carbsOnBoard = carbsOnBoard
 
         context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
+        podLoanShareCGMConfiguration(context)
 
         let settings = self.settingsManager.loopSettings
 
@@ -561,11 +562,8 @@ extension WatchDataManager: WCSessionDelegate {
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         Task { @MainActor in
             self.log.default("Received message: %{public}@", message)
-            // The loan's interactive handshake — request, hand-back offer, acks — rides this
-            // channel so a backgrounded watch app is woken now rather than whenever iOS decides
-            // to drain the queue. Answer it before the stock message handling, which knows
-            // nothing about these kinds.
-            if (try? LoanMessage.decode(fromTransport: message)) != nil {
+            // Loan handshake messages, handled before the stock message handling.
+            if FeatureFlags.sportModeEnabled, (try? LoanMessage.decode(fromTransport: message)) != nil {
                 lockedLastWatchContact.value = Date()
                 podLoanController.handleIncoming(userInfo: message)
                 replyHandler([:])

@@ -2,14 +2,8 @@
 //  PodLoanTimerCharacterizationTests.swift
 //  WatchAppTests
 //
-//  Characterization, not specification: these tests record what the timers DO today so that
-//  the refactor that follows has something to contradict. A characterization test that fails
-//  after a refactor is doing its job — it means behavior moved, and the diff has to say why.
-//
-//  What makes this possible is the scheduling seam carrying its LABEL. Asserting "a request
-//  arms exactly [request-timeout @60s]" is a claim about behavior; asserting "a request arms
-//  one timer" is a claim about arithmetic, and arithmetic survives refactors that break
-//  behavior.
+//  Characterization: records which labelled timers each action arms today, so a refactor that
+//  moves behaviour has to say so.
 //
 
 import XCTest
@@ -18,9 +12,7 @@ import LoopCore
 import LoopAlgorithm
 @testable import WatchApp
 
-/// Records every timer the controller arms, and fires none of them unless a test says so.
-/// Holding all time still is the default because most characterization questions are "what
-/// got armed", not "what happens when it fires".
+/// Records every arming and fires nothing unless asked.
 final class TimerRecorder {
     struct Armed: Equatable, CustomStringConvertible {
         let label: String
@@ -30,9 +22,7 @@ final class TimerRecorder {
 
     private let lock = NSLock()
     private var _armed: [Armed] = []
-    /// Every arming is kept, not just the latest: a superseded timer still exists in production
-    /// and still reaches its deadline, so a test that discarded it could not observe what the
-    /// seam does with one.
+    /// Every arming is kept; a superseded timer still reaches its deadline in production.
     private var _work: [String: [DispatchWorkItem]] = [:]
 
     /// Set to fire work items inline as they are armed — a virtual jump to every deadline.
@@ -53,9 +43,7 @@ final class TimerRecorder {
         }
     }
 
-    /// Fire one armed timer by label — virtual time for exactly that deadline. When a label was
-    /// armed more than once this fires the LATEST, matching what a real deadline would do to
-    /// the most recent arming.
+    /// Fires the latest arming of a label.
     @discardableResult
     func fire(_ label: String) -> Bool {
         lock.lock()
@@ -123,21 +111,15 @@ final class PodLoanTimerCharacterizationTests: XCTestCase {
             cacheLength: .hours(24),
             provenanceIdentifier: "TimerCharacterization"
         )
-        let manager = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore)
+        let manager = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
+                                       defaults: defaults, stateDirectory: journalDir)
         loopManager = manager
         return PodLoanWatchController(loopManager: manager,
                                       journal: LoanEventJournal(directory: journalDir),
-                                      defaults: defaults)
+                                      stateDirectory: journalDir)
     }
 
-    /// Wait until the recorder has seen at least `count` armings.
-    ///
-    /// `drain` below sleeps a fixed interval, which is a race: the controller arms on its own
-    /// serial queue, and on a loaded machine that block may not have run yet. Observed
-    /// with a field loan running and a second session building — two tests read an
-    /// EMPTY recorder and failed against a pure code move that could not have changed behavior.
-    /// Wait for the value wherever the assertion is about something being present; `drain`
-    /// remains correct only for asserting an ABSENCE, which cannot be waited for.
+    /// Waits for armings; `drain` alone races the controller's queue on a loaded machine.
     private func waitForArmed(_ rec: TimerRecorder, atLeast count: Int, timeout: TimeInterval = 5) {
         let e = expectation(description: "recorder saw \(count) arming(s)")
         let deadline = Date().addingTimeInterval(timeout)
@@ -151,9 +133,7 @@ final class PodLoanTimerCharacterizationTests: XCTestCase {
         wait(for: [e], timeout: timeout + 1)
     }
 
-    /// Settle for a fixed interval. Correct ONLY for asserting an absence — that a second tap
-    /// armed nothing — because there is no value to wait for. Every present-tense assertion
-    /// uses `waitForArmed` instead.
+    /// Fixed settle; only for asserting an absence.
     private func drain(_ controller: PodLoanWatchController, _ seconds: TimeInterval = 0.3) {
         let done = expectation(description: "queue settled")
         DispatchQueue.global().asyncAfter(deadline: .now() + seconds) { done.fulfill() }
@@ -211,15 +191,12 @@ final class PodLoanTimerCharacterizationTests: XCTestCase {
     }
 
     // MARK: - The simulator flow driver
-    //
-    // Reachable here because WatchAppTests runs in the simulator, and the driver is a pure
-    // phase machine on timers: no pod, no BLE, no WCSession. It is the only path that
-    // characterizes a multi-timer transition without a real grant blob.
+    // A pure phase machine on timers: the only multi-timer path without a real grant.
 
     /// The sim driver arms its grant and active hops together, up front — not chained.
     func testSimFlowArmsGrantAndActiveTogether() async {
         let controller = await makeController()
-        defaults.set(true, forKey: "sim.fakeLoanFlow")
+        controller.simFakeLoanFlow = true
         let rec = TimerRecorder()
         rec.install(on: controller)
         controller.send = { _ in }
@@ -236,7 +213,7 @@ final class PodLoanTimerCharacterizationTests: XCTestCase {
     /// loan starts OPEN. The phase guards are what make out-of-order firing safe.
     func testSimFlowHopsWalkToActiveAndOpenLoop() async {
         let controller = await makeController()
-        defaults.set(true, forKey: "sim.fakeLoanFlow")
+        controller.simFakeLoanFlow = true
         let rec = TimerRecorder()
         rec.install(on: controller)
         controller.send = { _ in }
@@ -254,12 +231,10 @@ final class PodLoanTimerCharacterizationTests: XCTestCase {
                        "a loan starts OPEN — the wearer closes it deliberately")
     }
 
-    /// Out-of-order firing is inert: sim-active found the wrong phase and did nothing. This
-    /// is the property that makes the arm-both-up-front design safe, so it is worth pinning
-    /// before any refactor turns these into a chain.
+    /// Out-of-order firing is inert, which is what makes arming both up front safe.
     func testSimActiveIsInertWhenItsPhaseGuardFails() async {
         let controller = await makeController()
-        defaults.set(true, forKey: "sim.fakeLoanFlow")
+        controller.simFakeLoanFlow = true
         let rec = TimerRecorder()
         rec.install(on: controller)
         controller.send = { _ in }
@@ -276,10 +251,7 @@ final class PodLoanTimerCharacterizationTests: XCTestCase {
 
     // MARK: - Harness integrity
 
-    /// The harness's load-bearing assumption: what the recorder captures is the SEAM'S
-    /// WRAPPER, not the raw body. Every other test here fires through that wrapper, so if the
-    /// seam ever stopped wrapping — or wrapped something inert — those tests would keep
-    /// passing while testing nothing. Firing the timeout must produce the body's real effects.
+    /// Firing through the recorder runs the seam's wrapper and has real effects.
     func testRecorderCapturesTheSeamWrapperSoFiringHasRealEffects() async {
         let controller = await makeController()
         let rec = TimerRecorder()
@@ -296,16 +268,7 @@ final class PodLoanTimerCharacterizationTests: XCTestCase {
         XCTAssertNotNil(controller.lastIdleNote, "and the body's user-visible reason was set")
     }
 
-    // MARK: - Cross-epoch firing: NOT tested here, deliberately
-    //
-    // The seam LOGS a cross-epoch firing ("** armed e=N firing e=M **") but still calls
-    // work.perform(). Every guard against a stale timer is hand-written at its call site,
-    // across 14 sites — which is exactly the shape where one gets forgotten.
-    //
-    // That gap is real and is what phase 4 closes, but it is not honestly testable from here:
-    // `epoch` is private and the only path that advances it is the simulator driver, whose
-    // own call-site phase guards would mask the seam's policy rather than reveal it. A test
-    // that drove it anyway would be asserting on the call-site guard while claiming to assert
-    // on the seam. Phase 4 introduces the enforcement and its test together.
+    // Cross-epoch firing is logged but not enforced by the seam; not testable here without
+    // asserting on call-site guards instead.
 
 }

@@ -2,10 +2,8 @@
 //  WakeResumeTests.swift
 //  WatchAppTests
 //
-//  R40(e), re-ruled 2026-09-18: a relaunch mid-loan is a STOCK relaunch. The controller saves
-//  the pump manager's raw state while it holds the pod and rebuilds from it at launch — the
-//  phone's own PumpManagerState persistence, on the wrist. Only an ACTIVE loan with saved
-//  state resumes; every other relaunch keeps the data-first drain of spec §3.2.
+//  A relaunch mid-loan rebuilds from saved pump state, as the phone does. Only an active loan
+//  with saved state resumes; anything else drains.
 //
 
 import XCTest
@@ -28,22 +26,31 @@ final class WakeResumeTests: XCTestCase {
         journalDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try? FileManager.default.createDirectory(at: journalDir, withIntermediateDirectories: true)
         defaults = UserDefaults(suiteName: "WakeResumeTests-\(UUID().uuidString)")!
-        // The loop manager persists its last-loop time in the STANDARD defaults, process-wide,
-        // and seeds forward-only: an earlier test's cycle would otherwise outrank this test's seed.
-        UserDefaults.standard.removeObject(forKey: "WatchLoopManager.lastLoopCompleted")
-        UserDefaults.standard.removeObject(forKey: WatchLoopManager.closedLoopDefaultsKey)
-        UserDefaults.standard.removeObject(forKey: WatchLoopManager.integralRCDefaultsKey)
     }
 
-    /// What a grant leaves on disk: its therapy-settings payload — the stock snapshot (whose raw
-    /// form drops the schedules) plus the supplement carrying the basal schedule, the one thing
-    /// a resume cannot dose without.
+    /// Writes the controller's state file as a previous run left it.
+    private func saveState(_ change: (inout PodLoanWatchState) -> Void) {
+        var store = PersistedProperty<[String: Any]>(key: "PodLoanWatchState", directory: journalDir)
+        var state = store.wrappedValue.flatMap(PodLoanWatchState.init(rawValue:)) ?? PodLoanWatchState()
+        change(&state)
+        store.wrappedValue = state.rawValue
+    }
+
+    /// Writes the saved pump manager state as a previous run left it.
+    private func savePumpState(_ state: [String: Any]) {
+        var store = PersistedProperty<[String: Any]>(key: "PumpManagerState", directory: journalDir)
+        store.wrappedValue = state
+    }
+
+    /// The grant's settings payload on disk, including the supplement's basal schedule.
     private func persistGrantedSettings() {
         let basal = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.0)])!
         let raw = try! PropertyListSerialization.data(fromPropertyList: LoopSettings().rawValue, format: .binary, options: 0)
         let supplement = try! PropertyListSerialization.data(fromPropertyList: ["basalRateSchedule": basal.rawValue], format: .binary, options: 0)
-        defaults.set(["raw": raw, "supplement": supplement, "interim": true, "overrideRecords": true],
-                     forKey: PodLoanWatchController.Keys.grantedTherapySettings)
+        saveState {
+            $0.grantedSettings = .init(therapySettingsRaw: raw, supplementRaw: supplement,
+                                       supportsInterimHandback: true, supportsOverrideRecords: true)
+        }
     }
 
     override func tearDown() {
@@ -62,29 +69,78 @@ final class WakeResumeTests: XCTestCase {
                                               cacheLength: .hours(4), provenanceIdentifier: "WakeResumeTests")
         let carbStore = CarbStore(healthKitSampleStore: nil, cacheStore: cacheStore,
                                   cacheLength: .hours(24), provenanceIdentifier: "WakeResumeTests")
-        let manager = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore)
+        let manager = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
+                                       defaults: defaults, stateDirectory: journalDir)
         return PodLoanWatchController(loopManager: manager,
                                       journal: LoanEventJournal(directory: journalDir),
-                                      defaults: defaults)
+                                      stateDirectory: journalDir)
     }
 
-    /// The smallest raw state `OmniPumpManager(rawState:)` accepts: a basal schedule, and a
-    /// controller id so it takes the DASH path the watch uses. No pod — nothing to connect to.
+    /// The smallest pump state the watch's registry restores: the Omnipod manager's identifier, a
+    /// basal schedule, and a controller id so it takes the DASH path the watch uses. No pod.
     private var readablePumpState: [String: Any] {
-        ["basalSchedule": ["entries": [["rate": 1.0, "startTime": 0.0]]],
-         "controllerId": UInt32(0x1234_5678), "podId": UInt32(0x1234_5679)]
+        ["managerIdentifier": "Omni",
+         "state": ["basalSchedule": ["entries": [["rate": 1.0, "startTime": 0.0]]],
+                   "controllerId": UInt32(0x1234_5678), "podId": UInt32(0x1234_5679)] as [String: Any]]
     }
 
     private func relaunch(phase: PodLoanWatchController.Phase, epoch: Int = 7, savedState: [String: Any]?,
                           granted: Bool = true) async -> PodLoanWatchController {
         if granted { persistGrantedSettings() }
-        defaults.set(phase.rawValue, forKey: PodLoanWatchController.Keys.phase)
-        defaults.set(epoch, forKey: PodLoanWatchController.Keys.epoch)
-        if let savedState { defaults.set(savedState, forKey: PodLoanWatchController.Keys.pumpState) }
+        saveState {
+            $0.phase = phase
+            $0.epoch = epoch
+        }
+        if let savedState { savePumpState(savedState) }
         let c = await makeController()
         c.resumeIfNeeded()   // what the session does once the hooks are wired
         c.queue.sync { }     // the resume is built on the queue; wait for it
         return c
+    }
+
+    /// The direct-reading clock is memory, seeded at launch from the sensor.
+    func testDirectReadingClockIsSeededAtLaunch() async {
+        let c = await makeController()
+        XCTAssertNil(c.loopManager.lastGlucoseSourceStamps.direct)
+
+        let reading = Date().addingTimeInterval(-300)
+        c.loopManager.seedLastDirectG7At(reading)
+        XCTAssertEqual(c.loopManager.lastGlucoseSourceStamps.direct, reading)
+        c.loopManager.seedLastDirectG7At(reading.addingTimeInterval(-600))
+        XCTAssertEqual(c.loopManager.lastGlucoseSourceStamps.direct, reading, "a seed never moves the clock back")
+    }
+
+    /// An interrupted start is reported once: the next relaunch is plain idle, not a second
+    /// `takeoverFailed` and a second "start was interrupted".
+    func testASecondRelaunchAfterAnInterruptedStartIsIdle() async {
+        let first = await relaunch(phase: .takingOver, savedState: nil, granted: false)
+        XCTAssertEqual(first.phase, .idle)
+        XCTAssertEqual(first.pendingInterruptedTakeoverEpoch, 7, "the first relaunch tells the phone")
+        let second = await makeController()
+        XCTAssertEqual(second.phase, .idle)
+        XCTAssertNil(second.epoch)
+        XCTAssertNil(second.pendingInterruptedTakeoverEpoch, "the normalised phase was saved, so nothing is re-reported")
+        XCTAssertNil(second.lastIdleNote)
+    }
+
+    /// A revoke recorded before a relaunch still refuses a grant at or below it afterwards; in
+    /// memory only, the relaunched watch could take a pod the phone had already asked back.
+    func testARecordedRevokeSurvivesARelaunch() async throws {
+        let c = await makeController()
+        c.handleIncoming(userInfo: try LoanMessage.revoke(Revoke(epoch: 8)).transportDictionary(), channel: .urgent)
+        c.queue.sync { }
+
+        let relaunched = await makeController()
+        var failures: [String] = []
+        relaunched.send = { dict in
+            if case .takeoverFailed(let f)? = try? LoanMessage.decode(fromTransport: dict) { failures.append(f.reason) }
+        }
+        let grant = LoanGrant(epoch: 8, expiresAt: Date().addingTimeInterval(300), pumpConfiguration: Data([1, 2, 3]),
+                              podAddress: 0, therapySettingsRaw: Data([4, 5]), settingsTimeZoneID: "GMT", doseHistory: [],
+                              therapySettingsSupplementRaw: nil)
+        relaunched.queue.sync { relaunched.handleGrant(grant) }
+        XCTAssertEqual(failures.count, 1)
+        XCTAssertTrue(failures.first?.contains("last revoke") == true, "refused for the revoke, got: \(failures)")
     }
 
     func testActiveLoanWithSavedPodStateResumes() async {
@@ -94,12 +150,12 @@ final class WakeResumeTests: XCTestCase {
         XCTAssertNotNil(c.pumpManager, "the pump manager is rebuilt from the saved state")
         XCTAssertNotNil(c.loopManager.pumpManager, "and handed to the loop, so dosing can resume")
         XCTAssertTrue(c.isLoanActiveNonBlocking,
-                      "the main-safe mirror is set — init loads the phase without its didSet (bench 2026-09-18: onboarding screen + blank IOB)")
+                      "the main-safe mirror is set — init loads the phase without its didSet (else: onboarding screen + blank IOB)")
         XCTAssertNotNil(c.loopManager.settings.basalRateSchedule,
-                        "the granted therapy settings came back from disk (bench 2026-09-18: blank IOB, no schedule)")
+                        "the granted therapy settings came back from disk (else: blank IOB, no schedule)")
         XCTAssertTrue(c.phoneSupportsInterimHandback,
-                      "the phone's hand-back capability comes back with the grant payload (bench 2026-09-18: resumed loan handed back single-phase)")
-        XCTAssertNotNil(defaults.dictionary(forKey: PodLoanWatchController.Keys.pumpState),
+                      "the phone's hand-back capability comes back with the grant payload (else: a resumed loan hands back single-phase)")
+        XCTAssertNotNil(c.pumpStateStore.wrappedValue,
                         "the saved state stays on disk — the next relaunch resumes the same way")
     }
 
@@ -108,7 +164,7 @@ final class WakeResumeTests: XCTestCase {
         let c = await relaunch(phase: .active, savedState: readablePumpState, granted: false)
         XCTAssertEqual(c.phase, .recoveredDrain)
         XCTAssertNil(c.pumpManager)
-        XCTAssertNil(defaults.dictionary(forKey: PodLoanWatchController.Keys.pumpState))
+        XCTAssertNil(c.pumpStateStore.wrappedValue)
     }
 
     func testActiveLoanWithoutSavedStateStillDrains() async {
@@ -118,11 +174,19 @@ final class WakeResumeTests: XCTestCase {
         XCTAssertNil(c.pumpManager)
     }
 
+    /// State saved before it carried its manager's identifier cannot be routed: drain, as for any
+    /// unreadable state.
+    func testStateSavedWithoutItsManagersIdentifierFallsBackToDrain() async {
+        let c = await relaunch(phase: .active, savedState: readablePumpState["state"] as? [String: Any])
+        XCTAssertEqual(c.phase, .recoveredDrain)
+        XCTAssertNil(c.pumpManager)
+    }
+
     func testUnreadableSavedStateFallsBackToDrain() async {
         let c = await relaunch(phase: .active, savedState: ["garbage": 1])
         XCTAssertEqual(c.phase, .recoveredDrain, "unreadable state returns the pod, as a relaunch always did")
         XCTAssertNil(c.pumpManager)
-        XCTAssertNil(defaults.dictionary(forKey: PodLoanWatchController.Keys.pumpState), "and the bad state is discarded")
+        XCTAssertNil(c.pumpStateStore.wrappedValue, "and the bad state is discarded")
     }
 
     func testOnlyAnActiveLoanResumes() async {
@@ -144,11 +208,11 @@ final class WakeResumeTests: XCTestCase {
         let relaunched = await makeController()
         XCTAssertEqual(relaunched.loopManager.lastLoopCompleted?.timeIntervalSince1970 ?? 0,
                        completed.timeIntervalSince1970, accuracy: 0.001,
-                       "the last-loop time comes back from disk (bench 2026-09-18: gray ring for one cycle)")
+                       "the last-loop time comes back from disk (else: gray ring for one cycle)")
     }
 
     func testLiveHandbackWithPhoneUnreachableFailsFastAndKeepsTheLoan() async {
-        // Ruled 2026-09-19: a live hand-back is never queued. Out of reach, End fails at once
+        // A live hand-back is never queued. Out of reach, End fails at once
         // and the loan continues — no offer is sent, nothing can land later and take the pod.
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         XCTAssertNotNil(c.pumpManager)
@@ -164,7 +228,7 @@ final class WakeResumeTests: XCTestCase {
     }
 
     func testPhoneRefusalEndsTheHandbackAtOnceAndKeepsTheLoan() async throws {
-        // Goal (a), 2026-09-19: with the phone's Bluetooth off, End is refused and the watch
+        // With the phone's Bluetooth off, End is refused and the watch
         // knows at once — no budget to wait out. The phone says so; the watch shows its reason.
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         c.isPhoneReachable = { true }
@@ -183,21 +247,19 @@ final class WakeResumeTests: XCTestCase {
     }
 
     func testResumeRestoresEverythingALoanHadInstalled() async {
-        // ONE list, so the next field a grant installs cannot be forgotten silently. Found one at
-        // a time on the bench (settings, hand-back capability, last-loop time, then on 2026-09-19
-        // closed-loop mode and the delivery baseline) — each was loan state living in memory.
+        // One list, so a new grant field cannot be left out of the saved state.
         let live = await makeController()
         live.loopManager.setClosedLoopEnabled(true, reason: "test")
         live.loopManager.setIntegralRetrospectiveCorrection(true)
-        defaults.set(12.5, forKey: PodLoanWatchController.Keys.deliveredAtTakeover)
+        saveState { $0.deliveredAtTakeover = 12.5 }
 
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         XCTAssertNotNil(c.loopManager.settings.basalRateSchedule, "therapy settings")
-        XCTAssertTrue(c.loopManager.closedLoopEnabledNonBlocking, "closed-loop mode — bench: a resumed loan came back OPEN")
+        XCTAssertTrue(c.loopManager.closedLoopEnabledNonBlocking, "closed-loop mode — else a resumed loan comes back OPEN")
         XCTAssertTrue(c.loopManager.isIntegralRetrospectiveCorrectionEnabled, "retrospective-correction mode")
         XCTAssertTrue(c.phoneSupportsInterimHandback, "the phone's interim hand-back capability")
         XCTAssertTrue(c.phoneSupportsOverrideRecords, "the phone's override-records capability")
-        XCTAssertEqual(c.deliveredAtTakeover, 12.5, "the delivery baseline — bench: the hand-back audit read delivered=n/a")
+        XCTAssertEqual(c.deliveredAtTakeover, 12.5, "the delivery baseline — else the hand-back audit reads delivered=n/a")
         XCTAssertTrue(c.isLoanActiveNonBlocking, "the live-loan mirror")
     }
 
@@ -226,9 +288,7 @@ final class WakeResumeTests: XCTestCase {
     }
 
     func testAPhoneBolusGivenAfterTheCopyIsBooked() {
-        // The forgotten phone: lunch bolus on the phone, out of the door without it, Start on a copy
-        // that predates the bolus. Without this the watch sees rising glucose, no insulin on
-        // board, and doses on top of six units it has never heard of.
+        // A copy older than a phone bolus: the watch books the unexplained insulin.
         XCTAssertEqual(unexplained(podTotal: 16.2, after: 10), 6.0, accuracy: 0.001)
     }
 
@@ -275,13 +335,13 @@ final class WakeResumeTests: XCTestCase {
     // MARK: the rebuild after a relaunch
 
     func testASavedSessionIsLiveFromLaunchNotFromTheEndOfItsRebuild() async {
-        // 2026-09-20: after a power-up the pump manager took forty seconds to rebuild, and until
-        // it finished nothing on the wrist knew a session was live — the stock pages sat behind
-        // "complete onboarding" and the Sport Mode page was blank.
+        // State shows a live session before the slow pump rebuild finishes.
         persistGrantedSettings()
-        defaults.set(PodLoanWatchController.Phase.active.rawValue, forKey: PodLoanWatchController.Keys.phase)
-        defaults.set(7, forKey: PodLoanWatchController.Keys.epoch)
-        defaults.set(readablePumpState, forKey: PodLoanWatchController.Keys.pumpState)
+        saveState {
+            $0.phase = .active
+            $0.epoch = 7
+        }
+        savePumpState(readablePumpState)
         let c = await makeController()
         XCTAssertTrue(c.isLoanActiveNonBlocking, "live from the moment the saved session is found")
         XCTAssertTrue(c.isResumingNonBlocking, "and known to be rebuilding — what the glance shows instead of nothing")
@@ -294,9 +354,11 @@ final class WakeResumeTests: XCTestCase {
     }
 
     func testAFailedRebuildIsNeitherLiveNorResuming() async {
-        defaults.set(PodLoanWatchController.Phase.active.rawValue, forKey: PodLoanWatchController.Keys.phase)
-        defaults.set(7, forKey: PodLoanWatchController.Keys.epoch)
-        defaults.set(readablePumpState, forKey: PodLoanWatchController.Keys.pumpState)
+        saveState {
+            $0.phase = .active
+            $0.epoch = 7
+        }
+        savePumpState(readablePumpState)
         let c = await makeController()          // no granted settings on disk: the rebuild must fail
         c.resumeIfNeeded()
         c.queue.sync { }
@@ -352,9 +414,7 @@ final class WakeResumeTests: XCTestCase {
     }
 
     func testAReleasedWatchNeverResumesByTimer() async throws {
-        // 2026-09-19: the watch gave up 2.4 s after its final offer and resumed dosing; the phone
-        // committed 0.6 s later — two controllers for 7.6 minutes. Once the watch has released,
-        // no timer brings it back: it lets go of the pod and keeps offering its records.
+        // Once released, no timer brings the watch back to dosing.
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         c.isPhoneReachable = { true }
         var sent: [[String: Any]] = []
@@ -384,7 +444,7 @@ final class WakeResumeTests: XCTestCase {
         XCTAssertNotNil(c.pumpManager)
         c.queue.sync { c.teardownPump() }
         XCTAssertNil(c.pumpManager)
-        XCTAssertNil(defaults.dictionary(forKey: PodLoanWatchController.Keys.pumpState),
+        XCTAssertNil(c.pumpStateStore.wrappedValue,
                      "no pod held, nothing to resume — a relaunch now sees an ordinary closed loan")
     }
 }

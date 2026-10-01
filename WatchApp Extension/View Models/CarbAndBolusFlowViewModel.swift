@@ -129,15 +129,8 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func recommendBolus(with entry: NewCarbEntry? = nil) async {
-        // DURING A LOAN THE PHONE IS THE WRONG DEVICE TO ASK. It released its pod link at the
-        // grant and its books have been frozen since, so its IOB, COB and prediction are the ones
-        // it held when it handed the pod over — an answer computed from the wrong device's data.
-        // With the phone switched off it cannot answer at all, which is exactly the case Sport
-        // Mode exists for, and the failure surfaces as "Unable to Reach iPhone" at the bolus step
-        // (field 2026-08-16, 23:33, phone off deliberately).
-        //
-        // The watch holds the pod, ran the loop, and owns the only current books — so it computes
-        // its own recommendation.
+        // During a loan the watch computes the recommendation: the phone's books are frozen, and it
+        // may be off.
         if let session = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession,
            session.loanController.isLoanActive {
             await recommendLoanBolus(with: entry, session: session)
@@ -199,16 +192,8 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func sendSetBolusUserInfo(carbEntry: NewCarbEntry?, bolus: Double) async throws {
-        // PODLOAN: during an active loan the PHONE has RELEASED its pod link, so a bolus relayed
-        // there dies undelivered — found on the wrist 2026-07-18, and again on this branch
-        // 2026-08-16 when two boluses entered from these screens reached neither the pod nor the
-        // phone's books. Deliver on the WATCH's pump instead.
-        //
-        // Carbs take both paths deliberately: the LOCAL store so this loop's COB sees them on the
-        // very next cycle, and the loan JOURNAL — resend-until-ack — as the durable record that
-        // reaches the phone even while it is unreachable, which is the entire point of Sport Mode.
-        // The stock WC relay is skipped, not merely zeroed: it cannot deliver and its carb write
-        // would race the journal's.
+        // During a pod loan the phone has released the pod, so bolus on the watch's pump. Carbs
+        // go to the local store and the loan journal, not the stock relay.
         if let session = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession,
            session.loanController.isLoanActive {
             podLoanDeliverOnWrist(carbEntry: carbEntry, bolus: bolus, session: session)

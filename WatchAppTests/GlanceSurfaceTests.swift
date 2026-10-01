@@ -2,21 +2,7 @@
 //  GlanceSurfaceTests.swift
 //  WatchAppTests
 //
-//  THE GLANCE SURFACE, tested for the first time.
-//
-//  Three separate fields were declared on WatchLoopManager, READ into GlanceData, and assigned
-//  NOWHERE in the tree — so the wrist showed nothing while the log printed a full prediction
-//  every five minutes:
-//
-//    * predictedGlucoseIncludingPendingInsulin  → glance "eventual" always nil
-//    * lastPredictionBreakdown                  → diagnostics "no prediction to reconcile", always
-//
-//  All three survived because nothing ever asserted on the glance surface. They are pure
-//  computation — no BLE, no pod, no phone — so a simulator test catches them, which matters
-//  because this is the surface a person reads before deciding to bolus.
-//
-//  These tests assert the WIRING, not the algorithm's numbers: that what the loop computed
-//  actually reaches the surface that displays it.
+//  What the loop computes reaches the glance (the wiring, not the numbers).
 //
 
 import XCTest
@@ -95,10 +81,7 @@ final class GlanceSurfaceTests: XCTestCase {
         _ = try? await manager.glucoseStore.addGlucoseSamples(samples)
     }
 
-    /// A pump report in the book, because the algorithm refuses to run without one: stock's
-    /// pump-data recency gate (the one-book form of the 2026-08-18 fix — the algorithm must never
-    /// dose off a book the pod has not written to). An empty report is exactly what the
-    /// takeover's first status read looks like.
+    /// An empty pump report, so the recency gate lets the algorithm run.
     private func seedBook(_ manager: WatchLoopManager) async {
         try? await manager.recordPumpEvents([], lastReconciliation: Date(), replacePendingEvents: true)
     }
@@ -125,7 +108,7 @@ final class GlanceSurfaceTests: XCTestCase {
     }
 
     /// The diagnostics reconciliation panel reads this; it said "no prediction to reconcile" on
-    /// every cycle since the port because the field was never assigned.
+    /// every cycle because the field was never assigned.
     func testDiagnosticsCarriesAPredictionBreakdown() async {
         let manager = await makeManager()
         await seedGlucose(manager)

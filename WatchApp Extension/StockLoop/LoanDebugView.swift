@@ -2,12 +2,8 @@
 //  LoanDebugView.swift
 //  WatchApp
 //
-//  The Sport Mode diagnostics page: a TabView page beside the glance, showing the loop's and the
-//  loan's internals and offering the log.
-//
-//  It is a READER. Everything on it comes from the published mirrors, never from a synchronous
-//  read of the loop or loan queues — see `tick`. The few controls act through the loan
-//  controller or the CGM manager, or flip a stored flag another component reads later.
+//  The Sport Mode diagnostics page. It reads published mirrors only, never the loop or loan
+//  queues.
 //
 
 import Foundation
@@ -18,8 +14,7 @@ import HealthKit
 import LoopKit
 import G7SensorKit
 
-/// A snapshot of the CGM manager's own view of its sensor, taken whole at tick time so the CGM
-/// rows all describe one instant instead of drifting apart as the body re-evaluates.
+/// The CGM's view of its sensor, taken whole at tick time.
 struct CGMHealth {
     let sensorName: String?
     let lastReadingAge: TimeInterval?
@@ -64,16 +59,10 @@ struct LoanDebugView: View {
     @State private var dosing: WatchLoopManager.GlanceData?
     @State private var cobText: String = "—"
 
-    // Same defaults key as `StockLoopSession.loanWorkoutKey`, spelled out twice. Change one and
-    // the toggle silently stops reaching the thing it toggles.
-    @AppStorage("G7Lab.loan.workout") private var loanWorkout = false
-
     private let refresh = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
 
-    /// Always `sharedIfAvailable()`, never `WKApplication.shared().delegate` — under the SwiftUI
-    /// lifecycle that property is always nil, and a control wired through it is silently inert
-    /// with no error anywhere. Nil here simply means Sport Mode is unavailable, and every row
-    /// keeps its previous value rather than blanking.
+    /// Always `sharedIfAvailable()`: under the SwiftUI lifecycle `WKApplication.shared().delegate`
+    /// is nil.
     private var session: StockLoopSession? {
         ExtensionDelegate.sharedIfAvailable()?.stockLoopSession
     }
@@ -114,12 +103,6 @@ struct LoanDebugView: View {
 
                 Text("POD LOAN").font(.footnote).foregroundColor(.secondary)
 
-                Button("Keep a workout session running during loans: \(loanWorkout ? "ON" : "OFF") → tap to flip") {
-                    loanWorkout.toggle()
-                    SportLog.event("lab", "loan workout session = \(loanWorkout ? "ON — the soak holder spans the next loan" : "OFF — the app sleeps between bursts; takeover/hand-back keep their runtime")")
-                    lastAction = "loan workout → \(loanWorkout ? "ON" : "OFF") — next loan"
-                }
-
                 Button("Read Pod Status") {
                     lastAction = "reading…"
                     session?.loanController.debugReadStatus { ok in
@@ -154,7 +137,7 @@ struct LoanDebugView: View {
 
                 Button("Reconnect sensor") {
                     SportLog.event("g7-ble", "*** USER RECONNECT *** dropping the G7 link and re-acquiring the same sensor")
-                    ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.cgmManager.reconnectG7()
+                    (ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager.cgmManager as? G7CGMManager)?.reconnectG7()
                     lastAction = "sensor reconnect started"
                 }
 
@@ -162,13 +145,6 @@ struct LoanDebugView: View {
 
                 NavigationLink("Logs") { LogView() }
                     .font(.caption)
-
-                // Gated on GLANCE_DEMO rather than DEBUG: a Debug clone is built by people with
-                // no way to know that a screenful of pod and insulin numbers is invented.
-                #if GLANCE_DEMO
-                NavigationLink("Glance demo") { GlanceDemoView() }
-                    .font(.caption)
-                #endif
             }
         }
         }
@@ -180,18 +156,11 @@ struct LoanDebugView: View {
         }
     }
 
-    /// MAIN MUST NEVER SYNC ONTO THE LOOP OR LOAN QUEUES. The loan queue doubles as the pump's
-    /// delegate queue, so a synchronous read here blocks main for the length of whatever pod
-    /// operation is in flight — a bolus, a takeover, a reclaim — long enough for watchOS to kill
-    /// the app. So each refresh ASKS the owner to republish its mirror and then reads the mirror
-    /// that is already there; the value shown is the previous publish, which is the price.
-    ///
-    /// Keeping the previous value on a nil read (`?? snapshot`) matters too: a page that blanks
-    /// whenever a publish is in flight reads as "the loan is gone".
+    /// Asks owners to republish, then reads the existing mirror; keeps the old value on nil.
     private func tick() {
         session?.loanController.refreshDebugSnapshot()
         snapshot = session?.loanController.mirroredDebugSnapshot ?? snapshot
-        cgm = session.map { CGMHealth($0.stack.cgmManager) } ?? cgm
+        cgm = (session?.stack.loopManager.cgmManager as? G7CGMManager).map(CGMHealth.init) ?? cgm
 
         RuntimeStateLog.mark("debug.tick")
         session?.stack.loopManager.refreshGlanceData()
@@ -204,9 +173,7 @@ struct LoanDebugView: View {
         }
     }
 
-    /// The eventual glucose broken into the effects that produced it, with `r` carrying whatever
-    /// the named effects do not account for so the row adds up. `r` is NOT zero by construction —
-    /// it is the quantity worth looking at when a prediction surprises you.
+    /// Eventual glucose by effect; `r` is the unexplained remainder.
     @ViewBuilder
     private var predictionReconciliation: some View {
         if let b = dosing?.predictionBreakdown {
@@ -246,8 +213,7 @@ struct LoanDebugView: View {
     }
 }
 
-/// The wrist's own log reader: tail it, share it, or send it to the phone. This is what makes a
-/// field problem diagnosable without a Mac, on a build whose container no tool can reach.
+/// The wrist's log: tail, share, or send to the phone.
 struct LogView: View {
     @State private var text: String = ""
     @State private var sendNote: String?
@@ -257,8 +223,7 @@ struct LogView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Button {
                     if let url = LogFile.url {
-                        // The phone files the transfer by this metadata "kind"; it is the same
-                        // literal the session's automatic snapshots use.
+                        // The phone files the transfer by this kind.
                         WCSession.default.transferFile(url, metadata: ["kind": "g7watch.log"])
                         sendNote = "queued — appears in iPhone Files app (Loop folder)"
                     }
@@ -289,8 +254,7 @@ struct LogView: View {
         .onAppear(perform: load)
     }
 
-    /// Rendered NEWEST FIRST. The file is written oldest-first and there is no scroll position to
-    /// restore on a watch, so the thing that just happened has to be at the top.
+    /// Newest first.
     private func load() {
         let tail = LogFile.tail()
         text = tail.split(separator: "\n", omittingEmptySubsequences: false)

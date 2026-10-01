@@ -13,33 +13,33 @@ import LoopKit
 // MARK: - Pod loan (client API)
 
 extension DeviceDataManager {
+    /// nil with the flag off, so every read below is stock's "no loan" and nothing builds the controller.
+    private var podLoanController: PodLoanPhoneController? {
+        FeatureFlags.sportModeEnabled ? watchManager?.podLoanController : nil
+    }
+
     /// Revoke the watch's loan and bring the pod home. Dosing stays paused until the records
     /// the watch is holding have been reconciled.
     func reclaimPodLoanFromWatch() {
-        watchManager?.podLoanController.reclaimNow()
+        podLoanController?.reclaimNow()
     }
 
-    /// Any non-owner state — the pod is not this phone's to command.
-    /// The TILE's read — never blocks on the loan queue. See `PodLoanPhoneController.UISnapshot`:
-    /// this is drawn from the main thread, and a stalled reclaim holding that queue would freeze
-    /// the whole interface behind it.
+    /// Any non-owner state. Never blocks on the loan queue: the tile draws from main.
     var isPodLoanedToWatch: Bool {
-        watchManager?.podLoanController.isPodLoanedOutForUI ?? false
+        podLoanController?.isPodLoanedOutForUI ?? false
     }
 
     /// Grant sent, takeover not yet confirmed: the outbound half of the handover.
     var isPodTakeoverInProgress: Bool {
-        watchManager?.podLoanController.isPodTakeoverInProgressForUI ?? false
+        podLoanController?.isPodTakeoverInProgressForUI ?? false
     }
 
-    /// Actively coming home. Extends through the settle window — state can read `.owner` while
-    /// the pod's BLE link is still re-establishing, and clearing the indicator at that instant
-    /// would claim control the phone does not yet have.
+    /// Includes the settle window, while the pod's link is still coming back.
     var isPodLoanReclaiming: Bool {
-        watchManager?.podLoanController.isReclaimActivityForUI ?? false
+        podLoanController?.isReclaimActivityForUI ?? false
     }
 
     var podReclaimProgress: PodLoanPhoneController.ReclaimProgress? {
-        watchManager?.podLoanController.reclaimProgressForUI
+        podLoanController?.reclaimProgressForUI
     }
 }

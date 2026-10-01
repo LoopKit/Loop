@@ -2,20 +2,9 @@
 //  PodLoanPhoneController+Settle.swift
 //  Loop
 //
-//  Part of PodLoanPhoneController (see PodLoanPhoneController.swift). Split by concern; stored
-//  properties live in the core class.
-//
-//  The window between the phone becoming owner again and the pod proving it. Being back at
-//  .owner is a claim about authority, not about radio: the link still has to come up and a
-//  fresh read still has to come back. Until that round-trip lands no grant may start and no
-//  audit can rule.
-//
-//  A settle that never verifies is never treated as fine. It reaches its ceiling, says so, and
-//  where a verdict was owed the loop opens.
-//
-//  Two failure shapes are worth telling apart in the log, and the chase reports both: the link
-//  never came up at all, or the link came up and the reads kept returning the same stale sync
-//  stamp. The first is a radio problem, the second a pump-manager caching one.
+//  The settle window: from the phone owning the pod again until a fresh pod read proves it.
+//  No grant starts and no audit rules until then; a settle that never verifies opens the loop
+//  where a verdict was owed.
 //
 
 import Foundation
@@ -27,23 +16,16 @@ import os.log
 
 extension PodLoanPhoneController {
 
-    /// Hard ceiling on the whole settle. Past it the phone stops waiting and states plainly that
-    /// the round-trip never happened; it also bounds how long a grant can be refused as
-    /// not-yet-ready.
+    /// Ceiling on the settle; also bounds how long a grant can be refused as not-yet-ready.
     static let reclaimSettleTimeout: TimeInterval = .minutes(5)
 
-    /// What a settle normally costs, and the only expectation the progress bar is drawn
-    /// against — there is one stage, not a fast/slow split.
+    /// A typical settle; the progress bar is drawn against it.
     static let reclaimSettleExpectation: TimeInterval = 10
 
-    /// When to escalate to the pump manager's own recovery. Elapsed time is the trigger because
-    /// this exists solely for the case where the link never came up at all, and there absence is
-    /// the only evidence there is.
+    /// Escalate to the pump manager's recovery when the link has not come up by then.
     static let reclaimEscalateAfter: TimeInterval = 12
 
-    /// Opens the window. Called from every route back into `.owner`, and always BEFORE `.owner`
-    /// is announced — an observer that sees ownership without a baseline draws a pod that is
-    /// home when the phone has not reached it yet.
+    /// Called on every route back to `.owner`, before `.owner` is announced.
     func beginReclaimSettleWindow() {
         let started = deps.now()
         reclaimStartedAt = started
@@ -54,17 +36,13 @@ extension PodLoanPhoneController {
         reclaimLinkUpAt = nil
         reclaimStaleReads = 0
 
-        // The display anchor is separate from the settle's own start so that a second window
-        // opening moments after the first (a reclaim that immediately re-arms) keeps one
-        // continuous elapsed count on screen instead of restarting the bar.
+        // A window reopened within a minute keeps the on-screen elapsed count running.
         if let anchor = reclaimDisplayAnchor, started.timeIntervalSince(anchor) < 60 {
         } else {
             reclaimDisplayAnchor = started
         }
 
-        // Hold background execution for the whole settle. Without it a user who taps and pockets
-        // the phone freezes this mid-flight, and the pod sits orphaned: released by the watch,
-        // not yet taken by the phone, nobody dosing.
+        // Background time for the whole settle, so pocketing the phone cannot orphan the pod.
         deps.beginReclaimBackgroundTask()
         reclaimSettleWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
@@ -72,7 +50,7 @@ extension PodLoanPhoneController {
             os_log("Reclaim settle CEILING reached (%.0fs) without a verified round-trip — clearing anyway",
                    log: self.log, type: .error, Self.reclaimSettleTimeout)
 
-            let ble = (self.deps.pumpManager() as? PumpConnectionLendable)?.connectionDiagnostics()
+            let ble = (self.deps.pumpManager() as? ExclusiveDeviceControl)?.connectionDiagnostics()
             self.handbackDiag(self.epoch, String(
                 format: "settle CEILING at %.0fs — NO verified round-trip; clearing anyway · ble: %@",
                 Self.reclaimSettleTimeout, ble ?? "no diagnostics from the pump manager"))
@@ -81,34 +59,54 @@ extension PodLoanPhoneController {
             self.reclaimDisplayAnchor = nil
             self.deps.endReclaimBackgroundTask()
 
-            // "Cannot verify" is not "assume fine". A force reclaim was owed a verdict and the
-            // pod never answered, so dosing resumes only in the sense that the pause is lifted —
-            // the loop itself is opened and the user is told.
-            if let pending = self.pendingHandbackAudit, pending.flavor == .forceReclaim {
-                self.pendingHandbackAudit = nil
-                self.handbackDiag(pending.epoch, "** R37: audit NEVER RAN — pod unreachable through the settle window. Session UNVERIFIED, loop OPENS **")
-                self.deps.setAutomaticDosingPaused(false)
-                self.deps.openLoopForUncertainReconciliation()
-                self.armOpenLoopReminder()
-
-                self.deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)
-            }
+            self.resolveOwedForceReclaimAudit(why: "pod unreachable through the settle window")
             self.deps.ownershipDidChange()
         }
         reclaimSettleWork = work
 
-        // A WALL deadline, not a monotonic one: Dispatch's `.now() + delay` freezes while iOS
-        // suspends the app and then appends the suspension, so a locked phone turns a
-        // five-minute ceiling into an unbounded one.
+        // Wall deadline: a monotonic one stops while the app is suspended.
         queue.asyncAfter(wallDeadline: .now() + Self.reclaimSettleTimeout, execute: work)
         chaseReclaimVerification(started: started)
     }
 
-    /// Polls every couple of seconds until the round-trip lands or the ceiling fires. `started`
-    /// identifies the window: a later settle replaces `reclaimStartedAt`, and every rung of the
-    /// older chase then retires itself.
+    /// Ends the window early, for a phone that has stopped trying to hold the pod. Left open, the
+    /// chase would escalate at +12 s and lift the release, the phone's dosing gate.
+    func closeReclaimSettleWindow(reason: String) {
+        guard reclaimStartedAt != nil else { return }
+        handbackDiag(epoch, "settle window CLOSED early — \(reason)")
+
+        reclaimSettleWork?.cancel()
+        reclaimSettleWork = nil
+        reclaimStartedAt = nil
+        reclaimDisplayAnchor = nil
+        reclaimVerifyInFlight = false
+        deps.endReclaimBackgroundTask()
+
+        // The ceiling would have resolved an owed verdict; closing early inherits that duty.
+        resolveOwedForceReclaimAudit(why: reason)
+        syncUIMirror()
+    }
+
+    /// A force-reclaim verdict the pod will never answer: lift the pause, open the loop, tell the user.
+    func resolveOwedForceReclaimAudit(why: String) {
+        guard let pending = pendingHandbackAudit, pending.flavor == .forceReclaim else { return }
+        pendingHandbackAudit = nil
+        handbackDiag(pending.epoch, "** force-reclaim audit NEVER RAN — \(why). Session UNVERIFIED, loop OPENS **")
+        deps.setAutomaticDosingPaused(false)
+        deps.openLoopForUncertainReconciliation()
+        armOpenLoopReminder()
+        deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)
+    }
+
+    /// Polls every 2 s until the round-trip lands or the ceiling fires; `started` names the window.
     func chaseReclaimVerification(started: Date, attempt: Int = 0) {
         guard reclaimStartedAt == started, reclaimVerifiedAt == nil else { return }
+
+        // Backstop: never chase, or escalate for, a pod this phone is not holding.
+        guard state == .owner, !yieldingToInferredLoan else {
+            handbackDiag(epoch, "settle chase STOOD DOWN at tick \(attempt) — the phone is not holding the pod (state \(state.rawValue)\(yieldingToInferredLoan ? ", yielded to an inferred loan" : ""))")
+            return
+        }
 
         if reclaimLinkUpAt == nil, deps.isConnectionReady() {
             let up = deps.now()
@@ -118,40 +116,34 @@ extension PodLoanPhoneController {
             handbackDiag(epoch, String(format: "settle: link up +%.1fs (tick %d)", waited, attempt))
         }
 
-        // Escalate once per settle, and only while the link has NEVER come up. Once it is up
-        // there is nothing for an escalation to find.
+        // Once per settle, and only while the link has never come up.
         if reclaimLinkUpAt == nil, !reclaimEscalated,
            deps.now().timeIntervalSince(started) >= Self.reclaimEscalateAfter,
-           let lendable = deps.pumpManager() as? PumpConnectionLendable {
+           let control = deps.pumpManager() as? ExclusiveDeviceControl {
             reclaimEscalated = true
-            let bleBefore = lendable.connectionDiagnostics() ?? "none"
-            let outcome = lendable.escalateConnectionReclaim() ?? "the pump manager had nothing to escalate"
+            let bleBefore = control.connectionDiagnostics() ?? "none"
+            let outcome = control.escalateTakeControl() ?? "the pump manager had nothing to escalate"
             handbackDiag(epoch, String(format: "settle: link still down at +%.0fs — escalating: %@ · ble before: %@",
                                        deps.now().timeIntervalSince(started), outcome, bleBefore))
         }
 
         attemptReclaimVerificationNow(started: started)
-        // Re-arm unconditionally. The ceiling, not this loop, is what ends a settle: a chase
-        // that stopped on its own would leave the window open with nothing driving it.
+        // Always re-arm: the ceiling, not this loop, ends a settle.
         queue.asyncAfter(deadline: .now() + 2) { [weak self] in
             self?.chaseReclaimVerification(started: started, attempt: attempt + 1)
         }
     }
 
-    /// One verification attempt. Verified means a reading that came back AFTER this window
-    /// opened — nothing weaker counts, because the phone is trying to prove it can reach the pod
-    /// now, not that it could at some point in the past.
+    /// Verified means a reading newer than the window's start.
     func attemptReclaimVerificationNow(started: Date) {
         guard reclaimStartedAt == started, reclaimVerifiedAt == nil else { return }
         if deps.isConnectionReady(), !reclaimVerifyInFlight, let pump = deps.pumpManager() {
             reclaimVerifyInFlight = true
             let read: (@escaping (Date?) -> Void) -> Void
-            // A FORCED read first where the pump manager offers one: `ensureCurrentPumpData`
-            // skips the radio when its data is recent and hands back the same old `lastSync`,
-            // which this window rejects — forever, on every tick, while the pod sits reachable.
-            if let lendable = pump as? PumpConnectionLendable {
+            // Force a real read where offered: `ensureCurrentPumpData` alone can return a cached `lastSync`.
+            if let odometer = pump as? PumpDeliveryOdometer {
                 read = { done in
-                    lendable.refreshLentDeviceStatus { _ in pump.ensureCurrentPumpData { done($0) } }
+                    odometer.refreshDeliveredUnits { _ in pump.ensureCurrentPumpData { done($0) } }
                 }
             } else {
                 read = { done in pump.ensureCurrentPumpData { done($0) } }
@@ -162,8 +154,6 @@ extension PodLoanPhoneController {
                     self.reclaimVerifyInFlight = false
                     guard self.reclaimStartedAt == started, self.reclaimVerifiedAt == nil else { return }
 
-                    // The proof: a sync stamp from AFTER this window opened. Anything earlier is
-                    // the pump manager returning what it already had.
                     if let sync = lastSync, sync > started {
                         let elapsed = self.deps.now().timeIntervalSince(started)
                         self.reclaimVerifiedAt = self.deps.now()
@@ -176,9 +166,7 @@ extension PodLoanPhoneController {
                         let linkWait = self.reclaimLinkUpAt.map { $0.timeIntervalSince(started) } ?? elapsed
                         let readWait = max(elapsed - linkWait, 0)
 
-                        // Keep the leading phrase of this line as it is. A long series of
-                        // captured settles is parsed off it, so new fields append rather than
-                        // replace.
+                        // Log analysis parses this prefix: append fields, don't reword it.
                         self.handbackDiag(self.epoch,
                             String(format: "reclaim VERIFIED — pod round-trip complete +%.0fs (link +%.1fs, stale reads %d, read +%.1fs)",
                                    elapsed, linkWait, self.reclaimStaleReads, readWait))
@@ -186,9 +174,7 @@ extension PodLoanPhoneController {
 
                         self.finishPendingHandbackAudit(elapsed: elapsed)
                     } else {
-                        // A read that came back without advancing the sync stamp. Counted and
-                        // reported, because a settle that ends at its ceiling with a high count
-                        // failed differently from one where the link never came up at all.
+                        // Stale read: counted, to tell a caching failure from a radio one.
                         self.reclaimStaleReads += 1
                         os_log("Settle: status read %d did not advance lastSync — link %{public}@",
                                log: self.log, type: .default, self.reclaimStaleReads,
@@ -203,31 +189,19 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// The end of a loan: read the pod's delivery total, rule on it, and only then cancel the
-    /// temp the watch left running.
-    ///
-    /// This runs at the verified round-trip because that is the one instant in the whole
-    /// hand-back where the pod is provably reachable. Order matters — the reading has to
-    /// describe the loan, not the cancel this method is about to issue.
-    ///
-    /// An audit CONSUMES its anchors, hence the unconditional clear: anchors describe exactly
-    /// one loan, and any left behind make the next take-back audit a session that already
-    /// closed and report its insulin as unexplained.
+    /// At the verified round-trip: read the pod's total, rule on the loan, then cancel the
+    /// watch's temp. The audit consumes its anchors either way.
     func finishPendingHandbackAudit(elapsed: TimeInterval) {
         defer { clearAuditAnchors() }
         guard let pending = pendingHandbackAudit else { return }
         pendingHandbackAudit = nil
 
-        if let latest = (deps.pumpManager() as? PumpConnectionLendable)?.lentDeviceInsulinDelivered {
+        if let latest = (deps.pumpManager() as? PumpDeliveryOdometer)?.deliveredUnits?.units {
             let delivered = latest - pending.deliveredAtStart
-            // Quantize to milli-units BEFORE any band comparison. Binary arithmetic turns
-            // 2.400 − 2.200 into 0.20000000000000018, and the verdict must turn on the pulse
-            // grid rather than on float dust one ulp outside the band.
+            // Milli-units, so the band comparison is not decided by float error.
             let residual = ((delivered - pending.expected) * 1000).rounded() / 1000
 
-            // Two figures: the residual above is the VERDICT window, which accepted checkpoints
-            // may have narrowed to the last unreconciled stretch; this one spans the whole loan
-            // and is reported for context only.
+            // Whole-loan figure, for the log only; the verdict uses the window above.
             let loanDelivered = pending.takeoverUnits.map { latest - $0 }
             let loanResidual: Double? = {
                 guard let d = loanDelivered, let e = pending.wholeLoanExpected else { return nil }
@@ -236,7 +210,7 @@ extension PodLoanPhoneController {
 
             let drift = pending.watchLatest.map { latest - $0 }
             handbackDiag(pending.epoch, String(format:
-                "reconcile[%@]: delivered=%.3f expected=%.3f residual=%+.3f (tol 0.05) · loan total %@ resid %@ · %d checkpoint(s) · loanMin=%.0f cycles=%d · odometer read by PHONE +%.0fs after reclaim · vs watch endpoint %@ (watch fresh=%@)",
+                "reconcile[%@]: delivered=%.3f expected=%.3f residual=%+.3f (band ±0.20) · loan total %@ resid %@ · %d checkpoint(s) · loanMin=%.0f cycles=%d · odometer read by PHONE +%.0fs after reclaim · vs watch endpoint %@ (watch fresh=%@)",
                 pending.flavor == .forceReclaim ? "FORCE-RECLAIM" : "AUTHORITATIVE",
                 delivered, pending.expected, residual,
                 loanDelivered.map { String(format: "%.3f", $0) } ?? "n/a",
@@ -245,54 +219,38 @@ extension PodLoanPhoneController {
                 pending.loanMinutes, pending.cycles, elapsed,
                 drift.map { String(format: "%+.3f", $0) } ?? "n/a",
                 pending.watchFreshened ? "Y" : "N"))
-            UserDefaults.standard.set(loanDelivered ?? delivered, forKey: Keys.deliveredAuthoritative)
 
-            // Drift tripwire: every window reconciled, yet the loan total did not. Diagnostic
-            // only and never an action — quantization drift is same-signed too, so this pattern
-            // does not distinguish a real leak from arithmetic.
+            // Diagnostic only: windows reconciled but the loan total drifted.
             if let lr = loanResidual, abs(lr) > 0.5, abs(residual) <= Self.checkpointBand {
                 handbackDiag(pending.epoch, String(format:
                     "** [checkpoint] loan-total residual %+.3f U exceeds ±0.5 while every window reconciled — possible systematic drip; diagnostic only **", lr))
             }
             switch pending.flavor {
             case .handback:
-
-                // Bank ONLY on a clean hand-back. A force reclaim's residual measures a watch
-                // whose records never arrived, and banking those poisons the statistics the
-                // threshold review reads.
-                bankResidual(loanResidual ?? residual,
-                             worstWindow: max(worstWindowThisLoan, abs(residual)),
-                             epoch: pending.epoch)
                 applyReconciliationVerdict(residual: residual, epoch: pending.epoch)
             case .forceReclaim:
                 applyForceReclaimVerdict(residual: residual, epoch: pending.epoch)
             }
         } else if pending.flavor == .forceReclaim {
-            // Reachable, but no delivery total came back. For a force reclaim that is still
-            // "cannot verify", and it gets the same treatment as the ceiling above.
-            handbackDiag(pending.epoch, "** R37: reclaim round-trip landed but no odometer — session UNVERIFIED, loop OPENS **")
+            // No delivery total: a force reclaim is still unverified.
+            handbackDiag(pending.epoch, "** force-reclaim round-trip landed but no odometer — session UNVERIFIED, loop OPENS **")
             deps.setAutomaticDosingPaused(false)
             deps.openLoopForUncertainReconciliation()
             armOpenLoopReminder()
             deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)
         } else {
-            // A clean hand-back with no reading is different: the watch's records are already
-            // committed and its own provisional figures stand. Nothing is opened over it.
+            // A clean hand-back keeps its committed records; nothing opens.
             handbackDiag(pending.epoch, "reconcile[AUTHORITATIVE]: pod reachable but reported no odometer — keeping the provisional line")
         }
 
-        // Now the cancel. No automatic program outlives the controller that set it — but the
-        // watch has no link by this point, so the phone is the device that enforces it, and it
-        // does so only after the reading above has described the loan. A failure here is not
-        // fatal: the pod keeps the watch's last rate, which is therapy rather than a gap, until
-        // the phone's next cycle.
+        // The watch's temp ends here, after the reading. On failure it runs until the next cycle.
         deps.cancelTempBasalAfterPodReturn { [weak self] error in
             guard let self = self else { return }
             self.queue.async {
                 if let error = error {
-                    self.handbackDiag(pending.epoch, "R33 temp cancel FAILED — pod keeps the watch's temp until the next cycle · \(String(describing: error))")
+                    self.handbackDiag(pending.epoch, "temp cancel FAILED — pod keeps the watch's temp until the next cycle · \(String(describing: error))")
                 } else {
-                    self.handbackDiag(pending.epoch, "R33 temp cancelled — pod reverts to the user's schedule until the phone's next reading")
+                    self.handbackDiag(pending.epoch, "temp cancelled — pod reverts to the user's schedule until the phone's next reading")
                 }
             }
         }
