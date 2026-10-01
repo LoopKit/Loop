@@ -562,6 +562,45 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertEqual(addedDoses.flatMap { $0 }.filter { $0.type == .bolus }.count, 1, "the bolus landed")
     }
 
+    /// A wrist carb committed by an interim drain, then deleted on the wrist: the delete carries
+    /// the event ID the phone stored it under, so the phone's match removes it.
+    func testAWristDeleteAfterAnInterimCommitRemovesThePhonesCarb() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        var phoneCarbs: [StoredCarbEntry] = []
+        controller.deps.addCarb = { entry, sync, done in
+            self.lock.lock(); phoneCarbs.append(StoredCarbEntry(startDate: entry.startDate, quantity: entry.quantity, syncIdentifier: sync)); self.lock.unlock()
+            done(nil)
+        }
+        controller.deps.deleteCarb = { gone, done in
+            self.lock.lock(); let before = phoneCarbs.count; phoneCarbs.removeAll(where: gone.matches); let hit = phoneCarbs.count < before; self.lock.unlock()
+            done(hit ? nil : NSError(domain: "test", code: 404))
+        }
+        let now = Date()
+        let carb = carbEvent(seq: 1, grams: 30, at: now.addingTimeInterval(-.minutes(10)), absorption: .hours(3))
+
+        let committed = expectSend()
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(HandbackOffer(
+            epoch: grant.epoch, handedBackAt: now, finalStatus: nil, odometer: nil,
+            events: [carb], tombstones: [], recovered: false, released: false)).transportDictionary())
+        wait(for: [committed], timeout: 5)
+        lock.lock(); XCTAssertEqual(phoneCarbs.map(\.syncIdentifier), [carb.id.uuidString]); lock.unlock()
+
+        let delete = LoanEvent(id: UUID(), seq: 2, provenance: .confirmed,
+                               record: LoanDoseRecord(kind: .carbDeleted, startDate: carb.record.startDate, amount: 30,
+                                                      syncIdentifier: carb.id.uuidString),
+                               loggedAt: now)
+        let deleted = expectSend()
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(HandbackOffer(
+            epoch: grant.epoch, handedBackAt: now.addingTimeInterval(60), finalStatus: nil, odometer: nil,
+            events: [delete], tombstones: [], recovered: false, released: false)).transportDictionary())
+        wait(for: [deleted], timeout: 5)
+
+        lock.lock(); XCTAssertTrue(phoneCarbs.isEmpty, "the phone's copy is gone"); lock.unlock()
+        XCTAssertNotNil(diagMatching("carb DELETE applied on phone"))
+        XCTAssertNil(diagMatching("carb DELETE MISSED"))
+    }
+
     /// A force reclaim records committed IDs, so a redelivered offer does not re-add the carb.
     func testForceReclaimThenRedeliveryCommitsCarbOnce() throws {
         let controller = makeController()

@@ -171,10 +171,10 @@ extension WatchLoopManager {
         }
     }
 
-    /// The local half; the caller journals it. Re-runs the loop because carb effects are only
-    /// invalidated by new CGM data here.
-    func addLoanCarbEntry(_ entry: NewCarbEntry) {
-        carbStore.addCarbEntry(entry) { result in
+    /// The local half, under the identity the caller journals it with. Re-runs the loop because
+    /// carb effects are only invalidated by new CGM data here.
+    func addLoanCarbEntry(_ entry: NewCarbEntry, syncIdentifier: String) {
+        carbStore.addCarbEntry(entry, syncIdentifier: syncIdentifier) { result in
             switch result {
             case .success(let stored):
                 SportLog.event("loan", String(format: "carbs logged locally: %.0f g", stored.quantity.doubleValue(for: .gram)))

@@ -106,12 +106,7 @@ extension WatchDataManager {
                 let window = gone.startDate.addingTimeInterval(-.hours(1))
                 Task {
                     guard let entries = try? await self.deviceManager.carbStore.getCarbEntries(start: window) else { completion(nil); return }
-                    let match = entries.first { entry in
-                        if let id = gone.syncIdentifier, let entryID = entry.syncIdentifier { return id == entryID }
-                        return abs(entry.startDate.timeIntervalSince(gone.startDate)) < 1
-                            && abs(entry.quantity.doubleValue(for: .gram) - gone.grams) < 0.01
-                    }
-                    guard let victim = match else {
+                    guard let victim = entries.first(where: gone.matches) else {
                         let lineup = entries.map { e in
                             String(format: "%.0fg@%@ sync=%@", e.quantity.doubleValue(for: .gram),
                                    DateFormatter.localizedString(from: e.startDate, dateStyle: .none, timeStyle: .medium),

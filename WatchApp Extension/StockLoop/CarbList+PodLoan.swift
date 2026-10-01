@@ -28,7 +28,7 @@ extension CarbList {
         entries.removeAll { $0 == entry }   // optimistic: the row is gone, the loop recalculates
         SportLog.event("carb-ui", String(format: "wrist DELETE %.0f g @ %@ · sync=%@",
                                          grams, timeFormatter.string(from: startDate),
-                                         syncIdentifier ?? "none(watch-entered)"))
+                                         syncIdentifier ?? "none"))
 
         // Re-runs the loop, so the prediction drops the carb at once.
         session.stack.loopManager.deleteLoanCarbEntry(entry) { ok in

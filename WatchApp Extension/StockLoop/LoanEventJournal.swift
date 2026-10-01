@@ -93,10 +93,10 @@ final class LoanEventJournal {
     }
 
     /// Persists before returning. A failed persist logs but does not throw.
-    func mintEvent(record: LoanDoseRecord, provenance: EventProvenance, at date: Date = Date()) throws -> LoanEvent {
+    func mintEvent(record: LoanDoseRecord, provenance: EventProvenance, at date: Date = Date(), id: UUID = UUID()) throws -> LoanEvent {
         lock.lock(); defer { lock.unlock() }
         guard var s = state else { throw LoanJournalError.noActiveLoan }
-        let event = LoanEvent(id: UUID(), seq: s.nextSeq, provenance: provenance, record: record, loggedAt: date)
+        let event = LoanEvent(id: id, seq: s.nextSeq, provenance: provenance, record: record, loggedAt: date)
         s.nextSeq += 1
         s.events.append(event)
         state = s

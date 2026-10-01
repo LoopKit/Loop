@@ -32,6 +32,13 @@ enum LoanReconciler {
         let syncIdentifier: String?
         let startDate: Date
         let grams: Double
+
+        /// As swipe-to-delete does: by identity where both have one, else start date and grams.
+        func matches(_ entry: StoredCarbEntry) -> Bool {
+            if let id = syncIdentifier, let entryID = entry.syncIdentifier { return id == entryID }
+            return abs(entry.startDate.timeIntervalSince(startDate)) < 1
+                && abs(entry.quantity.doubleValue(for: .gram) - grams) < 0.01
+        }
     }
 
     /// The event ID is the carb's sync identifier; the store would otherwise mint a new one.

@@ -285,7 +285,7 @@ extension PodLoanPhoneController {
                                 }
                             }
                         } else if !outcome.carbs.isEmpty {
-                            // Carbs need a live loan: they have no identity, so a replay would be a second meal.
+                            // A newer loan has started: an older loan's records add no carbs.
                             self.handbackDiag(offer.epoch, "stale offer — \(outcome.carbs.count) carb(s) NOT committed (a dead loan cannot add carbs)")
                         }
 
@@ -296,7 +296,7 @@ extension PodLoanPhoneController {
 
                         let newCursor = events.map(\.seq).max() ?? self.committedCursor
                         if !isStale {
-                            // Saved before the ack: a relaunch must never re-commit (carbs have no identity).
+                            // Saved before the ack, so a relaunch does not re-commit.
                             self.updateState {
                                 $0.committedCursor = max($0.committedCursor, newCursor)
                                 $0.committedIDs.formUnion(committable.map(\.id))

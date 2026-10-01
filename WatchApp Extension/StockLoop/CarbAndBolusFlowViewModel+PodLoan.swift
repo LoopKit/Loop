@@ -80,7 +80,6 @@ extension CarbAndBolusFlowViewModel {
     func podLoanDeliverOnWrist(carbEntry: NewCarbEntry?, bolus: Double, session: StockLoopSession) {
         let activationType: BolusActivationType = .activationTypeFor(recommendedAmount: recommendedBolusAmount, bolusAmount: bolus)
         if let carbEntry = carbEntry {
-            session.stack.loopManager.addLoanCarbEntry(carbEntry)
             session.loanController.loanDidRecordCarbs(carbEntry)
         }
         if bolus > 0 {

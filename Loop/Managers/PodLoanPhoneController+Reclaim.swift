@@ -198,7 +198,7 @@ extension PodLoanPhoneController {
     func forceReclaimToOwner(reason: String) {
         os_log("Force reclaim to OWNER: %{public}@", log: log, type: .default, reason)
 
-        // Defer behind a write in flight, or carbs (which have no identity) would double.
+        // Defer behind a write in flight, so the salvage does not re-commit what it is writing.
         if commitInFlight {
             handbackDiag(epoch, "force reclaim DEFERRED — a hand-back commit is writing; runs when it lands")
             pendingForceReclaimReason = reason

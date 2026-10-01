@@ -386,6 +386,7 @@
 		DB66EB0397D54C94B49ADEF8 /* FirstContactNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */; };
 		73E0AA9C0C5503C0A38FDCA6 /* WristAlertAcknowledgementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */; };
 		8077722BF812D34BDD35AEE6 /* WristOverrideRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */; };
+		7AF2FE0D12D46279AA80608B /* WristCarbDeleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22969076523D145599EA2FBF /* WristCarbDeleteTests.swift */; };
 		5FDDEC8709A17CE196A2F202 /* WristGlucoseAlertTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94E05C050AF4C0CC0B314040 /* WristGlucoseAlertTests.swift */; };
 		9A7CE031302D82A800A03F53 /* LoanContextPrecedenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE030302D82A800A03F53 /* LoanContextPrecedenceTests.swift */; };
 		9A7CE061302D82A800A03F53 /* WristAlertScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE060302D82A800A03F53 /* WristAlertScheduler.swift */; };
@@ -1322,6 +1323,7 @@
 		7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirstContactNoteTests.swift"; sourceTree = "<group>"; };
 		98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WristAlertAcknowledgementTests.swift"; sourceTree = "<group>"; };
 		295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WristOverrideRecordTests.swift"; sourceTree = "<group>"; };
+		22969076523D145599EA2FBF /* WristCarbDeleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WristCarbDeleteTests.swift"; sourceTree = "<group>"; };
 		94E05C050AF4C0CC0B314040 /* WristGlucoseAlertTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WristGlucoseAlertTests.swift"; sourceTree = "<group>"; };
 		9A7CE030302D82A800A03F53 /* LoanContextPrecedenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanContextPrecedenceTests.swift; sourceTree = "<group>"; };
 		9A7CE060302D82A800A03F53 /* WristAlertScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WristAlertScheduler.swift; path = "WatchApp Extension/StockLoop/WristAlertScheduler.swift"; sourceTree = SOURCE_ROOT; };
@@ -2949,6 +2951,7 @@
 				7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */,
 				98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */,
 				295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */,
+				22969076523D145599EA2FBF /* WristCarbDeleteTests.swift */,
 				94E05C050AF4C0CC0B314040 /* WristGlucoseAlertTests.swift */,
 			);
 			path = WatchAppTests;
@@ -4441,6 +4444,7 @@
 				DB66EB0397D54C94B49ADEF8 /* FirstContactNoteTests.swift in Sources */,
 				73E0AA9C0C5503C0A38FDCA6 /* WristAlertAcknowledgementTests.swift in Sources */,
 				8077722BF812D34BDD35AEE6 /* WristOverrideRecordTests.swift in Sources */,
+				7AF2FE0D12D46279AA80608B /* WristCarbDeleteTests.swift in Sources */,
 				5FDDEC8709A17CE196A2F202 /* WristGlucoseAlertTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

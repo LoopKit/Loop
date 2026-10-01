@@ -86,9 +86,12 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Also in the local store, so this cycle's COB already sees it.
+    /// Also in the local store, so this cycle's COB already sees it. Both under the event ID,
+    /// the identity the phone stores it under, so a later wrist delete matches there.
     func loanDidRecordCarbs(_ entry: NewCarbEntry) {
         let grams = entry.quantity.doubleValue(for: .gram)
+        let eventID = UUID()
+        loopManager.addLoanCarbEntry(entry, syncIdentifier: eventID.uuidString)
         // async, never sync: ordering with the pump's reports, and main must not wait.
         queue.async {
             guard self.phase == .active else {
@@ -99,7 +102,7 @@ extension PodLoanWatchController {
                                         startDate: entry.startDate,
                                         amount: grams,
                                         absorptionTime: entry.absorptionTime)
-            guard let event = try? self.journal.mintEvent(record: record, provenance: .confirmed) else {
+            guard let event = try? self.journal.mintEvent(record: record, provenance: .confirmed, id: eventID) else {
                 SportLog.event("loan", String(format: "** CARB JOURNAL MINT FAILED (%.0f g) — the carb is LIVE on the watch but will NOT follow the pod home **", grams))
                 return
             }
@@ -110,8 +113,8 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Journaled, or the next grant would resurrect the carb. A wrist carb has no phone identity;
-    /// the phone cancels add-and-delete pairs by seq.
+    /// Journaled, or the next grant would resurrect the carb. A wrist carb's identity is its
+    /// event ID; an add and delete in one drain cancel on the phone.
     func loanDidDeleteCarb(syncIdentifier: String?, startDate: Date, grams: Double) {
         queue.async {
             guard self.phase == .active else {
@@ -128,7 +131,7 @@ extension PodLoanWatchController {
             }
             SportLog.event("loan", String(format: "carb DELETE journaled %.0f g @ %@ — sync %@, seq %d, event %@",
                                           grams, ISO8601DateFormatter().string(from: startDate),
-                                          syncIdentifier ?? "none(watch-entered)", event.seq,
+                                          syncIdentifier ?? "none", event.seq,
                                           String(event.id.uuidString.prefix(8))))
             self.streamRecords()
         }
