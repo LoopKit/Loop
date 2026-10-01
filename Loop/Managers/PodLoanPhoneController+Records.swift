@@ -182,15 +182,15 @@ extension PodLoanPhoneController {
             isFinalHandback: isFinal)
         let outcome = LoanReconciler.reconcile(input)
 
-        if auditThisOffer {
+        if auditThisOffer, let pulseUnits = pumpPulseUnits {
             let expected = LoanReconciler.expectedInsulin(events: allStagedEvents, schedule: deps.settings().basalRateSchedule,
-                                                          from: loanStart, to: offer.handedBackAt)
+                                                          pulseUnits: pulseUnits, from: loanStart, to: offer.handedBackAt)
 
             // The watch's own reading: logged, not ruled on.
             let delivered = offer.odometer.map { $0.deliveredLatest - $0.deliveredAtStart }
             // Continuous and pulse-floored totals, logged to tell a discrepancy from rounding.
             let drainCont = outcome.doses.reduce(0.0) { $0 + $1.programmedUnits }
-            let drainFloor = outcome.doses.reduce(0.0) { $0 + (($1.programmedUnits * 20).rounded(.down) / 20) }
+            let drainFloor = outcome.doses.reduce(0.0) { $0 + ($1.programmedUnits / pulseUnits).rounded(.down) * pulseUnits }
             let loanMin = offer.handedBackAt.timeIntervalSince(loanStart) / 60
             handbackDiag(offer.epoch, String(format:
                 "reconcile[provisional]: delivered=%@ expected=%.3f residual=%@ (band ±0.20) · thisDrain cont=%.3f floor=%.3f · loanMin=%.0f cycles=%d fresh=%@",
@@ -204,7 +204,7 @@ extension PodLoanPhoneController {
                 let windowStart = auditBase?.units ?? start
                 let windowExpected = auditBase.map {
                     LoanReconciler.expectedInsulin(events: allStagedEvents, schedule: deps.settings().basalRateSchedule,
-                                                   from: $0.asOf, to: offer.handedBackAt)
+                                                   pulseUnits: pulseUnits, from: $0.asOf, to: offer.handedBackAt)
                 } ?? expected
                 if checkpointsThisLoan > 0 {
                     handbackDiag(offer.epoch, String(format:

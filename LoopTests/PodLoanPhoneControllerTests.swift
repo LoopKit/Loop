@@ -42,6 +42,7 @@ final class LendableMockPumpManager: MockPumpManager, ExclusiveDeviceControl, Pu
     func releaseControl() { Self.testConnectionReleased = true }
     func takeControl() { Self.testConnectionReleased = false }
     var deliveredUnits: (units: Double, at: Date)? { Self.testOdometer.map { ($0, Date()) } }
+    var deliveryPulseUnits: Double { 0.05 }
     var lastForeignSessionAt: Date? { Self.testForeignSessionAt }
     /// Like the real one, lifts the release.
     func escalateTakeControl() -> String? {

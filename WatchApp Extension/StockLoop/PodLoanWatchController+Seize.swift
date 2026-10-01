@@ -176,13 +176,15 @@ extension PodLoanWatchController {
     /// Delivery since the copy that it cannot explain. Boluses still delivering are pro-rated;
     /// milli-unit quantized; zero unless the excess clears the band.
     static func insulinTheCopyCannotExplain(copyTotal: Double, copyAt: Date, podTotal: Double, now: Date,
-                                            records: [LoanDoseRecord], schedule: BasalRateSchedule?) -> Double {
+                                            records: [LoanDoseRecord], schedule: BasalRateSchedule?,
+                                            pulseUnits: Double) -> Double {
         guard now > copyAt, podTotal >= copyTotal else { return 0 }
         // Synthetic events; only their order matters.
         let rateEvents = records.filter { $0.kind != .bolus }.enumerated().map {
             LoanEvent(id: UUID(), seq: $0.offset + 1, provenance: .confirmed, record: $0.element, loggedAt: now)
         }
-        var expected = LoanReconciler.expectedInsulin(events: rateEvents, schedule: schedule, from: copyAt, to: now)
+        var expected = LoanReconciler.expectedInsulin(events: rateEvents, schedule: schedule, pulseUnits: pulseUnits,
+                                                      from: copyAt, to: now)
         for bolus in records where bolus.kind == .bolus {
             guard let amount = bolus.amount, amount > 0 else { continue }
             let end = bolus.endDate ?? bolus.startDate
@@ -199,7 +201,7 @@ extension PodLoanWatchController {
 
     /// Books the unexplained insulin as a bolus now, before the first cycle. Seeded, not journaled:
     /// the phone already has these units. Does not open the loop.
-    func bookInsulinTheCopyCannotExplain(podTotal: Double, epoch: Int) {
+    func bookInsulinTheCopyCannotExplain(podTotal: Double, pulseUnits: Double, epoch: Int) {
         defer { takeoverCopyTotal = nil; takeoverCopyRecords = [] }
         guard let copy = takeoverCopyTotal else {
             SportLog.event("loan", "takeover book check SKIPPED — the copy carried no pod total to compare against")
@@ -208,7 +210,8 @@ extension PodLoanWatchController {
         let at = self.now()
         let unexplained = Self.insulinTheCopyCannotExplain(copyTotal: copy.units, copyAt: copy.asOf, podTotal: podTotal, now: at,
                                                            records: takeoverCopyRecords,
-                                                           schedule: loopManager.settings.basalRateSchedule)
+                                                           schedule: loopManager.settings.basalRateSchedule,
+                                                           pulseUnits: pulseUnits)
         let age = at.timeIntervalSince(copy.asOf) / 60
         guard unexplained > 0 else {
             SportLog.event("loan", String(format: "takeover book check CLEAN — pod total %.2f → %.2f U over %.1f min is explained by the copy's records and the schedule",

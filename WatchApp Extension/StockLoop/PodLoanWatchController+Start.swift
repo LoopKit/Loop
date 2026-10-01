@@ -633,7 +633,7 @@ extension PodLoanWatchController {
                     self.sendMessage(.takeoverFailed(TakeoverFailed(epoch: grant.epoch, reason: "grant expired mid-takeover")))
                     return
                 }
-                if success, let delivered = odometer?.deliveredUnits?.units {
+                if success, let odometer, let delivered = odometer.deliveredUnits?.units {
                     // The base for every later audit of this loan.
                     self.revokeCapturedDelivered = nil
                     self.revokeCapturedDeliveredAt = nil
@@ -646,7 +646,7 @@ extension PodLoanWatchController {
                     self.sendMessage(.takeoverComplete(TakeoverComplete(epoch: grant.epoch, firstPodStatus: self.currentPodStatus())))
 
                     // Book the unexplained insulin, then run a full `loop()` so the first program is journaled.
-                    self.bookInsulinTheCopyCannotExplain(podTotal: delivered, epoch: grant.epoch)
+                    self.bookInsulinTheCopyCannotExplain(podTotal: delivered, pulseUnits: odometer.deliveryPulseUnits, epoch: grant.epoch)
                     self.loopManager.loop()
                 } else if attempt + 1 < maxAttempts {
                     if attempt == 0 {

@@ -159,10 +159,10 @@ enum LoanReconciler {
         return event.record.syncIdentifier ?? "loanv2-\(event.id.uuidString)"
     }
 
-    /// Insulin the records say the pod delivered between two instants. `schedule` fills gaps (nil:
-    /// journaled only); `includingBolusesAtEnd` is false at an interior checkpoint.
-    static func expectedInsulin(events: [LoanEvent], schedule: BasalRateSchedule?, from start: Date, to end: Date,
-                                includingBolusesAtEnd: Bool = true) -> Double {
+    /// Insulin the records say the pump delivered between two instants, in whole `pulseUnits`.
+    /// `schedule` fills gaps (nil: journaled only); `includingBolusesAtEnd` is false at an interior checkpoint.
+    static func expectedInsulin(events: [LoanEvent], schedule: BasalRateSchedule?, pulseUnits: Double,
+                                from start: Date, to end: Date, includingBolusesAtEnd: Bool = true) -> Double {
         guard end > start else { return 0 }
 
         var total: Double = 0
@@ -205,7 +205,7 @@ enum LoanReconciler {
         }
 
         for seg in resolved {
-            total += pulsedInsulin(rate: seg.rate, seconds: seg.end.timeIntervalSince(seg.start))
+            total += pulsedInsulin(rate: seg.rate, seconds: seg.end.timeIntervalSince(seg.start), pulseUnits: pulseUnits)
         }
 
         // Gaps are the scheduled basal.
@@ -213,36 +213,33 @@ enum LoanReconciler {
             var cursor = start
             for seg in resolved {
                 if seg.start > cursor {
-                    total += scheduleInsulin(schedule, from: cursor, to: seg.start)
+                    total += scheduleInsulin(schedule, from: cursor, to: seg.start, pulseUnits: pulseUnits)
                 }
                 cursor = max(cursor, seg.end)
             }
             if end > cursor {
-                total += scheduleInsulin(schedule, from: cursor, to: end)
+                total += scheduleInsulin(schedule, from: cursor, to: end, pulseUnits: pulseUnits)
             }
         }
 
         return total
     }
 
-    /// Whole pulses: each new rate restarts the pod's pulse clock, so rate × time over-counts.
-    private static func pulsedInsulin(rate: Double, seconds: TimeInterval) -> Double {
+    /// Whole pulses: each new rate restarts the pump's pulse clock, so rate × time over-counts.
+    private static func pulsedInsulin(rate: Double, seconds: TimeInterval, pulseUnits: Double) -> Double {
         guard rate > 0, seconds > 0 else { return 0 }
-        let pulseInterval = 3600.0 * podPulseSize / rate
+        let pulseInterval = 3600.0 * pulseUnits / rate
         let pulses = (seconds / pulseInterval).rounded(.down)
-        return pulses * podPulseSize
+        return pulses * pulseUnits
     }
 
-    /// The Omnipod's delivery increment.
-    private static let podPulseSize: Double = 0.05
-
     /// Known gap: pulsed per schedule item, which can only make the expectation smaller.
-    private static func scheduleInsulin(_ schedule: BasalRateSchedule, from: Date, to: Date) -> Double {
+    private static func scheduleInsulin(_ schedule: BasalRateSchedule, from: Date, to: Date, pulseUnits: Double) -> Double {
         return schedule.between(start: from, end: to).reduce(0) { partial, item in
             let s = max(item.startDate, from)
             let e = min(item.endDate, to)
             guard e > s else { return partial }
-            return partial + pulsedInsulin(rate: item.value, seconds: e.timeIntervalSince(s))
+            return partial + pulsedInsulin(rate: item.value, seconds: e.timeIntervalSince(s), pulseUnits: pulseUnits)
         }
     }
 }

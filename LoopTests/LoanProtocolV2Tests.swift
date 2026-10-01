@@ -224,7 +224,7 @@ final class LoanProtocolV2Tests: XCTestCase {
                                                     unitsPerHour: 2.15),
                              loggedAt: start)
 
-        let expected = LoanReconciler.expectedInsulin(events: [temp], schedule: nil,
+        let expected = LoanReconciler.expectedInsulin(events: [temp], schedule: nil, pulseUnits: 0.05,
                                                       from: start, to: start.addingTimeInterval(302))
 
         XCTAssertEqual(expected, 0.150, accuracy: 0.0001,
@@ -241,7 +241,7 @@ final class LoanProtocolV2Tests: XCTestCase {
                               record: LoanDoseRecord(kind: .bolus, startDate: start, amount: 1.60),
                               loggedAt: start)
 
-        let expected = LoanReconciler.expectedInsulin(events: [bolus], schedule: nil,
+        let expected = LoanReconciler.expectedInsulin(events: [bolus], schedule: nil, pulseUnits: 0.05,
                                                       from: start, to: start.addingTimeInterval(60))
         XCTAssertEqual(expected, 1.60, accuracy: 0.0001)
     }
@@ -267,8 +267,8 @@ final class LoanProtocolV2Tests: XCTestCase {
                                loggedAt: start)]
 
         let end = start.addingTimeInterval(3000)
-        let choppedTotal = LoanReconciler.expectedInsulin(events: chopped, schedule: nil, from: start, to: end)
-        let wholeTotal = LoanReconciler.expectedInsulin(events: whole, schedule: nil, from: start, to: end)
+        let choppedTotal = LoanReconciler.expectedInsulin(events: chopped, schedule: nil, pulseUnits: 0.05, from: start, to: end)
+        let wholeTotal = LoanReconciler.expectedInsulin(events: whole, schedule: nil, pulseUnits: 0.05, from: start, to: end)
 
         // The loss is per replacement, so it grows with loan length.
         XCTAssertLessThan(choppedTotal, wholeTotal,
@@ -331,7 +331,7 @@ final class LoanProtocolV2Tests: XCTestCase {
                              record: LoanDoseRecord(kind: .tempBasal, startDate: loanStart,
                                                     endDate: loanStart.addingTimeInterval(3600), unitsPerHour: 2.0),
                              loggedAt: loanStart)
-        let expected = LoanReconciler.expectedInsulin(events: [temp], schedule: flatSchedule, from: loanStart, to: loanEnd)
+        let expected = LoanReconciler.expectedInsulin(events: [temp], schedule: flatSchedule, pulseUnits: 0.05, from: loanStart, to: loanEnd)
         XCTAssertEqual(expected, 3.0, accuracy: 0.01)
     }
 
@@ -341,7 +341,7 @@ final class LoanProtocolV2Tests: XCTestCase {
                                 record: LoanDoseRecord(kind: .suspend, startDate: loanStart,
                                                        endDate: loanStart.addingTimeInterval(3600), unitsPerHour: 0),
                                 loggedAt: loanStart)
-        let expected = LoanReconciler.expectedInsulin(events: [suspend], schedule: flatSchedule, from: loanStart, to: loanEnd)
+        let expected = LoanReconciler.expectedInsulin(events: [suspend], schedule: flatSchedule, pulseUnits: 0.05, from: loanStart, to: loanEnd)
         XCTAssertEqual(expected, 1.0, accuracy: 0.01)
     }
 

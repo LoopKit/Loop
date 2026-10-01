@@ -281,21 +281,22 @@ extension PodLoanPhoneController {
         } else {
             anchor = nil
         }
-        guard let anchor = anchor, let schedule = deps.settings().basalRateSchedule else {
-            handbackDiag(epoch, "** force-reclaim audit IMPOSSIBLE — no start odometer/schedule; loop OPENS on principle (cannot verify => do not resume) **")
+        guard let anchor = anchor, let schedule = deps.settings().basalRateSchedule, let pulseUnits = pumpPulseUnits else {
+            handbackDiag(epoch, "** force-reclaim audit IMPOSSIBLE — no start odometer/schedule/pump; loop OPENS on principle (cannot verify => do not resume) **")
             deps.openLoopForUncertainReconciliation()
             armOpenLoopReminder()
             deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)
             return false
         }
         let allEvents = staged.values.sorted { $0.seq < $1.seq }
-        let expected = LoanReconciler.expectedInsulin(events: allEvents, schedule: schedule,
+        let expected = LoanReconciler.expectedInsulin(events: allEvents, schedule: schedule, pulseUnits: pulseUnits,
                                                       from: anchor.asOf, to: deps.now())
 
         // Whole-loan figure for the drift check only.
         let takeoverUnits = persisted.audit.deliveredAtTakeover
         let wholeLoanExpected = takeoverUnits.map {
-            _ in LoanReconciler.expectedInsulin(events: allEvents, schedule: schedule, from: start, to: deps.now())
+            _ in LoanReconciler.expectedInsulin(events: allEvents, schedule: schedule, pulseUnits: pulseUnits,
+                                                from: start, to: deps.now())
         }
         pendingHandbackAudit = PendingHandbackAudit(
             epoch: epoch, deliveredAtStart: anchor.units, expected: expected,

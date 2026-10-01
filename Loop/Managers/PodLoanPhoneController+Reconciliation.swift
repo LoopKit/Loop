@@ -278,11 +278,14 @@ extension PodLoanPhoneController {
     /// Same band as the final verdict.
     static let checkpointBand: Double = 0.20
 
+    /// The lent pump's delivery pulse; nil with no pump, which no audit can be judged without.
+    var pumpPulseUnits: Double? { (deps.pumpManager() as? PumpDeliveryOdometer)?.deliveryPulseUnits }
+
     /// Reconciles the stretch since the last base using a mid-loan reading; a match advances
     /// the base, a mismatch is carried.
     func considerCheckpoint(_ snap: LoanOdometerSnapshot, context: String) {
         guard let asOf = snap.asOf else { return }
-        guard let base = auditBase else { return }
+        guard let base = auditBase, let pulseUnits = pumpPulseUnits else { return }
         // A reading no newer than the base closes no window.
         guard asOf > base.asOf else { return }
         // A total that went backwards is not a reading of this pod.
@@ -297,7 +300,7 @@ extension PodLoanPhoneController {
             .sorted { $0.seq < $1.seq }
         // A bolus exactly at the boundary belongs to the next window.
         let expected = LoanReconciler.expectedInsulin(events: events, schedule: deps.settings().basalRateSchedule,
-                                                      from: base.asOf, to: asOf,
+                                                      pulseUnits: pulseUnits, from: base.asOf, to: asOf,
                                                       includingBolusesAtEnd: false)
         let delivered = snap.deliveredLatest - base.units
 

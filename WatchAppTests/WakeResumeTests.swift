@@ -278,7 +278,7 @@ final class WakeResumeTests: XCTestCase {
     private func unexplained(podTotal: Double, after minutes: Double, records: [LoanDoseRecord] = []) -> Double {
         PodLoanWatchController.insulinTheCopyCannotExplain(copyTotal: 10.0, copyAt: t0, podTotal: podTotal,
                                                            now: t0.addingTimeInterval(.minutes(minutes)),
-                                                           records: records, schedule: flatSchedule)
+                                                           records: records, schedule: flatSchedule, pulseUnits: 0.05)
     }
 
     func testAnOrdinaryStartHasNothingToBook() {
@@ -322,7 +322,7 @@ final class WakeResumeTests: XCTestCase {
         c.queue.sync {
             c.takeoverCopyTotal = (10.0, copyAt)
             c.takeoverCopyRecords = []
-            c.bookInsulinTheCopyCannotExplain(podTotal: 16.2, epoch: 7)   // 0.2 U of basal, 6.0 U nobody recorded
+            c.bookInsulinTheCopyCannotExplain(podTotal: 16.2, pulseUnits: 0.05, epoch: 7)   // 0.2 U of basal, 6.0 U nobody recorded
         }
         let iob: Double? = await withCheckedContinuation { done in
             c.loopManager.primeIOBFromStore(at: Date().addingTimeInterval(.minutes(1))) { done.resume(returning: $0) }

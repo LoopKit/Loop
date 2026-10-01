@@ -1014,7 +1014,7 @@ final class LoanOverrideTests: XCTestCase {
                                             freshenSucceeded: true, asOf: t0.addingTimeInterval(2400))
 
         let expected = LoanReconciler.expectedInsulin(
-            events: [bolus, bracket, cancel, nextTemp], schedule: baseBasal,
+            events: [bolus, bracket, cancel, nextTemp], schedule: baseBasal, pulseUnits: 0.05,
             from: t0, to: t0.addingTimeInterval(2400))
 
         XCTAssertEqual(odometer.deliveredLatest - odometer.deliveredAtStart, expected, accuracy: 0.05,
