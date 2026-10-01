@@ -435,7 +435,7 @@ class LoopAppManager: NSObject {
 
         loopDataManager.deliveryDelegate = deviceDataManager
         loopDataManager.isPumpConnectionReleased = { [weak deviceDataManager] in
-            (deviceDataManager?.pumpManager as? ExclusiveDeviceControl)?.isControlReleased ?? false
+            deviceDataManager?.holdsAutomaticDosingForPodLoan ?? false
         }
 
         deviceDataManager.instantiateDeviceManagers()

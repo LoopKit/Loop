@@ -24,6 +24,11 @@ extension DeviceDataManager {
         podLoanController?.reclaimNow()
     }
 
+    /// The loop's loan gate; with the flag off, only the pump's own release.
+    var holdsAutomaticDosingForPodLoan: Bool {
+        podLoanController?.holdsAutomaticDosing ?? ((pumpManager as? ExclusiveDeviceControl)?.isControlReleased ?? false)
+    }
+
     /// Any non-owner state. Never blocks on the loan queue: the tile draws from main.
     var isPodLoanedToWatch: Bool {
         podLoanController?.isPodLoanedOutForUI ?? false

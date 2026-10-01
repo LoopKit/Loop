@@ -194,7 +194,7 @@ extension PodLoanPhoneController {
     }
 
     /// Take the pod without the watch: commit the salvage, arm an audit, take the link, open the
-    /// settle, clear staging last. Dosing stays paused until the audit rules.
+    /// settle, clear staging last. The armed audit holds automatic dosing until it rules.
     func forceReclaimToOwner(reason: String) {
         os_log("Force reclaim to OWNER: %{public}@", log: log, type: .default, reason)
 

@@ -90,7 +90,8 @@ extension PodLoanPhoneController {
     /// A force-reclaim verdict the pod will never answer: lift the pause, open the loop, tell the user.
     func resolveOwedForceReclaimAudit(why: String) {
         guard let pending = pendingHandbackAudit, pending.flavor == .forceReclaim else { return }
-        pendingHandbackAudit = nil
+        // The dosing hold lifts last, after the loop-open is dispatched.
+        defer { pendingHandbackAudit = nil }
         handbackDiag(pending.epoch, "** force-reclaim audit NEVER RAN — \(why). Session UNVERIFIED, loop OPENS **")
         deps.setAutomaticDosingPaused(false)
         deps.openLoopForUncertainReconciliation()
@@ -194,7 +195,8 @@ extension PodLoanPhoneController {
     func finishPendingHandbackAudit(elapsed: TimeInterval) {
         defer { clearAuditAnchors() }
         guard let pending = pendingHandbackAudit else { return }
-        pendingHandbackAudit = nil
+        // The dosing hold lifts last, after the verdict (and any loop-open) is dispatched.
+        defer { pendingHandbackAudit = nil }
 
         if let latest = (deps.pumpManager() as? PumpDeliveryOdometer)?.deliveredUnits?.units {
             let delivered = latest - pending.deliveredAtStart

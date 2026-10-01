@@ -248,6 +248,13 @@ extension PodLoanPhoneController {
         }
     }
 
+    /// The phone loop's dosing gate: the pod is lent out, or a force reclaim's audit has not
+    /// ruled. Never blocks: it reads the pump and the locked state.
+    var holdsAutomaticDosing: Bool {
+        (deps.pumpManager() as? ExclusiveDeviceControl)?.isControlReleased == true
+            || persisted.pendingForceAudit != nil
+    }
+
     /// Blocking; never from the controller's queue or a UI draw path.
     var isPodLoanedOut: Bool {
         return queue.sync { state != .owner || yieldingToInferredLoan }

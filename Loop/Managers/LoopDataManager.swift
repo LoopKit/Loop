@@ -632,7 +632,7 @@ final class LoopDataManager: ObservableObject {
         LoopAlgorithm.run(input: input)
     }
 
-    /// True while the pod's BLE connection is loaned out (or being released); injected at wiring — see `LoopDataManager+PodLoan.swift`.
+    /// True while the pod is loaned out, or until a force reclaim's audit rules; injected at wiring — see `LoopDataManager+PodLoan.swift`.
     var isPumpConnectionReleased: () -> Bool = { false }
 
     /// Cancel the active temp basal if it was automatically issued

@@ -1642,7 +1642,7 @@ extension PodLoanPhoneControllerTests {
         XCTAssertTrue(resumed, "automatic dosing resumes on the clean verdict")
     }
 
-    /// With the pod unreachable, dosing stays held.
+    /// With the pod unreachable, the gate the phone loop reads stays shut after the link is taken back.
     func testDosingIsHeldUntilTheAuditVerdictArrives() throws {
         let controller = makeController()
         establishLoan(controller)
@@ -1654,15 +1654,18 @@ extension PodLoanPhoneControllerTests {
         waitForState(controller, .owner)
         settle()
 
+        XCTAssertFalse(MockPumpManager.testConnectionReleased, "the link is the phone's again, so the release no longer gates")
+        XCTAssertTrue(controller.holdsAutomaticDosing, "no verdict, no automatic dosing — 'cannot verify' must never become 'assume fine'")
         lock.lock()
         let resumedEarly = pauseCalls.contains(false)
         lock.unlock()
-        XCTAssertFalse(resumedEarly, "no verdict, no resumption — 'cannot verify' must never become 'assume fine'")
+        XCTAssertFalse(resumedEarly, "nor are the loop-not-running reminders re-armed")
 
         lock.lock(); connectionReady = true; lock.unlock()    // the pod comes back
-        waitUntil(timeout: 8, "verdict after pod returns") { self.lock.lock(); defer { self.lock.unlock() }; return self.pauseCalls.contains(false) }
-        lock.lock(); let opened = openLoopCalls; lock.unlock()
+        waitUntil(timeout: 8, "verdict after pod returns") { !controller.holdsAutomaticDosing }
+        lock.lock(); let opened = openLoopCalls; let resumed = pauseCalls.contains(false); lock.unlock()
         XCTAssertEqual(opened, 1, "and the verdict still opens on the unexplained 2.5 U")
+        XCTAssertTrue(resumed)
     }
 
     /// The returning watch's real records replace the placeholder.
