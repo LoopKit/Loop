@@ -48,49 +48,6 @@ final class G7AdoptedSensorActivationTests: XCTestCase {
 final class G7WatchAcquisitionTests: XCTestCase {
     private let anchor = Date(timeIntervalSince1970: 1_000_000)
 
-    // MARK: the re-lodge arm
-
-    func testTheProvenArmIsTheDefault() {
-        XCTAssertEqual(G7WatchAcquisition.relodge, .holdApp, "33 in 33; the grid delay measured 1 in 4")
-        XCTAssertEqual(G7WatchAcquisition.Relodge(rawValue: "gridDelay"), .gridDelay)
-        XCTAssertEqual(G7WatchAcquisition.Relodge(rawValue: "holdApp"), .holdApp)
-        XCTAssertNil(G7WatchAcquisition.Relodge(rawValue: "tailDelay"), "the 31-s arm is gone")
-    }
-
-    // MARK: the grid delay — the arithmetic
-
-    func testTheGridDelayIsTheFormulaOnTheReadingsGrid() {
-        // delay = 298 - (now - bg_timestamp). A lodge happens at the
-        // sensor's close, a few seconds after the reading's own timestamp.
-        for sinceReading in [3.5, 4.0, 5.5, 12.0, 60.0] {
-            let now = anchor.addingTimeInterval(sinceReading)
-            XCTAssertEqual(Double(G7WatchAcquisition.gridDelay(anchor: anchor, now: now)), 298 - sinceReading, accuracy: 0.5,
-                           "whole seconds of the formula, not a variant of it")
-        }
-        XCTAssertEqual(G7WatchAcquisition.period + G7WatchAcquisition.fireOffset - G7WatchAcquisition.lead, 298, accuracy: 0.001,
-                       "period + fireOffset - lead == 298 is what makes it the formula")
-    }
-
-    func testTheGridDelayIsWholeSecondsNeverBelowOneAndInsideTheCycle() {
-        let d = G7WatchAcquisition.gridDelay(anchor: anchor, now: anchor.addingTimeInterval(10))
-        XCTAssertGreaterThan(d, 0)
-        XCTAssertLessThan(Double(d), G7WatchAcquisition.period, "never past the burst it is aimed at")
-        // The burst is already here: a delay would land after it — the shortest legal delay instead
-        // (a zero or fractional NSNumber is refused with CBError 1).
-        XCTAssertEqual(G7WatchAcquisition.gridDelay(anchor: anchor, now: anchor.addingTimeInterval(299)), 1)
-        // Hours later the anchor still names the grid: it is the sensor's own clock.
-        XCTAssertEqual(Double(G7WatchAcquisition.gridDelay(anchor: anchor, now: anchor.addingTimeInterval(47 * 300 + 12))),
-                       298 - 12, accuracy: 0.5)
-    }
-
-    func testTheNextFireStaysGridAligned() {
-        let fire = G7WatchAcquisition.nextFire(anchor: anchor, now: anchor.addingTimeInterval(100))
-        XCTAssertEqual(fire.timeIntervalSince(anchor), G7WatchAcquisition.period + G7WatchAcquisition.fireOffset, accuracy: 0.001)
-        let close = anchor.addingTimeInterval(G7WatchAcquisition.period + G7WatchAcquisition.fireOffset - 0.5)
-        XCTAssertEqual(G7WatchAcquisition.nextFire(anchor: anchor, now: close).timeIntervalSince(anchor),
-                       2 * G7WatchAcquisition.period + G7WatchAcquisition.fireOffset, accuracy: 0.001, "inside the margin: take the next one")
-    }
-
     // MARK: the hold
 
     func testTheHoldWaitsOutTheTailFromLinkUp() {
@@ -105,25 +62,11 @@ final class G7WatchAcquisitionTests: XCTestCase {
         XCTAssertLessThan(G7WatchAcquisition.tailClearanceSeconds, G7WatchAcquisition.period - 60)
     }
 
-    // MARK: the plan the toggle selects
-
-    func testTheToggleSelectsThePlan() {
-        let now = anchor.addingTimeInterval(3.5)
-        XCTAssertEqual(G7WatchAcquisition.relodgePlan(.gridDelay, sinceLinkUp: 3.5, anchor: anchor, now: now), .startDelay(seconds: 295))
-        XCTAssertEqual(G7WatchAcquisition.relodgePlan(.holdApp, sinceLinkUp: 3.5, anchor: anchor, now: now), .holdThenConnect(wait: 31.5))
-    }
-
-    func testPastTheClearanceTheHoldHasNothingToWaitFor() {
-        XCTAssertNil(G7WatchAcquisition.relodgePlan(.holdApp, sinceLinkUp: 120, anchor: anchor), "a wake mid-cycle: a plain request now")
-        XCTAssertEqual(G7WatchAcquisition.relodgePlan(.holdApp, sinceLinkUp: 0, anchor: nil), .holdThenConnect(wait: 35),
+    func testTheHoldRunsUntilTheClearanceThenNothingToWaitFor() {
+        XCTAssertEqual(G7WatchAcquisition.relodgeHold(sinceLinkUp: 3.5), 31.5, "a close after the read: hold out the tail")
+        XCTAssertNil(G7WatchAcquisition.relodgeHold(sinceLinkUp: 120), "a wake mid-cycle: a plain request now")
+        XCTAssertEqual(G7WatchAcquisition.relodgeHold(sinceLinkUp: 0), 35,
                        "a late connect failure counts from now: hold the full clearance")
-    }
-
-    func testTheGridDelayWithNoReadingOnRecordClearsTheTailLikeTheHold() {
-        // No grid to aim at, but never a plain connect straight after a close: a same-burst
-        // failure storm (58 of 77 handshakes) once began with exactly that.
-        XCTAssertEqual(G7WatchAcquisition.relodgePlan(.gridDelay, sinceLinkUp: 3.5, anchor: nil), .holdThenConnect(wait: 31.5))
-        XCTAssertNil(G7WatchAcquisition.relodgePlan(.gridDelay, sinceLinkUp: 120, anchor: nil))
     }
 
     // MARK: refusals — back off, stop after two
