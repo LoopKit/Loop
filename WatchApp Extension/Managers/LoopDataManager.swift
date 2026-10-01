@@ -80,8 +80,13 @@ class LoopDataManager {
     private let log = OSLog(category: "LoopDosingManager")
 
     // Main queue only
+    /// The last context the PHONE sent, regardless of what is currently active.
+    /// Written by LoopDataManager+PodLoanWatch.swift.
+    var phoneRelayContext: WatchContext?
+
     private(set) var activeContext: WatchContext? {
         didSet {
+            podLoanNoteContextChange(oldValue)
             rawWatchContext = activeContext?.rawValue
             needsDidUpdateContextNotification = true
             sendDidUpdateContextNotificationIfNecessary()
@@ -143,6 +148,30 @@ extension LoopDataManager {
 extension LoopDataManager {
     func updateContext(_ context: WatchContext) {
         dispatchPrecondition(condition: .onQueue(.main))
+
+        podLoanNotePhoneRelayContext(context)
+        podLoanReadPairingCode(from: context)
+
+        // DURING A LOAN THE PHONE'S CONTEXT MUST NOT BECOME `activeContext`.
+        //
+        // `shouldReplace` compares ONLY glucoseDate, with `>=`. The phone relays the same
+        // physical reading the watch just took, so its context arrives carrying an EQUAL
+        // timestamp and wins — silently discarding the watch-authored prediction, IOB, COB, temp
+        // and loop mode. Whether that happens depends on whether a phone context lands after the
+        // watch's, which is why the symptom is intermittent rather than constant: the prediction
+        // goes missing in certain corner cases and not others.
+        //
+        // One cause, several symptoms that read as separate bugs — a blank prediction line, the
+        // ring showing the PHONE's loop mode, a blank recommended bolus.
+        //
+        // The watch is the dosing controller here, so its context is authoritative and the
+        // phone's is stale by construction. Refuse it outright rather than merging: there is no
+        // field on it the watch does not know better.
+        let onLoan = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController.isLoanActiveNonBlocking ?? false
+        if onLoan, !context.isWatchAuthored {
+            podLoanAbsorbPhoneContextDuringLoan(context)
+            return
+        }
 
         if activeContext == nil || context.shouldReplace(activeContext!) {
             if let newGlucoseSample = context.newGlucoseSample {
@@ -259,6 +288,10 @@ extension LoopDataManager {
     func clearOverride() async throws {
         var watchInfoUpdate = self.watchInfo
         watchInfoUpdate.scheduleOverride = nil
+        if let manager = loanDosingManagerIfActive {
+            return await applyOverrideDuringLoan(manager, TemporaryScheduleOverride?.none, watchInfoUpdate,
+                                                 presetId: String?.none, alertIdentifier: String?.none)
+        }
         try await WCSession.default.sendSetPreset(presetIdentifier: nil, alertIdentifier: nil)
         watchInfo = watchInfoUpdate
     }
@@ -266,6 +299,11 @@ extension LoopDataManager {
     func activateOverride(_ override: TemporaryScheduleOverride, alertIdentifierToAcknowledge: String? = nil) async throws {
         var watchInfoUpdate = self.watchInfo
         watchInfoUpdate.scheduleOverride = override
+        if let manager = loanDosingManagerIfActive {
+            return await applyOverrideDuringLoan(manager, override, watchInfoUpdate,
+                                                 presetId: override.presetId,
+                                                 alertIdentifier: alertIdentifierToAcknowledge)
+        }
         try await WCSession.default.sendSetPreset(presetIdentifier: override.presetId, alertIdentifier: alertIdentifierToAcknowledge)
         watchInfo = watchInfoUpdate
     }
@@ -355,7 +393,13 @@ extension LoopDataManager {
             correctionRange: self.watchInfo.loopSettings.glucoseTargetRangeSchedule,
             scheduleOverride: self.watchInfo.scheduleOverride,
             historicalGlucose: historicalGlucose,
-            predictedGlucose: (activeContext.isClosedLoop ?? false) ? activeContext.predictedGlucose?.values : nil
+            // DRAW THE PREDICTION WHATEVER THE LOOP MODE, matching the phone — which assigns
+            // `predictedGlucoseValues = state.output?.predictedGlucose` with no mode gate at all.
+            // The gate here blanked the chart on an OPEN loop, and a loan INHERITS the phone's
+            // mode at grant, so a wrist holding the pod in advisory mode showed no forecast — the
+            // situation where you most need one, because you are deciding by hand. The number was
+            // computed every cycle regardless; we were simply declining to draw it.
+            predictedGlucose: activeContext.predictedGlucose?.values
         )
         return chartData
     }

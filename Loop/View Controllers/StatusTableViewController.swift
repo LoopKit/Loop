@@ -145,6 +145,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 Task { @MainActor [weak self] in
                     self?.registerPumpManager()
                     self?.configurePumpManagerHUDViews()
+                    // .status EXPLICITLY: every loan ownership transition posts this
+                    // notification, and a reloadData with an empty refresh context skips the
+                    // status section — the pill then shows the PREVIOUS ownership until some
+                    // unrelated trigger reloads it (field 2026-08-23: "Handing over…" standing
+                    // long after the watch was green; a tap revealed the already-arrived truth).
+                    self?.refreshContext.update(with: .status)
                     await self?.reloadData()
                 }
             },
@@ -649,6 +655,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
             // Pump Status
             hudView.pumpStatusHUD.presentStatusHighlight(self.deviceManager.pumpStatusHighlight)
+                self.updatePodReclaimCountdown()
             hudView.pumpStatusHUD.presentStatusBadge(self.deviceManager.pumpStatusBadge)
             hudView.pumpStatusHUD.lifecycleProgress = self.deviceManager.pumpLifecycleProgress
         }
@@ -1736,6 +1743,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 pumpManagerHUDProvider.visible = active && onscreen
             }
             hudView.pumpStatusHUD.presentStatusHighlight(deviceManager.pumpStatusHighlight)
+            // The countdown has to start HERE too: .PumpManagerChanged — which every loan state
+            // transition posts — routes to this function, NOT to the periodic HUD update where
+            // the other call site lives. Without this a reclaim could run its whole course
+            // without anything ever starting the timer.
+            updatePodReclaimCountdown()
             hudView.pumpStatusHUD.lifecycleProgress = deviceManager.pumpLifecycleProgress
         }
     }
@@ -1804,9 +1816,41 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     @objc private func pumpStatusTapped(_ sender: UIGestureRecognizer) {
+        // While the pod is on the watch, the pump tile's normal destination is the pump manager's
+        // own settings — which would let someone command a pod this phone is not holding. Offer
+        // the reclaim instead, and say plainly why the usual screen is not available.
+        if deviceManager.isPodLoanedToWatch {
+            presentPodLoanReclaimPrompt()
+            return
+        }
+        if deviceManager.isPodLoanReclaiming {
+            presentPodSettlingNotice()
+            return
+        }
         if let pumpStatusView = sender.view as? PumpStatusHUDView {
             executeHUDTapAction(deviceManager.didTapOnPumpStatus(pumpStatusView.pumpManagerProvidedHUD), from: sender.view)
         }
+    }
+
+    private func presentPodLoanReclaimPrompt() {
+        let alert = UIAlertController(
+            title: NSLocalizedString("Pod Is on the Watch", comment: "Title of the reclaim prompt when tapping the pump tile during a loan"),
+            message: NSLocalizedString("Reclaim the pod to this phone? The watch's Sport Mode session will end and its records will be collected.", comment: "Message of the reclaim prompt"),
+            preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Reclaim Now", comment: "Button to reclaim the pod from the watch"), style: .default) { [weak self] _ in
+            self?.deviceManager.reclaimPodLoanFromWatch()
+        })
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Cancel the reclaim prompt"), style: .cancel))
+        present(alert, animated: true)
+    }
+
+    private func presentPodSettlingNotice() {
+        let alert = UIAlertController(
+            title: NSLocalizedString("Finishing Pod Handover", comment: "Title shown when the phone owns the pod but its connection is not re-established"),
+            message: NSLocalizedString("Sport Mode has ended and this phone is back in control, but it is still reconnecting to the pod. Try again in a moment.", comment: "Message shown while the phone is re-establishing the pod connection after a reclaim"),
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Dismiss the pod-settling notice"), style: .default))
+        present(alert, animated: true)
     }
 
     @objc private func cgmStatusTapped( _ sender: UIGestureRecognizer) {
@@ -1901,6 +1945,49 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
         }
         lastOrientation = UIDevice.current.orientation
+    }
+
+    // MARK: - Pod reclaim countdown
+
+    private var podReclaimCountdownTimer: Timer?
+    private let podReclaimCountdownInterval = TimeInterval(0.5)
+
+    /// THE TILE'S SECONDS DO NOT ADVANCE ON THEIR OWN. `pumpStatusHighlight` is a value read at
+    /// render time, so its elapsed count only moves when something re-presents it — and the loan
+    /// controller notifies on STATE CHANGES, of which a reclaim in progress has none. Field
+    /// 2026-08-16: a force reclaim showed "Forcing... 0s" and sat there, then jumped to 48s and
+    /// 69s as unrelated taps happened to redraw the view. Correct underneath, unreadable on top.
+    private func updatePodReclaimCountdown() {
+        if deviceManager.isPodLoanReclaiming || deviceManager.isPodTakeoverInProgress {
+            startPodReclaimCountdown()
+        } else {
+            stopPodReclaimCountdown()
+        }
+    }
+
+    private func startPodReclaimCountdown() {
+        guard podReclaimCountdownTimer == nil else { return }
+        podReclaimCountdownTimer = Timer.scheduledTimer(withTimeInterval: podReclaimCountdownInterval, repeats: true) { [weak self] timer in
+            // A repeating timer outlives a weak reference that went nil, so it has to retire
+            // itself — invalidating from `stopPodReclaimCountdown` is unreachable without a self.
+            guard let self = self else { timer.invalidate(); return }
+            guard let hudView = self.hudView else { self.stopPodReclaimCountdown(); return }
+            // Re-present on every tick: the label carries elapsed seconds that only advance if the
+            // text is rebuilt, and the phase can move under it as the reclaim progresses.
+            hudView.pumpStatusHUD.presentStatusHighlight(self.deviceManager.pumpStatusHighlight)
+            // The bar rides the same tick: reclaim progress publishes through
+            // pumpLifecycleProgress (stock's own tile-progress mechanism), and nothing else
+            // refreshes it at reclaim cadence.
+            hudView.pumpStatusHUD.lifecycleProgress = self.deviceManager.pumpLifecycleProgress
+            if !self.deviceManager.isPodLoanReclaiming, !self.deviceManager.isPodTakeoverInProgress {
+                self.stopPodReclaimCountdown()
+            }
+        }
+    }
+
+    private func stopPodReclaimCountdown() {
+        podReclaimCountdownTimer?.invalidate()
+        podReclaimCountdownTimer = nil
     }
 
     private func presentDebugMenu() {
