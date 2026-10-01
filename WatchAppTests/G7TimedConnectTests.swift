@@ -9,6 +9,9 @@
 
 import XCTest
 import CoreBluetooth
+import LoopKit
+import LoopCore
+import LoopAlgorithm
 @testable import G7SensorKit
 @testable import WatchApp
 
@@ -94,5 +97,64 @@ final class G7WatchAcquisitionTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(G7WatchAcquisition.missedBursts(since: anchor, now: anchor.addingTimeInterval(3 * 300 + 8)),
                                     G7WatchAcquisition.missedBurstsBeforeBootstrap)
         XCTAssertEqual(G7WatchAcquisition.missedBursts(since: nil, now: anchor), 0, "nothing on record: nothing missed")
+    }
+}
+
+/// The phone's relay and the watch's own G7 name a reading alike, so the store keeps one row.
+final class G7RelayDedupTests: XCTestCase {
+    private func message(_ hex: String) -> G7GlucoseMessage { G7GlucoseMessage(data: Data(hexadecimalString: hex)!)! }
+
+    func testARelayedReadingAndTheWatchsOwnReadingOfItAreOneRow() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let cacheStore = PersistenceController(directoryURL: dir.appendingPathComponent("cache"))
+        let doseStore = await DoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                        longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
+                                        provenanceIdentifier: "G7RelayDedupTests")
+        let glucoseStore = await GlucoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                              cacheLength: 4 * 60 * 60, provenanceIdentifier: "G7RelayDedupTests")
+        let carbStore = CarbStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                  cacheLength: 24 * 60 * 60, provenanceIdentifier: "G7RelayDedupTests")
+        let wrist = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
+                                     defaults: UserDefaults(suiteName: "G7RelayDedupTests-\(UUID().uuidString)")!,
+                                     stateDirectory: dir)
+
+        // The phone discovered the sensor; the watch adopts its export.
+        let activatedAt = Date().addingTimeInterval(-87_485 - 60)
+        var phone = G7CGMManagerState()
+        phone.sensorID = "DXCMQj"
+        phone.activatedAt = activatedAt
+        let adopted = G7CGMManagerState.adopted(from: phone.sharedState)
+        let sensor = G7Sensor(mode: .direct, credentials: adopted.sensorCredentials, bluetoothManager: TestBluetoothManager())
+        let g7 = G7CGMManager(state: adopted, sensor: sensor)
+        wrist.installCGMManager(g7, builtFrom: nil)
+
+        // The phone's reading, relayed under the phone's name (G7CGMManager: activation hours,
+        // sensor ID, sensor timestamp).
+        let reading = message("4e00c35501002601000106008a00060187000f")
+        let relayed = try XCTUnwrap(WatchContext(
+            glucose: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 138),
+            glucoseDate: activatedAt.addingTimeInterval(TimeInterval(reading.glucoseTimestamp)),
+            glucoseSyncIdentifier: "\(activatedAt.timeIntervalSince1970 / 3600) DXCMQj \(reading.glucoseTimestamp)"
+        ).newGlucoseSample)
+        _ = try await glucoseStore.addGlucoseSamples([relayed])
+
+        // The watch then reads the same sample itself (its own activation estimate is a fraction
+        // off), then the next one, which marks that the first has been through the store.
+        sensor.activationDate = activatedAt.addingTimeInterval(0.4)
+        g7.sensor(sensor, didRead: reading)
+        g7.sensor(sensor, didRead: message("4e00ef5601002701000106008c00060187000f"))
+
+        var stored: [StoredGlucoseSample] = []
+        for _ in 0..<50 {
+            stored = try await glucoseStore.getGlucoseSamples(start: activatedAt, end: nil)
+            if stored.contains(where: { $0.quantity.doubleValue(for: .milligramsPerDeciliter) == 140 }) { break }
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
+        XCTAssertTrue(stored.contains { $0.quantity.doubleValue(for: .milligramsPerDeciliter) == 140 },
+                      "the watch's own readings reach the store")
+        XCTAssertEqual(stored.filter { $0.syncIdentifier == relayed.syncIdentifier }.count, 1,
+                       "one row for the sample both devices read")
+        XCTAssertEqual(stored.count, 2)
     }
 }

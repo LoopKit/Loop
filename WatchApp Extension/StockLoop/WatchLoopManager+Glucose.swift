@@ -57,17 +57,14 @@ extension WatchLoopManager: CGMManagerDelegate {
         WCSession.default.transferFile(url, metadata: ["kind": "g7watch.log"])
     }
 
-    /// Stock `processCGMReadingResult` plus a cross-device dedup, a source stamp and a post-write
-    /// check; no staleness monitor. Glucose alerts see every delivered reading, as stock's do.
+    /// Stock `processCGMReadingResult` plus a source stamp and a post-write check; no staleness
+    /// monitor. Glucose alerts see every delivered reading, as stock's do. The phone's relay of the
+    /// same reading carries the same sync identifier, so the store's own dedup drops the second.
     private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult, completion: @escaping () -> Void) {
         switch readingResult {
-        case .newData(let rawValues):
-            let values = rawValues
-
-            dropAlreadyStored(values) { kept in
-
+        case .newData(let values):
             let deliveredCount = values.count
-            let latest = kept.max(by: { $0.date < $1.date }) ?? values.max(by: { $0.date < $1.date })
+            let latest = values.max(by: { $0.date < $1.date })
             let latestDesc: String = {
                 guard let s = latest else { return "none" }
                 let mgdl = Int(s.quantity.doubleValue(for: .milligramsPerDeciliter).rounded())
@@ -80,25 +77,24 @@ extension WatchLoopManager: CGMManagerDelegate {
             if !values.isEmpty { self.evaluateGlucoseAlerts(values) }
 
             SportLog.event("glucose",
-                "INGEST src=direct-G7 kept=\(kept.count)/\(deliveredCount) · latest \(latestDesc)\(batchTag)")
-            guard !kept.isEmpty else { completion(); return }
+                "INGEST src=direct-G7 n=\(deliveredCount) · latest \(latestDesc)\(batchTag)")
+            guard !values.isEmpty else { completion(); return }
             Task {
                 do {
-                    _ = try await self.glucoseStore.addGlucoseSamples(kept)
+                    _ = try await self.glucoseStore.addGlucoseSamples(values)
 
                     // A successful write has left the store pinned to an older sample before; check it moved.
-                    if let newest = kept.map(\.date).max(),
+                    if let newest = values.map(\.date).max(),
                        (self.glucoseStore.latestGlucose?.startDate ?? .distantPast) < newest.addingTimeInterval(-1) {
                         SportLog.event("glucose", "STORE LATEST IS STALE after a write — wrote up to \(newest), store says \(self.glucoseStore.latestGlucose.map { String(describing: $0.startDate) } ?? "nil") [glucose-store]")
                     }
                 } catch {
                     self.log.error("Failure adding glucose samples: %{public}@", String(describing: error))
-                    SportLog.event("glucose", "STORE WRITE FAILED — \(kept.count) reading(s) NOT written: \(error) [glucose-store]")
+                    SportLog.event("glucose", "STORE WRITE FAILED — \(values.count) reading(s) NOT written: \(error) [glucose-store]")
                 }
 
                 self.dataAccessQueue.async { self.publishOwnGlucoseContextWhenIdle() }
                 completion()
-            }
             }
         case .unreliableData:
             // Stock cancels a high temp here; unreachable, as G7SensorKit never reports `.unreliableData`.
@@ -121,7 +117,7 @@ extension WatchLoopManager: CGMManagerDelegate {
     }
 
     /// The phone's reading as a gap-filler while a pod is held, from `phoneRelayContext`. Guards,
-    /// in order: syncId latch (correct under the async-add race), newer than stored, cross-device dedup.
+    /// in order: syncId latch (correct under the async-add race), newer than stored, the store's dedup.
     @MainActor
     func ingestPhoneGlucoseFromContext() {
         guard pumpManager != nil else { return }
@@ -133,11 +129,10 @@ extension WatchLoopManager: CGMManagerDelegate {
             self.lastPhoneFallbackSyncId = sample.syncIdentifier
 
             if let latest = self.glucoseStore.latestGlucose?.startDate, latest >= sample.date { return }
-            self.dropAlreadyStored([sample]) { kept in
-            guard !kept.isEmpty else { return }
             Task {
                 do {
-                    _ = try await self.glucoseStore.addGlucoseSamples(kept)
+                    // Empty when the watch's own reading of this sample is already stored.
+                    guard try await !self.glucoseStore.addGlucoseSamples([sample]).isEmpty else { return }
                 } catch {
                     self.log.error("phone-BG fallback add failed: %{public}@", String(describing: error))
                     return
@@ -155,43 +150,6 @@ extension WatchLoopManager: CGMManagerDelegate {
                     self.checkPumpDataAndLoop()
                 }
             }
-            }
-        }
-    }
-
-    /// Sensor ID plus reading timestamp, dropping each device's own `activatedAt` estimate;
-    /// nil for an unlatched ("invalid") identifier.
-    private static func sensorIdentity(_ syncIdentifier: String?) -> String? {
-        guard let s = syncIdentifier, let sp = s.firstIndex(of: " ") else { return nil }
-        let tail = s[s.index(after: sp)...]
-        return tail.isEmpty ? nil : String(tail)
-    }
-
-    /// Drops readings stored under the other device's name (duplicate rows fake a trend). Fails open.
-    private func dropAlreadyStored(_ samples: [NewGlucoseSample],
-                                   completion: @escaping ([NewGlucoseSample]) -> Void) {
-        let wanted = samples.compactMap { Self.sensorIdentity($0.syncIdentifier) }
-        guard !wanted.isEmpty else { completion(samples); return }
-
-        // Bounded lookback; an older backfilled duplicate is accepted.
-        let since = self.now().addingTimeInterval(-.minutes(30))
-        Task {
-            guard let stored = try? await glucoseStore.getGlucoseSamples(start: since, end: nil) else {
-                completion(samples)
-                return
-            }
-            let seen = Set(stored.compactMap { Self.sensorIdentity($0.syncIdentifier) })
-            guard !seen.isEmpty else { completion(samples); return }
-            var dropped: [String] = []
-            let kept = samples.filter { s in
-                guard let id = Self.sensorIdentity(s.syncIdentifier), seen.contains(id) else { return true }
-                dropped.append(id)
-                return false
-            }
-            if !dropped.isEmpty {
-                SportLog.event("glucose", "dedup: dropped \(dropped.count) already-filed reading(s) [\(dropped.joined(separator: ", "))] — same sensor stamp, different device name tag")
-            }
-            completion(kept)
         }
     }
 
