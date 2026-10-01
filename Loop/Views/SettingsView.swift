@@ -38,7 +38,7 @@ struct SettingsView: View {
             case deleteAllTestingData
         }
         
-        enum ActionSheet: String, Identifiable {
+        enum PluginPicker: String, Identifiable {
             var id: String {
                 rawValue
             }
@@ -58,9 +58,10 @@ struct SettingsView: View {
         }
     }
     
-    @State private var actionSheet: Destination.ActionSheet?
+    @State private var pluginPicker: Destination.PluginPicker?
     @State private var alert: Destination.Alert?
     @State private var sheet: Destination.Sheet?
+    @State private var pluginSelection: (() -> Void)?
     
     var localizedAppNameAndVersion: String
 
@@ -119,6 +120,12 @@ struct SettingsView: View {
             .insetGroupedListStyle()
             .navigationBarTitle(Text(NSLocalizedString("Settings", comment: "Settings screen title")))
             .navigationBarItems(trailing: dismissButton)
+            .fullScreenCover(item: $pluginPicker, onDismiss: {
+                pluginSelection?()
+                pluginSelection = nil
+            }) { picker in
+                pluginPickerView(for: picker)
+            }
             .alert(item: $alert) { alert in
                 switch alert {
                 case .deleteCGMData:
@@ -454,37 +461,11 @@ extension SettingsView {
                         label: viewModel.pumpManagerSettingsViewModel.name(),
                         descriptiveText: NSLocalizedString("Insulin Pump", comment: "Descriptive text for Insulin Pump"))
         } else if viewModel.isOnboardingComplete {
-            LargeButton(action: { actionSheet = .pumpPicker },
+            LargeButton(action: { pluginPicker = .pumpPicker },
                         includeArrow: false,
                         imageView: plusImage,
                         label: NSLocalizedString("Add Pump", comment: "Title text for button to add pump device"),
                         descriptiveText: NSLocalizedString("Tap here to set up a pump", comment: "Descriptive text for button to add pump device"))
-            .background(
-                PluginPopover(
-                    isPresented: pickerBinding(.pumpPicker),
-                    title: NSLocalizedString("Add Pump", comment: "The title of the pump chooser in settings"),
-                    actions: pumpChoices
-                )
-            )
-        }
-    }
-
-    private func pickerBinding(_ destination: Destination.ActionSheet) -> Binding<Bool> {
-        Binding(
-            get: { actionSheet == destination },
-            set: { isPresented in
-                if !isPresented, actionSheet == destination {
-                    actionSheet = nil
-                }
-            }
-        )
-    }
-
-    private var pumpChoices: [PluginPopover.Action] {
-        viewModel.pumpManagerSettingsViewModel.availableDevices.map { availableDevice in
-            .init(title: availableDevice.localizedTitle) {
-                self.viewModel.pumpManagerSettingsViewModel.didTapAdd(availableDevice)
-            }
         }
     }
 
@@ -497,18 +478,11 @@ extension SettingsView {
                         label: viewModel.cgmManagerSettingsViewModel.name(),
                         descriptiveText: NSLocalizedString("Continuous Glucose Monitor", comment: "Descriptive text for Continuous Glucose Monitor"))
         } else {
-            LargeButton(action: { actionSheet = .cgmPicker },
+            LargeButton(action: { pluginPicker = .cgmPicker },
                         includeArrow: false,
                         imageView: plusImage,
                         label: NSLocalizedString("Add CGM", comment: "Title text for button to add CGM device"),
                         descriptiveText: NSLocalizedString("Tap here to set up a CGM", comment: "Descriptive text for button to add CGM device"))
-            .background(
-                PluginPopover(
-                    isPresented: pickerBinding(.cgmPicker),
-                    title: NSLocalizedString("Add CGM", comment: "The title of the CGM chooser in settings"),
-                    actions: cgmChoices
-                )
-            )
         }
     }
     
@@ -522,14 +496,46 @@ extension SettingsView {
         }
     }
     
-    private var cgmChoices: [PluginPopover.Action] {
-        viewModel.cgmManagerSettingsViewModel.availableDevices
-            .sorted(by: {$0.localizedTitle < $1.localizedTitle})
-            .map { availableDevice in
-                .init(title: availableDevice.localizedTitle) {
-                    self.viewModel.cgmManagerSettingsViewModel.didTapAdd(availableDevice)
-                }
-            }
+    @ViewBuilder
+    private func pluginPickerView(for picker: Destination.PluginPicker) -> some View {
+        switch picker {
+        case .pumpPicker:
+            PluginPickerView(
+                pluginType: .pump,
+                items: viewModel.pumpManagerSettingsViewModel.availableDevices.map { PluginPickerView.Item($0) },
+                onSelect: { item in
+                    if let device = viewModel.pumpManagerSettingsViewModel.availableDevices.first(where: { $0.identifier == item.id }) {
+                        pluginSelection = { viewModel.pumpManagerSettingsViewModel.didTapAdd(device) }
+                    }
+                    pluginPicker = nil
+                },
+                onCancel: { pluginPicker = nil }
+            )
+        case .cgmPicker:
+            PluginPickerView(
+                pluginType: .cgm,
+                items: viewModel.cgmManagerSettingsViewModel.availableDevices.map { PluginPickerView.Item($0) },
+                onSelect: { item in
+                    if let device = viewModel.cgmManagerSettingsViewModel.availableDevices.first(where: { $0.identifier == item.id }) {
+                        pluginSelection = { viewModel.cgmManagerSettingsViewModel.didTapAdd(device) }
+                    }
+                    pluginPicker = nil
+                },
+                onCancel: { pluginPicker = nil }
+            )
+        case .servicePicker:
+            PluginPickerView(
+                pluginType: .service,
+                items: viewModel.servicesViewModel.inactiveServices().map { PluginPickerView.Item($0) },
+                onSelect: { item in
+                    if let service = viewModel.servicesViewModel.inactiveServices().first(where: { $0.identifier == item.id }) {
+                        pluginSelection = { viewModel.servicesViewModel.didTapAddService(service) }
+                    }
+                    pluginPicker = nil
+                },
+                onCancel: { pluginPicker = nil }
+            )
+        }
     }
 
     private var servicesSection: some View {
@@ -542,26 +548,11 @@ extension SettingsView {
                             descriptiveText: "")
             }
             if viewModel.servicesViewModel.inactiveServices().count > 0 {
-                LargeButton(action: { actionSheet = .servicePicker },
+                LargeButton(action: { pluginPicker = .servicePicker },
                             includeArrow: false,
                             imageView: plusImage,
                             label: NSLocalizedString("Add Service", comment: "The title of the add service button in settings"),
                             descriptiveText: NSLocalizedString("Tap here to set up a Service", comment: "The descriptive text of the add service button in settings"))
-                .background(
-                    PluginPopover(
-                        isPresented: pickerBinding(.servicePicker),
-                        title: NSLocalizedString("Add Service", comment: "The title of the add service action sheet in settings"),
-                        actions: serviceChoices
-                    )
-                )
-            }
-        }
-    }
-
-    private var serviceChoices: [PluginPopover.Action] {
-        viewModel.servicesViewModel.inactiveServices().map { availableService in
-            .init(title: availableService.localizedTitle) {
-                self.viewModel.servicesViewModel.didTapAddService(availableService)
             }
         }
     }
@@ -779,77 +770,6 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
                 }
             }
             .padding(EdgeInsets(top: topBottomPadding, leading: 0, bottom: topBottomPadding, trailing: 0))
-        }
-    }
-}
-
-/// Presents the plugin chooser as a UIKit action sheet anchored to the tapped row.
-///
-/// A SwiftUI `.actionSheet`/`.confirmationDialog` presented from a `List` row breaks
-/// under the Liquid Glass design, so the sheet is presented from a hosted
-/// `UIViewController` positioned behind the row instead.
-struct PluginPopover: UIViewControllerRepresentable {
-    struct Action {
-        let title: String
-        let handler: () -> Void
-    }
-
-    @Binding var isPresented: Bool
-    let title: String
-    let actions: [Action]
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-
-    func makeUIViewController(context: Context) -> UIViewController {
-        UIViewController()
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        let coordinator = context.coordinator
-
-        if !isPresented {
-            coordinator.didPresent = false
-            return
-        }
-
-        guard !coordinator.didPresent else { return }
-        guard uiViewController.presentedViewController == nil else { return }
-
-        coordinator.didPresent = true
-        coordinator.onDismiss = { self.isPresented = false }
-
-        let alert = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
-        for action in actions {
-            alert.addAction(UIAlertAction(title: action.title, style: .default) { _ in
-                self.isPresented = false
-                action.handler()
-            })
-        }
-
-        alert.addAction(UIAlertAction(
-            title: NSLocalizedString("Cancel", comment: "The title of the cancel action in an action sheet"),
-            style: .destructive
-        ) { _ in
-            self.isPresented = false
-        })
-
-        if let popover = alert.popoverPresentationController {
-            popover.sourceView = uiViewController.view
-            popover.sourceRect = uiViewController.view.bounds
-            popover.delegate = coordinator
-        }
-
-        uiViewController.present(alert, animated: true)
-    }
-
-    final class Coordinator: NSObject, UIPopoverPresentationControllerDelegate {
-        var didPresent = false
-        var onDismiss: (() -> Void)?
-
-        func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-            onDismiss?()
         }
     }
 }
