@@ -435,9 +435,11 @@ extension PodLoanWatchController {
                                        supplementRaw: grant.therapySettingsSupplementRaw,
                                        supportsInterimHandback: grant.supportsInterimHandback ?? false,
                                        supportsOverrideRecords: grant.supportsOverrideRecords ?? false,
-                                       glucoseAlertSettings: grant.glucoseAlertSettings)
+                                       glucoseAlertSettings: grant.glucoseAlertSettings,
+                                       settingsHistory: grant.settingsHistory)
         }
         loopManager.settings = decodedSettings!
+        loopManager.settingsProvider.history = grant.settingsHistory
         Task { @MainActor [loopManager] in loopManager.configureGlucoseAlerts(from: grant.glucoseAlertSettings) }
         WatchAlertPresenter.logAuthorization("loan start, epoch \(grant.epoch)")
 

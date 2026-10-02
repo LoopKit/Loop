@@ -203,6 +203,72 @@ final class LoanProtocolV2Tests: XCTestCase {
         XCTAssertLessThan(withField - without, 4_000, "a day of overrides stays small beside the 60 KB urgent limit")
     }
 
+    /// The settings history rides the grant; nil from an older phone. Built the way the phone
+    /// builds it, by stock's queries over a settings store, with every value changed 2 h before.
+    func testGrantSettingsHistoryRoundTripsAndIsOptional() async throws {
+        let now = Date(timeIntervalSince1970: 1_784_338_000)
+        let gmt = TimeZone(identifier: "GMT")!
+        let mgdl = LoopUnit.milligramsPerDeciliter
+
+        /// Basal in `basalSegments` equal blocks, ISF in 3, carb ratio in 4, target in 3; `bump` changes every value.
+        func storedSettings(at date: Date, basalSegments: Int, bump: Double) -> StoredSettings {
+            func items<T>(_ count: Int, _ value: (Int) -> T) -> [RepeatingScheduleValue<T>] {
+                (0..<count).map { RepeatingScheduleValue(startTime: .hours(24.0 * Double($0) / Double(count)), value: value($0)) }
+            }
+            return StoredSettings(
+                date: date,
+                glucoseTargetRangeSchedule: GlucoseRangeSchedule(unit: mgdl, dailyItems: items(3) { DoubleRange(minValue: 100 + 5 * Double($0) + bump, maxValue: 110 + 5 * Double($0) + bump) }, timeZone: gmt),
+                basalRateSchedule: BasalRateSchedule(dailyItems: items(basalSegments) { 0.8 + 0.05 * Double($0) + bump / 10 }, timeZone: gmt),
+                insulinSensitivitySchedule: InsulinSensitivitySchedule(unit: mgdl, dailyItems: items(3) { 45 + 5 * Double($0) + bump }, timeZone: gmt),
+                carbRatioSchedule: CarbRatioSchedule(unit: .gram, dailyItems: items(4) { 10 + Double($0) + bump }, timeZone: gmt))
+        }
+
+        /// What the phone's grant assembly sends for a day with one change 2 h before it.
+        func phoneHistory(basalSegments: Int) async throws -> LoanSettingsHistory {
+            let cache = PersistenceController(directoryURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+            let store = SettingsStore(store: cache, expireAfter: .days(7))
+            for settings in [storedSettings(at: now.addingTimeInterval(-.hours(30)), basalSegments: basalSegments, bump: 0),
+                             storedSettings(at: now.addingTimeInterval(-.hours(2)), basalSegments: basalSegments, bump: 2)] {
+                await withCheckedContinuation { done in store.storeSettings(settings) { _ in done.resume() } }
+            }
+            let start = now.addingTimeInterval(-.hours(24))
+            return LoanSettingsHistory(
+                basal: try await store.getBasalHistory(startDate: start, endDate: now),
+                sensitivity: try await store.getInsulinSensitivityHistory(startDate: start, endDate: now),
+                carbRatio: try await store.getCarbRatioHistory(startDate: start, endDate: now),
+                targetRange: try await store.getTargetRangeHistory(startDate: start, endDate: now))
+        }
+
+        func grant(_ history: LoanSettingsHistory?) -> LoanGrant {
+            LoanGrant(epoch: 4, expiresAt: now, pumpConfiguration: Data([1]), podAddress: 0,
+                      therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC", doseHistory: [], settingsHistory: history)
+        }
+        func value(_ timeline: [AbsoluteScheduleValue<Double>], at date: Date) -> Double? {
+            timeline.first { $0.startDate <= date && date < $0.endDate }?.value
+        }
+
+        let history = try await phoneHistory(basalSegments: 6)
+        guard case .grant(let received) = try roundTrip(.grant(grant(history))) else { return XCTFail("not a grant") }
+        XCTAssertEqual(received.settingsHistory, history)
+        let carried = try XCTUnwrap(received.settingsHistory)
+        // `now` is 01:26 GMT: 3 h before is the last block of the old schedules (the new ones would
+        // read 1.25 U/h and 57 there), 1 h before is the first block of the new ones.
+        XCTAssertEqual(try XCTUnwrap(value(carried.basal, at: now.addingTimeInterval(-.hours(3)))), 1.05, accuracy: 0.001, "the old rate before the change")
+        XCTAssertEqual(try XCTUnwrap(value(carried.basal, at: now.addingTimeInterval(-.hours(1)))), 1.0, accuracy: 0.001, "the new one after")
+        XCTAssertEqual(try XCTUnwrap(value(carried.sensitivity, at: now.addingTimeInterval(-.hours(3)))), 55, accuracy: 0.001)
+        XCTAssertEqual(try XCTUnwrap(value(carried.sensitivity, at: now.addingTimeInterval(-.hours(1)))), 47, accuracy: 0.001)
+        XCTAssertEqual(carried.basal.last?.endDate, now, "up to the grant")
+
+        guard case .grant(let fromOlder) = try roundTrip(.grant(grant(nil))) else { return XCTFail("not a grant") }
+        XCTAssertNil(fromOlder.settingsHistory, "an older phone: nil, so the watch projects its snapshot back")
+
+        let without = try LoanProtocol.encoder.encode(LoanEnvelope(message: .grant(grant(nil)))).count
+        let typical = try LoanProtocol.encoder.encode(LoanEnvelope(message: .grant(grant(history)))).count - without
+        let hourly = try LoanProtocol.encoder.encode(LoanEnvelope(message: .grant(grant(try await phoneHistory(basalSegments: 24))))).count - without
+        print("SETTINGS-HISTORY-SIZE grant +\(typical)B (basal in 6 blocks), +\(hourly)B (hourly basal); entries \(history.basal.count)/\(history.sensitivity.count)/\(history.carbRatio.count)/\(history.targetRange.count)")
+        XCTAssertLessThan(typical, 4_000, "a day of settings stays small beside the 60 KB urgent limit")
+    }
+
     func testAGrantWithoutAConfigurationDecodesToNil() {
         let grant = LoanGrant(epoch: 4, expiresAt: Date(), pumpConfiguration: Data([1, 2, 3]), podAddress: 0,
                               therapySettingsRaw: Data(), settingsTimeZoneID: "UTC", doseHistory: [])

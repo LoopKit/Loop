@@ -186,6 +186,7 @@ extension LoanGrant {
                   therapySettingsSupplementRaw: therapySettingsSupplementRaw,
                   lastLoopCompleted: lastLoopCompleted,
                   glucoseAlertSettings: glucoseAlertSettings,
-                  overrideHistoryRaw: overrideHistoryRaw)
+                  overrideHistoryRaw: overrideHistoryRaw,
+                  settingsHistory: settingsHistory)
     }
 }

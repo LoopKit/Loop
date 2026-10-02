@@ -27,6 +27,7 @@ struct PodLoanWatchState: RawRepresentable {
         var supportsInterimHandback: Bool
         var supportsOverrideRecords: Bool
         var glucoseAlertSettings: Data? = nil
+        var settingsHistory: LoanSettingsHistory? = nil
     }
     var grantedSettings: GrantedSettings?
 
@@ -56,6 +57,7 @@ struct PodLoanWatchState: RawRepresentable {
                                     "overrideRecords": $0.supportsOverrideRecords]
             d["supplement"] = $0.supplementRaw
             d["glucoseAlerts"] = $0.glucoseAlertSettings
+            d["settingsHistory"] = $0.settingsHistory.flatMap { try? LoanProtocol.encoder.encode($0) }
             return d
         }
         raw["deliveredAtTakeover"] = deliveredAtTakeover
@@ -69,7 +71,10 @@ struct PodLoanWatchState: RawRepresentable {
         return GrantedSettings(therapySettingsRaw: raw, supplementRaw: d["supplement"] as? Data,
                                supportsInterimHandback: d["interim"] as? Bool ?? false,
                                supportsOverrideRecords: d["overrideRecords"] as? Bool ?? false,
-                               glucoseAlertSettings: d["glucoseAlerts"] as? Data)
+                               glucoseAlertSettings: d["glucoseAlerts"] as? Data,
+                               settingsHistory: (d["settingsHistory"] as? Data).flatMap {
+                                   try? LoanProtocol.decoder.decode(LoanSettingsHistory.self, from: $0)
+                               })
     }
 
 }

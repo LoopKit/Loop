@@ -201,6 +201,20 @@ extension WatchDataManager {
                     completion(self?.temporaryPresetsManager.presetHistory.getOverrideHistory(startDate: start, endDate: .distantFuture) ?? [])
                 }
             },
+            settingsHistory: { [weak self] start, end, completion in
+                Task { @MainActor in
+                    guard let settings = self?.settingsManager else { return completion(nil) }
+                    do {
+                        completion(LoanSettingsHistory(
+                            basal: try await settings.getBasalHistory(startDate: start, endDate: end),
+                            sensitivity: try await settings.getInsulinSensitivityHistory(startDate: start, endDate: end),
+                            carbRatio: try await settings.getCarbRatioHistory(startDate: start, endDate: end),
+                            targetRange: try await settings.getTargetRangeHistory(startDate: start, endDate: end)))
+                    } catch {
+                        completion(nil)
+                    }
+                }
+            },
             glucoseAlertSettings: { [weak self] completion in
                 Task { @MainActor in completion(self?.deviceManager.glucoseAlertManager.sharedSettings.encoded) }
             },

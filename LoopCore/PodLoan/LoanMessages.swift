@@ -8,6 +8,7 @@
 
 import Foundation
 import HealthKit
+import LoopAlgorithm
 import LoopKit
 
 extension LoanGrant {
@@ -51,6 +52,32 @@ extension LoanGrant {
             return folded.rawValue
         }
         return try? PropertyListSerialization.data(fromPropertyList: raws, format: .binary, options: 0)
+    }
+}
+
+/// The phone's therapy settings over a past window, as stock's settings-history queries return
+/// them: absolute timelines, glucose values in mg/dL.
+public struct LoanSettingsHistory: Codable, Equatable {
+    public let basal: [AbsoluteScheduleValue<Double>]
+    public let sensitivity: [AbsoluteScheduleValue<Double>]
+    public let carbRatio: [AbsoluteScheduleValue<Double>]
+    public let targetRange: [AbsoluteScheduleValue<DoubleRange>]
+
+    public init(basal: [AbsoluteScheduleValue<Double>],
+                sensitivity: [AbsoluteScheduleValue<LoopQuantity>],
+                carbRatio: [AbsoluteScheduleValue<Double>],
+                targetRange: [AbsoluteScheduleValue<ClosedRange<LoopQuantity>>]) {
+        let mgdl = LoopUnit.milligramsPerDeciliter
+        self.basal = basal
+        self.sensitivity = sensitivity.map {
+            AbsoluteScheduleValue(startDate: $0.startDate, endDate: $0.endDate, value: $0.value.doubleValue(for: mgdl))
+        }
+        self.carbRatio = carbRatio
+        self.targetRange = targetRange.map {
+            AbsoluteScheduleValue(startDate: $0.startDate, endDate: $0.endDate,
+                                  value: DoubleRange(minValue: $0.value.lowerBound.doubleValue(for: mgdl),
+                                                     maxValue: $0.value.upperBound.doubleValue(for: mgdl)))
+        }
     }
 }
 
@@ -171,6 +198,9 @@ public struct LoanGrant: Codable, Equatable {
     /// The phone's overrides of the last 24 h, ended ones included, as a binary plist of raw values.
     public let overrideHistoryRaw: Data?
 
+    /// The phone's settings over the last 24 h, up to the grant.
+    public let settingsHistory: LoanSettingsHistory?
+
     public init(epoch: Int, expiresAt: Date, pumpConfiguration: Data, podAddress: UInt32,
                 therapySettingsRaw: Data, settingsTimeZoneID: String,
                 doseHistory: [LoanDoseRecord],
@@ -185,7 +215,8 @@ public struct LoanGrant: Codable, Equatable {
                 therapySettingsSupplementRaw: Data? = nil,
                 lastLoopCompleted: Date? = nil,
                 glucoseAlertSettings: Data? = nil,
-                overrideHistoryRaw: Data? = nil) {
+                overrideHistoryRaw: Data? = nil,
+                settingsHistory: LoanSettingsHistory? = nil) {
         self.epoch = epoch
         self.expiresAt = expiresAt
         self.pumpConfiguration = pumpConfiguration
@@ -205,6 +236,7 @@ public struct LoanGrant: Codable, Equatable {
         self.lastLoopCompleted = lastLoopCompleted
         self.glucoseAlertSettings = glucoseAlertSettings
         self.overrideHistoryRaw = overrideHistoryRaw
+        self.settingsHistory = settingsHistory
     }
 }
 

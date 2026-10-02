@@ -47,9 +47,14 @@ final class WakeResumeTests: XCTestCase {
         let basal = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.0)])!
         let raw = try! PropertyListSerialization.data(fromPropertyList: LoopSettings().rawValue, format: .binary, options: 0)
         let supplement = try! PropertyListSerialization.data(fromPropertyList: ["basalRateSchedule": basal.rawValue], format: .binary, options: 0)
+        let now = Date()
+        let history = LoanSettingsHistory(
+            basal: [AbsoluteScheduleValue(startDate: now.addingTimeInterval(-.hours(24)), endDate: now, value: 0.8)],
+            sensitivity: [], carbRatio: [], targetRange: [])
         saveState {
             $0.grantedSettings = .init(therapySettingsRaw: raw, supplementRaw: supplement,
-                                       supportsInterimHandback: true, supportsOverrideRecords: true)
+                                       supportsInterimHandback: true, supportsOverrideRecords: true,
+                                       settingsHistory: history)
         }
     }
 
@@ -257,6 +262,8 @@ final class WakeResumeTests: XCTestCase {
 
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         XCTAssertNotNil(c.loopManager.settings.basalRateSchedule, "therapy settings")
+        XCTAssertEqual(c.loopManager.settingsProvider.history?.basal.first?.value, 0.8,
+                       "the phone's settings history — else the resumed loan projects today's settings back")
         XCTAssertTrue(c.loopManager.closedLoopEnabledNonBlocking, "closed-loop mode — else a resumed loan comes back OPEN")
         XCTAssertTrue(c.loopManager.isIntegralRetrospectiveCorrectionEnabled, "retrospective-correction mode")
         XCTAssertTrue(c.phoneSupportsInterimHandback, "the phone's interim hand-back capability")

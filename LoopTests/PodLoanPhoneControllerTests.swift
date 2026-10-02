@@ -102,6 +102,9 @@ final class PodLoanPhoneControllerTests: XCTestCase {
     /// What `Dependencies.overrideHistory` hands the grant, and the start it was asked for.
     var phoneOverrideHistory: [TemporaryScheduleOverride] = []
     var overrideHistoryAskedFrom: Date?
+    /// What `Dependencies.settingsHistory` hands the grant, and the window it was asked for.
+    var phoneSettingsHistory: LoanSettingsHistory?
+    var settingsHistoryAskedFor: DateInterval?
     /// The phone's current override, and every override change the controller applied.
     var phoneScheduleOverride: TemporaryScheduleOverride?
     var appliedOverrideChanges: [(override: TemporaryScheduleOverride?, changedAt: Date)] = []
@@ -139,6 +142,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         glucoseAlertSettings = nil
         phoneOverrideHistory = []
         overrideHistoryAskedFrom = nil
+        phoneSettingsHistory = nil
+        settingsHistoryAskedFor = nil
         phoneScheduleOverride = nil
         appliedOverrideChanges = []
         addedDoses = []
@@ -236,6 +241,11 @@ final class PodLoanPhoneControllerTests: XCTestCase {
             overrideHistory: { [weak self] start, completion in
                 guard let self = self else { return completion([]) }
                 self.lock.lock(); self.overrideHistoryAskedFrom = start; let history = self.phoneOverrideHistory; self.lock.unlock()
+                completion(history)
+            },
+            settingsHistory: { [weak self] start, end, completion in
+                guard let self = self else { return completion(nil) }
+                self.lock.lock(); self.settingsHistoryAskedFor = DateInterval(start: start, end: end); let history = self.phoneSettingsHistory; self.lock.unlock()
                 completion(history)
             },
             glucoseAlertSettings: { [weak self] completion in completion(self?.glucoseAlertSettings) },
@@ -1649,6 +1659,25 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                        "the early end, folded in because the raw form drops it")
         XCTAssertEqual(carried[1].duration, .indefinite)
         XCTAssertEqual(try XCTUnwrap(overrideHistoryAskedFrom).timeIntervalSince(now), -.hours(24), accuracy: 60)
+    }
+
+    /// The grant carries the phone's settings history for the last 24 h, up to the grant.
+    func testTheGrantCarriesTheLastDaysSettingsHistory() throws {
+        let now = Date(timeIntervalSince1970: Date().timeIntervalSince1970.rounded())
+        let mgdl = LoopUnit.milligramsPerDeciliter
+        let history = LoanSettingsHistory(
+            basal: [AbsoluteScheduleValue(startDate: now.addingTimeInterval(-.hours(24)), endDate: now, value: 0.8)],
+            sensitivity: [AbsoluteScheduleValue(startDate: now.addingTimeInterval(-.hours(24)), endDate: now, value: LoopQuantity(unit: mgdl, doubleValue: 40))],
+            carbRatio: [AbsoluteScheduleValue(startDate: now.addingTimeInterval(-.hours(24)), endDate: now, value: 8)],
+            targetRange: [])
+        phoneSettingsHistory = history
+
+        let grant = offerGrant(makeController())
+
+        XCTAssertEqual(grant.settingsHistory, history)
+        let window = try XCTUnwrap(settingsHistoryAskedFor)
+        XCTAssertEqual(window.duration, .hours(24), accuracy: 1)
+        XCTAssertEqual(window.end.timeIntervalSinceNow, 0, accuracy: 60, "up to the grant")
     }
 
     /// The active override and the schedules ride in the grant's own fields; the settings blob

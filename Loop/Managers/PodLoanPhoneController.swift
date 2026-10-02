@@ -91,6 +91,9 @@ final class PodLoanPhoneController {
         /// Overrides overlapping `start` onward, ended ones included, as the phone's history holds them.
         var overrideHistory: (_ start: Date, _ completion: @escaping ([TemporaryScheduleOverride]) -> Void) -> Void = { _, done in done([]) }
 
+        /// Stock's settings-history queries over the window; nil leaves the wrist on its snapshot.
+        var settingsHistory: (_ start: Date, _ end: Date, _ completion: @escaping (LoanSettingsHistory?) -> Void) -> Void = { _, _, done in done(nil) }
+
         /// The glucose alert settings, encoded for the grant; nil leaves the wrist without them.
         var glucoseAlertSettings: (_ completion: @escaping (Data?) -> Void) -> Void = { $0(nil) }
 

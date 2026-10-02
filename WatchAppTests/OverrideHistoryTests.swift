@@ -3,7 +3,8 @@
 //  WatchAppTests
 //
 //  The watch's algorithm input reads overrides the way stock's does: over stock's windows, from a
-//  history that keeps ended overrides for as long as the algorithm looks back.
+//  history that keeps ended overrides for as long as the algorithm looks back. Settings likewise:
+//  the phone's settings history before the grant, the granted snapshot after.
 //
 
 import XCTest
@@ -68,7 +69,8 @@ final class OverrideHistoryTests: XCTestCase {
 
     /// A grant with complete settings. Its pump configuration is not a pump, so intake stops
     /// (and tears down) after the overrides are applied.
-    private func grant(activeOverride: TemporaryScheduleOverride?, overrideHistory: [TemporaryScheduleOverride]? = nil) -> LoanGrant {
+    private func grant(activeOverride: TemporaryScheduleOverride?, overrideHistory: [TemporaryScheduleOverride]? = nil,
+                       settingsHistory: LoanSettingsHistory? = nil) -> LoanGrant {
         var settings = LoopSettings()
         settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(
             unit: .milligramsPerDeciliter,
@@ -87,7 +89,8 @@ final class OverrideHistoryTests: XCTestCase {
                          podAddress: 0, therapySettingsRaw: plist(settings.rawValue), settingsTimeZoneID: "GMT",
                          doseHistory: [], activeOverrideRaw: activeOverride.map { plist($0.rawValue) },
                          therapySettingsSupplementRaw: plist(supplement),
-                         overrideHistoryRaw: overrideHistory.flatMap(LoanGrant.overrideHistoryRaw))
+                         overrideHistoryRaw: overrideHistory.flatMap(LoanGrant.overrideHistoryRaw),
+                         settingsHistory: settingsHistory)
     }
 
     /// Glucose for the last `hours`, every five minutes: the history starts there, not earlier.
@@ -224,5 +227,100 @@ final class OverrideHistoryTests: XCTestCase {
         let copy = grant(activeOverride: nil, overrideHistory: [halfNeeds(start: Date().addingTimeInterval(-.hours(3)), duration: .hours(1))])
         XCTAssertNotNil(copy.overrideHistoryRaw)
         XCTAssertEqual(copy.withEpoch(9, leaseUntil: Date()).overrideHistoryRaw, copy.overrideHistoryRaw)
+    }
+
+    // MARK: - The phone's settings history arrives with the grant
+
+    /// The phone's last day: basal 0.8, ISF 40, carb ratio 8, target 90-100 until `change`, then
+    /// the granted snapshot's 1.0, 50, 10, 100-110 up to `now`.
+    private func settingsHistory(changedAt change: Date, now: Date) -> LoanSettingsHistory {
+        let start = now.addingTimeInterval(-.hours(24))
+        func timeline<T>(_ old: T, _ new: T) -> [AbsoluteScheduleValue<T>] {
+            [AbsoluteScheduleValue(startDate: start, endDate: change, value: old),
+             AbsoluteScheduleValue(startDate: change, endDate: now, value: new)]
+        }
+        let mgdl = LoopUnit.milligramsPerDeciliter
+        return LoanSettingsHistory(
+            basal: timeline(0.8, 1.0),
+            sensitivity: timeline(LoopQuantity(unit: mgdl, doubleValue: 40), LoopQuantity(unit: mgdl, doubleValue: 50)),
+            carbRatio: timeline(8, 10),
+            targetRange: timeline(LoopQuantity(unit: mgdl, doubleValue: 90)...LoopQuantity(unit: mgdl, doubleValue: 100),
+                                  LoopQuantity(unit: mgdl, doubleValue: 100)...LoopQuantity(unit: mgdl, doubleValue: 110)))
+    }
+
+    /// Entries cover the window end to end, with no gap or overlap.
+    private func assertContinuous<T>(_ timeline: [AbsoluteScheduleValue<T>], from start: Date, to end: Date,
+                                     _ name: String, file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertEqual(timeline.first?.startDate, start, "\(name) starts at the window", file: file, line: line)
+        XCTAssertEqual(timeline.last?.endDate, end, "\(name) ends at the window", file: file, line: line)
+        for (a, b) in zip(timeline, timeline.dropFirst()) {
+            XCTAssertEqual(a.endDate, b.startDate, "\(name) is continuous", file: file, line: line)
+        }
+    }
+
+    /// Basal, ISF and carb ratio changed on the phone 2 h before Start: the watch's settings
+    /// queries read the old values before the change and the new ones after.
+    func testASettingsChangeBeforeStartReadsTheOldValuesBeforeIt() async throws {
+        let c = await makeController(overrideHistory: StockLoopStack.makeOverrideHistory())
+        let now = Date()
+        c.queue.sync { c.handleGrant(grant(activeOverride: nil, settingsHistory: settingsHistory(changedAt: now.addingTimeInterval(-.hours(2)), now: now))) }
+
+        let provider = c.loopManager.settingsProvider
+        let start = now.addingTimeInterval(-.hours(6)), end = now.addingTimeInterval(.hours(1))
+        let basal = try await provider.getBasalHistory(startDate: start, endDate: end)
+        let isf = try await provider.getInsulinSensitivityHistory(startDate: start, endDate: end)
+        let carbRatio = try await provider.getCarbRatioHistory(startDate: start, endDate: end)
+        let target = try await provider.getTargetRangeHistory(startDate: start, endDate: end)
+        let before = now.addingTimeInterval(-.hours(3)), after = now.addingTimeInterval(-.hours(1))
+        let later = now.addingTimeInterval(.minutes(30))
+        let isfValue: (Date) -> Double? = { d in isf.first { $0.startDate <= d && d < $0.endDate }?.value.doubleValue(for: .milligramsPerDeciliter) }
+
+        XCTAssertEqual(value(basal, at: before), 0.8, "basal: the old rate before the change")
+        XCTAssertEqual(value(basal, at: after), 1.0, "and the new one after")
+        XCTAssertEqual(value(basal, at: later), 1.0, "and the snapshot past the grant")
+        XCTAssertEqual(isfValue(before), 40)
+        XCTAssertEqual(isfValue(after), 50)
+        XCTAssertEqual(value(carbRatio, at: before), 8)
+        XCTAssertEqual(value(carbRatio, at: after), 10)
+        XCTAssertEqual(target.first { $0.startDate <= before && before < $0.endDate }?.value.lowerBound.doubleValue(for: .milligramsPerDeciliter), 90)
+        assertContinuous(basal, from: start, to: end, "basal")
+        assertContinuous(isf, from: start, to: end, "ISF")
+        assertContinuous(carbRatio, from: start, to: end, "carb ratio")
+        assertContinuous(target, from: start, to: end, "target")
+    }
+
+    /// The same change, in the first cycle's input.
+    func testTheFirstCycleReadsTheOldValuesBeforeAChangeBeforeStart() async throws {
+        let c = await makeController(overrideHistory: StockLoopStack.makeOverrideHistory())
+        let now = Date()
+        c.queue.sync { c.handleGrant(grant(activeOverride: nil, settingsHistory: settingsHistory(changedAt: now.addingTimeInterval(-.hours(2)), now: now))) }
+        let before = now.addingTimeInterval(-.hours(3))
+
+        await seedGlucose(c.loopManager, hours: 3)
+        try await c.loopManager.recordPumpEvents([], lastReconciliation: Date(), replacePendingEvents: true)
+        let input = try await c.loopManager.fetchAlgorithmInput(at: Date(), recommendationType: .tempBasal)
+        XCTAssertEqual(try XCTUnwrap(value(input.basal, at: before)), 0.8, accuracy: 0.001)
+        XCTAssertEqual(try XCTUnwrap(sensitivity(input, at: before)), 40, accuracy: 0.001)
+        XCTAssertEqual(try XCTUnwrap(value(input.carbRatio, at: before)), 8, accuracy: 0.001)
+    }
+
+    /// An older phone sends no history: the snapshot is projected back, as before.
+    func testAGrantWithoutSettingsHistoryProjectsTheSnapshotBack() async throws {
+        let c = await makeController(overrideHistory: StockLoopStack.makeOverrideHistory())
+        let now = Date()
+        c.queue.sync { c.handleGrant(grant(activeOverride: nil)) }
+
+        let provider = c.loopManager.settingsProvider
+        XCTAssertNil(provider.history)
+        let basal = try await provider.getBasalHistory(startDate: now.addingTimeInterval(-.hours(6)), endDate: now)
+        XCTAssertEqual(value(basal, at: now.addingTimeInterval(-.hours(3))), 1.0, "today's rate, throughout")
+    }
+
+    /// A phoneless start rebuilds the standing copy's grant; the settings history rides along.
+    func testAStartFromTheStandingCopyKeepsTheSettingsHistory() {
+        let now = Date()
+        let copy = grant(activeOverride: nil, settingsHistory: settingsHistory(changedAt: now.addingTimeInterval(-.hours(2)), now: now))
+        XCTAssertNotNil(copy.settingsHistory)
+        XCTAssertEqual(copy.withEpoch(9, leaseUntil: Date()).settingsHistory, copy.settingsHistory)
     }
 }
