@@ -424,6 +424,9 @@ class LoopAppManager: NSObject {
             healthStore: healthStore
         )
 
+        // Weak lookup for the pump tile.
+        deviceDataManager.watchManager = watchManager
+
         self.mealDetectionManager = MealDetectionManager(
             algorithmStateProvider: loopDataManager,
             settingsProvider: temporaryPresetsManager,
@@ -431,6 +434,9 @@ class LoopAppManager: NSObject {
         )
 
         loopDataManager.deliveryDelegate = deviceDataManager
+        loopDataManager.isPumpConnectionReleased = { [weak deviceDataManager] in
+            deviceDataManager?.holdsAutomaticDosingForPodLoan ?? false
+        }
 
         deviceDataManager.instantiateDeviceManagers()
 
@@ -918,8 +924,14 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
              LoopNotificationCategory.requiredUpdate.rawValue:
             completionHandler([.badge, .sound, .list, .banner])
         default:
-            // For all others, banners are not to be displayed while in the foreground
-            completionHandler([.badge, .sound, .list])
+            // Foreground banners for the loan's notices, whose identifiers are minted per notice;
+            // the phone may be the only device that can reach the user.
+            if notification.request.identifier.hasPrefix("podloan.") {
+                completionHandler([.badge, .sound, .list, .banner])
+            } else {
+                // For all others, banners are not to be displayed while in the foreground
+                completionHandler([.badge, .sound, .list])
+            }
         }
     }
 

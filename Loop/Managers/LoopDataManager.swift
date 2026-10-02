@@ -82,17 +82,9 @@ protocol DosingManagerDelegate {
     func didMakeDosingDecision(_ decision: StoredDosingDecision)
 }
 
-enum LoopUpdateContext: Int {
-    case insulin
-    case carbs
-    case glucose
-    case preferences
-    case forecast
-}
-
 @MainActor
 final class LoopDataManager: ObservableObject {
-    nonisolated static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
+    nonisolated static let LoopUpdateContextKey = LoopUpdateContext.notificationKey
 
     // Represents the current state of the loop algorithm for display
     var displayState = AlgorithmDisplayState()
@@ -115,6 +107,13 @@ final class LoopDataManager: ObservableObject {
     }
 
     @Published private(set) var lastLoopCompleted: Date?
+
+    /// Display only: at reclaim the watch's last cycle seeds the phone's loop-recency clock.
+    /// Forward-only; dosing never reads it.
+    func seedLastLoopCompleted(fromWatch date: Date) {
+        guard (lastLoopCompleted ?? .distantPast) < date else { return }
+        lastLoopCompleted = date
+    }
     @Published private(set) var publishedMostRecentGlucoseDataDate: Date?
     @Published private(set) var publishedMostRecentPumpDataDate: Date?
     @Published private(set) var lastManualBolus: LastManualBolus?
@@ -633,9 +632,18 @@ final class LoopDataManager: ObservableObject {
         LoopAlgorithm.run(input: input)
     }
 
+    /// True while the pod is loaned out, or until a force reclaim's audit rules; injected at wiring — see `LoopDataManager+PodLoan.swift`.
+    var isPumpConnectionReleased: () -> Bool = { false }
+
     /// Cancel the active temp basal if it was automatically issued
     func cancelActiveTempBasal(for reason: CancelActiveTempBasalReason) async throws {
         guard case .tempBasal(let dose) = deliveryDelegate?.basalDeliveryState, (dose.automatic ?? true) else { return }
+
+        // Never command a pod lent to the watch; the boundary cancel runs after reclaim.
+        guard !isPumpConnectionReleased() else {
+            logger.default("Temp-basal cancel SKIPPED (%{public}@) — pod connection is released (loaned out); the watch owns the program until reclaim", String(describing: reason))
+            return
+        }
 
         logger.default("Cancelling active temp basal for reason: %{public}@", String(describing: reason))
 
@@ -753,7 +761,8 @@ final class LoopDataManager: ObservableObject {
 
                 dosingDecision.updateFrom(input: input, output: output)
 
-                if self.settingsProvider.dosingEnabled {
+                // While the pod is lent, compute but never enact; dosingEnabled is untouched.
+                if self.settingsProvider.dosingEnabled, !isPumpConnectionReleased() {
                     if deliveryDelegate.basalDeliveryState == .pumpInoperable {
                         throw LoopError.pumpInoperable
                     }
@@ -782,7 +791,8 @@ final class LoopDataManager: ObservableObject {
                     self.logger.default("Not adjusting dosing during open loop.")
                 }
 
-                await dosingDecisionStore.storeDosingDecision(dosingDecision)
+                // While the pod is lent the watch stores this cycle's decisions; the phone stores none.
+                if !isPumpConnectionReleased() { await dosingDecisionStore.storeDosingDecision(dosingDecision) }
                 NotificationCenter.default.post(name: .LoopCycleCompleted, object: self)
 
             case .failure(let error):
@@ -792,7 +802,8 @@ final class LoopDataManager: ObservableObject {
             logger.error("loop() did error: %{public}@", String(describing: error))
             let loopError = error as? LoopError ?? .unknownError(error)
             dosingDecision.appendError(loopError)
-            await dosingDecisionStore.storeDosingDecision(dosingDecision)
+            // While the pod is lent the watch stores this cycle's decisions; the phone stores none.
+            if !isPumpConnectionReleased() { await dosingDecisionStore.storeDosingDecision(dosingDecision) }
             analyticsServicesManager?.loopDidError(error: loopError)
             NotificationCenter.default.post(name: .LoopCycleCompleted, object: self)
         }
@@ -871,6 +882,9 @@ final class LoopDataManager: ObservableObject {
     }
 
     func updateRemoteRecommendation(force: Bool = false) async {
+        // While the pod is lent the watch stores these decisions; the phone stores none.
+        guard !isPumpConnectionReleased() else { return }
+
         if lastManualBolusRecommendation == nil {
             lastManualBolusRecommendation = displayState.output?.recommendation?.manual
         }
@@ -1260,7 +1274,6 @@ extension StoredDataAlgorithmInput {
 }
 
 extension Notification.Name {
-    static let LoopDataUpdated = Notification.Name(rawValue: "com.loopkit.Loop.LoopDataUpdated")
     static let LoopRunning = Notification.Name(rawValue: "com.loopkit.Loop.LoopRunning")
     static let LoopCycleCompleted = Notification.Name(rawValue: "com.loopkit.Loop.LoopCycleCompleted")
 }
@@ -1296,7 +1309,8 @@ extension ManualBolusRecommendationWithDate {
     }
 }
 
-private extension StoredDosingDecision.Settings {
+// Internal, not private — LoopDataManager+PodLoan.swift builds the same dosing decision.
+extension StoredDosingDecision.Settings {
     init?(_ settings: StoredSettings?) {
         guard let settings = settings else {
             return nil
@@ -1661,6 +1675,8 @@ enum CancelActiveTempBasalReason: String {
     case automaticDosingDisabled
     case unreliableCGMData
     case maximumBasalRateChanged
+    case pumpControlReturned
+    case pumpControlReleased
 }
 
 extension LoopDataManager : AlgorithmDisplayStateProvider {

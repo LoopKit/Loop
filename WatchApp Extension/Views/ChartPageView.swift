@@ -224,6 +224,7 @@ struct ChartPageView: View {
             updateGlucoseChart()
         }
         .sheet(isPresented: $isShowingCarbList) {
+            // The stock list, loan-aware inside `CarbList` (loan store, swipe-to-delete).
             CarbList()
         }
     }

@@ -145,6 +145,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 Task { @MainActor [weak self] in
                     self?.registerPumpManager()
                     self?.configurePumpManagerHUDViews()
+                    // Reload .status explicitly: an empty refresh context skips the section.
+                    self?.refreshContext.update(with: .status)
                     await self?.reloadData()
                 }
             },
@@ -391,6 +393,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private var reloading = false
 
     private var refreshContext = RefreshContext.all
+    private var lastReloadPodLoanedToWatch = false
 
     private var shouldShowPresets: Bool {
         presetsRowMode.hasRow
@@ -457,7 +460,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
             return
         }
         
+        // A loan starting or ending changes what the charts may show; refetch everything.
+        if lastReloadPodLoanedToWatch != deviceManager.isPodLoanedToWatch {
+            lastReloadPodLoanedToWatch = deviceManager.isPodLoanedToWatch
+            refreshContext = RefreshContext.all
+        }
+
         // This should be kept up to date immediately
+        hudView?.loopCompletionHUD.loopRunsElsewhere = deviceManager.isPodLoanedToWatch
         hudView?.loopCompletionHUD.lastLoopCompleted = loopManager.lastLoopCompleted
         hudView?.loopCompletionHUD.deviceIssue = deviceIssue
         hudView?.loopCompletionHUD.mostRecentGlucoseDataDate = loopManager.mostRecentGlucoseDataDate
@@ -501,6 +511,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let startDate = charts.startDate
         let basalDeliveryState = self.basalDeliveryState
         let automaticDosingEnabled = settingsManager.dosingEnabled
+        // While the watch runs the loop, the phone's forecast and projections are not current: show history only.
+        let podLoanedToWatch = deviceManager.isPodLoanedToWatch
 
         let state = await loopManager.algorithmDisplayState
         predictedGlucoseValues = state.output?.predictedGlucose ?? []
@@ -521,6 +533,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         if currentContext.contains(.carbs) {
             cobValues = await loopManager.dynamicCarbsOnBoard(from: startDate)
+            if podLoanedToWatch {
+                cobValues = cobValues?.filter { $0.startDate <= Date() }
+            }
         }
 
         // always check for cob
@@ -537,7 +552,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         if currentContext.contains(.insulin) {
             doseEntries = try? await loopManager.doseStore.getNormalizedDoseEntries(start: startDate, end: nil)
-            iobValues = loopManager.iobValues.filterDateRange(startDate, nil)
+            iobValues = loopManager.iobValues.filterDateRange(startDate, podLoanedToWatch ? Date() : nil)
             totalDelivery = await loopManager.totalDeliveredToday()?.value
         }
 
@@ -547,7 +562,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         if let glucoseSamples = glucoseSamples {
             self.statusCharts.setGlucoseValues(glucoseSamples)
         }
-        if (automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled), let predictedGlucoseValues = predictedGlucoseValues {
+        if !podLoanedToWatch, (automaticDosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled), let predictedGlucoseValues = predictedGlucoseValues {
             self.statusCharts.setPredictedGlucoseValues(predictedGlucoseValues)
         } else {
             self.statusCharts.setPredictedGlucoseValues([])
@@ -584,7 +599,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
 
         // Show the larger of the value either before or after the current date
-        if let activeInsulin = loopManager.activeInsulin, let valueString = insulinFormatter.string(from: activeInsulin.quantity, includeUnit: false) {
+        if !podLoanedToWatch, let activeInsulin = loopManager.activeInsulin, let valueString = insulinFormatter.string(from: activeInsulin.quantity, includeUnit: false) {
             let valueAttributedString = NSMutableAttributedString(string: valueString, attributes: [.font: UIFont.systemFont(ofSize: 22, weight: .semibold), .foregroundColor: ChartColorPalette.primary.insulinTint])
             let spacer = NSAttributedString(string: "\u{00a0}")
             let unitAttributedString = NSMutableAttributedString(string: insulinFormatter.localizedUnitStringWithPlurality(forQuantity: activeInsulin.quantity, avoidLineBreaking: true), attributes: [.font: UIFont.systemFont(ofSize: 15, weight: .regular), .foregroundColor: ChartColorPalette.primary.insulinTint])
@@ -609,7 +624,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         if let cobValues = cobValues {
             charts.setCOBValues(cobValues)
         }
-        if let index = charts.cob.cobPoints.closestIndex(priorTo: Date()) {
+        if !podLoanedToWatch, let index = charts.cob.cobPoints.closestIndex(priorTo: Date()) {
             let valueAttributedString = NSMutableAttributedString(string: String(describing: charts.cob.cobPoints[index].y.copy), attributes: [.font: UIFont.systemFont(ofSize: 22, weight: .semibold), .foregroundColor: ChartColorPalette.primary.carbTint])
             let spacer = NSAttributedString(string: "\u{00a0}")
             let unitAttributedString =  NSAttributedString(string: String(describing: charts.cob.cobPoints[index].y).replacingOccurrences(of: String(describing: charts.cob.cobPoints[index].y.copy), with: "").trimmingCharacters(in: .whitespacesAndNewlines), attributes: [.font: UIFont.systemFont(ofSize: 15, weight: .regular), .foregroundColor: ChartColorPalette.primary.carbTint])
@@ -618,7 +633,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             valueAttributedString.append(unitAttributedString)
             
             self.currentCOBDescription = valueAttributedString
-        } else if let carbsOnBoard = carbsOnBoard, let valueString = carbFormatter.string(from: carbsOnBoard, includeUnit: false) {
+        } else if !podLoanedToWatch, let carbsOnBoard = carbsOnBoard, let valueString = carbFormatter.string(from: carbsOnBoard, includeUnit: false) {
             let valueAttributedString = NSMutableAttributedString(string: valueString, attributes: [.font: UIFont.systemFont(ofSize: 22, weight: .semibold), .foregroundColor: ChartColorPalette.primary.carbTint])
             let spacer = NSAttributedString(string: "\u{00a0}")
             let unitAttributedString = NSAttributedString(string: carbFormatter.localizedUnitStringWithPlurality(forQuantity: carbsOnBoard, avoidLineBreaking: true), attributes: [.font: UIFont.systemFont(ofSize: 15, weight: .regular), .foregroundColor: ChartColorPalette.primary.carbTint])
@@ -649,11 +664,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
             // Pump Status
             hudView.pumpStatusHUD.presentStatusHighlight(self.deviceManager.pumpStatusHighlight)
+                self.updatePodReclaimCountdown()
             hudView.pumpStatusHUD.presentStatusBadge(self.deviceManager.pumpStatusBadge)
             hudView.pumpStatusHUD.lifecycleProgress = self.deviceManager.pumpLifecycleProgress
         }
 
         // Show/hide the table view rows
+        statusTableViewModel.isPodLoanedToWatch = deviceManager.isPodLoanedToWatch
         let statusRowMode = self.determineStatusRowMode()
 
         updateBannerAndHUDandStatusRows(statusRowMode: statusRowMode, newSize: currentContext.newSize, animated: animated)
@@ -736,6 +753,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case pumpSuspended(resuming: Bool)
         case onboardingSuspended
         case recommendManualGlucoseEntry
+        case podLoanedToWatch
 
         var hasRow: Bool {
             switch self {
@@ -767,7 +785,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
     private func determineStatusRowMode() -> StatusRowMode {
         let statusRowMode: StatusRowMode
 
-        if case .canceling = bolusState {
+        if deviceManager.isPodLoanedToWatch {
+            statusRowMode = .podLoanedToWatch
+        } else if case .canceling = bolusState {
             statusRowMode = .cancelingBolus
         } else if let canceledDose {
             statusRowMode = .canceledBolus(dose: canceledDose)
@@ -1147,6 +1167,42 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     let cell = tableView.dequeueReusableCell(withIdentifier: RecentGlucoseTableViewCell.className, for: indexPath) as! RecentGlucoseTableViewCell
                     cell.selectionStyle = .default
                     return cell
+                case .podLoanedToWatch:
+                    let cell = UITableViewCell()
+                    cell.backgroundColor = .secondarySystemBackground
+                    let subtitle: String
+                    if deviceManager.isPodTakeoverInProgress {
+                        subtitle = NSLocalizedString("Handing the pod to Apple Watch…", comment: "The subtitle of the banner while the watch is taking over the pod")
+                    } else if deviceManager.isPodLoanReclaiming {
+                        subtitle = NSLocalizedString("Reclaiming the pod…", comment: "The subtitle of the banner while the phone is reclaiming the pod")
+                    } else {
+                        subtitle = NSLocalizedString("Apple Watch is controlling the pod. Tap to reclaim.", comment: "The subtitle of the banner indicating the pod is controlled by the watch")
+                    }
+                    cell.contentConfiguration = UIHostingConfiguration {
+                        HStack {
+                            Text(Image(systemName: "applewatch")).font(.title) + Text(" ")
+
+                            VStack(alignment: .leading) {
+                                Text(NSLocalizedString("Sport Mode Active", comment: "The title of the banner indicating the pod is controlled by the watch"))
+                                    .font(.headline.bold())
+
+                                Text(subtitle)
+                                    .font(.subheadline)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+
+                            Spacer()
+
+                            Text(Image(systemName: "chevron.right"))
+                                .font(.headline)
+                        }
+                        .foregroundStyle(Color.black.opacity(0.85))
+                        .padding(8)
+                        .background(Color.warning.cornerRadius(10))
+                        .padding([.top, .horizontal], 8)
+                    }
+                    .margins(.all, 0)
+                    return cell
                 }
             }
         }
@@ -1339,6 +1395,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     onboardingManager.resume()
                 case .recommendManualGlucoseEntry:
                     presentBolusEntryView(enableManualGlucoseEntry: true)
+                case .podLoanedToWatch:
+                    if deviceManager.isPodLoanReclaiming {
+                        presentPodSettlingNotice()
+                    } else {
+                        presentPodLoanReclaimPrompt()
+                    }
                 default:
                     break
                 }
@@ -1706,6 +1768,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             // when HUD view is initialized, update loop completion HUD (e.g., icon and last loop completed)
             hudView.loopCompletionHUD.stateColors = .loopStatus
             hudView.loopCompletionHUD.loopIconClosed = settingsManager.dosingEnabled
+            hudView.loopCompletionHUD.loopRunsElsewhere = deviceManager.isPodLoanedToWatch
             hudView.loopCompletionHUD.lastLoopCompleted = loopManager.lastLoopCompleted
             hudView.loopCompletionHUD.mostRecentGlucoseDataDate = loopManager.mostRecentGlucoseDataDate
             hudView.loopCompletionHUD.mostRecentPumpDataDate = loopManager.mostRecentPumpDataDate
@@ -1736,6 +1799,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 pumpManagerHUDProvider.visible = active && onscreen
             }
             hudView.pumpStatusHUD.presentStatusHighlight(deviceManager.pumpStatusHighlight)
+            // Loan transitions arrive here, not at the periodic HUD update.
+            updatePodReclaimCountdown()
             hudView.pumpStatusHUD.lifecycleProgress = deviceManager.pumpLifecycleProgress
         }
     }
@@ -1804,9 +1869,39 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     @objc private func pumpStatusTapped(_ sender: UIGestureRecognizer) {
+        // The pod is on the watch: offer the reclaim instead of pump settings.
+        if deviceManager.isPodLoanedToWatch {
+            presentPodLoanReclaimPrompt()
+            return
+        }
+        if deviceManager.isPodLoanReclaiming {
+            presentPodSettlingNotice()
+            return
+        }
         if let pumpStatusView = sender.view as? PumpStatusHUDView {
             executeHUDTapAction(deviceManager.didTapOnPumpStatus(pumpStatusView.pumpManagerProvidedHUD), from: sender.view)
         }
+    }
+
+    private func presentPodLoanReclaimPrompt() {
+        let alert = UIAlertController(
+            title: NSLocalizedString("Pod Is on the Watch", comment: "Title of the reclaim prompt when tapping the pump tile during a loan"),
+            message: NSLocalizedString("Reclaim the pod to this phone? The watch's Sport Mode session will end and its records will be collected.", comment: "Message of the reclaim prompt"),
+            preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Reclaim Now", comment: "Button to reclaim the pod from the watch"), style: .default) { [weak self] _ in
+            self?.deviceManager.reclaimPodLoanFromWatch()
+        })
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Cancel the reclaim prompt"), style: .cancel))
+        present(alert, animated: true)
+    }
+
+    private func presentPodSettlingNotice() {
+        let alert = UIAlertController(
+            title: NSLocalizedString("Finishing Pod Handover", comment: "Title shown when the phone owns the pod but its connection is not re-established"),
+            message: NSLocalizedString("Sport Mode has ended and this phone is back in control, but it is still reconnecting to the pod. Try again in a moment.", comment: "Message shown while the phone is re-establishing the pod connection after a reclaim"),
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Dismiss the pod-settling notice"), style: .default))
+        present(alert, animated: true)
     }
 
     @objc private func cgmStatusTapped( _ sender: UIGestureRecognizer) {
@@ -1901,6 +1996,42 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
         }
         lastOrientation = UIDevice.current.orientation
+    }
+
+    // MARK: - Pod reclaim countdown
+
+    private var podReclaimCountdownTimer: Timer?
+    private let podReclaimCountdownInterval = TimeInterval(0.5)
+
+    /// Re-presents the tile each second during a reclaim; its elapsed text does not advance on
+    /// its own.
+    private func updatePodReclaimCountdown() {
+        if deviceManager.isPodLoanReclaiming || deviceManager.isPodTakeoverInProgress {
+            startPodReclaimCountdown()
+        } else {
+            stopPodReclaimCountdown()
+        }
+    }
+
+    private func startPodReclaimCountdown() {
+        guard podReclaimCountdownTimer == nil else { return }
+        podReclaimCountdownTimer = Timer.scheduledTimer(withTimeInterval: podReclaimCountdownInterval, repeats: true) { [weak self] timer in
+            // Retire the timer once self is gone.
+            guard let self = self else { timer.invalidate(); return }
+            guard let hudView = self.hudView else { self.stopPodReclaimCountdown(); return }
+            // Rebuild the label each tick.
+            hudView.pumpStatusHUD.presentStatusHighlight(self.deviceManager.pumpStatusHighlight)
+            // Reclaim progress rides the tile's lifecycle progress.
+            hudView.pumpStatusHUD.lifecycleProgress = self.deviceManager.pumpLifecycleProgress
+            if !self.deviceManager.isPodLoanReclaiming, !self.deviceManager.isPodTakeoverInProgress {
+                self.stopPodReclaimCountdown()
+            }
+        }
+    }
+
+    private func stopPodReclaimCountdown() {
+        podReclaimCountdownTimer?.invalidate()
+        podReclaimCountdownTimer = nil
     }
 
     private func presentDebugMenu() {

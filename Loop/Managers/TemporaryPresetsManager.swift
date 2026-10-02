@@ -360,7 +360,7 @@ class TemporaryPresetsManager {
         NotificationCenter.default.post(name: .LoopDataUpdated,
             object: self,
             userInfo: [
-                LoopDataManager.LoopUpdateContextKey: context.rawValue
+                LoopUpdateContext.notificationKey: context.rawValue
             ]
         )
     }
@@ -469,11 +469,13 @@ class TemporaryPresetsManager {
 
 }
 
+#if os(iOS)
 extension TemporaryPresetsManager {
     static var placeholder: TemporaryPresetsManager {
         .init(settingsProvider: SettingsManager.placeholder)
     }
 }
+#endif
 
 extension TemporaryPresetsManager : AlertResponder {
     func acknowledgeAlert(alertIdentifier: Alert.AlertIdentifier) async throws {

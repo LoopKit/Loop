@@ -44,6 +44,15 @@ extension DeviceDataManager {
             return DeviceDataManager.resumeOnboardingStatusHighlight
         } else if pumpManager == nil {
             return DeviceDataManager.addPumpStatusHighlight
+        } else if isPodLoanReclaiming {
+            // Hand-back in flight; the label follows the reclaim's phase.
+            return DeviceDataManager.podReclaimingStatusHighlight(phase: podReclaimProgress?.phase)
+        } else if isPodTakeoverInProgress {
+            // Grant out, not yet confirmed. Must precede the next branch: the link is already released.
+            return DeviceDataManager.podHandingOverStatusHighlight
+        } else if (pumpManager as? ExclusiveDeviceControl)?.isControlReleased == true || isPodLoanedToWatch {
+            // On the watch: switch the tile at release rather than waiting for signal loss.
+            return DeviceDataManager.podOnWatchStatusHighlight
         } else {
             return (pumpManager as? PumpManagerUI)?.pumpStatusHighlight
         }
@@ -54,6 +63,7 @@ extension DeviceDataManager {
     }
 
     var pumpLifecycleProgress: DeviceLifecycleProgress? {
+        if let podLoanProgress = podLoanLifecycleProgress { return podLoanProgress }
         return (pumpManager as? PumpManagerUI)?.pumpLifecycleProgress
     }
     

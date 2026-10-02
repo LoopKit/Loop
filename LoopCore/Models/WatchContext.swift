@@ -40,6 +40,9 @@ public final class WatchContext: RawRepresentable {
     public var glucoseSyncIdentifier: String?
 
     public var predictedGlucose: WatchPredictedGlucose?
+
+    /// True only for a context the watch built during a loan; not encoded, so a relayed copy reads false.
+    public var isWatchAuthored: Bool = false
     public var eventualGlucose: LoopQuantity? {
         return predictedGlucose?.values.last?.quantity
     }
@@ -60,6 +63,9 @@ public final class WatchContext: RawRepresentable {
     public var batteryPercentage: Double?
 
     public var cgmManagerState: CGMManager.RawStateValue?
+
+    /// The CGM's `SharedDeviceConfiguration`, for a watch that reads the sensor itself.
+    public var cgmConfiguration: SharedDeviceConfiguration.RawValue?
 
     public var isClosedLoop: Bool?
     public var deviceIssue: Bool?
@@ -178,6 +184,7 @@ public final class WatchContext: RawRepresentable {
         cob = rawValue["cob"] as? Double
 
         cgmManagerState = rawValue["cgmManagerState"] as? CGMManager.RawStateValue
+        cgmConfiguration = rawValue["cgmConfiguration"] as? SharedDeviceConfiguration.RawValue
 
         if let rawValue = rawValue["pg"] as? WatchPredictedGlucose.RawValue {
             predictedGlucose = WatchPredictedGlucose(rawValue: rawValue)
@@ -198,6 +205,7 @@ public final class WatchContext: RawRepresentable {
         raw["oc"] = isOnboardingCompleted
 
         raw["cgmManagerState"] = cgmManagerState
+        raw["cgmConfiguration"] = cgmConfiguration
 
         raw["cob"] = cob
 
