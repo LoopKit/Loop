@@ -135,7 +135,7 @@ final class OverrideHistoryTests: XCTestCase {
         manager.overrideHistory.recordOverride(halfNeeds(start: now.addingTimeInterval(-.hours(7)), duration: .hours(2)))
 
         // After the entry is made: an entry created after the base time is filtered, as in stock.
-        let input = try await manager.fetchAlgorithmInput(at: Date(), recommendationType: .tempBasal)
+        let input = try await manager.fetchData(for: Date())
 
         XCTAssertEqual(input.carbEntries.count, 1, "the 6-hour-old carb is in the input")
         let isfStart = try XCTUnwrap(input.sensitivity.first?.startDate)
@@ -160,7 +160,7 @@ final class OverrideHistoryTests: XCTestCase {
         manager.scheduleOverride = halfNeeds(start: now.addingTimeInterval(-.minutes(90)), duration: .hours(1))
 
         _ = manager.basalRateScheduleApplyingOverrideHistory   // what every glance and HUD refresh reads
-        let input = try await manager.fetchAlgorithmInput(at: Date(), recommendationType: .tempBasal)
+        let input = try await manager.fetchData(for: Date())
 
         let during = now.addingTimeInterval(-.minutes(60))
         XCTAssertEqual(try XCTUnwrap(value(input.basal, at: during)), 0.5, accuracy: 0.001, "basal halved for its minutes")
@@ -213,7 +213,7 @@ final class OverrideHistoryTests: XCTestCase {
         // The cycle reads that same history (the intake's teardown reset this loop's book).
         let loop = await makeManager(overrideHistory: history)
         await seedGlucose(loop, hours: 3)
-        let input = try await loop.fetchAlgorithmInput(at: Date(), recommendationType: .tempBasal)
+        let input = try await loop.fetchData(for: Date())
         let during = now.addingTimeInterval(-.hours(3))
         XCTAssertEqual(try XCTUnwrap(value(input.basal, at: during)), 0.5, accuracy: 0.001, "basal halved for its minutes")
         XCTAssertEqual(try XCTUnwrap(sensitivity(input, at: during)), 100, accuracy: 0.001, "ISF doubled")
@@ -298,7 +298,7 @@ final class OverrideHistoryTests: XCTestCase {
 
         await seedGlucose(c.loopManager, hours: 3)
         try await c.loopManager.recordPumpEvents([], lastReconciliation: Date(), replacePendingEvents: true)
-        let input = try await c.loopManager.fetchAlgorithmInput(at: Date(), recommendationType: .tempBasal)
+        let input = try await c.loopManager.fetchData(for: Date())
         XCTAssertEqual(try XCTUnwrap(value(input.basal, at: before)), 0.8, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(sensitivity(input, at: before)), 40, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(value(input.carbRatio, at: before)), 8, accuracy: 0.001)

@@ -38,45 +38,7 @@ extension WatchLoopManager {
         SportLog.event("book", "insulin book reset — \(reason)")
     }
 
-    /// IOB from the book, against the override-applied schedule; takes the larger grid neighbour.
-    /// nil only when there is no basal schedule.
-    func insulinOnBoardFromStore(at date: Date) -> Double? {
-        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
-        guard let basal = basalRateScheduleApplyingOverrideHistory else { return nil }
-        let longest = doseStore.longestEffectDuration
-        guard let doses = try? runBlocking({
-            try await self.doseStore.getNormalizedDoseEntries(start: date.addingTimeInterval(-longest), end: nil)
-        }) else { return nil }
-        if doses.isEmpty { return 0 }
-        let window = (start: doses.map(\.startDate).min() ?? date,
-                      end: (doses.map(\.endDate).max() ?? date).addingTimeInterval(longest))
-        let basalTimeline = BasalRateSchedule.generateTimeline(
-            schedules: [(date: .distantPast, schedule: basal)],
-            startDate: window.start,
-            endDate: window.end)
-        let timeline = doses
-            .map { $0.simpleDose(with: insulinModel(for: $0.insulinType)) }
-            .annotated(with: basalTimeline)
-            .insulinOnBoardTimeline(longestEffectDuration: longest,
-                                    from: date.addingTimeInterval(-.minutes(5)),
-                                    to: date.addingTimeInterval(.minutes(5)))
-        let before = timeline.last(where: { $0.startDate <= date })?.value
-        let after = timeline.first(where: { $0.startDate >= date })?.value
-        return max(before ?? 0, after ?? 0)
-    }
-
-    /// Publish an IOB from the book before any cycle has run, so the glance shows the loan's
-    /// inherited insulin from the moment of takeover rather than a dash.
-    func primeIOBFromStore(at date: Date, _ completion: @escaping (Double?) -> Void) {
-        dataAccessQueue.async {
-            let iob = self.insulinOnBoardFromStore(at: date)
-            if let iob { self.activeInsulin = iob }
-            completion(iob)
-        }
-    }
-
-    /// Queue hop only; the contract is `manualBolusRecommendationOnQueue`, including the fact
-    /// that running it REPUBLISHES the displayed prediction, IOB and COB.
+    /// Queue hop only; the contract is `manualBolusRecommendationOnQueue`.
     func recommendManualBolus(potentialCarbEntry: NewCarbEntry? = nil,
                               completion: @escaping (Swift.Result<ManualBolusRecommendation, Error>) -> Void) {
         dataAccessQueue.async {
@@ -84,50 +46,69 @@ extension WatchLoopManager {
         }
     }
 
-    /// Stock `recommendManualBolus`, except: it republishes the display values, rounds to a
-    /// deliverable volume, appends the carb entry by hand, and applies the recency gate and trim.
-    func manualBolusRecommendationOnQueue(potentialCarbEntry: NewCarbEntry? = nil) -> Swift.Result<ManualBolusRecommendation, Error> {
+    /// Stock `LoopDataManager.recommendManualBolus`: `fetchData(for: now)` with the active preset
+    /// presumed ending now when asked or when a pre-meal preset meets a carb entry, NO trim (a
+    /// running temp is credited through its scheduled end, since the bolus goes on top of a temp
+    /// that keeps running), the potential carb entry added, `.manualBolus`. It stores nothing:
+    /// no displayed value changes. Differences from stock: no manual glucose sample or edited
+    /// original entry (the wrist has no UI for either); a nil recommendation is an error rather
+    /// than nil; the amount is rounded by the pump manager when one is held, as in stock.
+    func manualBolusRecommendationOnQueue(potentialCarbEntry: NewCarbEntry? = nil,
+                                          truncatingActiveOverride: Bool = false) -> Swift.Result<ManualBolusRecommendation, Error> {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
-        var result: Swift.Result<ManualBolusRecommendation, Error>!
-        let completion: (Swift.Result<ManualBolusRecommendation, Error>) -> Void = { result = $0 }
+
         do {
-                var input = try self.runBlocking {
-                    try await self.fetchAlgorithmInput(at: self.now(), recommendationType: .manualBolus)
+            let input = try manualBolusInput(potentialCarbEntry: potentialCarbEntry,
+                                             truncatingActiveOverride: truncatingActiveOverride)
+
+            let output = LoopAlgorithm.run(input: input)
+
+            switch output.recommendationResult {
+            case .success(let prediction):
+                guard var manualBolusRecommendation = prediction.manual else {
+                    return .failure(WatchLoopError.missingDataError("no manual bolus recommendation"))
                 }
-
-                if let potentialCarbEntry {
-                    input.carbEntries += [StoredCarbEntry(
-                        startDate: potentialCarbEntry.startDate,
-                        quantity: potentialCarbEntry.quantity,
-                        foodType: potentialCarbEntry.foodType,
-                        absorptionTime: potentialCarbEntry.absorptionTime)]
+                if let pump = self.pumpManager {
+                    manualBolusRecommendation.amount = pump.roundToSupportedBolusVolume(units: manualBolusRecommendation.amount)
                 }
-
-                let output = LoopAlgorithm.run(input: input)
-
-                self.predictedGlucose = output.predictedGlucose
-                self.activeInsulin = output.activeInsulin
-                self.activeCarbs = output.activeCarbs
-                self.lastAlgorithmEffects = output.effects
-
-                switch output.recommendationResult {
-                case .failure(let error):
-                    throw error
-                case .success(let recommendation):
-                    guard var manual = recommendation.manual else {
-                        throw WatchLoopError.missingDataError("no manual bolus recommendation")
-                    }
-
-                    if let pump = self.pumpManager {
-                        manual.amount = pump.roundToSupportedBolusVolume(units: manual.amount)
-                    }
-                    completion(.success(manual))
-                }
+                return .success(manualBolusRecommendation)
+            case .failure(let error):
+                return .failure(error)
+            }
         } catch {
-            completion(.failure(error))
+            return .failure(error)
         }
-        return result
     }
+
+    /// The input of stock's `recommendManualBolus`, up to the run (separate so the suite can read it).
+    func manualBolusInput(potentialCarbEntry: NewCarbEntry? = nil,
+                          truncatingActiveOverride: Bool = false) throws -> StoredDataAlgorithmInput {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+
+        var endingPremealOverride = false
+
+        // Watch: stock's `temporaryPresetsManager.activeOverride`.
+        if potentialCarbEntry != nil,
+           let activeOverride = scheduleOverride, activeOverride.isActive(at: now()),
+           activeOverride.context == .preMeal
+        {
+            endingPremealOverride = true
+        }
+
+        var input = try runBlocking {
+            try await self.fetchData(for: self.now(), presumePresetEndingNow: truncatingActiveOverride || endingPremealOverride)
+        }
+        .addingCarbEntry(carbEntry: potentialCarbEntry?.asStoredCarbEntry)
+
+        input.includePositiveVelocityAndRC = usePositiveMomentumAndRCForManualBoluses
+        input.recommendationType = .manualBolus
+        return input
+    }
+
+    /// Stock's `LoopDataManager.usePositiveMomentumAndRCForManualBoluses`. Stock's app never
+    /// passes `FeatureFlags.usePositiveMomentumAndRCForManualBoluses` to it, so the init default
+    /// (`true`) is what the phone runs; the watch matches that.
+    var usePositiveMomentumAndRCForManualBoluses: Bool { true }
 
     /// Straight to `pumpManager.enactBolus`, capped at the grant's `maximumBolus`. Skips stock's
     /// `DeviceDataManager.enact` wrapper and its uncertain-delivery and suspend checks.
@@ -223,8 +204,10 @@ extension WatchLoopManager {
         }
     }
 
-    /// Stock's `DeviceDataManager.enact` plus `loop()`'s gates, minus `pumpInoperable` and
-    /// `manualTempBasalRunning`. Failures must be `.enactFailed`, never `.missingDataError`.
+    /// Stock's `DeviceDataManager.enact` plus `loop()`'s gates before it, in stock's order:
+    /// pump inoperable, suspended, manual temp basal running. One deliberate watch difference: a
+    /// recommendation older than five minutes is refused. Failures must be enact refusals or
+    /// `.enactFailed`, never `.missingDataError`.
     func enactRecommendedAutomaticDose() -> WatchLoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
@@ -242,10 +225,20 @@ extension WatchLoopManager {
             return .pumpManagerUnconnected
         }
 
-        // A suspended pod is a deliberate user state, not a fault: refuse quietly and let the
-        // cycle report it, rather than sending a temp that would resume delivery.
-        if case .suspended = pumpManager.status.basalDeliveryState {
+        // Stock `DeviceDataManager.isPumpInoperable`: a nil delivery state counts.
+        guard let basalDeliveryState = pumpManager.status.basalDeliveryState,
+              basalDeliveryState != .pumpInoperable else {
+            return .pumpInoperable
+        }
+
+        // Stock `isSuspended`. A suspended pod is a deliberate user state, not a fault.
+        if basalDeliveryState.isSuspended {
             return .pumpSuspended
+        }
+
+        // Stock `isManualTempBasalRunning`: the user's temp is left alone.
+        if case .tempBasal(let dose) = basalDeliveryState, dose.automatic == false, dose.endDate > now() {
+            return .manualTempBasalRunning
         }
 
         // Unacknowledged last command: OmnipodKit resolves it next session; don't guess.
@@ -289,5 +282,28 @@ extension WatchLoopManager {
         }
 
         return enactError
+    }
+}
+
+/// Labelled copies of stock's helpers (`Loop/Managers/LoopDataManager.swift`, phone-only).
+extension NewCarbEntry {
+    var asStoredCarbEntry: StoredCarbEntry {
+        StoredCarbEntry(
+            startDate: startDate,
+            quantity: quantity,
+            foodType: foodType,
+            absorptionTime: absorptionTime,
+            userCreatedDate: date
+        )
+    }
+}
+
+extension StoredDataAlgorithmInput {
+    func addingCarbEntry(carbEntry: CarbType?) -> StoredDataAlgorithmInput {
+        var rval = self
+        if let carbEntry {
+            rval.carbEntries = carbEntries + [carbEntry]
+        }
+        return rval
     }
 }

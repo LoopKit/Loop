@@ -110,11 +110,11 @@ final class InsulinBookTests: XCTestCase {
         wait(for: [done], timeout: seconds + 5)
     }
 
-    /// The IOB the algorithm dosed with (`predictionBreakdown.iobUnits`), not the glance's.
+    /// The IOB the automatic loop dosed with (its own run), not the glance's display run.
     private func dosingIOB(_ manager: WatchLoopManager) -> Double? {
-        manager.refreshPredictionForGlance()
+        manager.loop()
         settle()
-        return manager.glanceData().predictionBreakdown?.iobUnits
+        return manager.glanceData().dosingIOB
     }
 
     // MARK: -
@@ -177,18 +177,19 @@ final class InsulinBookTests: XCTestCase {
                           "taking \(firstAmount) U must reduce the next recommendation; an unchanged figure is the stacking path")
     }
 
-    /// The displayed and dosing IOB are the same number.
+    /// With no temp running the display run and the loop run read the same book the same way,
+    /// so the glance's IOB is the IOB the loop dosed on.
     func testTheDisplayedIOBAndTheDosingIOBAreTheSameNumber() async {
         let manager = await makeManager()
         await seedGlucose(manager)
         await seed(manager, [bolus(2.0, minutesAgo: 3)])
         await report(manager)
 
-        manager.refreshPredictionForGlance()
+        manager.loop()
         settle()
         let data = manager.glanceData()
 
-        guard let shown = data.iob, let dosed = data.predictionBreakdown?.iobUnits else {
+        guard let shown = data.iob, let dosed = data.dosingIOB else {
             return XCTFail("both IOB figures must exist before they can be compared")
         }
         XCTAssertEqual(shown, dosed, accuracy: 0.05,
@@ -259,20 +260,20 @@ final class InsulinBookTests: XCTestCase {
                           "halving insulin needs doubles ISF, so the correction must fall well below \(baseline) U; got \(overridden) U — an unchanged figure means the override reached the display and not the dosing")
     }
 
-    /// With no pump report the algorithm refuses rather than assuming zero IOB.
-    func testWithoutAPumpReportTheAlgorithmRefusesRatherThanAssumingZero() async {
+    /// With no pump report the automatic loop refuses rather than assuming zero IOB (stock's
+    /// `pumpDataTooOld`; stock's recommended bolus has no such check).
+    func testWithoutAPumpReportTheLoopRefusesRatherThanAssumingZero() async {
         let manager = await makeManager()
         await seedGlucose(manager)
         await seed(manager, [bolus(2.0, minutesAgo: 2)])
         // Deliberately no report — the pod has never spoken to this book.
 
-        let done = expectation(description: "recommendation attempted")
-        var failed = false
-        manager.recommendManualBolus { if case .failure = $0 { failed = true }; done.fulfill() }
-        wait(for: [done], timeout: 20)
+        manager.loop()
+        settle()
 
-        XCTAssertTrue(failed,
-                      "with no pump report the watch must refuse; returning a recommendation here would be a dose computed against a book the pod never wrote")
+        let error = manager.glanceData().lastLoopErrorText ?? ""
+        XCTAssertTrue(error.contains("pumpDataTooOld"),
+                      "with no pump report the loop must refuse; a temp here would be computed against a book the pod never wrote; got: \(error)")
     }
 
     /// The book is per loan: a reset empties it, and the next report starts a clean one.

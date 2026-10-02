@@ -49,10 +49,11 @@ extension PodLoanWatchController {
         SportLog.event("loan", String(format: "insulin book seeded from grant — %d finished record(s) under the phone's identities%@ · grossImpliedΣ=%.2fU",
                                        entries.count, liveNote, grossImpliedSum))
 
-        // Diagnostic only: the seeded IOB at takeover, to compare with the phone's.
-        loopManager.primeIOBFromStore(at: seedReconciliation) { iob in
-            guard let iob = iob else {
-                SportLog.event("loan", "SEED-IN IOB unavailable (no schedule yet)")
+        // The display run, so the glance shows the inherited insulin from takeover; its IOB is
+        // also logged to compare with the phone's.
+        loopManager.updateDisplayState { state in
+            guard let iob = state.activeInsulin?.value else {
+                SportLog.event("loan", "SEED-IN IOB unavailable (display run incomplete: no settings or no recent glucose yet)")
                 return
             }
             SportLog.event("loan", String(format: "SEED-IN IOB=%.2fU @ takeover (%d seeded doses: %d finished%@)",
@@ -168,6 +169,9 @@ extension PodLoanWatchController {
 
                 SportLog.event("glucose", "INGEST src=grant-seed stored=\(stored.count)/\(samples.count) · loan takeover warm-up")
                 SportLog.event("loan", "seeded \(stored.count) glucose sample\(stored.count == 1 ? "" : "s") from the phone (momentum/RC warm-up)")
+                // Rerun the display now the phone's glucose is in: the takeover's first display
+                // run may have found none.
+                self.loopManager.updateDisplayState()
             } catch {
                 os_log("Grant glucose ingest failed: %{public}@", log: OSLog(subsystem: "com.loopkit.Loop", category: "PodLoanWatchController"), type: .error, String(describing: error))
             }

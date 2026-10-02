@@ -18,8 +18,13 @@ extension WatchLoopManager {
 
     /// The per-cycle prediction line: each effect's forward difference from the latest glucose.
     /// `residualMgdl` is what the named effects do not explain; not zero by construction.
+    /// Describes the automatic loop's run (`loopRunState`), never the display run.
     func logPredictionBreakdown(decided: AutomaticDoseRecommendation? = nil) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+
+        let predictedGlucose = loopRunState.output?.predictedGlucose
+        let activeInsulin = loopRunState.output?.activeInsulin
+        let activeCarbs = loopRunState.output?.activeCarbs
 
         // `net` and `delta` are the same difference; keep them in step.
         func net(_ effects: [GlucoseEffect]?) -> String {
@@ -51,9 +56,10 @@ extension WatchLoopManager {
             else { return "—" }
             return String(format: "%.0f@%dm", m.quantity.doubleValue(for: mgdlU), Int(m.startDate.timeIntervalSince(now()) / 60))
         }()
-        let suspendThr = settings.suspendThreshold.map { String(format: "%.0f", $0.quantity.doubleValue(for: mgdlU)) } ?? "—"
+        // The run's own threshold: a very-high-insulin-needs override raises it.
+        let suspendThr = loopRunState.input?.suspendThreshold.map { String(format: "%.0f", $0.doubleValue(for: mgdlU)) } ?? "—"
 
-        let e = lastAlgorithmEffects
+        let e = loopRunState.output?.effects
 
         lastPredictionBreakdown = {
             func delta(_ effects: [GlucoseEffect]?) -> Double {
@@ -96,8 +102,12 @@ extension WatchLoopManager {
     }
 
     /// Column diff against the prediction the phone stamped into the grant, for 20 minutes.
+    /// The watch side is the automatic loop's run, as `[predict]`.
     func logPredictionDiffAgainstPhone(effects e: LoopAlgorithmEffects<StoredCarbEntry>?) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+        let predictedGlucose = loopRunState.output?.predictedGlucose
+        let activeInsulin = loopRunState.output?.activeInsulin
+        let activeCarbs = loopRunState.output?.activeCarbs
         guard let snap = phonePredictionSnapshotAtGrant else { return }
         let age = now().timeIntervalSince(snap.snapshotAt)
         guard age <= .minutes(20) else { return }

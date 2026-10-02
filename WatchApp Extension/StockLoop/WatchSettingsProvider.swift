@@ -12,7 +12,7 @@ import LoopAlgorithm
 import LoopCore
 import Observation
 
-/// Serves the grant's settings to `fetchAlgorithmInput` and the dose store's basal history.
+/// Serves the grant's settings to `WatchLoopManager.fetchData` and the dose store's basal history.
 @Observable
 final class WatchSettingsProvider {
     /// The granted snapshot, in the shape the rest of the settings machinery expects.
@@ -56,7 +56,7 @@ extension WatchSettingsProvider: SettingsProvider {
     /// The phone's flag; the wrist uses `WatchLoopManager.closedLoopEnabled`.
     var dosingEnabled: Bool { storedSettings.dosingEnabled }
 
-    /// Splits at midnight as stock does; `fetchAlgorithmInput` collapses same-rate runs.
+    /// Splits at midnight as stock does; `WatchLoopManager.fetchData` collapses same-rate runs.
     func getBasalHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<Double>] {
         guard let schedule = storedSettings.basalRateSchedule else { return [] }
         return Self.stitch(history?.basal, startDate, endDate) { start, end in
@@ -79,7 +79,7 @@ extension WatchSettingsProvider: SettingsProvider {
         return Self.stitch(past, startDate, endDate) { schedule.quantitiesBetween(start: $0, end: $1) }
     }
 
-    /// In the schedule's own unit; overrides are applied in `fetchAlgorithmInput`.
+    /// In the schedule's own unit; overrides are applied in `WatchLoopManager.fetchData`.
     func getTargetRangeHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<ClosedRange<LoopQuantity>>] {
         guard let schedule = storedSettings.glucoseTargetRangeSchedule else { return [] }
         let past = history?.targetRange.map {

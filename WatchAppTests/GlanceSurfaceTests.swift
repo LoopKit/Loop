@@ -94,17 +94,17 @@ final class GlanceSurfaceTests: XCTestCase {
 
     /// THE REGRESSION THIS FILE EXISTS FOR. The glance's eventual read a field nothing assigned,
     /// so the wrist showed no forecast for weeks while `[predict]` logged one every cycle.
-    func testGlanceCarriesAnEventualAfterAPredictionRefresh() async {
+    func testGlanceCarriesAnEventualAfterADisplayRun() async {
         let manager = await makeManager()
         await seedGlucose(manager)
         await seedBook(manager)
 
-        manager.refreshPredictionForGlance()
+        manager.updateDisplayState()
         settle()
 
         let data = manager.glanceData()
         XCTAssertNotNil(data.eventual,
-                        "the glance must carry the eventual the loop just computed — a nil here is the field that nothing assigns")
+                        "the glance must carry the eventual the display run just computed — a nil here is the field that nothing assigns")
     }
 
     /// The diagnostics reconciliation panel reads this; it said "no prediction to reconcile" on
@@ -114,7 +114,7 @@ final class GlanceSurfaceTests: XCTestCase {
         await seedGlucose(manager)
         await seedBook(manager)
 
-        manager.refreshPredictionForGlance()
+        manager.loop()
         settle()
 
         let data = manager.glanceData()
@@ -122,18 +122,18 @@ final class GlanceSurfaceTests: XCTestCase {
                         "the diagnostics panel must receive the decomposition the loop computed")
     }
 
-    /// The panel and the log must describe the SAME cycle: both read the same effects on the same
-    /// queue in the same pass, so the breakdown's eventual must equal the glance's eventual.
-    func testTheBreakdownAndTheGlanceAgreeOnTheSameCycle() async {
+    /// The panel's breakdown and its eventual row must describe the SAME run, the automatic loop's,
+    /// so the breakdown's eventual must equal the diagnostics eventual.
+    func testTheBreakdownAndTheDiagnosticsEventualAgreeOnTheSameCycle() async {
         let manager = await makeManager()
         await seedGlucose(manager)
         await seedBook(manager)
 
-        manager.refreshPredictionForGlance()
+        manager.loop()
         settle()
 
         let data = manager.glanceData()
-        guard let eventual = data.eventual?.doubleValue(for: .milligramsPerDeciliter),
+        guard let eventual = data.dosingEventual?.doubleValue(for: .milligramsPerDeciliter),
               let breakdown = data.predictionBreakdown else {
             return XCTFail("both surfaces must be populated before they can be compared")
         }

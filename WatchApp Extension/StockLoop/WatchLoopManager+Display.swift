@@ -54,7 +54,9 @@ extension WatchLoopManager {
             }
             let sources = self.lastGlucoseSourceStamps
 
-            let liveIOB: Double? = liveInsulinOnBoard
+            // The glance reads the display run, as stock's screens read `displayState`; the
+            // diagnostics page reads the automatic loop's run.
+            let loopOutput = loopRunState.output
             return GlanceData(
                 glucose: latest?.quantity,
                 glucoseDate: latest?.startDate,
@@ -63,8 +65,11 @@ extension WatchLoopManager {
                 sensorActivatedAt: (cgmManager as? G7CGMManager)?.sensorActivatedAt,
                 trend: (latest as? StoredGlucoseSample)?.trend,
 
-                eventual: predictedGlucose?.last?.quantity,
-                iob: liveIOB,
+                eventual: displayState.output?.predictedGlucose.last?.quantity,
+                iob: displayState.activeInsulin?.value,
+                dosingEventual: loopOutput?.predictedGlucose.last?.quantity,
+                dosingIOB: loopOutput?.activeInsulin,
+                dosingCOB: loopOutput?.activeCarbs,
                 tempRate: tempRate,
                 lastLoopCompleted: lastLoopCompleted,
                 suspendThreshold: settings.suspendThreshold?.quantity,
@@ -77,7 +82,7 @@ extension WatchLoopManager {
                 predictionBreakdown: lastPredictionBreakdown,
 
                 retrospectiveCorrectionIsIntegral: integralRetrospectiveCorrectionEnabled,
-                retrospectiveDiscrepancyCount: lastAlgorithmEffects?.retrospectiveGlucoseDiscrepancies.count ?? 0,
+                retrospectiveDiscrepancyCount: loopOutput?.effects.retrospectiveGlucoseDiscrepancies.count ?? 0,
                 // Only while the override is active.
                 overrideLabel: {
                     guard let o = scheduleOverride, o.isActive() else { return nil }
@@ -101,11 +106,10 @@ extension WatchLoopManager {
                 }())
     }
 
-    /// COB from the last algorithm run.
+    /// COB from the display run, as stock's `LoopDataManager.activeCarbs`.
     func glanceCarbsOnBoard(_ completion: @escaping (Double?) -> Void) {
         dataAccessQueue.async { [weak self] in
-
-            completion(self?.activeCarbs)
+            completion(self?.displayState.activeCarbs?.value)
         }
     }
 
@@ -130,7 +134,10 @@ extension WatchLoopManager {
         }
     }
 
-    /// The watch-authored context for the stock pages, only while a pod is held.
+    /// The watch-authored context for the stock pages, only while a pod is held. As stock's
+    /// `WatchDataManager.createWatchContext`: IOB, COB and the prediction come from the display
+    /// run (`displayState`), and the recommended bolus from its own manual-bolus run, which
+    /// changes nothing displayed.
     func publishHUDContext() {
         guard pumpManager != nil else { return }
         let ctx = WatchContext()
@@ -139,13 +146,20 @@ extension WatchLoopManager {
         // The wrist holding the pod asserts onboarding; the phone may be off.
         ctx.isOnboardingCompleted = true
 
-        ctx.predictedGlucose = predictedGlucose.flatMap { WatchPredictedGlucose(values: $0) }
+        let (_, algoOutput) = displayState.asTuple
+        if let predictedGlucose = algoOutput?.predictedGlucose {
+            // Drop the first element in predictedGlucose because it is the current glucose
+            let filteredPredictedGlucose = predictedGlucose.dropFirst()
+            if filteredPredictedGlucose.count > 0 {
+                ctx.predictedGlucose = WatchPredictedGlucose(values: Array(filteredPredictedGlucose))
+            }
+        }
         let latest = glucoseStore.latestGlucose
         ctx.glucose = latest?.quantity
         ctx.glucoseDate = latest?.startDate
         ctx.glucoseTrend = (latest as? StoredGlucoseSample)?.trend
 
-        ctx.iob = liveInsulinOnBoard
+        ctx.iob = displayState.activeInsulin?.value
         ctx.loopLastRunDate = lastLoopCompleted
         ctx.isClosedLoop = _closedLoopEnabled
         // Net against the override-applied schedule.
@@ -159,14 +173,13 @@ extension WatchLoopManager {
         }
 
         do {
-            if let cob = activeCarbs {
+            if let cob = displayState.activeCarbs?.value {
                 ctx.cob = cob
 
                 if cob > 0.05 { SportLog.event("loop", String(format: "COB %.1f g on board", cob)) }
             }
 
             // Fill the recommendation before installing the context: the stock flow reads nil as zero.
-            // This runs a full manual-bolus algorithm pass (see `manualBolusRecommendationOnQueue`).
             switch self.manualBolusRecommendationOnQueue() {
             case .success(let recommendation):
 

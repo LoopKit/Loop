@@ -31,7 +31,11 @@ enum WatchLoopError: Error {
     /// Not stock: the recommendation is older than the enact path will act on.
     case recommendationExpired(date: Date)
 
+    /// Enact refusals, as stock `loop()` refuses: a faulted pod, a suspended pod, and a manual
+    /// temp basal the user is running (left alone).
+    case pumpInoperable
     case pumpSuspended
+    case manualTempBasalRunning
 
     /// No pod on this watch. The ordinary answer between loans, not a fault.
     case pumpManagerUnconnected
@@ -50,8 +54,12 @@ extension WatchLoopError: LocalizedError {
             return String(format: NSLocalizedString("The pod did not accept the dose: %@", comment: "Watch loop error (1: pump error)"), why)
         case .recommendationExpired:
             return NSLocalizedString("The recommendation expired before enacting.", comment: "Watch loop error")
+        case .pumpInoperable:
+            return NSLocalizedString("The pod is not operable.", comment: "Watch loop error")
         case .pumpSuspended:
             return NSLocalizedString("Insulin delivery is suspended.", comment: "Watch loop error")
+        case .manualTempBasalRunning:
+            return NSLocalizedString("A manual temp basal is running.", comment: "Watch loop error")
         case .pumpManagerUnconnected:
             return NSLocalizedString("No pod connected to the watch.", comment: "Watch loop error")
         }
@@ -368,9 +376,14 @@ final class WatchLoopManager {
         /// by design, and without this the silence hint cannot tell that from a parked radio.
         let sensorActivatedAt: Date?
         let trend: GlucoseTrend?
+        /// The display run's (stock's `displayState`), as is `iob`; the glance shows these.
         let eventual: LoopQuantity?
-        /// From the book; may differ from `predictionBreakdown.iobUnits`, which is as of the last run.
         let iob: Double?
+
+        /// The automatic loop's last run; the diagnostics page shows these.
+        let dosingEventual: LoopQuantity?
+        let dosingIOB: Double?
+        let dosingCOB: Double?
 
         let tempRate: Double?
         let lastLoopCompleted: Date?
@@ -543,27 +556,24 @@ final class WatchLoopManager {
         }
     }
 
-    /// IOB for display: the book first, the last algorithm run only as a fallback. The book
-    /// answers even before a cycle has run, which is what fills the number in at takeover.
-    var liveInsulinOnBoard: Double? {
-        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
-        return insulinOnBoardFromStore(at: now()) ?? activeInsulin
-    }
-
     /// Queue-owned; `isIntegralRetrospectiveCorrectionEnabled` is the safe way to read it.
     var integralRetrospectiveCorrectionEnabled = false
 
     /// Stock glucose alerts, built from the phone's settings for a loan; nil between loans.
     @MainActor var glucoseAlerts: GlucoseAlertManager?
 
-    // MARK: - Last algorithm run
-    // Written by both the temp-basal and manual-bolus runs; `dataAccessQueue`-owned.
+    // MARK: - Algorithm runs
+    // Stock runs the algorithm three ways, each fed differently, and only the display run is
+    // kept for screens. Each run's result is stored under its own name so no run can overwrite
+    // another's values; the manual-bolus run stores nothing. `dataAccessQueue`-owned.
 
-    var predictedGlucose: [PredictedGlucoseValue]?
+    /// Stock's `displayState`: the display run (`updateDisplayState`). The glance's IOB, eventual
+    /// and COB, the stock pages' context and the complication read it; nothing doses from it.
+    var displayState = AlgorithmDisplayState()
 
-    var activeInsulin: Double?
-    var activeCarbs: Double?
-    var lastAlgorithmEffects: LoopAlgorithmEffects<StoredCarbEntry>?
+    /// The automatic loop's last run (input and output). Stock keeps this run local to `loop()`;
+    /// the watch keeps it for the diagnostics page, the prediction breakdown and `[predict]`.
+    var loopRunState = AlgorithmDisplayState()
 
     var lastPredictionBreakdown: PredictionBreakdown?
 
@@ -606,8 +616,8 @@ final class WatchLoopManager {
     /// milliseconds of each other are not each re-examined against an uncommitted store.
     var lastPhoneFallbackSyncId: String?
 
-    /// A labelled copy of stock's `DoseEnactor`; see that file.
-    let doseEnactor = WatchDoseEnactor()
+    /// A labelled copy of stock's `DoseEnactor`; see that file. A `var` so tests can observe it.
+    var doseEnactor = WatchDoseEnactor()
 
     /// Say "idle, no pod" once per idle stretch instead of once per reading.
     var loggedIdleNoPump = false
@@ -666,5 +676,30 @@ struct WatchLoopState: RawRepresentable {
         raw["lastLoopCompleted"] = lastLoopCompleted
         raw["overrideEvents"] = overrideEvents
         return raw
+    }
+}
+
+/// A labelled copy of stock's `AlgorithmDisplayState` (`Loop/Managers/LoopDataManager.swift`,
+/// phone-only): one algorithm run's input and output.
+struct AlgorithmDisplayState {
+    var input: StoredDataAlgorithmInput?
+    var output: AlgorithmOutput<StoredCarbEntry>?
+
+    var activeInsulin: InsulinValue? {
+        guard let input, let value = output?.activeInsulin else {
+            return nil
+        }
+        return InsulinValue(startDate: input.predictionStart, value: value)
+    }
+
+    var activeCarbs: CarbValue? {
+        guard let input, let value = output?.activeCarbs else {
+            return nil
+        }
+        return CarbValue(startDate: input.predictionStart, value: value)
+    }
+
+    var asTuple: (algoInput: StoredDataAlgorithmInput?, algoOutput: AlgorithmOutput<StoredCarbEntry>?) {
+        return (algoInput: input, algoOutput: output)
     }
 }

@@ -351,7 +351,23 @@ final class WakeResumeTests: XCTestCase {
         let c = await makeController()
         var settings = LoopSettings()
         settings.basalRateSchedule = flatSchedule
+        // The rest of a grant's settings, and glucose: IOB is read from the display run, as stock's.
+        settings.insulinSensitivitySchedule = InsulinSensitivitySchedule(
+            unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 50)])
+        settings.carbRatioSchedule = CarbRatioSchedule(unit: .gram, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 10)])
+        settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(
+            unit: .milligramsPerDeciliter,
+            dailyItems: [RepeatingScheduleValue(startTime: 0, value: DoubleRange(minValue: 100, maxValue: 110))])
+        settings.maximumBolus = 10
+        settings.maximumBasalRatePerHour = 4
+        settings.suspendThreshold = GlucoseThreshold(unit: .milligramsPerDeciliter, value: 80)
         c.loopManager.settings = settings
+        _ = try? await c.loopManager.glucoseStore.addGlucoseSamples((0..<6).map { i in
+            NewGlucoseSample(date: Date().addingTimeInterval(-Double(i) * 5 * 60),
+                             quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 120),
+                             condition: nil, trend: .flat, trendRate: nil, isDisplayOnly: false,
+                             wasUserEntered: false, syncIdentifier: "booked-\(i)")
+        })
         let copyAt = Date().addingTimeInterval(-.minutes(10))
         c.queue.sync {
             c.takeoverCopyTotal = (10.0, copyAt)
@@ -359,7 +375,7 @@ final class WakeResumeTests: XCTestCase {
             c.bookInsulinTheCopyCannotExplain(podTotal: 16.2, pulseUnits: 0.05, epoch: 7)   // 0.2 U of basal, 6.0 U nobody recorded
         }
         let iob: Double? = await withCheckedContinuation { done in
-            c.loopManager.primeIOBFromStore(at: Date().addingTimeInterval(.minutes(1))) { done.resume(returning: $0) }
+            c.loopManager.updateDisplayState { done.resume(returning: $0.activeInsulin?.value) }
         }
         XCTAssertEqual(iob ?? 0, 6.0, accuracy: 0.5, "six units, a minute old, are all still on board")
         XCTAssertNotNil(c.debugSnapshot().startNoteText, "and the wrist says so")

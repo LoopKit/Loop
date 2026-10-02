@@ -580,11 +580,17 @@ final class GlanceViewModel: ObservableObject {
         let age = data.glucoseDate.map { now.timeIntervalSince($0) }
         let isStale = age.map { $0 > displayStaleAge } ?? true
 
-        switch data.lastLoopCompleted.map({ LoopCompletionFreshness(age: now.timeIntervalSince($0)) }) {
-        case .fresh?: s.loopFreshness = .fresh
-        case .aging?: s.loopFreshness = .aging
-        case .stale?: s.loopFreshness = .stale
-        case nil:     s.loopFreshness = .unknown
+        // Stock `LoopCompletionHUDView`: open loop always presents fresh (device issues are shown
+        // elsewhere); closed loop ages from the last completed cycle.
+        if !data.closedLoopEnabled {
+            s.loopFreshness = .fresh
+        } else {
+            switch data.lastLoopCompleted.map({ LoopCompletionFreshness(age: now.timeIntervalSince($0)) }) {
+            case .fresh?: s.loopFreshness = .fresh
+            case .aging?: s.loopFreshness = .aging
+            case .stale?: s.loopFreshness = .stale
+            case nil:     s.loopFreshness = .unknown
+            }
         }
         if let quantity = data.glucose {
             let mgdl = quantity.doubleValue(for: .milligramsPerDeciliter)

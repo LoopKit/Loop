@@ -506,6 +506,7 @@
 		B66D1F3E2E6A5D6600471149 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B66D1F3D2E6A5D6600471149 /* Localizable.xcstrings */; };
 		BAF043BF0BC70EC99AE79F71 /* HealthAccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4854073AAE5C2CB97167F63 /* HealthAccessView.swift */; };
 		BB7CE081302D82A800A03F53 /* InsulinBookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7CE080302D82A800A03F53 /* InsulinBookTests.swift */; };
+		5C7A1E01302D82A800A03F53 /* StockRunsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7A1E00302D82A800A03F53 /* StockRunsTests.swift */; };
 		BC5C47547CCB49F9BA618108 /* StockLoopSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D15E99F644E4E50A306CA01 /* StockLoopSession.swift */; };
 		BDE04F37312A4F6C86EC7872 /* G7TimedConnectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E489814AB551420DA40399A4 /* G7TimedConnectTests.swift */; };
 		5E12EA730000000000000049 /* PodReturnsWithUnknownDeliveryStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E12EA740000000000000049 /* PodReturnsWithUnknownDeliveryStateTests.swift */; };
@@ -1446,6 +1447,7 @@
 		B6F22EF72E95A03800CCA05F /* hu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hu; path = hu.lproj/Intents.strings; sourceTree = "<group>"; };
 		B6F22EF92E95A03C00CCA05F /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Intents.strings; sourceTree = "<group>"; };
 		BB7CE080302D82A800A03F53 /* InsulinBookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinBookTests.swift; sourceTree = "<group>"; };
+		5C7A1E00302D82A800A03F53 /* StockRunsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockRunsTests.swift; sourceTree = "<group>"; };
 		BE577A60A96B49F3A608001B /* PodLoanPhoneController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PodLoanPhoneController.swift; path = Loop/Managers/PodLoanPhoneController.swift; sourceTree = SOURCE_ROOT; };
 		E90AACBD349B6B4DF8C52236 /* PodLoanPhoneController+Wiring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Wiring.swift"; path = "Loop/Managers/PodLoanPhoneController+Wiring.swift"; sourceTree = SOURCE_ROOT; };
 		5601535EB4FC12903ED69946 /* PodLoanPhoneController+Reconciliation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Reconciliation.swift"; path = "Loop/Managers/PodLoanPhoneController+Reconciliation.swift"; sourceTree = SOURCE_ROOT; };
@@ -2948,6 +2950,7 @@
 				9A7CE070302D82A800A03F53 /* RecordingWristAlertScheduler.swift */,
 				9A7CE080302D82A800A03F53 /* GlanceSurfaceTests.swift */,
 				BB7CE080302D82A800A03F53 /* InsulinBookTests.swift */,
+				5C7A1E00302D82A800A03F53 /* StockRunsTests.swift */,
 				9A7CE01B302D82A800A03F53 /* WatchdogArmingTests.swift */,
 				29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */,
 				7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */,
@@ -4442,6 +4445,7 @@
 				9A7CE071302D82A800A03F53 /* RecordingWristAlertScheduler.swift in Sources */,
 				9A7CE081302D82A800A03F53 /* GlanceSurfaceTests.swift in Sources */,
 				BB7CE081302D82A800A03F53 /* InsulinBookTests.swift in Sources */,
+				5C7A1E01302D82A800A03F53 /* StockRunsTests.swift in Sources */,
 				9A7CE02F302D82A800A03F53 /* WatchdogArmingTests.swift in Sources */,
 				18606676A16D24BF383CCCF8 /* WatchAlertPresenterTests.swift in Sources */,
 				DB66EB0397D54C94B49ADEF8 /* FirstContactNoteTests.swift in Sources */,

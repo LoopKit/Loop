@@ -73,9 +73,10 @@ struct LoanDebugView: View {
                 Text("DOSING").font(.footnote).foregroundColor(.secondary)
                 row("closed?", (dosing?.closedLoopEnabled ?? false) ? "YES" : "no")
                 row("BG now", dosing?.glucose.map { String(format: "%.0f", $0.doubleValue(for: .milligramsPerDeciliter)) } ?? "—")
-                row("eventual", dosing?.eventual.map { String(format: "%.0f", $0.doubleValue(for: .milligramsPerDeciliter)) } ?? "—")
+                // The DOSING block is the automatic loop's last run, not the glance's display run.
+                row("eventual", dosing?.dosingEventual.map { String(format: "%.0f", $0.doubleValue(for: .milligramsPerDeciliter)) } ?? "—")
                 predictionReconciliation
-                row("COB / IOB", "\(cobText) / \(dosing?.iob.map { String(format: "%.2f U", $0) } ?? "—")")
+                row("COB / IOB", "\(cobText) / \(iobText)")
                 row("recommend", dosing?.recommendedTempRate.map { String(format: "%+.2f U/hr", $0) } ?? "—")
                 row("running", dosing?.tempRate.map { String(format: "%+.2f U/hr net", $0) } ?? "none (scheduled)")
                 row("last loop", dosing?.lastLoopCompleted.map { String(format: "%.0fs ago", Date().timeIntervalSince($0)) } ?? "—")
@@ -154,10 +155,8 @@ struct LoanDebugView: View {
         session?.stack.loopManager.refreshGlanceData()
         if let gd = session?.stack.loopManager.mirroredGlanceData {
             dosing = gd
-            iobText = gd.iob.map { String(format: "%.2f U", $0) } ?? "—"
-        }
-        session?.stack.loopManager.glanceCarbsOnBoard { v in
-            DispatchQueue.main.async { cobText = v.map { String(format: "%.0f g", $0) } ?? "—" }
+            iobText = gd.dosingIOB.map { String(format: "%.2f U", $0) } ?? "—"
+            cobText = gd.dosingCOB.map { String(format: "%.0f g", $0) } ?? "—"
         }
     }
 
