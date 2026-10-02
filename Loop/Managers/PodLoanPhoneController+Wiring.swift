@@ -339,6 +339,11 @@ extension WatchDataManager {
                 }
             },
 
+            addDeviceLogEntries: { [weak self] entries, completion in
+                guard let deviceLog = self?.deviceManager.deviceLog else { return completion(.success(0)) }
+                PodLoanPhoneController.addNewDeviceLogEntries(entries, to: deviceLog, completion: completion)
+            },
+
             insulinHistoryRewritten: { [weak self] earliestStart in
                 guard let self = self else { return }
 

@@ -86,6 +86,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
     var addedDosingDecisions: [[StoredDosingDecision]] = []
     /// Every batch of the watch's alert records the controller handed to the store.
     var addedAlerts: [[SyncAlertObject]] = []
+    /// Every batch of the watch's device log lines the controller handed to the log.
+    var addedDeviceLog: [[LoanDeviceLogEntry]] = []
     var deletedGapSyncs: [String] = []
     var gapDeleteSucceeds = true
     /// Virtual clock for the reclaim bars; only tests passing `now:` use it.
@@ -141,6 +143,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         bookedGapDoses = []
         addedDosingDecisions = []
         addedAlerts = []
+        addedDeviceLog = []
         deletedGapSyncs = []
         gapDeleteSucceeds = true
         sent = []
@@ -292,6 +295,11 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                 guard let self = self else { return completion(.success(0)) }
                 self.lock.lock(); self.addedAlerts.append(alerts); self.lock.unlock()
                 completion(.success(alerts.count))
+            },
+            addDeviceLogEntries: { [weak self] entries, completion in
+                guard let self = self else { return completion(.success(0)) }
+                self.lock.lock(); self.addedDeviceLog.append(entries); self.lock.unlock()
+                completion(.success(entries.count))
             },
             whenProtectedDataAvailable: whenProtectedDataAvailable,
             beginReclaimBackgroundTask: { [weak self] in
@@ -820,6 +828,22 @@ final class PodLoanPhoneControllerTests: XCTestCase {
 
         XCTAssertEqual(addedAlerts.count, 1, "only the granted loan's")
         XCTAssertEqual(addedAlerts.first?.map(\.syncIdentifier), alerts.map(\.syncIdentifier))
+    }
+
+    /// The watch's device log lines for a loan this phone granted go to the device log; a loan
+    /// it never granted is ignored.
+    func testWatchDeviceLogIsAddedOnlyForALoanThisPhoneGranted() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        let lines = [LoanDeviceLogEntry(StoredDeviceLogEntry(type: .send, managerIdentifier: "Omni", deviceIdentifier: "177E6B7D",
+                                                             message: "177e6b7d34030e01070200", timestamp: Date().addingTimeInterval(-600)))]
+
+        controller.handleWatchLoanHistory(LoanHistory(epoch: grant.epoch + 1, decisions: [], deviceLog: lines))
+        controller.handleWatchLoanHistory(LoanHistory(epoch: grant.epoch, decisions: [], deviceLog: lines))
+        waitUntil(timeout: 5, "the granted loan's lines handed over") { self.lock.lock(); defer { self.lock.unlock() }; return !self.addedDeviceLog.isEmpty }
+        settle()
+
+        XCTAssertEqual(addedDeviceLog, [lines], "only the granted loan's")
     }
 
     /// Yielding to an inferred loan closes the settle window, whose +12 s escalation would

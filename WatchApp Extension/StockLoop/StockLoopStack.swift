@@ -38,7 +38,8 @@ enum StockLoopStack {
             carbStore: stores.carbStore,
             overrideHistory: stores.overrideHistory,
             dosingDecisionStore: stores.dosingDecisionStore,
-            alertStore: stores.alertStore
+            alertStore: stores.alertStore,
+            deviceLog: stores.deviceLog
         )
 
         // The phone's next context brings a configuration if nothing was saved.
@@ -55,7 +56,7 @@ enum StockLoopStack {
 
     /// The watch's own stores. The directory name carries the LoopKit model version, since this
     /// and the stock watch app share a bundle id. Not read-only: this extension owns them.
-    static func makeStores() async -> (doseStore: DoseStore, glucoseStore: GlucoseStore, carbStore: CarbStore, overrideHistory: TemporaryScheduleOverrideHistory, dosingDecisionStore: DosingDecisionStore, alertStore: AlertStore)? {
+    static func makeStores() async -> (doseStore: DoseStore, glucoseStore: GlucoseStore, carbStore: CarbStore, overrideHistory: TemporaryScheduleOverrideHistory, dosingDecisionStore: DosingDecisionStore, alertStore: AlertStore, deviceLog: PersistentDeviceLog)? {
         guard let documents = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true) else {
             SportLog.event("session", "STACK UNAVAILABLE — no documents directory")
             return nil
@@ -104,8 +105,19 @@ enum StockLoopStack {
         }
         let alertStore = AlertStore(storageDirectoryURL: alertStoreDirectory, expireAfter: Bundle.main.localCacheDuration)
 
+        // As stock `LoopAppManager` builds it, in the same place.
+        let deviceLogDirectory = documents.appendingPathComponent("DeviceLog")
+        do {
+            try FileManager.default.createDirectory(at: deviceLogDirectory, withIntermediateDirectories: true)
+        } catch {
+            SportLog.event("session", "STACK UNAVAILABLE — device log directory not created: \(error.localizedDescription)")
+            return nil
+        }
+        let deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"),
+                                            maxEntryAge: Bundle.main.localCacheDuration)
+
         SportLog.event("session", "stack: stores open")
-        return (doseStore, glucoseStore, carbStore, overrideHistory, dosingDecisionStore, alertStore)
+        return (doseStore, glucoseStore, carbStore, overrideHistory, dosingDecisionStore, alertStore, deviceLog)
     }
 
     /// Keeps ended overrides for the algorithm's lookback (about 18 h); the phone keeps 90 days.

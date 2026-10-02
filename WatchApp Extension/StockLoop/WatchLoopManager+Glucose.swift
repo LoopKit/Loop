@@ -244,16 +244,23 @@ extension WatchLoopManager: CGMManagerDelegate {
         log.default("CGM status did update")
     }
 
-    /// Device-log sink for the CGM and pump managers, headed by manager and throttled.
+    /// Device-log sink for the CGM and pump managers. While the watch holds the pod every line goes
+    /// to stock's device log, as stock `DeviceDataManager` writes it (a pump's lines always: the
+    /// watch has a pump only during a loan); the text log gets each line headed by manager, throttled.
     func deviceManager(_ manager: DeviceManager, logEventForDeviceIdentifier deviceIdentifier: String?, type: DeviceLogEntryType, message: String, completion: ((Error?) -> Void)?) {
         log.default("Device %{public}@: %{public}@", deviceIdentifier ?? "unknown", message)
+
+        if let deviceLog, manager is PumpManager || pumpManager != nil {
+            deviceLog.log(managerIdentifier: manager.pluginIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
+        } else {
+            completion?(nil)
+        }
 
         let source = manager is CGMManager ? "cgm" : "pod-ble"
 
         let line = "\(type) \(deviceIdentifier ?? "—"): \(message)"
         switch deviceLogThrottle.admit(line, at: now()) {
         case .suppress:
-            completion?(nil)
             return
         case .write(let flushing):
             if flushing > 0 {
@@ -261,7 +268,6 @@ extension WatchLoopManager: CGMManagerDelegate {
             }
         }
         SportLog.event(source, line)
-        completion?(nil)
     }
 
     // MARK: - Alerts

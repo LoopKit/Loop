@@ -367,22 +367,25 @@ extension PodLoanWatchController {
         sendHandbackOffer(freshened: false, recovered: true)
     }
 
-    /// What the watch recorded in stock's stores during the loan (dosing decisions, alerts) goes
-    /// home once, at its close, in one background file transfer: everything stored since the last
-    /// file went. Every close comes here (the ack of the final offer, the ack of a revoke's or
+    /// What the watch recorded in stock's stores during the loan (dosing decisions, alerts, device
+    /// log) goes home once, at its close, in one background file transfer: everything stored since
+    /// the last file went. Every close comes here (the ack of the final offer, the ack of a revoke's or
     /// relaunch's drain, a drain given up), so a force reclaim's history follows whenever this
     /// watch learns its loan ended. Each store's anchor advances only once the file is handed over.
     func sendLoanHistoryHome(epoch: Int) {
         let decisionsAnchor = persisted.dosingDecisionsSent.flatMap(DosingDecisionStore.QueryAnchor.init(rawValue:))
         let alertsAnchor = persisted.alertsSent.flatMap(AlertStore.QueryAnchor.init(rawValue:))
+        let deviceLogAnchor = persisted.deviceLogSent
         let loopManager = self.loopManager
         Task {
             let decisions = await Self.dosingDecisions(in: loopManager.dosingDecisionStore, since: decisionsAnchor, epoch: epoch)
             let alerts = await Self.alerts(in: loopManager.settledAlertStore(), since: alertsAnchor, epoch: epoch)
+            let deviceLog = await Self.deviceLogEntries(in: loopManager.deviceLog, after: deviceLogAnchor, epoch: epoch)
             self.queue.async {
-                let history = LoanHistory(epoch: epoch, decisions: decisions?.decisions ?? [], alerts: alerts?.alerts ?? [])
-                let counts = "\(history.decisions.count) dosing decision(s), \(history.alerts?.count ?? 0) alert(s)"
-                guard !history.decisions.isEmpty || history.alerts?.isEmpty == false else {
+                let history = LoanHistory(epoch: epoch, decisions: decisions?.decisions ?? [], alerts: alerts?.alerts ?? [],
+                                          deviceLog: deviceLog ?? [])
+                let counts = "\(history.decisions.count) dosing decision(s), \(history.alerts?.count ?? 0) alert(s), \(history.deviceLog?.count ?? 0) device log line(s)"
+                guard !history.decisions.isEmpty || history.alerts?.isEmpty == false || history.deviceLog?.isEmpty == false else {
                     SportLog.event("loan", "no loan history to send home for e\(epoch)")
                     return
                 }
@@ -394,6 +397,7 @@ extension PodLoanWatchController {
                 self.updateState {
                     if let decisions { $0.dosingDecisionsSent = decisions.anchor.rawValue }
                     if let alerts { $0.alertsSent = alerts.anchor.rawValue }
+                    if let newest = deviceLog?.last?.timestamp { $0.deviceLogSent = newest }
                 }
                 SportLog.event("loan", "loan history sent home for e\(epoch): \(counts) — \(data.count) bytes, one file transfer")
             }
@@ -426,6 +430,21 @@ extension PodLoanWatchController {
             return (newAnchor, alerts)
         } catch {
             SportLog.event("loan", "alerts NOT sent home for e\(epoch) — the store query failed: \(error)")
+            return nil
+        }
+    }
+
+    /// The device log lines written after `anchor`, oldest first; nil when the fetch failed. Lines
+    /// past the log's age go first, as stock's export purges them: nothing else on the watch does.
+    private static func deviceLogEntries(in deviceLog: PersistentDeviceLog?, after anchor: Date?,
+                                         epoch: Int) async -> [LoanDeviceLogEntry]? {
+        guard let deviceLog else { return nil }
+        deviceLog.purgeLogEntries(before: deviceLog.earliestLogEntryDate)
+        do {
+            let entries = try await deviceLog.fetch(startDate: anchor ?? .distantPast, endDate: .distantFuture)
+            return entries.filter { anchor == nil || $0.timestamp > anchor! }.map(LoanDeviceLogEntry.init)
+        } catch {
+            SportLog.event("loan", "device log NOT sent home for e\(epoch) — the fetch failed: \(error)")
             return nil
         }
     }

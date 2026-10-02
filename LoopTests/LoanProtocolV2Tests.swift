@@ -808,4 +808,48 @@ final class LoanHistoryIntakeTests: XCTestCase {
         let (_, uploadable) = try await store.executeAlertQuery(fromQueryAnchor: nil, limit: 100)
         XCTAssertEqual(Set(uploadable.map(\.syncIdentifier)), [low.syncIdentifier, expiring.syncIdentifier], "the upload query finds them")
     }
+
+    /// Each line is added once with the watch's own time, however often the file comes, beside
+    /// the phone's own lines for the same span; a line of a type this phone does not know is skipped.
+    func testDeviceLogLinesFromTheWatchAreAddedOnceWithTheirOwnTimes() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let deviceLog = PersistentDeviceLog(storageFile: directory.appendingPathComponent("Storage.sqlite"))
+        await withCheckedContinuation { continuation in
+            deviceLog.log(managerIdentifier: "G7CGMManager", deviceIdentifier: "DXCMqL", type: .connection,
+                          message: "Sensor connected") { _ in continuation.resume() }
+        }
+        let at = Date(timeIntervalSinceNow: -1800)
+        func line(_ type: DeviceLogEntryType, _ message: String, _ offset: TimeInterval) -> LoanDeviceLogEntry {
+            LoanDeviceLogEntry(StoredDeviceLogEntry(type: type, managerIdentifier: "Omni", deviceIdentifier: "177E6B7D",
+                                                    message: message, timestamp: at.addingTimeInterval(offset)))
+        }
+        let send = line(.send, "177e6b7d34030e01070200", 0)
+        let receive = line(.receive, "177e6b7d380a1d1801b81800002bbfff001d", 0.8)
+        let sameInstant = line(.connection, "Pod disconnected 8752D1D3-2009-8769-2091-F5B0CE32418E nil", 0.8)
+        var raw = try XCTUnwrap(PropertyListSerialization.propertyList(from: PropertyListEncoder().encode(send), format: nil) as? [String: Any])
+        raw["type"] = "someFutureType"
+        raw["message"] = "from a newer watch"
+        let newer = try PropertyListDecoder().decode(LoanDeviceLogEntry.self,
+                                                     from: PropertyListSerialization.data(fromPropertyList: raw, format: .binary, options: 0))
+        let lines = [send, receive, sameInstant, newer]
+
+        func add(_ lines: [LoanDeviceLogEntry]) async throws -> Int {
+            try await withCheckedThrowingContinuation { continuation in
+                PodLoanPhoneController.addNewDeviceLogEntries(lines, to: deviceLog) { continuation.resume(with: $0) }
+            }
+        }
+        let first = try await add(lines)
+        let again = try await add(lines)
+        XCTAssertEqual(first, 3, "the unknown type skipped")
+        XCTAssertEqual(again, 0, "the second delivery adds nothing")
+        async let a = add(lines)
+        async let b = add(lines)
+        _ = try await (a, b)
+
+        let stored = try await deviceLog.fetch(startDate: .distantPast, endDate: .distantFuture)
+        XCTAssertEqual(stored.count, 4, "the phone's own line and the watch's three, once each")
+        let fromWatch = stored.filter { $0.managerIdentifier == "Omni" }.map(LoanDeviceLogEntry.init)
+        XCTAssertEqual(Set(fromWatch), [send, receive, sameInstant], "with the watch's own times")
+    }
 }

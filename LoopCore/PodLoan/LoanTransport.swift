@@ -204,8 +204,8 @@ extension LoanMessage {
     }
 }
 
-/// What the watch recorded in stock's stores during one loan (its dosing decisions and alert
-/// history), sent home once when the loan closes as one background file (`transferFile`).
+/// What the watch recorded in stock's stores during one loan (its dosing decisions, alert
+/// history and device log), sent home once when the loan closes as one background file (`transferFile`).
 /// Outside the envelope on purpose: a phone that does not know the file kind ignores it, where an
 /// unknown envelope kind would be nacked; a phone that does not know a field ignores the field.
 public struct LoanHistory: Codable {
@@ -217,11 +217,15 @@ public struct LoanHistory: Codable {
     public let decisions: [StoredDosingDecision]
     /// `AlertStore`'s records, each under its own sync identifier. Absent from an older watch's file.
     public let alerts: [SyncAlertObject]?
+    /// `PersistentDeviceLog`'s lines, oldest first. Absent from an older watch's file.
+    public let deviceLog: [LoanDeviceLogEntry]?
 
-    public init(epoch: Int, decisions: [StoredDosingDecision], alerts: [SyncAlertObject] = []) {
+    public init(epoch: Int, decisions: [StoredDosingDecision], alerts: [SyncAlertObject] = [],
+                deviceLog: [LoanDeviceLogEntry] = []) {
         self.epoch = epoch
         self.decisions = decisions
         self.alerts = alerts
+        self.deviceLog = deviceLog
     }
 
     public var fileMetadata: [String: Any] { ["kind": Self.fileKind, "epoch": epoch] }
@@ -235,5 +239,32 @@ public struct LoanHistory: Codable {
 
     public static func decode(_ data: Data) throws -> LoanHistory {
         try PropertyListDecoder().decode(LoanHistory.self, from: data)
+    }
+}
+
+/// One line of `PersistentDeviceLog`, whose `StoredDeviceLogEntry` is not Codable. The log gives
+/// a line no identity of its own, so the whole line is its identity: two equal lines are one.
+public struct LoanDeviceLogEntry: Codable, Hashable {
+    /// `DeviceLogEntryType`'s raw value.
+    public let type: String
+    public let managerIdentifier: String
+    public let deviceIdentifier: String?
+    public let message: String
+    public let timestamp: Date
+
+    public init(_ entry: StoredDeviceLogEntry) {
+        type = entry.type.rawValue
+        managerIdentifier = entry.managerIdentifier
+        deviceIdentifier = entry.deviceIdentifier
+        message = entry.message
+        timestamp = entry.timestamp
+    }
+
+    /// nil for a type this side does not know.
+    public var storedEntry: StoredDeviceLogEntry? {
+        DeviceLogEntryType(rawValue: type).map {
+            StoredDeviceLogEntry(type: $0, managerIdentifier: managerIdentifier, deviceIdentifier: deviceIdentifier,
+                                 message: message, timestamp: timestamp)
+        }
     }
 }

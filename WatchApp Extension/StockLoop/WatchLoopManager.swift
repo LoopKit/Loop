@@ -81,6 +81,10 @@ final class WatchLoopManager {
     /// look at it.
     let alertStore: AlertStore?
 
+    /// Stock's device log, written while the watch holds the pod; nil in suites that do not look
+    /// at it.
+    let deviceLog: PersistentDeviceLog?
+
     /// Stock `AlertManager` awaits each record before the next; the wrist's alert calls are
     /// synchronous, so their records are chained in call order.
     var alertRecords: Task<Void, Never>?
@@ -474,6 +478,7 @@ final class WatchLoopManager {
          overrideHistory: TemporaryScheduleOverrideHistory = TemporaryScheduleOverrideHistory(),
          dosingDecisionStore: DosingDecisionStore? = nil,
          alertStore: AlertStore? = nil,
+         deviceLog: PersistentDeviceLog? = nil,
          settings: LoopSettings = LoopSettings(),
          defaults: UserDefaults = .standard, stateDirectory: URL? = nil) {
         self.defaults = defaults
@@ -490,6 +495,7 @@ final class WatchLoopManager {
         self.carbStore = carbStore
         self.dosingDecisionStore = dosingDecisionStore
         self.alertStore = alertStore
+        self.deviceLog = deviceLog
         self.settingsProvider = WatchSettingsProvider(settings: settings)
         self.overrideHistory = overrideHistory
         self.settings = settings

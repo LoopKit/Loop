@@ -40,6 +40,8 @@ struct PodLoanWatchState: RawRepresentable {
     var dosingDecisionsSent: [String: Any]?
     /// The alert store's query anchor as of the last alerts sent home.
     var alertsSent: [String: Any]?
+    /// The newest device log line sent home.
+    var deviceLogSent: Date?
 
     init() {}
 
@@ -53,6 +55,7 @@ struct PodLoanWatchState: RawRepresentable {
         seizeToken = (rawValue["seizeToken"] as? String).flatMap(UUID.init(uuidString:))
         dosingDecisionsSent = rawValue["dosingDecisionsSent"] as? [String: Any]
         alertsSent = rawValue["alertsSent"] as? [String: Any]
+        deviceLogSent = rawValue["deviceLogSent"] as? Date
     }
 
     var rawValue: [String: Any] {
@@ -71,6 +74,7 @@ struct PodLoanWatchState: RawRepresentable {
         raw["seizeToken"] = seizeToken?.uuidString
         raw["dosingDecisionsSent"] = dosingDecisionsSent
         raw["alertsSent"] = alertsSent
+        raw["deviceLogSent"] = deviceLogSent
         return raw
     }
 

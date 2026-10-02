@@ -350,17 +350,17 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// What the watch recorded in stock's stores for a loan (its dosing decisions and alerts),
-    /// sent once when the loan closed (after a force reclaim, whenever the watch learned it had
+    /// What the watch recorded in stock's stores for a loan (its dosing decisions, alerts and
+    /// device log), sent once when the loan closed (after a force reclaim, whenever the watch learned it had
     /// ended). A loan this phone never granted or adopted is ignored; an earlier loan's are kept,
     /// as a stale offer's doses are.
     func handleWatchLoanHistory(_ transfer: LoanHistory) {
         deps.whenProtectedDataAvailable { [weak self] in
             guard let self = self else { return }
             self.queue.async {
-                let alerts = transfer.alerts ?? []
+                let alerts = transfer.alerts ?? [], deviceLog = transfer.deviceLog ?? []
                 guard transfer.epoch <= self.epoch else {
-                    self.handbackDiag(transfer.epoch, "loan history IGNORED — \(transfer.decisions.count) dosing decision(s), \(alerts.count) alert(s) for e\(transfer.epoch), a loan this phone (e\(self.epoch)) never granted")
+                    self.handbackDiag(transfer.epoch, "loan history IGNORED — \(transfer.decisions.count) dosing decision(s), \(alerts.count) alert(s), \(deviceLog.count) device log line(s) for e\(transfer.epoch), a loan this phone (e\(self.epoch)) never granted")
                     return
                 }
                 self.deps.addDosingDecisions(transfer.decisions) { [weak self] result in
@@ -371,13 +371,24 @@ extension PodLoanPhoneController {
                         self?.handbackDiag(transfer.epoch, "dosing decisions from the watch NOT added — \(error)")
                     }
                 }
-                guard !alerts.isEmpty else { return }
-                self.deps.addAlerts(alerts) { [weak self] result in
-                    switch result {
-                    case .success(let changed):
-                        self?.handbackDiag(transfer.epoch, "alerts from the watch: \(changed) of \(alerts.count) added or updated (the rest already here)")
-                    case .failure(let error):
-                        self?.handbackDiag(transfer.epoch, "alerts from the watch NOT added — \(error)")
+                if !alerts.isEmpty {
+                    self.deps.addAlerts(alerts) { [weak self] result in
+                        switch result {
+                        case .success(let changed):
+                            self?.handbackDiag(transfer.epoch, "alerts from the watch: \(changed) of \(alerts.count) added or updated (the rest already here)")
+                        case .failure(let error):
+                            self?.handbackDiag(transfer.epoch, "alerts from the watch NOT added — \(error)")
+                        }
+                    }
+                }
+                if !deviceLog.isEmpty {
+                    self.deps.addDeviceLogEntries(deviceLog) { [weak self] result in
+                        switch result {
+                        case .success(let added):
+                            self?.handbackDiag(transfer.epoch, "device log from the watch: \(added) of \(deviceLog.count) line(s) added (the rest already here)")
+                        case .failure(let error):
+                            self?.handbackDiag(transfer.epoch, "device log from the watch NOT added — \(error)")
+                        }
                     }
                 }
             }
@@ -388,7 +399,7 @@ extension PodLoanPhoneController {
     /// file delivered twice adds nothing the second time.
     static func addNewDosingDecisions(_ decisions: [StoredDosingDecision], to store: DosingDecisionStore,
                                       completion: @escaping (Result<Int, Error>) -> Void) {
-        dosingDecisionIntakeQueue.async {
+        loanHistoryIntakeQueue.async {
             let semaphore = DispatchSemaphore(value: 0)
             var result: Result<Int, Error> = .success(0)
             Task {
@@ -408,7 +419,34 @@ extension PodLoanPhoneController {
         }
     }
 
-    private static let dosingDecisionIntakeQueue = DispatchQueue(label: "com.loopkit.Loop.PodLoanPhoneController.dosingDecisionIntake")
+    /// Adds the device log lines this log does not already hold, comparing whole lines over the
+    /// span they cover, one batch at a time, so a file delivered twice adds nothing the second time.
+    static func addNewDeviceLogEntries(_ entries: [LoanDeviceLogEntry], to deviceLog: PersistentDeviceLog,
+                                       completion: @escaping (Result<Int, Error>) -> Void) {
+        loanHistoryIntakeQueue.async {
+            guard let first = entries.map(\.timestamp).min(), let last = entries.map(\.timestamp).max() else {
+                return completion(.success(0))
+            }
+            let semaphore = DispatchSemaphore(value: 0)
+            var result: Result<Int, Error> = .success(0)
+            Task {
+                do {
+                    let present = try await deviceLog.fetch(startDate: first, endDate: last.addingTimeInterval(1))
+                    var seen = Set(present.map(LoanDeviceLogEntry.init))
+                    let new = entries.filter { seen.insert($0).inserted }.compactMap(\.storedEntry)
+                    try await deviceLog.addStoredDeviceLogEntries(entries: new)
+                    result = .success(new.count)
+                } catch {
+                    result = .failure(error)
+                }
+                semaphore.signal()
+            }
+            semaphore.wait()
+            completion(result)
+        }
+    }
+
+    private static let loanHistoryIntakeQueue = DispatchQueue(label: "com.loopkit.Loop.PodLoanPhoneController.loanHistoryIntake")
 
     /// After a write: run any deferred force, then one coalesced offer.
     func drainAfterCommit() {
