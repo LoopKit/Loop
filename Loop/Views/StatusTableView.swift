@@ -171,7 +171,8 @@ struct StatusTableView: View {
             ActionTab(
                 title: "Settings",
                 icon: "settings",
-                tintColor: .secondaryLabel
+                tintColor: .secondaryLabel,
+                isEnabled: !viewModel.isPodLoanedToWatch
             ) {
                 viewController.presentSettings()
             }
