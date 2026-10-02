@@ -65,6 +65,7 @@ extension PodLoanWatchController {
         }
         SportLog.event("loan", "RESUME: pump manager built")
         loopManager.settings = settings
+        loopManager.restoreOverrideHistory()
         Task { @MainActor [loopManager] in loopManager.configureGlucoseAlerts(from: payload.glucoseAlertSettings) }
         phoneSupportsInterimHandback = payload.supportsInterimHandback
         phoneSupportsOverrideRecords = payload.supportsOverrideRecords

@@ -251,6 +251,8 @@ final class WakeResumeTests: XCTestCase {
         let live = await makeController()
         live.loopManager.setClosedLoopEnabled(true, reason: "test")
         live.loopManager.setIntegralRetrospectiveCorrection(true)
+        let override = halfNeeds(start: Date().addingTimeInterval(-.minutes(10)), duration: .indefinite)
+        live.loopManager.applyWristOverride(override)
         saveState { $0.deliveredAtTakeover = 12.5 }
 
         let c = await relaunch(phase: .active, savedState: readablePumpState)
@@ -260,7 +262,32 @@ final class WakeResumeTests: XCTestCase {
         XCTAssertTrue(c.phoneSupportsInterimHandback, "the phone's interim hand-back capability")
         XCTAssertTrue(c.phoneSupportsOverrideRecords, "the phone's override-records capability")
         XCTAssertEqual(c.deliveredAtTakeover, 12.5, "the delivery baseline — else the hand-back audit reads delivered=n/a")
+        XCTAssertEqual(c.loopManager.scheduleOverride?.syncIdentifier, override.syncIdentifier,
+                       "the active override — else the resumed loan doses unscaled")
         XCTAssertTrue(c.isLoanActiveNonBlocking, "the live-loan mirror")
+    }
+
+    /// The whole history comes back, not only the active override: one that ended before the
+    /// relaunch still scales its minutes.
+    func testResumeRestoresTheOverrideHistory() async {
+        let live = await makeController()
+        let now = Date()
+        let ended = halfNeeds(start: now.addingTimeInterval(-.hours(2)), duration: .finite(.hours(1)))
+        let active = halfNeeds(start: now.addingTimeInterval(-.minutes(30)), duration: .indefinite)
+        live.loopManager.applyWristOverride(ended)
+        live.loopManager.applyWristOverride(active)
+
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        XCTAssertEqual(c.loopManager.scheduleOverride?.syncIdentifier, active.syncIdentifier, "the target the cycle drives to")
+        let kept = c.loopManager.overrideHistory.getOverrideHistory(startDate: now.addingTimeInterval(-.hours(3)), endDate: now)
+        XCTAssertEqual(kept.map(\.syncIdentifier), [ended.syncIdentifier, active.syncIdentifier], "and every override the cycle scales by")
+    }
+
+    private func halfNeeds(start: Date, duration: TemporaryScheduleOverride.Duration) -> TemporaryScheduleOverride {
+        TemporaryScheduleOverride(context: .custom,
+                                  settings: TemporaryPresetSettings(unit: .milligramsPerDeciliter, targetRange: nil,
+                                                                    insulinNeedsScaleFactor: 0.5),
+                                  startDate: start, duration: duration, enactTrigger: .local, syncIdentifier: UUID())
     }
 
     func testClosedLoopDoesNotOutliveItsLoan() async {

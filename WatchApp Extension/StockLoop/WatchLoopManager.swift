@@ -309,6 +309,15 @@ final class WatchLoopManager {
             overrideHistory.recordOverride(override, at: override.startDate)
         }
         _scheduleOverride = overrideHistory.activeOverride(at: now())
+        temporaryScheduleOverrideHistoryDidUpdate(overrideHistory)
+    }
+
+    /// On a resume: the history saved before the relaunch, and the override active in it.
+    func restoreOverrideHistory() {
+        guard let data = loopState.overrideEvents,
+              let events = try? PropertyListDecoder().decode([OverrideEvent].self, from: data) else { return }
+        overrideHistory.recentEvents = events
+        _scheduleOverride = overrideHistory.activeOverride(at: now())
     }
 
     /// Eventual glucose split by effect. Diagnostic only; see `logPredictionBreakdown`.
@@ -456,6 +465,7 @@ final class WatchLoopManager {
         // The store asks us for the scheduled basal it nets doses against; see the
         // `DoseStoreDelegate` conformance.
         doseStore.delegate = self
+        overrideHistory.delegate = self
         #if !targetEnvironment(simulator)
 
         NotificationCenter.default.addObserver(forName: LoopDataManager.didUpdateContextNotification,
@@ -625,11 +635,21 @@ private extension PresetSymbol {
     var textGlyph: String? { symbolType == .emoji ? value : nil }
 }
 
+extension WatchLoopManager: TemporaryScheduleOverrideHistoryDelegate {
+    /// Saved on every change, so a relaunch mid-loan doses under the same overrides.
+    func temporaryScheduleOverrideHistoryDidUpdate(_ history: TemporaryScheduleOverrideHistory) {
+        let events = try? PropertyListEncoder().encode(history.recentEvents)
+        updateLoopState { $0.overrideEvents = events }
+    }
+}
+
 /// The loop manager's persisted state, saved and restored as one value.
 struct WatchLoopState: RawRepresentable {
     var closedLoopEnabled = false
     var integralRetrospectiveCorrectionEnabled = false
     var lastLoopCompleted: Date?
+    /// The override history's events, as LoopKit encodes them; read back only by a resume.
+    var overrideEvents: Data?
 
     init() {}
 
@@ -637,12 +657,14 @@ struct WatchLoopState: RawRepresentable {
         closedLoopEnabled = rawValue["closedLoopEnabled"] as? Bool ?? false
         integralRetrospectiveCorrectionEnabled = rawValue["integralRetrospectiveCorrectionEnabled"] as? Bool ?? false
         lastLoopCompleted = rawValue["lastLoopCompleted"] as? Date
+        overrideEvents = rawValue["overrideEvents"] as? Data
     }
 
     var rawValue: [String: Any] {
         var raw: [String: Any] = ["closedLoopEnabled": closedLoopEnabled,
                                   "integralRetrospectiveCorrectionEnabled": integralRetrospectiveCorrectionEnabled]
         raw["lastLoopCompleted"] = lastLoopCompleted
+        raw["overrideEvents"] = overrideEvents
         return raw
     }
 }
