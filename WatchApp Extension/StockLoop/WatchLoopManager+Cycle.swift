@@ -160,9 +160,8 @@ extension WatchLoopManager {
     }
 
     /// Stock `LoopDataManager.fetchData`, except: the pump-data recency gate lives here; doses
-    /// are trimmed per dose (no forward credit); 10 h carb/glucose window; ISF/override windows
-    /// are not widened to the carb start; no preset-ending, high-needs threshold or ongoing-dose
-    /// projection; missing settings throw rather than default.
+    /// are trimmed per dose (no forward credit); no preset-ending, high-needs threshold or
+    /// ongoing-dose projection; missing settings throw rather than default.
     func fetchAlgorithmInput(at baseTime: Date, recommendationType: DoseRecommendationType) async throws -> StoredDataAlgorithmInput {
         // Dose history reaches back a full carb absorption PLUS a full insulin duration, as in
         // stock: dynamic carb absorption is derived from glucose the older insulin also moved.
@@ -195,7 +194,8 @@ extension WatchLoopManager {
         }
 
         let forecastEndTime = baseTime.addingTimeInterval(InsulinMath.defaultInsulinActivityDuration).dateCeiledToTimeInterval(GlucoseMath.defaultDelta)
-        let carbsStart = baseTime.addingTimeInterval(CarbMath.maximumAbsorptionTimeInterval * -1)
+        // Stock's `LoopConstants.maxCarbEntryPastTime` (phone-only) less a minute for carb/ratio second skew.
+        let carbsStart = baseTime.addingTimeInterval(.hours(-12) + .minutes(-1))
 
         let carbEntries = try await carbStore.getCarbEntries(start: carbsStart, end: forecastEndTime)
             .filter { $0.userCreatedDate ?? $0.startDate < baseTime }
@@ -215,9 +215,10 @@ extension WatchLoopManager {
             glucoseHistoryStart: glucose.first?.startDate ?? baseTime,
             recommendationEffectInterval: DateInterval(start: baseTime, duration: recommendationInsulinModel.effectDuration)
         )
-        // Difference 4: stock starts this at `min(neededSensitivityTimeline.start, carbsStart)`.
+        // Covers every carb entry: glucose (and so this timeline) can start later, e.g. after a CGM gap.
+        let sensitivityStart = min(neededSensitivityTimeline.start, carbsStart)
         let sensitivity = try await settingsProvider.getInsulinSensitivityHistory(
-            startDate: neededSensitivityTimeline.start,
+            startDate: sensitivityStart,
             endDate: neededSensitivityTimeline.end
         )
         guard !sensitivity.isEmpty else { throw WatchLoopError.configurationError("insulinSensitivitySchedule") }
@@ -227,8 +228,7 @@ extension WatchLoopManager {
         guard let maxBasalRate = dosingLimits.maxBasalRate else { throw WatchLoopError.configurationError("maximumBasalRatePerHour") }
         guard let suspendThreshold = dosingLimits.suspendThreshold else { throw WatchLoopError.configurationError("suspendThreshold") }
 
-        // Same window as the sensitivity query, and stock widens this one too — see difference 4.
-        let overrides = overrideHistory.getOverrideHistory(startDate: neededSensitivityTimeline.start, endDate: forecastEndTime)
+        let overrides = overrideHistory.getOverrideHistory(startDate: sensitivityStart, endDate: forecastEndTime)
 
         // An override replaces the target for the whole forecast; the suspend threshold is the grant's.
         var target: [AbsoluteScheduleValue<ClosedRange<LoopQuantity>>]
