@@ -1085,55 +1085,6 @@ final class LoanOverrideTests: XCTestCase {
                        "mid-override the effective basal is 0.60 — a 0.60 U/hr temp nets to ZERO, not -0.40")
     }
 
-    /// The active override reaches the wrist in the grant, not in `LoopSettings.rawValue`.
-    func testOverrideReachesTheWristInTheGrant() {
-        var settings = LoopSettings()
-        settings.basalRateSchedule = baseBasal
-        settings.insulinSensitivitySchedule = baseISF
-        settings.carbRatioSchedule = baseCR
-        // The dosing limits the wrist's loop requires.
-        settings.maximumBolus = 10
-        settings.maximumBasalRatePerHour = 4
-        settings.suspendThreshold = GlucoseThreshold(unit: .milligramsPerDeciliter, value: 80)
-        let now = Date()
-        let active = exerciseOverride(start: now)
-
-        // The settings blob carries the schedules, not the override.
-        guard let decodedSettings = LoopSettings(rawValue: settings.rawValue) else {
-            return XCTFail("settings must round-trip")
-        }
-        XCTAssertNotNil(decodedSettings.basalRateSchedule, "schedules still ride in the settings blob")
-
-        // The transport: the grant's own field, encoded exactly as the hand-back records encode
-        // an override, so both directions of the wire agree on one format.
-        guard let raw = try? PropertyListSerialization.data(fromPropertyList: active.rawValue,
-                                                           format: .binary, options: 0) else {
-            return XCTFail("the active override must encode for the wire")
-        }
-        let grant = LoanGrant(
-            epoch: 1,
-            expiresAt: now.addingTimeInterval(.minutes(5)),
-            pumpConfiguration: Data(),
-            podAddress: 0,
-            therapySettingsRaw: Data(),
-            settingsTimeZoneID: TimeZone.current.identifier,
-            doseHistory: [],
-            activeOverrideRaw: raw)
-
-        guard let carried = grant.activeOverrideRaw,
-              let plist = (try? PropertyListSerialization.propertyList(from: carried, options: [], format: nil)) as? TemporaryScheduleOverride.RawValue,
-              let override = TemporaryScheduleOverride(rawValue: plist) else {
-            return XCTFail("the active override must survive the grant")
-        }
-        XCTAssertEqual(override.settings.effectiveInsulinNeedsScaleFactor, 0.6, accuracy: 0.001)
-        XCTAssertEqual(override.settings.targetRange?.lowerBound.doubleValue(for: .milligramsPerDeciliter) ?? 0,
-                       140, accuracy: 0.1)
-        XCTAssertEqual(override.settings.targetRange?.upperBound.doubleValue(for: .milligramsPerDeciliter) ?? 0,
-                       160, accuracy: 0.1)
-        XCTAssertEqual(override.syncIdentifier, active.syncIdentifier,
-                       "identity must survive so the two devices can agree on WHICH override")
-    }
-
     /// A grant from a phone that never sends the field (or that holds no override) must be a
     /// clean "no override" rather than anything the watch has to special-case.
     func testGrantWithoutAnOverrideCarriesNone() {
@@ -1305,12 +1256,13 @@ final class LoanOverrideTests: XCTestCase {
         XCTAssertTrue(cleanHarness.applied.isEmpty,
                       "clearing a phone that already holds no override is a no-op, not a write")
 
-        // ...but a clear against a phone that DOES hold one lands exactly once.
+        // ...but a clear against a phone that DOES hold one lands exactly once. A minute after
+        // the override starts: the wire rounds dates to whole milliseconds.
         let liveHarness = PhoneOverrideHarness()
         defer { liveHarness.tearDown() }
         liveHarness.phoneOverride = override
         let clearEvent2 = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
-                                    record: .overrideChange(nil, at: now), loggedAt: now)
+                                    record: .overrideChange(nil, at: now.addingTimeInterval(60)), loggedAt: now)
         liveHarness.deliverFinalOffer(events: [clearEvent2], at: now)
         XCTAssertEqual(liveHarness.applied.count, 1)
         XCTAssertNil(liveHarness.applied.first ?? nil, "the clear applies nil")
@@ -1331,7 +1283,7 @@ final class LoanOverrideTests: XCTestCase {
         let now = Date()
         let start = now.addingTimeInterval(-.minutes(10))
 
-        // Granted route: the phone's override arrives in the grant's LoopSettings blob.
+        // Granted route: the phone's override arrives in the grant's own override fields.
         let grantedHistory = TemporaryScheduleOverrideHistory()
         grantedHistory.recordOverride(exerciseOverride(start: start, duration: .hours(2)))
 
@@ -1380,8 +1332,8 @@ private final class PhoneOverrideHarness {
     /// Every applyScheduleOverride call, in order (`nil` element = a clear), and its change time.
     private(set) var applied: [TemporaryScheduleOverride?] = []
     private(set) var appliedAt: [Date] = []
-    /// Stands in for the phone's LoopSettings.scheduleOverride — read by the idempotency check,
-    /// written by the apply, exactly as `mutateSettings { $0.scheduleOverride = … }` does.
+    /// Stands in for `TemporaryPresetsManager.scheduleOverride`: read by the idempotency check,
+    /// written by the apply.
     var phoneOverride: TemporaryScheduleOverride?
 
     private let lock = NSLock()

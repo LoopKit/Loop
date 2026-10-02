@@ -1651,6 +1651,33 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(overrideHistoryAskedFrom).timeIntervalSince(now), -.hours(24), accuracy: 60)
     }
 
+    /// The active override and the schedules ride in the grant's own fields; the settings blob
+    /// (`LoopSettings.rawValue`) carries neither.
+    func testTheGrantCarriesTheActiveOverrideInItsOwnField() throws {
+        let exercise = TemporaryScheduleOverride(context: .custom,
+                                                 settings: TemporaryPresetSettings(unit: .milligramsPerDeciliter,
+                                                                                   targetRange: DoubleRange(minValue: 140, maxValue: 160),
+                                                                                   insulinNeedsScaleFactor: 0.6),
+                                                 startDate: Date().addingTimeInterval(-.minutes(5)), duration: .finite(.hours(1)),
+                                                 enactTrigger: .local, syncIdentifier: UUID())
+        phoneScheduleOverride = exercise
+
+        let grant = offerGrant(makeController())
+
+        let raw = try XCTUnwrap(grant.activeOverrideRaw, "the active override rides in its own field")
+        let plist = try XCTUnwrap(PropertyListSerialization.propertyList(from: raw, options: [], format: nil) as? TemporaryScheduleOverride.RawValue)
+        let carried = try XCTUnwrap(TemporaryScheduleOverride(rawValue: plist))
+        XCTAssertEqual(carried.syncIdentifier, exercise.syncIdentifier, "identity, so both devices agree on which override")
+        XCTAssertEqual(carried.settings.effectiveInsulinNeedsScaleFactor, 0.6, accuracy: 0.001)
+        XCTAssertEqual(carried.settings.targetRange?.lowerBound.doubleValue(for: .milligramsPerDeciliter) ?? 0, 140, accuracy: 0.1)
+
+        let settingsPlist = try XCTUnwrap(PropertyListSerialization.propertyList(from: grant.therapySettingsRaw, options: [], format: nil) as? LoopSettings.RawValue)
+        XCTAssertNil(LoopSettings(rawValue: settingsPlist)?.basalRateSchedule, "the settings blob drops the schedules")
+        let supplementData = try XCTUnwrap(grant.therapySettingsSupplementRaw)
+        let supplement = try XCTUnwrap(PropertyListSerialization.propertyList(from: supplementData, options: [], format: nil) as? [String: Any])
+        XCTAssertNotNil(supplement["basalRateSchedule"], "the supplement carries them")
+    }
+
     /// End to end: an override set on the phone, a loan, a wrist clear at a known time, the
     /// hand-back an hour later. The phone's history ends the override at the clear.
     @MainActor
