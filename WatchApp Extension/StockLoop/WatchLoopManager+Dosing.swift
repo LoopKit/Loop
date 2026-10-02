@@ -38,11 +38,14 @@ extension WatchLoopManager {
         SportLog.event("book", "insulin book reset — \(reason)")
     }
 
-    /// Queue hop only; the contract is `manualBolusRecommendationOnQueue`.
+    /// Queue hop; the contract is `manualBolusRecommendationOnQueue`. Like stock's recommendation
+    /// for the watch, it also keeps the watchBolus decision built with it.
     func recommendManualBolus(potentialCarbEntry: NewCarbEntry? = nil,
                               completion: @escaping (Swift.Result<ManualBolusRecommendation, Error>) -> Void) {
         dataAccessQueue.async {
-            completion(self.manualBolusRecommendationOnQueue(potentialCarbEntry: potentialCarbEntry))
+            let result = self.manualBolusRecommendationOnQueue(potentialCarbEntry: potentialCarbEntry)
+            self.noteContextDosingDecision(potentialCarbEntry: potentialCarbEntry, recommendation: try? result.get())
+            completion(result)
         }
     }
 
@@ -111,9 +114,13 @@ extension WatchLoopManager {
     var usePositiveMomentumAndRCForManualBoluses: Bool { true }
 
     /// Straight to `pumpManager.enactBolus`, capped at the grant's `maximumBolus`. Skips stock's
-    /// `DeviceDataManager.enact` wrapper and its uncertain-delivery and suspend checks.
-    func enactManualBolus(units: Double, activationType: BolusActivationType, completion: @escaping (Error?) -> Void) {
+    /// `DeviceDataManager.enact` wrapper and its uncertain-delivery and suspend checks. As stock's
+    /// watch bolus, the watchBolus decision is stored first and its id goes with the command.
+    func enactManualBolus(units: Double, activationType: BolusActivationType, carbEntry: NewCarbEntry? = nil,
+                          completion: @escaping (Error?) -> Void) {
         dataAccessQueue.async {
+            let decisionId = self.storeWatchBolusDosingDecision(carbEntry: carbEntry, requested: units)
+
             guard let pumpManager = self.pumpManager else {
                 DispatchQueue.main.async { completion(WatchLoopError.pumpManagerUnconnected) }
                 return
@@ -132,7 +139,7 @@ extension WatchLoopManager {
 
             let deliverBolus = {
                 SportLog.event("loan", String(format: "MANUAL BOLUS %.2f U — enacting on the watch pump", rounded))
-                pumpManager.enactBolus(decisionId: nil, units: rounded, activationType: activationType) { error in
+                self.enactBolusCommand(pumpManager, decisionId, rounded, activationType) { error in
                     if let error = error {
                         SportLog.event("loan", "MANUAL BOLUS FAILED — \(String(describing: error))")
                     } else {
@@ -208,7 +215,7 @@ extension WatchLoopManager {
     /// pump inoperable, suspended, manual temp basal running. One deliberate watch difference: a
     /// recommendation older than five minutes is refused. Failures must be enact refusals or
     /// `.enactFailed`, never `.missingDataError`.
-    func enactRecommendedAutomaticDose() -> WatchLoopError? {
+    func enactRecommendedAutomaticDose(decisionId: UUID? = nil) -> WatchLoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         guard let recommendedDose = self.recommendedAutomaticDose else {
@@ -262,7 +269,7 @@ extension WatchLoopManager {
         }
         do {
             try runBlocking {
-                try await self.doseEnactor.enact(decisionId: nil, bolus: bolus, tempBasal: temp, with: pumpManager)
+                try await self.doseEnactor.enact(decisionId: decisionId, bolus: bolus, tempBasal: temp, with: pumpManager)
             }
             if let temp {
                 SportLog.event("dose", String(format: "temp %.2f U/hr ACCEPTED by pod", temp.unitsPerHour))

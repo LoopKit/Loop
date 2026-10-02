@@ -6,8 +6,9 @@
 //  (`loop()`), the recommended bolus (`recommendManualBolus`) and the display run
 //  (`updateDisplayState`). Each run's result lands under its own name, so the glance reads the
 //  display run, the diagnostics page the loop's, and the bolus run changes nothing displayed.
-//  Also stock `loop()`'s recency checks, rounding, enact refusals and `lastLoopCompleted`, and
-//  the display run's refresh on a store change, as stock's observers do.
+//  Also stock `loop()`'s recency checks, rounding, enact refusals and `lastLoopCompleted`, the
+//  display run's refresh on a store change, as stock's observers do, and stock's dosing decisions
+//  ("loop", "updateRemoteRecommendation", "watchBolus") and their one trip home at a loan's close.
 //
 
 import XCTest
@@ -21,9 +22,11 @@ import HealthKit
 /// Records what the loop asks the pod for, and sends nothing.
 final class RecordingDoseEnactor: WatchDoseEnactor {
     private(set) var calls: [(bolus: Double?, tempBasal: TempBasalRecommendation?)] = []
+    private(set) var decisionIds: [UUID?] = []
 
     override func enact(decisionId: UUID?, bolus: Double?, tempBasal: TempBasalRecommendation?, with pumpManager: PumpManager) async throws {
         calls.append((bolus, tempBasal))
+        decisionIds.append(decisionId)
     }
 }
 
@@ -59,6 +62,7 @@ final class StockRunsTests: XCTestCase {
                                               cacheLength: TimeInterval(24 * 3600), provenanceIdentifier: "StockRunsTests")
         let carbStore = CarbStore(healthKitSampleStore: nil, cacheStore: cacheStore,
                                   cacheLength: TimeInterval(24 * 3600), provenanceIdentifier: "StockRunsTests")
+        let dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: TimeInterval(24 * 3600))
 
         var settings = LoopSettings()
         settings.basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 0.7)])
@@ -74,13 +78,14 @@ final class StockRunsTests: XCTestCase {
 
         let defaults = UserDefaults(suiteName: "StockRunsTests-\(UUID().uuidString)")!
         return WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
+                                dosingDecisionStore: dosingDecisionStore,
                                 settings: settings, defaults: defaults,
                                 stateDirectory: dir.appendingPathComponent(UUID().uuidString, isDirectory: true))
     }
 
-    /// A flat hour of readings ending at `latest`.
-    private func seedGlucose(_ manager: WatchLoopManager, mgdl value: Double = 250, latest: Date = Date()) async {
-        let samples: [NewGlucoseSample] = (0..<12).reversed().map { i in
+    /// A flat hour of readings ending at `latest` (or `count` readings, five minutes apart).
+    private func seedGlucose(_ manager: WatchLoopManager, mgdl value: Double = 250, latest: Date = Date(), count: Int = 12) async {
+        let samples: [NewGlucoseSample] = (0..<count).reversed().map { i in
             NewGlucoseSample(date: latest.addingTimeInterval(-Double(i) * 5 * 60),
                              quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: value),
                              condition: nil, trend: .flat, trendRate: nil,
@@ -546,6 +551,201 @@ final class StockRunsTests: XCTestCase {
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
         XCTAssertEqual(manager.dataAccessQueue.sync { manager.displayState.input?.predictionStart }, before)
+    }
+
+    // MARK: - Stock's dosing decisions
+
+    /// Everything the watch's decision store holds, in the order stored.
+    private func storedDecisions(_ manager: WatchLoopManager) async throws -> [StoredDosingDecision] {
+        let store = try XCTUnwrap(manager.dosingDecisionStore)
+        return try await withCheckedThrowingContinuation { continuation in
+            store.executeDosingDecisionQuery(fromQueryAnchor: nil, limit: 1000) { result in
+                switch result {
+                case .success(_, let decisions): continuation.resume(returning: decisions)
+                case .failure(let error): continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
+    /// A closed-loop cycle stores one "loop" decision, as stock builds it, and the dose it enacts
+    /// carries that decision's id.
+    func testAClosedLoopCycleStoresOneLoopDecisionWhoseIdTheDoseCarries() async throws {
+        let manager = await makeManager()
+        await seedGlucose(manager)
+        await report(manager)
+        let enactor = RecordingDoseEnactor()
+        manager.pumpManager = try makePump()
+        manager.doseEnactor = enactor
+        manager.setClosedLoopEnabled(true, reason: "test")
+
+        runLoop(manager)
+
+        let loops = try await storedDecisions(manager).filter { $0.reason == "loop" }
+        XCTAssertEqual(loops.count, 1, "one per cycle")
+        let decision = try XCTUnwrap(loops.first)
+        XCTAssertEqual(enactor.decisionIds.count, 1, "one command")
+        XCTAssertEqual(enactor.decisionIds.first ?? nil, decision.id, "the dose carries the decision's id")
+        XCTAssertTrue(decision.errors.isEmpty)
+        XCTAssertNotNil(decision.automaticDoseRecommendation, "updateFrom: the recommendation")
+        XCTAssertEqual(decision.enactedTempBasal, enactor.calls.first?.tempBasal, "what went to the pod")
+        XCTAssertNotNil(decision.predictedGlucose, "updateFrom: the forecast")
+        XCTAssertNotNil(decision.insulinOnBoard)
+        XCTAssertFalse(decision.historicalGlucose?.isEmpty ?? true)
+        XCTAssertNotNil(decision.settings, "stock's settings reference")
+    }
+
+    /// A cycle that ends in error still stores its "loop" decision, with the error.
+    func testAnErrorCycleStillStoresALoopDecisionWithTheError() async throws {
+        let manager = await makeManager()
+        await seedGlucose(manager)
+        await report(manager, reconciledAt: Date().addingTimeInterval(-.minutes(20)))
+        let enactor = RecordingDoseEnactor()
+        manager.pumpManager = try makePump()
+        manager.doseEnactor = enactor
+        manager.setClosedLoopEnabled(true, reason: "test")
+
+        runLoop(manager)
+
+        let loops = try await storedDecisions(manager).filter { $0.reason == "loop" }
+        XCTAssertEqual(loops.count, 1, "stored on the error arm too")
+        let error = try XCTUnwrap(loops.first?.errors.first)
+        XCTAssertEqual(error.id, "missingDataError")
+        XCTAssertTrue(error.details?["detail"]?.contains("pumpDataTooOld") == true, "got \(String(describing: error.details))")
+        XCTAssertTrue(enactor.calls.isEmpty, "nothing sent")
+    }
+
+    /// Each cycle ends with the display run's "updateRemoteRecommendation" decision, forced, after
+    /// the cycle's "loop" decision: stock's pair.
+    func testACycleStoresAnUpdateRemoteRecommendationAfterItsLoopDecision() async throws {
+        let manager = await makeManager()
+        await seedGlucose(manager)
+        await report(manager)
+        manager.pumpManager = try makePump()
+
+        runLoop(manager)
+
+        let decisions = try await storedDecisions(manager)
+        let loopIndex = try XCTUnwrap(decisions.firstIndex { $0.reason == "loop" })
+        let remote = try XCTUnwrap(decisions[(loopIndex + 1)...].first { $0.reason == "updateRemoteRecommendation" },
+                                   "stored after the loop decision; got \(decisions.map(\.reason))")
+        XCTAssertNotNil(remote.predictedGlucose)
+        XCTAssertNotNil(remote.manualBolusRecommendation, "the display run's manual recommendation")
+        XCTAssertNotNil(remote.pumpManagerStatus)
+        XCTAssertNotNil(remote.controllerStatus)
+    }
+
+    /// Between loans (no pod) the watch stores no decisions: the phone is the controller.
+    func testWithoutAPodNoDecisionIsStored() async throws {
+        let manager = await makeManager()
+        await seedGlucose(manager)
+        await report(manager)
+
+        runLoop(manager)
+
+        let decisions = try await storedDecisions(manager)
+        XCTAssertTrue(decisions.isEmpty, "got \(decisions.map(\.reason))")
+    }
+
+    /// A wrist bolus stores stock's watchBolus decision (the recommendation shown, the amount, the
+    /// carb entry it came with) before the command, and the command carries its id.
+    func testAWristBolusStoresAWatchBolusDecisionWhoseIdTheBolusCarries() async throws {
+        let manager = await makeManager()
+        await seedGlucose(manager)
+        await report(manager)
+        manager.pumpManager = try makePump()
+        var commanded: (id: UUID?, units: Double)?
+        manager.enactBolusCommand = { _, decisionId, units, _, completion in
+            commanded = (decisionId, units)
+            completion(nil)
+        }
+        runDisplay(manager)
+        let meal = carbs(30)
+
+        let shown = expectation(description: "recommendation")
+        manager.recommendManualBolus(potentialCarbEntry: meal) { _ in shown.fulfill() }
+        await fulfillment(of: [shown], timeout: 20)
+
+        let accepted = expectation(description: "bolus")
+        manager.enactManualBolus(units: 1.0, activationType: .manualNoRecommendation, carbEntry: meal) { _ in accepted.fulfill() }
+        await fulfillment(of: [accepted], timeout: 20)
+        manager.dataAccessQueue.sync {}
+
+        let bolusDecisions = try await storedDecisions(manager).filter { $0.reason == "watchBolus" }
+        XCTAssertEqual(bolusDecisions.count, 1)
+        let decision = try XCTUnwrap(bolusDecisions.first)
+        XCTAssertEqual(try XCTUnwrap(commanded).id, decision.id, "the bolus carries the decision's id")
+        XCTAssertEqual(decision.manualBolusRequested, 1.0)
+        XCTAssertEqual(decision.carbEntry?.quantity.doubleValue(for: .gram) ?? 0, 30, accuracy: 0.001)
+        XCTAssertNotNil(decision.manualBolusRecommendation, "the recommendation shown with this carb entry")
+        XCTAssertNotNil(decision.predictedGlucose)
+        XCTAssertNotNil(decision.settings)
+    }
+
+    /// At a loan's close the decisions go home once, in one file: a second close sends only what
+    /// was stored since. Also logs the measured size.
+    func testALoansDecisionsGoHomeOnceAtItsClose() async throws {
+        let manager = await makeManager()
+        // The four hours the watch's glucose store keeps, varied as real readings are (a flat
+        // trace would encode smaller than any real one).
+        let latest = Date()
+        let readings: [NewGlucoseSample] = (0..<48).reversed().map { (i: Int) -> NewGlucoseSample in
+            let wave: Double = 40 * sin(Double(i) / 5)
+            let mgdl: Double = 180 + wave + Double(i % 7)
+            return NewGlucoseSample(date: latest.addingTimeInterval(-Double(i) * 5 * 60),
+                             quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl),
+                             condition: nil, trend: .flat, trendRate: nil, isDisplayOnly: false, wasUserEntered: false,
+                             syncIdentifier: "stock-runs-\(UUID().uuidString)")
+        }
+        _ = try await manager.glucoseStore.addGlucoseSamples(readings)
+        await report(manager)
+        manager.pumpManager = try makePump()
+        manager.doseEnactor = RecordingDoseEnactor()
+        manager.setClosedLoopEnabled(true, reason: "test")
+        runLoop(manager)
+        runLoop(manager)
+
+        let controller = PodLoanWatchController(loopManager: manager, journal: LoanEventJournal(directory: dir),
+                                                stateDirectory: dir.appendingPathComponent(UUID().uuidString, isDirectory: true))
+        let lock = NSLock()
+        var files: [(data: Data, metadata: [String: Any])] = []
+        controller.transferDosingDecisions = { data, metadata in
+            lock.lock(); files.append((data, metadata)); lock.unlock()
+            return true
+        }
+        func sendAndSettle() async {
+            controller.queue.sync { controller.sendDosingDecisionsHome(epoch: 7) }
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            controller.queue.sync {}
+        }
+
+        await sendAndSettle()
+        let stored = try await storedDecisions(manager)
+        XCTAssertEqual(files.count, 1, "one file")
+        let first = try LoanDosingDecisions.decode(try XCTUnwrap(files.first).data)
+        XCTAssertEqual(first.epoch, 7)
+        XCTAssertEqual(first.decisions.map(\.id), stored.map(\.id), "every decision, in the order stored")
+        XCTAssertEqual(files.first?.metadata["kind"] as? String, LoanDosingDecisions.fileKind)
+
+        let encoder = PropertyListEncoder()
+        encoder.outputFormat = .binary
+        for reason in ["loop", "updateRemoteRecommendation"] {
+            if let one = stored.first(where: { $0.reason == reason }) {
+                let size = try encoder.encode(one).count
+                print("[decision-size] \(reason): \(size) bytes (binary plist), \(try JSONEncoder().encode(one).count) bytes (JSON)")
+            }
+        }
+        print("[decision-size] file of \(first.decisions.count) decisions: \(files[0].data.count) bytes")
+
+        await sendAndSettle()
+        XCTAssertEqual(files.count, 1, "nothing new: no second file")
+
+        runLoop(manager)
+        await sendAndSettle()
+        XCTAssertEqual(files.count, 2)
+        let second = try LoanDosingDecisions.decode(files[1].data)
+        XCTAssertFalse(second.decisions.isEmpty)
+        XCTAssertTrue(Set(second.decisions.map(\.id)).isDisjoint(with: Set(first.decisions.map(\.id))), "only what was stored since")
     }
 
     @MainActor

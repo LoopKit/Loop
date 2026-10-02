@@ -225,6 +225,7 @@
 		4EBEFA1A38224E7E8CE432A7 /* WatchLoopManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B9D276E492E4C55A6858278 /* WatchLoopManager.swift */; };
 		4DDC23AB11E8E215F41D2E42 /* WatchLoopManager+Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9198C65DD7145352022F9854 /* WatchLoopManager+Diagnostics.swift */; };
 		7BE5EC4CA7BFBB16E8018091 /* WatchLoopManager+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5744C796822627F1C74D802F /* WatchLoopManager+Display.swift */; };
+		DEEBD7E5F70AA942BC1437A2 /* WatchLoopManager+DosingDecisions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEFD1862AFEBB55667FB9627 /* WatchLoopManager+DosingDecisions.swift */; };
 		C5247AB8EBF91BAC440F95DC /* WatchLoopManager+Glucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = C286C2D1E18B35177E020E34 /* WatchLoopManager+Glucose.swift */; };
 		99A92794C3DBB3888B340AE6 /* GlucoseAlertManager+Watch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446048F44BAE9C66B12394F4 /* GlucoseAlertManager+Watch.swift */; };
 		A9DE3D1E90432124BB5738B2 /* WatchLoopManager+GlucoseAlerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6E574D826158B33EE53EF6 /* WatchLoopManager+GlucoseAlerts.swift */; };
@@ -1192,6 +1193,7 @@
 		7B9D276E492E4C55A6858278 /* WatchLoopManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WatchLoopManager.swift; path = "WatchApp Extension/StockLoop/WatchLoopManager.swift"; sourceTree = SOURCE_ROOT; };
 		9198C65DD7145352022F9854 /* WatchLoopManager+Diagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+Diagnostics.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+Diagnostics.swift"; sourceTree = SOURCE_ROOT; };
 		5744C796822627F1C74D802F /* WatchLoopManager+Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+Display.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+Display.swift"; sourceTree = SOURCE_ROOT; };
+		AEFD1862AFEBB55667FB9627 /* WatchLoopManager+DosingDecisions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+DosingDecisions.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+DosingDecisions.swift"; sourceTree = SOURCE_ROOT; };
 		C286C2D1E18B35177E020E34 /* WatchLoopManager+Glucose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+Glucose.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+Glucose.swift"; sourceTree = SOURCE_ROOT; };
 		446048F44BAE9C66B12394F4 /* GlucoseAlertManager+Watch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GlucoseAlertManager+Watch.swift"; path = "WatchApp Extension/StockLoop/GlucoseAlertManager+Watch.swift"; sourceTree = SOURCE_ROOT; };
 		DC6E574D826158B33EE53EF6 /* WatchLoopManager+GlucoseAlerts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+GlucoseAlerts.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+GlucoseAlerts.swift"; sourceTree = SOURCE_ROOT; };
@@ -2628,6 +2630,7 @@
 				7B9D276E492E4C55A6858278 /* WatchLoopManager.swift */,
 				9198C65DD7145352022F9854 /* WatchLoopManager+Diagnostics.swift */,
 				5744C796822627F1C74D802F /* WatchLoopManager+Display.swift */,
+				AEFD1862AFEBB55667FB9627 /* WatchLoopManager+DosingDecisions.swift */,
 				C286C2D1E18B35177E020E34 /* WatchLoopManager+Glucose.swift */,
 				446048F44BAE9C66B12394F4 /* GlucoseAlertManager+Watch.swift */,
 				DC6E574D826158B33EE53EF6 /* WatchLoopManager+GlucoseAlerts.swift */,
@@ -4124,6 +4127,7 @@
 				4EBEFA1A38224E7E8CE432A7 /* WatchLoopManager.swift in Sources */,
 				4DDC23AB11E8E215F41D2E42 /* WatchLoopManager+Diagnostics.swift in Sources */,
 				7BE5EC4CA7BFBB16E8018091 /* WatchLoopManager+Display.swift in Sources */,
+				DEEBD7E5F70AA942BC1437A2 /* WatchLoopManager+DosingDecisions.swift in Sources */,
 				C5247AB8EBF91BAC440F95DC /* WatchLoopManager+Glucose.swift in Sources */,
 				99A92794C3DBB3888B340AE6 /* GlucoseAlertManager+Watch.swift in Sources */,
 				A9DE3D1E90432124BB5738B2 /* WatchLoopManager+GlucoseAlerts.swift in Sources */,

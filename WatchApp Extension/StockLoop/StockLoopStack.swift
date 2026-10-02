@@ -31,7 +31,8 @@ enum StockLoopStack {
             doseStore: stores.doseStore,
             glucoseStore: stores.glucoseStore,
             carbStore: stores.carbStore,
-            overrideHistory: stores.overrideHistory
+            overrideHistory: stores.overrideHistory,
+            dosingDecisionStore: stores.dosingDecisionStore
         )
 
         // The phone's next context brings a configuration if nothing was saved.
@@ -48,7 +49,7 @@ enum StockLoopStack {
 
     /// The watch's own stores. The directory name carries the LoopKit model version, since this
     /// and the stock watch app share a bundle id. Not read-only: this extension owns them.
-    static func makeStores() async -> (doseStore: DoseStore, glucoseStore: GlucoseStore, carbStore: CarbStore, overrideHistory: TemporaryScheduleOverrideHistory)? {
+    static func makeStores() async -> (doseStore: DoseStore, glucoseStore: GlucoseStore, carbStore: CarbStore, overrideHistory: TemporaryScheduleOverrideHistory, dosingDecisionStore: DosingDecisionStore)? {
         guard let documents = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true) else {
             SportLog.event("session", "STACK UNAVAILABLE — no documents directory")
             return nil
@@ -84,8 +85,12 @@ enum StockLoopStack {
             provenanceIdentifier: provenanceIdentifier
         )
 
+        // As stock `LoopAppManager` builds it. The watch's bundle sets no `LoopLocalCacheDurationDays`,
+        // so this resolves to the default, one day.
+        let dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: Bundle.main.localCacheDuration)
+
         SportLog.event("session", "stack: stores open")
-        return (doseStore, glucoseStore, carbStore, overrideHistory)
+        return (doseStore, glucoseStore, carbStore, overrideHistory, dosingDecisionStore)
     }
 
     /// Keeps ended overrides for the algorithm's lookback (about 18 h); the phone keeps 90 days.

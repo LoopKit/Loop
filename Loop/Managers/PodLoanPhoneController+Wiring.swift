@@ -321,6 +321,13 @@ extension WatchDataManager {
                 }
             },
 
+            addDosingDecisions: { [weak self] decisions, completion in
+                guard let store = self?.loopDataManager.dosingDecisionStore as? DosingDecisionStore else {
+                    return completion(.success(0))
+                }
+                PodLoanPhoneController.addNewDosingDecisions(decisions, to: store, completion: completion)
+            },
+
             insulinHistoryRewritten: { [weak self] earliestStart in
                 guard let self = self else { return }
 

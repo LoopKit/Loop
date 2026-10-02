@@ -203,3 +203,33 @@ extension LoanMessage {
         }
     }
 }
+
+/// The dosing decisions the watch stored during one loan, sent home once when the loan closes,
+/// as one background file (`transferFile`). Outside the envelope on purpose: a phone that does
+/// not know the file kind ignores it, where an unknown envelope kind would be nacked.
+public struct LoanDosingDecisions: Codable {
+    /// The file's `metadata["kind"]`.
+    public static let fileKind = "loan.dosingDecisions"
+
+    /// The loan the decisions belong to.
+    public let epoch: Int
+    public let decisions: [StoredDosingDecision]
+
+    public init(epoch: Int, decisions: [StoredDosingDecision]) {
+        self.epoch = epoch
+        self.decisions = decisions
+    }
+
+    public var fileMetadata: [String: Any] { ["kind": Self.fileKind, "epoch": epoch] }
+
+    /// A binary property list, as `DosingDecisionStore` stores each decision.
+    public func encoded() throws -> Data {
+        let encoder = PropertyListEncoder()
+        encoder.outputFormat = .binary
+        return try encoder.encode(self)
+    }
+
+    public static func decode(_ data: Data) throws -> LoanDosingDecisions {
+        try PropertyListDecoder().decode(LoanDosingDecisions.self, from: data)
+    }
+}

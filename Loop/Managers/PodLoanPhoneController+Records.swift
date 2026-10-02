@@ -350,6 +350,55 @@ extension PodLoanPhoneController {
         }
     }
 
+    /// The watch's dosing decisions for a loan, sent once when it closed (after a force reclaim,
+    /// whenever the watch learned it had ended). A loan this phone never granted or adopted is
+    /// ignored; an earlier loan's are kept, as a stale offer's doses are.
+    func handleWatchDosingDecisions(_ transfer: LoanDosingDecisions) {
+        deps.whenProtectedDataAvailable { [weak self] in
+            guard let self = self else { return }
+            self.queue.async {
+                guard transfer.epoch <= self.epoch else {
+                    self.handbackDiag(transfer.epoch, "dosing decisions IGNORED — \(transfer.decisions.count) for e\(transfer.epoch), a loan this phone (e\(self.epoch)) never granted")
+                    return
+                }
+                self.deps.addDosingDecisions(transfer.decisions) { [weak self] result in
+                    switch result {
+                    case .success(let added):
+                        self?.handbackDiag(transfer.epoch, "dosing decisions from the watch: \(added) of \(transfer.decisions.count) added (the rest already here)")
+                    case .failure(let error):
+                        self?.handbackDiag(transfer.epoch, "dosing decisions from the watch NOT added — \(error)")
+                    }
+                }
+            }
+        }
+    }
+
+    /// Adds the decisions this store does not already hold, by id, one batch at a time, so a
+    /// file delivered twice adds nothing the second time.
+    static func addNewDosingDecisions(_ decisions: [StoredDosingDecision], to store: DosingDecisionStore,
+                                      completion: @escaping (Result<Int, Error>) -> Void) {
+        dosingDecisionIntakeQueue.async {
+            let semaphore = DispatchSemaphore(value: 0)
+            var result: Result<Int, Error> = .success(0)
+            Task {
+                do {
+                    let present: [StoredDosingDecision] = try await store.findDosingDecisionsByIds(decisions.map(\.id))
+                    var seen = Set(present.map(\.id))
+                    let new = decisions.filter { seen.insert($0.id).inserted }
+                    try await store.addStoredDosingDecisions(dosingDecisions: new)
+                    result = .success(new.count)
+                } catch {
+                    result = .failure(error)
+                }
+                semaphore.signal()
+            }
+            semaphore.wait()
+            completion(result)
+        }
+    }
+
+    private static let dosingDecisionIntakeQueue = DispatchQueue(label: "com.loopkit.Loop.PodLoanPhoneController.dosingDecisionIntake")
+
     /// After a write: run any deferred force, then one coalesced offer.
     func drainAfterCommit() {
         if let reason = pendingForceReclaimReason {

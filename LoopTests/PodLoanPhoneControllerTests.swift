@@ -82,6 +82,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
     /// Every scheduled reminder, for its interruption level.
     var addedNotifications: [UNNotificationRequest] = []
     var bookedGapDoses: [DoseEntry] = []
+    /// Every batch of the watch's dosing decisions the controller handed to the store.
+    var addedDosingDecisions: [[StoredDosingDecision]] = []
     var deletedGapSyncs: [String] = []
     var gapDeleteSucceeds = true
     /// Virtual clock for the reclaim bars; only tests passing `now:` use it.
@@ -135,6 +137,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         urgentNoticeBodies = []
         addedNotifications = []
         bookedGapDoses = []
+        addedDosingDecisions = []
         deletedGapSyncs = []
         gapDeleteSucceeds = true
         sent = []
@@ -276,6 +279,11 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                 guard let self = self else { return completion(false) }
                 self.lock.lock(); self.deletedGapSyncs.append(sync); let ok = self.gapDeleteSucceeds; self.lock.unlock()
                 completion(ok)
+            },
+            addDosingDecisions: { [weak self] decisions, completion in
+                guard let self = self else { return completion(.success(0)) }
+                self.lock.lock(); self.addedDosingDecisions.append(decisions); self.lock.unlock()
+                completion(.success(decisions.count))
             },
             whenProtectedDataAvailable: whenProtectedDataAvailable,
             beginReclaimBackgroundTask: { [weak self] in
@@ -739,6 +747,51 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         waitUntil(timeout: 5, "audit verdict") { self.pauseCalls.last == false }
         XCTAssertEqual(openLoopCalls, 1, "unverifiable session opens the loop rather than resuming closed")
         XCTAssertTrue(urgentNotices.contains { $0.contains("Unverified") })
+    }
+
+    // MARK: - Dosing decisions from the watch
+
+    /// The decision ids the watch's doses carry reach the phone's dose entries, through the
+    /// hand-back's write.
+    func testWatchDoseDecisionIdsReachThePhonesDoseEntries() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        let at = Date().addingTimeInterval(-.minutes(10))
+        let bolusDecision = UUID(), tempDecision = UUID()
+        let bolus = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                              record: LoanDoseRecord(kind: .bolus, startDate: at, amount: 1.5, decisionId: bolusDecision),
+                              loggedAt: at)
+        let temp = LoanEvent(id: UUID(), seq: 2, provenance: .confirmed,
+                             record: LoanDoseRecord(kind: .tempBasal, startDate: at, endDate: at.addingTimeInterval(.minutes(5)),
+                                                    unitsPerHour: 2.0, decisionId: tempDecision),
+                             loggedAt: at)
+
+        let acked = expectSend()
+        let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil, odometer: nil,
+                                  events: [bolus, temp], tombstones: [], recovered: false)
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
+        wait(for: [acked], timeout: 5)
+        waitForState(controller, .owner)
+
+        let doses = addedDoses.flatMap { $0 }
+        XCTAssertEqual(doses.first { $0.type == .bolus }?.decisionId, bolusDecision)
+        XCTAssertEqual(doses.first { $0.type == .tempBasal }?.decisionId, tempDecision)
+    }
+
+    /// The watch's decisions for a loan this phone granted go to the store; a loan it never
+    /// granted (a later epoch) is ignored.
+    func testWatchDosingDecisionsAreAddedOnlyForALoanThisPhoneGranted() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        let decisions = [StoredDosingDecision(reason: "loop"), StoredDosingDecision(reason: "updateRemoteRecommendation")]
+
+        controller.handleWatchDosingDecisions(LoanDosingDecisions(epoch: grant.epoch + 1, decisions: decisions))
+        controller.handleWatchDosingDecisions(LoanDosingDecisions(epoch: grant.epoch, decisions: decisions))
+        waitUntil(timeout: 5, "the granted loan's decisions handed over") { self.lock.lock(); defer { self.lock.unlock() }; return !self.addedDosingDecisions.isEmpty }
+        settle()
+
+        XCTAssertEqual(addedDosingDecisions.count, 1, "only the granted loan's")
+        XCTAssertEqual(addedDosingDecisions.first?.map(\.id), decisions.map(\.id))
     }
 
     /// Yielding to an inferred loan closes the settle window, whose +12 s escalation would

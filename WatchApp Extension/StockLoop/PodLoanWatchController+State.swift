@@ -36,6 +36,8 @@ struct PodLoanWatchState: RawRepresentable {
     var deliveredAtTakeover: Double?
     /// The reunion token for a seized loan, echoed by every offer until the loan closes.
     var seizeToken: UUID?
+    /// The dosing decision store's query anchor as of the last decisions sent home.
+    var dosingDecisionsSent: [String: Any]?
 
     init() {}
 
@@ -47,6 +49,7 @@ struct PodLoanWatchState: RawRepresentable {
         grantedSettings = (rawValue["grantedSettings"] as? [String: Any]).flatMap(Self.grantedSettings(from:))
         deliveredAtTakeover = rawValue["deliveredAtTakeover"] as? Double
         seizeToken = (rawValue["seizeToken"] as? String).flatMap(UUID.init(uuidString:))
+        dosingDecisionsSent = rawValue["dosingDecisionsSent"] as? [String: Any]
     }
 
     var rawValue: [String: Any] {
@@ -63,6 +66,7 @@ struct PodLoanWatchState: RawRepresentable {
         }
         raw["deliveredAtTakeover"] = deliveredAtTakeover
         raw["seizeToken"] = seizeToken?.uuidString
+        raw["dosingDecisionsSent"] = dosingDecisionsSent
         return raw
     }
 

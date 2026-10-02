@@ -84,7 +84,7 @@ extension CarbAndBolusFlowViewModel {
         }
         if bolus > 0 {
             let units = bolus
-            session.stack.loopManager.enactManualBolus(units: units, activationType: activationType) { error in
+            session.stack.loopManager.enactManualBolus(units: units, activationType: activationType, carbEntry: carbEntry) { error in
                 if let error = error {
                     // No re-send: the carbs are already journaled.
                     WKInterfaceDevice.current().play(.failure)
@@ -100,7 +100,9 @@ extension CarbAndBolusFlowViewModel {
                     WKInterfaceDevice.current().play(.success)
                 }
             }
-        } else if carbEntry != nil {
+        } else if let carbEntry {
+            // Carbs alone: stock stores a watchBolus decision for these too.
+            session.stack.loopManager.storeWatchCarbsOnlyDosingDecision(carbEntry: carbEntry)
             WKInterfaceDevice.current().play(.success)
         }
     }

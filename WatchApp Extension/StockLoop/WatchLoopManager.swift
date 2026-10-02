@@ -14,6 +14,7 @@ import LoopKit
 import LoopAlgorithm
 import LoopCore
 import WatchConnectivity
+import WatchKit
 import os.log
 
 /// The cycle's failure vocabulary. The CYCLE VERDICT line reads these to say WHICH STAGE failed,
@@ -71,6 +72,10 @@ final class WatchLoopManager {
     let doseStore: DoseStore
     let glucoseStore: GlucoseStore
     let carbStore: CarbStore
+
+    /// Stock's dosing decisions, kept by the watch while it holds the pod; nil in suites that
+    /// do not look at them.
+    let dosingDecisionStore: DosingDecisionStore?
 
     let settingsProvider: WatchSettingsProvider
 
@@ -458,6 +463,7 @@ final class WatchLoopManager {
     /// (except in the simulator, which has its own ingest).
     init(doseStore: DoseStore, glucoseStore: GlucoseStore, carbStore: CarbStore,
          overrideHistory: TemporaryScheduleOverrideHistory = TemporaryScheduleOverrideHistory(),
+         dosingDecisionStore: DosingDecisionStore? = nil,
          settings: LoopSettings = LoopSettings(),
          defaults: UserDefaults = .standard, stateDirectory: URL? = nil) {
         self.defaults = defaults
@@ -472,6 +478,7 @@ final class WatchLoopManager {
         self.doseStore = doseStore
         self.glucoseStore = glucoseStore
         self.carbStore = carbStore
+        self.dosingDecisionStore = dosingDecisionStore
         self.settingsProvider = WatchSettingsProvider(settings: settings)
         self.overrideHistory = overrideHistory
         self.settings = settings
@@ -484,6 +491,9 @@ final class WatchLoopManager {
         // `DoseStoreDelegate` conformance.
         doseStore.delegate = self
         overrideHistory.delegate = self
+
+        // As stock: required for the device status in stored dosing decisions.
+        WKInterfaceDevice.current().isBatteryMonitoringEnabled = true
 
         // Stock `LoopDataManager`'s observers: a change in any of its stores refreshes the display run.
         let storeChanges: [(Notification.Name, AnyObject)] = [
@@ -638,6 +648,21 @@ final class WatchLoopManager {
 
     /// Say "idle, no pod" once per idle stretch instead of once per reading.
     var loggedIdleNoPump = false
+
+    /// Stock's `LoopDataManager.lastManualBolusRecommendation`: the display run's last manual
+    /// recommendation, so `updateRemoteRecommendation` stores only a change unless forced.
+    var lastManualBolusRecommendation: ManualBolusRecommendation?
+
+    /// Stock's `WatchDataManager.contextDosingDecisions`: the watchBolus decision built with each
+    /// recommendation the wrist was shown, by the carb entry it assumed; kept five minutes.
+    var contextDosingDecisions: [(date: Date, potentialCarbEntry: NewCarbEntry?, decision: StoredDosingDecision)] = []
+
+    /// The pod command for a manual bolus, as stock `DeviceDataManager.enactBolus` sends it; a
+    /// `var` so the suite can see the decision id it carries.
+    var enactBolusCommand: (PumpManager, _ decisionId: UUID?, _ units: Double, BolusActivationType,
+                            @escaping (PumpManagerError?) -> Void) -> Void = { pumpManager, decisionId, units, activationType, completion in
+        pumpManager.enactBolus(decisionId: decisionId, units: units, activationType: activationType, completion: completion)
+    }
 
 }
 

@@ -97,7 +97,7 @@ enum LoanReconciler {
                         startDate: event.record.startDate,
                         endDate: event.record.endDate ?? event.record.startDate,
                         value: units, unit: .units,
-                        decisionId: nil,
+                        decisionId: event.record.decisionId,
                         syncIdentifier: syncIdentifier(for: event),
                         automatic: event.record.automatic))
                 }
@@ -112,7 +112,7 @@ enum LoanReconciler {
                         startDate: event.record.startDate,
                         endDate: clampedEnd,
                         value: rate, unit: .unitsPerHour,
-                        decisionId: nil,
+                        decisionId: event.record.decisionId,
                         syncIdentifier: syncIdentifier(for: event)))
                 }
             case .carb:

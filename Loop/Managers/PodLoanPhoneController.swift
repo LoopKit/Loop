@@ -119,6 +119,10 @@ final class PodLoanPhoneController {
 
         var backfillDoses: (_ doses: [DoseEntry], _ completion: @escaping (Error?) -> Void) -> Void = { _, done in done(nil) }
 
+        /// The watch's dosing decisions into this phone's store, skipping any already there; the
+        /// result is how many were added.
+        var addDosingDecisions: (_ decisions: [StoredDosingDecision], _ completion: @escaping (Result<Int, Error>) -> Void) -> Void = { _, done in done(.success(0)) }
+
         /// After a back-dated insulin write; the counteraction memo is append-only.
         var insulinHistoryRewritten: (_ earliestDoseStart: Date) -> Void = { _ in }
 
@@ -235,17 +239,18 @@ final class PodLoanPhoneController {
         switch dose.type {
         case .bolus:
             return LoanDoseRecord(kind: .bolus, startDate: dose.startDate, endDate: dose.endDate, amount: dose.deliveredUnits ?? dose.programmedUnits,
-                                  syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType, automatic: dose.automatic)
+                                  syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType, automatic: dose.automatic,
+                                  decisionId: dose.decisionId)
         // Rate records carry delivered units: the pod floors to whole pulses.
         case .tempBasal:
 
             return LoanDoseRecord(kind: .tempBasal, startDate: dose.startDate, endDate: dose.endDate, unitsPerHour: dose.unitsPerHour,
                                   syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType,
-                                  deliveredUnits: dose.deliveredUnits)
+                                  deliveredUnits: dose.deliveredUnits, decisionId: dose.decisionId)
         case .suspend:
             return LoanDoseRecord(kind: .suspend, startDate: dose.startDate, endDate: dose.endDate, unitsPerHour: 0,
                                   syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType,
-                                  deliveredUnits: dose.deliveredUnits)
+                                  deliveredUnits: dose.deliveredUnits, decisionId: dose.decisionId)
         case .basal, .resume:
             return nil
         }

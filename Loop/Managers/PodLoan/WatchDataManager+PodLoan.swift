@@ -170,11 +170,20 @@ extension WatchDataManager {
         }
     }
 
-    /// The watch's log files. Copied at once (the system deletes the file on return) to Documents,
-    /// for AirDrop from the phone.
+    /// The watch's log files, copied at once (the system deletes the file on return) to Documents
+    /// for AirDrop from the phone; and a loan's dosing decisions, read at once for the store.
     nonisolated func session(_ session: WCSession, didReceive file: WCSessionFile) {
         guard FeatureFlags.sportModeEnabled else { return }
         lockedLastWatchContact.value = Date()   // the log pulse is the loan's heartbeat
+        if file.metadata?["kind"] as? String == LoanDosingDecisions.fileKind {
+            do {
+                let transfer = try LoanDosingDecisions.decode(Data(contentsOf: file.fileURL))
+                Task { @MainActor in self.podLoanController.handleWatchDosingDecisions(transfer) }
+            } catch {
+                PhoneLog.event("loan", "dosing decisions file from the watch UNREADABLE — \(error)")
+            }
+            return
+        }
         guard file.metadata?["kind"] as? String == "g7watch.log" else { return }
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let formatter = DateFormatter()

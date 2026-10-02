@@ -597,3 +597,154 @@ final class LoanProtocolV2Tests: XCTestCase {
         XCTAssertNil(LoanMessage.peekKind(transport: [:]))
     }
 }
+
+/// Stock's dosing decisions across a loan: the watch's come home once, the doses carry their
+/// ids, and the phone stores none of its own while the pod is lent.
+@MainActor
+final class LoanDosingDecisionTests: XCTestCase {
+
+    // MARK: - Decision ids on the wire
+
+    /// The id rides the dose record into the phone's dose entries; a record from an older peer,
+    /// without it, still decodes.
+    func testADoseRecordCarriesItsDecisionIdAndAnOlderRecordStillDecodes() throws {
+        let decisionId = UUID()
+        let at = Date(timeIntervalSince1970: 1_700_000_000)
+        let record = LoanDoseRecord(kind: .bolus, startDate: at, amount: 1.0, syncIdentifier: "0a0b", decisionId: decisionId)
+        let decoded = try LoanProtocol.decoder.decode(LoanDoseRecord.self, from: LoanProtocol.encoder.encode(record))
+        XCTAssertEqual(decoded.decisionId, decisionId)
+        XCTAssertEqual(record.seedDoseEntry(syncIdentifier: "0a0b")?.decisionId, decisionId, "the seed carries it")
+
+        let event = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed, record: record, loggedAt: at)
+        let outcome = LoanReconciler.reconcile(LoanReconciler.Input(events: [event], schedule: nil, loanStart: at.addingTimeInterval(-60),
+                                                                    loanEnd: at.addingTimeInterval(60), isFinalHandback: true))
+        XCTAssertEqual(outcome.doses.first?.decisionId, decisionId, "the reconciler carries it")
+
+        var older = try XCTUnwrap(JSONSerialization.jsonObject(with: LoanProtocol.encoder.encode(record)) as? [String: Any])
+        older["decisionId"] = nil
+        let fromOlder = try LoanProtocol.decoder.decode(LoanDoseRecord.self, from: JSONSerialization.data(withJSONObject: older))
+        XCTAssertNil(fromOlder.decisionId)
+        XCTAssertEqual(fromOlder.amount, 1.0)
+    }
+
+    // MARK: - The watch's decisions, added once
+
+    private func storedDecisions(_ store: DosingDecisionStore) async throws -> [StoredDosingDecision] {
+        try await withCheckedThrowingContinuation { continuation in
+            store.executeDosingDecisionQuery(fromQueryAnchor: nil, limit: 1000) { result in
+                switch result {
+                case .success(_, let decisions): continuation.resume(returning: decisions)
+                case .failure(let error): continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
+    private func add(_ decisions: [StoredDosingDecision], to store: DosingDecisionStore) async throws -> Int {
+        try await withCheckedThrowingContinuation { continuation in
+            PodLoanPhoneController.addNewDosingDecisions(decisions, to: store) { continuation.resume(with: $0) }
+        }
+    }
+
+    /// A file delivered twice, or twice at once, adds each decision once.
+    func testDecisionsFromTheWatchDeliveredTwiceAreAddedOnce() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let store = DosingDecisionStore(store: PersistenceController(directoryURL: directory), expireAfter: TimeInterval(24 * 3600))
+        let decisions = (0..<6).map { i in
+            StoredDosingDecision(date: Date().addingTimeInterval(Double(i - 6) * 300), reason: i % 2 == 0 ? "loop" : "updateRemoteRecommendation")
+        }
+
+        let first = try await add(decisions, to: store)
+        let again = try await add(decisions, to: store)
+        XCTAssertEqual(first, 6)
+        XCTAssertEqual(again, 0, "the second delivery adds nothing")
+
+        async let a = add(decisions + [StoredDosingDecision(reason: "loop")], to: store)
+        async let b = add(decisions, to: store)
+        _ = try await (a, b)
+
+        let stored = try await storedDecisions(store)
+        XCTAssertEqual(stored.count, 7)
+        XCTAssertEqual(Set(stored.map(\.id)).count, 7, "no id twice")
+        XCTAssertEqual(Array(stored.prefix(6)).map(\.id), decisions.map(\.id), "in the watch's order")
+    }
+
+    // MARK: - The phone's own decisions while the pod is lent
+
+    private var dosingDecisionStore: MockDosingDecisionStore!
+    private var glucoseStore: MockGlucoseStore!
+    private var loopDataManager: LoopDataManager!
+    private var deliveryDelegate: MockDeliveryDelegate!
+    private var lent = false
+
+    override func setUp() async throws {
+        let now = Date()
+        glucoseStore = MockGlucoseStore()
+        glucoseStore.storedGlucose = [StoredGlucoseSample(startDate: now.addingTimeInterval(-60), quantity: .glucose(value: 150))]
+        let doseStore = MockDoseStore()
+        doseStore.lastAddedPumpData = now
+
+        let settings = StoredSettings(
+            dosingEnabled: true,
+            glucoseTargetRangeSchedule: GlucoseRangeSchedule(unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: DoubleRange(minValue: 100, maxValue: 110))]),
+            maximumBasalRatePerHour: 6,
+            maximumBolus: 5,
+            suspendThreshold: GlucoseThreshold(unit: .milligramsPerDeciliter, value: 75),
+            basalRateSchedule: BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.0)]),
+            insulinSensitivitySchedule: InsulinSensitivitySchedule(unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 50)]),
+            carbRatioSchedule: CarbRatioSchedule(unit: .gram, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 10)]),
+            automaticDosingStrategy: .tempBasalOnly
+        )
+        let settingsProvider = MockSettingsProvider(settings: settings)
+        dosingDecisionStore = MockDosingDecisionStore()
+        loopDataManager = LoopDataManager(
+            lastLoopCompleted: now,
+            temporaryPresetsManager: TemporaryPresetsManager(settingsProvider: settingsProvider, presetHistory: TemporaryScheduleOverrideHistory()),
+            settingsProvider: settingsProvider,
+            doseStore: doseStore,
+            glucoseStore: glucoseStore,
+            carbStore: MockCarbStore(),
+            crashRecoveryManager: CrashRecoveryManager(alertIssuer: LoopDataManagerTests.MockAlertIssuer()),
+            dosingDecisionStore: dosingDecisionStore,
+            trustedTimeOffset: { 0 },
+            analyticsServicesManager: nil,
+            carbAbsorptionModel: .piecewiseLinear
+        )
+        deliveryDelegate = MockDeliveryDelegate()
+        deliveryDelegate.basalDeliveryState = .active(now.addingTimeInterval(-.hours(2)))
+        loopDataManager.deliveryDelegate = deliveryDelegate
+        lent = false
+        loopDataManager.isPumpConnectionReleased = { [unowned self] in self.lent }
+    }
+
+    override func tearDown() async throws {
+        loopDataManager = nil
+    }
+
+    /// While the pod is lent the phone's loop still runs, but stores neither its "loop" decision
+    /// nor an "updateRemoteRecommendation"; after reclaim it stores both again.
+    func testWhileThePodIsLentThePhoneStoresNoLoopDecisionsAndAfterReclaimItDoes() async {
+        lent = true
+        await loopDataManager.loop()
+        await loopDataManager.updateRemoteRecommendation(force: true)
+        XCTAssertEqual(dosingDecisionStore.dosingDecisions.map(\.reason), [], "none while lent")
+        XCTAssertNil(deliveryDelegate.lastEnact.tempBasal, "and nothing enacted, as before")
+
+        lent = false
+        await loopDataManager.loop()
+        XCTAssertEqual(dosingDecisionStore.dosingDecisions.map(\.reason), ["loop", "updateRemoteRecommendation"], "stored again after reclaim")
+    }
+
+    /// The error arm too: a cycle that fails while the pod is lent stores no decision.
+    func testWhileThePodIsLentAFailedCycleStoresNoDecision() async {
+        lent = true
+        glucoseStore.storedGlucose = []
+        await loopDataManager.loop()
+        XCTAssertTrue(dosingDecisionStore.dosingDecisions.isEmpty)
+
+        lent = false
+        await loopDataManager.loop()
+        XCTAssertEqual(dosingDecisionStore.dosingDecisions.first?.reason, "loop")
+        XCTAssertFalse(dosingDecisionStore.dosingDecisions.first?.errors.isEmpty ?? true, "the error arm stores, with the error")
+    }
+}

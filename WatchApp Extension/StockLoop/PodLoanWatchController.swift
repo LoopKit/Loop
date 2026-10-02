@@ -139,6 +139,10 @@ final class PodLoanWatchController {
     /// Transport seam: the controller is testable without WCSession.
     var send: (([String: Any]) -> Void)?
 
+    /// Background file transport for the loan's dosing decisions (`transferFile`); false when the
+    /// file could not be handed over.
+    var transferDosingDecisions: ((_ data: Data, _ metadata: [String: Any]) -> Bool)?
+
     /// Drops queued requests not yet transferring; returns how many.
     var cancelQueuedLoanRequests: (() -> Int)?
 

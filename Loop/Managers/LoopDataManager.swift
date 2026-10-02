@@ -791,7 +791,8 @@ final class LoopDataManager: ObservableObject {
                     self.logger.default("Not adjusting dosing during open loop.")
                 }
 
-                await dosingDecisionStore.storeDosingDecision(dosingDecision)
+                // While the pod is lent the watch stores this cycle's decisions; the phone stores none.
+                if !isPumpConnectionReleased() { await dosingDecisionStore.storeDosingDecision(dosingDecision) }
                 NotificationCenter.default.post(name: .LoopCycleCompleted, object: self)
 
             case .failure(let error):
@@ -801,7 +802,8 @@ final class LoopDataManager: ObservableObject {
             logger.error("loop() did error: %{public}@", String(describing: error))
             let loopError = error as? LoopError ?? .unknownError(error)
             dosingDecision.appendError(loopError)
-            await dosingDecisionStore.storeDosingDecision(dosingDecision)
+            // While the pod is lent the watch stores this cycle's decisions; the phone stores none.
+            if !isPumpConnectionReleased() { await dosingDecisionStore.storeDosingDecision(dosingDecision) }
             analyticsServicesManager?.loopDidError(error: loopError)
             NotificationCenter.default.post(name: .LoopCycleCompleted, object: self)
         }
@@ -880,6 +882,9 @@ final class LoopDataManager: ObservableObject {
     }
 
     func updateRemoteRecommendation(force: Bool = false) async {
+        // While the pod is lent the watch stores these decisions; the phone stores none.
+        guard !isPumpConnectionReleased() else { return }
+
         if lastManualBolusRecommendation == nil {
             lastManualBolusRecommendation = displayState.output?.recommendation?.manual
         }

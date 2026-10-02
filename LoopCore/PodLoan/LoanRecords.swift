@@ -68,12 +68,17 @@ public struct LoanDoseRecord: Codable, Equatable {
     public let overrideRaw: Data?
     /// Bolus only: enacted by the loop rather than confirmed by the user. Absent on older records.
     public let automatic: Bool?
+    /// The dose's `DoseEntry.decisionId`: the dosing decision that commanded it. Absent on older
+    /// records, and ignored by an older peer.
+    public let decisionId: UUID?
 
     public init(kind: Kind, startDate: Date, endDate: Date? = nil, unitsPerHour: Double? = nil,
                 amount: Double? = nil, absorptionTime: TimeInterval? = nil, note: String? = nil,
                 syncIdentifier: String? = nil, insulinType: InsulinType? = nil,
-                deliveredUnits: Double? = nil, overrideRaw: Data? = nil, automatic: Bool? = nil) {
+                deliveredUnits: Double? = nil, overrideRaw: Data? = nil, automatic: Bool? = nil,
+                decisionId: UUID? = nil) {
         self.automatic = automatic
+        self.decisionId = decisionId
         self.kind = kind
         self.startDate = startDate
         self.endDate = endDate
@@ -130,18 +135,18 @@ extension LoanDoseRecord {
         case .bolus:
             guard let units = amount else { return nil }
             return DoseEntry(type: .bolus, startDate: startDate, endDate: endDate ?? startDate,
-                             value: units, unit: .units, decisionId: nil, syncIdentifier: syncIdentifier, insulinType: insulinType,
+                             value: units, unit: .units, decisionId: decisionId, syncIdentifier: syncIdentifier, insulinType: insulinType,
                              automatic: automatic)
         case .tempBasal:
             guard let rate = unitsPerHour, let end = endDate else { return nil }
 
             return DoseEntry(type: .tempBasal, startDate: startDate, endDate: end,
-                             value: rate, unit: .unitsPerHour, decisionId: nil, deliveredUnits: deliveredUnits,
+                             value: rate, unit: .unitsPerHour, decisionId: decisionId, deliveredUnits: deliveredUnits,
                              syncIdentifier: syncIdentifier, insulinType: insulinType)
         case .suspend:
             guard let end = endDate else { return nil }
             return DoseEntry(type: .tempBasal, startDate: startDate, endDate: end,
-                             value: 0, unit: .unitsPerHour, decisionId: nil, deliveredUnits: deliveredUnits,
+                             value: 0, unit: .unitsPerHour, decisionId: decisionId, deliveredUnits: deliveredUnits,
                              syncIdentifier: syncIdentifier, insulinType: insulinType)
 
         case .carb, .carbDeleted, .overrideChange:

@@ -40,10 +40,12 @@ extension WatchLoopManager {
     /// trimmed at now (a bolus in flight counts whole), the recommendation type is the phone's
     /// dosing strategy, stock's glucose and pump-data recency checks run before the algorithm,
     /// the temp is rounded by the pump manager, and every cycle (both arms) ends with the display
-    /// run, `updateDisplayState`. `lastLoopCompleted` moves, as in stock, only on an error-free
+    /// run, `updateDisplayState`, which force-stores the "updateRemoteRecommendation" decision.
+    /// The "loop" decision is built and stored as stock builds it, on both arms, and its id goes to
+    /// the pod with the dose. `lastLoopCompleted` moves, as in stock, only on an error-free
     /// closed-loop cycle. Remaining differences from stock:
     /// - enact is gated on the watch's loop mode (`closedLoopEnabled`), not the phone's `dosingEnabled`;
-    /// - no `StoredDosingDecision` is stored; a CYCLE VERDICT line is logged instead;
+    /// - decisions are stored only while the pod is held (`storeDosingDecision`);
     /// - the dead-man watchdog (`LoopStallWatchdog`) is refreshed on any error-free cycle, open or
     ///   closed, with a pod held (stock's loop-failure notification keys off `lastLoopCompleted`);
     /// - the predicted-low alert reads the display run's forecast, as stock, but only after a
@@ -55,9 +57,15 @@ extension WatchLoopManager {
             self.lastLoopError = nil
             let startDate = self.now()
 
+            var dosingDecision = StoredDosingDecision(
+                date: startDate,
+                reason: "loop",
+                settings: StoredDosingDecision.Settings(self.settingsProvider.settings)
+            )
+
             var error: WatchLoopError? = nil
             if error == nil {
-                error = self.updatePredictedGlucoseAndRecommendedDose()
+                error = self.updatePredictedGlucoseAndRecommendedDose(dosingDecision: &dosingDecision)
             }
 
             if case .missingDataError(let what)? = error {
@@ -67,12 +75,22 @@ extension WatchLoopManager {
             let decided = self.recommendedAutomaticDose?.recommendation
             self.lastRecommendation = decided
             if error == nil, self._closedLoopEnabled {
-                error = self.enactRecommendedAutomaticDose()
+                // Read before the enact, which clears it on success.
+                let enacting = self.recommendedAutomaticDose
+                error = self.enactRecommendedAutomaticDose(decisionId: dosingDecision.id)
+                if error == nil {
+                    dosingDecision.enactedTempBasal = enacting?.enactTempBasal == true ? enacting?.recommendation.basalAdjustment : nil
+                    dosingDecision.enactedBolusAmount = enacting?.recommendation.bolusUnits
+                }
             } else if error == nil {
                 self.log.default("Advisory (open loop) — computed but not enacting.")
             }
 
             self.lastLoopError = error
+
+            // Both arms, as stock.
+            if let error { dosingDecision.appendError(error) }
+            self.storeDosingDecision(dosingDecision)
 
             // Open loop first: it still computes with no error, so later arms would report an unsent command.
             let enactVerdict: String
@@ -127,8 +145,9 @@ extension WatchLoopManager {
                 self.logPredictionBreakdown(decided: decided)
             }
 
-            // Both arms, as stock's `loop()` ends: the display run, then the stock pages' context.
-            self.updateDisplayStateOnQueue()
+            // Both arms, as stock's `loop()` ends: the display run, its forced
+            // "updateRemoteRecommendation" decision, then the stock pages' context.
+            self.updateDisplayStateOnQueue(forceStoreRemoteRecommendation: true)
 
             // Stock's predicted-low alert reads `LoopDataManager.predictedGlucose`, the display
             // run's forecast. Stock evaluates on both arms; the wrist keeps its compute-succeeded gate.
@@ -156,6 +175,15 @@ extension WatchLoopManager {
         }
 
         return pumpManager.roundToSupportedBasalRate(unitsPerHour: unitsPerHour)
+    }
+
+    /// Stock `DeviceDataManager.roundBolusVolume`: the pump manager's rounding.
+    func roundBolusVolume(units: Double) -> Double {
+        guard let pumpManager = pumpManager else {
+            return units
+        }
+
+        return pumpManager.roundToSupportedBolusVolume(units: units)
     }
 
     /// A labelled copy of stock `LoopDataManager.fetchData`: same parameters, same body, adapted
@@ -390,8 +418,9 @@ extension WatchLoopManager {
         return nil
     }
 
-    /// The body of stock `loop()` up to the enact: fetch, trim, check, run, round, decide.
-    func updatePredictedGlucoseAndRecommendedDose() -> WatchLoopError? {
+    /// The body of stock `loop()` up to the enact: fetch, trim, check, run, round, decide, and
+    /// fill the cycle's decision from the run (`updateFrom`) where stock does.
+    func updatePredictedGlucoseAndRecommendedDose(dosingDecision: inout StoredDosingDecision) -> WatchLoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         let loopBaseTime = now()
@@ -434,13 +463,20 @@ extension WatchLoopManager {
             return .missingDataError(String(describing: error))
 
         case .success(let recommendation):
-            guard var automatic = recommendation.automatic else {
+            guard let algoRecommendation = recommendation.automatic else {
                 recommendedAutomaticDose = nil
+                dosingDecision.updateFrom(input: input, output: output)
                 self.log.default("No dose recommended.")
                 return nil
             }
 
-            var basal = automatic.basalAdjustment
+            var recommendationToEnact = algoRecommendation
+            // Round bolus recommendation based on pump bolus precision
+            if let bolus = algoRecommendation.bolusUnits, bolus > 0 {
+                recommendationToEnact.bolusUnits = roundBolusVolume(units: bolus)
+            }
+
+            var basal = algoRecommendation.basalAdjustment
             basal.unitsPerHour = roundBasalRate(unitsPerHour: basal.unitsPerHour)
             let scheduledBasalRate = input.basal.closestPrior(to: loopBaseTime)?.value ?? 0
             let adjusted = basal.adjustForCurrentDelivery(
@@ -451,18 +487,25 @@ extension WatchLoopManager {
                 neutralBasalRateMatchesPump: overrideHistory.activeOverride(at: loopBaseTime) == nil
             )
 
+            if let adjusted {
+                recommendationToEnact.basalAdjustment = adjusted
+            }
+
+            // As stock: the decision records the recommendation as it will be enacted.
+            var output = output
+            output.recommendationResult = .success(.init(automatic: recommendationToEnact))
+            dosingDecision.updateFrom(input: input, output: output)
+
             // Stock's call: `continuationInterval` leaves a matching temp alone; `neutralBasalRateMatchesPump`
             // is false under an override. Nil means no command.
-            let bolusUnits = automatic.bolusUnits.flatMap { $0 > 0 ? $0 : nil }
+            let bolusUnits = recommendationToEnact.bolusUnits.flatMap { $0 > 0 ? $0 : nil }
+            var automatic = recommendationToEnact
             automatic.bolusUnits = bolusUnits
 
             guard adjusted != nil || bolusUnits != nil else {
                 recommendedAutomaticDose = nil
                 SportLog.event("dosemath", String(format: "no command needed — pod already at %.2f U/hr", basal.unitsPerHour))
                 return nil
-            }
-            if let adjusted {
-                automatic.basalAdjustment = adjusted
             }
 
             recommendedAutomaticDose = (recommendation: automatic, enactTempBasal: adjusted != nil, date: loopBaseTime)
@@ -487,7 +530,8 @@ extension WatchLoopManager {
 
     /// Stock's other triggers for the display run: a change in the carb, glucose or dose store, an
     /// override set or cleared, and the loop mode. No debounce, as stock. Only while a pod is held:
-    /// between loans the display run is not refreshed, as before. The run itself writes to no store.
+    /// between loans the display run is not refreshed, as before. The run writes to none of the
+    /// stores observed (only to the dosing decision store), so it cannot retrigger itself.
     func updateDisplayStateForChange() {
         dataAccessQueue.async {
             guard self.pumpManager != nil else { return }
@@ -495,7 +539,7 @@ extension WatchLoopManager {
         }
     }
 
-    func updateDisplayStateOnQueue() {
+    func updateDisplayStateOnQueue(forceStoreRemoteRecommendation: Bool = false) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
         let now = self.now()
 
@@ -516,6 +560,8 @@ extension WatchLoopManager {
 
         publishHUDContext()
         refreshGlanceData()
+
+        updateRemoteRecommendation(force: forceStoreRemoteRecommendation)
     }
 }
 
