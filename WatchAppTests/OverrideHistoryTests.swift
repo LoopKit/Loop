@@ -61,6 +61,34 @@ final class OverrideHistoryTests: XCTestCase {
         return manager
     }
 
+    private func makeController(overrideHistory: TemporaryScheduleOverrideHistory) async -> PodLoanWatchController {
+        let manager = await makeManager(overrideHistory: overrideHistory)
+        return PodLoanWatchController(loopManager: manager, journal: LoanEventJournal(directory: cacheDir),
+                                      stateDirectory: cacheDir)
+    }
+
+    /// A grant with complete settings. Its pump configuration is not a pump, so intake stops
+    /// (and tears down) after the overrides are applied.
+    private func grant(activeOverride: TemporaryScheduleOverride?) -> LoanGrant {
+        var settings = LoopSettings()
+        settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(
+            unit: .milligramsPerDeciliter,
+            dailyItems: [RepeatingScheduleValue(startTime: 0, value: DoubleRange(minValue: 100, maxValue: 110))])
+        settings.maximumBasalRatePerHour = 4
+        settings.maximumBolus = 10
+        let supplement: [String: Any] = [
+            "basalRateSchedule": BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.0)])!.rawValue,
+            "insulinSensitivitySchedule": InsulinSensitivitySchedule(
+                unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 50)])!.rawValue,
+            "carbRatioSchedule": CarbRatioSchedule(unit: .gram, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 10)])!.rawValue,
+        ]
+        func plist(_ value: Any) -> Data { try! PropertyListSerialization.data(fromPropertyList: value, format: .binary, options: 0) }
+        return LoanGrant(epoch: 1, expiresAt: Date().addingTimeInterval(300), pumpConfiguration: Data([1, 2, 3]),
+                         podAddress: 0, therapySettingsRaw: plist(settings.rawValue), settingsTimeZoneID: "GMT",
+                         doseHistory: [], activeOverrideRaw: activeOverride.map { plist($0.rawValue) },
+                         therapySettingsSupplementRaw: plist(supplement))
+    }
+
     /// Glucose for the last `hours`, every five minutes: the history starts there, not earlier.
     private func seedGlucose(_ manager: WatchLoopManager, hours: Double) async {
         let now = Date()
@@ -115,5 +143,48 @@ final class OverrideHistoryTests: XCTestCase {
         // Before, this trapped in CarbMath; now it runs.
         let output = LoopAlgorithm.run(input: input)
         XCTAssertFalse(output.predictedGlucose.isEmpty)
+    }
+
+    // MARK: - Ended overrides are kept
+
+    /// An override that expired during the loan still scales its minutes after a glance refresh,
+    /// which prunes the history; at LoopKit's 1-second default it was gone within a cycle.
+    func testAnOverrideThatEndedStillScalesItsMinutesAfterARefresh() async throws {
+        let manager = await makeManager(overrideHistory: StockLoopStack.makeOverrideHistory())
+        let now = Date()
+        await seedGlucose(manager, hours: 3)
+        manager.scheduleOverride = halfNeeds(start: now.addingTimeInterval(-.minutes(90)), duration: .hours(1))
+
+        _ = manager.basalRateScheduleApplyingOverrideHistory   // what every glance and HUD refresh reads
+        let input = try await manager.fetchAlgorithmInput(at: Date(), recommendationType: .tempBasal)
+
+        let during = now.addingTimeInterval(-.minutes(60))
+        XCTAssertEqual(try XCTUnwrap(value(input.basal, at: during)), 0.5, accuracy: 0.001, "basal halved for its minutes")
+        XCTAssertEqual(try XCTUnwrap(sensitivity(input, at: during)), 100, accuracy: 0.001, "ISF doubled")
+        XCTAssertEqual(try XCTUnwrap(value(input.carbRatio, at: during)), 20, accuracy: 0.001, "carb ratio doubled")
+        XCTAssertEqual(try XCTUnwrap(value(input.basal, at: now.addingTimeInterval(-.minutes(10)))), 1.0, accuracy: 0.001,
+                       "and nothing after it ended")
+    }
+
+    /// Each grant starts the history over, so an override the phone sends again cannot overlap an
+    /// event only this watch kept: LoopKit traps on overlapping overrides.
+    func testAGrantStartsTheHistoryOverSoAResentOverrideCannotOverlap() async throws {
+        let c = await makeController(overrideHistory: StockLoopStack.makeOverrideHistory())
+        let now = Date()
+        let granted = TemporaryScheduleOverride(context: .custom,
+                                                settings: TemporaryPresetSettings(unit: .milligramsPerDeciliter, targetRange: nil,
+                                                                                  insulinNeedsScaleFactor: 0.8),
+                                                startDate: now.addingTimeInterval(-.hours(3)), duration: .indefinite,
+                                                enactTrigger: .local, syncIdentifier: UUID())
+        // The last loan: granted, replaced on the wrist, cleared. The phone never heard of the wrist's.
+        c.loopManager.scheduleOverride = granted
+        c.loopManager.applyWristOverride(halfNeeds(start: now.addingTimeInterval(-.hours(2)), duration: .hours(3)))
+        c.loopManager.applyWristOverride(nil)
+
+        c.queue.sync { c.handleGrant(grant(activeOverride: granted)) }
+
+        _ = c.loopManager.basalRateScheduleApplyingOverrideHistory   // traps on an overlap
+        let kept = c.loopManager.overrideHistory.getOverrideHistory(startDate: now.addingTimeInterval(-.hours(4)), endDate: Date())
+        XCTAssertEqual(kept.map(\.syncIdentifier), [granted.syncIdentifier], "only what the phone sent")
     }
 }

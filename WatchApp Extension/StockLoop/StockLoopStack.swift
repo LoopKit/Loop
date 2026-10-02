@@ -60,7 +60,7 @@ enum StockLoopStack {
         let provenanceIdentifier = HKSource.default().bundleIdentifier
 
         // One override history: a second would dose unscaled while the screens showed the override.
-        let overrideHistory = TemporaryScheduleOverrideHistory()
+        let overrideHistory = makeOverrideHistory()
 
         SportLog.event("session", "stack: opening stores")
         let doseStore = await DoseStore(
@@ -86,5 +86,12 @@ enum StockLoopStack {
 
         SportLog.event("session", "stack: stores open")
         return (doseStore, glucoseStore, carbStore, overrideHistory)
+    }
+
+    /// Keeps ended overrides for the algorithm's lookback (about 18 h); the phone keeps 90 days.
+    /// The window is a LoopKit static that only the phone's `TemporaryPresetsManager` sets otherwise.
+    static func makeOverrideHistory() -> TemporaryScheduleOverrideHistory {
+        TemporaryScheduleOverrideHistory.relevantTimeWindow = .hours(24)
+        return TemporaryScheduleOverrideHistory()
     }
 }

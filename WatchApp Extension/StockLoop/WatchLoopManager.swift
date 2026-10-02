@@ -301,6 +301,16 @@ final class WatchLoopManager {
         scheduleOverride = override
     }
 
+    /// Replaces this watch's override history with the phone's, each at its own start, as stock
+    /// loads its history at launch. The active one becomes `scheduleOverride`.
+    func adoptOverrideHistory(_ overrides: [TemporaryScheduleOverride]) {
+        overrideHistory.recentEvents = []
+        for override in overrides.sorted(by: { $0.startDate < $1.startDate }) {
+            overrideHistory.recordOverride(override, at: override.startDate)
+        }
+        _scheduleOverride = overrideHistory.activeOverride(at: now())
+    }
+
     /// Eventual glucose split by effect. Diagnostic only; see `logPredictionBreakdown`.
     struct PredictionBreakdown {
         /// The latest STORED glucose, which is the row's left-hand side rather than the
