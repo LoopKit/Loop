@@ -485,6 +485,16 @@ extension WatchLoopManager {
         }
     }
 
+    /// Stock's other triggers for the display run: a change in the carb, glucose or dose store, an
+    /// override set or cleared, and the loop mode. No debounce, as stock. Only while a pod is held:
+    /// between loans the display run is not refreshed, as before. The run itself writes to no store.
+    func updateDisplayStateForChange() {
+        dataAccessQueue.async {
+            guard self.pumpManager != nil else { return }
+            self.updateDisplayStateOnQueue()
+        }
+    }
+
     func updateDisplayStateOnQueue() {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
         let now = self.now()

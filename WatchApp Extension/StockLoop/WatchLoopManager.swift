@@ -127,6 +127,8 @@ final class WatchLoopManager {
                 SportLog.event("override", "CLEARED — schedules resolve unscaled again")
             }
 
+            // As stock: an override change refreshes the display run.
+            updateDisplayStateForChange()
         }
     }
 
@@ -278,6 +280,9 @@ final class WatchLoopManager {
             SportLog.event("loop", enabled ? "CLOSED \(reason) — the watch will adjust basal" : "OPENED \(reason) — advisory only, no dosing")
 
             self.publishHUDContext()
+
+            // As stock: a change of loop mode refreshes the display run.
+            if wasEnabled != enabled { self.updateDisplayStateForChange() }
 
             guard wasEnabled, !enabled else { return }
             let recommendation = AutomaticDoseRecommendation(basalAdjustment: .cancel, direction: .decrease)
@@ -479,6 +484,18 @@ final class WatchLoopManager {
         // `DoseStoreDelegate` conformance.
         doseStore.delegate = self
         overrideHistory.delegate = self
+
+        // Stock `LoopDataManager`'s observers: a change in any of its stores refreshes the display run.
+        let storeChanges: [(Notification.Name, AnyObject)] = [
+            (CarbStore.carbEntriesDidChange, carbStore),
+            (GlucoseStore.glucoseSamplesDidChange, glucoseStore),
+            (DoseStore.valuesDidChange, doseStore),
+        ]
+        for (name, store) in storeChanges {
+            NotificationCenter.default.addObserver(forName: name, object: store, queue: nil) { [weak self] _ in
+                self?.updateDisplayStateForChange()
+            }
+        }
         #if !targetEnvironment(simulator)
 
         NotificationCenter.default.addObserver(forName: LoopDataManager.didUpdateContextNotification,

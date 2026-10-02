@@ -6,7 +6,8 @@
 //  (`loop()`), the recommended bolus (`recommendManualBolus`) and the display run
 //  (`updateDisplayState`). Each run's result lands under its own name, so the glance reads the
 //  display run, the diagnostics page the loop's, and the bolus run changes nothing displayed.
-//  Also stock `loop()`'s recency checks, rounding, enact refusals and `lastLoopCompleted`.
+//  Also stock `loop()`'s recency checks, rounding, enact refusals and `lastLoopCompleted`, and
+//  the display run's refresh on a store change, as stock's observers do.
 //
 
 import XCTest
@@ -476,6 +477,75 @@ final class StockRunsTests: XCTestCase {
         XCTAssertNil(manager.glanceData().lastLoopErrorText)
         XCTAssertFalse(enactor.calls.isEmpty, "the temp was enacted")
         XCTAssertGreaterThanOrEqual(try XCTUnwrap(manager.lastLoopCompleted), before)
+    }
+
+    // MARK: - The display run refreshes when stock's does
+
+    /// Polls the display run, with no loop cycle, until `condition` holds.
+    private func waitForDisplay(_ manager: WatchLoopManager, _ label: String, timeout: TimeInterval = 10,
+                                _ condition: @escaping (AlgorithmDisplayState) -> Bool) async {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if manager.dataAccessQueue.sync(execute: { condition(manager.displayState) }) { return }
+            try? await Task.sleep(nanoseconds: 50_000_000)
+        }
+        XCTFail(label)
+    }
+
+    /// A bolus lands in the dose store: the glance IOB follows without waiting for a cycle.
+    func testADoseStoreChangeUpdatesTheGlanceIOBWithoutALoopCycle() async throws {
+        let manager = await makeManager()
+        manager.pumpManager = try makePump()
+        await seedGlucose(manager)
+        await report(manager)
+        runDisplay(manager)
+        let before = manager.glanceData().iob ?? 0
+
+        let now = Date()
+        await report(manager, [bolus(2.0, start: now.addingTimeInterval(-60), end: now)])
+
+        await waitForDisplay(manager, "the dose store's change refreshed the display run") {
+            ($0.activeInsulin?.value ?? 0) > before + 1.5
+        }
+        XCTAssertGreaterThan(manager.glanceData().iob ?? 0, before + 1.5, "the glance reads it")
+        XCTAssertNil(loopInput(manager), "no loop cycle ran")
+    }
+
+    /// A carb entry lands in the carb store: the glance COB follows without waiting for a cycle.
+    func testACarbEntryUpdatesTheGlanceCOBWithoutALoopCycle() async throws {
+        let manager = await makeManager()
+        manager.pumpManager = try makePump()
+        await seedGlucose(manager)
+        await report(manager)
+        runDisplay(manager)
+        XCTAssertEqual(manager.dataAccessQueue.sync { manager.displayState.activeCarbs?.value } ?? 0, 0, accuracy: 0.01)
+
+        _ = try await manager.carbStore.addCarbEntry(carbs(30))
+
+        await waitForDisplay(manager, "the carb store's change refreshed the display run") {
+            ($0.activeCarbs?.value ?? 0) > 20
+        }
+        let done = expectation(description: "glance COB")
+        var cob: Double?
+        manager.glanceCarbsOnBoard { cob = $0; done.fulfill() }
+        await fulfillment(of: [done], timeout: 5)
+        XCTAssertGreaterThan(try XCTUnwrap(cob), 20, "the glance reads it")
+        XCTAssertNil(loopInput(manager), "no loop cycle ran")
+    }
+
+    /// Between loans (no pod) a store change does not refresh the display run, as before.
+    func testBetweenLoansAStoreChangeLeavesTheDisplayRunAlone() async throws {
+        let manager = await makeManager()
+        await seedGlucose(manager)
+        await report(manager)
+        runDisplay(manager)
+        let before = manager.dataAccessQueue.sync { manager.displayState.input?.predictionStart }
+
+        let now = Date()
+        await report(manager, [bolus(2.0, start: now.addingTimeInterval(-60), end: now)])
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        XCTAssertEqual(manager.dataAccessQueue.sync { manager.displayState.input?.predictionStart }, before)
     }
 
     @MainActor
