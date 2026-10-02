@@ -64,10 +64,10 @@ enum LoanReconciler {
         var overrideChange: OverrideChange?
     }
 
-    /// `.cleared` is a deliberate change, not missing information.
+    /// `.cleared` is a deliberate change, not missing information. `at`: when the wrist made it.
     enum OverrideChange: Equatable {
-        case set(TemporaryScheduleOverride)
-        case cleared
+        case set(TemporaryScheduleOverride, at: Date)
+        case cleared(at: Date)
     }
 
     /// Events are processed in the order given; carbs and overrides depend on it.
@@ -142,9 +142,9 @@ enum LoanReconciler {
             case .overrideChange:
 
                 if event.record.overrideChangeIsClear {
-                    outcome.overrideChange = .cleared
+                    outcome.overrideChange = .cleared(at: event.record.startDate)
                 } else if let override = event.record.overrideChangePayload {
-                    outcome.overrideChange = .set(override)
+                    outcome.overrideChange = .set(override, at: event.record.startDate)
                 }
 
                 break

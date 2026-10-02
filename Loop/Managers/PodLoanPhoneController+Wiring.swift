@@ -132,9 +132,8 @@ extension WatchDataManager {
             scheduleOverride: { [weak self] in
                 self?.temporaryPresetsManager.scheduleOverride
             },
-            applyScheduleOverride: { [weak self] override in
-
-                self?.temporaryPresetsManager.scheduleOverride = override
+            applyScheduleOverride: { [weak self] override, changedAt in
+                self?.temporaryPresetsManager.setScheduleOverride(override, changedAt: changedAt)
             },
 
             // The wrist's loop mode coming home; a settings write, so via main.
@@ -344,5 +343,14 @@ extension WatchDataManager {
             lastWatchContactAt: { [weak self] in self?.lockedLastWatchContact.value ?? nil },
             latestGlucoseDate: { [weak self] in self?.deviceManager.glucoseStore.latestGlucose?.startDate }
         ))
+    }
+}
+
+extension TemporaryPresetsManager {
+    /// The setter, with the history recording the change at `date` rather than now; the setter's
+    /// own record then finds nothing left to do.
+    func setScheduleOverride(_ override: TemporaryScheduleOverride?, changedAt date: Date) {
+        presetHistory.recordOverride(override, at: date)
+        scheduleOverride = override
     }
 }

@@ -73,7 +73,8 @@ final class PodLoanPhoneController {
 
         /// Read and write: the reader tells a clear from the wrist whether there is anything to clear.
         var scheduleOverride: () -> TemporaryScheduleOverride? = { nil }
-        var applyScheduleOverride: (TemporaryScheduleOverride?) -> Void = { _ in }
+        /// Recorded in the override history at `changedAt`, when the wrist made the change.
+        var applyScheduleOverride: (TemporaryScheduleOverride?, _ changedAt: Date) -> Void = { _, _ in }
 
         var noteWatchClosedLoop: (Bool) -> Void = { _ in }
 

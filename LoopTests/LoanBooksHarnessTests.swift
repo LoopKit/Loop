@@ -1242,7 +1242,7 @@ final class LoanOverrideTests: XCTestCase {
         let soloOutcome = LoanReconciler.reconcile(LoanReconciler.Input(
             events: [LoanEvent(id: UUID(), seq: 1, provenance: .confirmed, record: decodedClear, loggedAt: now)],
             schedule: baseBasal, loanStart: now.addingTimeInterval(-.hours(1)), loanEnd: now))
-        XCTAssertEqual(soloOutcome.overrideChange, .cleared)
+        XCTAssertEqual(soloOutcome.overrideChange, .cleared(at: decodedClear.startDate), "stamped with the wrist's time")
         XCTAssertTrue(soloOutcome.doses.isEmpty, "an override record is not dose accounting")
 
         // Set THEN clear in one drain → cleared (last wins; no resurrection).
@@ -1254,7 +1254,7 @@ final class LoanOverrideTests: XCTestCase {
         let pairOutcome = LoanReconciler.reconcile(LoanReconciler.Input(
             events: [setEvent, clearEvent], schedule: baseBasal,
             loanStart: now.addingTimeInterval(-.hours(1)), loanEnd: now))
-        XCTAssertEqual(pairOutcome.overrideChange, .cleared,
+        XCTAssertEqual(pairOutcome.overrideChange, .cleared(at: now),
                        "set→clear in one drain must land as CLEARED — the reverse would resurrect a cancelled override")
 
         // And a drain with no override record at all leaves the phone's override alone.
@@ -1277,8 +1277,10 @@ final class LoanOverrideTests: XCTestCase {
         defer { harness.tearDown() }
         let record = LoanDoseRecord.overrideChange(override, at: now, note: "🏃 Exercise")
         let event = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed, record: record, loggedAt: now)
-        harness.deliverFinalOffer(events: [event], at: now)
+        harness.deliverFinalOffer(events: [event], at: now.addingTimeInterval(.hours(1)))
         XCTAssertEqual(harness.applied.count, 1, "the first drain applies the wrist override")
+        XCTAssertEqual(harness.appliedAt.first?.timeIntervalSince(now) ?? .infinity, 0, accuracy: 0.01,
+                       "at the time the wrist set it, not the hand-back an hour later")
         XCTAssertTrue(harness.phoneOverride?.syncIdentifier == override.syncIdentifier,
                       "and the phone ends up holding exactly the wrist's override")
 
@@ -1313,6 +1315,15 @@ final class LoanOverrideTests: XCTestCase {
         XCTAssertEqual(liveHarness.applied.count, 1)
         XCTAssertNil(liveHarness.applied.first ?? nil, "the clear applies nil")
         XCTAssertNil(liveHarness.phoneOverride)
+
+        // (d) A clear made before the phone's own override started does not end it.
+        let newerHarness = PhoneOverrideHarness()
+        defer { newerHarness.tearDown() }
+        newerHarness.phoneOverride = override
+        let olderClear = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                                   record: .overrideChange(nil, at: now.addingTimeInterval(-60)), loggedAt: now)
+        newerHarness.deliverFinalOffer(events: [olderClear], at: now)
+        XCTAssertTrue(newerHarness.applied.isEmpty, "the phone's newer override stands")
     }
 
     /// 4. A wrist-set override rescales schedules like a granted one (same history mechanism).
@@ -1366,8 +1377,9 @@ final class LoanOverrideTests: XCTestCase {
 /// The real `PodLoanPhoneController` in LOANED via persisted state, capturing override applies.
 private final class PhoneOverrideHarness {
 
-    /// Every applyScheduleOverride call, in order (`nil` element = a clear).
+    /// Every applyScheduleOverride call, in order (`nil` element = a clear), and its change time.
     private(set) var applied: [TemporaryScheduleOverride?] = []
+    private(set) var appliedAt: [Date] = []
     /// Stands in for the phone's LoopSettings.scheduleOverride — read by the idempotency check,
     /// written by the apply, exactly as `mutateSettings { $0.scheduleOverride = … }` does.
     var phoneOverride: TemporaryScheduleOverride?
@@ -1399,10 +1411,11 @@ private final class PhoneOverrideHarness {
             addCarb: { _, _, completion in completion(nil) },
             // Read by the controller's "already applied?" check.
             scheduleOverride: { [weak self] in self?.phoneOverride },
-            applyScheduleOverride: { [weak self] override in
+            applyScheduleOverride: { [weak self] override, changedAt in
                 guard let self = self else { return }
                 self.lock.lock()
                 self.applied.append(override)
+                self.appliedAt.append(changedAt)
                 self.phoneOverride = override
                 self.lock.unlock()
             },

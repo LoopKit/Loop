@@ -361,19 +361,20 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// Idempotent by the override's identifier; a clear is skipped when the phone holds none.
+    /// Idempotent by the override's identifier; a clear is skipped when the phone holds none, or
+    /// one newer than the clear.
     private func applyWatchOverride(_ change: LoanReconciler.OverrideChange, epoch: Int, isFinal: Bool) {
         let current = deps.scheduleOverride()
         let phase = isFinal ? "final" : "interim"
         switch change {
-        case .set(let override):
+        case .set(let override, let changedAt):
             guard current?.syncIdentifier != override.syncIdentifier else {
                 os_log("[override] from watch: SKIPPED — %{public}@ already applied (sync %{public}@)",
                        log: log, type: .default, Self.overrideNameForLog(override), override.syncIdentifier.uuidString)
                 handbackDiag(epoch, "[override] SKIPPED (already applied) \(Self.overrideNameForLog(override))")
                 return
             }
-            deps.applyScheduleOverride(override)
+            deps.applyScheduleOverride(override, changedAt)
             let ends = override.duration.isInfinite ? "indefinite" : ISO8601DateFormatter().string(from: override.scheduledEndDate)
             os_log("[override] from watch: APPLIED %{public}@ · insulin needs %.0f%% · target %{public}@ · ends %{public}@ · sync %{public}@ (%{public}@ drain)",
                    log: log, type: .default, Self.overrideNameForLog(override),
@@ -383,16 +384,21 @@ extension PodLoanPhoneController {
                                        Self.overrideNameForLog(override),
                                        override.settings.effectiveInsulinNeedsScaleFactor * 100,
                                        Self.targetForLog(override), ends, phase))
-        case .cleared:
-            guard current != nil else {
+        case .cleared(let changedAt):
+            guard let current else {
                 os_log("[override] from watch: SKIPPED clear — the phone holds no override", log: log, type: .default)
                 handbackDiag(epoch, "[override] SKIPPED clear (phone already has none)")
                 return
             }
-            deps.applyScheduleOverride(nil)
+            guard current.startDate <= changedAt else {
+                os_log("[override] from watch: SKIPPED clear — the phone's override is newer", log: log, type: .default)
+                handbackDiag(epoch, "[override] SKIPPED clear (phone's override started after it)")
+                return
+            }
+            deps.applyScheduleOverride(nil, changedAt)
             os_log("[override] from watch: CLEARED %{public}@ — phone schedules resolve unscaled again (%{public}@ drain)",
-                   log: log, type: .default, current.map(Self.overrideNameForLog) ?? "—", phase)
-            handbackDiag(epoch, "[override] CLEARED \(current.map(Self.overrideNameForLog) ?? "—") (\(phase) drain)")
+                   log: log, type: .default, Self.overrideNameForLog(current), phase)
+            handbackDiag(epoch, "[override] CLEARED \(Self.overrideNameForLog(current)) (\(phase) drain)")
         }
     }
 
