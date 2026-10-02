@@ -130,12 +130,13 @@ final class G7RelayDedupTests: XCTestCase {
         wrist.installCGMManager(g7, builtFrom: nil)
 
         // The phone's reading, relayed under the phone's name (G7CGMManager: activation hours,
-        // sensor ID, sensor timestamp).
+        // sensor ID, sensor timestamp). The hours are computed as the kit does, minutes then
+        // hours: `t / 3600` rounds differently for about a quarter of timestamps.
         let reading = message("4e00c35501002601000106008a00060187000f")
         let relayed = try XCTUnwrap(WatchContext(
             glucose: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 138),
             glucoseDate: activatedAt.addingTimeInterval(TimeInterval(reading.glucoseTimestamp)),
-            glucoseSyncIdentifier: "\(activatedAt.timeIntervalSince1970 / 3600) DXCMQj \(reading.glucoseTimestamp)"
+            glucoseSyncIdentifier: "\(activatedAt.timeIntervalSince1970 / 60 / 60) DXCMQj \(reading.glucoseTimestamp)"
         ).newGlucoseSample)
         _ = try await glucoseStore.addGlucoseSamples([relayed])
 
