@@ -171,16 +171,16 @@ extension WatchDataManager {
     }
 
     /// The watch's log files, copied at once (the system deletes the file on return) to Documents
-    /// for AirDrop from the phone; and a loan's dosing decisions, read at once for the store.
+    /// for AirDrop from the phone; and a loan's history, read at once for the stores.
     nonisolated func session(_ session: WCSession, didReceive file: WCSessionFile) {
         guard FeatureFlags.sportModeEnabled else { return }
         lockedLastWatchContact.value = Date()   // the log pulse is the loan's heartbeat
-        if file.metadata?["kind"] as? String == LoanDosingDecisions.fileKind {
+        if file.metadata?["kind"] as? String == LoanHistory.fileKind {
             do {
-                let transfer = try LoanDosingDecisions.decode(Data(contentsOf: file.fileURL))
-                Task { @MainActor in self.podLoanController.handleWatchDosingDecisions(transfer) }
+                let transfer = try LoanHistory.decode(Data(contentsOf: file.fileURL))
+                Task { @MainActor in self.podLoanController.handleWatchLoanHistory(transfer) }
             } catch {
-                PhoneLog.event("loan", "dosing decisions file from the watch UNREADABLE — \(error)")
+                PhoneLog.event("loan", "loan history file from the watch UNREADABLE — \(error)")
             }
             return
         }

@@ -123,6 +123,10 @@ final class PodLoanPhoneController {
         /// result is how many were added.
         var addDosingDecisions: (_ decisions: [StoredDosingDecision], _ completion: @escaping (Result<Int, Error>) -> Void) -> Void = { _, done in done(.success(0)) }
 
+        /// The watch's alert records into this phone's `AlertStore`, one per sync identifier; the
+        /// result is how many were added or updated.
+        var addAlerts: (_ alerts: [SyncAlertObject], _ completion: @escaping (Result<Int, Error>) -> Void) -> Void = { _, done in done(.success(0)) }
+
         /// After a back-dated insulin write; the counteraction memo is append-only.
         var insulinHistoryRewritten: (_ earliestDoseStart: Date) -> Void = { _ in }
 

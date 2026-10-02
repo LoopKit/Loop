@@ -97,24 +97,24 @@ final class StockLoopSession {
             })
         }
 
-        // The loan's dosing decisions, one queued file at close. Files whose transfer has finished
-        // are removed first; the system may still be reading one that is outstanding.
-        loanController.transferDosingDecisions = { data, metadata in
+        // The loan's history, one queued file at close. Files whose transfer has finished are
+        // removed first; the system may still be reading one that is outstanding.
+        loanController.transferLoanHistory = { data, metadata in
             let session = WCSession.default
             guard session.activationState == .activated,
                   let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return false }
-            let directory = caches.appendingPathComponent("LoanDosingDecisions", isDirectory: true)
+            let directory = caches.appendingPathComponent("LoanHistory", isDirectory: true)
             let outstanding = Set(session.outstandingFileTransfers.map { $0.file.fileURL.lastPathComponent })
             for old in (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
             where !outstanding.contains(old.lastPathComponent) {
                 try? FileManager.default.removeItem(at: old)
             }
-            let url = directory.appendingPathComponent("decisions-\(UUID().uuidString).plist")
+            let url = directory.appendingPathComponent("history-\(UUID().uuidString).plist")
             do {
                 try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
                 try data.write(to: url)
             } catch {
-                SportLog.event("wc", "dosing decisions file NOT written — \(error.localizedDescription)")
+                SportLog.event("wc", "loan history file NOT written — \(error.localizedDescription)")
                 return false
             }
             session.transferFile(url, metadata: metadata)

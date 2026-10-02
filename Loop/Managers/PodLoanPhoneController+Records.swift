@@ -350,15 +350,17 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// The watch's dosing decisions for a loan, sent once when it closed (after a force reclaim,
-    /// whenever the watch learned it had ended). A loan this phone never granted or adopted is
-    /// ignored; an earlier loan's are kept, as a stale offer's doses are.
-    func handleWatchDosingDecisions(_ transfer: LoanDosingDecisions) {
+    /// What the watch recorded in stock's stores for a loan (its dosing decisions and alerts),
+    /// sent once when the loan closed (after a force reclaim, whenever the watch learned it had
+    /// ended). A loan this phone never granted or adopted is ignored; an earlier loan's are kept,
+    /// as a stale offer's doses are.
+    func handleWatchLoanHistory(_ transfer: LoanHistory) {
         deps.whenProtectedDataAvailable { [weak self] in
             guard let self = self else { return }
             self.queue.async {
+                let alerts = transfer.alerts ?? []
                 guard transfer.epoch <= self.epoch else {
-                    self.handbackDiag(transfer.epoch, "dosing decisions IGNORED — \(transfer.decisions.count) for e\(transfer.epoch), a loan this phone (e\(self.epoch)) never granted")
+                    self.handbackDiag(transfer.epoch, "loan history IGNORED — \(transfer.decisions.count) dosing decision(s), \(alerts.count) alert(s) for e\(transfer.epoch), a loan this phone (e\(self.epoch)) never granted")
                     return
                 }
                 self.deps.addDosingDecisions(transfer.decisions) { [weak self] result in
@@ -367,6 +369,15 @@ extension PodLoanPhoneController {
                         self?.handbackDiag(transfer.epoch, "dosing decisions from the watch: \(added) of \(transfer.decisions.count) added (the rest already here)")
                     case .failure(let error):
                         self?.handbackDiag(transfer.epoch, "dosing decisions from the watch NOT added — \(error)")
+                    }
+                }
+                guard !alerts.isEmpty else { return }
+                self.deps.addAlerts(alerts) { [weak self] result in
+                    switch result {
+                    case .success(let changed):
+                        self?.handbackDiag(transfer.epoch, "alerts from the watch: \(changed) of \(alerts.count) added or updated (the rest already here)")
+                    case .failure(let error):
+                        self?.handbackDiag(transfer.epoch, "alerts from the watch NOT added — \(error)")
                     }
                 }
             }

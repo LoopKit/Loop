@@ -253,7 +253,7 @@ extension PodLoanWatchController {
                                                    sendsErrored: self.handbackSawUrgentSendError)
                 SportLog.event("loan", "drain GIVING UP after \(self.handbackResendCount) unacked offer(s) [\(wedge)] — the phone owns the pod and has already committed these records; closing to idle")
                 self.resendWorkItem?.cancel()
-                if let closing = self.epoch ?? self.journal.activeEpoch { self.sendDosingDecisionsHome(epoch: closing) }
+                if let closing = self.epoch ?? self.journal.activeEpoch { self.sendLoanHistoryHome(epoch: closing) }
                 self.teardownPump()
                 self.journal.end()
                 // Closed in one save; the token goes too, or the next loan is mistaken for a seized one.
@@ -317,7 +317,7 @@ extension PodLoanWatchController {
         teardownPump()
         SportLog.event("loan", String(format: "pod BLE teardown returned in %.2fs — the phone's standing connect can land from here",
                                       self.now().timeIntervalSince(releaseBegan)))
-        sendDosingDecisionsHome(epoch: current)
+        sendLoanHistoryHome(epoch: current)
         // Closed: epoch, journal, takeover odometer and seize token go; the high-water epoch stays.
         finalOfferSentAt = nil
         journal.end()
@@ -367,38 +367,74 @@ extension PodLoanWatchController {
         sendHandbackOffer(freshened: false, recovered: true)
     }
 
-    /// The loan's dosing decisions go home once, at its close, in one background file transfer:
-    /// every decision stored since the last ones went. Every close comes here (the ack of the
-    /// final offer, the ack of a revoke's or relaunch's drain, a drain given up), so a force
-    /// reclaim's decisions follow whenever this watch learns its loan ended.
-    func sendDosingDecisionsHome(epoch: Int) {
-        guard let store = loopManager.dosingDecisionStore else { return }
-        let anchor = persisted.dosingDecisionsSent.flatMap(DosingDecisionStore.QueryAnchor.init(rawValue:))
-        store.executeDosingDecisionQuery(fromQueryAnchor: anchor, limit: Self.maxDosingDecisionsHome) { result in
+    /// What the watch recorded in stock's stores during the loan (dosing decisions, alerts) goes
+    /// home once, at its close, in one background file transfer: everything stored since the last
+    /// file went. Every close comes here (the ack of the final offer, the ack of a revoke's or
+    /// relaunch's drain, a drain given up), so a force reclaim's history follows whenever this
+    /// watch learns its loan ended. Each store's anchor advances only once the file is handed over.
+    func sendLoanHistoryHome(epoch: Int) {
+        let decisionsAnchor = persisted.dosingDecisionsSent.flatMap(DosingDecisionStore.QueryAnchor.init(rawValue:))
+        let alertsAnchor = persisted.alertsSent.flatMap(AlertStore.QueryAnchor.init(rawValue:))
+        let loopManager = self.loopManager
+        Task {
+            let decisions = await Self.dosingDecisions(in: loopManager.dosingDecisionStore, since: decisionsAnchor, epoch: epoch)
+            let alerts = await Self.alerts(in: loopManager.settledAlertStore(), since: alertsAnchor, epoch: epoch)
             self.queue.async {
+                let history = LoanHistory(epoch: epoch, decisions: decisions?.decisions ?? [], alerts: alerts?.alerts ?? [])
+                let counts = "\(history.decisions.count) dosing decision(s), \(history.alerts?.count ?? 0) alert(s)"
+                guard !history.decisions.isEmpty || history.alerts?.isEmpty == false else {
+                    SportLog.event("loan", "no loan history to send home for e\(epoch)")
+                    return
+                }
+                guard let data = try? history.encoded(),
+                      self.transferLoanHistory?(data, history.fileMetadata) == true else {
+                    SportLog.event("loan", "loan history NOT sent home for e\(epoch) (\(counts)) — the file could not be handed over; the next close retries")
+                    return
+                }
+                self.updateState {
+                    if let decisions { $0.dosingDecisionsSent = decisions.anchor.rawValue }
+                    if let alerts { $0.alertsSent = alerts.anchor.rawValue }
+                }
+                SportLog.event("loan", "loan history sent home for e\(epoch): \(counts) — \(data.count) bytes, one file transfer")
+            }
+        }
+    }
+
+    /// The decisions stored since `anchor`; nil when the query failed, so its anchor stays.
+    private static func dosingDecisions(in store: DosingDecisionStore?, since anchor: DosingDecisionStore.QueryAnchor?,
+                                        epoch: Int) async -> (anchor: DosingDecisionStore.QueryAnchor, decisions: [StoredDosingDecision])? {
+        guard let store else { return nil }
+        return await withCheckedContinuation { continuation in
+            store.executeDosingDecisionQuery(fromQueryAnchor: anchor, limit: maxDosingDecisionsHome) { result in
                 switch result {
                 case .failure(let error):
                     SportLog.event("loan", "dosing decisions NOT sent home for e\(epoch) — the store query failed: \(error)")
+                    continuation.resume(returning: nil)
                 case .success(let newAnchor, let decisions):
-                    guard !decisions.isEmpty else {
-                        SportLog.event("loan", "no dosing decisions to send home for e\(epoch)")
-                        return
-                    }
-                    let transfer = LoanDosingDecisions(epoch: epoch, decisions: decisions)
-                    guard let data = try? transfer.encoded(),
-                          self.transferDosingDecisions?(data, transfer.fileMetadata) == true else {
-                        SportLog.event("loan", "dosing decisions NOT sent home for e\(epoch) — the file could not be handed over; the next close retries")
-                        return
-                    }
-                    self.updateState { $0.dosingDecisionsSent = newAnchor.rawValue }
-                    SportLog.event("loan", "\(decisions.count) dosing decision(s) sent home for e\(epoch) — \(data.count) bytes, one file transfer")
+                    continuation.resume(returning: (newAnchor, decisions))
                 }
             }
         }
     }
 
+    /// The alert records added or changed since `anchor`; nil when the query failed.
+    private static func alerts(in store: AlertStore?, since anchor: AlertStore.QueryAnchor?,
+                               epoch: Int) async -> (anchor: AlertStore.QueryAnchor, alerts: [SyncAlertObject])? {
+        guard let store else { return nil }
+        do {
+            let (newAnchor, alerts) = try await store.executeAlertQuery(fromQueryAnchor: anchor, limit: maxAlertsHome)
+            return (newAnchor, alerts)
+        } catch {
+            SportLog.event("loan", "alerts NOT sent home for e\(epoch) — the store query failed: \(error)")
+            return nil
+        }
+    }
+
     /// Far above a day of cycles, which is as long as the store keeps them.
     static let maxDosingDecisionsHome = 5000
+
+    /// Far above any loan's alerts.
+    static let maxAlertsHome = 1000
 
     /// After launch: report a takeover that died mid-flight, and restart a parked drain's resends.
     func drainRecoveredIfNeeded() {

@@ -709,12 +709,12 @@ final class StockRunsTests: XCTestCase {
                                                 stateDirectory: dir.appendingPathComponent(UUID().uuidString, isDirectory: true))
         let lock = NSLock()
         var files: [(data: Data, metadata: [String: Any])] = []
-        controller.transferDosingDecisions = { data, metadata in
+        controller.transferLoanHistory = { data, metadata in
             lock.lock(); files.append((data, metadata)); lock.unlock()
             return true
         }
         func sendAndSettle() async {
-            controller.queue.sync { controller.sendDosingDecisionsHome(epoch: 7) }
+            controller.queue.sync { controller.sendLoanHistoryHome(epoch: 7) }
             try? await Task.sleep(nanoseconds: 500_000_000)
             controller.queue.sync {}
         }
@@ -722,10 +722,10 @@ final class StockRunsTests: XCTestCase {
         await sendAndSettle()
         let stored = try await storedDecisions(manager)
         XCTAssertEqual(files.count, 1, "one file")
-        let first = try LoanDosingDecisions.decode(try XCTUnwrap(files.first).data)
+        let first = try LoanHistory.decode(try XCTUnwrap(files.first).data)
         XCTAssertEqual(first.epoch, 7)
         XCTAssertEqual(first.decisions.map(\.id), stored.map(\.id), "every decision, in the order stored")
-        XCTAssertEqual(files.first?.metadata["kind"] as? String, LoanDosingDecisions.fileKind)
+        XCTAssertEqual(files.first?.metadata["kind"] as? String, LoanHistory.fileKind)
 
         let encoder = PropertyListEncoder()
         encoder.outputFormat = .binary
@@ -743,7 +743,7 @@ final class StockRunsTests: XCTestCase {
         runLoop(manager)
         await sendAndSettle()
         XCTAssertEqual(files.count, 2)
-        let second = try LoanDosingDecisions.decode(files[1].data)
+        let second = try LoanHistory.decode(files[1].data)
         XCTAssertFalse(second.decisions.isEmpty)
         XCTAssertTrue(Set(second.decisions.map(\.id)).isDisjoint(with: Set(first.decisions.map(\.id))), "only what was stored since")
     }

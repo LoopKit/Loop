@@ -77,6 +77,15 @@ final class WatchLoopManager {
     /// do not look at them.
     let dosingDecisionStore: DosingDecisionStore?
 
+    /// Stock's alert history, recorded while the watch holds the pod; nil in suites that do not
+    /// look at it.
+    let alertStore: AlertStore?
+
+    /// Stock `AlertManager` awaits each record before the next; the wrist's alert calls are
+    /// synchronous, so their records are chained in call order.
+    var alertRecords: Task<Void, Never>?
+    let alertRecordsLock = NSLock()
+
     let settingsProvider: WatchSettingsProvider
 
     /// The stack's only override history; a second instance would dose unscaled.
@@ -464,6 +473,7 @@ final class WatchLoopManager {
     init(doseStore: DoseStore, glucoseStore: GlucoseStore, carbStore: CarbStore,
          overrideHistory: TemporaryScheduleOverrideHistory = TemporaryScheduleOverrideHistory(),
          dosingDecisionStore: DosingDecisionStore? = nil,
+         alertStore: AlertStore? = nil,
          settings: LoopSettings = LoopSettings(),
          defaults: UserDefaults = .standard, stateDirectory: URL? = nil) {
         self.defaults = defaults
@@ -479,6 +489,7 @@ final class WatchLoopManager {
         self.glucoseStore = glucoseStore
         self.carbStore = carbStore
         self.dosingDecisionStore = dosingDecisionStore
+        self.alertStore = alertStore
         self.settingsProvider = WatchSettingsProvider(settings: settings)
         self.overrideHistory = overrideHistory
         self.settings = settings

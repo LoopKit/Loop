@@ -748,3 +748,64 @@ final class LoanDosingDecisionTests: XCTestCase {
         XCTAssertFalse(dosingDecisionStore.dosingDecisions.first?.errors.isEmpty ?? true, "the error arm stores, with the error")
     }
 }
+
+/// The watch's stock records of a loan, added to the phone's own stores once each, as the watch
+/// recorded them.
+@MainActor
+final class LoanHistoryIntakeTests: XCTestCase {
+
+    private final class AlertUploadSpy: AlertStoreDelegate {
+        var updates = 0
+        func alertStoreHasUpdatedAlertData(_ alertStore: AlertStore) { updates += 1 }
+    }
+
+    private func watchAlert(_ id: String, issued: Date, acknowledged: Date? = nil, retracted: Date? = nil,
+                            syncIdentifier: UUID = UUID()) -> SyncAlertObject {
+        let content = Alert.Content(title: "Low Reservoir", body: "10 U insulin or less remaining in Pod. Change Pod soon.",
+                                    acknowledgeActionButtonLabel: "OK")
+        return SyncAlertObject(identifier: Alert.Identifier(managerIdentifier: "Omnipod", alertIdentifier: id),
+                               trigger: .immediate, interruptionLevel: .timeSensitive, foregroundContent: content,
+                               backgroundContent: content, sound: nil, metadata: nil, issuedDate: issued,
+                               acknowledgedDate: acknowledged, retractedDate: retracted, syncIdentifier: syncIdentifier)
+    }
+
+    /// Each alert is added once, under the watch's sync identifier and with the watch's dates,
+    /// however often the file comes; a later copy fills in the retraction. Adding one tells the
+    /// store's delegate, which is what starts stock's alert upload, and the upload query sees it.
+    func testAlertsFromTheWatchAreAddedOnceWithTheirOwnIdentityAndDates() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let store = AlertStore(storageDirectoryURL: directory)
+        let spy = AlertUploadSpy()
+        store.delegate = spy
+        let issued = Date(timeIntervalSinceNow: -3600)
+        let low = watchAlert("lowReservoir", issued: issued, acknowledged: issued.addingTimeInterval(30))
+        let expiring = watchAlert("podExpiring", issued: issued.addingTimeInterval(600))
+
+        let first = try await store.recordAlerts(fromAnotherDevice: [low, expiring])
+        let again = try await store.recordAlerts(fromAnotherDevice: [low, expiring])
+        XCTAssertEqual(first, 2)
+        XCTAssertEqual(again, 0, "the second delivery adds nothing")
+        XCTAssertEqual(spy.updates, 1, "the upload is started once, for the change")
+
+        async let a = store.recordAlerts(fromAnotherDevice: [low, expiring])
+        async let b = store.recordAlerts(fromAnotherDevice: [low, expiring])
+        _ = try await (a, b)
+
+        let retracted = watchAlert("podExpiring", issued: expiring.issuedDate, retracted: issued.addingTimeInterval(900),
+                                   syncIdentifier: expiring.syncIdentifier)
+        let updated = try await store.recordAlerts(fromAnotherDevice: [retracted])
+        XCTAssertEqual(updated, 1)
+
+        let records = try await store.fetch()
+        XCTAssertEqual(records.count, 2, "no alert twice")
+        XCTAssertEqual(records.map(\.syncIdentifier), [low.syncIdentifier, expiring.syncIdentifier])
+        XCTAssertEqual(records.map(\.issuedDate), [low.issuedDate, expiring.issuedDate], "the watch's dates")
+        XCTAssertEqual(records.first?.acknowledgedDate, low.acknowledgedDate)
+        XCTAssertEqual(records.last?.retractedDate, retracted.retractedDate)
+        XCTAssertEqual(records.first?.title, "Low Reservoir")
+
+        let (_, uploadable) = try await store.executeAlertQuery(fromQueryAnchor: nil, limit: 100)
+        XCTAssertEqual(Set(uploadable.map(\.syncIdentifier)), [low.syncIdentifier, expiring.syncIdentifier], "the upload query finds them")
+    }
+}

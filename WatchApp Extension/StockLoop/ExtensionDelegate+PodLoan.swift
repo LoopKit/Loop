@@ -80,6 +80,7 @@ extension ExtensionDelegate {
         guard FeatureFlags.sportModeEnabled, WatchAlertPresenter.isWristAlert(request.identifier) else { return false }
         guard WatchAlertPresenter.acknowledges(response.actionIdentifier),
               let identifier = WatchAlertPresenter.alertIdentifier(in: request.content.userInfo) else { return true }
+        stockLoopSession?.stack.loopManager.recordAlertAcknowledgement(identifier)
         guard let responder = await stockLoopSession?.loanController.pumpAlertResponder(for: identifier.managerIdentifier) else {
             SportLog.event("alert", "ACKNOWLEDGED \(identifier.value) on the wrist — not the loaned pump's, nothing to pass on")
             return true

@@ -328,6 +328,17 @@ extension WatchDataManager {
                 PodLoanPhoneController.addNewDosingDecisions(decisions, to: store, completion: completion)
             },
 
+            addAlerts: { [weak self] alerts, completion in
+                guard let store = self?.deviceManager.alertManager?.alertStore else { return completion(.success(0)) }
+                Task {
+                    do {
+                        completion(.success(try await store.recordAlerts(fromAnotherDevice: alerts)))
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
+            },
+
             insulinHistoryRewritten: { [weak self] earliestStart in
                 guard let self = self else { return }
 

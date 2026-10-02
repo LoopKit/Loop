@@ -84,6 +84,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
     var bookedGapDoses: [DoseEntry] = []
     /// Every batch of the watch's dosing decisions the controller handed to the store.
     var addedDosingDecisions: [[StoredDosingDecision]] = []
+    /// Every batch of the watch's alert records the controller handed to the store.
+    var addedAlerts: [[SyncAlertObject]] = []
     var deletedGapSyncs: [String] = []
     var gapDeleteSucceeds = true
     /// Virtual clock for the reclaim bars; only tests passing `now:` use it.
@@ -138,6 +140,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         addedNotifications = []
         bookedGapDoses = []
         addedDosingDecisions = []
+        addedAlerts = []
         deletedGapSyncs = []
         gapDeleteSucceeds = true
         sent = []
@@ -284,6 +287,11 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                 guard let self = self else { return completion(.success(0)) }
                 self.lock.lock(); self.addedDosingDecisions.append(decisions); self.lock.unlock()
                 completion(.success(decisions.count))
+            },
+            addAlerts: { [weak self] alerts, completion in
+                guard let self = self else { return completion(.success(0)) }
+                self.lock.lock(); self.addedAlerts.append(alerts); self.lock.unlock()
+                completion(.success(alerts.count))
             },
             whenProtectedDataAvailable: whenProtectedDataAvailable,
             beginReclaimBackgroundTask: { [weak self] in
@@ -785,13 +793,33 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         let grant = establishLoan(controller)
         let decisions = [StoredDosingDecision(reason: "loop"), StoredDosingDecision(reason: "updateRemoteRecommendation")]
 
-        controller.handleWatchDosingDecisions(LoanDosingDecisions(epoch: grant.epoch + 1, decisions: decisions))
-        controller.handleWatchDosingDecisions(LoanDosingDecisions(epoch: grant.epoch, decisions: decisions))
+        controller.handleWatchLoanHistory(LoanHistory(epoch: grant.epoch + 1, decisions: decisions))
+        controller.handleWatchLoanHistory(LoanHistory(epoch: grant.epoch, decisions: decisions))
         waitUntil(timeout: 5, "the granted loan's decisions handed over") { self.lock.lock(); defer { self.lock.unlock() }; return !self.addedDosingDecisions.isEmpty }
         settle()
 
         XCTAssertEqual(addedDosingDecisions.count, 1, "only the granted loan's")
         XCTAssertEqual(addedDosingDecisions.first?.map(\.id), decisions.map(\.id))
+    }
+
+    /// The watch's alert records for a loan this phone granted go to the alert store, with the
+    /// decisions; a loan it never granted is ignored.
+    func testWatchAlertsAreAddedOnlyForALoanThisPhoneGranted() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        let content = Alert.Content(title: "Low Reservoir", body: "Change Pod soon.", acknowledgeActionButtonLabel: "OK")
+        let alerts = [SyncAlertObject(identifier: Alert.Identifier(managerIdentifier: "Omnipod", alertIdentifier: "lowReservoir"),
+                                      trigger: .immediate, interruptionLevel: .timeSensitive, foregroundContent: content,
+                                      backgroundContent: content, sound: nil, metadata: nil, issuedDate: Date().addingTimeInterval(-600),
+                                      acknowledgedDate: nil, retractedDate: nil, syncIdentifier: UUID())]
+
+        controller.handleWatchLoanHistory(LoanHistory(epoch: grant.epoch + 1, decisions: [], alerts: alerts))
+        controller.handleWatchLoanHistory(LoanHistory(epoch: grant.epoch, decisions: [], alerts: alerts))
+        waitUntil(timeout: 5, "the granted loan's alerts handed over") { self.lock.lock(); defer { self.lock.unlock() }; return !self.addedAlerts.isEmpty }
+        settle()
+
+        XCTAssertEqual(addedAlerts.count, 1, "only the granted loan's")
+        XCTAssertEqual(addedAlerts.first?.map(\.syncIdentifier), alerts.map(\.syncIdentifier))
     }
 
     /// Yielding to an inferred loan closes the settle window, whose +12 s escalation would

@@ -13,6 +13,11 @@ import HealthKit
 import LoopKit
 import LoopAlgorithm
 import LoopCore
+import os.log
+
+/// Stock's `AlertStore` logs through the phone's `DiagnosticLog`, which forwards to logging
+/// services the watch does not have; os_log under the same subsystem stands in.
+typealias DiagnosticLog = OSLog
 
 enum StockLoopStack {
     /// Outlives any loan. The CGM manager lives on the loop manager, which rebuilds it when the
@@ -32,7 +37,8 @@ enum StockLoopStack {
             glucoseStore: stores.glucoseStore,
             carbStore: stores.carbStore,
             overrideHistory: stores.overrideHistory,
-            dosingDecisionStore: stores.dosingDecisionStore
+            dosingDecisionStore: stores.dosingDecisionStore,
+            alertStore: stores.alertStore
         )
 
         // The phone's next context brings a configuration if nothing was saved.
@@ -49,7 +55,7 @@ enum StockLoopStack {
 
     /// The watch's own stores. The directory name carries the LoopKit model version, since this
     /// and the stock watch app share a bundle id. Not read-only: this extension owns them.
-    static func makeStores() async -> (doseStore: DoseStore, glucoseStore: GlucoseStore, carbStore: CarbStore, overrideHistory: TemporaryScheduleOverrideHistory, dosingDecisionStore: DosingDecisionStore)? {
+    static func makeStores() async -> (doseStore: DoseStore, glucoseStore: GlucoseStore, carbStore: CarbStore, overrideHistory: TemporaryScheduleOverrideHistory, dosingDecisionStore: DosingDecisionStore, alertStore: AlertStore)? {
         guard let documents = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true) else {
             SportLog.event("session", "STACK UNAVAILABLE — no documents directory")
             return nil
@@ -88,8 +94,18 @@ enum StockLoopStack {
         // As stock `LoopAppManager` builds it, with the phone's `LoopLocalCacheDurationDays`.
         let dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: Bundle.main.localCacheDuration)
 
+        // As stock `AlertManager` builds it, in the same place.
+        let alertStoreDirectory = documents.appendingPathComponent("AlertStore")
+        do {
+            try FileManager.default.createDirectory(at: alertStoreDirectory, withIntermediateDirectories: true,
+                                                    attributes: [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication])
+        } catch {
+            SportLog.event("session", "alert store directory NOT created — \(error.localizedDescription)")
+        }
+        let alertStore = AlertStore(storageDirectoryURL: alertStoreDirectory, expireAfter: Bundle.main.localCacheDuration)
+
         SportLog.event("session", "stack: stores open")
-        return (doseStore, glucoseStore, carbStore, overrideHistory, dosingDecisionStore)
+        return (doseStore, glucoseStore, carbStore, overrideHistory, dosingDecisionStore, alertStore)
     }
 
     /// Keeps ended overrides for the algorithm's lookback (about 18 h); the phone keeps 90 days.

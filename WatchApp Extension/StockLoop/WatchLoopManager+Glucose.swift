@@ -265,13 +265,18 @@ extension WatchLoopManager: CGMManagerDelegate {
     }
 
     // MARK: - Alerts
-    // Presented on the wrist; nothing is persisted, so the lookups answer empty.
+    // Presented on the wrist, and recorded in stock's `AlertStore` as stock's `AlertManager`
+    // records them: an issue only while the watch holds the pod, so the store holds the loans'
+    // alerts; an acknowledgement or retraction whenever its record is there. The lookups answer
+    // from the store, as stock's do.
 
     /// The watch is the only device hearing the pump during a loan.
     func issueAlert(_ alert: LoopKit.Alert) {
         log.default("Alert issued: %{public}@", alert.identifier.value)
         SportLog.event("alert", "ISSUED \(alert.identifier.value) — \(alert.backgroundContent.title): \(alert.backgroundContent.body)")
         WatchAlertPresenter.present(alert)
+        guard pumpManager != nil else { return }
+        recordAlert { await $0.recordIssued(alert: alert) }
     }
 
     /// Withdraw it. A driver retracts when the condition clears, and an alarm left standing after
@@ -280,22 +285,62 @@ extension WatchLoopManager: CGMManagerDelegate {
         log.default("Alert retracted: %{public}@", identifier.value)
         SportLog.event("alert", "RETRACTED \(identifier.value)")
         WatchAlertPresenter.retract(identifier)
+        recordAlert { try? await $0.recordRetraction(of: identifier) }
+    }
+
+    /// The wrist's OK or dismissal, recorded as stock `AlertManager.acknowledgeAlert` records it,
+    /// whatever the alert's manager made of it.
+    func recordAlertAcknowledgement(_ identifier: LoopKit.Alert.Identifier) {
+        recordAlert { try? await $0.recordAcknowledgement(of: identifier) }
     }
 
     func doesIssuedAlertExist(identifier: LoopKit.Alert.Identifier) async throws -> Bool {
-        false
+        guard let alertStore = await settledAlertStore() else { return false }
+        return try await !alertStore.lookupAllMatching(identifier: identifier).isEmpty
     }
 
     func lookupAllUnretracted(managerIdentifier: String) async throws -> [PersistedAlert] {
-        []
+        guard let alertStore = await settledAlertStore() else { return [] }
+        return try await alertStore.lookupAllUnretracted(managerIdentifier: managerIdentifier).compactMap(Self.persistedAlert)
     }
 
     func lookupAllUnacknowledgedUnretracted(managerIdentifier: String) async throws -> [PersistedAlert] {
-        []
+        guard let alertStore = await settledAlertStore() else { return [] }
+        return try await alertStore.lookupAllUnacknowledgedUnretracted(managerIdentifier: managerIdentifier).compactMap(Self.persistedAlert)
     }
 
     func recordRetractedAlert(_ alert: LoopKit.Alert, at date: Date) {
         log.default("Retracted alert recorded: %{public}@", alert.identifier.value)
+        guard pumpManager != nil else { return }
+        recordAlert { try? await $0.recordRetractedAlert(alert, at: date) }
+    }
+
+    /// Runs after every record asked for before it.
+    func recordAlert(_ record: @escaping (AlertStore) async -> Void) {
+        guard let alertStore else { return }
+        alertRecordsLock.lock()
+        defer { alertRecordsLock.unlock() }
+        let previous = alertRecords
+        alertRecords = Task {
+            await previous?.value
+            await record(alertStore)
+        }
+    }
+
+    /// The store, once every record asked for so far has landed.
+    func settledAlertStore() async -> AlertStore? {
+        alertRecordsLock.lock()
+        let pending = alertRecords
+        alertRecordsLock.unlock()
+        await pending?.value
+        return alertStore
+    }
+
+    /// Stock `AlertManager`'s mapping for the lookups.
+    static func persistedAlert(_ stored: StoredAlert) throws -> PersistedAlert? {
+        guard let alert = try LoopKit.Alert(from: stored, adjustedForStorageTime: false) else { return nil }
+        return PersistedAlert(alert: alert, issuedDate: stored.issuedDate, retractedDate: stored.retractedDate,
+                              acknowledgedDate: stored.acknowledgedDate)
     }
 }
 

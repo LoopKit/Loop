@@ -204,20 +204,24 @@ extension LoanMessage {
     }
 }
 
-/// The dosing decisions the watch stored during one loan, sent home once when the loan closes,
-/// as one background file (`transferFile`). Outside the envelope on purpose: a phone that does
-/// not know the file kind ignores it, where an unknown envelope kind would be nacked.
-public struct LoanDosingDecisions: Codable {
-    /// The file's `metadata["kind"]`.
+/// What the watch recorded in stock's stores during one loan (its dosing decisions and alert
+/// history), sent home once when the loan closes as one background file (`transferFile`).
+/// Outside the envelope on purpose: a phone that does not know the file kind ignores it, where an
+/// unknown envelope kind would be nacked; a phone that does not know a field ignores the field.
+public struct LoanHistory: Codable {
+    /// The file's `metadata["kind"]`, named when the file held only decisions.
     public static let fileKind = "loan.dosingDecisions"
 
-    /// The loan the decisions belong to.
+    /// The loan the records belong to.
     public let epoch: Int
     public let decisions: [StoredDosingDecision]
+    /// `AlertStore`'s records, each under its own sync identifier. Absent from an older watch's file.
+    public let alerts: [SyncAlertObject]?
 
-    public init(epoch: Int, decisions: [StoredDosingDecision]) {
+    public init(epoch: Int, decisions: [StoredDosingDecision], alerts: [SyncAlertObject] = []) {
         self.epoch = epoch
         self.decisions = decisions
+        self.alerts = alerts
     }
 
     public var fileMetadata: [String: Any] { ["kind": Self.fileKind, "epoch": epoch] }
@@ -229,7 +233,7 @@ public struct LoanDosingDecisions: Codable {
         return try encoder.encode(self)
     }
 
-    public static func decode(_ data: Data) throws -> LoanDosingDecisions {
-        try PropertyListDecoder().decode(LoanDosingDecisions.self, from: data)
+    public static func decode(_ data: Data) throws -> LoanHistory {
+        try PropertyListDecoder().decode(LoanHistory.self, from: data)
     }
 }

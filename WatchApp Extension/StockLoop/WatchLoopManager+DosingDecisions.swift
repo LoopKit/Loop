@@ -5,7 +5,7 @@
 //  Stock's dosing decisions, kept by the watch while it holds the pod and built as stock builds
 //  them: "loop" each cycle (built in `loop()`), "updateRemoteRecommendation" after the display
 //  run, and "watchBolus" for a wrist bolus. They go home once, when the loan closes
-//  (`PodLoanWatchController.sendDosingDecisionsHome`). Labelled copies of stock's phone-only
+//  (`PodLoanWatchController.sendLoanHistoryHome`). Labelled copies of stock's phone-only
 //  helpers are at the bottom.
 //
 
