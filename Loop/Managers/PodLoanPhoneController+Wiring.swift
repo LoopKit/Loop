@@ -194,6 +194,11 @@ extension WatchDataManager {
                     })
                 }
             },
+            overrideHistory: { [weak self] start, completion in
+                Task { @MainActor in
+                    completion(self?.temporaryPresetsManager.presetHistory.getOverrideHistory(startDate: start, endDate: .distantFuture) ?? [])
+                }
+            },
             glucoseAlertSettings: { [weak self] completion in
                 Task { @MainActor in completion(self?.deviceManager.glucoseAlertManager.sharedSettings.encoded) }
             },

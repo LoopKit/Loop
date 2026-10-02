@@ -29,6 +29,29 @@ extension LoanGrant {
         let all = seedDoseEntries()
         return (all.filter { $0.endDate <= instant }, all.filter { $0.endDate > instant })
     }
+
+    /// The phone's recent overrides; nil from a phone that does not send them.
+    public var overrideHistory: [TemporaryScheduleOverride]? {
+        guard let data = overrideHistoryRaw,
+              let raws = (try? PropertyListSerialization.propertyList(from: data, options: [], format: nil)) as? [TemporaryScheduleOverride.RawValue]
+        else { return nil }
+        return raws.compactMap(TemporaryScheduleOverride.init(rawValue:))
+    }
+
+    /// The raw form drops `actualEnd`, so an early end is folded into the duration, as
+    /// `queryByAnchor` does. Deleted overrides are left out.
+    public static func overrideHistoryRaw(_ overrides: [TemporaryScheduleOverride]) -> Data? {
+        let raws: [TemporaryScheduleOverride.RawValue] = overrides.compactMap { override in
+            var folded = override
+            switch override.actualEnd {
+            case .natural: break
+            case .early(let end) where end > override.startDate: folded.scheduledEndDate = end
+            case .early, .deleted: return nil
+            }
+            return folded.rawValue
+        }
+        return try? PropertyListSerialization.data(fromPropertyList: raws, format: .binary, options: 0)
+    }
 }
 
 /// The pod's own report at a moment; carried at takeover and hand-back.
@@ -145,6 +168,9 @@ public struct LoanGrant: Codable, Equatable {
     /// The phone's glucose alert settings (JSON), so the wrist sounds the same lows.
     public let glucoseAlertSettings: Data?
 
+    /// The phone's overrides of the last 24 h, ended ones included, as a binary plist of raw values.
+    public let overrideHistoryRaw: Data?
+
     public init(epoch: Int, expiresAt: Date, pumpConfiguration: Data, podAddress: UInt32,
                 therapySettingsRaw: Data, settingsTimeZoneID: String,
                 doseHistory: [LoanDoseRecord],
@@ -158,7 +184,8 @@ public struct LoanGrant: Codable, Equatable {
                 activeOverrideRaw: Data? = nil,
                 therapySettingsSupplementRaw: Data? = nil,
                 lastLoopCompleted: Date? = nil,
-                glucoseAlertSettings: Data? = nil) {
+                glucoseAlertSettings: Data? = nil,
+                overrideHistoryRaw: Data? = nil) {
         self.epoch = epoch
         self.expiresAt = expiresAt
         self.pumpConfiguration = pumpConfiguration
@@ -177,6 +204,7 @@ public struct LoanGrant: Codable, Equatable {
         self.therapySettingsSupplementRaw = therapySettingsSupplementRaw
         self.lastLoopCompleted = lastLoopCompleted
         self.glucoseAlertSettings = glucoseAlertSettings
+        self.overrideHistoryRaw = overrideHistoryRaw
     }
 }
 

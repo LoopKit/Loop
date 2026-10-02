@@ -99,6 +99,9 @@ final class PodLoanPhoneControllerTests: XCTestCase {
     var stateDir: URL!
     /// What `Dependencies.glucoseAlertSettings` hands the grant.
     var glucoseAlertSettings: Data?
+    /// What `Dependencies.overrideHistory` hands the grant, and the start it was asked for.
+    var phoneOverrideHistory: [TemporaryScheduleOverride] = []
+    var overrideHistoryAskedFrom: Date?
 
     /// Never reset: a controller's late log lines must not reach the host app's Documents either.
     static let phoneLogDirectory: URL = {
@@ -131,6 +134,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         sent = []
         sentExpectations = []
         glucoseAlertSettings = nil
+        phoneOverrideHistory = []
+        overrideHistoryAskedFrom = nil
         addedDoses = []
         pauseCalls = []
         notices = []
@@ -214,6 +219,11 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                 completion(nil)
             },
             doseHistory: { _, completion in completion([]) },
+            overrideHistory: { [weak self] start, completion in
+                guard let self = self else { return completion([]) }
+                self.lock.lock(); self.overrideHistoryAskedFrom = start; let history = self.phoneOverrideHistory; self.lock.unlock()
+                completion(history)
+            },
             glucoseAlertSettings: { [weak self] completion in completion(self?.glucoseAlertSettings) },
             issueNotice: { [weak self] title, _ in
                 guard let self = self else { return }
@@ -1599,6 +1609,32 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                                                     loopAlertsOverrideForOwnAlertingCGM: false).encoded
         let grant = offerGrant(makeController())
         XCTAssertEqual(GlucoseAlertSettings(encoded: grant.glucoseAlertSettings)?.profiles, [profile])
+    }
+
+    /// The grant carries the phone's last 24 h of overrides; an early end rides in the duration.
+    func testTheGrantCarriesTheLastDaysOverrides() throws {
+        let now = Date()
+        func override(start: Date, duration: TemporaryScheduleOverride.Duration, end: End = .natural) -> TemporaryScheduleOverride {
+            TemporaryScheduleOverride(context: .custom,
+                                      settings: TemporaryPresetSettings(unit: .milligramsPerDeciliter, targetRange: nil,
+                                                                        insulinNeedsScaleFactor: 0.5),
+                                      startDate: start, duration: duration, enactTrigger: .local, syncIdentifier: UUID(),
+                                      actualEnd: end)
+        }
+        let ended = override(start: now.addingTimeInterval(-.hours(5)), duration: .finite(.hours(3)),
+                             end: .early(now.addingTimeInterval(-.hours(3))))
+        let deleted = override(start: now.addingTimeInterval(-.hours(2)), duration: .finite(.hours(1)), end: .deleted)
+        let active = override(start: now.addingTimeInterval(-.hours(1)), duration: .indefinite)
+        phoneOverrideHistory = [ended, deleted, active]
+
+        let grant = offerGrant(makeController())
+
+        let carried = try XCTUnwrap(grant.overrideHistory, "a current phone always sends the field")
+        XCTAssertEqual(carried.map(\.syncIdentifier), [ended.syncIdentifier, active.syncIdentifier], "a deleted one is left out")
+        XCTAssertEqual(carried[0].scheduledEndDate.timeIntervalSince(ended.actualEndDate), 0, accuracy: 0.001,
+                       "the early end, folded in because the raw form drops it")
+        XCTAssertEqual(carried[1].duration, .indefinite)
+        XCTAssertEqual(try XCTUnwrap(overrideHistoryAskedFrom).timeIntervalSince(now), -.hours(24), accuracy: 60)
     }
 
     // MARK: - The outbound handover is two states, not one

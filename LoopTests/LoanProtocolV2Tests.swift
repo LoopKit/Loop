@@ -154,6 +154,55 @@ final class LoanProtocolV2Tests: XCTestCase {
         XCTAssertNil(fromOlder.glucoseAlertSettings)
     }
 
+    /// The override history rides the grant; nil from an older phone. An older watch ignores it,
+    /// as JSON decoding ignores any key its type does not declare.
+    func testGrantOverrideHistoryRoundTripsAndIsOptional() throws {
+        let now = Date(timeIntervalSince1970: 1_784_338_000)
+        let exercise = TemporaryPreset(symbol: "🏃", name: "Exercise",
+                                       settings: TemporaryPresetSettings(unit: .milligramsPerDeciliter,
+                                                                         targetRange: DoubleRange(minValue: 140, maxValue: 160),
+                                                                         insulinNeedsScaleFactor: 0.5),
+                                       duration: .finite(.hours(2)))
+        var morning = exercise.createOverride(enactTrigger: .local, beginningAt: now.addingTimeInterval(-.hours(20)))
+        morning.actualEnd = .early(now.addingTimeInterval(-.hours(19)))
+        let preMeal = TemporaryScheduleOverride(context: .preMeal,
+                                                settings: TemporaryPresetSettings(unit: .milligramsPerDeciliter,
+                                                                                  targetRange: DoubleRange(minValue: 80, maxValue: 80),
+                                                                                  insulinNeedsScaleFactor: nil),
+                                                startDate: now.addingTimeInterval(-.hours(6)), duration: .finite(.hours(1)),
+                                                enactTrigger: .local, syncIdentifier: UUID())
+        let current = exercise.createOverride(enactTrigger: .local, beginningAt: now.addingTimeInterval(-.minutes(30)))
+        let raw = try XCTUnwrap(LoanGrant.overrideHistoryRaw([morning, preMeal, current]))
+
+        func grant(_ history: Data?) -> LoanGrant {
+            LoanGrant(epoch: 4, expiresAt: now, pumpConfiguration: Data([1]), podAddress: 0,
+                      therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC", doseHistory: [], overrideHistoryRaw: history)
+        }
+        guard case .grant(let received) = try roundTrip(.grant(grant(raw))) else { return XCTFail("not a grant") }
+        let history = try XCTUnwrap(received.overrideHistory)
+        XCTAssertEqual(history.map(\.syncIdentifier), [morning, preMeal, current].map(\.syncIdentifier))
+        XCTAssertEqual(history[0].scheduledEndDate, morning.actualEndDate, "an early end folds into the duration")
+        XCTAssertEqual(history[2].context, current.context)
+
+        guard case .grant(let fromOlder) = try roundTrip(.grant(grant(nil))) else { return XCTFail("not a grant") }
+        XCTAssertNil(fromOlder.overrideHistory, "an older phone: nil, so the watch keeps only the active override")
+
+        // What a watch without the field sees: an undeclared key, which decoding skips.
+        var envelope = try XCTUnwrap(JSONSerialization.jsonObject(with: LoanProtocol.encoder.encode(LoanEnvelope(message: .grant(grant(nil))))) as? [String: Any])
+        var body = try XCTUnwrap(envelope["body"] as? [String: Any])
+        body["aFieldFromANewerPhone"] = raw.base64EncodedString()
+        envelope["body"] = body
+        let skewed = try JSONSerialization.data(withJSONObject: envelope)
+        guard case .grant? = try LoanMessage.decode(fromTransport: [LoanProtocol.userInfoKey: skewed]) else {
+            return XCTFail("an unknown grant field must not make the grant unreadable")
+        }
+
+        let withField = try LoanProtocol.encoder.encode(LoanEnvelope(message: .grant(grant(raw)))).count
+        let without = try LoanProtocol.encoder.encode(LoanEnvelope(message: .grant(grant(nil)))).count
+        print("OVERRIDE-HISTORY-SIZE plist=\(raw.count)B grant +\(withField - without)B for 3 overrides")
+        XCTAssertLessThan(withField - without, 4_000, "a day of overrides stays small beside the 60 KB urgent limit")
+    }
+
     func testAGrantWithoutAConfigurationDecodesToNil() {
         let grant = LoanGrant(epoch: 4, expiresAt: Date(), pumpConfiguration: Data([1, 2, 3]), podAddress: 0,
                               therapySettingsRaw: Data(), settingsTimeZoneID: "UTC", doseHistory: [])

@@ -215,6 +215,8 @@ extension PodLoanPhoneController {
         let historyStart = referenceDate.addingTimeInterval(-.hours(16))
 
         let glucoseStart = referenceDate.addingTimeInterval(-.hours(3))
+        // The watch keeps 24 h of overrides; the algorithm looks back about 18.
+        let overridesStart = referenceDate.addingTimeInterval(-.hours(24))
         deps.doseHistory(historyStart) { [weak self] history in
             guard let self = self else { return }
             self.deps.carbHistory(historyStart) { [weak self] carbs in
@@ -222,6 +224,8 @@ extension PodLoanPhoneController {
                 self.deps.glucoseHistory(glucoseStart) { [weak self] glucose in
                     guard let self = self else { return }
                     self.deps.glucoseAlertSettings { [weak self] glucoseAlertSettings in
+                    guard let self = self else { return }
+                    self.deps.overrideHistory(overridesStart) { [weak self] overrides in
                     guard let self = self else { return }
                     self.queue.async {
                         guard let stateData = try? PropertyListSerialization.data(fromPropertyList: pumpConfiguration.rawValue, format: .binary, options: 0),
@@ -265,7 +269,8 @@ extension PodLoanPhoneController {
                                settings.defaultRapidActingModel.map { String(describing: $0) } ?? "MISSING (wrist will assume rapid-acting adult)",
                                supplementData?.count ?? 0)
 
-                        self.handbackDiag(grantEpoch, "[grant] supplement \(supplementData?.count ?? 0)B · seeds: \(history.count) dose, \(carbs.count) carb, \(glucose.count) glucose · podState \(stateData.count)B · settings \(settingsData.count)B · glucose alerts \(glucoseAlertSettings.map { "\($0.count)B" } ?? "ABSENT")")
+                        let overrideHistoryData = LoanGrant.overrideHistoryRaw(overrides)
+                        self.handbackDiag(grantEpoch, "[grant] supplement \(supplementData?.count ?? 0)B · seeds: \(history.count) dose, \(carbs.count) carb, \(glucose.count) glucose, \(overrides.count) override (\(overrideHistoryData?.count ?? 0)B) · podState \(stateData.count)B · settings \(settingsData.count)B · glucose alerts \(glucoseAlertSettings.map { "\($0.count)B" } ?? "ABSENT")")
                         let grant = LoanGrant(
                             epoch: grantEpoch,
                             expiresAt: expiresAt,
@@ -290,8 +295,10 @@ extension PodLoanPhoneController {
 
                             // Loop recency carries across the boundary.
                             lastLoopCompleted: self.deps.lastLoopCompleted(),
-                            glucoseAlertSettings: glucoseAlertSettings)
+                            glucoseAlertSettings: glucoseAlertSettings,
+                            overrideHistoryRaw: overrideHistoryData)
                         completion(grant)
+                    }
                     }
                     }
                 }

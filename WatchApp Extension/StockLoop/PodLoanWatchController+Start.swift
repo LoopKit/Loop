@@ -441,8 +441,9 @@ extension PodLoanWatchController {
         Task { @MainActor [loopManager] in loopManager.configureGlucoseAlerts(from: grant.glucoseAlertSettings) }
         WatchAlertPresenter.logAuthorization("loan start, epoch \(grant.epoch)")
 
-        // A kept event the phone never saw could overlap one it re-sends, which LoopKit traps on.
-        loopManager.adoptOverrideHistory([])
+        // The phone's history, else none: a kept event the phone never saw could overlap one it
+        // re-sends, which LoopKit traps on.
+        loopManager.adoptOverrideHistory(grant.overrideHistory ?? [])
         if let raw = grant.activeOverrideRaw {
             if let plist = (try? PropertyListSerialization.propertyList(from: raw, options: [], format: nil)) as? TemporaryScheduleOverride.RawValue,
                let override = TemporaryScheduleOverride(rawValue: plist) {

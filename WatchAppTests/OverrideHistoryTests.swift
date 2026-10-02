@@ -15,22 +15,21 @@ import LoopCore
 final class OverrideHistoryTests: XCTestCase {
 
     private var cacheDir: URL!
-    private var cacheStore: PersistenceController!
 
     override func setUp() {
         super.setUp()
         cacheDir = FileManager.default.temporaryDirectory.appendingPathComponent("override-history-\(UUID().uuidString)")
         try? FileManager.default.createDirectory(at: cacheDir, withIntermediateDirectories: true)
-        cacheStore = PersistenceController(directoryURL: cacheDir)
     }
 
     override func tearDown() {
-        cacheStore = nil
         cacheDir = nil
         super.tearDown()
     }
 
+    /// Fresh stores on every call; the override history is whatever the caller passes.
     private func makeManager(overrideHistory: TemporaryScheduleOverrideHistory = TemporaryScheduleOverrideHistory()) async -> WatchLoopManager {
+        let cacheStore = PersistenceController(directoryURL: cacheDir.appendingPathComponent(UUID().uuidString))
         let doseStore = await DoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
                                         longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
                                         provenanceIdentifier: "OverrideHistoryTests")
@@ -69,13 +68,14 @@ final class OverrideHistoryTests: XCTestCase {
 
     /// A grant with complete settings. Its pump configuration is not a pump, so intake stops
     /// (and tears down) after the overrides are applied.
-    private func grant(activeOverride: TemporaryScheduleOverride?) -> LoanGrant {
+    private func grant(activeOverride: TemporaryScheduleOverride?, overrideHistory: [TemporaryScheduleOverride]? = nil) -> LoanGrant {
         var settings = LoopSettings()
         settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(
             unit: .milligramsPerDeciliter,
             dailyItems: [RepeatingScheduleValue(startTime: 0, value: DoubleRange(minValue: 100, maxValue: 110))])
         settings.maximumBasalRatePerHour = 4
         settings.maximumBolus = 10
+        settings.suspendThreshold = GlucoseThreshold(unit: .milligramsPerDeciliter, value: 80)
         let supplement: [String: Any] = [
             "basalRateSchedule": BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.0)])!.rawValue,
             "insulinSensitivitySchedule": InsulinSensitivitySchedule(
@@ -86,7 +86,8 @@ final class OverrideHistoryTests: XCTestCase {
         return LoanGrant(epoch: 1, expiresAt: Date().addingTimeInterval(300), pumpConfiguration: Data([1, 2, 3]),
                          podAddress: 0, therapySettingsRaw: plist(settings.rawValue), settingsTimeZoneID: "GMT",
                          doseHistory: [], activeOverrideRaw: activeOverride.map { plist($0.rawValue) },
-                         therapySettingsSupplementRaw: plist(supplement))
+                         therapySettingsSupplementRaw: plist(supplement),
+                         overrideHistoryRaw: overrideHistory.flatMap(LoanGrant.overrideHistoryRaw))
     }
 
     /// Glucose for the last `hours`, every five minutes: the history starts there, not earlier.
@@ -186,5 +187,42 @@ final class OverrideHistoryTests: XCTestCase {
         _ = c.loopManager.basalRateScheduleApplyingOverrideHistory   // traps on an overlap
         let kept = c.loopManager.overrideHistory.getOverrideHistory(startDate: now.addingTimeInterval(-.hours(4)), endDate: Date())
         XCTAssertEqual(kept.map(\.syncIdentifier), [granted.syncIdentifier], "only what the phone sent")
+    }
+
+    // MARK: - The phone's history arrives with the grant
+
+    /// An override that ended on the phone 2 h before Start scales the watch's first cycle for
+    /// its minutes, from its original start to its early end.
+    func testAnOverrideThatEndedBeforeStartScalesTheFirstCycle() async throws {
+        let history = StockLoopStack.makeOverrideHistory()
+        let c = await makeController(overrideHistory: history)
+        let now = Date()
+        var ended = halfNeeds(start: now.addingTimeInterval(-.hours(4)), duration: .hours(3))
+        ended.actualEnd = .early(now.addingTimeInterval(-.hours(2)))   // cut short on the phone
+
+        c.queue.sync { c.handleGrant(grant(activeOverride: nil, overrideHistory: [ended])) }
+
+        let kept = try XCTUnwrap(history.getOverrideHistory(startDate: now.addingTimeInterval(-.hours(24)), endDate: now).first)
+        XCTAssertEqual(kept.syncIdentifier, ended.syncIdentifier)
+        XCTAssertEqual(kept.startDate.timeIntervalSince(ended.startDate), 0, accuracy: 0.001, "its original start")
+        XCTAssertEqual(kept.actualEndDate.timeIntervalSince(ended.actualEndDate), 0, accuracy: 0.001, "and its early end")
+
+        // The cycle reads that same history (the intake's teardown reset this loop's book).
+        let loop = await makeManager(overrideHistory: history)
+        await seedGlucose(loop, hours: 3)
+        let input = try await loop.fetchAlgorithmInput(at: Date(), recommendationType: .tempBasal)
+        let during = now.addingTimeInterval(-.hours(3))
+        XCTAssertEqual(try XCTUnwrap(value(input.basal, at: during)), 0.5, accuracy: 0.001, "basal halved for its minutes")
+        XCTAssertEqual(try XCTUnwrap(sensitivity(input, at: during)), 100, accuracy: 0.001, "ISF doubled")
+        XCTAssertEqual(try XCTUnwrap(value(input.carbRatio, at: during)), 20, accuracy: 0.001, "carb ratio doubled")
+        XCTAssertEqual(try XCTUnwrap(value(input.basal, at: now.addingTimeInterval(-.hours(1)))), 1.0, accuracy: 0.001,
+                       "and nothing after its early end")
+    }
+
+    /// A phoneless start rebuilds the standing copy's grant; the history must ride along.
+    func testAStartFromTheStandingCopyKeepsTheHistory() {
+        let copy = grant(activeOverride: nil, overrideHistory: [halfNeeds(start: Date().addingTimeInterval(-.hours(3)), duration: .hours(1))])
+        XCTAssertNotNil(copy.overrideHistoryRaw)
+        XCTAssertEqual(copy.withEpoch(9, leaseUntil: Date()).overrideHistoryRaw, copy.overrideHistoryRaw)
     }
 }
