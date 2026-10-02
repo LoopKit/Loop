@@ -266,7 +266,7 @@ extension PodLoanWatchController {
     /// Resting, with a standing copy of a pump this watch would have to search for: Start needs the screen on.
     func pumpFirstContactExpected() -> Bool {
         guard phase == .idle || phase == .recoveredDrain, let configuration = standingPumpConfiguration else { return false }
-        return watchTakeControlNeedsSearch(adopting: configuration)
+        return watchTakeControlNeedsSearch(adopting: configuration, localState: pumpLocalState(for: configuration))
     }
 
     static let firstContactStartNote = NSLocalizedString(
@@ -505,11 +505,12 @@ extension PodLoanWatchController {
             }
         }
 
-        // Built through the registry from the phone's export; the kit attaches this watch's own
-        // handle for the pump if it has one. A pump that can be loaned has control and an odometer.
+        // Built through the registry from the phone's export and this watch's saved local state,
+        // from which the kit attaches its own handle for the pump if it has one. A pump that can be
+        // loaned has control and an odometer.
         SportLog.event("loan", "pump manager: building from the phone's configuration")
         guard let configuration = grant.sharedPumpConfiguration,
-              let manager = watchPumpManager(adopting: configuration),
+              let manager = watchPumpManager(adopting: configuration, localState: pumpLocalState(for: configuration)),
               let control = manager as? ExclusiveDeviceControl, manager is PumpDeliveryOdometer else {
             teardownPump()
             returnToRestingPhase()
@@ -524,6 +525,7 @@ extension PodLoanWatchController {
         manager.delegateQueue = queue
         pumpManager = manager
         pumpStateStore.wrappedValue = manager.watchRawValue
+        savePumpLocalState(of: manager)
 
         // The export's header is the copy's view; on a phoneless start it can be half an hour old.
         takeoverCopyTotal = configuration.deliveredUnits.map { (units: $0, asOf: configuration.asOf) }

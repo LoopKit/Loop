@@ -208,7 +208,8 @@ extension WatchLoopManager: CGMManagerDelegate {
         if cgmManager != nil, let builtFrom = cgmBuiltFrom, (builtFrom as NSDictionary).isEqual(to: configuration.state) {
             return
         }
-        guard let manager = watchCGMManager(adopting: configuration) else {
+        // No CGM kit keeps local state yet.
+        guard let manager = watchCGMManager(adopting: configuration, localState: nil) else {
             SportLog.event("cgm", "phone's CGM (\(configuration.managerIdentifier)) cannot be read from the watch — no CGM here")
             return
         }

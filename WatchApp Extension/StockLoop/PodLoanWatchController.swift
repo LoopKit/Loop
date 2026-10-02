@@ -108,6 +108,10 @@ final class PodLoanWatchController {
     /// saves a pump manager; beside an active phase it means the loan can resume.
     var pumpStateStore: PersistedProperty<PumpManager.RawStateValue>
 
+    /// Each pump kit's `localState` (what it knows about the pump that is this watch's own, e.g.
+    /// its Bluetooth handle), by `managerIdentifier`. Outlives the loan: the next adopt reads it.
+    var pumpLocalStateStore: PersistedProperty<[String: Any]>
+
     /// The stored seize credential, in its own file: large, and replaced whole by each refresh.
     var dormantGrantStore: PersistedProperty<Data>
 
@@ -254,6 +258,7 @@ final class PodLoanWatchController {
         self.stateDirectory = stateDirectory
         self.dormantGrantStore = Self.fileStore("PodLoanDormantGrant", in: stateDirectory)
         self.pumpStateStore = Self.fileStore("PumpManagerState", in: stateDirectory)
+        self.pumpLocalStateStore = Self.fileStore("PumpLocalState", in: stateDirectory)
         let store: PersistedProperty<[String: Any]> = Self.fileStore("PodLoanWatchState", in: stateDirectory)
         self._persisted = store.wrappedValue.flatMap(PodLoanWatchState.init(rawValue:)) ?? PodLoanWatchState()
         self.stateStore = store

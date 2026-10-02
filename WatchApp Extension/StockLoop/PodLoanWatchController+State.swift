@@ -8,6 +8,7 @@
 
 import Foundation
 import LoopCore
+import LoopKit
 
 struct PodLoanWatchState: RawRepresentable {
     static let version = 1
@@ -83,6 +84,20 @@ extension PodLoanWatchController {
     /// A file-backed value in `directory`, or in the app's default location.
     static func fileStore<V>(_ key: String, in directory: URL?) -> PersistedProperty<V> {
         directory.map { PersistedProperty<V>(key: key, directory: $0) } ?? PersistedProperty(key: key)
+    }
+
+    /// The `localState` the last manager for this export's pump left on this watch.
+    func pumpLocalState(for configuration: SharedDeviceConfiguration) -> [String: Any]? {
+        pumpLocalStateStore.wrappedValue?[configuration.managerIdentifier] as? [String: Any]
+    }
+
+    /// Saved beside the manager's state, and also after the loan: a release can still change it.
+    func savePumpLocalState(of manager: PumpManager) {
+        var saved = pumpLocalStateStore.wrappedValue ?? [:]
+        let localState = (manager as? DeviceConfigurationSharing)?.localState
+        guard (saved[manager.pluginIdentifier] as? NSDictionary) != (localState as NSDictionary?) else { return }
+        saved[manager.pluginIdentifier] = localState
+        pumpLocalStateStore.wrappedValue = saved
     }
 
     /// The persisted state, readable from any queue.

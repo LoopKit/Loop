@@ -22,15 +22,15 @@ let watchCGMManagersByIdentifier: [String: (CGMManager & DeviceConfigurationShar
     "G7CGMManager": G7CGMManager.self,
 ]
 
-/// A pump manager built from another controller's export.
-func watchPumpManager(adopting configuration: SharedDeviceConfiguration) -> PumpManager? {
-    watchPumpManagersByIdentifier[configuration.managerIdentifier]?.init(adopting: configuration)
+/// A pump manager built from another controller's export and this watch's saved `localState`.
+func watchPumpManager(adopting configuration: SharedDeviceConfiguration, localState: [String: Any]?) -> PumpManager? {
+    watchPumpManagersByIdentifier[configuration.managerIdentifier]?.init(adopting: configuration, localState: localState)
 }
 
 /// Whether taking control of this export here would have to find the device first.
-func watchTakeControlNeedsSearch(adopting configuration: SharedDeviceConfiguration) -> Bool {
+func watchTakeControlNeedsSearch(adopting configuration: SharedDeviceConfiguration, localState: [String: Any]?) -> Bool {
     let type = watchPumpManagersByIdentifier[configuration.managerIdentifier] as? ExclusiveDeviceControl.Type
-    return type?.takeControlNeedsSearch(adopting: configuration) ?? false
+    return type?.takeControlNeedsSearch(adopting: configuration, localState: localState) ?? false
 }
 
 /// A pump manager restored from its saved `managerIdentifier` and `state`, as stock restores one.
@@ -40,9 +40,9 @@ func watchPumpManager(rawValue: [String: Any]) -> PumpManager? {
     return watchPumpManagersByIdentifier[identifier]?.init(rawState: rawState)
 }
 
-/// A CGM manager built from another controller's export.
-func watchCGMManager(adopting configuration: SharedDeviceConfiguration) -> CGMManager? {
-    watchCGMManagersByIdentifier[configuration.managerIdentifier]?.init(adopting: configuration)
+/// A CGM manager built from another controller's export and this watch's saved `localState`.
+func watchCGMManager(adopting configuration: SharedDeviceConfiguration, localState: [String: Any]?) -> CGMManager? {
+    watchCGMManagersByIdentifier[configuration.managerIdentifier]?.init(adopting: configuration, localState: localState)
 }
 
 /// A CGM manager restored from its saved `managerIdentifier` and `state`.

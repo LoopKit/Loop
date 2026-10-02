@@ -18,6 +18,7 @@ extension PodLoanWatchController: PumpManagerDelegate {
     /// Saved on every update; its presence tells the next launch the loan was live.
     func pumpManagerDidUpdateState(_ pumpManager: PumpManager) {
         pumpStateStore.wrappedValue = pumpManager.watchRawValue
+        savePumpLocalState(of: pumpManager)
         reportPumpFaultOnce()
     }
 

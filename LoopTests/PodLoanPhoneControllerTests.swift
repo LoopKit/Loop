@@ -34,7 +34,7 @@ final class LendableMockPumpManager: MockPumpManager, ExclusiveDeviceControl, Pu
     func exportConfiguration() -> SharedDeviceConfiguration {
         SharedDeviceConfiguration(managerIdentifier: pluginIdentifier, asOf: Date(), deliveredUnits: Self.testOdometer, state: rawState)
     }
-    convenience init?(adopting configuration: SharedDeviceConfiguration) {
+    convenience init?(adopting configuration: SharedDeviceConfiguration, localState: [String: Any]?) {
         self.init()
     }
     var isConfiguredByAnotherController: Bool { false }
