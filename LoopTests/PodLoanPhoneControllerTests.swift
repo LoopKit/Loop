@@ -1716,6 +1716,37 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                        "ended when the wrist cleared it, not an hour later at the hand-back")
     }
 
+    /// The wiring's apply, called from the controller's queue, runs on main, in call order; until
+    /// it does, the change is visible as unapplied, which is what the controller's next read sees.
+    @MainActor
+    func testAWristOverrideIsAppliedOnMainInCallOrder() throws {
+        let presets = TemporaryPresetsManager(settingsProvider: MockSettingsProvider(settings: StoredSettings()),
+                                              presetHistory: TemporaryScheduleOverrideHistory())
+        let observer = MainThreadPresetObserver(expectation(description: "cleared"))
+        presets.addTemporaryPresetObserver(observer)
+        let setAt = Date().addingTimeInterval(-.hours(1))
+        let clearedAt = Date().addingTimeInterval(-.minutes(30))
+        let exercise = TemporaryScheduleOverride(context: .custom,
+                                                 settings: TemporaryPresetSettings(unit: .milligramsPerDeciliter, targetRange: nil,
+                                                                                   insulinNeedsScaleFactor: 0.5),
+                                                 startDate: setAt, duration: .indefinite, enactTrigger: .local, syncIdentifier: UUID())
+
+        let unapplied = Locked<[TemporaryScheduleOverride?]>([])
+        DispatchQueue.global().sync {
+            presets.setScheduleOverrideOnMain(exercise, changedAt: setAt, unapplied: unapplied)
+            XCTAssertEqual(unapplied.value.last, .some(exercise), "the set, before main has run")
+            presets.setScheduleOverrideOnMain(nil, changedAt: clearedAt, unapplied: unapplied)
+            XCTAssertEqual(unapplied.value.last, .some(nil), "then the clear")
+        }
+        XCTAssertTrue(observer.calls.isEmpty, "nothing is applied on the calling queue")
+        waitForExpectations(timeout: 5)
+
+        XCTAssertEqual(observer.calls, ["activated on main", "deactivated on main"])
+        XCTAssertTrue(unapplied.value.isEmpty, "both applied")
+        let recorded = try XCTUnwrap(presets.presetHistory.getOverrideHistory(startDate: setAt.addingTimeInterval(-60), endDate: Date()).first)
+        XCTAssertEqual(recorded.actualEndDate.timeIntervalSince(clearedAt), 0, accuracy: 0.01)
+    }
+
     // MARK: - The outbound handover is two states, not one
 
     /// "Taking over…" from grant until the watch confirms, then "Pod on Watch".
@@ -3028,5 +3059,22 @@ extension PodLoanPhoneControllerTests {
         controller.queue.sync { }
         tick(controller)
         XCTAssertNotNil(controller.holdLapseNoticedAt, "19 minutes old on arrival: the watch is still silent")
+    }
+}
+
+/// Records each preset callback and whether it ran on main; fulfils on the first deactivation.
+private final class MainThreadPresetObserver: PresetActivationObserver {
+    private(set) var calls: [String] = []
+    private let deactivated: XCTestExpectation
+
+    init(_ deactivated: XCTestExpectation) { self.deactivated = deactivated }
+
+    func presetActivated(context: TemporaryScheduleOverride.Context, duration: TemporaryScheduleOverride.Duration) {
+        calls.append("activated \(Thread.isMainThread ? "on main" : "OFF main")")
+    }
+
+    func presetDeactivated(context: TemporaryScheduleOverride.Context) {
+        calls.append("deactivated \(Thread.isMainThread ? "on main" : "OFF main")")
+        deactivated.fulfill()
     }
 }

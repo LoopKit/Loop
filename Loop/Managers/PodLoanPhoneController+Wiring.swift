@@ -15,6 +15,7 @@ import LoopCore
 
 extension WatchDataManager {
     func makePodLoanController() -> PodLoanPhoneController {
+        let unappliedOverrides = Locked<[TemporaryScheduleOverride?]>([])
         return PodLoanPhoneController(dependencies: .init(
             pumpManager: { [weak self] in self?.deviceManager.pumpManager },
             settings: { [weak self] in self?.settingsManager.loopSettings ?? LoopSettings() },
@@ -130,10 +131,12 @@ extension WatchDataManager {
             watchAppInstalled: { WCSession.isSupported() && WCSession.default.isWatchAppInstalled },
             // Without the reader, a clear from the wrist could never switch the phone's override off.
             scheduleOverride: { [weak self] in
-                self?.temporaryPresetsManager.scheduleOverride
+                // A change still on its way to main is the current one.
+                if let pending = unappliedOverrides.value.last { return pending }
+                return self?.temporaryPresetsManager.scheduleOverride
             },
             applyScheduleOverride: { [weak self] override, changedAt in
-                self?.temporaryPresetsManager.setScheduleOverride(override, changedAt: changedAt)
+                self?.temporaryPresetsManager.setScheduleOverrideOnMain(override, changedAt: changedAt, unapplied: unappliedOverrides)
             },
 
             // The wrist's loop mode coming home; a settings write, so via main.
@@ -352,5 +355,16 @@ extension TemporaryPresetsManager {
     func setScheduleOverride(_ override: TemporaryScheduleOverride?, changedAt date: Date) {
         presetHistory.recordOverride(override, at: date)
         scheduleOverride = override
+    }
+
+    /// From the loan controller's queue: applied on main, in call order, without waiting for it.
+    /// `unapplied` holds each change until main has applied it.
+    nonisolated func setScheduleOverrideOnMain(_ override: TemporaryScheduleOverride?, changedAt date: Date,
+                                               unapplied: Locked<[TemporaryScheduleOverride?]>) {
+        unapplied.mutate { $0.append(override) }
+        DispatchQueue.main.async {
+            self.setScheduleOverride(override, changedAt: date)
+            unapplied.mutate { $0.removeFirst() }
+        }
     }
 }
