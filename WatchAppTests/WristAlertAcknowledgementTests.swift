@@ -44,6 +44,12 @@ final class WristAlertAcknowledgementTests: XCTestCase {
         super.tearDown()
     }
 
+    /// This test's own requests: an earlier test's controller can still post an alert of its
+    /// own into the shared scheduler while this one runs.
+    private func pending(for alert: LoopKit.Alert) -> [UNNotificationRequest] {
+        scheduler.pending.filter { WatchAlertPresenter.alertIdentifier(in: $0.content.userInfo) == alert.identifier }
+    }
+
     private func podAlert(_ id: String = "podExpiring") -> LoopKit.Alert {
         let content = LoopKit.Alert.Content(title: "Pod Expiring", body: "Change the pod soon.", acknowledgeActionButtonLabel: "OK")
         return LoopKit.Alert(identifier: .init(managerIdentifier: "Omni", alertIdentifier: id),
@@ -51,8 +57,9 @@ final class WristAlertAcknowledgementTests: XCTestCase {
     }
 
     func testAWristAlertCarriesWhatAnAcknowledgementNeeds() throws {
-        WatchAlertPresenter.present(podAlert())
-        let request = try XCTUnwrap(scheduler.pending.first)
+        let alert = podAlert()
+        WatchAlertPresenter.present(alert)
+        let request = try XCTUnwrap(pending(for: alert).first)
 
         XCTAssertEqual(request.content.categoryIdentifier, LoopNotificationCategory.alert.rawValue, "the OK button")
         XCTAssertEqual(WatchAlertPresenter.alertIdentifier(in: request.content.userInfo),
@@ -69,25 +76,25 @@ final class WristAlertAcknowledgementTests: XCTestCase {
     func testAnAcknowledgementReachesTheManagerAndClearsTheAlert() async throws {
         let alert = podAlert()
         WatchAlertPresenter.present(alert)
-        let content = try XCTUnwrap(scheduler.pending.first?.content)
+        let content = try XCTUnwrap(pending(for: alert).first?.content)
         let responder = SpyResponder()
 
         await WatchAlertPresenter.acknowledge(alert.identifier, with: responder, content: content)
 
         XCTAssertEqual(responder.acknowledged, ["podExpiring"], "the pump's own acknowledgeAlert, as the phone calls it")
-        XCTAssertTrue(scheduler.pending.isEmpty)
+        XCTAssertTrue(pending(for: alert).isEmpty)
     }
 
     func testAFailedAcknowledgementPutsTheAlertBack() async throws {
         let alert = podAlert()
         WatchAlertPresenter.present(alert)
-        let content = try XCTUnwrap(scheduler.pending.first?.content)
+        let content = try XCTUnwrap(pending(for: alert).first?.content)
         let responder = SpyResponder()
         responder.failure = NSError(domain: "pod", code: 1)
 
         await WatchAlertPresenter.acknowledge(alert.identifier, with: responder, content: content)
 
-        XCTAssertEqual(scheduler.pending.count, 1, "the pod is still beeping, so the user must be able to try again")
+        XCTAssertEqual(pending(for: alert).count, 1, "the pod is still beeping, so the user must be able to try again")
     }
 
     /// Only the loaned pump, only for its own alerts, only while the loan is live.
