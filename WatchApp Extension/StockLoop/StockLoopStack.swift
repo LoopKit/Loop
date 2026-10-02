@@ -85,8 +85,7 @@ enum StockLoopStack {
             provenanceIdentifier: provenanceIdentifier
         )
 
-        // As stock `LoopAppManager` builds it. The watch's bundle sets no `LoopLocalCacheDurationDays`,
-        // so this resolves to the default, one day.
+        // As stock `LoopAppManager` builds it, with the phone's `LoopLocalCacheDurationDays`.
         let dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: Bundle.main.localCacheDuration)
 
         SportLog.event("session", "stack: stores open")
