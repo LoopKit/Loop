@@ -48,7 +48,7 @@ protocol DoseStoreProtocol: AnyObject {
     func addDoses(_ doses: [DoseEntry], from device: HKDevice?, completion: @escaping (_ error: Error?) -> Void)
     
     // MARK: IOB and insulin effect
-    func insulinOnBoard(at date: Date, completion: @escaping (_ result: DoseStoreResult<InsulinValue>) -> Void)
+    func insulinOnBoard(at date: Date, basalDosingEnd: Date?, completion: @escaping (_ result: DoseStoreResult<InsulinValue>) -> Void)
     
     func getGlucoseEffects(start: Date, end: Date?, basalDosingEnd: Date?, completion: @escaping (_ result: DoseStoreResult<[GlucoseEffect]>) -> Void)
     
