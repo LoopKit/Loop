@@ -823,7 +823,7 @@ fileprivate class MockLoopState: LoopState {
     var totalRetrospectiveCorrection: HKQuantity?
     
     var predictGlucoseValueResult: [PredictedGlucoseValue] = []
-    func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, includingPendingInsulin: Bool, considerPositiveVelocityAndRC: Bool) throws -> [PredictedGlucoseValue] {
+    func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, includingPendingInsulin: Bool, considerPositiveVelocityAndRC: Bool, requireRecentPumpData: Bool) throws -> [PredictedGlucoseValue] {
         return predictGlucoseValueResult
     }
 
@@ -947,6 +947,8 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     var mostRecentPumpDataDate: Date?
     
     var isPumpConfigured: Bool = true
+    
+    var shouldModelAsNoDelivery: Bool = false
     
     var preferredGlucoseUnit: HKUnit = .milligramsPerDeciliter
     
