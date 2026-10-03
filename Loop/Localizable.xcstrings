@@ -374,7 +374,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : " Veiligheidsmeldingen staan UIT"
+            "value" : " Veiligheids- en kritieke meldingen staan UIT"
           }
         },
         "pl" : {
@@ -1237,7 +1237,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ %2$@ kon je huidige tijdelijke basaalstand niet annuleren, die hoger is dan de nieuwe maximale basaallimiet die je hebt ingesteld. Dit kan leiden tot een hogere insulinetoediening dan gewenst. \n\nOverweeg om de insulinetoediening handmatig te onderbreken en dan direct het hervatten van de basaaltoediening uit te laten voeren met de nieuwe geldende limiet."
+            "value" : "%@%@  kon je huidige tijdelijke basaalstand niet annuleren, die hoger is dan de nieuwe maximale basaallimiet die je hebt ingesteld. Dit kan leiden tot een hogere insulinetoediening dan gewenst. \n\nOverweeg om de insulinetoediening handmatig te onderbreken en dan direct het hervatten van de basaaltoediening uit te laten voeren met de nieuwe geldende limiet."
           }
         },
         "pl" : {
@@ -35440,7 +35440,27 @@
       }
     },
     "Simplify Carb Entry" : {
-      "comment" : "Subheading for Favorite Foods in Settings"
+      "comment" : "Subheading for Favorite Foods in Settings",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vereinfache die KH-Eingabe"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koolhydraatinvoer vereenvoudigen"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "简化碳水录入"
+          }
+        }
+      }
     },
     "since %@" : {
       "comment" : "Format fragment for a start time",
