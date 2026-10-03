@@ -384,7 +384,7 @@ final class WatchDataManager: NSObject {
                 return
             }
 
-            deviceManager.enactBolus(units: bolus.value, activationType: bolus.activationType) { (error) in
+            deviceManager.enactBolus(units: bolus.value, activationType: bolus.activationType, origin: .watch) { (error) in
                 if error == nil {
                     self.deviceManager.analyticsServicesManager.didBolus(source: "Watch", units: bolus.value)
                 }
