@@ -20,7 +20,7 @@ import HealthKit
 @testable import WatchApp
 
 /// Records what the loop asks the pod for, and sends nothing.
-final class RecordingDoseEnactor: WatchDoseEnactor {
+final class RecordingDoseEnactor: DoseEnactor {
     private(set) var calls: [(bolus: Double?, tempBasal: TempBasalRecommendation?)] = []
     private(set) var decisionIds: [UUID?] = []
 

@@ -72,7 +72,7 @@
 		14D906F42A846510006EB79A /* FavoriteFoodsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */; };
 		14ED83F62C6421F9008B4A5C /* FavoriteFoodInsightsCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14ED83F52C6421F9008B4A5C /* FavoriteFoodInsightsCardView.swift */; };
 		16E5A3BC4D931CE6AED18518 /* trill.caf in Resources */ = {isa = PBXBuildFile; fileRef = 21F13EB666EBFDD03F99CB7E /* trill.caf */; };
-		1A353D3E971442118DD6956C /* WatchDoseEnactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3F9328E659A49159A47F646 /* WatchDoseEnactor.swift */; };
+		4624A94E56A6ABB49478893A /* DoseEnactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16B983D26B4893300256B05 /* DoseEnactor.swift */; };
 		1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
 		1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219C2469F1F5000EBBDE /* AlertStore.swift */; };
 		1D080CBD2473214A00356610 /* AlertStore.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */; };
@@ -1692,7 +1692,6 @@
 		00E9C192B33D5FC41E45E7A9 /* GlanceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GlanceModel.swift"; path = "WatchApp Extension/StockLoop/GlanceModel.swift"; sourceTree = SOURCE_ROOT; };
 		F23412C23E024F9A9399C435 /* StockLoopStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StockLoopStack.swift; path = "WatchApp Extension/StockLoop/StockLoopStack.swift"; sourceTree = SOURCE_ROOT; };
 		AD49ED34A3CE3A86BEFB048E /* WatchDeviceManagers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchDeviceManagers.swift"; path = "WatchApp Extension/StockLoop/WatchDeviceManagers.swift"; sourceTree = SOURCE_ROOT; };
-		F3F9328E659A49159A47F646 /* WatchDoseEnactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WatchDoseEnactor.swift; path = "WatchApp Extension/StockLoop/WatchDoseEnactor.swift"; sourceTree = SOURCE_ROOT; };
 		F520419E66CD453A809324D1 /* RuntimeStateLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RuntimeStateLog.swift; path = "WatchApp Extension/StockLoop/RuntimeStateLog.swift"; sourceTree = SOURCE_ROOT; };
 		F5D9C01727DABBE0002E48F6 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Intents.strings; sourceTree = "<group>"; };
 		F5E0BDD327E1D71C0033557E /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Intents.strings; sourceTree = "<group>"; };
@@ -2645,7 +2644,6 @@
 				C4975B7BB91A91CB21F89ED6 /* WatchLoopManager+Cycle.swift */,
 				C940C6F431E6435B971D98B2 /* SportLog.swift */,
 				8C77C38CD576410EA92A5B9A /* WorkoutKeepalive.swift */,
-				F3F9328E659A49159A47F646 /* WatchDoseEnactor.swift */,
 				036B897A66F14CAA9CD5CAD0 /* PodLoanWatchController.swift */,
 				5B7EDF8F4E611C98701399C6 /* CarbAndBolusFlow+PodLoan.swift */,
 				DAB6D8790872D927B336A1E3 /* ContentView+PodLoan.swift */,
@@ -4148,7 +4146,7 @@
 				344ABCF8A638888D8C0AC47B /* WatchLoopManager+Cycle.swift in Sources */,
 				F06FDE1F67AF4011937B1529 /* SportLog.swift in Sources */,
 				DBA92856969B47C19B2BD581 /* WorkoutKeepalive.swift in Sources */,
-				1A353D3E971442118DD6956C /* WatchDoseEnactor.swift in Sources */,
+				4624A94E56A6ABB49478893A /* DoseEnactor.swift in Sources */,
 				C5A82FBEC2AE43769A416B01 /* PodLoanWatchController.swift in Sources */,
 				8EADBFF2925E675CBA2E77C4 /* CarbAndBolusFlow+PodLoan.swift in Sources */,
 				5784CCC929DD5EED549010EE /* ContentView+PodLoan.swift in Sources */,

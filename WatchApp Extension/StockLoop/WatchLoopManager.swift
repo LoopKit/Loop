@@ -677,8 +677,8 @@ final class WatchLoopManager {
     /// milliseconds of each other are not each re-examined against an uncommitted store.
     var lastPhoneFallbackSyncId: String?
 
-    /// A labelled copy of stock's `DoseEnactor`; see that file. A `var` so tests can observe it.
-    var doseEnactor = WatchDoseEnactor()
+    /// Stock's `DoseEnactor`, unchanged. A `var` so tests can observe it.
+    var doseEnactor = DoseEnactor()
 
     /// Say "idle, no pod" once per idle stretch instead of once per reading.
     var loggedIdleNoPump = false
