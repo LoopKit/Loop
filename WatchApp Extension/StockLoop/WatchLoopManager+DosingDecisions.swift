@@ -119,11 +119,10 @@ extension WatchLoopManager {
     /// Stock `WatchDataManager.addCarbEntryAndBolusFromWatchMessage` then
     /// `LoopDataManager.storeManualBolusDosingDecision`: the decision built with the
     /// recommendation shown for this carb entry (a bare one if the user saved without waiting for
-    /// one), with the carb entry and the amount requested. Returns its id for the pod command.
-    /// Watch: a context decision is used once; the carb entry is as entered (the carb store keeps
-    /// its own copy under the journal's identity).
+    /// one), with the carb entry as stored and the amount requested. Returns its id for the pod
+    /// command. Watch: a context decision is used once, found by the entry as entered.
     @discardableResult
-    func storeWatchBolusDosingDecision(carbEntry: NewCarbEntry?, requested units: Double) -> UUID {
+    func storeWatchBolusDosingDecision(carbEntry: NewCarbEntry?, storedCarbEntry: StoredCarbEntry?, requested units: Double) -> UUID {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         var dosingDecision: StoredDosingDecision
@@ -134,7 +133,7 @@ extension WatchLoopManager {
             dosingDecision = StoredDosingDecision(reason: "watchBolus")  // The user saved without waiting for recommendation (no bolus)
         }
 
-        dosingDecision.carbEntry = carbEntry?.asStoredCarbEntry
+        dosingDecision.carbEntry = storedCarbEntry
         dosingDecision.manualBolusRequested = units
 
         dosingDecision.date = now
@@ -149,9 +148,9 @@ extension WatchLoopManager {
     }
 
     /// Carbs saved with no bolus: stock stores this as a watchBolus decision too.
-    func storeWatchCarbsOnlyDosingDecision(carbEntry: NewCarbEntry) {
+    func storeWatchCarbsOnlyDosingDecision(carbEntry: NewCarbEntry, storedCarbEntry: StoredCarbEntry) {
         dataAccessQueue.async {
-            self.storeWatchBolusDosingDecision(carbEntry: carbEntry, requested: 0)
+            self.storeWatchBolusDosingDecision(carbEntry: carbEntry, storedCarbEntry: storedCarbEntry, requested: 0)
         }
     }
 }

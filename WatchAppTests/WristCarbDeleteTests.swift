@@ -59,6 +59,28 @@ final class WristCarbDeleteTests: XCTestCase {
         XCTAssertTrue(drain.deletedCarbs.first?.matches(onPhone) ?? false, "and finds the carb the phone stored")
     }
 
+    /// The wrist bolus waits on this answer (stock saves the carbs before it boluses), and its
+    /// decision records the entry as stored, under the journal's identity.
+    func testTheCarbSaveAnswersWithTheStoredEntryUnderTheJournalsIdentity() async throws {
+        let controller = try await liveLoan()
+        let meal = NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 45),
+                                startDate: Date().addingTimeInterval(-60), foodType: nil, absorptionTime: .hours(3))
+
+        let saved = expectation(description: "saved")
+        var answer: StoredCarbEntry?
+        controller.loanDidRecordCarbs(meal) { result in
+            answer = try? result.get()
+            saved.fulfill()
+        }
+        await fulfillment(of: [saved], timeout: 10)
+        controller.queue.sync { }
+
+        let stored = try XCTUnwrap(answer, "the save succeeded")
+        let carbEvent = try XCTUnwrap(controller.journal.unackedEvents().first { $0.record.kind == .carb })
+        XCTAssertEqual(stored.syncIdentifier, carbEvent.id.uuidString)
+        XCTAssertEqual(stored.quantity.doubleValue(for: .gram), 45, accuracy: 0.001)
+    }
+
     private func localCarb(_ controller: PodLoanWatchController) async throws -> StoredCarbEntry {
         for _ in 0..<50 {
             if let entry = try await controller.loopManager.carbStore.getCarbEntries(start: Date().addingTimeInterval(-3600)).first {

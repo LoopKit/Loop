@@ -692,6 +692,11 @@ final class WatchLoopManager {
         pumpManager.enactBolus(decisionId: decisionId, units: units, activationType: activationType, completion: completion)
     }
 
+    /// Stock's cancel of an automatic bolus before a manual one; a `var` so the suite can see it.
+    var cancelBolusCommand: (PumpManager) async -> Void = { pumpManager in
+        let _ = try? await pumpManager.cancelBolus()
+    }
+
 }
 
 /// Log-only naming for an override's preset, so an override line says which preset it was

@@ -115,11 +115,12 @@ extension WatchLoopManager {
 
     /// Straight to `pumpManager.enactBolus`, capped at the grant's `maximumBolus`. Skips stock's
     /// `DeviceDataManager.enact` wrapper and its uncertain-delivery and suspend checks. As stock's
-    /// watch bolus, the watchBolus decision is stored first and its id goes with the command.
+    /// watch bolus, the watchBolus decision is stored first, with the carb entry as stored, and its
+    /// id goes with the command.
     func enactManualBolus(units: Double, activationType: BolusActivationType, carbEntry: NewCarbEntry? = nil,
-                          completion: @escaping (Error?) -> Void) {
+                          storedCarbEntry: StoredCarbEntry? = nil, completion: @escaping (Error?) -> Void) {
         dataAccessQueue.async {
-            let decisionId = self.storeWatchBolusDosingDecision(carbEntry: carbEntry, requested: units)
+            let decisionId = self.storeWatchBolusDosingDecision(carbEntry: carbEntry, storedCarbEntry: storedCarbEntry, requested: units)
 
             guard let pumpManager = self.pumpManager else {
                 DispatchQueue.main.async { completion(WatchLoopError.pumpManagerUnconnected) }
@@ -137,28 +138,38 @@ extension WatchLoopManager {
             }
             let rounded = pumpManager.roundToSupportedBolusVolume(units: units)
 
-            let deliverBolus = {
-                SportLog.event("loan", String(format: "MANUAL BOLUS %.2f U — enacting on the watch pump", rounded))
-                self.enactBolusCommand(pumpManager, decisionId, rounded, activationType) { error in
-                    if let error = error {
-                        SportLog.event("loan", "MANUAL BOLUS FAILED — \(String(describing: error))")
-                    } else {
-                        // As stock, no cycle follows: the dose store's change refreshes the display.
-                        SportLog.event("loan", String(format: "MANUAL BOLUS %.2f U ACCEPTED by pod", rounded))
-                    }
-                    self.setManualBolusInFlight(false)
-                    DispatchQueue.main.async { completion(error) }
-                }
-            }
             self.setManualBolusInFlight(true, units: rounded)
 
-            self.dataAccessQueue.async { deliverBolus() }
+            // A labelled copy of stock `DeviceDataManager.enactBolus`: a manual bolus first
+            // cancels an automatic bolus in progress.
+            var automaticBolusOngoing = false
+            if case .inProgress(let dose) = pumpManager.status.bolusState, dose.automatic == true {
+                automaticBolusOngoing = true
+            }
+
+            if automaticBolusOngoing && activationType != .automatic {
+                SportLog.event("loan", "MANUAL BOLUS — cancelling the automatic bolus in progress first, as stock")
+                try? self.runBlocking { await self.cancelBolusCommand(pumpManager) }
+            }
+
+            SportLog.event("loan", String(format: "MANUAL BOLUS %.2f U — enacting on the watch pump", rounded))
+            self.enactBolusCommand(pumpManager, decisionId, rounded, activationType) { error in
+                if let error = error {
+                    SportLog.event("loan", "MANUAL BOLUS FAILED — \(String(describing: error))")
+                } else {
+                    // As stock, no cycle follows: the dose store's change refreshes the display.
+                    SportLog.event("loan", String(format: "MANUAL BOLUS %.2f U ACCEPTED by pod", rounded))
+                }
+                self.setManualBolusInFlight(false)
+                DispatchQueue.main.async { completion(error) }
+            }
         }
     }
 
     /// The local half, under the identity the caller journals it with. As stock, no cycle
     /// follows: the next reading runs one, and the carb store's change refreshes the display.
-    func addLoanCarbEntry(_ entry: NewCarbEntry, syncIdentifier: String) {
+    func addLoanCarbEntry(_ entry: NewCarbEntry, syncIdentifier: String,
+                          completion: ((Swift.Result<StoredCarbEntry, Error>) -> Void)? = nil) {
         carbStore.addCarbEntry(entry, syncIdentifier: syncIdentifier) { result in
             switch result {
             case .success(let stored):
@@ -166,6 +177,7 @@ extension WatchLoopManager {
             case .failure(let error):
                 SportLog.event("loan", "carb store add FAILED — \(String(describing: error))")
             }
+            completion?(result)
         }
     }
 

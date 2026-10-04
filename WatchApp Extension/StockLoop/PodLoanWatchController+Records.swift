@@ -87,12 +87,13 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Also in the local store, so this cycle's COB already sees it. Both under the event ID,
-    /// the identity the phone stores it under, so a later wrist delete matches there.
-    func loanDidRecordCarbs(_ entry: NewCarbEntry) {
+    /// Also in the local store, so the next cycle's COB sees it. Both under the event ID, the
+    /// identity the phone stores it under, so a later wrist delete matches there. `completion`
+    /// gets the local store's answer.
+    func loanDidRecordCarbs(_ entry: NewCarbEntry, completion: ((Swift.Result<StoredCarbEntry, Error>) -> Void)? = nil) {
         let grams = entry.quantity.doubleValue(for: .gram)
         let eventID = UUID()
-        loopManager.addLoanCarbEntry(entry, syncIdentifier: eventID.uuidString)
+        loopManager.addLoanCarbEntry(entry, syncIdentifier: eventID.uuidString, completion: completion)
         // async, never sync: ordering with the pump's reports, and main must not wait.
         queue.async {
             guard self.phase == .active else {

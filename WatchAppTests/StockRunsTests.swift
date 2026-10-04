@@ -166,12 +166,14 @@ final class StockRunsTests: XCTestCase {
     }
 
     /// An Omnipod manager with a completed pod, optionally faulted or running a temp.
-    private func makePump(fault: DetailedStatus? = nil, unfinalizedTemp: UnfinalizedDose? = nil) throws -> OmniPumpManager {
+    private func makePump(fault: DetailedStatus? = nil, unfinalizedTemp: UnfinalizedDose? = nil,
+                          unfinalizedBolus: UnfinalizedDose? = nil) throws -> OmniPumpManager {
         var podState = PodState(address: 0x1f0b3557, firmwareVersion: "2.7.0", iFirmwareVersion: "2.7.0",
                                 lotNo: 1, lotSeq: 1, insulinType: .novolog, podType: dashType)
         podState.setupProgress = .completed
         podState.fault = fault
         podState.unfinalizedTempBasal = unfinalizedTemp
+        podState.unfinalizedBolus = unfinalizedBolus
         let raw: [String: Any] = ["basalSchedule": ["entries": [["rate": 0.7, "startTime": 0.0]]],
                                   "controllerId": UInt32(0x1234_5678), "podId": UInt32(0x1234_5679),
                                   "podState": podState.rawValue]
@@ -666,8 +668,14 @@ final class StockRunsTests: XCTestCase {
         manager.recommendManualBolus(potentialCarbEntry: meal) { _ in shown.fulfill() }
         await fulfillment(of: [shown], timeout: 20)
 
+        let mealSyncId = UUID().uuidString
+        let stored = try await withCheckedThrowingContinuation { continuation in
+            manager.carbStore.addCarbEntry(meal, syncIdentifier: mealSyncId) { continuation.resume(with: $0) }
+        }
+
         let accepted = expectation(description: "bolus")
-        manager.enactManualBolus(units: 1.0, activationType: .manualNoRecommendation, carbEntry: meal) { _ in accepted.fulfill() }
+        manager.enactManualBolus(units: 1.0, activationType: .manualNoRecommendation, carbEntry: meal,
+                                 storedCarbEntry: stored) { _ in accepted.fulfill() }
         await fulfillment(of: [accepted], timeout: 20)
         manager.dataAccessQueue.sync {}
 
@@ -677,6 +685,7 @@ final class StockRunsTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(commanded).id, decision.id, "the bolus carries the decision's id")
         XCTAssertEqual(decision.manualBolusRequested, 1.0)
         XCTAssertEqual(decision.carbEntry?.quantity.doubleValue(for: .gram) ?? 0, 30, accuracy: 0.001)
+        XCTAssertEqual(decision.carbEntry?.syncIdentifier, mealSyncId, "the entry as stored, as stock records it")
         XCTAssertNotNil(decision.manualBolusRecommendation, "the recommendation shown with this carb entry")
         XCTAssertNotNil(decision.predictedGlucose)
         XCTAssertNotNil(decision.settings)
@@ -767,6 +776,33 @@ final class StockRunsTests: XCTestCase {
         manager.setClosedLoopEnabled(true, reason: "test")
         manager.dataAccessQueue.sync {}
         return (manager, enactor)
+    }
+
+    /// A labelled copy of stock `DeviceDataManager.enactBolus`: a manual bolus first cancels an
+    /// automatic bolus in progress (the pod refuses a bolus while one runs); a manual bolus in
+    /// progress is left alone.
+    func testAManualBolusCancelsAnAutomaticBolusInProgressFirst() async throws {
+        func inProgress(automatic: Bool) -> UnfinalizedDose {
+            UnfinalizedDose(decisionId: nil, bolusAmount: 2.0, startTime: Date().addingTimeInterval(-10),
+                            scheduledCertainty: .certain, insulinType: .novolog, automatic: automatic)
+        }
+        for automatic in [true, false] {
+            let manager = await makeManager()
+            manager.pumpManager = try makePump(unfinalizedBolus: inProgress(automatic: automatic))
+            var commands: [String] = []
+            manager.cancelBolusCommand = { _ in commands.append("cancel") }
+            manager.enactBolusCommand = { _, _, _, _, completion in
+                commands.append("bolus")
+                completion(nil)
+            }
+
+            let accepted = expectation(description: "bolus")
+            manager.enactManualBolus(units: 1.0, activationType: .manualNoRecommendation) { _ in accepted.fulfill() }
+            await fulfillment(of: [accepted], timeout: 10)
+
+            XCTAssertEqual(commands, automatic ? ["cancel", "bolus"] : ["bolus"],
+                           automatic ? "the automatic bolus is cancelled first" : "a manual bolus is not cancelled")
+        }
     }
 
     private func storedCarbs(_ manager: WatchLoopManager) async -> [StoredCarbEntry] {
