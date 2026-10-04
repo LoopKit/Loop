@@ -61,7 +61,8 @@ struct GlanceProvider: AppIntentTimelineProvider {
         let snapshot = GlanceComplicationSnapshot.load()
         GlanceComplicationSnapshot.noteServed(configuration.metric.rawValue, at: now)
         glanceWidgetLog.notice("timeline metric=\(configuration.metric.rawValue, privacy: .public) family=\(String(describing: context.family), privacy: .public)")
-        let moments = [now] + (snapshot?.changeMoments(after: now) ?? [])
+        let marks = (snapshot?.changeMoments(after: now) ?? []) + (snapshot?.loopAgeMarks(after: now) ?? [])
+        let moments = [now] + Set(marks).sorted()
         return Timeline(entries: moments.map { GlanceEntry(date: $0, metric: configuration.metric, snapshot: snapshot) },
                         policy: .never)
     }
@@ -101,11 +102,8 @@ struct GlanceComplicationView: View {
     @ViewBuilder private var content: some View {
         switch family {
         case .accessoryInline:
-            if metric == .loop, let loopDate = snapshot.loopDate {
-                Text(snapshot.line(.bg, at: date) + " · ") + Text(loopDate, style: .relative)
-            } else {
-                Text(snapshot.line(metric, at: date))
-            }
+            Text(metric == .loop ? snapshot.line(.bg, at: date) + " · loop " + snapshot.loopAge(at: date)
+                                 : snapshot.line(metric, at: date))
         case .accessoryCorner:
             corner
         case .accessoryCircular:
@@ -146,6 +144,17 @@ struct GlanceComplicationView: View {
                     Text(snapshot.value(.bg, at: date))
                         .font(.system(size: 17, weight: .semibold, design: .rounded)).foregroundStyle(bgColor)
                     Text(snapshot.iob(at: date) ?? GlanceComplicationSnapshot.dash).font(.system(size: 11, weight: .medium))
+                } else if metric == .bgEventual {
+                    // The reading on top, where it is to go beneath (circles are too small for one line).
+                    Text(snapshot.bgWithTrend(at: date))
+                        .font(.system(size: 15, weight: .semibold, design: .rounded)).foregroundStyle(bgColor)
+                    Text("→" + (snapshot.eventual(at: date) ?? GlanceComplicationSnapshot.dash))
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                } else if metric == .override {
+                    // The preset's symbol large, its scale and target beneath; no caption row.
+                    let parts = snapshot.overrideParts
+                    Text(parts.symbol).font(.system(size: 18))
+                    Text(parts.rest).font(.system(size: 12, weight: .semibold, design: .rounded))
                 } else if metric == .bg || metric == .loop {
                     Text(snapshot.value(metric, at: date))
                         .font(.system(size: 18, weight: .semibold, design: .rounded)).foregroundStyle(bgColor)
@@ -162,23 +171,28 @@ struct GlanceComplicationView: View {
     }
 
     private var loopAge: some View {
-        Group {
-            if let loopDate = snapshot.loopDate {
-                Text(loopDate, style: .relative)
-            } else {
-                Text(GlanceComplicationSnapshot.dash)
-            }
-        }
-        .font(.caption2)
-        .foregroundStyle(snapshot.freshness(at: date).color)
+        Text(snapshot.loopAge(at: date))
+            .font(.system(size: 13, weight: .medium, design: .rounded))
+            .foregroundStyle(snapshot.freshness(at: date).color)
     }
 
+    /// The metric's name and the loop's age, then the value large, then BG → eventual for context
+    /// (the loop's numbers when the value is BG itself).
     private var rectangular: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text(metric.title).font(.headline).widgetAccentable()
-            Text(metric == .override ? snapshot.value(.override, at: date) : snapshot.line(metric, at: date))
-                .font(.body).minimumScaleFactor(0.6).lineLimit(1)
-            loopAge
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text(metric.title.uppercased())
+                    .font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary).widgetAccentable()
+                Spacer(minLength: 4)
+                loopAge
+            }
+            Text(snapshot.headline(metric, at: date))
+                .font(.system(size: 26, weight: .semibold, design: .rounded))
+                .foregroundStyle(metric == .bg || metric == .loop ? bgColor : .primary)
+                .minimumScaleFactor(0.5).lineLimit(1)
+            Text(snapshot.context(metric, at: date))
+                .font(.system(size: 14, weight: .medium, design: .rounded)).foregroundStyle(.secondary)
+                .minimumScaleFactor(0.7).lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -194,11 +208,12 @@ struct GlanceComplicationView: View {
                 Text(snapshot.watchHasPod ? "⌚︎" : "📱").font(.caption2)
             }
             Text(snapshot.miniGlanceNumbers(at: date))
-                .font(.caption).minimumScaleFactor(0.6).lineLimit(1)
+                .font(.system(size: 15, weight: .medium, design: .rounded)).minimumScaleFactor(0.7).lineLimit(1)
             HStack(spacing: 4) {
                 if let label = snapshot.overrideLabel {
-                    Text(label).font(.caption2).lineLimit(1)
+                    Text(label).font(.system(size: 13, weight: .medium, design: .rounded)).lineLimit(1)
                 }
+                Spacer(minLength: 4)
                 loopAge
             }
         }

@@ -162,12 +162,54 @@ extension GlanceComplicationSnapshot {
         }
     }
 
+    /// The loop's age in whole minutes ("now", "4m", "30m+"), not WidgetKit's ticking relative date
+    /// ("33sec"). The timeline carries an entry at each minute mark, which costs no reload budget.
+    func loopAge(at date: Date) -> String {
+        guard let loopDate else { return Self.dash }
+        let minutes = Int(max(0, date.timeIntervalSince(loopDate)) / 60)
+        if minutes < 1 { return "now" }
+        return minutes >= Self.loopAgeMinutes ? "\(Self.loopAgeMinutes)m+" : "\(minutes)m"
+    }
+
+    static let loopAgeMinutes = 30
+
+    /// The minute marks after `date` at which `loopAge` changes.
+    func loopAgeMarks(after date: Date) -> [Date] {
+        guard let loopDate else { return [] }
+        return (1...Self.loopAgeMinutes).map { loopDate.addingTimeInterval(TimeInterval($0 * 60)) }.filter { $0 > date }
+    }
+
+    /// A rectangle's big value.
+    func headline(_ metric: GlanceMetric, at date: Date) -> String {
+        switch metric {
+        case .bg, .loop: return bgWithTrend(at: date)
+        case .bgEventual: return line(.bgEventual, at: date)
+        default: return value(metric, at: date)
+        }
+    }
+
+    /// A rectangle's line under the value: BG → eventual, or the loop's numbers when the value is BG.
+    func context(_ metric: GlanceMetric, at date: Date) -> String {
+        switch metric {
+        case .bg, .bgEventual, .eventual, .loop: return line(.iobCob, at: date)
+        default: return line(.bgEventual, at: date)
+        }
+    }
+
     /// The mini glance's second line and the numbers under it.
     func miniGlanceEventual(at date: Date) -> String { "→ " + or(eventual(at: date)) }
     func miniGlanceNumbers(at date: Date) -> String {
         let iob = "IOB " + or(iob(at: date))
         let cob = "COB " + or(cob(at: date))
         return [iob, cob, or(temp(at: date))].joined(separator: "  ")
+    }
+
+    /// The override label split for a circle: its leading symbol, then the rest ("70% 140"). A dash
+    /// when no override is active.
+    var overrideParts: (symbol: String, rest: String) {
+        guard let label = overrideLabel, !label.isEmpty else { return (Self.dash, "") }
+        let words = label.split(separator: " ", maxSplits: 1)
+        return (String(words[0]), words.count > 1 ? String(words[1]) : "")
     }
 
     /// A circular slot: a small caption over the value.

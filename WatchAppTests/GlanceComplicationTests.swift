@@ -144,4 +144,37 @@ final class GlanceComplicationTests: XCTestCase {
         let served = GlanceComplicationSnapshot.served(after: now.addingTimeInterval(-60), defaults: defaults)
         XCTAssertEqual(served.map(\.metric), ["bg"])
     }
+
+    /// The loop's age reads in whole minutes, with a timeline mark at each, and stops counting at 30.
+    func testTheLoopAgeCountsWholeMinutes() {
+        let s = GlanceComplicationPublisher.snapshot(loan: glanceData(loopAge: 30), cob: 10,
+                                                     unit: .milligramsPerDeciliter, now: now)
+        XCTAssertEqual(s.loopAge(at: now), "now")
+        XCTAssertEqual(s.loopAge(at: now.addingTimeInterval(4 * 60)), "4m")
+        XCTAssertEqual(s.loopAge(at: now.addingTimeInterval(45 * 60)), "30m+")
+        let marks = s.loopAgeMarks(after: now)
+        XCTAssertEqual(marks.count, 30)
+        XCTAssertEqual(s.loopAge(at: marks[0]), "1m")
+    }
+
+    /// A rectangle shows its value large and BG → eventual beneath, or the loop's numbers under BG.
+    func testARectangleCarriesContext() {
+        let s = GlanceComplicationPublisher.snapshot(loan: glanceData(), cob: 15, unit: .milligramsPerDeciliter, now: now)
+        let up = GlucoseTrend.up.symbol
+        XCTAssertEqual(s.headline(.iob, at: now), "2.3")
+        XCTAssertEqual(s.context(.iob, at: now), "106\(up) → 112")
+        XCTAssertEqual(s.headline(.bg, at: now), "106\(up)")
+        XCTAssertEqual(s.context(.bg, at: now), "IOB 2.3 · COB 15")
+    }
+
+    /// A circle shows an override as its symbol over the rest of the label.
+    func testAnOverrideSplitsForACircle() {
+        var s = GlanceComplicationSnapshot()
+        XCTAssertEqual(s.overrideParts.symbol, "—")
+        s.overrideLabel = "🏃 70% 140"
+        XCTAssertEqual(s.overrideParts.symbol, "🏃")
+        XCTAssertEqual(s.overrideParts.rest, "70% 140")
+        s.overrideLabel = "⏱"
+        XCTAssertEqual(s.overrideParts.rest, "")
+    }
 }
