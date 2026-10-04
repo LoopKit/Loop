@@ -459,7 +459,8 @@ final class WakeResumeTests: XCTestCase {
         c.beginHandback()
         c.queue.sync { }
         c.handleIncoming(userInfo: try LoanMessage.handbackAck(HandbackAck(epoch: 7, committedCursor: 0)).transportDictionary(), channel: .urgent)
-        c.queue.sync { }; c.queue.sync { }   // the ack finalizes; finalize sends the final offer on the queue
+        // The ack finalizes: dosing stops on the loop's queue, then the final offer goes from the loan's.
+        c.queue.sync { }; c.loopManager.dataAccessQueue.sync { }; c.queue.sync { }; c.queue.sync { }
         XCTAssertEqual(c.phase, .handingBack, "released: the final offer is out")
         XCTAssertNil(c.loopManager.pumpManager, "and dosing has stopped")
 

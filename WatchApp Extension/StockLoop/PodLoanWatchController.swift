@@ -384,6 +384,12 @@ final class PodLoanWatchController {
     /// and wrist override, since WatchLoopManager outlives the loan.
     func teardownPump() {
         SportLog.event("handback", "teardownPump: releasing control of the pump explicitly")
+        // The pod's alerts are the phone's from here: a repeating one left on the wrist would keep
+        // sounding while the phone raises the same alert.
+        if let pumpIdentifier = pumpManager?.pluginIdentifier {
+            let loopManager = self.loopManager
+            Task { await loopManager.retractStandingAlerts(managerIdentifier: pumpIdentifier) }
+        }
         pumpControl?.releaseControl()
         pumpManager?.pumpManagerDelegate = nil
         pumpManager = nil

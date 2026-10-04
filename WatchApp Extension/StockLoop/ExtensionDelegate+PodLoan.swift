@@ -83,6 +83,10 @@ extension ExtensionDelegate {
         stockLoopSession?.stack.loopManager.recordAlertAcknowledgement(identifier)
         guard let responder = await stockLoopSession?.loanController.pumpAlertResponder(for: identifier.managerIdentifier) else {
             SportLog.event("alert", "ACKNOWLEDGED \(identifier.value) on the wrist — not the loaned pump's, nothing to pass on")
+            // A repeating alert from a pod no longer here would otherwise go on sounding.
+            if identifier.managerIdentifier != GlucoseAlertManager.managerIdentifier {
+                stockLoopSession?.stack.loopManager.retractAlert(identifier: identifier)
+            }
             return true
         }
         await WatchAlertPresenter.acknowledge(identifier, with: responder, content: request.content)

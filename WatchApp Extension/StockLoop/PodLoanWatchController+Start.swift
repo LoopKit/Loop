@@ -626,15 +626,17 @@ extension PodLoanWatchController {
                     self.revokeCapturedDelivered = nil
                     self.revokeCapturedDeliveredAt = nil
                     self.recordTakeoverActive(delivered: delivered)
-                    self.loopManager.pumpManager = manager
                     self.onLoanActiveChanged?(true)
                     let takeoverSecs = self.attemptStartedAt.map { self.now().timeIntervalSince($0) } ?? -1
                     SportLog.event("loan", String(format: "ACTIVE — epoch %d, pod taken after %d read(s) in %.1fs [takeover-timing], odometer %.2f U, final read driver=%@ · %@",
                                                   grant.epoch, attempt + 1, takeoverSecs, delivered, driver, RuntimeStateLog.snapshot()))
                     self.sendMessage(.takeoverComplete(TakeoverComplete(epoch: grant.epoch, firstPodStatus: self.currentPodStatus())))
 
-                    // Book the unexplained insulin, then run a full `loop()` so the first program is journaled.
+                    // Book the unexplained insulin, then give the loop the pump and run a full `loop()`
+                    // so the first program is journaled. Not before: a cycle triggered in between would
+                    // dose without the booking.
                     self.bookInsulinTheCopyCannotExplain(podTotal: delivered, pulseUnits: odometer.deliveryPulseUnits, epoch: grant.epoch)
+                    self.loopManager.pumpManager = manager
                     self.loopManager.loop()
                 } else if attempt + 1 < maxAttempts {
                     if attempt == 0 {

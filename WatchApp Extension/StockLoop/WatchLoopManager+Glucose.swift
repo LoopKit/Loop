@@ -288,6 +288,12 @@ extension WatchLoopManager: CGMManagerDelegate {
         recordAlert { try? await $0.recordRetraction(of: identifier) }
     }
 
+    /// Every alert from one manager still standing on the wrist, withdrawn.
+    func retractStandingAlerts(managerIdentifier: String) async {
+        let standing = (try? await lookupAllUnretracted(managerIdentifier: managerIdentifier)) ?? []
+        for persisted in standing { await retractAlert(identifier: persisted.alert.identifier) }
+    }
+
     /// The wrist's OK or dismissal, recorded as stock `AlertManager.acknowledgeAlert` records it,
     /// whatever the alert's manager made of it.
     func recordAlertAcknowledgement(_ identifier: LoopKit.Alert.Identifier) {
