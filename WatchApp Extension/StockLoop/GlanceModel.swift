@@ -323,7 +323,11 @@ final class GlanceViewModel: ObservableObject {
             state.loopStatusText = closed ? "CLOSED · 0m" : "OPEN"
             return
         }
-        ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager.setClosedLoopEnabled(closed)
+        guard let loopManager = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager else { return }
+        loopManager.setClosedLoopEnabled(closed)
+        // As stock's `StatusTableViewController.automaticDosingStatusChanged`: closing the loop
+        // runs a cycle at once. Through the watch's entry point, which refreshes the pod first.
+        if closed { loopManager.checkPumpDataAndLoop() }
         refresh()
     }
 
