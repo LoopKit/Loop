@@ -537,15 +537,3 @@ extension WatchLoopManager {
         updateRemoteRecommendation(force: forceStoreRemoteRecommendation)
     }
 }
-
-/// A labelled copy of stock's extension (`Loop/Managers/LoopDataManager.swift`, phone-only).
-extension AutomaticDosingStrategy {
-    var recommendationType: DoseRecommendationType {
-        switch self {
-        case .tempBasalOnly:
-            return .tempBasal
-        case .automaticBolus:
-            return .automaticBolus
-        }
-    }
-}

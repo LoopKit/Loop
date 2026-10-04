@@ -665,28 +665,3 @@ struct WatchLoopState: RawRepresentable {
         return raw
     }
 }
-
-/// A labelled copy of stock's `AlgorithmDisplayState` (`Loop/Managers/LoopDataManager.swift`,
-/// phone-only): one algorithm run's input and output.
-struct AlgorithmDisplayState {
-    var input: StoredDataAlgorithmInput?
-    var output: AlgorithmOutput<StoredCarbEntry>?
-
-    var activeInsulin: InsulinValue? {
-        guard let input, let value = output?.activeInsulin else {
-            return nil
-        }
-        return InsulinValue(startDate: input.predictionStart, value: value)
-    }
-
-    var activeCarbs: CarbValue? {
-        guard let input, let value = output?.activeCarbs else {
-            return nil
-        }
-        return CarbValue(startDate: input.predictionStart, value: value)
-    }
-
-    var asTuple: (algoInput: StoredDataAlgorithmInput?, algoOutput: AlgorithmOutput<StoredCarbEntry>?) {
-        return (algoInput: input, algoOutput: output)
-    }
-}

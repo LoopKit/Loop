@@ -296,26 +296,3 @@ extension WatchLoopManager {
         return nil
     }
 }
-
-/// Labelled copies of stock's helpers (`Loop/Managers/LoopDataManager.swift`, phone-only).
-extension NewCarbEntry {
-    var asStoredCarbEntry: StoredCarbEntry {
-        StoredCarbEntry(
-            startDate: startDate,
-            quantity: quantity,
-            foodType: foodType,
-            absorptionTime: absorptionTime,
-            userCreatedDate: date
-        )
-    }
-}
-
-extension StoredDataAlgorithmInput {
-    func addingCarbEntry(carbEntry: CarbType?) -> StoredDataAlgorithmInput {
-        var rval = self
-        if let carbEntry {
-            rval.carbEntries = carbEntries + [carbEntry]
-        }
-        return rval
-    }
-}

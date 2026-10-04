@@ -73,6 +73,7 @@
 		14ED83F62C6421F9008B4A5C /* FavoriteFoodInsightsCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14ED83F52C6421F9008B4A5C /* FavoriteFoodInsightsCardView.swift */; };
 		16E5A3BC4D931CE6AED18518 /* trill.caf in Resources */ = {isa = PBXBuildFile; fileRef = 21F13EB666EBFDD03F99CB7E /* trill.caf */; };
 		4624A94E56A6ABB49478893A /* DoseEnactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16B983D26B4893300256B05 /* DoseEnactor.swift */; };
+		8BACA0014DF81FD4EF87D856 /* LoopAlgorithmSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */; };
 		9924D02917D093DAB0BB475E /* LoopError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436A0DA41D236A2A00104B24 /* LoopError.swift */; };
 		00FE80DB999DB15B4B435C6B /* LoopWarning.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B996EF27235191002DC09C /* LoopWarning.swift */; };
 		8B352261A7F5BD9D6566293E /* PumpManagerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A999D40524663D18004C89D4 /* PumpManagerError.swift */; };
@@ -570,6 +571,7 @@
 		C16575752539FD60004AE16E /* LoopCoreConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16575742539FD60004AE16E /* LoopCoreConstants.swift */; };
 		C16575762539FEF3004AE16E /* LoopCoreConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16575742539FD60004AE16E /* LoopCoreConstants.swift */; };
 		C16B983E26B4893300256B05 /* DoseEnactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16B983D26B4893300256B05 /* DoseEnactor.swift */; };
+		D03E5031106568CF6EEBC4DF /* LoopAlgorithmSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */; };
 		C16B984026B4898800256B05 /* DoseEnactorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16B983F26B4898800256B05 /* DoseEnactorTests.swift */; };
 		C16DA84222E8E112008624C2 /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* PluginManager.swift */; };
 		C16F51192B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16F51182B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift */; };
@@ -1552,6 +1554,7 @@
 		C16575722538AFF6004AE16E /* CGMStalenessMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGMStalenessMonitorTests.swift; sourceTree = "<group>"; };
 		C16575742539FD60004AE16E /* LoopCoreConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopCoreConstants.swift; sourceTree = "<group>"; };
 		C16B983D26B4893300256B05 /* DoseEnactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseEnactor.swift; sourceTree = "<group>"; };
+		812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopAlgorithmSupport.swift"; sourceTree = "<group>"; };
 		C16B983F26B4898800256B05 /* DoseEnactorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseEnactorTests.swift; sourceTree = "<group>"; };
 		C16DA84122E8E112008624C2 /* PluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginManager.swift; sourceTree = "<group>"; };
 		C16F51182B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredDataAlgorithmInput.swift; sourceTree = "<group>"; };
@@ -2354,6 +2357,7 @@
 				C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */,
 				43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */,
 				C16B983D26B4893300256B05 /* DoseEnactor.swift */,
+				812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */,
 				4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */,
 				A9C62D862331703000535612 /* LoggingServicesManager.swift */,
 				A9D5C5B525DC6C6A00534873 /* LoopAppManager.swift */,
@@ -3970,6 +3974,7 @@
 				84DF48C32F6A0AF600BEDB40 /* Image+Crop.swift in Sources */,
 				439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */,
 				C16B983E26B4893300256B05 /* DoseEnactor.swift in Sources */,
+				D03E5031106568CF6EEBC4DF /* LoopAlgorithmSupport.swift in Sources */,
 				3ED319962EB65A5C00820BCF /* LiveActivityManagementViewModel.swift in Sources */,
 				E98A55EF24EDD6E60008715D /* DosingDecisionStoreProtocol.swift in Sources */,
 				B4001CEE28CBBC82002FB414 /* AlertManagementView.swift in Sources */,
@@ -4162,6 +4167,7 @@
 				F06FDE1F67AF4011937B1529 /* SportLog.swift in Sources */,
 				DBA92856969B47C19B2BD581 /* WorkoutKeepalive.swift in Sources */,
 				4624A94E56A6ABB49478893A /* DoseEnactor.swift in Sources */,
+				8BACA0014DF81FD4EF87D856 /* LoopAlgorithmSupport.swift in Sources */,
 				9924D02917D093DAB0BB475E /* LoopError.swift in Sources */,
 				00FE80DB999DB15B4B435C6B /* LoopWarning.swift in Sources */,
 				8B352261A7F5BD9D6566293E /* PumpManagerError.swift in Sources */,

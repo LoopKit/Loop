@@ -157,45 +157,6 @@ extension WatchLoopManager {
 
 // MARK: - Labelled copies of stock's phone-only helpers
 
-/// A labelled copy of stock's extension (`Loop/Managers/LoopDataManager.swift`, private there).
-extension StoredDosingDecision {
-    mutating func updateFrom(input: StoredDataAlgorithmInput, output: AlgorithmOutput<StoredCarbEntry>) {
-        self.historicalGlucose = input.glucoseHistory.map { HistoricalGlucoseValue(startDate: $0.startDate, quantity: $0.quantity) }
-        switch output.recommendationResult {
-        case .success(let recommendation):
-            self.automaticDoseRecommendation = recommendation.automatic
-        case .failure(let error):
-            self.appendError(error as? LoopError ?? .unknownError(error))
-        }
-        if let activeInsulin = output.activeInsulin {
-            self.insulinOnBoard = InsulinValue(startDate: input.predictionStart, value: activeInsulin)
-        }
-        if let activeCarbs = output.activeCarbs {
-            self.carbsOnBoard = CarbValue(startDate: input.predictionStart, value: activeCarbs)
-        }
-        self.predictedGlucose = output.predictedGlucose
-    }
-}
-
-/// Labelled copies of stock's extensions (`Loop/Managers/LoopDataManager.swift`).
-extension StoredDosingDecision.Settings {
-    init?(_ settings: StoredSettings?) {
-        guard let settings = settings else {
-            return nil
-        }
-        self.init(syncIdentifier: settings.syncIdentifier)
-    }
-}
-
-extension StoredDosingDecision.LastReservoirValue {
-    init?(_ reservoirValue: ReservoirValue?) {
-        guard let reservoirValue = reservoirValue else {
-            return nil
-        }
-        self.init(startDate: reservoirValue.startDate, unitVolume: reservoirValue.unitVolume)
-    }
-}
-
 /// A labelled copy of stock's `UIDevice.controllerStatus` (`Loop/Extensions/UIDevice+Loop.swift`).
 extension WKInterfaceDevice {
     var controllerStatus: StoredDosingDecision.ControllerStatus {
