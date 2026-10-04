@@ -23,32 +23,21 @@ enum LoopStallWatchdog {
     /// Re-adds each rung under its own identifier, which replaces the pending one: that is the
     /// dead-man.
     static func refresh() {
-        let center = WristAlerts.scheduler
         let formatter = DateComponentsFormatter()
         formatter.maximumUnitCount = 1
         formatter.allowedUnits = [.hour, .minute]
         formatter.unitsStyle = .full
         for rung in rungs {
-            let content = UNMutableNotificationContent()
-            content.title = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
-            content.body = String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"),
-                                  formatter.string(from: rung)?.localizedLowercase ?? "\(Int(rung / 60)) minutes")
-
-            // Time-sensitive is the highest level the watch is entitled to; no Critical Alerts.
-            content.interruptionLevel = .timeSensitive
-            content.sound = .default
-            content.threadIdentifier = identifier
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: rung, repeats: false)
-            center.add(UNNotificationRequest(identifier: "\(identifier).\(Int(rung))",
-                                             content: content, trigger: trigger))
+            WristAlerts.arm("\(identifier).\(Int(rung))", thread: identifier, after: rung,
+                            title: NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure"),
+                            body: String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"),
+                                         formatter.string(from: rung)?.localizedLowercase ?? "\(Int(rung / 60)) minutes"))
         }
     }
 
     /// For a loop stopped on purpose; the phone re-arms its ladder at reclaim.
     static func disarm() {
-        let center = WristAlerts.scheduler
-        center.removePendingRequests(withIdentifiers: rungIdentifiers)
-        center.removeDeliveredRequests(withIdentifiers: rungIdentifiers)
+        WristAlerts.disarm(rungIdentifiers)
     }
 }
 
@@ -60,22 +49,13 @@ enum SensorSearchAlert {
     private static let identifier = "g7.sensorSearch"
 
     static func arm() {
-        let center = WristAlerts.scheduler
-        center.removePendingRequests(withIdentifiers: [identifier])
-        let content = UNMutableNotificationContent()
-        content.title = NSLocalizedString("Sensor Not Found", comment: "Watch sensor-search alert title")
-        content.body = NSLocalizedString("Loop on your watch is still looking for your sensor. Open Loop and keep it open until it connects.", comment: "Watch sensor-search alert body")
-        content.interruptionLevel = .timeSensitive
-        content.sound = .default
-        content.threadIdentifier = identifier
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
-        center.add(UNNotificationRequest(identifier: identifier, content: content, trigger: trigger))
+        WristAlerts.arm(identifier, after: interval,
+                        title: NSLocalizedString("Sensor Not Found", comment: "Watch sensor-search alert title"),
+                        body: NSLocalizedString("Loop on your watch is still looking for your sensor. Open Loop and keep it open until it connects.", comment: "Watch sensor-search alert body"))
     }
 
     static func disarm() {
-        let center = WristAlerts.scheduler
-        center.removePendingRequests(withIdentifiers: [identifier])
-        center.removeDeliveredRequests(withIdentifiers: [identifier])
+        WristAlerts.disarm([identifier])
     }
 }
 
@@ -87,21 +67,12 @@ enum HandbackStuckAlert {
     private static let identifier = "sportmode.handbackStuck"
 
     static func arm() {
-        let center = WristAlerts.scheduler
-        center.removePendingRequests(withIdentifiers: [identifier])
-        let content = UNMutableNotificationContent()
-        content.title = NSLocalizedString("Couldn't End Sport Mode", comment: "Hand-back-stuck alert title")
-        content.body = NSLocalizedString("The iPhone didn't respond, so Sport Mode is still running on your watch. Tap End to try again.", comment: "Hand-back-stuck alert body")
-        content.interruptionLevel = .timeSensitive
-        content.sound = .default
-        content.threadIdentifier = identifier
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
-        center.add(UNNotificationRequest(identifier: identifier, content: content, trigger: trigger))
+        WristAlerts.arm(identifier, after: interval,
+                        title: NSLocalizedString("Couldn't End Sport Mode", comment: "Hand-back-stuck alert title"),
+                        body: NSLocalizedString("The iPhone didn't respond, so Sport Mode is still running on your watch. Tap End to try again.", comment: "Hand-back-stuck alert body"))
     }
 
     static func disarm() {
-        let center = WristAlerts.scheduler
-        center.removePendingRequests(withIdentifiers: [identifier])
-        center.removeDeliveredRequests(withIdentifiers: [identifier])
+        WristAlerts.disarm([identifier])
     }
 }

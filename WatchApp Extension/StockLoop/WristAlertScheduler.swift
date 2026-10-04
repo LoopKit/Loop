@@ -36,4 +36,23 @@ extension UNUserNotificationCenter: WristAlertScheduling {
 enum WristAlerts {
     /// The live scheduler. Tests substitute a recording double; nothing else should replace it.
     static var scheduler: WristAlertScheduling = UNUserNotificationCenter.current()
+
+    /// One alarm `interval` from now, replacing any pending one under `identifier`. Time-sensitive
+    /// is the highest level the watch is entitled to; no Critical Alerts.
+    static func arm(_ identifier: String, thread: String? = nil, after interval: TimeInterval, title: String, body: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.interruptionLevel = .timeSensitive
+        content.sound = .default
+        content.threadIdentifier = thread ?? identifier
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
+        scheduler.add(UNNotificationRequest(identifier: identifier, content: content, trigger: trigger))
+    }
+
+    /// Withdraws the alarms, pending and delivered.
+    static func disarm(_ identifiers: [String]) {
+        scheduler.removePendingRequests(withIdentifiers: identifiers)
+        scheduler.removeDeliveredRequests(withIdentifiers: identifiers)
+    }
 }
