@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3672F37D7AD0ADCF799182C1 /* LoopConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C660D0252E4DD5009B5C32 /* LoopConstants.swift */; };
+		8E2E2E3DF5D4A6551D194071 /* ConstantApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */; };
+		11A602D57094373065D00D79 /* ApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */; };
+		290D9C5E7F6180BB7DAD0251 /* GlucoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380424EADF78005E2F50 /* GlucoseStoreProtocol.swift */; };
+		AC44A203AF37A510128D735D /* CarbStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */; };
+		3E0AFD48BBFA03B4F15AF0BC /* DoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */; };
 		E62787C09306EF6C572B00AE /* AlertStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219C2469F1F5000EBBDE /* AlertStore.swift */; };
 		D3A7A6C51CA176C05E9DDF04 /* AlertStore.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */; };
 		983E18F38E193C0E5AFB0358 /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
@@ -4129,6 +4135,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3672F37D7AD0ADCF799182C1 /* LoopConstants.swift in Sources */,
+				8E2E2E3DF5D4A6551D194071 /* ConstantApplicationFactorStrategy.swift in Sources */,
+				11A602D57094373065D00D79 /* ApplicationFactorStrategy.swift in Sources */,
+				290D9C5E7F6180BB7DAD0251 /* GlucoseStoreProtocol.swift in Sources */,
+				AC44A203AF37A510128D735D /* CarbStoreProtocol.swift in Sources */,
+				3E0AFD48BBFA03B4F15AF0BC /* DoseStoreProtocol.swift in Sources */,
 				E62787C09306EF6C572B00AE /* AlertStore.swift in Sources */,
 				D3A7A6C51CA176C05E9DDF04 /* AlertStore.xcdatamodeld in Sources */,
 				983E18F38E193C0E5AFB0358 /* StoredAlert.swift in Sources */,
