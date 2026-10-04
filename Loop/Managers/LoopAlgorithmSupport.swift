@@ -2,9 +2,10 @@
 //  LoopAlgorithmSupport.swift
 //  Loop
 //
-//  Moved unchanged from LoopDataManager.swift so the watch app compiles the same definitions.
-//  LastReservoirValue and Settings were private there; the watch and
-//  LoopDataManager+PodLoan.swift use them.
+//  Code from LoopDataManager.swift that the watch app also runs, so both compile one definition.
+//  The declarations moved unchanged; `fetch` is `fetchData`'s body and `checkRecency` is `loop()`'s
+//  input checks, with LoopDataManager's own properties as parameters. LastReservoirValue and
+//  Settings were private there; the watch and LoopDataManager+PodLoan.swift use them.
 //
 
 import Foundation
@@ -385,5 +386,50 @@ extension StoredDataAlgorithmInput {
             recommendationInsulinModel: recommendationInsulinModel,
             recommendationType: .manualBolus,
             automaticBolusApplicationFactor: effectiveBolusApplicationFactor)
+    }
+}
+
+extension PumpManagerStatus.BasalDeliveryState {
+    var currentTempBasal: DoseEntry? {
+        switch self {
+        case .tempBasal(let dose):
+            return dose
+        default:
+            return nil
+        }
+    }
+    
+    func currentBasalRate(currentScheduledBasalRate: Double) -> Double? {
+        switch self {
+        case .tempBasal(let dose):
+            return dose.unitsPerHour
+        case .suspended:
+            return 0
+        case .pumpInoperable:
+            return nil
+        default:
+            return currentScheduledBasalRate
+        }
+    }
+}
+
+extension StoredDataAlgorithmInput {
+    /// `LoopDataManager.loop()`'s checks on its input, before the algorithm runs.
+    func checkRecency(at loopBaseTime: Date, lastAddedPumpData: Date) throws {
+        guard let latestGlucose = glucoseHistory.last else {
+            throw LoopError.missingDataError(.glucose)
+        }
+
+        guard loopBaseTime.timeIntervalSince(latestGlucose.startDate) <= LoopAlgorithm.inputDataRecencyInterval else {
+            throw LoopError.glucoseTooOld(date: latestGlucose.startDate)
+        }
+
+        guard latestGlucose.startDate.timeIntervalSince(loopBaseTime) <= LoopAlgorithm.inputDataRecencyInterval else {
+            throw LoopError.invalidFutureGlucose(date: latestGlucose.startDate)
+        }
+
+        guard loopBaseTime.timeIntervalSince(lastAddedPumpData) <= LoopAlgorithm.inputDataRecencyInterval else {
+            throw LoopError.pumpDataTooOld(date: lastAddedPumpData)
+        }
     }
 }

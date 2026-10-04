@@ -149,7 +149,7 @@ extension WatchLoopManager {
             format: "eventual %@ vs target %@ · running %@ · scheduled %.2f · maxBasal %.2f · IOB %.2f · COB %.0f · suspendThr %@ => temp %.2f U/hr x %.0f min",
             output.predictedGlucose.last.map { String(format: "%.0f", $0.quantity.doubleValue(for: mgdl)) } ?? "—",
             target.map { String(format: "%.0f-%.0f", $0.lowerBound.doubleValue(for: mgdl), $0.upperBound.doubleValue(for: mgdl)) } ?? "—",
-            runningTempBasal().map { String(format: "%.2f U/hr", $0.unitsPerHour) } ?? "none(scheduled)",
+            pumpManager?.status.basalDeliveryState?.currentTempBasal.map { String(format: "%.2f U/hr", $0.unitsPerHour) } ?? "none(scheduled)",
             input.basal.closestPrior(to: input.predictionStart)?.value ?? 0,
             input.maxBasalRate,
             output.activeInsulin ?? 0,

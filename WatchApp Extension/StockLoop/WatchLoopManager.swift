@@ -354,12 +354,6 @@ final class WatchLoopManager {
         let overrideLabel: String?
     }
 
-    /// What the pod is running, from the pump's delivery state.
-    func runningTempBasal() -> DoseEntry? {
-        if case .some(.tempBasal(let dose)) = pumpManager?.status.basalDeliveryState { return dose }
-        return nil
-    }
-
     let glanceMirrorLock = NSLock()
     var _glanceMirror: GlanceData?
     var _glanceRefreshPending = false

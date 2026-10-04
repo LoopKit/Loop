@@ -80,9 +80,7 @@ extension WatchLoopManager {
                 }
                 input.recommendationType = dosingStrategy.recommendationType
 
-                if let error = self.loopInputRecencyError(input, at: loopBaseTime) {
-                    throw error
-                }
+                try input.checkRecency(at: loopBaseTime, lastAddedPumpData: self.doseStore.lastAddedPumpData)
 
                 var output = LoopAlgorithm.run(input: input)
                 self.loopRunState = AlgorithmDisplayState(input: input, output: output)
@@ -111,7 +109,7 @@ extension WatchLoopManager {
                     basalAdjustment = basal.adjustForCurrentDelivery(
                         at: loopBaseTime,
                         neutralBasalRate: scheduledBasalRate,
-                        currentTempBasal: self.runningTempBasal(),
+                        currentTempBasal: self.pumpManager?.status.basalDeliveryState?.currentTempBasal,
                         continuationInterval: .minutes(11),
                         neutralBasalRateMatchesPump: self.overrideHistory.activeOverride(at: loopBaseTime) == nil
                     )
@@ -294,28 +292,6 @@ extension WatchLoopManager {
                 ? GlucoseBasedApplicationFactorStrategy()
                 : ConstantApplicationFactorStrategy(),
             carbAbsorptionModel: .piecewiseLinear)
-    }
-
-    /// Stock `loop()`'s checks on its input, in stock's order, after the trim and before the
-    /// algorithm. As in stock, `fetchData` queries glucose up to the base time only, so a
-    /// future-dated reading never reaches the input and the future check cannot fire from `loop()`.
-    func loopInputRecencyError(_ input: StoredDataAlgorithmInput, at loopBaseTime: Date) -> LoopError? {
-        guard let latestGlucose = input.glucoseHistory.last else {
-            return .missingDataError(.glucose)
-        }
-
-        guard loopBaseTime.timeIntervalSince(latestGlucose.startDate) <= LoopAlgorithm.inputDataRecencyInterval else {
-            return .glucoseTooOld(date: latestGlucose.startDate)
-        }
-
-        guard latestGlucose.startDate.timeIntervalSince(loopBaseTime) <= LoopAlgorithm.inputDataRecencyInterval else {
-            return .invalidFutureGlucose(date: latestGlucose.startDate)
-        }
-
-        guard loopBaseTime.timeIntervalSince(doseStore.lastAddedPumpData) <= LoopAlgorithm.inputDataRecencyInterval else {
-            return .pumpDataTooOld(date: doseStore.lastAddedPumpData)
-        }
-        return nil
     }
 
     /// Stock `LoopDataManager.updateDisplayState`: the display run, fed with doses back a day,

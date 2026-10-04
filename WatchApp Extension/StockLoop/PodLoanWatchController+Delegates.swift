@@ -106,10 +106,11 @@ extension PodLoanWatchController: PumpManagerDelegate {
         return phase == .active && loopManager.closedLoopEnabledNonBlocking
     }
 
-    /// Judged against the override-applied schedule.
+    /// Judged against the override-applied schedule. Simpler than stock's: only MockKit's phone UI
+    /// reads this, and nothing reads it on the watch.
     var automatedTreatmentState: AutomatedTreatmentState? {
         guard phase == .active else { return nil }
-        guard let dose = loopManager.runningTempBasal() else { return .neutralNoOverride }
+        guard let dose = loopManager.pumpManager?.status.basalDeliveryState?.currentTempBasal else { return .neutralNoOverride }
         let scheduled = loopManager.basalRateScheduleApplyingOverrideHistory?.value(at: now()) ?? 0
         if dose.unitsPerHour == 0 { return .minimumDelivery }
         if dose.unitsPerHour > scheduled { return .increasedInsulin }

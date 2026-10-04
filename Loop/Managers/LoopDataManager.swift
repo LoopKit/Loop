@@ -31,30 +31,6 @@ protocol DeliveryDelegate: AnyObject {
     func roundBolusVolume(units: Double) -> Double
 }
 
-extension PumpManagerStatus.BasalDeliveryState {
-    var currentTempBasal: DoseEntry? {
-        switch self {
-        case .tempBasal(let dose):
-            return dose
-        default:
-            return nil
-        }
-    }
-    
-    func currentBasalRate(currentScheduledBasalRate: Double) -> Double? {
-        switch self {
-        case .tempBasal(let dose):
-            return dose.unitsPerHour
-        case .suspended:
-            return 0
-        case .pumpInoperable:
-            return nil
-        default:
-            return currentScheduledBasalRate
-        }
-    }
-}
-
 protocol DosingManagerDelegate {
     func didMakeDosingDecision(_ decision: StoredDosingDecision)
 }
@@ -498,21 +474,7 @@ final class LoopDataManager: ObservableObject {
             }
             input.recommendationType = dosingStrategy.recommendationType
 
-            guard let latestGlucose = input.glucoseHistory.last else {
-                throw LoopError.missingDataError(.glucose)
-            }
-
-            guard loopBaseTime.timeIntervalSince(latestGlucose.startDate) <= LoopAlgorithm.inputDataRecencyInterval else {
-                throw LoopError.glucoseTooOld(date: latestGlucose.startDate)
-            }
-
-            guard latestGlucose.startDate.timeIntervalSince(loopBaseTime) <= LoopAlgorithm.inputDataRecencyInterval else {
-                throw LoopError.invalidFutureGlucose(date: latestGlucose.startDate)
-            }
-
-            guard loopBaseTime.timeIntervalSince(doseStore.lastAddedPumpData) <= LoopAlgorithm.inputDataRecencyInterval else {
-                throw LoopError.pumpDataTooOld(date: doseStore.lastAddedPumpData)
-            }
+            try input.checkRecency(at: loopBaseTime, lastAddedPumpData: doseStore.lastAddedPumpData)
 
             var output = LoopAlgorithm.run(input: input)
 

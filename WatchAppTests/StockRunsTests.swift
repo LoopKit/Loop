@@ -371,10 +371,12 @@ final class StockRunsTests: XCTestCase {
             copy.glucoseHistory.append(StoredGlucoseSample(startDate: date, quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 250)))
             return copy
         }
-        let far = manager.loopInputRecencyError(withLatest(at: now.addingTimeInterval(.minutes(16))), at: now)
-        XCTAssertTrue(String(describing: far).contains("invalidFutureGlucose"), "16 min ahead: refused; got \(String(describing: far))")
-        XCTAssertNil(manager.loopInputRecencyError(withLatest(at: now.addingTimeInterval(.minutes(4))), at: now),
-                     "4 min ahead: within the recency interval")
+        let pumpData = manager.doseStore.lastAddedPumpData
+        XCTAssertThrowsError(try withLatest(at: now.addingTimeInterval(.minutes(16))).checkRecency(at: now, lastAddedPumpData: pumpData)) {
+            XCTAssertTrue(String(describing: $0).contains("invalidFutureGlucose"), "16 min ahead: refused; got \($0)")
+        }
+        XCTAssertNoThrow(try withLatest(at: now.addingTimeInterval(.minutes(4))).checkRecency(at: now, lastAddedPumpData: pumpData),
+                         "4 min ahead: within the recency interval")
     }
 
     /// As in stock, `fetchData` queries glucose up to the base time, so a future-dated reading
