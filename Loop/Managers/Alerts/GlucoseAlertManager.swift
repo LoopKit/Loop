@@ -300,6 +300,9 @@ final class GlucoseAlertManager: ObservableObject {
         !cgmProvidesOwnAlerts || loopAlertsOverrideForOwnAlertingCGM
     }
 
+    /// True while another controller raises these alerts for this user; nothing is evaluated here.
+    var alertsHandledElsewhere: () -> Bool = { false }
+
     // MARK: - Profile access
 
     var primaryProfile: GlucoseAlertProfile { profiles[0] }
@@ -578,7 +581,7 @@ final class GlucoseAlertManager: ObservableObject {
     // MARK: - Evaluation
 
     func evaluate(samples: [NewGlucoseSample], now: Date = Date()) async {
-        guard effectiveLoopAlertsEnabled else { return }
+        guard effectiveLoopAlertsEnabled, !alertsHandledElsewhere() else { return }
         checkSchedule(at: now)
         guard let latest = samples.max(by: { $0.date < $1.date }) else { return }
         guard now.timeIntervalSince(latest.date) < 6 * 60 else {
@@ -688,7 +691,7 @@ final class GlucoseAlertManager: ObservableObject {
     }
 
     func evaluatePredictedGlucose(_ predicted: [PredictedGlucoseValue], now: Date = Date()) async {
-        guard effectiveLoopAlertsEnabled else { return }
+        guard effectiveLoopAlertsEnabled, !alertsHandledElsewhere() else { return }
         let config = activeConfiguration(at: now)
         guard config.predictedLowEnabled else { return }
 

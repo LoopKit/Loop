@@ -7,6 +7,7 @@
 
 import XCTest
 import LoopKit
+import LoopAlgorithm
 @testable import Loop
 
 @MainActor
@@ -53,6 +54,24 @@ final class GlucoseAlertManagerTests: XCTestCase {
         let now = Date()
         await manager.evaluate(samples: [sample(65, at: now)], now: now)
         XCTAssertEqual(issuer.issuedIDs, [GlucoseAlertManager.lowAlertIdentifier])
+    }
+
+    /// While another controller raises these alerts (a watch running the loop), a low and a
+    /// predicted low raise nothing here.
+    func testNothingIsRaisedWhileAlertsAreHandledElsewhere() async {
+        manager.alertsHandledElsewhere = { true }
+        let now = Date()
+        await manager.evaluate(samples: [sample(50, at: now)], now: now)
+        let forecast = (0...6).map { i in
+            PredictedGlucoseValue(startDate: now.addingTimeInterval(Double(i) * 5 * 60),
+                                  quantity: .glucose(value: 120 - Double(i) * 20))
+        }
+        await manager.evaluatePredictedGlucose(forecast, now: now)
+        XCTAssertTrue(issuer.issued.isEmpty, "got \(issuer.issuedIDs)")
+
+        manager.alertsHandledElsewhere = { false }
+        await manager.evaluate(samples: [sample(50, at: now.addingTimeInterval(5 * 60))], now: now.addingTimeInterval(5 * 60))
+        XCTAssertEqual(issuer.issuedIDs, [GlucoseAlertManager.urgentLowAlertIdentifier], "back here, the next low alarms")
     }
 
     /// A sudden drop straight past low into urgent low issues ONLY the most

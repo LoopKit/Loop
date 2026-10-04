@@ -18,6 +18,11 @@ extension DeviceDataManager {
         FeatureFlags.sportModeEnabled ? watchManager?.podLoanController : nil
     }
 
+    /// During a loan the watch raises the glucose alerts; never blocks.
+    var podLoanWatchOwnsAlerts: Bool {
+        podLoanController?.watchOwnsAlerts ?? false
+    }
+
     /// Revoke the watch's loan and bring the pod home. Dosing stays paused until the records
     /// the watch is holding have been reconciled.
     func reclaimPodLoanFromWatch() {

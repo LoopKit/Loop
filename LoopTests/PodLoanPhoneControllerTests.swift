@@ -558,6 +558,22 @@ final class PodLoanPhoneControllerTests: XCTestCase {
 
     // MARK: - Watch-entered carbs follow the pod home
 
+    /// During a loan the watch raises the glucose alerts, until the phone notices it silent beside
+    /// the body; then the phone's own alerts come back on.
+    func testTheWatchOwnsAlertsDuringALoanUntilThePhoneNoticesItSilent() {
+        let controller = makeController()
+        XCTAssertFalse(controller.watchOwnsAlerts, "no loan: the phone's alerts")
+
+        _ = establishLoan(controller)
+        XCTAssertTrue(controller.watchOwnsAlerts, "a loan with the watch heard from: the wrist's")
+
+        controller.holdLapseNoticedAt = Date()
+        XCTAssertFalse(controller.watchOwnsAlerts, "the watch silent beside the body: the phone's again")
+
+        controller.holdLapseNoticedAt = nil
+        XCTAssertTrue(controller.watchOwnsAlerts, "the watch reporting again: back to the wrist")
+    }
+
     /// A wrist carb lands in the phone's CarbStore intact at hand-back.
     func testWatchCarbRoundTripsToThePhoneOnHandback() throws {
         let controller = makeController()
