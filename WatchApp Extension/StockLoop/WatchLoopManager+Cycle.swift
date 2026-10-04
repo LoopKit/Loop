@@ -92,10 +92,10 @@ extension WatchLoopManager {
             // Open loop first: it still computes with no error, so later arms would report an unsent command.
             let enactVerdict: String
             if !self._closedLoopEnabled { enactVerdict = "none(open-loop)" }
-            else if decided?.basalAdjustment == nil && decided != nil { enactVerdict = "none(no-change)" }
-            else if decided == nil { enactVerdict = "none(nothing-decided)" }
             else if case .enactFailed(let why)? = error { enactVerdict = "FAILED \(why)" }
             else if error != nil { enactVerdict = "not-attempted(\(error!))" }
+            else if decided?.basalAdjustment == nil && decided != nil { enactVerdict = "none(no-change)" }
+            else if decided == nil { enactVerdict = "none(nothing-decided)" }
             else { enactVerdict = "ok" }
 
             let watchdogRefreshed = (error == nil && self.pumpManager != nil)

@@ -438,6 +438,22 @@ final class StockRunsTests: XCTestCase {
         XCTAssertEqual(dose.automatic, false)
     }
 
+    /// As stock's `loop()`, the refusals run on a cycle with nothing to send, so it is not an OK cycle.
+    func testTheRefusalsRunWithNothingToSend() async throws {
+        let manager = await makeManager()
+        let manual = UnfinalizedDose(decisionId: nil, tempBasalRate: 0.5, startTime: Date().addingTimeInterval(-.minutes(5)),
+                                     duration: .minutes(60), isHighTemp: false, automatic: false,
+                                     scheduledCertainty: .certain, insulinType: .novolog)
+        manager.pumpManager = try makePump(unfinalizedTemp: manual)
+
+        let error = manager.dataAccessQueue.sync { () -> WatchLoopError? in
+            manager.recommendedAutomaticDose = nil
+            return manager.enactRecommendedAutomaticDose()
+        }
+
+        guard case .manualTempBasalRunning? = error else { return XCTFail("refused as stock does; got \(String(describing: error))") }
+    }
+
     func testAFaultedPodIsRefusedWithoutCallingTheEnactor() async throws {
         let manager = await makeManager()
         let status = try DetailedStatus(encodedData: Data([0x02, 0x0d, 0, 0, 0, 0x06, 0, 0, 0x8f, 0, 0, 0x03, 0xff,

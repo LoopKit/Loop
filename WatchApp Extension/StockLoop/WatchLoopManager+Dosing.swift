@@ -217,12 +217,40 @@ extension WatchLoopManager {
     }
 
     /// Stock's `DeviceDataManager.enact` plus `loop()`'s gates before it, in stock's order:
-    /// pump inoperable, suspended, manual temp basal running. One deliberate watch difference: a
-    /// recommendation older than five minutes is refused. Failures must be enact refusals or
-    /// `.enactFailed`, never `.missingDataError`.
+    /// pump inoperable, suspended, manual temp basal running, delivery uncertain. As stock, they
+    /// run on every closed-loop cycle, including one with nothing to send. One deliberate watch
+    /// difference: a recommendation older than five minutes is refused. Failures must be enact
+    /// refusals or `.enactFailed`, never `.missingDataError`.
     func enactRecommendedAutomaticDose(decisionId: UUID? = nil) -> WatchLoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
+        guard let pumpManager = pumpManager else {
+            return .pumpManagerUnconnected
+        }
+
+        // Stock `loop()` compares with `== .pumpInoperable`, so a nil delivery state passes.
+        let basalDeliveryState = pumpManager.status.basalDeliveryState
+        if basalDeliveryState == .pumpInoperable {
+            return .pumpInoperable
+        }
+
+        // Stock `isSuspended`. A suspended pod is a deliberate user state, not a fault.
+        if basalDeliveryState?.isSuspended == true {
+            return .pumpSuspended
+        }
+
+        // Stock `isManualTempBasalRunning`: the user's temp is left alone.
+        if case .tempBasal(let dose)? = basalDeliveryState, dose.automatic == false, dose.endDate > now() {
+            return .manualTempBasalRunning
+        }
+
+        // Unacknowledged last command: OmnipodKit resolves it next session; don't guess.
+        guard !pumpManager.status.deliveryIsUncertain else {
+            SportLog.event("dose", "enact refused — the pod's last command is unacknowledged (delivery uncertain); the pump manager resolves it on its next session")
+            return .enactFailed("delivery uncertain")
+        }
+
+        // Nothing to send: the checks above have passed, as in stock's `loop()`.
         guard let recommendedDose = self.recommendedAutomaticDose else {
             return nil
         }
@@ -233,31 +261,6 @@ extension WatchLoopManager {
             return .recommendationExpired(date: recommendedDose.date)
         }
 
-        guard let pumpManager = pumpManager else {
-            return .pumpManagerUnconnected
-        }
-
-        // Stock `DeviceDataManager.isPumpInoperable`: a nil delivery state counts.
-        guard let basalDeliveryState = pumpManager.status.basalDeliveryState,
-              basalDeliveryState != .pumpInoperable else {
-            return .pumpInoperable
-        }
-
-        // Stock `isSuspended`. A suspended pod is a deliberate user state, not a fault.
-        if basalDeliveryState.isSuspended {
-            return .pumpSuspended
-        }
-
-        // Stock `isManualTempBasalRunning`: the user's temp is left alone.
-        if case .tempBasal(let dose) = basalDeliveryState, dose.automatic == false, dose.endDate > now() {
-            return .manualTempBasalRunning
-        }
-
-        // Unacknowledged last command: OmnipodKit resolves it next session; don't guess.
-        guard !pumpManager.status.deliveryIsUncertain else {
-            SportLog.event("dose", "enact refused — the pod's last command is unacknowledged (delivery uncertain); the pump manager resolves it on its next session")
-            return .enactFailed("delivery uncertain")
-        }
         var enactError: WatchLoopError?
 
         let recommendation = recommendedDose.recommendation
