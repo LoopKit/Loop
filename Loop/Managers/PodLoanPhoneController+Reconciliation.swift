@@ -260,15 +260,6 @@ extension PodLoanPhoneController {
         return queue.sync { state != .owner || yieldingToInferredLoan }
     }
 
-    var isReclaimSettling: Bool {
-        return queue.sync {
-            guard state == .owner, let started = reclaimStartedAt else { return false }
-            if deps.now().timeIntervalSince(started) >= Self.reclaimSettleTimeout { return false }
-
-            return reclaimVerifiedAt == nil
-        }
-    }
-
     /// The audit window's start; consumed when the loan is judged.
     struct AuditBase {
         let units: Double

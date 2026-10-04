@@ -3219,3 +3219,15 @@ private final class MainThreadPresetObserver: PresetActivationObserver {
         deactivated.fulfill()
     }
 }
+
+extension PodLoanPhoneController {
+    /// Blocking; the tests' view of the reclaim's settle window.
+    var isReclaimSettling: Bool {
+        return queue.sync {
+            guard state == .owner, let started = reclaimStartedAt else { return false }
+            if deps.now().timeIntervalSince(started) >= Self.reclaimSettleTimeout { return false }
+
+            return reclaimVerifiedAt == nil
+        }
+    }
+}

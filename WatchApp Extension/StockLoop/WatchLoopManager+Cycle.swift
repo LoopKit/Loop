@@ -44,7 +44,7 @@ extension WatchLoopManager {
     /// The "loop" decision is built and stored as stock builds it, on both arms, and its id goes to
     /// the pod with the dose. `lastLoopCompleted` moves, as in stock, only on an error-free
     /// closed-loop cycle. Remaining differences from stock:
-    /// - enact is gated on the watch's loop mode (`closedLoopEnabled`), not the phone's `dosingEnabled`;
+    /// - enact is gated on the watch's loop mode (`_closedLoopEnabled`), not the phone's `dosingEnabled`;
     /// - decisions are stored only while the pod is held (`storeDosingDecision`);
     /// - the dead-man watchdog (`LoopStallWatchdog`) is refreshed on any error-free cycle, open or
     ///   closed, with a pod held (stock's loop-failure notification keys off `lastLoopCompleted`);

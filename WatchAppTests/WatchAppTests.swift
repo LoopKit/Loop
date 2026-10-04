@@ -37,3 +37,12 @@ final class WatchAppTargetReachabilityTests: XCTestCase {
         XCTAssertFalse(String(describing: PodLoanWatchController.self).isEmpty)
     }
 }
+
+/// Blocking readers only the tests use; production reads the mirrors.
+extension WatchLoopManager {
+    var closedLoopEnabled: Bool { dataAccessQueue.sync { _closedLoopEnabled } }
+
+    var isIntegralRetrospectiveCorrectionEnabled: Bool { dataAccessQueue.sync { integralRetrospectiveCorrectionEnabled } }
+
+    func glanceData() -> GlanceData { dataAccessQueue.sync { buildGlanceData() } }
+}

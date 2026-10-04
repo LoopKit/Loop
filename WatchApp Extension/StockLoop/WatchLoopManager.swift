@@ -248,15 +248,9 @@ final class WatchLoopManager {
         }
     }
 
-    var _closedLoopEnabled = false
-
     /// The only gate on automatic dosing here; not combined with the phone's `dosingEnabled`.
-    /// Syncs onto `dataAccessQueue`, so use `closedLoopEnabledNonBlocking` from the loan queue.
-    var closedLoopEnabled: Bool {
-        RuntimeStateLog.markBlockingIfMain("blocking.closedLoopEnabled")
-        defer { RuntimeStateLog.markBlockingIfMain("blocking.closedLoopEnabled.done") }
-        return dataAccessQueue.sync { _closedLoopEnabled }
-    }
+    /// Queue-owned; `closedLoopEnabledNonBlocking` reads it from elsewhere.
+    var _closedLoopEnabled = false
 
     private let closedLoopMirrorLock = NSLock()
     private var _closedLoopMirror = false
@@ -274,10 +268,6 @@ final class WatchLoopManager {
         change(&loopState)
         loopStateStore.wrappedValue = loopState.rawValue
     }
-    /// Syncs onto `dataAccessQueue`, with the same caveat as `closedLoopEnabled`: not from the
-    /// loan controller's queue.
-    var isIntegralRetrospectiveCorrectionEnabled: Bool { dataAccessQueue.sync { integralRetrospectiveCorrectionEnabled } }
-
     /// Per session, so the next grant's mode is not mistaken for a transition.
     func resetClosedLoopForSessionEnd() {
         updateLoopState { $0.closedLoopEnabled = false }
@@ -583,7 +573,7 @@ final class WatchLoopManager {
         }
     }
 
-    /// Queue-owned; `isIntegralRetrospectiveCorrectionEnabled` is the safe way to read it.
+    /// Queue-owned.
     var integralRetrospectiveCorrectionEnabled = false
 
     /// Stock glucose alerts, built from the phone's settings for a loan; nil between loans.

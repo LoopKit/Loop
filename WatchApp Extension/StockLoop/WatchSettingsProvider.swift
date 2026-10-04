@@ -53,7 +53,7 @@ final class WatchSettingsProvider {
 extension WatchSettingsProvider: SettingsProvider {
     var settings: StoredSettings { storedSettings }
 
-    /// The phone's flag; the wrist uses `WatchLoopManager.closedLoopEnabled`.
+    /// The phone's flag; the wrist gates on its own loop switch, `WatchLoopManager._closedLoopEnabled`.
     var dosingEnabled: Bool { storedSettings.dosingEnabled }
 
     /// Splits at midnight as stock does; `WatchLoopManager.fetchData` collapses same-rate runs.

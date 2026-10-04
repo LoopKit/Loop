@@ -36,13 +36,6 @@ extension WatchLoopManager {
         }
     }
 
-    /// Blocking; main reads `mirroredGlanceData`.
-    func glanceData() -> GlanceData {
-        RuntimeStateLog.markBlockingIfMain("blocking.glanceData")
-        defer { RuntimeStateLog.markBlockingIfMain("blocking.glanceData.done") }
-        return dataAccessQueue.sync { self.buildGlanceData() }
-    }
-
     /// Stock's net basal, against the override-applied schedule as stock's watch context uses.
     func netBasal() -> NetBasal? {
         guard let basalDeliveryState = pumpManager?.status.basalDeliveryState,
