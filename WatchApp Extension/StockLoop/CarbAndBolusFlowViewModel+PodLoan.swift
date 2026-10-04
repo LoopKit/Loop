@@ -73,7 +73,15 @@ extension CarbAndBolusFlowViewModel {
         return content
     }
 
-    /// Local recommendation during a loan; a failure is announced, not left as a 0 dial.
+    /// The Sport Mode session while a loan is live; nil otherwise.
+    var loanSessionIfActive: StockLoopSession? {
+        guard let session = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession,
+              session.loanController.isLoanActive else { return nil }
+        return session
+    }
+
+    /// During a loan the watch computes the recommendation: the phone's books are frozen, and it
+    /// may be off. A failure is announced, not left as a 0 dial.
     func recommendLoanBolus(with entry: NewCarbEntry?, session: StockLoopSession) async {
         isComputingRecommendedBolus = true
         defer { isComputingRecommendedBolus = false }
@@ -101,7 +109,9 @@ extension CarbAndBolusFlowViewModel {
         }
     }
 
-    /// Called from `sendSetBolusUserInfo(carbEntry:bolus:)` while a loan is live.
+    /// Called from `sendSetBolusUserInfo(carbEntry:bolus:)` while a loan is live: the phone has
+    /// released the pod, so the bolus goes to the watch's pump, and the carbs to the local store
+    /// and the loan journal rather than the stock relay.
     func podLoanDeliverOnWrist(carbEntry: NewCarbEntry?, bolus: Double, session: StockLoopSession) {
         let activationType: BolusActivationType = .activationTypeFor(recommendedAmount: recommendedBolusAmount, bolusAmount: bolus)
         Self.podLoanDeliver(carbEntry: carbEntry, bolus: bolus, activationType: activationType, session: session)

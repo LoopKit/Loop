@@ -146,14 +146,7 @@ extension LoopDataManager {
         dispatchPrecondition(condition: .onQueue(.main))
 
         podLoanAdoptCGMConfiguration(from: context)
-
-        // During a loan the phone's context never replaces the watch's: `shouldReplace` compares only
-        // glucoseDate with `>=`, so an equal-timestamp relay would discard the watch's prediction.
-        let onLoan = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController.isLoanActiveNonBlocking ?? false
-        if onLoan, !context.isWatchAuthored {
-            podLoanAbsorbPhoneContextDuringLoan(context)
-            return
-        }
+        if podLoanAbsorbsPhoneContext(context) { return }
 
         if activeContext == nil || context.shouldReplace(activeContext!) {
             if let newGlucoseSample = context.newGlucoseSample {

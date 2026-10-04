@@ -144,6 +144,17 @@ extension ExtensionDelegate {
         log.default("Ignoring unexpected sendMessage: %{public}@", String(describing: Array(message.keys)))
     }
 
+    /// Loan traffic first: it is addressed to the loan controller, not to the context machinery in
+    /// `didReceiveUserInfo`, whose switch's default arm would otherwise swallow it.
+    func podLoanRoutesUserInfo(_ userInfo: [String: Any]) -> Bool {
+        if let session = stockLoopSession {
+            return session.handleIncomingIfLoanMessage(userInfo, channel: .queued)
+        }
+        guard userInfo[LoanProtocol.userInfoKey] != nil else { return false }
+        podLoanNoteEarlyPayload()
+        return true
+    }
+
     /// The queued channel's half of the same recovery, called from `didReceiveUserInfo`.
     func podLoanNoteEarlyPayload() {
         guard FeatureFlags.sportModeEnabled else {

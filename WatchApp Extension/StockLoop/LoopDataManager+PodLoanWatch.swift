@@ -30,8 +30,17 @@ extension LoopDataManager {
         ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager.adoptCGMConfiguration(configuration)
     }
 
-    /// Called from `updateContext(_:)` when a phone context is refused mid-loan: the relayed
-    /// reading is still stored here, and offered to the wrist's loop.
+    /// During a loan the phone's context never replaces the watch's: `shouldReplace` compares only
+    /// glucoseDate with `>=`, so an equal-timestamp relay would discard the watch's prediction.
+    func podLoanAbsorbsPhoneContext(_ context: WatchContext) -> Bool {
+        let onLoan = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController.isLoanActiveNonBlocking ?? false
+        guard onLoan, !context.isWatchAuthored else { return false }
+        podLoanAbsorbPhoneContextDuringLoan(context)
+        return true
+    }
+
+    /// A phone context refused mid-loan: the relayed reading is still stored here, and offered to
+    /// the wrist's loop.
     func podLoanAbsorbPhoneContextDuringLoan(_ context: WatchContext) {
         guard let newGlucoseSample = context.newGlucoseSample else { return }
         Task {

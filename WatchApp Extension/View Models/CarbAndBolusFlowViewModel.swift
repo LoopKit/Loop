@@ -129,13 +129,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func recommendBolus(with entry: NewCarbEntry? = nil) async {
-        // During a loan the watch computes the recommendation: the phone's books are frozen, and it
-        // may be off.
-        if let session = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession,
-           session.loanController.isLoanActive {
-            await recommendLoanBolus(with: entry, session: session)
-            return
-        }
+        if let session = loanSessionIfActive { return await recommendLoanBolus(with: entry, session: session) }
 
         do {
             isComputingRecommendedBolus = true
@@ -192,13 +186,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func sendSetBolusUserInfo(carbEntry: NewCarbEntry?, bolus: Double) async throws {
-        // During a pod loan the phone has released the pod, so bolus on the watch's pump. Carbs
-        // go to the local store and the loan journal, not the stock relay.
-        if let session = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession,
-           session.loanController.isLoanActive {
-            podLoanDeliverOnWrist(carbEntry: carbEntry, bolus: bolus, session: session)
-            return
-        }
+        if let session = loanSessionIfActive { return podLoanDeliverOnWrist(carbEntry: carbEntry, bolus: bolus, session: session) }
 
         let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), contextDate: self.contextDate, carbEntry: carbEntry, activationType: .activationTypeFor(recommendedAmount: recommendedBolusAmount, bolusAmount: bolus))
         let updatedContext = try await WCSession.default.sendBolusMessage(bolus)
