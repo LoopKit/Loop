@@ -8,8 +8,6 @@
 	<string>$(MAIN_APP_DISPLAY_NAME)</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
-	<key>CFBundleIconName</key>
-	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -53,6 +51,8 @@
 	</array>
 	<key>WKCompanionAppBundleIdentifier</key>
 	<string>$(MAIN_APP_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
 	<key>WKSupportsLiveActivityLaunchAttributeTypes</key>
 	<array>
 		<string>GlucoseActivityAttributes</string>

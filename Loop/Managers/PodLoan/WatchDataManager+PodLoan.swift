@@ -3,12 +3,14 @@
 //  Loop
 //
 //  The phone side of the pod loan on WatchDataManager: controller startup, the loan's
-//  WatchConnectivity channels, the reclaim background hold, and the link census.
+//  WatchConnectivity channels, the reclaim background hold, the link census, and the notice
+//  for a watch bolus refused during a loan.
 //
 
 import Combine
 import HealthKit
 import UIKit
+import UserNotifications
 import WatchConnectivity
 import LoopAlgorithm
 import LoopKit
@@ -236,5 +238,23 @@ extension WatchDataManager {
             + "appInstalled=\(session.isWatchAppInstalled) reachable=\(session.isReachable) "
             + "activation=\(session.activationState.rawValue) "
             + "complication=\(session.isComplicationEnabled)")
+    }
+}
+
+extension NotificationManager {
+    /// A watch bolus request arrived while the pod is on loan; the phone refused delivery.
+    static func sendBolusFailureNotificationForPodLoan(units: Double) {
+        let notification = UNMutableNotificationContent()
+        notification.title = NSLocalizedString("Bolus Not Delivered", comment: "Notification title when a bolus is refused because the pod is on loan")
+        notification.body = String(
+            format: NSLocalizedString("%1$@ U was not delivered — the pod is on the watch. Bolus from the watch, or end Sport Mode first.", comment: "Notification body when a bolus is refused because the pod is on loan (1: units)"),
+            NumberFormatter.localizedString(from: NSNumber(value: units), number: .decimal))
+        notification.sound = .default
+        // No bolusFailure category: its Retry would be a no-op. Own identifier, so it replaces nothing.
+        let request = UNNotificationRequest(
+            identifier: "podloan.bolusRefused",
+            content: notification,
+            trigger: nil)
+        UNUserNotificationCenter.current().add(request)
     }
 }

@@ -97,22 +97,6 @@ extension NotificationManager {
 
     // MARK: - Notifications
 
-    /// A watch bolus request arrived while the pod is on loan; the phone refused delivery.
-    static func sendBolusFailureNotificationForPodLoan(units: Double) {
-        let notification = UNMutableNotificationContent()
-        notification.title = NSLocalizedString("Bolus Not Delivered", comment: "Notification title when a bolus is refused because the pod is on loan")
-        notification.body = String(
-            format: NSLocalizedString("%1$@ U was not delivered — the pod is on the watch. Bolus from the watch, or end Sport Mode first.", comment: "Notification body when a bolus is refused because the pod is on loan (1: units)"),
-            NumberFormatter.localizedString(from: NSNumber(value: units), number: .decimal))
-        notification.sound = .default
-        // No bolusFailure category: its Retry would be a no-op. Own identifier, so it replaces nothing.
-        let request = UNNotificationRequest(
-            identifier: "podloan.bolusRefused",
-            content: notification,
-            trigger: nil)
-        UNUserNotificationCenter.current().add(request)
-    }
-
     @MainActor
     static func sendBolusFailureNotification(for error: PumpManagerError, units: Double, at startDate: Date, decisionId: UUID?, activationType: BolusActivationType) async throws {
         let notification = UNMutableNotificationContent()

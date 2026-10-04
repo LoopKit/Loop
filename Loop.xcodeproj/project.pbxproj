@@ -277,7 +277,6 @@
 		1B377B11C88EA02BAD431175 /* LoanMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */; };
 		EE29D32ADAB50ABC07CDCEF6 /* LoanRecords.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBC4D5290F0F35E6B66B7227 /* LoanRecords.swift */; };
 		7D23667D21250C7E0028B67D /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D23667C21250C7E0028B67D /* LocalizedString.swift */; };
-		7DF84FAADBC24ABEA2C0829E /* LoopUpdateContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0291A8F31C4B68ACE34BFC /* LoopUpdateContext.swift */; };
 		7E69CFFC2A16A77E00203CBD /* ResetLoopManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */; };
 		824A01CBE97A4F7A9D32F7D6 /* clear_chimes.caf in Resources */ = {isa = PBXBuildFile; fileRef = 4A645E0E2DDA534A635C9201 /* clear_chimes.caf */; };
 		841306BB2F7F0D9C00AF0320 /* ReferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841306BA2F7F0D9C00AF0320 /* ReferencesView.swift */; };
@@ -406,7 +405,6 @@
 		9F0BBEE28E9F45FC8DB3D8C9 /* LoanReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBF9B08E9314F23AB94CF5A /* LoanReconciler.swift */; };
 		5E12EA770000000000000051 /* LoanReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBF9B08E9314F23AB94CF5A /* LoanReconciler.swift */; };
 		A1B2C3D40000000000000002 /* GlucoseAlertManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */; };
-		A2439AB6D2CE4F36A2C75F11 /* LoopUpdateContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F641189FC64AA2B92246C7 /* LoopUpdateContext.swift */; };
 		A2779286E117BD3627DA0618 /* simple.caf in Resources */ = {isa = PBXBuildFile; fileRef = 5181B60CBF3CB2DA537F0475 /* simple.caf */; };
 		A413B305CB4C4009DA09BE57 /* bloom.caf in Resources */ = {isa = PBXBuildFile; fileRef = 8FB2394478FF679F436E8EF1 /* bloom.caf */; };
 		A4574F416AD62A1FCDE36D7D /* high_chimes.caf in Resources */ = {isa = PBXBuildFile; fileRef = 491F8F0D89972E9D8903CFA7 /* high_chimes.caf */; };
@@ -527,6 +525,7 @@
 		C10C57FC2E70B8B900A4825C /* EnvironmentValues+GlucoseDisplayUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10C57FB2E70B87500A4825C /* EnvironmentValues+GlucoseDisplayUnit.swift */; };
 		C10C57FE2E71E87D00A4825C /* ActiveOverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10C57FD2E71E87400A4825C /* ActiveOverrideView.swift */; };
 		C110888D2A3913C600BA4898 /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = C110888C2A3913C600BA4898 /* BuildDetails.swift */; };
+		474214211EDBB2939A45354A /* BuildDetails+SportMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED4A237EFD018441E29D616 /* BuildDetails+SportMode.swift */; };
 		C11445B22DA98A3400034864 /* CorrectionRangeInformationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11445B12DA98A2D00034864 /* CorrectionRangeInformationView.swift */; };
 		C11B9D5B286778A800500CF8 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C11B9D5A286778A800500CF8 /* SwiftCharts */; };
 		C11B9D5E286778D000500CF8 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D5D286778D000500CF8 /* LoopKitUI.framework */; };
@@ -719,6 +718,7 @@
 		DBA92856969B47C19B2BD581 /* WorkoutKeepalive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C77C38CD576410EA92A5B9A /* WorkoutKeepalive.swift */; };
 		DD3DBD292A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */; };
 		DDBD0001000000000000BD01 /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = C110888C2A3913C600BA4898 /* BuildDetails.swift */; };
+		824F9EABE70A97638CA3B5DC /* BuildDetails+SportMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED4A237EFD018441E29D616 /* BuildDetails+SportMode.swift */; };
 		DDBD0002000000000000BD02 /* BuildDetails.plist in Resources */ = {isa = PBXBuildFile; fileRef = C1EE9E802A38D0FB0064784A /* BuildDetails.plist */; };
 		DDC389F62A2B61750066E2E8 /* ApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */; };
 		DDC389F82A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */; };
@@ -1498,6 +1498,7 @@
 		C10C57FB2E70B87500A4825C /* EnvironmentValues+GlucoseDisplayUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EnvironmentValues+GlucoseDisplayUnit.swift"; sourceTree = "<group>"; };
 		C10C57FD2E71E87400A4825C /* ActiveOverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveOverrideView.swift; sourceTree = "<group>"; };
 		C110888C2A3913C600BA4898 /* BuildDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildDetails.swift; sourceTree = "<group>"; };
+		DED4A237EFD018441E29D616 /* BuildDetails+SportMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BuildDetails+SportMode.swift"; sourceTree = "<group>"; };
 		C11445B12DA98A2D00034864 /* CorrectionRangeInformationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CorrectionRangeInformationView.swift; sourceTree = "<group>"; };
 		C11AA5C7258736CF00BDE12F /* DerivedAssetsBase.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssetsBase.xcassets; sourceTree = "<group>"; };
 		C11B9D5D286778D000500CF8 /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1633,14 +1634,12 @@
 		8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LoanMessages.swift"; path = "LoopCore/PodLoan/LoanMessages.swift"; sourceTree = SOURCE_ROOT; };
 		FBC4D5290F0F35E6B66B7227 /* LoanRecords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LoanRecords.swift"; path = "LoopCore/PodLoan/LoanRecords.swift"; sourceTree = SOURCE_ROOT; };
 		D1368A70B6E347BCB432DF4D /* LoanProtocolV2Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanProtocolV2Tests.swift; path = LoopTests/LoanProtocolV2Tests.swift; sourceTree = SOURCE_ROOT; };
-		DD0291A8F31C4B68ACE34BFC /* LoopUpdateContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoopUpdateContext.swift; path = Loop/Managers/LoopUpdateContext.swift; sourceTree = SOURCE_ROOT; };
 		DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegralRetrospectiveCorrectionSelectionView.swift; sourceTree = "<group>"; };
 		DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationFactorStrategy.swift; sourceTree = "<group>"; };
 		DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorStrategy.swift; sourceTree = "<group>"; };
 		DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstantApplicationFactorStrategy.swift; sourceTree = "<group>"; };
 		DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+algorithmExperimentsSection.swift"; sourceTree = "<group>"; };
 		DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorSelectionView.swift; sourceTree = "<group>"; };
-		E3F641189FC64AA2B92246C7 /* LoopUpdateContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoopUpdateContext.swift; path = Loop/Managers/LoopUpdateContext.swift; sourceTree = SOURCE_ROOT; };
 		E4854073AAE5C2CB97167F63 /* HealthAccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthAccessView.swift; sourceTree = "<group>"; };
 		E489814AB551420DA40399A4 /* G7TimedConnectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = G7TimedConnectTests.swift; sourceTree = "<group>"; };
 		5E12EA740000000000000049 /* PodReturnsWithUnknownDeliveryStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodReturnsWithUnknownDeliveryStateTests.swift; sourceTree = "<group>"; };
@@ -2492,6 +2491,7 @@
 			isa = PBXGroup;
 			children = (
 				C110888C2A3913C600BA4898 /* BuildDetails.swift */,
+				DED4A237EFD018441E29D616 /* BuildDetails+SportMode.swift */,
 				43C3B6F620BBCAA30026CAFA /* PumpManager.swift */,
 				C1FB428E217921D600FAB378 /* PumpManagerUI.swift */,
 				4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */,
@@ -2609,7 +2609,6 @@
 				5E12EA760000000000000050 /* PodLoanPhoneController+Hold.swift */,
 				1FF82B359AC5A6738CEBD729 /* PodLoanPhoneController+Staging.swift */,
 				3E0817A2A6F276A886CA6A15 /* PodLoanPhoneController+State.swift */,
-				DD0291A8F31C4B68ACE34BFC /* LoopUpdateContext.swift */,
 				0CB27CFCF9F0424FBB930CFF /* SettingsProvider.swift */,
 				C03823C4CE664226A1EDAF41 /* RileyLinkBLEKit.framework */,
 				ACC381BA270149C9B0DDCB01 /* RileyLinkKit.framework */,
@@ -2628,7 +2627,6 @@
 				9A7CE060302D82A800A03F53 /* WristAlertScheduler.swift */,
 				B579C199D790911890AE3F3A /* WatchAlertPresenter.swift */,
 				C8B06DC011B54C348CC2A48F /* LoopStallWatchdog.swift */,
-				E3F641189FC64AA2B92246C7 /* LoopUpdateContext.swift */,
 				4971DDDFFE8B43BB86B4696D /* SimpleInsulinDose.swift */,
 				00A28F30399B460CABF4EDD2 /* SettingsProvider.swift */,
 				A40BA18B2486452C8083B70A /* DeviceLogThrottle.swift */,
@@ -3842,7 +3840,6 @@
 				5E12EA750000000000000050 /* PodLoanPhoneController+Hold.swift in Sources */,
 				B6B80446C9117B34FEA7329E /* PodLoanPhoneController+Staging.swift in Sources */,
 				B18A390A68A8C03E20643F4C /* PodLoanPhoneController+State.swift in Sources */,
-				7DF84FAADBC24ABEA2C0829E /* LoopUpdateContext.swift in Sources */,
 				0514DEEA3C0A404FBA775CD7 /* SettingsProvider.swift in Sources */,
 				C17824A51E1AD4D100D9D25C /* ManualBolusRecommendation.swift in Sources */,
 				897A5A9624C2175B00C4E71D /* BolusEntryView.swift in Sources */,
@@ -4007,6 +4004,7 @@
 				899433B823FE129800FA4BEA /* OverrideBadgeView.swift in Sources */,
 				89D1503E24B506EB00EDE253 /* Dictionary.swift in Sources */,
 				C110888D2A3913C600BA4898 /* BuildDetails.swift in Sources */,
+				474214211EDBB2939A45354A /* BuildDetails+SportMode.swift in Sources */,
 				A96DAC2C2838F31200D94E38 /* SharedLogging.swift in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
 				1D63DEA526E950D400F46FA5 /* SupportManager.swift in Sources */,
@@ -4117,6 +4115,7 @@
 				B20CD77F806353E80916E596 /* GlucoseAlertManager.swift in Sources */,
 				D1C318442145F5A2652A5DD6 /* GlucoseAlertManager+Sharing.swift in Sources */,
 				DDBD0001000000000000BD01 /* BuildDetails.swift in Sources */,
+				824F9EABE70A97638CA3B5DC /* BuildDetails+SportMode.swift in Sources */,
 				8C844DFDB7274EB6A6B0A09E /* LoanEventJournal.swift in Sources */,
 				D4E5F6A7B8C9D0E1F2A3B4C5 /* G7SilenceHint.swift in Sources */,
 				29E7925FADC442E78B1BFA79 /* LoanDebugView.swift in Sources */,
@@ -4130,7 +4129,6 @@
 				9A7CE061302D82A800A03F53 /* WristAlertScheduler.swift in Sources */,
 				C4811779E54B6B2608BF2998 /* WatchAlertPresenter.swift in Sources */,
 				0580A71C73134CBC9DE309C5 /* LoopStallWatchdog.swift in Sources */,
-				A2439AB6D2CE4F36A2C75F11 /* LoopUpdateContext.swift in Sources */,
 				A72567C5546B4E6FBFACA3CB /* SimpleInsulinDose.swift in Sources */,
 				0929161C5DEB4DFB9F0826AE /* SettingsProvider.swift in Sources */,
 				54CB774C12C6459DB3AFF5C2 /* DeviceLogThrottle.swift in Sources */,

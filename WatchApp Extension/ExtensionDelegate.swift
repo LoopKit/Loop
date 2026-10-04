@@ -31,7 +31,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     private var notifications: [NSObjectProtocol] = []
 
     static func shared() -> ExtensionDelegate {
-        return sharedIfAvailable()!
+        return WKApplication.shared().extensionDelegate
     }
 
     let loopManager = LoopDataManager.shared
@@ -385,5 +385,12 @@ extension ExtensionDelegate {
         dispatchPrecondition(condition: .onQueue(.main))
 
         WKApplication.shared().rootInterfaceController?.presentAlert(withTitle: error.localizedDescription, message: (error as NSError).localizedRecoverySuggestion ?? (error as NSError).localizedFailureReason, preferredStyle: .alert, actions: [WKAlertAction.dismissAction()])
+    }
+}
+
+
+fileprivate extension WKApplication {
+    var extensionDelegate: ExtensionDelegate! {
+        return delegate as? ExtensionDelegate
     }
 }

@@ -28,7 +28,7 @@ LOOP_LOCAL_CACHE_DURATION_DAYS = 90
 // Entitlements [DEFAULT]
 LOOP_ENTITLEMENTS = Loop/Loop.entitlements
 // The watch signs with none, as stock. Sport Mode builds set it to
-// "WatchApp Extension/WatchApp Extension.entitlements" (HealthKit for the workout session,
+// "WatchApp Extension/SportMode.entitlements" (HealthKit for the workout session,
 // time-sensitive notifications for wrist alarms), next to SPORT_MODE_ENABLED.
 LOOP_WATCH_ENTITLEMENTS =
 
