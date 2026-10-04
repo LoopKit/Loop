@@ -66,6 +66,7 @@ struct GlanceProvider: AppIntentTimelineProvider {
     func timeline(for configuration: GlanceMetricIntent, in context: Context) async -> Timeline<GlanceEntry> {
         let now = Date()
         let snapshot = GlanceComplicationSnapshot.load()
+        GlanceComplicationSnapshot.noteServed(configuration.metric.rawValue, at: now)
         let moments = [now] + (snapshot?.changeMoments(after: now) ?? [])
         return Timeline(entries: moments.map { GlanceEntry(date: $0, metric: configuration.metric, snapshot: snapshot) },
                         policy: .never)

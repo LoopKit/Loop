@@ -134,4 +134,14 @@ final class GlanceComplicationTests: XCTestCase {
         s.save(to: defaults)
         XCTAssertEqual(GlanceComplicationSnapshot.load(from: defaults), s)
     }
+
+    /// The confirmation runs count what the widget served, read back by the app.
+    func testServedTimelinesAreReadBackAfterADate() {
+        let defaults = UserDefaults(suiteName: "GlanceComplicationServed")!
+        defaults.removePersistentDomain(forName: "GlanceComplicationServed")
+        GlanceComplicationSnapshot.noteServed("iob", at: now.addingTimeInterval(-120), defaults: defaults)
+        GlanceComplicationSnapshot.noteServed("bg", at: now.addingTimeInterval(-30), defaults: defaults)
+        let served = GlanceComplicationSnapshot.served(after: now.addingTimeInterval(-60), defaults: defaults)
+        XCTAssertEqual(served.map(\.metric), ["bg"])
+    }
 }

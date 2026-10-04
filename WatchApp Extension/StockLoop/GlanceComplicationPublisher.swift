@@ -93,12 +93,22 @@ enum GlanceComplicationPublisher {
         return s
     }
 
+    /// The last publish, for the diagnostics line.
+    private static var lastLoggedAt = Date()
+
     @MainActor private static func store(_ snapshot: GlanceComplicationSnapshot, source: String) {
-        let decision = throttle.offer(snapshot, now: Date())
+        let now = Date()
+        let decision = throttle.offer(snapshot, now: now)
         if decision.save { snapshot.save() }
         if decision.reload { WidgetCenter.shared.reloadTimelines(ofKind: GlanceComplicationKind.kind) }
-        if decision.save || decision.reload {
-            SportLog.event("complication", "glance publish src=\(source) changed=\(decision.save) reload=\(decision.reload)")
-        }
+
+        // Confirmation runs C1/C2: requested vs served redraws, and how old the shown values are.
+        let served = GlanceComplicationSnapshot.served(after: lastLoggedAt)
+        lastLoggedAt = now
+        func age(_ date: Date?) -> String { date.map { "\(Int(now.timeIntervalSince($0)))s" } ?? "n/a" }
+        let reload = decision.reload ? "requested" : (throttle.reloadOwed ? "owed" : "none")
+        let metrics = Set(served.map(\.metric)).sorted().joined(separator: ",")
+        let bgAge = snapshot.bgStaleAt.map { $0.addingTimeInterval(-LoopAlgorithm.inputDataRecencyInterval) }
+        SportLog.event("complication", "glance publish src=\(source) changed=\(decision.save) reload=\(reload) · served since last: \(served.count) [\(metrics)] · BG age \(age(bgAge)) · loop age \(age(snapshot.loopDate))")
     }
 }
