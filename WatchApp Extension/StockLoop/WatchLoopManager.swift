@@ -162,7 +162,10 @@ final class WatchLoopManager {
 
     /// The loaned pod, or nil. This IS the loan flag for the loop's purposes: every path that
     /// asks "do we hold the pod?" asks it here, and it is set at takeover and cleared at teardown.
-    var pumpManager: PumpManager?
+    var pumpManager: PumpManager? {
+        // As stock `DeviceDataManager.setupPump`.
+        didSet { doseStore.device = pumpManager?.status.device }
+    }
 
     /// Fired by `loop()` only on a cycle that LANDED, which is what renews the phone's hold. A
     /// cycle that computed but could not reach the pod must not renew it.

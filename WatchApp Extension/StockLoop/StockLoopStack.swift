@@ -70,10 +70,14 @@ enum StockLoopStack {
         // One override history: a second would dose unscaled while the screens showed the override.
         let overrideHistory = makeOverrideHistory()
 
+        // As stock `LoopAppManager` builds them, with the phone's `LoopLocalCacheDurationDays`.
+        let localCacheDuration = Bundle.main.localCacheDuration
+
         SportLog.event("session", "stack: opening stores")
         let doseStore = await DoseStore(
             healthKitSampleStore: nil,
             cacheStore: cacheStore,
+            cacheLength: localCacheDuration,
             longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
             provenanceIdentifier: provenanceIdentifier
         )
@@ -81,19 +85,19 @@ enum StockLoopStack {
         let glucoseStore = await GlucoseStore(
             healthKitSampleStore: nil,
             cacheStore: cacheStore,
-            cacheLength: .hours(4),
+            cacheLength: localCacheDuration,
             provenanceIdentifier: provenanceIdentifier
         )
 
         let carbStore = CarbStore(
             healthKitSampleStore: nil,
             cacheStore: cacheStore,
-            cacheLength: .hours(24),
+            cacheLength: localCacheDuration,
             provenanceIdentifier: provenanceIdentifier
         )
 
-        // As stock `LoopAppManager` builds it, with the phone's `LoopLocalCacheDurationDays`.
-        let dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: Bundle.main.localCacheDuration)
+        // As stock `LoopAppManager` builds it.
+        let dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: localCacheDuration)
 
         // As stock `AlertManager` builds it, in the same place.
         let alertStoreDirectory = documents.appendingPathComponent("AlertStore")
