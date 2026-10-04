@@ -170,7 +170,7 @@ extension WatchLoopManager {
             else if let enactError {
                 // The pod's or the loop's refusal before sending, versus a send that failed.
                 switch enactError {
-                case .pumpInoperable, .pumpSuspended, .manualTempBasalRunning, .configurationError, .connectionError, .recommendationExpired:
+                case .pumpInoperable, .pumpSuspended, .manualTempBasalRunning, .configurationError, .connectionError:
                     enactVerdict = "not-attempted(\(enactError.issueId))"
                 default:
                     enactVerdict = "FAILED \(enactError)"

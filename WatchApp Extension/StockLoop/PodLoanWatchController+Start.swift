@@ -153,7 +153,7 @@ extension PodLoanWatchController {
         }
 
         // These samples came from the phone, so stamp them as such.
-        loopManager.notePhoneGlucoseDelivered()
+        loopManager.noteGlucoseSource(directG7: false)
         Task {
             do {
                 let stored = try await loopManager.glucoseStore.addGlucoseSamples(samples)

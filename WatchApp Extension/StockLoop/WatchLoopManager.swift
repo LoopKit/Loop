@@ -484,11 +484,6 @@ final class WatchLoopManager {
         refreshGlanceData()
     }
 
-    /// For glucose that arrived outside the CGM delegate, e.g. the grant seed.
-    func notePhoneGlucoseDelivered() {
-        noteGlucoseSource(directG7: false)
-    }
-
     /// One-line "who is feeding this watch" for the log at the start of a loan.
     var g7ContentionSummary: String {
         let stamps = lastGlucoseSourceStamps
@@ -544,8 +539,8 @@ final class WatchLoopManager {
 
     var lastPredictionBreakdown: PredictionBreakdown?
 
-    /// The last cycle's recommendation as enacted, for the glance; cleared when a cycle starts, so a
-    /// failed cycle shows none rather than the one before.
+    /// The last cycle's recommendation, for the glance; cleared when a cycle starts, so a cycle
+    /// whose compute failed shows none rather than the one before.
     var lastRecommendation: AutomaticDoseRecommendation?
 
     /// When a cycle last completed — the freshness ring's only input. Persisted on every write:

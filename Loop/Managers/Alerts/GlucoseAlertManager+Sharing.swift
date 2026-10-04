@@ -38,9 +38,9 @@ extension GlucoseAlertManager {
     }
 
     /// Forgets the saved episode before a controller starts a new spell of alerting: the saved
-    /// one was left by readings from an earlier spell. The key is stock's `episodeStateKey`.
+    /// one was left by readings from an earlier spell.
     static func clearEpisodeState(in userDefaults: UserDefaults) {
-        userDefaults.removeObject(forKey: "GlucoseAlertEpisodeState")
+        userDefaults.removeObject(forKey: episodeStateKey)
     }
 
     /// Takes another controller's settings; this manager keeps its own episode state.

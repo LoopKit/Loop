@@ -10,6 +10,6 @@ import Foundation
 import LoopAlgorithm
 
 extension LoopDataManager {
-    /// Read only by the listener above, which never fires here.
+    /// Read only by stock's predicted-low listener, which never fires here.
     nonisolated var predictedGlucose: [PredictedGlucoseValue]? { nil }
 }

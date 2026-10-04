@@ -227,7 +227,7 @@ final class GlucoseAlertManager: ObservableObject {
     private static let lowSoundKey = "GlucoseAlertLowSound"
     private static let highSoundKey = "GlucoseAlertHighSound"
     private static let predictedLowSoundKey = "GlucoseAlertPredictedLowSound"
-    private static let episodeStateKey = "GlucoseAlertEpisodeState"
+    static let episodeStateKey = "GlucoseAlertEpisodeState"
 
     // Per-alarm sound defaults. Urgent low keeps the loud critical tone;
     // the rest get a gentler default the user can change.

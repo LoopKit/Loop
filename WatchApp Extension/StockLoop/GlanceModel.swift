@@ -326,7 +326,8 @@ final class GlanceViewModel: ObservableObject {
         guard let loopManager = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager else { return }
         loopManager.setClosedLoopEnabled(closed)
         // As stock's `StatusTableViewController.automaticDosingStatusChanged`: closing the loop
-        // runs a cycle at once. Through the watch's entry point, which refreshes the pod first.
+        // runs a cycle at once. Unlike stock, through the entry point that reads the pod first: the
+        // watch has no pump heartbeat, and a temp set on a stale view of the pod can fault it (049).
         if closed { loopManager.checkPumpDataAndLoop() }
         refresh()
     }

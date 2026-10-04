@@ -25,14 +25,14 @@ extension WatchLoopManager {
         let activeInsulin = loopRunState.output?.activeInsulin
         let activeCarbs = loopRunState.output?.activeCarbs
 
-        // `net` and `delta` are the same difference; keep them in step.
-        func net(_ effects: [GlucoseEffect]?) -> String {
-            guard let effects, !effects.isEmpty else { return "—" }
-            let forward = effects.filter { $0.startDate >= now() }
-            guard let first = forward.first, let last = forward.last else { return "—" }
+        /// An effect's change from now to the end of its forecast; nil with none ahead.
+        func delta(_ effects: [GlucoseEffect]?) -> Double? {
+            let forward = (effects ?? []).filter { $0.startDate >= now() }
+            guard let first = forward.first, let last = forward.last else { return nil }
             let mgdl = LoopUnit.milligramsPerDeciliter
-            return String(format: "%+.0f", last.quantity.doubleValue(for: mgdl) - first.quantity.doubleValue(for: mgdl))
+            return last.quantity.doubleValue(for: mgdl) - first.quantity.doubleValue(for: mgdl)
         }
+        func net(_ effects: [GlucoseEffect]?) -> String { delta(effects).map { String(format: "%+.0f", $0) } ?? "—" }
 
         let mgdlU = LoopUnit.milligramsPerDeciliter
         let eventual = predictedGlucose?.last.map { String(format: "%.0f", $0.quantity.doubleValue(for: mgdlU)) } ?? "—"
@@ -60,21 +60,15 @@ extension WatchLoopManager {
         let e = loopRunState.output?.effects
 
         lastPredictionBreakdown = {
-            func delta(_ effects: [GlucoseEffect]?) -> Double {
-                guard let effects else { return 0 }
-                let forward = effects.filter { $0.startDate >= now() }
-                guard let first = forward.first, let last = forward.last else { return 0 }
-                return last.quantity.doubleValue(for: mgdlU) - first.quantity.doubleValue(for: mgdlU)
-            }
             guard let start = glucoseStore.latestGlucose?.quantity.doubleValue(for: mgdlU),
                   let eventualValue = predictedGlucose?.last?.quantity.doubleValue(for: mgdlU) else { return nil }
             return PredictionBreakdown(
                 startMgdl: start,
                 eventualMgdl: eventualValue,
-                insulinMgdl: delta(e?.insulin),
-                carbMgdl: delta(e?.carbs),
-                momentumMgdl: delta(e?.momentum),
-                retrospectiveMgdl: delta(e?.retrospectiveCorrection))
+                insulinMgdl: delta(e?.insulin) ?? 0,
+                carbMgdl: delta(e?.carbs) ?? 0,
+                momentumMgdl: delta(e?.momentum) ?? 0,
+                retrospectiveMgdl: delta(e?.retrospectiveCorrection) ?? 0)
         }()
         SportLog.event("predict", "eventual \(eventual) · min \(minPredicted) · suspendThr \(suspendThr) · net effects: carbs \(net(e?.carbs)), insulin \(net(e?.insulin)), momentum \(net(e?.momentum)), RC \(net(e?.retrospectiveCorrection)) · IOB \(activeInsulin.map { String(format: "%.2f", $0) } ?? "—") · COB \(activeCarbs.map { String(format: "%.0f", $0) } ?? "—") · momPts \(e?.momentum.count ?? 0) · rcDisc \(e?.retrospectiveGlucoseDiscrepancies.count ?? 0) · rec \(rec)")
         SportLog.event("curve", curveSummary(predictedGlucose))
@@ -92,32 +86,28 @@ extension WatchLoopManager {
             let bookDoses = (try? self.runBlocking {
                 try await self.doseStore.getNormalizedDoseEntries(start: t.addingTimeInterval(-longest), end: nil)
             }) ?? []
-            do {
-                let window = (start: bookDoses.map(\.startDate).min() ?? t,
-                              end: (bookDoses.map(\.endDate).max() ?? t).addingTimeInterval(InsulinMath.defaultInsulinActivityDuration))
-                let basalTimeline = BasalRateSchedule.generateTimeline(
-                    schedules: [(date: .distantPast, schedule: basal)],
-                    startDate: window.start,
-                    endDate: window.end)
-                let doses = bookDoses
-                    .map { $0.simpleDose(with: self.insulinModel(for: $0.insulinType)) }
-                    .annotated(with: basalTimeline)
-                let tf = DateFormatter()
-                tf.dateFormat = "HH:mm:ss"
-                var netSum = 0.0
-                var rows: [String] = []
-                for d in doses where abs(d.netBasalUnits) > 0.0001 || d.type == .bolus {
-                    netSum += d.netBasalUnits
-                    let sched = String(format: "%.2f", d.volume / max(d.duration / 3600, .ulpOfOne))
-                    let id = "—"
-
-                    let del = String(format: "%.3f", d.volume)
-                    rows.append(String(format: "%@ %@..%@ net=%+.3f sched=%@ vol=%@ id=%@",
-                                       "\(d.type)", tf.string(from: d.startDate), tf.string(from: d.endDate),
-                                       d.netBasalUnits, sched, del, id))
-                }
-                SportLog.event("iob-decomp", "@\(label) Σnet=\(String(format: "%.3f", netSum))U n=\(rows.count) · " + rows.joined(separator: " | "))
+            let window = (start: bookDoses.map(\.startDate).min() ?? t,
+                          end: (bookDoses.map(\.endDate).max() ?? t).addingTimeInterval(InsulinMath.defaultInsulinActivityDuration))
+            let basalTimeline = BasalRateSchedule.generateTimeline(
+                schedules: [(date: .distantPast, schedule: basal)],
+                startDate: window.start,
+                endDate: window.end)
+            let doses = bookDoses
+                .map { $0.simpleDose(with: self.insulinModel(for: $0.insulinType)) }
+                .annotated(with: basalTimeline)
+            let tf = DateFormatter()
+            tf.dateFormat = "HH:mm:ss"
+            var netSum = 0.0
+            var rows: [String] = []
+            for d in doses where abs(d.netBasalUnits) > 0.0001 || d.type == .bolus {
+                netSum += d.netBasalUnits
+                let sched = String(format: "%.2f", d.volume / max(d.duration / 3600, .ulpOfOne))
+                let del = String(format: "%.3f", d.volume)
+                rows.append(String(format: "%@ %@..%@ net=%+.3f sched=%@ vol=%@",
+                                   "\(d.type)", tf.string(from: d.startDate), tf.string(from: d.endDate),
+                                   d.netBasalUnits, sched, del))
             }
+            SportLog.event("iob-decomp", "@\(label) Σnet=\(String(format: "%.3f", netSum))U n=\(rows.count) · " + rows.joined(separator: " | "))
         }
     }
 

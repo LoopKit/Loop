@@ -643,6 +643,29 @@ final class StockRunsTests: XCTestCase {
         XCTAssertNotNil(decision.settings, "stock's settings reference")
     }
 
+    /// Open loop with the pod held, as stock: the decision is stored, nothing is sent, nothing is
+    /// recorded as enacted, and the last-loop clock stays where it was.
+    func testAnOpenLoopCycleStoresItsDecisionAndSendsNothing() async throws {
+        let manager = await makeManager()
+        await seedGlucose(manager)
+        await report(manager)
+        let enactor = RecordingDoseEnactor()
+        manager.pumpManager = try makePump()
+        manager.doseEnactor = enactor
+        manager.setClosedLoopEnabled(false, reason: "test")
+
+        runLoop(manager)
+
+        let loops = try await storedDecisions(manager).filter { $0.reason == "loop" }
+        XCTAssertEqual(loops.count, 1, "the cycle's decision is stored")
+        let decision = try XCTUnwrap(loops.first)
+        XCTAssertNotNil(decision.automaticDoseRecommendation, "computed")
+        XCTAssertNil(decision.enactedTempBasal, "nothing enacted")
+        XCTAssertNil(decision.enactedBolusAmount)
+        XCTAssertTrue(enactor.calls.isEmpty, "nothing sent to the pod")
+        XCTAssertNil(manager.lastLoopCompleted, "stock moves it only after a closed-loop enact")
+    }
+
     /// A cycle that ends in error still stores its "loop" decision, with the error.
     func testAnErrorCycleStillStoresALoopDecisionWithTheError() async throws {
         let manager = await makeManager()

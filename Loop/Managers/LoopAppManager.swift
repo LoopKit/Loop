@@ -437,7 +437,7 @@ class LoopAppManager: NSObject {
         loopDataManager.isPumpConnectionReleased = { [weak deviceDataManager] in
             deviceDataManager?.holdsAutomaticDosingForPodLoan ?? false
         }
-        // During a loan the watch raises the glucose alerts and missed-meal notifications.
+        // During a loan the watch raises the glucose alerts; missed-meal detection pauses.
         deviceDataManager.glucoseAlertManager.alertsHandledElsewhere = { [weak deviceDataManager] in
             deviceDataManager?.podLoanWatchOwnsAlerts ?? false
         }
