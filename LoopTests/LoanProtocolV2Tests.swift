@@ -95,30 +95,6 @@ final class LoanProtocolV2Tests: XCTestCase {
         XCTAssertNil(g2.glucoseHistory)
     }
 
-    func testGrantPredictionSnapshotRoundTrips() throws {
-        let now = Date(timeIntervalSince1970: 1_784_338_000.125)
-        let snap = LoanPredictionSnapshot(
-            snapshotAt: now, startGlucoseMgdl: 180, startGlucoseDate: now.addingTimeInterval(-300),
-            eventualMgdl: 105, eventualIncludingPendingMgdl: 103,
-            impactMomentumMgdl: 39, impactInsulinMgdl: -105, impactCarbMgdl: 0, impactRCMgdl: 6,
-            iobUnits: 1.5, iobDate: now.addingTimeInterval(-60), cobGrams: 0,
-            momentumPointCount: 5, rcDiscrepancyCount: 7, enabledEffectsRaw: 15)
-        let grant = LoanGrant(epoch: 9, expiresAt: now.addingTimeInterval(300),
-                              pumpConfiguration: Data([1]), podAddress: 0,
-                              therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC",
-                              doseHistory: [], predictionSnapshot: snap)
-        guard case .grant(let g) = try roundTrip(.grant(grant)) else { return XCTFail("not a grant") }
-        XCTAssertEqual(g.predictionSnapshot, snap, "prediction snapshot must survive the wire (incl. sub-second dates)")
-
-        // Backward compat: an older phone sends no snapshot; it must decode as nil, not a default.
-        let old = LoanGrant(epoch: 9, expiresAt: now.addingTimeInterval(300),
-                            pumpConfiguration: Data([1]), podAddress: 0,
-                            therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC",
-                            doseHistory: [])
-        guard case .grant(let g2) = try roundTrip(.grant(old)) else { return XCTFail("not a grant") }
-        XCTAssertNil(g2.predictionSnapshot)
-    }
-
     /// The grant carries the pump's exported configuration whole; the watch reads only its header.
     func testGrantCarriesThePumpsSharedConfiguration() throws {
         let asOf = Date(timeIntervalSince1970: 1_784_338_000)

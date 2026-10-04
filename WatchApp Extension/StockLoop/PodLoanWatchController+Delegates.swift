@@ -185,7 +185,7 @@ extension LoanGrant {
                   supportsOverrideRecords: supportsOverrideRecords,
                   integralRetrospectiveCorrectionEnabled: integralRetrospectiveCorrectionEnabled,
                   phoneClosedLoopEnabled: phoneClosedLoopEnabled, carbHistory: carbHistory,
-                  glucoseHistory: glucoseHistory, predictionSnapshot: predictionSnapshot,
+                  glucoseHistory: glucoseHistory,
                   activeOverrideRaw: activeOverrideRaw,
                   therapySettingsSupplementRaw: therapySettingsSupplementRaw,
                   lastLoopCompleted: lastLoopCompleted,

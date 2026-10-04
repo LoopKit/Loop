@@ -68,10 +68,6 @@ extension PodLoanWatchController {
     /// Replaces the carb store wholesale, so deleted or stale entries cannot keep dosing.
     /// Verified by reading identities back, not by comparing COB.
     func ingestGrantCarbs(_ grant: LoanGrant) {
-        let phoneCOB = grant.predictionSnapshot?.cobGrams
-        let phoneCOBStr = phoneCOB.map { String(format: "%.1f", $0) } ?? "n/a"
-
-        let snapshotAge = grant.predictionSnapshot.map { self.now().timeIntervalSince($0.snapshotAt) }
         let carbs = grant.carbHistory ?? []
         // Seeded entries are the phone's, so deleting one skips stock's authorship check.
         let objects: [SyncCarbObject] = carbs.map { c in
@@ -132,13 +128,8 @@ extension PodLoanWatchController {
                 }
                 self.loopManager.glanceCarbsOnBoard { cob in
                     let postV = cob ?? 0
-                    let vsPhone = phoneCOB.map { postV - $0 }
-
-                    let ageStr = snapshotAge.map { "\(Int($0.rounded()))s" } ?? "n/a"
-                    SportLog.event("cob-diff", String(format: "REPLACE %@ · phoneCOB=%@ g (snapshot age %@) · watch COB(post)=%.2f g · replaced %.0f g · Δ(post−phone)=%@ g (observation freshness, not a model split)%@ · [%@]",
-                                                       source, phoneCOBStr, ageStr, postV, seededGrams,
-                                                       vsPhone.map { String(format: "%+.2f", $0) } ?? "—",
-                                                       verdict, manifest))
+                    SportLog.event("cob-diff", String(format: "REPLACE %@ · watch COB(post)=%.2f g · replaced %.0f g%@ · [%@]",
+                                                       source, postV, seededGrams, verdict, manifest))
                 }
             }
         }
@@ -176,19 +167,6 @@ extension PodLoanWatchController {
                 os_log("Grant glucose ingest failed: %{public}@", log: OSLog(subsystem: "com.loopkit.Loop", category: "PodLoanWatchController"), type: .error, String(describing: error))
             }
         }
-    }
-
-    /// Logs the phone's last prediction beside ours; nothing that doses reads it.
-    func ingestPredictionSnapshot(_ grant: LoanGrant) {
-        loopManager.stashPhonePredictionSnapshot(grant.predictionSnapshot)
-        guard let s = grant.predictionSnapshot else { return }
-        let now = self.now()
-        SportLog.event("snapshot", String(format:
-            "RX phone@grant — eventual %.0f start %.0f@%.0fs IOB %.2f@%.0fs COB %.0f · impact mom %+.0f ins %+.0f carb %+.0f RC %+.0f · momPts %d rcDisc %d · snapAge %.0fs",
-            s.eventualMgdl, s.startGlucoseMgdl, now.timeIntervalSince(s.startGlucoseDate),
-            s.iobUnits, now.timeIntervalSince(s.iobDate), s.cobGrams,
-            s.impactMomentumMgdl, s.impactInsulinMgdl, s.impactCarbMgdl, s.impactRCMgdl,
-            s.momentumPointCount, s.rcDiscrepancyCount, now.timeIntervalSince(s.snapshotAt)))
     }
 
     /// Every refusal and failed start lands here, so none can strand the controller in `.requested`.
@@ -473,8 +451,6 @@ extension PodLoanWatchController {
         if let phoneLoop = grant.lastLoopCompleted {
             loopManager.seedLastLoopCompleted(phoneLoop, source: "phone at grant")
         }
-
-        ingestPredictionSnapshot(grant)
 
         if let s = decodedSettings {
             let now = self.loopManager.now()

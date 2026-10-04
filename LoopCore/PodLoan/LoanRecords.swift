@@ -228,54 +228,6 @@ public struct LoanOdometerSnapshot: Codable, Equatable {
     }
 }
 
-public struct LoanPredictionSnapshot: Codable, Equatable {
-    public let snapshotAt: Date
-    public let startGlucoseMgdl: Double
-
-    public let startGlucoseDate: Date
-
-    public let eventualMgdl: Double
-
-    public let eventualIncludingPendingMgdl: Double?
-    public let impactMomentumMgdl: Double
-    public let impactInsulinMgdl: Double
-    public let impactCarbMgdl: Double
-    public let impactRCMgdl: Double
-
-    public let iobUnits: Double
-    public let iobDate: Date
-    public let cobGrams: Double
-
-    public let momentumPointCount: Int
-
-    public let rcDiscrepancyCount: Int
-
-    public let enabledEffectsRaw: Int
-
-    public init(snapshotAt: Date, startGlucoseMgdl: Double, startGlucoseDate: Date,
-                eventualMgdl: Double, eventualIncludingPendingMgdl: Double?,
-                impactMomentumMgdl: Double, impactInsulinMgdl: Double,
-                impactCarbMgdl: Double, impactRCMgdl: Double,
-                iobUnits: Double, iobDate: Date, cobGrams: Double,
-                momentumPointCount: Int, rcDiscrepancyCount: Int, enabledEffectsRaw: Int) {
-        self.snapshotAt = snapshotAt
-        self.startGlucoseMgdl = startGlucoseMgdl
-        self.startGlucoseDate = startGlucoseDate
-        self.eventualMgdl = eventualMgdl
-        self.eventualIncludingPendingMgdl = eventualIncludingPendingMgdl
-        self.impactMomentumMgdl = impactMomentumMgdl
-        self.impactInsulinMgdl = impactInsulinMgdl
-        self.impactCarbMgdl = impactCarbMgdl
-        self.impactRCMgdl = impactRCMgdl
-        self.iobUnits = iobUnits
-        self.iobDate = iobDate
-        self.cobGrams = cobGrams
-        self.momentumPointCount = momentumPointCount
-        self.rcDiscrepancyCount = rcDiscrepancyCount
-        self.enabledEffectsRaw = enabledEffectsRaw
-    }
-}
-
 public struct LoanCarbRecord: Codable, Equatable {
     public let syncIdentifier: String?
     public let provenanceIdentifier: String

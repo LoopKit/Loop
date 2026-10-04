@@ -79,52 +79,6 @@ extension WatchLoopManager {
         }()
         SportLog.event("predict", "eventual \(eventual) · min \(minPredicted) · suspendThr \(suspendThr) · net effects: carbs \(net(e?.carbs)), insulin \(net(e?.insulin)), momentum \(net(e?.momentum)), RC \(net(e?.retrospectiveCorrection)) · IOB \(activeInsulin.map { String(format: "%.2f", $0) } ?? "—") · COB \(activeCarbs.map { String(format: "%.0f", $0) } ?? "—") · momPts \(e?.momentum.count ?? 0) · rcDisc \(e?.retrospectiveGlucoseDiscrepancies.count ?? 0) · rec \(rec)")
         SportLog.event("curve", curveSummary(predictedGlucose))
-        logPredictionDiffAgainstPhone(effects: e)
-    }
-
-    /// Column diff against the prediction the phone stamped into the grant, for 20 minutes.
-    /// The watch side is the automatic loop's run, as `[predict]`.
-    func logPredictionDiffAgainstPhone(effects e: LoopAlgorithmEffects<StoredCarbEntry>?) {
-        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
-        let predictedGlucose = loopRunState.output?.predictedGlucose
-        let activeInsulin = loopRunState.output?.activeInsulin
-        let activeCarbs = loopRunState.output?.activeCarbs
-        guard let snap = phonePredictionSnapshotAtGrant else { return }
-        let age = now().timeIntervalSince(snap.snapshotAt)
-        guard age <= .minutes(20) else { return }
-
-        let mgdl = LoopUnit.milligramsPerDeciliter
-
-        func fwd(_ effects: [GlucoseEffect]?) -> Double? {
-            guard let effects else { return nil }
-            let forward = effects.filter { $0.startDate >= now() }
-            guard let first = forward.first, let last = forward.last else { return nil }
-            return last.quantity.doubleValue(for: mgdl) - first.quantity.doubleValue(for: mgdl)
-        }
-        func col(_ label: String, _ watch: Double?, _ phone: Double) -> String {
-            guard let w = watch else { return "\(label) —/\(String(format: "%+.0f", phone))" }
-            return String(format: "%@ %+.0f vs %+.0f (Δ%+.0f)", label, w, phone, w - phone)
-        }
-
-        let wEventual = predictedGlucose?.last?.quantity.doubleValue(for: mgdl)
-        let eventualCol = wEventual.map { String(format: "eventual %.0f vs %.0f (Δ%+.0f)", $0, snap.eventualMgdl, $0 - snap.eventualMgdl) }
-            ?? String(format: "eventual —/%.0f", snap.eventualMgdl)
-        let iobCol = activeInsulin.map { String(format: "IOB %.2f vs %.2f (Δ%+.2f)", $0, snap.iobUnits, $0 - snap.iobUnits) }
-            ?? String(format: "IOB —/%.2f", snap.iobUnits)
-        let cobCol = activeCarbs.map { String(format: "COB %.0f vs %.0f", $0, snap.cobGrams) }
-            ?? String(format: "COB —/%.0f", snap.cobGrams)
-
-        SportLog.event("predict-diff", String(
-            format: "@+%.0fs (watch vs phone@grant) — %@ | %@ · %@ · %@ · %@ | %@ · %@ | momPts %d vs %d · rcDisc %d vs %d",
-            age,
-            eventualCol,
-            col("mom", fwd(e?.momentum), snap.impactMomentumMgdl),
-            col("ins", fwd(e?.insulin), snap.impactInsulinMgdl),
-            col("carb", fwd(e?.carbs), snap.impactCarbMgdl),
-            col("RC", fwd(e?.retrospectiveCorrection), snap.impactRCMgdl),
-            iobCol, cobCol,
-            e?.momentum.count ?? 0, snap.momentumPointCount,
-            e?.retrospectiveGlucoseDiscrepancies.count ?? 0, snap.rcDiscrepancyCount))
     }
 
     /// The insulin book dose by dose at one instant, for seed-in and hand-back. Rows with zero

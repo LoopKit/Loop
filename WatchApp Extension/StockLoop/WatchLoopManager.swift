@@ -615,13 +615,6 @@ final class WatchLoopManager {
     /// refuses a recommendation older than five minutes.
     var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, enactTempBasal: Bool, date: Date)?
 
-    /// The phone's prediction as of the grant, kept only so the log can compare the two devices
-    /// over the one window where they ran on the same inputs. Nothing doses from it.
-    var phonePredictionSnapshotAtGrant: LoanPredictionSnapshot?
-    func stashPhonePredictionSnapshot(_ snapshot: LoanPredictionSnapshot?) {
-        dataAccessQueue.async { self.phonePredictionSnapshotAtGrant = snapshot }
-    }
-
     /// The display's copy, kept because a successful enact clears `recommendedAutomaticDose` —
     /// without it the glance would blank the recommended rate on exactly the cycles that dosed.
     var lastRecommendation: AutomaticDoseRecommendation?
