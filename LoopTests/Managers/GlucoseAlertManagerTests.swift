@@ -74,6 +74,24 @@ final class GlucoseAlertManagerTests: XCTestCase {
         XCTAssertEqual(issuer.issuedIDs, [GlucoseAlertManager.urgentLowAlertIdentifier], "back here, the next low alarms")
     }
 
+    /// A low raised here before another controller took the alerts must not silence the first low
+    /// after they come back: no reading here closed that episode, and the low has no repeat.
+    func testALowRaisedBeforeAlertsWentElsewhereDoesNotSilenceTheNextOne() async {
+        let start = Date()
+        await manager.evaluate(samples: [sample(65, at: start)], now: start)
+        XCTAssertEqual(issuer.issuedIDs, [GlucoseAlertManager.lowAlertIdentifier])
+
+        manager.alertsHandledElsewhere = { true }
+        let during = start.addingTimeInterval(30 * 60)
+        await manager.evaluate(samples: [sample(120, at: during)], now: during)
+
+        issuer.reset()
+        manager.alertsHandledElsewhere = { false }
+        let back = start.addingTimeInterval(60 * 60)
+        await manager.evaluate(samples: [sample(65, at: back)], now: back)
+        XCTAssertEqual(issuer.issuedIDs, [GlucoseAlertManager.lowAlertIdentifier], "a new low alarms once the alerts are back")
+    }
+
     /// A sudden drop straight past low into urgent low issues ONLY the most
     /// severe (urgent-low) alert — not both low and urgent-low in one check.
     func testSuddenUrgentLowIssuesOnlyUrgentLow() async {

@@ -578,10 +578,19 @@ final class GlucoseAlertManager: ObservableObject {
         userDefaults.set(data, forKey: Self.episodeStateKey)
     }
 
+    private func forgetEpisodes() {
+        lowState = AlertState()
+        urgentLowState = AlertState()
+        highState = AlertState()
+        predictedLowInEpisode = false
+    }
+
     // MARK: - Evaluation
 
     func evaluate(samples: [NewGlucoseSample], now: Date = Date()) async {
-        guard effectiveLoopAlertsEnabled, !alertsHandledElsewhere() else { return }
+        guard effectiveLoopAlertsEnabled else { return }
+        // Readings evaluated elsewhere close no episode here, so the next spell starts from none.
+        guard !alertsHandledElsewhere() else { forgetEpisodes(); return }
         checkSchedule(at: now)
         guard let latest = samples.max(by: { $0.date < $1.date }) else { return }
         guard now.timeIntervalSince(latest.date) < 6 * 60 else {
