@@ -289,6 +289,15 @@ extension PodLoanPhoneController {
         let events = staged.values
             .filter { !stagedTombstones.contains($0.id) }
             .sorted { $0.seq < $1.seq }
+        // The records count a bolus whole at its start, so a pod read while one is still
+        // delivering shows less than they say: no checkpoint, the window stays open.
+        if let delivering = events.first(where: {
+            $0.record.kind == .bolus && $0.record.startDate <= asOf && asOf < ($0.record.endDate ?? $0.record.startDate)
+        }) {
+            PhoneLog.event("loan", String(format: "e%d [checkpoint] SKIPPED (%@): a %.2f U bolus was delivering at the reading — window stays open",
+                                          epoch, context, delivering.record.amount ?? 0))
+            return
+        }
         // A bolus exactly at the boundary belongs to the next window.
         let expected = LoanReconciler.expectedInsulin(events: events, schedule: deps.settings().basalRateSchedule,
                                                       pulseUnits: pulseUnits, from: base.asOf, to: asOf,

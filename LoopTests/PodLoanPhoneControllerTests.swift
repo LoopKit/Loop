@@ -1449,6 +1449,28 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertEqual(openLoopCalls, 1, "a checkpoint that failed to reconcile must not retire its window")
     }
 
+    /// A reading taken while a bolus is still delivering is no checkpoint: the records count the
+    /// bolus whole, the pod has not delivered it yet. Bench 2026-10-04: a 0.15 U automatic bolus
+    /// read at its start was accepted at −0.15, the base moved past it, and the hand-back found
+    /// +0.25 unexplained and opened the loop.
+    func testAReadingTakenWhileABolusIsDeliveringIsNoCheckpoint() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+
+        let start = Date().addingTimeInterval(1)
+        let bolus = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                              record: LoanDoseRecord(kind: .bolus, startDate: start,
+                                                     endDate: start.addingTimeInterval(6), amount: 0.15),
+                              loggedAt: start)
+        try sendCheckpoint(controller, epoch: grant.epoch, events: [bolus], latest: 10.0,
+                           asOf: start.addingTimeInterval(0.3))
+
+        // The bolus, plus 0.10 U of benign drift: inside the band over the whole loan.
+        try finishLoan(controller, epoch: grant.epoch, finalOdometer: 10.25)
+        XCTAssertEqual(openLoopCalls, 0, "the bolus is in the records; the loop must stay closed")
+        XCTAssertNil(diagMatching("OPEN LOOP — residual"))
+    }
+
     /// A loan that synced then died: the force audit judges only the tail since the last sync.
     func testForceReclaimJudgesOnlyTheTailSinceTheLastSync() throws {
         let controller = makeController()
