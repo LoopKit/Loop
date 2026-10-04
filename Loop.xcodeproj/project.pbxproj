@@ -704,6 +704,7 @@
 		403B9622AF3540FB052C59C3 /* WatchDataManager+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = A272AF93197B2BD41B81B693 /* WatchDataManager+PodLoan.swift */; };
 		BADED19355C7566CF6CB0A19 /* LoopDataManager+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED34CEFF556A1454634CD73 /* LoopDataManager+PodLoan.swift */; };
 		7107C26D3A4713D7FB208B3F /* AlertManager+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1475514C54ADC466268A8652 /* AlertManager+PodLoan.swift */; };
+		D8C2C308CDCA40C885044C9A /* StatusTableViewController+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB5940F7EE8E813C6C458FE /* StatusTableViewController+PodLoan.swift */; };
 		05C0DC219F462192051CEE28 /* DeviceDataManager+PodLoanStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EE7F32577A574C35B4926C /* DeviceDataManager+PodLoanStatus.swift */; };
 		53511B10978934B5A016FD0D /* DeviceDataManager+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6333EAA0FF7956C2DD4AC3E /* DeviceDataManager+PodLoan.swift */; };
 		FBAA6DF0227E06A9B478E4DD /* PodLoanPhoneController+Settle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6470B4DA5621FAD246F50E7A /* PodLoanPhoneController+Settle.swift */; };
@@ -1467,6 +1468,7 @@
 		A272AF93197B2BD41B81B693 /* WatchDataManager+PodLoan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchDataManager+PodLoan.swift"; path = "Loop/Managers/PodLoan/WatchDataManager+PodLoan.swift"; sourceTree = SOURCE_ROOT; };
 		FED34CEFF556A1454634CD73 /* LoopDataManager+PodLoan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LoopDataManager+PodLoan.swift"; path = "Loop/Managers/PodLoan/LoopDataManager+PodLoan.swift"; sourceTree = SOURCE_ROOT; };
 		1475514C54ADC466268A8652 /* AlertManager+PodLoan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AlertManager+PodLoan.swift"; path = "Loop/Managers/PodLoan/AlertManager+PodLoan.swift"; sourceTree = SOURCE_ROOT; };
+		6BB5940F7EE8E813C6C458FE /* StatusTableViewController+PodLoan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "StatusTableViewController+PodLoan.swift"; path = "Loop/Managers/PodLoan/StatusTableViewController+PodLoan.swift"; sourceTree = SOURCE_ROOT; };
 		93EE7F32577A574C35B4926C /* DeviceDataManager+PodLoanStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DeviceDataManager+PodLoanStatus.swift"; path = "Loop/Managers/PodLoan/DeviceDataManager+PodLoanStatus.swift"; sourceTree = SOURCE_ROOT; };
 		C6333EAA0FF7956C2DD4AC3E /* DeviceDataManager+PodLoan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DeviceDataManager+PodLoan.swift"; path = "Loop/Managers/PodLoan/DeviceDataManager+PodLoan.swift"; sourceTree = SOURCE_ROOT; };
 		6470B4DA5621FAD246F50E7A /* PodLoanPhoneController+Settle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Settle.swift"; path = "Loop/Managers/PodLoanPhoneController+Settle.swift"; sourceTree = SOURCE_ROOT; };
@@ -2601,6 +2603,7 @@
 				A272AF93197B2BD41B81B693 /* WatchDataManager+PodLoan.swift */,
 				FED34CEFF556A1454634CD73 /* LoopDataManager+PodLoan.swift */,
 				1475514C54ADC466268A8652 /* AlertManager+PodLoan.swift */,
+				6BB5940F7EE8E813C6C458FE /* StatusTableViewController+PodLoan.swift */,
 				93EE7F32577A574C35B4926C /* DeviceDataManager+PodLoanStatus.swift */,
 				C6333EAA0FF7956C2DD4AC3E /* DeviceDataManager+PodLoan.swift */,
 				6470B4DA5621FAD246F50E7A /* PodLoanPhoneController+Settle.swift */,
@@ -3832,6 +3835,7 @@
 				403B9622AF3540FB052C59C3 /* WatchDataManager+PodLoan.swift in Sources */,
 				BADED19355C7566CF6CB0A19 /* LoopDataManager+PodLoan.swift in Sources */,
 				7107C26D3A4713D7FB208B3F /* AlertManager+PodLoan.swift in Sources */,
+				D8C2C308CDCA40C885044C9A /* StatusTableViewController+PodLoan.swift in Sources */,
 				05C0DC219F462192051CEE28 /* DeviceDataManager+PodLoanStatus.swift in Sources */,
 				53511B10978934B5A016FD0D /* DeviceDataManager+PodLoan.swift in Sources */,
 				FBAA6DF0227E06A9B478E4DD /* PodLoanPhoneController+Settle.swift in Sources */,
