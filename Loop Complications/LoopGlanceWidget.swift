@@ -13,36 +13,26 @@
 //
 
 import AppIntents
+import os
 import SwiftUI
 import WidgetKit
-
-extension GlanceMetric: AppEnum {
-    static let typeDisplayRepresentation: TypeDisplayRepresentation = "Value"
-    static let caseDisplayRepresentations: [GlanceMetric: DisplayRepresentation] = [
-        .bg: "BG",
-        .bgEventual: "BG → Eventual",
-        .eventual: "Eventual BG",
-        .iob: "IOB",
-        .cob: "COB",
-        .iobCob: "IOB · COB",
-        .temp: "Temp Basal",
-        .loop: "Loop Status",
-        .override: "Override",
-        .glance: "Glance",
-    ]
-}
 
 struct GlanceMetricIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Loop Value"
     static let description = IntentDescription("Which of the glance's values this complication shows.")
 
-    @Parameter(title: "Value", default: .bgEventual)
-    var metric: GlanceMetric
+    /// GlanceMetric's raw value. A String, not an AppEnum: with an AppEnum parameter every face-editor
+    /// recommendation rendered as the default (watchOS 26.5 simulator, 2026-10-04 — the intent arrived
+    /// serialized as `iob`, `cob`, … but App Intents resolved the parameter to nil).
+    @Parameter(title: "Value")
+    var metricID: String?
+
+    var metric: GlanceMetric { metricID.flatMap(GlanceMetric.init(rawValue:)) ?? .bgEventual }
 
     init() {}
 
     init(metric: GlanceMetric) {
-        self.metric = metric
+        self.metricID = metric.rawValue
     }
 }
 
@@ -52,14 +42,17 @@ struct GlanceEntry: TimelineEntry {
     let snapshot: GlanceComplicationSnapshot?
 }
 
+private let glanceWidgetLog = Logger(subsystem: "com.loopkit.Loop.Complications", category: "glance")
+
 struct GlanceProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> GlanceEntry {
         GlanceEntry(date: Date(), metric: .bgEventual, snapshot: .sample)
     }
 
     func snapshot(for configuration: GlanceMetricIntent, in context: Context) async -> GlanceEntry {
-        GlanceEntry(date: Date(), metric: configuration.metric,
-                    snapshot: context.isPreview ? .sample : GlanceComplicationSnapshot.load())
+        glanceWidgetLog.notice("snapshot metric=\(configuration.metric.rawValue, privacy: .public) preview=\(context.isPreview, privacy: .public) family=\(String(describing: context.family), privacy: .public)")
+        return GlanceEntry(date: Date(), metric: configuration.metric,
+                           snapshot: context.isPreview ? .sample : GlanceComplicationSnapshot.load())
     }
 
     /// Now, then each moment a value goes stale or the ring turns. New data comes by a reload.
@@ -67,6 +60,7 @@ struct GlanceProvider: AppIntentTimelineProvider {
         let now = Date()
         let snapshot = GlanceComplicationSnapshot.load()
         GlanceComplicationSnapshot.noteServed(configuration.metric.rawValue, at: now)
+        glanceWidgetLog.notice("timeline metric=\(configuration.metric.rawValue, privacy: .public) family=\(String(describing: context.family), privacy: .public)")
         let moments = [now] + (snapshot?.changeMoments(after: now) ?? [])
         return Timeline(entries: moments.map { GlanceEntry(date: $0, metric: configuration.metric, snapshot: snapshot) },
                         policy: .never)
