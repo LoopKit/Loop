@@ -80,10 +80,6 @@ class LoopDataManager {
     private let log = OSLog(category: "LoopDosingManager")
 
     // Main queue only
-    /// The last context the PHONE sent, regardless of what is currently active.
-    /// Written by LoopDataManager+PodLoanWatch.swift.
-    var phoneRelayContext: WatchContext?
-
     private(set) var activeContext: WatchContext? {
         didSet {
             podLoanNoteContextChange(oldValue)
@@ -149,7 +145,6 @@ extension LoopDataManager {
     func updateContext(_ context: WatchContext) {
         dispatchPrecondition(condition: .onQueue(.main))
 
-        podLoanNotePhoneRelayContext(context)
         podLoanAdoptCGMConfiguration(from: context)
 
         // During a loan the phone's context never replaces the watch's: `shouldReplace` compares only

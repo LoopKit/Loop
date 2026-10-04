@@ -116,14 +116,12 @@ extension WatchLoopManager: CGMManagerDelegate {
         log.default("CGM event(s): %{public}d", events.count)
     }
 
-    /// The phone's reading as a gap-filler while a pod is held, from `phoneRelayContext`. Guards,
-    /// in order: syncId latch (correct under the async-add race), newer than stored, the store's dedup.
-    @MainActor
-    func ingestPhoneGlucoseFromContext() {
+    /// The phone's reading as a gap-filler while a pod is held. Guards, in order: syncId latch
+    /// (correct under the async-add race), newer than stored, the store's dedup.
+    /// A stored reading goes to the glucose alerts too, as the watch's own readings do: during a loan
+    /// the wrist owns the alarms, with or without its own sensor.
+    func ingestPhoneGlucose(_ sample: NewGlucoseSample) {
         guard pumpManager != nil else { return }
-
-        guard let ctx = ExtensionDelegate.sharedIfAvailable()?.loopManager.phoneRelayContext,
-              let sample = ctx.newGlucoseSample else { return }
         deviceQueue.async {
             if sample.syncIdentifier == self.lastPhoneFallbackSyncId { return }
             self.lastPhoneFallbackSyncId = sample.syncIdentifier
@@ -141,6 +139,7 @@ extension WatchLoopManager: CGMManagerDelegate {
                 // Stamped AFTER the write, unlike the direct path. The relay arrives constantly;
                 // only a reading that actually filled a gap counts as the phone having delivered.
                 self.noteGlucoseSource(directG7: false)
+                self.evaluateGlucoseAlerts([sample])
                 SportLog.event("glucose",
                     "INGEST src=phone-relay stored=1/1 · latest \(mgdl) mg/dL age \(Int(self.now().timeIntervalSince(sample.date)))s (direct-G7 gap)")
                 SportLog.event("loan", "phone-BG fallback: ingested \(mgdl) mg/dL syncId=\(sample.syncIdentifier ?? "?") (direct-G7 gap) — triggering loop")

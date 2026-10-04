@@ -23,14 +23,6 @@ extension LoopDataManager {
         }
     }
 
-    /// Called from `updateContext(_:)`.
-    func podLoanNotePhoneRelayContext(_ context: WatchContext) {
-        // Keep the phone's relay apart from the active context, which is the watch's during a loan.
-        if !context.isWatchAuthored {
-            phoneRelayContext = context
-        }
-    }
-
     /// Called from `updateContext(_:)`: the phone's CGM configuration rides in each context.
     func podLoanAdoptCGMConfiguration(from context: WatchContext) {
         guard !context.isWatchAuthored,
@@ -41,13 +33,12 @@ extension LoopDataManager {
     /// Called from `updateContext(_:)` when a phone context is refused mid-loan: the relayed
     /// reading is still stored here, and offered to the wrist's loop.
     func podLoanAbsorbPhoneContextDuringLoan(_ context: WatchContext) {
-        if let newGlucoseSample = context.newGlucoseSample {
-            Task {
-                try? await self.glucoseStore?.addGlucoseSamples([newGlucoseSample])
-            }
+        guard let newGlucoseSample = context.newGlucoseSample else { return }
+        Task {
+            try? await self.glucoseStore?.addGlucoseSamples([newGlucoseSample])
         }
         #if !targetEnvironment(simulator)
-        ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager.ingestPhoneGlucoseFromContext()
+        ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager.ingestPhoneGlucose(newGlucoseSample)
         #endif
     }
 
