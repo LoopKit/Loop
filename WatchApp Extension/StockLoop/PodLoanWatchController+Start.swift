@@ -444,7 +444,7 @@ extension PodLoanWatchController {
         }
         loopManager.settings = decodedSettings!
         loopManager.settingsProvider.history = grant.settingsHistory
-        Task { @MainActor [loopManager] in loopManager.configureGlucoseAlerts(from: grant.glucoseAlertSettings) }
+        Task { @MainActor [loopManager] in loopManager.configureGlucoseAlerts(from: grant.glucoseAlertSettings, startingLoan: true) }
         WatchAlertPresenter.logAuthorization("loan start, epoch \(grant.epoch)")
 
         // The phone's history, else none: a kept event the phone never saw could overlap one it

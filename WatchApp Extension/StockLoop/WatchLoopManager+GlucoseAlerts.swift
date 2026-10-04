@@ -12,8 +12,12 @@ import LoopAlgorithm
 
 extension WatchLoopManager {
     /// Built for each loan from the grant; nil data (an older phone) leaves the wrist without them.
+    /// A new loan starts with no episode: between loans no reading reaches these alerts, so a
+    /// saved low would never close, and with no repeat set it would silence this loan's first low.
+    /// A resume keeps the episode.
     @MainActor @discardableResult
-    func configureGlucoseAlerts(from data: Data?) -> String {
+    func configureGlucoseAlerts(from data: Data?, startingLoan: Bool = false) -> String {
+        if startingLoan { GlucoseAlertManager.clearEpisodeState(in: defaults) }
         guard let settings = GlucoseAlertSettings(encoded: data) else {
             glucoseAlerts = nil
             let note = data == nil

@@ -131,6 +131,23 @@ final class WristGlucoseAlertTests: XCTestCase {
         XCTAssertTrue(scheduler.pending.isEmpty, "between loans the phone has the pod and its own alarms")
     }
 
+    /// Between loans no reading closes an episode, so a low left open by the last loan must not
+    /// silence the next loan's first low (stock repeats a low only with snooze on).
+    func testANewLoanForgetsTheLastLoansLowEpisode() async {
+        let manager = await makeManager()
+        manager.configureGlucoseAlerts(from: phoneSettings, startingLoan: true)
+        await manager.evaluateGlucoseAlerts([reading(65)]).value
+        XCTAssertNotNil(request(GlucoseAlertManager.lowAlertIdentifier))
+        manager.clearGlucoseAlerts()
+
+        scheduler = RecordingWristAlertScheduler()
+        WristAlerts.scheduler = scheduler
+        manager.configureGlucoseAlerts(from: phoneSettings, startingLoan: true)
+        await manager.evaluateGlucoseAlerts([reading(65)]).value
+
+        XCTAssertNotNil(request(GlucoseAlertManager.lowAlertIdentifier), "the next loan's low sounds")
+    }
+
     func testAPredictedLowFromTheWristsForecastIsRaised() async {
         let manager = await makeManager()
         manager.configureGlucoseAlerts(from: phoneSettings)

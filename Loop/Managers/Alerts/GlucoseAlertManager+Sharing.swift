@@ -37,6 +37,12 @@ extension GlucoseAlertManager {
                              loopAlertsOverrideForOwnAlertingCGM: loopAlertsOverrideForOwnAlertingCGM)
     }
 
+    /// Forgets the saved episode before a controller starts a new spell of alerting: the saved
+    /// one was left by readings from an earlier spell. The key is stock's `episodeStateKey`.
+    static func clearEpisodeState(in userDefaults: UserDefaults) {
+        userDefaults.removeObject(forKey: "GlucoseAlertEpisodeState")
+    }
+
     /// Takes another controller's settings; this manager keeps its own episode state.
     func adopt(_ settings: GlucoseAlertSettings) {
         guard !settings.profiles.isEmpty else { return }
