@@ -48,8 +48,6 @@ extension WatchLoopManager {
     /// - decisions are stored only while the pod is held (`storeDosingDecision`);
     /// - the dead-man watchdog (`LoopStallWatchdog`) is refreshed on any error-free cycle, open or
     ///   closed, with a pod held (stock's loop-failure notification keys off `lastLoopCompleted`);
-    /// - the predicted-low alert reads the display run's forecast, as stock, but only after a
-    ///   cycle whose compute succeeded (stock evaluates on both arms);
     /// - not stock: a recommendation older than five minutes is refused at enact.
     func loop() {
         dataAccessQueue.async {
@@ -147,8 +145,8 @@ extension WatchLoopManager {
             self.updateDisplayStateOnQueue(forceStoreRemoteRecommendation: true)
 
             // Stock's predicted-low alert reads `LoopDataManager.predictedGlucose`, the display
-            // run's forecast. Stock evaluates on both arms; the wrist keeps its compute-succeeded gate.
-            if computeSucceeded { self.evaluatePredictedLowAlert(self.displayState.output?.predictedGlucose) }
+            // run's forecast, on both arms.
+            self.evaluatePredictedLowAlert(self.displayState.output?.predictedGlucose)
         }
     }
 
