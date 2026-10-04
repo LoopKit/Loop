@@ -544,12 +544,8 @@ final class WatchLoopManager {
 
     var lastPredictionBreakdown: PredictionBreakdown?
 
-    /// The pending command and WHEN it was decided. The date is not decoration — the enact path
-    /// refuses a recommendation older than five minutes.
-    var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, enactTempBasal: Bool, date: Date)?
-
-    /// The display's copy, kept because a successful enact clears `recommendedAutomaticDose` —
-    /// without it the glance would blank the recommended rate on exactly the cycles that dosed.
+    /// The last cycle's recommendation as enacted, for the glance; cleared when a cycle starts, so a
+    /// failed cycle shows none rather than the one before.
     var lastRecommendation: AutomaticDoseRecommendation?
 
     /// When a cycle last completed — the freshness ring's only input. Persisted on every write:

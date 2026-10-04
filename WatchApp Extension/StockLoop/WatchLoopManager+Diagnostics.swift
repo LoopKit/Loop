@@ -39,8 +39,7 @@ extension WatchLoopManager {
 
         let rec: String
 
-        // `decided` because a successful enact clears `recommendedAutomaticDose`.
-        if let r = decided ?? recommendedAutomaticDose?.recommendation {
+        if let r = decided {
             let basal = String(format: "%.2f U/h", r.basalAdjustment.unitsPerHour)
             let bolus = r.bolusUnits.map { String(format: " + auto-bolus %.2f U", $0) } ?? ""
             rec = basal + bolus

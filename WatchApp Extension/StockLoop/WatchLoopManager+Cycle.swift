@@ -47,36 +47,112 @@ extension WatchLoopManager {
     /// - enact is gated on the watch's loop mode (`_closedLoopEnabled`), not the phone's `dosingEnabled`;
     /// - decisions are stored only while the pod is held (`storeDosingDecision`);
     /// - the dead-man watchdog (`LoopStallWatchdog`) is refreshed on any error-free cycle, open or
-    ///   closed, with a pod held (stock's loop-failure notification keys off `lastLoopCompleted`);
-    /// - not stock: a recommendation older than five minutes is refused at enact.
+    ///   closed, with a pod held (stock's loop-failure notification keys off `lastLoopCompleted`).
     func loop() {
         dataAccessQueue.async {
             self.log.default("Loop running")
             self.lastLoopError = nil
-            let startDate = self.now()
+            self.lastRecommendation = nil
+            let loopBaseTime = self.now()
 
             var dosingDecision = StoredDosingDecision(
-                date: startDate,
+                date: loopBaseTime,
                 reason: "loop",
                 settings: StoredDosingDecision.Settings(self.settingsProvider.settings)
             )
 
-            let computeError = self.updatePredictedGlucoseAndRecommendedDose(dosingDecision: &dosingDecision)
+            // The recommendation as it will be enacted, and what it sends (nil: nothing of that kind).
+            var decided: AutomaticDoseRecommendation?
+            var basalAdjustment: TempBasalRecommendation?
+            var computeError: LoopError?
+            var enactError: LoopError?
+
+            do {
+                var input = try self.runBlocking { try await self.fetchData(for: loopBaseTime) }
+
+                // Trim future basal
+                input.doses = input.doses.trimmed(to: loopBaseTime)
+
+                var dosingStrategy: AutomaticDosingStrategy = .automaticBolus
+
+                if FeatureFlags.dosingStrategySelectionEnabled {
+                    dosingStrategy = self.settingsProvider.settings.automaticDosingStrategy
+                }
+                input.recommendationType = dosingStrategy.recommendationType
+
+                if let error = self.loopInputRecencyError(input, at: loopBaseTime) {
+                    throw error
+                }
+
+                var output = LoopAlgorithm.run(input: input)
+                self.loopRunState = AlgorithmDisplayState(input: input, output: output)
+
+                switch output.recommendationResult {
+                case .success(let recommendation):
+                    // Stock force-unwraps this; an automatic run always carries one.
+                    guard let algoRecommendation = recommendation.automatic else {
+                        dosingDecision.updateFrom(input: input, output: output)
+                        self.log.default("No dose recommended.")
+                        break
+                    }
+
+                    var recommendationToEnact = algoRecommendation
+                    // Round bolus recommendation based on pump bolus precision
+                    if let bolus = algoRecommendation.bolusUnits, bolus > 0 {
+                        recommendationToEnact.bolusUnits = self.roundBolusVolume(units: bolus)
+                    }
+
+                    var basal = algoRecommendation.basalAdjustment
+                    basal.unitsPerHour = self.roundBasalRate(unitsPerHour: basal.unitsPerHour)
+                    let scheduledBasalRate = input.basal.closestPrior(to: loopBaseTime)?.value ?? 0
+
+                    // Stock's call: `continuationInterval` leaves a matching temp alone;
+                    // `neutralBasalRateMatchesPump` is false under an override. Nil means no command.
+                    basalAdjustment = basal.adjustForCurrentDelivery(
+                        at: loopBaseTime,
+                        neutralBasalRate: scheduledBasalRate,
+                        currentTempBasal: self.runningTempBasal(),
+                        continuationInterval: .minutes(11),
+                        neutralBasalRateMatchesPump: self.overrideHistory.activeOverride(at: loopBaseTime) == nil
+                    )
+
+                    if let basalAdjustment {
+                        recommendationToEnact.basalAdjustment = basalAdjustment
+                    }
+
+                    // As stock: the decision records the recommendation as it will be enacted.
+                    output.recommendationResult = .success(.init(automatic: recommendationToEnact))
+                    dosingDecision.updateFrom(input: input, output: output)
+                    decided = recommendationToEnact
+                    self.lastRecommendation = recommendationToEnact
+
+                    let bolus = recommendationToEnact.bolusUnits.flatMap { $0 > 0 ? $0 : nil }
+                    if basalAdjustment == nil, bolus == nil {
+                        SportLog.event("dosemath", String(format: "no command needed — pod already at %.2f U/hr", basal.unitsPerHour))
+                    } else {
+                        SportLog.event("dosemath", self.algorithmSummary(input: input, output: output, enacting: basalAdjustment ?? basal)
+                            + (basalAdjustment == nil ? " (temp unchanged)" : "")
+                            + (bolus.map { String(format: " + auto-bolus %.2f U", $0) } ?? ""))
+                    }
+
+                case .failure(let error):
+                    SportLog.event("dosemath", "algorithm declined: \(String(describing: error))")
+                    throw error
+                }
+            } catch {
+                // As stock's `loop()` catch.
+                computeError = error as? LoopError ?? .unknownError(error)
+            }
 
             if let computeError {
                 SportLog.event("loop", "NOT DOSING — \(computeError.localizedDescription) (\(computeError.issueId))")
             }
 
-            let decided = self.recommendedAutomaticDose?.recommendation
-            self.lastRecommendation = decided
-            var enactError: LoopError?
             if computeError == nil, self._closedLoopEnabled {
-                // Read before the enact, which clears it on success.
-                let enacting = self.recommendedAutomaticDose
-                enactError = self.enactRecommendedAutomaticDose(decisionId: dosingDecision.id)
+                enactError = self.enactAutomaticDose(bolus: decided?.bolusUnits, tempBasal: basalAdjustment, decisionId: dosingDecision.id)
                 if enactError == nil {
-                    dosingDecision.enactedTempBasal = enacting?.enactTempBasal == true ? enacting?.recommendation.basalAdjustment : nil
-                    dosingDecision.enactedBolusAmount = enacting?.recommendation.bolusUnits
+                    dosingDecision.enactedTempBasal = basalAdjustment
+                    dosingDecision.enactedBolusAmount = decided?.bolusUnits
                 }
             } else if computeError == nil {
                 self.log.default("Advisory (open loop) — computed but not enacting.")
@@ -102,8 +178,8 @@ extension WatchLoopManager {
                     enactVerdict = "FAILED \(enactError)"
                 }
             }
-            else if decided?.basalAdjustment == nil && decided != nil { enactVerdict = "none(no-change)" }
             else if decided == nil { enactVerdict = "none(nothing-decided)" }
+            else if basalAdjustment == nil && (decided?.bolusUnits ?? 0) <= 0 { enactVerdict = "none(no-change)" }
             else { enactVerdict = "ok" }
 
             let watchdogRefreshed = (error == nil && self.pumpManager != nil)
@@ -132,7 +208,7 @@ extension WatchLoopManager {
                 if self._closedLoopEnabled {
                     self.lastLoopCompleted = self.now()
                 }
-                self.log.default("Loop ended (duration %.1fs)", self.now().timeIntervalSince(startDate))
+                self.log.default("Loop ended (duration %.1fs)", self.now().timeIntervalSince(loopBaseTime))
                 let bg = self.glucoseStore.latestGlucose.map { String(format: "%.0f", $0.quantity.doubleValue(for: .milligramsPerDeciliter)) } ?? "—"
 
                 let rec = decided.map { r in
@@ -412,102 +488,6 @@ extension WatchLoopManager {
             return .pumpDataTooOld(date: doseStore.lastAddedPumpData)
         }
         return nil
-    }
-
-    /// The body of stock `loop()` up to the enact: fetch, trim, check, run, round, decide, and
-    /// fill the cycle's decision from the run (`updateFrom`) where stock does.
-    func updatePredictedGlucoseAndRecommendedDose(dosingDecision: inout StoredDosingDecision) -> LoopError? {
-        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
-
-        let loopBaseTime = now()
-
-        var input: StoredDataAlgorithmInput
-        do {
-            input = try runBlocking { try await self.fetchData(for: loopBaseTime) }
-        } catch {
-            // As stock's `loop()` catch.
-            return error as? LoopError ?? .unknownError(error)
-        }
-
-        // Trim future basal
-        input.doses = input.doses.trimmed(to: loopBaseTime)
-
-        var dosingStrategy: AutomaticDosingStrategy = .automaticBolus
-
-        if FeatureFlags.dosingStrategySelectionEnabled {
-            dosingStrategy = settingsProvider.settings.automaticDosingStrategy
-        }
-        input.recommendationType = dosingStrategy.recommendationType
-
-        if let error = loopInputRecencyError(input, at: loopBaseTime) {
-            return error
-        }
-
-        let output = LoopAlgorithm.run(input: input)
-
-        loopRunState = AlgorithmDisplayState(input: input, output: output)
-
-        switch output.recommendationResult {
-        case .failure(let error):
-            // Clear the pending command as well as reporting: an algorithm that has just declined
-            // must not leave a previous cycle's recommendation behind for the enact path to find.
-            recommendedAutomaticDose = nil
-            SportLog.event("dosemath", "algorithm declined: \(String(describing: error))")
-            return error as? LoopError ?? .unknownError(error)
-
-        case .success(let recommendation):
-            guard let algoRecommendation = recommendation.automatic else {
-                recommendedAutomaticDose = nil
-                dosingDecision.updateFrom(input: input, output: output)
-                self.log.default("No dose recommended.")
-                return nil
-            }
-
-            var recommendationToEnact = algoRecommendation
-            // Round bolus recommendation based on pump bolus precision
-            if let bolus = algoRecommendation.bolusUnits, bolus > 0 {
-                recommendationToEnact.bolusUnits = roundBolusVolume(units: bolus)
-            }
-
-            var basal = algoRecommendation.basalAdjustment
-            basal.unitsPerHour = roundBasalRate(unitsPerHour: basal.unitsPerHour)
-            let scheduledBasalRate = input.basal.closestPrior(to: loopBaseTime)?.value ?? 0
-            let adjusted = basal.adjustForCurrentDelivery(
-                at: loopBaseTime,
-                neutralBasalRate: scheduledBasalRate,
-                currentTempBasal: runningTempBasal(),
-                continuationInterval: .minutes(11),
-                neutralBasalRateMatchesPump: overrideHistory.activeOverride(at: loopBaseTime) == nil
-            )
-
-            if let adjusted {
-                recommendationToEnact.basalAdjustment = adjusted
-            }
-
-            // As stock: the decision records the recommendation as it will be enacted.
-            var output = output
-            output.recommendationResult = .success(.init(automatic: recommendationToEnact))
-            dosingDecision.updateFrom(input: input, output: output)
-
-            // Stock's call: `continuationInterval` leaves a matching temp alone; `neutralBasalRateMatchesPump`
-            // is false under an override. Nil means no command.
-            let bolusUnits = recommendationToEnact.bolusUnits.flatMap { $0 > 0 ? $0 : nil }
-            var automatic = recommendationToEnact
-            automatic.bolusUnits = bolusUnits
-
-            guard adjusted != nil || bolusUnits != nil else {
-                recommendedAutomaticDose = nil
-                SportLog.event("dosemath", String(format: "no command needed — pod already at %.2f U/hr", basal.unitsPerHour))
-                return nil
-            }
-
-            recommendedAutomaticDose = (recommendation: automatic, enactTempBasal: adjusted != nil, date: loopBaseTime)
-            let derivation = algorithmSummary(input: input, output: output, enacting: adjusted ?? basal)
-                + (adjusted == nil ? " (temp unchanged)" : "")
-                + (bolusUnits.map { String(format: " + auto-bolus %.2f U", $0) } ?? "")
-            SportLog.event("dosemath", derivation)
-            return nil
-        }
     }
 
     /// Stock `LoopDataManager.updateDisplayState`: the display run, fed with doses back a day,

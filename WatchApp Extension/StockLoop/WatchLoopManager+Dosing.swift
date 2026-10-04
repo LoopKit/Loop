@@ -239,10 +239,9 @@ extension WatchLoopManager {
 
     /// Stock's `DeviceDataManager.enact` plus `loop()`'s gates before it, in stock's order:
     /// pump inoperable, suspended, manual temp basal running, delivery uncertain. As stock, they
-    /// run on every closed-loop cycle, including one with nothing to send. One deliberate watch
-    /// difference: a recommendation older than five minutes is refused. Errors are stock's, as
-    /// stock's `loop()` records them.
-    func enactRecommendedAutomaticDose(decisionId: UUID? = nil) -> LoopError? {
+    /// run on every closed-loop cycle, including one with nothing to send (the enactor then sends
+    /// no command). Errors are stock's, as stock's `loop()` records them.
+    func enactAutomaticDose(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?) -> LoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         guard let pumpManager = pumpManager else {
@@ -271,55 +270,30 @@ extension WatchLoopManager {
             return .connectionError
         }
 
-        // Nothing to send: the checks above have passed, as in stock's `loop()`.
-        guard let recommendedDose = self.recommendedAutomaticDose else {
-            return nil
-        }
-
-        // Not stock: a recommendation older than five minutes has been overtaken by its own
-        // inputs. The wrist can be suspended between compute and enact, which the phone cannot.
-        guard abs(recommendedDose.date.timeIntervalSince(now())) < TimeInterval(minutes: 5) else {
-            return .recommendationExpired(date: recommendedDose.date)
-        }
-
-        var enactError: LoopError?
-
-        let recommendation = recommendedDose.recommendation
-
         // Logged BEFORE the send, so a command that never comes back still leaves a record of
         // what was asked for.
-        let temp: TempBasalRecommendation? = recommendedDose.enactTempBasal ? recommendation.basalAdjustment : nil
-        if let temp {
-            SportLog.event("dose", String(format: "enacting temp %.2f U/hr × %.0f min", temp.unitsPerHour, temp.duration / 60))
+        if let tempBasal {
+            SportLog.event("dose", String(format: "enacting temp %.2f U/hr × %.0f min", tempBasal.unitsPerHour, tempBasal.duration / 60))
         }
-        // Rounded when it was decided, as stock.
-        let bolus: Double? = recommendation.bolusUnits.flatMap { $0 > 0 ? $0 : nil }
-        if let bolus {
+        if let bolus, bolus > 0 {
             SportLog.event("dose", String(format: "enacting automatic bolus %.2f U", bolus))
         }
         do {
             try runBlocking {
-                try await self.doseEnactor.enact(decisionId: decisionId, bolus: bolus, tempBasal: temp, with: pumpManager)
-            }
-            if let temp {
-                SportLog.event("dose", String(format: "temp %.2f U/hr ACCEPTED by pod", temp.unitsPerHour))
-            }
-            if let bolus {
-                SportLog.event("dose", String(format: "automatic bolus %.2f U ACCEPTED by pod", bolus))
+                try await self.doseEnactor.enact(decisionId: decisionId, bolus: bolus, tempBasal: tempBasal, with: pumpManager)
             }
         } catch {
             SportLog.event("dose", "enact FAILED — \(String(describing: error))")
             // As stock's `loop()` catch.
-            enactError = error as? LoopError ?? .unknownError(error)
+            return error as? LoopError ?? .unknownError(error)
         }
-
-        // Cleared only on success. A failed recommendation stays visible to the display, and the
-        // expiry guard above is what stops it being enacted later by some other path.
-        if enactError == nil {
-            self.recommendedAutomaticDose = nil
+        if let tempBasal {
+            SportLog.event("dose", String(format: "temp %.2f U/hr ACCEPTED by pod", tempBasal.unitsPerHour))
         }
-
-        return enactError
+        if let bolus, bolus > 0 {
+            SportLog.event("dose", String(format: "automatic bolus %.2f U ACCEPTED by pod", bolus))
+        }
+        return nil
     }
 }
 

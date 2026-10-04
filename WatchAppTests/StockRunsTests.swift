@@ -410,11 +410,7 @@ final class StockRunsTests: XCTestCase {
 
     // MARK: - Enact refusals, as stock `loop()`
 
-    private func pendingTemp(_ manager: WatchLoopManager) {
-        let recommendation = AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 2.0, duration: .minutes(30)),
-                                                         direction: .increase)
-        manager.recommendedAutomaticDose = (recommendation: recommendation, enactTempBasal: true, date: manager.now())
-    }
+    private let highTemp = TempBasalRecommendation(unitsPerHour: 2.0, duration: .minutes(30))
 
     func testAManualTempIsLeftRunning() async throws {
         let manager = await makeManager()
@@ -427,8 +423,7 @@ final class StockRunsTests: XCTestCase {
         manager.doseEnactor = enactor
 
         let error = manager.dataAccessQueue.sync { () -> LoopError? in
-            pendingTemp(manager)
-            return manager.enactRecommendedAutomaticDose()
+            manager.enactAutomaticDose(bolus: nil, tempBasal: highTemp, decisionId: nil)
         }
 
         guard case .manualTempBasalRunning? = error else { return XCTFail("refused as stock does; got \(String(describing: error))") }
@@ -447,8 +442,7 @@ final class StockRunsTests: XCTestCase {
         manager.pumpManager = try makePump(unfinalizedTemp: manual)
 
         let error = manager.dataAccessQueue.sync { () -> LoopError? in
-            manager.recommendedAutomaticDose = nil
-            return manager.enactRecommendedAutomaticDose()
+            manager.enactAutomaticDose(bolus: nil, tempBasal: nil, decisionId: nil)
         }
 
         guard case .manualTempBasalRunning? = error else { return XCTFail("refused as stock does; got \(String(describing: error))") }
@@ -463,8 +457,7 @@ final class StockRunsTests: XCTestCase {
         manager.doseEnactor = enactor
 
         let error = manager.dataAccessQueue.sync { () -> LoopError? in
-            pendingTemp(manager)
-            return manager.enactRecommendedAutomaticDose()
+            manager.enactAutomaticDose(bolus: nil, tempBasal: highTemp, decisionId: nil)
         }
 
         guard case .pumpInoperable? = error else { return XCTFail("refused as stock does; got \(String(describing: error))") }
