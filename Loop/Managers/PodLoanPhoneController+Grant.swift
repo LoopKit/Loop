@@ -214,7 +214,9 @@ extension PodLoanPhoneController {
         // Past the insulin and carb durations.
         let historyStart = referenceDate.addingTimeInterval(-.hours(16))
 
-        let glucoseStart = referenceDate.addingTimeInterval(-.hours(3))
+        // The algorithm's glucose window (`fetch` reads back to the carb window), so a loan without a
+        // watch G7 sees the carb absorption the phone sees.
+        let glucoseStart = referenceDate.addingTimeInterval(LoopConstants.maxCarbEntryPastTime)
         // The watch keeps 24 h of overrides and settings; the algorithm looks back about 18.
         let dayStart = referenceDate.addingTimeInterval(-.hours(24))
         deps.doseHistory(historyStart) { [weak self] history in

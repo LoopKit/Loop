@@ -95,6 +95,25 @@ final class LoanProtocolV2Tests: XCTestCase {
         XCTAssertNil(g2.glucoseHistory)
     }
 
+    /// The grant seeds the algorithm's 12 h glucose window: every five minutes, with identifiers as
+    /// long as a UUID, it fits inside the 60 KB urgent limit.
+    func testTwelveHoursOfGlucoseStaySmallInTheGrant() throws {
+        let now = Date(timeIntervalSince1970: 1_784_338_000.125)
+        let readings = (0...144).map { i in
+            LoanGlucoseRecord(syncIdentifier: UUID().uuidString, startDate: now.addingTimeInterval(Double(-i) * 300),
+                              valueMgdl: 120, trendRateMgdlPerMin: 1.5, isDisplayOnly: false, wasUserEntered: false)
+        }
+        func grant(_ glucose: [LoanGlucoseRecord]?) -> LoanGrant {
+            LoanGrant(epoch: 8, expiresAt: now.addingTimeInterval(300), pumpConfiguration: Data([1]), podAddress: 0,
+                      therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC", doseHistory: [], glucoseHistory: glucose)
+        }
+        let with = try LoanProtocol.encoder.encode(LoanEnvelope(message: .grant(grant(readings)))).count
+        let without = try LoanProtocol.encoder.encode(LoanEnvelope(message: .grant(grant(nil)))).count
+        print("GLUCOSE-SEED-SIZE grant +\(with - without)B for \(readings.count) readings")
+        // About 25 KB: with a typical day's doses the grant lands near 50 KB of the 60 KB urgent limit.
+        XCTAssertLessThan(with - without, 30_000, "12 h of glucose leaves the grant inside the 60 KB urgent limit")
+    }
+
     /// The grant carries the pump's exported configuration whole; the watch reads only its header.
     func testGrantCarriesThePumpsSharedConfiguration() throws {
         let asOf = Date(timeIntervalSince1970: 1_784_338_000)
