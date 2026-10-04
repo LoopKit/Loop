@@ -398,8 +398,6 @@ extension SettingsManager {
     }
 }
 
-@MainActor
-
 extension SettingsManager: SettingsProvider {
     var settings: StoredSettings { storedSettings }
 

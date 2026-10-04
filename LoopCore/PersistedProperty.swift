@@ -36,12 +36,6 @@ import os.log
         storageURL = documents.appendingPathComponent(key + ".plist")
     }
 
-    /// The same storage in a chosen folder, for owners whose tests inject one.
-    public init(key: String, directory: URL) {
-        self.key = key
-        storageURL = directory.appendingPathComponent(key + ".plist")
-    }
-
     public var wrappedValue: Value? {
         get {
             do {

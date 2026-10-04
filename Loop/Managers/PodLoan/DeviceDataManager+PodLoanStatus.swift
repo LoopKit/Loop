@@ -2,8 +2,8 @@
 //  DeviceDataManager+PodLoanStatus.swift
 //  Loop
 //
-//  The pump tile while the pod is on the watch. The choice between these stays in the stock
-//  chain in DeviceDataManager+DeviceStatus.swift.
+//  The pump tile while the pod is on the watch or moving between devices; the stock chain in
+//  DeviceDataManager+DeviceStatus.swift asks `podLoanStatusHighlight` after its own first checks.
 //
 
 import Foundation
@@ -11,6 +11,21 @@ import LoopKit
 import LoopKitUI
 
 extension DeviceDataManager {
+
+    /// nil when the pod is plainly the phone's, so the pump manager's own highlight shows.
+    var podLoanStatusHighlight: DeviceStatusHighlight? {
+        if isPodLoanReclaiming {
+            // Hand-back in flight; the label follows the reclaim's phase.
+            return Self.podReclaimingStatusHighlight(phase: podReclaimProgress?.phase)
+        } else if isPodTakeoverInProgress {
+            // Grant out, not yet confirmed. Must precede the next branch: the link is already released.
+            return Self.podHandingOverStatusHighlight
+        } else if (pumpManager as? ExclusiveDeviceControl)?.isControlReleased == true || isPodLoanedToWatch {
+            // On the watch: switch the tile at release rather than waiting for signal loss.
+            return Self.podOnWatchStatusHighlight
+        }
+        return nil
+    }
 
     static var podOnWatchStatusHighlight: PodOnWatchStatusHighlight {
         return PodOnWatchStatusHighlight()
