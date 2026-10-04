@@ -29,6 +29,7 @@ extension WatchLoopManager {
     var closedLoopEnabled: Bool { dataAccessQueue.sync { _closedLoopEnabled } }
 
     var isIntegralRetrospectiveCorrectionEnabled: Bool { dataAccessQueue.sync { integralRetrospectiveCorrectionEnabled } }
+    var isGlucoseBasedApplicationFactorEnabled: Bool { dataAccessQueue.sync { glucoseBasedApplicationFactorEnabled } }
 
     func glanceData() -> GlanceData { dataAccessQueue.sync { buildGlanceData() } }
 }

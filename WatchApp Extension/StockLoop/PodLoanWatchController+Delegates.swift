@@ -185,6 +185,7 @@ extension LoanGrant {
                   supportsInterimHandback: supportsInterimHandback,
                   supportsOverrideRecords: supportsOverrideRecords,
                   integralRetrospectiveCorrectionEnabled: integralRetrospectiveCorrectionEnabled,
+                  glucoseBasedApplicationFactorEnabled: glucoseBasedApplicationFactorEnabled,
                   phoneClosedLoopEnabled: phoneClosedLoopEnabled, carbHistory: carbHistory,
                   glucoseHistory: glucoseHistory,
                   activeOverrideRaw: activeOverrideRaw,

@@ -255,7 +255,7 @@ final class WakeResumeTests: XCTestCase {
         // One list, so a new grant field cannot be left out of the saved state.
         let live = await makeController()
         live.loopManager.setClosedLoopEnabled(true, reason: "test")
-        live.loopManager.setIntegralRetrospectiveCorrection(true)
+        live.loopManager.setAlgorithmExperiments(integralRetrospectiveCorrection: true, glucoseBasedApplicationFactor: true)
         let override = halfNeeds(start: Date().addingTimeInterval(-.minutes(10)), duration: .indefinite)
         live.loopManager.applyWristOverride(override)
         saveState { $0.deliveredAtTakeover = 12.5 }
@@ -266,6 +266,7 @@ final class WakeResumeTests: XCTestCase {
                        "the phone's settings history — else the resumed loan projects today's settings back")
         XCTAssertTrue(c.loopManager.closedLoopEnabledNonBlocking, "closed-loop mode — else a resumed loan comes back OPEN")
         XCTAssertTrue(c.loopManager.isIntegralRetrospectiveCorrectionEnabled, "retrospective-correction mode")
+        XCTAssertTrue(c.loopManager.isGlucoseBasedApplicationFactorEnabled, "application-factor mode")
         XCTAssertTrue(c.phoneSupportsInterimHandback, "the phone's interim hand-back capability")
         XCTAssertTrue(c.phoneSupportsOverrideRecords, "the phone's override-records capability")
         XCTAssertEqual(c.deliveredAtTakeover, 12.5, "the delivery baseline — else the hand-back audit reads delivered=n/a")

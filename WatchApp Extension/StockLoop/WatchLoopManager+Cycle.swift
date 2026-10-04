@@ -266,9 +266,8 @@ extension WatchLoopManager {
     ///   settings history before the grant);
     /// - the override history is this manager's `overrideHistory`, and the active override is
     ///   `scheduleOverride` while active (stock: `temporaryPresetsManager`);
-    /// - integral retrospective correction is the grant's flag, not this device's `UserDefaults`;
-    /// - the application factor is stock's `ConstantApplicationFactorStrategy` only: the
-    ///   glucose-based strategy is a parked experiment, deliberately off here.
+    /// - integral retrospective correction and the application-factor strategy follow the
+    ///   grant's flags, not this device's `UserDefaults`.
     /// No recency check lives here, as in stock: `loop()` checks after it fetches.
     func fetchData(
         for baseTime: Date? = nil,
@@ -291,7 +290,9 @@ extension WatchLoopManager {
             pumpInsulinType: pumpManager?.status.insulinType,
             insulinModel: insulinModel(for:),
             useIntegralRetrospectiveCorrection: integralRetrospectiveCorrectionEnabled,
-            applicationFactorStrategy: ConstantApplicationFactorStrategy(),
+            applicationFactorStrategy: glucoseBasedApplicationFactorEnabled
+                ? GlucoseBasedApplicationFactorStrategy()
+                : ConstantApplicationFactorStrategy(),
             carbAbsorptionModel: .piecewiseLinear)
     }
 

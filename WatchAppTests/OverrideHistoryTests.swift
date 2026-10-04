@@ -70,7 +70,7 @@ final class OverrideHistoryTests: XCTestCase {
     /// A grant with complete settings. Its pump configuration is not a pump, so intake stops
     /// (and tears down) after the overrides are applied.
     private func grant(activeOverride: TemporaryScheduleOverride?, overrideHistory: [TemporaryScheduleOverride]? = nil,
-                       settingsHistory: LoanSettingsHistory? = nil) -> LoanGrant {
+                       settingsHistory: LoanSettingsHistory? = nil, glucoseBasedApplicationFactor: Bool? = nil) -> LoanGrant {
         var settings = LoopSettings()
         settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(
             unit: .milligramsPerDeciliter,
@@ -87,7 +87,8 @@ final class OverrideHistoryTests: XCTestCase {
         func plist(_ value: Any) -> Data { try! PropertyListSerialization.data(fromPropertyList: value, format: .binary, options: 0) }
         return LoanGrant(epoch: 1, expiresAt: Date().addingTimeInterval(300), pumpConfiguration: Data([1, 2, 3]),
                          podAddress: 0, therapySettingsRaw: plist(settings.rawValue), settingsTimeZoneID: "GMT",
-                         doseHistory: [], activeOverrideRaw: activeOverride.map { plist($0.rawValue) },
+                         doseHistory: [], glucoseBasedApplicationFactorEnabled: glucoseBasedApplicationFactor,
+                         activeOverrideRaw: activeOverride.map { plist($0.rawValue) },
                          therapySettingsSupplementRaw: plist(supplement),
                          overrideHistoryRaw: overrideHistory.flatMap(LoanGrant.overrideHistoryRaw),
                          settingsHistory: settingsHistory)
@@ -302,6 +303,35 @@ final class OverrideHistoryTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(value(input.basal, at: before)), 0.8, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(sensitivity(input, at: before)), 40, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(value(input.carbRatio, at: before)), 8, accuracy: 0.001)
+    }
+
+    // MARK: - Algorithm Experiments
+
+    /// The phone's glucose-based application factor reaches the wrist's algorithm input, as
+    /// integral retrospective correction does.
+    func testTheApplicationFactorFollowsThePhonesExperimentToggle() async throws {
+        let factor = try await applicationFactor(afterGrantWith: true)
+        let range = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)...LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 110)
+        let expected = GlucoseBasedApplicationFactorStrategy().calculateDosingFactor(
+            for: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 120), correctionRange: range)
+        XCTAssertEqual(factor, expected, accuracy: 0.0001)
+    }
+
+    /// An older phone sends no flag: the factor stays stock's constant.
+    func testAGrantWithoutTheToggleKeepsTheConstantFactor() async throws {
+        let factor = try await applicationFactor(afterGrantWith: nil)
+        XCTAssertEqual(factor, LoopAlgorithm.defaultBolusPartialApplicationFactor, accuracy: 0.0001)
+    }
+
+    /// The factor in the first algorithm input after a grant, with glucose steady at 120 mg/dL.
+    private func applicationFactor(afterGrantWith flag: Bool?) async throws -> Double {
+        let c = await makeController(overrideHistory: StockLoopStack.makeOverrideHistory())
+        c.queue.sync { c.handleGrant(grant(activeOverride: nil, glucoseBasedApplicationFactor: flag)) }
+        XCTAssertEqual(c.loopManager.isGlucoseBasedApplicationFactorEnabled, flag ?? false)
+        await seedGlucose(c.loopManager, hours: 1)
+        try await c.loopManager.recordPumpEvents([], lastReconciliation: Date(), replacePendingEvents: true)
+        let input = try await c.loopManager.fetchData(for: Date())
+        return try XCTUnwrap(input.automaticBolusApplicationFactor)
     }
 
     /// An older phone sends no history: the snapshot is projected back, as before.

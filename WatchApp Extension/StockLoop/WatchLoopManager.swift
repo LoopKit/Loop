@@ -433,6 +433,7 @@ final class WatchLoopManager {
         self._closedLoopEnabled = loopState.closedLoopEnabled
         self._closedLoopMirror = loopState.closedLoopEnabled
         self.integralRetrospectiveCorrectionEnabled = loopState.integralRetrospectiveCorrectionEnabled
+        self.glucoseBasedApplicationFactorEnabled = loopState.glucoseBasedApplicationFactorEnabled
 
         // The store asks us for the scheduled basal it nets doses against; see the
         // `DoseStoreDelegate` conformance.
@@ -514,17 +515,22 @@ final class WatchLoopManager {
         settings.basalRateSchedule.map { overrideHistory.resolvingRecentBasalSchedule($0) }
     }
 
-    /// Applied on `dataAccessQueue`, ahead of the first prediction.
-    func setIntegralRetrospectiveCorrection(_ enabled: Bool) {
-        updateLoopState { $0.integralRetrospectiveCorrectionEnabled = enabled }
+    /// The phone's Algorithm Experiments. Applied on `dataAccessQueue`, ahead of the first prediction.
+    func setAlgorithmExperiments(integralRetrospectiveCorrection: Bool, glucoseBasedApplicationFactor: Bool) {
+        updateLoopState {
+            $0.integralRetrospectiveCorrectionEnabled = integralRetrospectiveCorrection
+            $0.glucoseBasedApplicationFactorEnabled = glucoseBasedApplicationFactor
+        }
         dataAccessQueue.async {
-            self.integralRetrospectiveCorrectionEnabled = enabled
-            SportLog.event("loan", "retrospective correction: \(enabled ? "INTEGRAL" : "standard") (from grant)")
+            self.integralRetrospectiveCorrectionEnabled = integralRetrospectiveCorrection
+            self.glucoseBasedApplicationFactorEnabled = glucoseBasedApplicationFactor
+            SportLog.event("loan", "retrospective correction: \(integralRetrospectiveCorrection ? "INTEGRAL" : "standard") · bolus application factor: \(glucoseBasedApplicationFactor ? "GLUCOSE-BASED" : "constant") (from grant)")
         }
     }
 
     /// Queue-owned.
     var integralRetrospectiveCorrectionEnabled = false
+    var glucoseBasedApplicationFactorEnabled = false
 
     /// Stock glucose alerts, built from the phone's settings for a loan; nil between loans.
     @MainActor var glucoseAlerts: GlucoseAlertManager?
@@ -644,6 +650,7 @@ extension WatchLoopManager: TemporaryScheduleOverrideHistoryDelegate {
 struct WatchLoopState: RawRepresentable {
     var closedLoopEnabled = false
     var integralRetrospectiveCorrectionEnabled = false
+    var glucoseBasedApplicationFactorEnabled = false
     var lastLoopCompleted: Date?
     /// The override history's events, as LoopKit encodes them; read back only by a resume.
     var overrideEvents: Data?
@@ -653,13 +660,15 @@ struct WatchLoopState: RawRepresentable {
     init?(rawValue: [String: Any]) {
         closedLoopEnabled = rawValue["closedLoopEnabled"] as? Bool ?? false
         integralRetrospectiveCorrectionEnabled = rawValue["integralRetrospectiveCorrectionEnabled"] as? Bool ?? false
+        glucoseBasedApplicationFactorEnabled = rawValue["glucoseBasedApplicationFactorEnabled"] as? Bool ?? false
         lastLoopCompleted = rawValue["lastLoopCompleted"] as? Date
         overrideEvents = rawValue["overrideEvents"] as? Data
     }
 
     var rawValue: [String: Any] {
         var raw: [String: Any] = ["closedLoopEnabled": closedLoopEnabled,
-                                  "integralRetrospectiveCorrectionEnabled": integralRetrospectiveCorrectionEnabled]
+                                  "integralRetrospectiveCorrectionEnabled": integralRetrospectiveCorrectionEnabled,
+                                  "glucoseBasedApplicationFactorEnabled": glucoseBasedApplicationFactorEnabled]
         raw["lastLoopCompleted"] = lastLoopCompleted
         raw["overrideEvents"] = overrideEvents
         return raw
