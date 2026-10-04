@@ -65,7 +65,7 @@ final class ComplicationSnapshotTests: XCTestCase {
 
     /// Reloads are budgeted: at most one per window, and a change inside the window is not lost.
     func testReloadsAreThrottledButNeverLost() {
-        var throttle = ComplicationReloadThrottle()
+        var throttle = ComplicationReloadThrottle<ComplicationSnapshot>()
         let a = snapshot(), b = snapshot(glucoseAge: 0)
 
         XCTAssertEqual(throttle.offer(a, now: now).reload, true, "the first value reloads at once")
