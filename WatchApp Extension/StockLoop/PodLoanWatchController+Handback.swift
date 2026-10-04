@@ -449,7 +449,7 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Far above a day of cycles, which is as long as the store keeps them.
+    /// Far above a day of cycles; the query starts at the last anchor sent home, so one loan's.
     static let maxDosingDecisionsHome = 5000
 
     /// Far above any loan's alerts.

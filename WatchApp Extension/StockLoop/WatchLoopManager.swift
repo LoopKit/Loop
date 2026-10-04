@@ -320,7 +320,7 @@ final class WatchLoopManager {
                                               o.duration.isInfinite ? "indefinite" : ISO8601DateFormatter().string(from: o.scheduledInterval.end),
                                               o.syncIdentifier.uuidString))
         } else {
-            SportLog.event("override", "SET-ON-WRIST · CLEARED by user — the loan's schedules resolve unscaled from here")
+            SportLog.event("override", "SET-ON-WRIST · CLEARED — the loan's schedules resolve unscaled from here")
         }
         scheduleOverride = override
     }

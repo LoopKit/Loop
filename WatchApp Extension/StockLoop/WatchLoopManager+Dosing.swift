@@ -113,10 +113,9 @@ extension WatchLoopManager {
     /// (`true`) is what the phone runs; the watch matches that.
     var usePositiveMomentumAndRCForManualBoluses: Bool { true }
 
-    /// Straight to `pumpManager.enactBolus`, capped at the grant's `maximumBolus`. Skips stock's
-    /// `DeviceDataManager.enact` wrapper and its uncertain-delivery and suspend checks. As stock's
-    /// watch bolus, the watchBolus decision is stored first, with the carb entry as stored, and its
-    /// id goes with the command.
+    /// Stock `DeviceDataManager.enactBolus`, straight to the pump manager, plus a cap at the
+    /// grant's `maximumBolus` (stock relies on the picker). As stock's watch bolus, the watchBolus
+    /// decision is stored first, with the carb entry as stored, and its id goes with the command.
     func enactManualBolus(units: Double, activationType: BolusActivationType, carbEntry: NewCarbEntry? = nil,
                           storedCarbEntry: StoredCarbEntry? = nil, completion: @escaping (Error?) -> Void) {
         dataAccessQueue.async {
@@ -303,7 +302,8 @@ extension WatchLoopManager {
         if let temp {
             SportLog.event("dose", String(format: "enacting temp %.2f U/hr × %.0f min", temp.unitsPerHour, temp.duration / 60))
         }
-        let bolus: Double? = recommendation.bolusUnits.map { pumpManager.roundToSupportedBolusVolume(units: $0) }.flatMap { $0 > 0 ? $0 : nil }
+        // Rounded when it was decided, as stock.
+        let bolus: Double? = recommendation.bolusUnits.flatMap { $0 > 0 ? $0 : nil }
         if let bolus {
             SportLog.event("dose", String(format: "enacting automatic bolus %.2f U", bolus))
         }

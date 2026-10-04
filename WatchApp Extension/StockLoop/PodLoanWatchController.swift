@@ -394,7 +394,10 @@ final class PodLoanWatchController {
         let loopManager = self.loopManager
         Task { await loopManager.resetInsulinBook(reason: "teardown") }
 
-        loopManager.applyWristOverride(nil)
+        if loopManager.scheduleOverride != nil {
+            SportLog.event("override", "wrist override reset at teardown — the next loan takes the phone's")
+        }
+        loopManager.scheduleOverride = nil
         Task { @MainActor in loopManager.clearGlucoseAlerts() }
     }
 
