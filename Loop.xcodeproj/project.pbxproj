@@ -393,6 +393,7 @@
 		9A7CE02F302D82A800A03F53 /* WatchdogArmingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE01B302D82A800A03F53 /* WatchdogArmingTests.swift */; };
 		18606676A16D24BF383CCCF8 /* WatchAlertPresenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */; };
 		DB66EB0397D54C94B49ADEF8 /* FirstContactNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */; };
+		12C61123C2943C92D0D4E44F /* PumpTeardownReleaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA796C9BB12BE239713AF507 /* PumpTeardownReleaseTests.swift */; };
 		73E0AA9C0C5503C0A38FDCA6 /* WristAlertAcknowledgementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */; };
 		8077722BF812D34BDD35AEE6 /* WristOverrideRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */; };
 		5CD53E8B45B61D0DF32D19BA /* OverrideHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8564B298B7F91A5B62826D45 /* OverrideHistoryTests.swift */; };
@@ -1336,6 +1337,7 @@
 		9A7CE01B302D82A800A03F53 /* WatchdogArmingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchdogArmingTests.swift; sourceTree = "<group>"; };
 		29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAlertPresenterTests.swift; sourceTree = "<group>"; };
 		7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirstContactNoteTests.swift"; sourceTree = "<group>"; };
+		BA796C9BB12BE239713AF507 /* PumpTeardownReleaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PumpTeardownReleaseTests.swift"; sourceTree = "<group>"; };
 		98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WristAlertAcknowledgementTests.swift"; sourceTree = "<group>"; };
 		295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WristOverrideRecordTests.swift"; sourceTree = "<group>"; };
 		8564B298B7F91A5B62826D45 /* OverrideHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OverrideHistoryTests.swift"; sourceTree = "<group>"; };
@@ -2970,6 +2972,7 @@
 				9A7CE01B302D82A800A03F53 /* WatchdogArmingTests.swift */,
 				29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */,
 				7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */,
+				BA796C9BB12BE239713AF507 /* PumpTeardownReleaseTests.swift */,
 				98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */,
 				295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */,
 				8564B298B7F91A5B62826D45 /* OverrideHistoryTests.swift */,
@@ -4477,6 +4480,7 @@
 				9A7CE02F302D82A800A03F53 /* WatchdogArmingTests.swift in Sources */,
 				18606676A16D24BF383CCCF8 /* WatchAlertPresenterTests.swift in Sources */,
 				DB66EB0397D54C94B49ADEF8 /* FirstContactNoteTests.swift in Sources */,
+				12C61123C2943C92D0D4E44F /* PumpTeardownReleaseTests.swift in Sources */,
 				73E0AA9C0C5503C0A38FDCA6 /* WristAlertAcknowledgementTests.swift in Sources */,
 				8077722BF812D34BDD35AEE6 /* WristOverrideRecordTests.swift in Sources */,
 				5CD53E8B45B61D0DF32D19BA /* OverrideHistoryTests.swift in Sources */,
