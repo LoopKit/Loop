@@ -105,19 +105,21 @@ struct ComplicationSnapshot: Codable, Equatable {
 enum LoopComplicationKind {
     static let loopStatus = "LoopStatus"
     static let glucoseGraph = "GlucoseGraph"
+
+    static let all = [loopStatus, glucoseGraph]
 }
 
 /// When the watch app should ask WidgetKit for a reload. Reloads are budgeted by the system, so one is
 /// requested only when the snapshot changed and at most every `minimumInterval`; a change inside the
 /// window is not lost — the owed reload is paid on the next offer once the window has passed.
-struct ComplicationReloadThrottle {
+struct ComplicationReloadThrottle<Snapshot: Equatable> {
     var minimumInterval: TimeInterval = 5 * 60
-    private(set) var lastPublished: ComplicationSnapshot?
+    private(set) var lastPublished: Snapshot?
     private(set) var lastReloadAt = Date.distantPast
     private(set) var reloadOwed = false
 
     /// `save`: the snapshot changed and should be written. `reload`: ask WidgetKit now.
-    mutating func offer(_ snapshot: ComplicationSnapshot, now: Date) -> (save: Bool, reload: Bool) {
+    mutating func offer(_ snapshot: Snapshot, now: Date) -> (save: Bool, reload: Bool) {
         let changed = snapshot != lastPublished
         if changed {
             lastPublished = snapshot

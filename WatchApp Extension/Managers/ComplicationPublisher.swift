@@ -17,7 +17,7 @@ import WidgetKit
 
 enum ComplicationPublisher {
 
-    private static var throttle = ComplicationReloadThrottle()
+    private static var throttle = ComplicationReloadThrottle<ComplicationSnapshot>()
     private static let chartManager = ComplicationChartManager()
 
     /// Called on main at each context update.
@@ -87,6 +87,7 @@ enum ComplicationPublisher {
     @MainActor private static func store(_ snapshot: ComplicationSnapshot, now: Date) {
         let decision = throttle.offer(snapshot, now: now)
         if decision.save { snapshot.save() }
-        if decision.reload { WidgetCenter.shared.reloadAllTimelines() }
+        // Only these kinds: WidgetKit budgets reloads per widget, and other widgets keep their own.
+        if decision.reload { LoopComplicationKind.all.forEach { WidgetCenter.shared.reloadTimelines(ofKind: $0) } }
     }
 }
