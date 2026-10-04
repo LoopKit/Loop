@@ -133,3 +133,34 @@ final class WatchAlertPresenterTests: XCTestCase {
         XCTAssertEqual(trigger?.repeats, false)
     }
 }
+
+/// A wrist bolus that failed: "unconfirmed, wait" only when delivery is genuinely uncertain;
+/// otherwise stock's "Bolus Issue", worded from the pump's error.
+final class WristBolusFailureWordingTests: XCTestCase {
+
+    private struct PodRefused: LocalizedError {
+        var errorDescription: String? { "Pod refused the bolus" }
+        var failureReason: String? { "A bolus is already in progress." }
+        var recoverySuggestion: String? { "Wait for it to finish" }
+    }
+
+    func testAnUncertainDeliveryKeepsTheUnconfirmedWording() {
+        let content = CarbAndBolusFlowViewModel.bolusFailureContent(units: 2, carbGrams: 30, error: PumpManagerError.uncertainDelivery)
+        XCTAssertTrue(content.title.contains("Unconfirmed"), "got \(content.title)")
+        XCTAssertTrue(content.body.contains("30 g was saved"), "got \(content.body)")
+    }
+
+    func testAnyOtherPumpErrorIsWordedAsStockWordsIt() {
+        let content = CarbAndBolusFlowViewModel.bolusFailureContent(units: 2, carbGrams: 30, error: PumpManagerError.deviceState(PodRefused()))
+        XCTAssertEqual(content.title, "Bolus Issue")
+        XCTAssertEqual(content.body, "Pod refused the bolus. A bolus is already in progress. Wait for it to finish.",
+                       "the pump's own words, each a sentence")
+        XCTAssertFalse(content.body.contains("wait to see if it resolves"))
+    }
+
+    func testAnErrorThatIsNotThePumpsIsWordedFromItsDescription() {
+        let content = CarbAndBolusFlowViewModel.bolusFailureContent(units: 2, carbGrams: nil, error: WatchLoopError.pumpManagerUnconnected)
+        XCTAssertEqual(content.title, "Bolus Issue")
+        XCTAssertEqual(content.body, "No pod connected to the watch.")
+    }
+}
