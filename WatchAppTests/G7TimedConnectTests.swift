@@ -110,14 +110,13 @@ final class G7RelayDedupTests: XCTestCase {
                          syncIdentifier: id)
     }
 
+    /// With no pod, a cycle asked for is recorded by the idle log's latch.
     private func readingAskedForACycle(_ manager: WatchLoopManager) -> Bool {
-        manager.awaitedPumpLock.lock(); defer { manager.awaitedPumpLock.unlock() }
-        return manager.readingArrivedWithoutPump
+        manager.loggedIdleNoPump
     }
 
     /// Stock's `storedNewGlucose`: a CGM reading runs a cycle only when the store did not already
-    /// hold it (the relay usually lands first). Read through the rebuild seam, which notes a cycle
-    /// asked for with no pump.
+    /// hold it (the relay usually lands first).
     func testAReadingTheStoreAlreadyHoldsRunsNoCycleAndANewOneDoes() async throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -137,7 +136,6 @@ final class G7RelayDedupTests: XCTestCase {
         let held = reading(now.addingTimeInterval(-5 * 60), id: "held-\(UUID().uuidString)")
         _ = try await glucoseStore.addGlucoseSamples([held])
 
-        wrist.beginAwaitingPumpManager()
         wrist.deviceQueue.sync { wrist.cgmManager(cgm, hasNew: .newData([held])) }
         try await Task.sleep(nanoseconds: 1_000_000_000)
         XCTAssertFalse(readingAskedForACycle(wrist), "the store already held it: no cycle")

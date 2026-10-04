@@ -116,12 +116,11 @@ extension WatchLoopManager: CGMManagerDelegate {
         log.default("CGM event(s): %{public}d", events.count)
     }
 
-    /// The phone's reading as a gap-filler while a pod is held. Guards, in order: syncId latch
-    /// (correct under the async-add race), newer than stored, the store's dedup.
-    /// A stored reading goes to the glucose alerts too, as the watch's own readings do: during a loan
-    /// the wrist owns the alarms, with or without its own sensor.
+    /// The phone's reading as a gap-filler while the wrist owns the alarms (the caller gates on the
+    /// loan), including mid-takeover and mid-resume. Guards, in order: syncId latch (correct under
+    /// the async-add race), newer than stored, the store's dedup. A stored reading goes to the
+    /// glucose alerts too, as the watch's own readings do; it runs a cycle only once a pod is held.
     func ingestPhoneGlucose(_ sample: NewGlucoseSample) {
-        guard pumpManager != nil else { return }
         deviceQueue.async {
             if sample.syncIdentifier == self.lastPhoneFallbackSyncId { return }
             self.lastPhoneFallbackSyncId = sample.syncIdentifier

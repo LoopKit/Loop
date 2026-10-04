@@ -35,13 +35,16 @@ extension PodLoanWatchController {
         loanActiveMirrorLock.lock()
         _resumingMirror = false
         loanActiveMirrorLock.unlock()
-        _ = loopManager.endAwaitingPumpManager()
         notifyUI()
     }
 
     /// Settings first, then the pump manager; either unreadable degrades to a recovered drain.
     func resumeSavedLoanOnQueue(_ savedState: PumpManager.RawStateValue) {
         defer { endResuming() }
+
+        // Before anything can fail: the phone still leaves the alarms here until the records land.
+        let alertSettings = persisted.grantedSettings?.glucoseAlertSettings
+        Task { @MainActor [loopManager] in loopManager.configureGlucoseAlerts(from: alertSettings) }
 
         guard let payload = persisted.grantedSettings,
               let settings = Self.decodeTherapySettings(raw: payload.therapySettingsRaw, supplement: payload.supplementRaw),
@@ -67,7 +70,6 @@ extension PodLoanWatchController {
         loopManager.settings = settings
         loopManager.settingsProvider.history = payload.settingsHistory
         loopManager.restoreOverrideHistory()
-        Task { @MainActor [loopManager] in loopManager.configureGlucoseAlerts(from: payload.glucoseAlertSettings) }
         phoneSupportsInterimHandback = payload.supportsInterimHandback
         phoneSupportsOverrideRecords = payload.supportsOverrideRecords
         manager.pumpManagerDelegate = self
@@ -81,15 +83,11 @@ extension PodLoanWatchController {
 
         // Seed the reconciliation stamp, or the first cycle refuses with "pump data too old".
         let lastSync = manager.lastSync
-        let readingWaited = loopManager.endAwaitingPumpManager()
         Task { [loopManager] in
             if let lastSync { try? await loopManager.recordPumpEvents([], lastReconciliation: lastSync, replacePendingEvents: false) }
             loopManager.updateDisplayState()
-            // Run the cycle for a reading that arrived mid-rebuild.
-            if readingWaited {
-                SportLog.event("loan", "RESUME: a reading arrived while the pump manager was being built — running its cycle now")
-                loopManager.checkPumpDataAndLoop()
-            }
+            // As stock at launch: a cycle now, not at the next reading.
+            loopManager.checkPumpDataAndLoop()
         }
         SportLog.event("loan", "RESUMED — epoch \(epoch ?? -1) rebuilt from saved pod state after a relaunch (stock relaunch) · \(RuntimeStateLog.snapshot())")
     }

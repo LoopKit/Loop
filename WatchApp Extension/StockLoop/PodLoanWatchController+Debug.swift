@@ -66,6 +66,12 @@ extension PodLoanWatchController {
     }
 
     /// A saved loan is still being rebuilt.
+    var wristOwnsAlarmsNonBlocking: Bool {
+        loanActiveMirrorLock.lock()
+        defer { loanActiveMirrorLock.unlock() }
+        return _wristAlarmsMirror
+    }
+
     var isResumingNonBlocking: Bool {
         loanActiveMirrorLock.lock()
         defer { loanActiveMirrorLock.unlock() }

@@ -16,14 +16,10 @@ import os.log
 
 extension WatchLoopManager {
 
-    /// Stock `DeviceDataManager.checkPumpDataAndLoop`, but returns with no pump (between loans
-    /// there is nothing to decide), noting a reading awaited by a rebuild.
+    /// Stock `DeviceDataManager.checkPumpDataAndLoop`, but returns with no pump (between loans, or
+    /// before a takeover or resume finishes, there is nothing to decide).
     func checkPumpDataAndLoop() {
         guard let pumpManager = pumpManager else {
-            awaitedPumpLock.lock()
-            if awaitingPumpManager { readingArrivedWithoutPump = true }
-            awaitedPumpLock.unlock()
-
             if !loggedIdleNoPump {
                 loggedIdleNoPump = true
                 SportLog.event("loop", "idle — no pod on the watch; cycles paused until the next grant (glucose still ingesting)")

@@ -124,23 +124,6 @@ final class WatchLoopManager {
     /// Fired when the wrist opens the loop (closed to open), where stock ends a pre-meal preset.
     var onLoopOpened: (() -> Void)?
 
-    // Glucose that arrives mid-rebuild runs the cycle once the pump manager is back.
-    let awaitedPumpLock = NSLock()
-    var awaitingPumpManager = false
-    var readingArrivedWithoutPump = false
-
-    func beginAwaitingPumpManager() {
-        awaitedPumpLock.lock(); awaitingPumpManager = true; readingArrivedWithoutPump = false; awaitedPumpLock.unlock()
-    }
-
-    /// Consumes the flag: it answers true ONCE, so two callers cannot each run a catch-up cycle.
-    func endAwaitingPumpManager() -> Bool {
-        awaitedPumpLock.lock(); defer { awaitedPumpLock.unlock() }
-        let waited = readingArrivedWithoutPump
-        awaitingPumpManager = false
-        readingArrivedWithoutPump = false
-        return waited
-    }
     /// Shared by the CGM and the pump managers, which log from several queues at once during a
     /// radio storm — the throttle has to be thread-safe on its own account.
     let deviceLogThrottle = DeviceLogThrottle()

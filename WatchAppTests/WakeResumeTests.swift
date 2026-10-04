@@ -415,21 +415,7 @@ final class WakeResumeTests: XCTestCase {
         c.queue.sync { }
         XCTAssertFalse(c.isResumingNonBlocking)
         XCTAssertFalse(c.isLoanActiveNonBlocking, "a session that could not be rebuilt is not live")
-        XCTAssertFalse(c.loopManager.endAwaitingPumpManager(), "and nothing is left waiting for a pump")
-    }
-
-    func testAReadingThatArrivesDuringTheRebuildIsRemembered() async {
-        // Stock restores the pump before the CGM, so a reading can never find no pump. Here the
-        // sensor is wired first; the reading that arrives in between must not cost a cycle.
-        let c = await makeController()
-        let loop = c.loopManager
-        loop.checkPumpDataAndLoop()
-        XCTAssertFalse(loop.endAwaitingPumpManager(), "no rebuild pending: an idle reading is just an idle reading")
-
-        loop.beginAwaitingPumpManager()
-        loop.checkPumpDataAndLoop()             // the reading arrives; no pump yet
-        XCTAssertTrue(loop.endAwaitingPumpManager(), "remembered — the rebuild's last act runs its cycle")
-        XCTAssertFalse(loop.endAwaitingPumpManager(), "once")
+        XCTAssertTrue(c.wristOwnsAlarmsNonBlocking, "the phone still leaves the alarms here until the records land")
     }
 
     // MARK: the hold

@@ -171,6 +171,22 @@ final class WristGlucoseAlertTests: XCTestCase {
         XCTAssertNotNil(request(GlucoseAlertManager.lowAlertIdentifier), "the relayed low alarms on the wrist")
     }
 
+    /// Mid-takeover or mid-resume the phone has already left the alarms to the wrist, so a relayed
+    /// low alarms before the pod is held.
+    func testARelayedLowAlarmsBeforeThePodIsHeld() async throws {
+        let manager = await makeManager()
+        manager.configureGlucoseAlerts(from: phoneSettings)
+        XCTAssertNil(manager.pumpManager)
+
+        manager.ingestPhoneGlucose(reading(65))
+
+        let deadline = Date().addingTimeInterval(5)
+        while request(GlucoseAlertManager.lowAlertIdentifier) == nil, Date() < deadline {
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        XCTAssertNotNil(request(GlucoseAlertManager.lowAlertIdentifier), "the relayed low alarms with no pod yet")
+    }
+
     func testAPredictedLowFromTheWristsForecastIsRaised() async {
         let manager = await makeManager()
         manager.configureGlucoseAlerts(from: phoneSettings)
