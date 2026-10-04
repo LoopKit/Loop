@@ -60,8 +60,9 @@ enum LoanReconciler {
         /// Never a carb this same drain added; that pair cancels.
         var deletedCarbs: [DeletedCarb] = []
 
-        /// At most one, because only the last override change in a drain survives.
-        var overrideChange: OverrideChange?
+        /// Every override change in the drain, in the wrist's order, so each one reaches the
+        /// phone's override history: stock applies past overrides to past dosing.
+        var overrideChanges: [OverrideChange] = []
     }
 
     /// `.cleared` is a deliberate change, not missing information. `at`: when the wrist made it.
@@ -138,13 +139,13 @@ enum LoanReconciler {
                         startDate: start,
                         grams: grams))
                 }
-            // The last override change wins; an undecodable one changes nothing.
+            // In order; an undecodable one changes nothing.
             case .overrideChange:
 
                 if event.record.overrideChangeIsClear {
-                    outcome.overrideChange = .cleared(at: event.record.startDate)
+                    outcome.overrideChanges.append(.cleared(at: event.record.startDate))
                 } else if let override = event.record.overrideChangePayload {
-                    outcome.overrideChange = .set(override, at: event.record.startDate)
+                    outcome.overrideChanges.append(.set(override, at: event.record.startDate))
                 }
 
                 break

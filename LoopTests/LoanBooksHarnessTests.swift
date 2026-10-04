@@ -1168,7 +1168,7 @@ final class LoanOverrideTests: XCTestCase {
         }
     }
 
-    /// 3. A clear round-trips; last record in a drain wins.
+    /// 3. A clear round-trips; every change in a drain lands, in order.
     func testClearedOverrideRoundTripsAndClears() {
         let now = Date()
         let clear = LoanDoseRecord.overrideChange(nil, at: now)
@@ -1193,10 +1193,10 @@ final class LoanOverrideTests: XCTestCase {
         let soloOutcome = LoanReconciler.reconcile(LoanReconciler.Input(
             events: [LoanEvent(id: UUID(), seq: 1, provenance: .confirmed, record: decodedClear, loggedAt: now)],
             schedule: baseBasal, loanStart: now.addingTimeInterval(-.hours(1)), loanEnd: now))
-        XCTAssertEqual(soloOutcome.overrideChange, .cleared(at: decodedClear.startDate), "stamped with the wrist's time")
+        XCTAssertEqual(soloOutcome.overrideChanges, [.cleared(at: decodedClear.startDate)], "stamped with the wrist's time")
         XCTAssertTrue(soloOutcome.doses.isEmpty, "an override record is not dose accounting")
 
-        // Set THEN clear in one drain → cleared (last wins; no resurrection).
+        // Set THEN clear in one drain → both, in order: the override ran for those minutes.
         let override = exercisePreset().createOverride(enactTrigger: .local, beginningAt: now.addingTimeInterval(-.minutes(20)))
         let setEvent = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
                                  record: .overrideChange(override, at: now.addingTimeInterval(-.minutes(20))),
@@ -1205,8 +1205,16 @@ final class LoanOverrideTests: XCTestCase {
         let pairOutcome = LoanReconciler.reconcile(LoanReconciler.Input(
             events: [setEvent, clearEvent], schedule: baseBasal,
             loanStart: now.addingTimeInterval(-.hours(1)), loanEnd: now))
-        XCTAssertEqual(pairOutcome.overrideChange, .cleared(at: now),
-                       "set→clear in one drain must land as CLEARED — the reverse would resurrect a cancelled override")
+        // Set→clear in one drain lands as both, in order: the phone ends with none, and its
+        // history keeps the override. The payload crosses a property list, so compare its identity.
+        guard pairOutcome.overrideChanges.count == 2,
+              case .set(let landed, let setAt) = pairOutcome.overrideChanges[0],
+              case .cleared(let clearedAt) = pairOutcome.overrideChanges[1] else {
+            return XCTFail("expected a set then a clear, got \(pairOutcome.overrideChanges)")
+        }
+        XCTAssertEqual(landed.syncIdentifier, override.syncIdentifier)
+        XCTAssertEqual(setAt, now.addingTimeInterval(-.minutes(20)))
+        XCTAssertEqual(clearedAt, now)
 
         // And a drain with no override record at all leaves the phone's override alone.
         let bolus = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
@@ -1214,8 +1222,26 @@ final class LoanOverrideTests: XCTestCase {
         let noneOutcome = LoanReconciler.reconcile(LoanReconciler.Input(
             events: [bolus], schedule: baseBasal,
             loanStart: now.addingTimeInterval(-.hours(1)), loanEnd: now))
-        XCTAssertNil(noneOutcome.overrideChange,
-                     "no override record must mean 'do not touch', never 'clear'")
+        XCTAssertTrue(noneOutcome.overrideChanges.isEmpty,
+                      "no override record must mean 'do not touch', never 'clear'")
+    }
+
+    /// Set then cleared on the wrist with the phone holding none: both reach the phone, so its
+    /// history keeps the override for the time it ran (stock applies past overrides to past dosing).
+    func testASetThenClearInOneDrainBothReachThePhone() {
+        let now = Date()
+        let setAt = now.addingTimeInterval(-.minutes(20))
+        let override = exercisePreset().createOverride(enactTrigger: .local, beginningAt: setAt)
+        let harness = PhoneOverrideHarness()
+        defer { harness.tearDown() }
+
+        harness.deliverFinalOffer(events: [
+            LoanEvent(id: UUID(), seq: 1, provenance: .confirmed, record: .overrideChange(override, at: setAt), loggedAt: setAt),
+            LoanEvent(id: UUID(), seq: 2, provenance: .confirmed, record: .overrideChange(nil, at: now), loggedAt: now)
+        ], at: now)
+
+        XCTAssertEqual(harness.applied.map { $0?.syncIdentifier }, [override.syncIdentifier, nil], "set, then cleared")
+        XCTAssertNil(harness.phoneOverride, "and the phone ends with none")
     }
 
     /// 2. Applying on the phone is idempotent across a replayed drain (committed IDs and syncIdentifier).

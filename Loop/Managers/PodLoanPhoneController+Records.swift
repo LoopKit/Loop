@@ -289,9 +289,11 @@ extension PodLoanPhoneController {
                             self.handbackDiag(offer.epoch, "stale offer — \(outcome.carbs.count) carb(s) NOT committed (a dead loan cannot add carbs)")
                         }
 
-                        // Overrides follow the pod home on interim drains too.
-                        if !isStale, let change = outcome.overrideChange {
-                            self.applyWatchOverride(change, epoch: offer.epoch, isFinal: isFinal)
+                        // Overrides follow the pod home on interim drains too, each in turn.
+                        if !isStale {
+                            for change in outcome.overrideChanges {
+                                self.applyWatchOverride(change, epoch: offer.epoch, isFinal: isFinal)
+                            }
                         }
 
                         let newCursor = events.map(\.seq).max() ?? self.committedCursor
