@@ -38,15 +38,17 @@ extension LoopDataManager {
         ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager.adoptCGMConfiguration(configuration)
     }
 
-    /// Called from `updateContext(_:)` when a phone context is refused mid-loan.
+    /// Called from `updateContext(_:)` when a phone context is refused mid-loan: the relayed
+    /// reading is still stored here, and offered to the wrist's loop.
     func podLoanAbsorbPhoneContextDuringLoan(_ context: WatchContext) {
-        // Still store the relayed reading and post the notification the ingest path hangs off.
         if let newGlucoseSample = context.newGlucoseSample {
             Task {
                 try? await self.glucoseStore?.addGlucoseSamples([newGlucoseSample])
             }
         }
-        NotificationCenter.default.post(name: LoopDataManager.didUpdateContextNotification, object: self)
+        #if !targetEnvironment(simulator)
+        ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager.ingestPhoneGlucoseFromContext()
+        #endif
     }
 
     /// Non-nil only while the wrist is dosing.

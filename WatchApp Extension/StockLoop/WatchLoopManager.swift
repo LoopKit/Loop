@@ -513,13 +513,6 @@ final class WatchLoopManager {
                 self?.updateDisplayStateForChange()
             }
         }
-        #if !targetEnvironment(simulator)
-
-        NotificationCenter.default.addObserver(forName: LoopDataManager.didUpdateContextNotification,
-                                               object: nil, queue: .main) { [weak self] _ in
-            self?.ingestPhoneGlucoseFromContext()
-        }
-        #endif
     }
 
     private let bgSourceLock = NSLock()
