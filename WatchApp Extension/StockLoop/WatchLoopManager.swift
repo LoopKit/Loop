@@ -168,6 +168,9 @@ final class WatchLoopManager {
     /// cycle that computed but could not reach the pod must not renew it.
     var onCycleLanded: (() -> Void)?
 
+    /// Fired when the wrist opens the loop (closed to open), where stock ends a pre-meal preset.
+    var onLoopOpened: (() -> Void)?
+
     // Glucose that arrives mid-rebuild runs the cycle once the pump manager is back.
     let awaitedPumpLock = NSLock()
     var awaitingPumpManager = false
@@ -292,6 +295,9 @@ final class WatchLoopManager {
         let wasEnabled = _closedLoopMirror
         _closedLoopMirror = enabled
         closedLoopMirrorLock.unlock()
+
+        // As stock: opening the loop ends a pre-meal preset, before the temp is cancelled.
+        if wasEnabled, !enabled { onLoopOpened?() }
 
         dataAccessQueue.async {
             self._closedLoopEnabled = enabled

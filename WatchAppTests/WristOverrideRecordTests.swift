@@ -78,6 +78,76 @@ final class WristOverrideRecordTests: XCTestCase {
         XCTAssertNotNil(controller.loopManager.scheduleOverride, "still dosed on the wrist")
     }
 
+    // MARK: - Pre-meal, ended where stock ends it
+
+    private func preMeal() -> TemporaryScheduleOverride {
+        TemporaryScheduleOverride(context: .preMeal,
+                                  settings: TemporaryPresetSettings(unit: .milligramsPerDeciliter,
+                                                                    targetRange: DoubleRange(minValue: 80, maxValue: 80)),
+                                  startDate: Date().addingTimeInterval(-600), duration: .finite(3600),
+                                  enactTrigger: .local, syncIdentifier: UUID())
+    }
+
+    private func meal() -> NewCarbEntry {
+        NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 30), startDate: Date(), foodType: nil,
+                     absorptionTime: .hours(3))
+    }
+
+    private func saveCarbs(_ controller: PodLoanWatchController) async {
+        let saved = expectation(description: "saved")
+        controller.loanDidRecordCarbs(meal()) { _ in saved.fulfill() }
+        await fulfillment(of: [saved], timeout: 10)
+        controller.queue.sync { }
+    }
+
+    /// Stock `LoopDataManager.addCarbEntry`: saving carbs ends a pre-meal preset, and the wrist's
+    /// clear is journaled for the phone.
+    func testSavingCarbsOnTheWristEndsPreMeal() async throws {
+        let controller = try await liveLoan()
+        controller.applyWristOverride(preMeal())
+        controller.queue.sync { }
+
+        await saveCarbs(controller)
+
+        XCTAssertNil(controller.loopManager.scheduleOverride, "pre-meal ended")
+        let overrides = controller.journal.unackedEvents().map(\.record).filter { $0.kind == .overrideChange }
+        XCTAssertEqual(overrides.count, 2, "set, then cleared")
+        XCTAssertTrue(overrides.last?.overrideChangeIsClear ?? false, "the phone is told")
+    }
+
+    /// Any other preset stays, as in stock.
+    func testSavingCarbsLeavesAnotherPresetRunning() async throws {
+        let controller = try await liveLoan()
+        let set = override()
+        controller.applyWristOverride(set)
+        controller.queue.sync { }
+
+        await saveCarbs(controller)
+
+        XCTAssertEqual(controller.loopManager.scheduleOverride?.syncIdentifier, set.syncIdentifier)
+    }
+
+    /// Stock ends pre-meal when automatic dosing is turned off: the wrist, when its loop is opened.
+    func testOpeningTheLoopOnTheWristEndsPreMeal() async throws {
+        let controller = try await liveLoan()
+        let loop = controller.loopManager
+        loop.onLoopOpened = { [weak controller] in controller?.endPreMealOverride(reason: "test") }
+        loop.setClosedLoopEnabled(true, reason: "test")
+        controller.applyWristOverride(preMeal())
+        controller.queue.sync { }
+
+        loop.setClosedLoopEnabled(true, reason: "test")
+        XCTAssertNotNil(loop.scheduleOverride, "closing it again changes nothing")
+
+        loop.setClosedLoopEnabled(false, reason: "test")
+        loop.dataAccessQueue.sync { }
+        controller.queue.sync { }
+
+        XCTAssertNil(loop.scheduleOverride, "pre-meal ended")
+        let overrides = controller.journal.unackedEvents().map(\.record).filter { $0.kind == .overrideChange }
+        XCTAssertTrue(overrides.last?.overrideChangeIsClear ?? false, "the phone is told")
+    }
+
     private func makeController() async -> PodLoanWatchController {
         let cacheStore = PersistenceController(directoryURL: dir.appendingPathComponent("cache"))
         let doseStore = await DoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,

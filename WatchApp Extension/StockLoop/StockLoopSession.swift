@@ -40,6 +40,7 @@ final class StockLoopSession {
 
         // The per-cycle renewal is the phone's liveness signal.
         stack.loopManager.onCycleLanded = { [weak loanController] in loanController?.renewHold() }
+        stack.loopManager.onLoopOpened = { [weak loanController] in loanController?.endPreMealOverride(reason: "loop opened on the wrist") }
 
         // Cancel queued requests that have not started transferring: delivered at reunion they could
         // re-grant over a running loan.
