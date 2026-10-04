@@ -73,6 +73,10 @@
 		14ED83F62C6421F9008B4A5C /* FavoriteFoodInsightsCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14ED83F52C6421F9008B4A5C /* FavoriteFoodInsightsCardView.swift */; };
 		16E5A3BC4D931CE6AED18518 /* trill.caf in Resources */ = {isa = PBXBuildFile; fileRef = 21F13EB666EBFDD03F99CB7E /* trill.caf */; };
 		4624A94E56A6ABB49478893A /* DoseEnactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16B983D26B4893300256B05 /* DoseEnactor.swift */; };
+		9924D02917D093DAB0BB475E /* LoopError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436A0DA41D236A2A00104B24 /* LoopError.swift */; };
+		00FE80DB999DB15B4B435C6B /* LoopWarning.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B996EF27235191002DC09C /* LoopWarning.swift */; };
+		8B352261A7F5BD9D6566293E /* PumpManagerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A999D40524663D18004C89D4 /* PumpManagerError.swift */; };
+		9EE9EA1CADE8ED9E95C3D6B0 /* DosingDecisionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B996F127238705002DC09C /* DosingDecisionStore.swift */; };
 		6A838D32706E94DA476EF481 /* NetBasal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D601DF8D9A900A04910 /* NetBasal.swift */; };
 		BA74C0C0BF4E8CFCB0D9EBAD /* BasalDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */; };
 		1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
@@ -4158,6 +4162,10 @@
 				F06FDE1F67AF4011937B1529 /* SportLog.swift in Sources */,
 				DBA92856969B47C19B2BD581 /* WorkoutKeepalive.swift in Sources */,
 				4624A94E56A6ABB49478893A /* DoseEnactor.swift in Sources */,
+				9924D02917D093DAB0BB475E /* LoopError.swift in Sources */,
+				00FE80DB999DB15B4B435C6B /* LoopWarning.swift in Sources */,
+				8B352261A7F5BD9D6566293E /* PumpManagerError.swift in Sources */,
+				9EE9EA1CADE8ED9E95C3D6B0 /* DosingDecisionStore.swift in Sources */,
 				6A838D32706E94DA476EF481 /* NetBasal.swift in Sources */,
 				BA74C0C0BF4E8CFCB0D9EBAD /* BasalDeliveryState.swift in Sources */,
 				C5A82FBEC2AE43769A416B01 /* PodLoanWatchController.swift in Sources */,

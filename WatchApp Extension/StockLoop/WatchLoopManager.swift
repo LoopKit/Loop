@@ -17,56 +17,6 @@ import WatchConnectivity
 import WatchKit
 import os.log
 
-/// The cycle's failure vocabulary. The CYCLE VERDICT line reads these to say WHICH STAGE failed,
-/// so the distinction between a compute error and an enact error is load-bearing, not cosmetic.
-enum WatchLoopError: Error {
-    /// A therapy setting the grant did not carry. Denies dosing; nothing is ever defaulted.
-    case configurationError(String)
-
-    /// The prediction could not be produced. A COMPUTE failure — never use it for a pod refusal.
-    case missingDataError(String)
-
-    /// The pod refused, or the command failed. Counts as a good compute and a failed enact.
-    case enactFailed(String)
-
-    /// Not stock: the recommendation is older than the enact path will act on.
-    case recommendationExpired(date: Date)
-
-    /// Enact refusals, as stock `loop()` refuses: a faulted pod, a suspended pod, and a manual
-    /// temp basal the user is running (left alone).
-    case pumpInoperable
-    case pumpSuspended
-    case manualTempBasalRunning
-
-    /// No pod on this watch. The ordinary answer between loans, not a fault.
-    case pumpManagerUnconnected
-}
-
-/// What a failed manual bolus reports, in the pod's terms.
-extension WatchLoopError: LocalizedError {
-    var errorDescription: String? {
-        switch self {
-        case .configurationError(let field):
-            return String(format: NSLocalizedString("Missing setting: %@", comment: "Watch loop error (1: setting name)"), field)
-        case .missingDataError(let what):
-            return String(format: NSLocalizedString("Missing data: %@", comment: "Watch loop error (1: data name)"), what)
-        case .enactFailed(let why):
-
-            return String(format: NSLocalizedString("The pod did not accept the dose: %@", comment: "Watch loop error (1: pump error)"), why)
-        case .recommendationExpired:
-            return NSLocalizedString("The recommendation expired before enacting.", comment: "Watch loop error")
-        case .pumpInoperable:
-            return NSLocalizedString("The pod is not operable.", comment: "Watch loop error")
-        case .pumpSuspended:
-            return NSLocalizedString("Insulin delivery is suspended.", comment: "Watch loop error")
-        case .manualTempBasalRunning:
-            return NSLocalizedString("A manual temp basal is running.", comment: "Watch loop error")
-        case .pumpManagerUnconnected:
-            return NSLocalizedString("No pod connected to the watch.", comment: "Watch loop error")
-        }
-    }
-}
-
 final class WatchLoopManager {
     /// The WATCH's own stores, opened by `StockLoopStack` — not a view onto the phone's.
     let doseStore: DoseStore

@@ -61,26 +61,28 @@ extension WatchLoopManager {
                 settings: StoredDosingDecision.Settings(self.settingsProvider.settings)
             )
 
-            var error: WatchLoopError? = self.updatePredictedGlucoseAndRecommendedDose(dosingDecision: &dosingDecision)
+            let computeError = self.updatePredictedGlucoseAndRecommendedDose(dosingDecision: &dosingDecision)
 
-            if case .missingDataError(let what)? = error {
-                SportLog.event("loop", "NOT DOSING — prediction missing \(what)")
+            if let computeError {
+                SportLog.event("loop", "NOT DOSING — \(computeError.localizedDescription) (\(computeError.issueId))")
             }
 
             let decided = self.recommendedAutomaticDose?.recommendation
             self.lastRecommendation = decided
-            if error == nil, self._closedLoopEnabled {
+            var enactError: LoopError?
+            if computeError == nil, self._closedLoopEnabled {
                 // Read before the enact, which clears it on success.
                 let enacting = self.recommendedAutomaticDose
-                error = self.enactRecommendedAutomaticDose(decisionId: dosingDecision.id)
-                if error == nil {
+                enactError = self.enactRecommendedAutomaticDose(decisionId: dosingDecision.id)
+                if enactError == nil {
                     dosingDecision.enactedTempBasal = enacting?.enactTempBasal == true ? enacting?.recommendation.basalAdjustment : nil
                     dosingDecision.enactedBolusAmount = enacting?.recommendation.bolusUnits
                 }
-            } else if error == nil {
+            } else if computeError == nil {
                 self.log.default("Advisory (open loop) — computed but not enacting.")
             }
 
+            let error = computeError ?? enactError
             self.lastLoopError = error
 
             // Both arms, as stock.
@@ -90,8 +92,16 @@ extension WatchLoopManager {
             // Open loop first: it still computes with no error, so later arms would report an unsent command.
             let enactVerdict: String
             if !self._closedLoopEnabled { enactVerdict = "none(open-loop)" }
-            else if case .enactFailed(let why)? = error { enactVerdict = "FAILED \(why)" }
-            else if error != nil { enactVerdict = "not-attempted(\(error!))" }
+            else if computeError != nil { enactVerdict = "not-attempted(compute failed)" }
+            else if let enactError {
+                // The pod's or the loop's refusal before sending, versus a send that failed.
+                switch enactError {
+                case .pumpInoperable, .pumpSuspended, .manualTempBasalRunning, .configurationError, .connectionError, .recommendationExpired:
+                    enactVerdict = "not-attempted(\(enactError.issueId))"
+                default:
+                    enactVerdict = "FAILED \(enactError)"
+                }
+            }
             else if decided?.basalAdjustment == nil && decided != nil { enactVerdict = "none(no-change)" }
             else if decided == nil { enactVerdict = "none(nothing-decided)" }
             else { enactVerdict = "ok" }
@@ -100,15 +110,8 @@ extension WatchLoopManager {
             if watchdogRefreshed { LoopStallWatchdog.refresh(); self.onCycleLanded?() }
             let sinceCompleted = self.lastLoopCompleted.map { Int(self.now().timeIntervalSince($0)) }
 
-            // Compute and enact judged separately; never type an enact failure as `.missingDataError`.
-            let computeSucceeded: Bool = {
-                switch error {
-                case .none: return true
-                case .enactFailed, .pumpManagerUnconnected,
-                     .pumpInoperable, .pumpSuspended, .manualTempBasalRunning: return true
-                default: return false
-                }
-            }()
+            // Compute and enact judged by the stage that failed.
+            let computeSucceeded = computeError == nil
 
             // Battery rides this line because it is the one line guaranteed every cycle.
             SportLog.event("loop", String(format: "CYCLE VERDICT computed=%@ enact=%@ watchdog=%@ lastCompletedAge=%@",
@@ -120,7 +123,7 @@ extension WatchLoopManager {
             if let error {
                 self.log.error("Loop ended with error: %{public}@", String(describing: error))
 
-                if case .missingDataError = error {} else {
+                if computeError == nil {
                     SportLog.event("loop", "cycle ended with error: \(error)")
                 }
             } else {
@@ -188,7 +191,6 @@ extension WatchLoopManager {
     /// - the override history is this manager's `overrideHistory`, and the active override is
     ///   `scheduleOverride` while active (stock: `temporaryPresetsManager.activeOverride`);
     /// - the carb window is stock's `LoopConstants.maxCarbEntryPastTime` (−12 h), a phone-only constant;
-    /// - errors are `WatchLoopError.configurationError`, not `LoopError`;
     /// - integral retrospective correction is the grant's flag, not this device's `UserDefaults`;
     /// - the application factor is stock's `ConstantApplicationFactorStrategy` only: the
     ///   glucose-based strategy is a parked experiment, deliberately off here.
@@ -230,7 +232,7 @@ extension WatchLoopManager {
         let rawBasal = try await settingsProvider.getBasalHistory(startDate: dosesStart, endDate: dosesEnd)
 
         guard !rawBasal.isEmpty else {
-            throw WatchLoopError.configurationError("basalRateSchedule")
+            throw LoopError.configurationError(.basalRateSchedule)
         }
 
         // Collapse contiguous same-rate basal entries split at local midnight (see stock).
@@ -261,7 +263,7 @@ extension WatchLoopManager {
         )
 
         guard !carbRatio.isEmpty else {
-            throw WatchLoopError.configurationError("carbRatioSchedule")
+            throw LoopError.configurationError(.carbRatioSchedule)
         }
 
         let glucose = try await glucoseStore.getGlucoseSamples(start: carbsStart, end: baseTime)
@@ -291,11 +293,11 @@ extension WatchLoopManager {
         let dosingLimits = try await settingsProvider.getDosingLimits(at: baseTime)
 
         guard let maxBolus = dosingLimits.maxBolus else {
-            throw WatchLoopError.configurationError("maximumBolus")
+            throw LoopError.configurationError(.maximumBolus)
         }
 
         guard let maxBasalRate = dosingLimits.maxBasalRate else {
-            throw WatchLoopError.configurationError("maximumBasalRatePerHour")
+            throw LoopError.configurationError(.maximumBasalRatePerHour)
         }
 
         var overrides = overrideHistory.getOverrideHistory(startDate: sensitivityStart, endDate: forecastEndTime)
@@ -311,25 +313,25 @@ extension WatchLoopManager {
         }
 
         guard !sensitivity.isEmpty else {
-            throw WatchLoopError.configurationError("insulinSensitivitySchedule")
+            throw LoopError.configurationError(.insulinSensitivitySchedule)
         }
 
         let sensitivityWithOverrides = overrides.applySensitivity(over: sensitivity)
 
         guard !basal.isEmpty else {
-            throw WatchLoopError.configurationError("basalRateSchedule")
+            throw LoopError.configurationError(.basalRateSchedule)
         }
         let basalWithOverrides = overrides.applyBasal(over: basal)
 
         guard !carbRatio.isEmpty else {
-            throw WatchLoopError.configurationError("carbRatioSchedule")
+            throw LoopError.configurationError(.carbRatioSchedule)
         }
         let carbRatioWithOverrides = overrides.applyCarbRatio(over: carbRatio)
 
         var target: [AbsoluteScheduleValue<ClosedRange<LoopQuantity>>]
 
         guard var suspendThreshold = dosingLimits.suspendThreshold else {
-            throw WatchLoopError.configurationError("suspendThreshold")
+            throw LoopError.configurationError(.suspendThreshold)
         }
 
         // If we have an active override, and it's not a preMeal override that should be disabled,
@@ -340,7 +342,7 @@ extension WatchLoopManager {
         {
             guard let schedule = settingsProvider.settings.glucoseTargetRangeSchedule else
             {
-                throw WatchLoopError.configurationError("glucoseTargetRangeSchedule")
+                throw LoopError.configurationError(.glucoseTargetRangeSchedule)
             }
             let scheduledRange = schedule.quantityRange(at: baseTime)
             let overriddenTargetRange = activeOverride.effectiveCorrectionRangeDuring(scheduledRange: scheduledRange)
@@ -361,7 +363,7 @@ extension WatchLoopManager {
         }
 
         guard !target.isEmpty else {
-            throw WatchLoopError.configurationError("glucoseTargetRangeSchedule")
+            throw LoopError.configurationError(.glucoseTargetRangeSchedule)
         }
 
         // Watch: stock's `ConstantApplicationFactorStrategy` (the glucose-based strategy is a
@@ -393,29 +395,28 @@ extension WatchLoopManager {
     /// Stock `loop()`'s checks on its input, in stock's order, after the trim and before the
     /// algorithm. As in stock, `fetchData` queries glucose up to the base time only, so a
     /// future-dated reading never reaches the input and the future check cannot fire from `loop()`.
-    func loopInputRecencyError(_ input: StoredDataAlgorithmInput, at loopBaseTime: Date) -> WatchLoopError? {
+    func loopInputRecencyError(_ input: StoredDataAlgorithmInput, at loopBaseTime: Date) -> LoopError? {
         guard let latestGlucose = input.glucoseHistory.last else {
-            return .missingDataError("glucose")
+            return .missingDataError(.glucose)
         }
 
         guard loopBaseTime.timeIntervalSince(latestGlucose.startDate) <= LoopAlgorithm.inputDataRecencyInterval else {
-            return .missingDataError(String(format: "glucoseTooOld (%.0f s old)", loopBaseTime.timeIntervalSince(latestGlucose.startDate)))
+            return .glucoseTooOld(date: latestGlucose.startDate)
         }
 
         guard latestGlucose.startDate.timeIntervalSince(loopBaseTime) <= LoopAlgorithm.inputDataRecencyInterval else {
-            return .missingDataError(String(format: "invalidFutureGlucose (%.0f s ahead)", latestGlucose.startDate.timeIntervalSince(loopBaseTime)))
+            return .invalidFutureGlucose(date: latestGlucose.startDate)
         }
 
-        let pumpDataAge = loopBaseTime.timeIntervalSince(doseStore.lastAddedPumpData)
-        guard pumpDataAge <= LoopAlgorithm.inputDataRecencyInterval else {
-            return .missingDataError(String(format: "pumpDataTooOld (%.0f s since the last pump report)", pumpDataAge))
+        guard loopBaseTime.timeIntervalSince(doseStore.lastAddedPumpData) <= LoopAlgorithm.inputDataRecencyInterval else {
+            return .pumpDataTooOld(date: doseStore.lastAddedPumpData)
         }
         return nil
     }
 
     /// The body of stock `loop()` up to the enact: fetch, trim, check, run, round, decide, and
     /// fill the cycle's decision from the run (`updateFrom`) where stock does.
-    func updatePredictedGlucoseAndRecommendedDose(dosingDecision: inout StoredDosingDecision) -> WatchLoopError? {
+    func updatePredictedGlucoseAndRecommendedDose(dosingDecision: inout StoredDosingDecision) -> LoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         let loopBaseTime = now()
@@ -423,12 +424,9 @@ extension WatchLoopManager {
         var input: StoredDataAlgorithmInput
         do {
             input = try runBlocking { try await self.fetchData(for: loopBaseTime) }
-        } catch let error as WatchLoopError {
-            return error
         } catch {
-            // Anything the stores throw is a COMPUTE failure by definition — nothing has been
-            // sent to the pod at this point.
-            return .missingDataError(String(describing: error))
+            // As stock's `loop()` catch.
+            return error as? LoopError ?? .unknownError(error)
         }
 
         // Trim future basal
@@ -455,7 +453,7 @@ extension WatchLoopManager {
             // must not leave a previous cycle's recommendation behind for the enact path to find.
             recommendedAutomaticDose = nil
             SportLog.event("dosemath", "algorithm declined: \(String(describing: error))")
-            return .missingDataError(String(describing: error))
+            return error as? LoopError ?? .unknownError(error)
 
         case .success(let recommendation):
             guard let algoRecommendation = recommendation.automatic else {

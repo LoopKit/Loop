@@ -78,7 +78,7 @@ extension CarbAndBolusFlowViewModel {
         isComputingRecommendedBolus = true
         defer { isComputingRecommendedBolus = false }
 
-        let result: Swift.Result<ManualBolusRecommendation, Swift.Error> = await withCheckedContinuation { continuation in
+        let result: Swift.Result<ManualBolusRecommendation?, Swift.Error> = await withCheckedContinuation { continuation in
             session.stack.loopManager.recommendManualBolus(potentialCarbEntry: entry) { result in
                 continuation.resume(returning: result)
             }
@@ -91,9 +91,9 @@ extension CarbAndBolusFlowViewModel {
         case .success(let recommendation):
             SportLog.event("bolus-ui", String(format: "REC carb %.0fg (watch-local): %.2f U",
                                               entry?.quantity.doubleValue(for: .gram) ?? 0,
-                                              recommendation.amount))
-            if recommendedBolusAmount != recommendation.amount {
-                recommendedBolusAmount = recommendation.amount
+                                              recommendation?.amount ?? 0))
+            if recommendedBolusAmount != recommendation?.amount {
+                recommendedBolusAmount = recommendation?.amount
             }
         case .failure(let error):
             SportLog.event("bolus-ui", "REC carb (watch-local) FAILED — \(error) · dial stays 0, button reads Save")

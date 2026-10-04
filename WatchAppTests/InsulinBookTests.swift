@@ -156,7 +156,7 @@ final class InsulinBookTests: XCTestCase {
 
         let empty = expectation(description: "first recommendation")
         var first: Double?
-        manager.recommendManualBolus { if case .success(let r) = $0 { first = r.amount }; empty.fulfill() }
+        manager.recommendManualBolus { if case .success(let r) = $0 { first = r?.amount }; empty.fulfill() }
         wait(for: [empty], timeout: 20)
 
         guard let firstAmount = first, firstAmount > 0.2 else {
@@ -167,7 +167,7 @@ final class InsulinBookTests: XCTestCase {
 
         let second = expectation(description: "second recommendation")
         var next: Double?
-        manager.recommendManualBolus { if case .success(let r) = $0 { next = r.amount }; second.fulfill() }
+        manager.recommendManualBolus { if case .success(let r) = $0 { next = r?.amount }; second.fulfill() }
         wait(for: [second], timeout: 20)
 
         guard let nextAmount = next else {
@@ -230,7 +230,7 @@ final class InsulinBookTests: XCTestCase {
 
         let unscaled = expectation(description: "no override")
         var before: Double?
-        manager.recommendManualBolus { if case .success(let r) = $0 { before = r.amount }; unscaled.fulfill() }
+        manager.recommendManualBolus { if case .success(let r) = $0 { before = r?.amount }; unscaled.fulfill() }
         wait(for: [unscaled], timeout: 20)
 
         guard let baseline = before, baseline > 0.3 else {
@@ -252,7 +252,7 @@ final class InsulinBookTests: XCTestCase {
 
         let scaled = expectation(description: "override active")
         var after: Double?
-        manager.recommendManualBolus { if case .success(let r) = $0 { after = r.amount }; scaled.fulfill() }
+        manager.recommendManualBolus { if case .success(let r) = $0 { after = r?.amount }; scaled.fulfill() }
         wait(for: [scaled], timeout: 20)
 
         guard let overridden = after else { return XCTFail("the recommendation must still compute under an override") }

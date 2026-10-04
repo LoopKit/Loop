@@ -83,7 +83,8 @@ extension PodLoanWatchController: PumpManagerDelegate {
 
     /// Refused: the schedule is frozen to the grant, and the phone's audit uses the same one.
     func pumpManager(_ pumpManager: PumpManager, didRequestBasalRateScheduleChange basalRateSchedule: BasalRateSchedule, completion: @escaping (Error?) -> Void) {
-        completion(WatchLoopError.configurationError("basal schedule changes are phone-only"))
+        // Basal schedule changes are the phone's; the closest stock error.
+        completion(LoopError.configurationError(.basalRateSchedule))
     }
 
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {

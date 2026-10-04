@@ -54,7 +54,7 @@ extension WatchLoopManager {
                     dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: manualRec, date: recommendationDate)
                 }
             case .failure(let error):
-                if let loopError = error as? WatchLoopError {
+                if let loopError = error as? LoopError {
                     dosingDecision.errors.append(loopError.issue)
                 } else {
                     dosingDecision.errors.append(.init(id: "error", details: ["description": error.localizedDescription]))
@@ -165,8 +165,7 @@ extension StoredDosingDecision {
         case .success(let recommendation):
             self.automaticDoseRecommendation = recommendation.automatic
         case .failure(let error):
-            // Watch: stock's `LoopError.unknownError` for an error that is not the loop's own.
-            self.errors.append((error as? WatchLoopError)?.issue ?? .init(id: "unknownError", details: ["error": WatchLoopError.issueDescription(for: error)]))
+            self.appendError(error as? LoopError ?? .unknownError(error))
         }
         if let activeInsulin = output.activeInsulin {
             self.insulinOnBoard = InsulinValue(startDate: input.predictionStart, value: activeInsulin)
@@ -176,9 +175,6 @@ extension StoredDosingDecision {
         }
         self.predictedGlucose = output.predictedGlucose
     }
-
-    /// Stock `appendError(_: LoopError)` (`Loop/Extensions/DosingDecisionStore.swift`).
-    mutating func appendError(_ error: WatchLoopError) { errors.append(error.issue) }
 }
 
 /// Labelled copies of stock's extensions (`Loop/Managers/LoopDataManager.swift`).
@@ -198,49 +194,6 @@ extension StoredDosingDecision.LastReservoirValue {
         }
         self.init(startDate: reservoirValue.startDate, unitVolume: reservoirValue.unitVolume)
     }
-}
-
-/// The watch's errors in stock's decision vocabulary (`LoopError.issue`, phone-only): stock's id
-/// where a watch case matches one, the watch's own text as the detail. The watch folds stock's
-/// recency errors (glucoseTooOld, invalidFutureGlucose, pumpDataTooOld) and an algorithm decline
-/// into `missingDataError`, so those arrive under that id with the reason in the detail.
-extension WatchLoopError {
-    var issue: StoredDosingDecision.Issue {
-        switch self {
-        case .configurationError(let detail):
-            return .init(id: "configurationError", details: ["detail": detail])
-        case .missingDataError(let detail):
-            return .init(id: "missingDataError", details: ["detail": detail])
-        case .enactFailed(let why):
-            // Stock: the pump manager's error reaches the decision as `unknownError`.
-            return .init(id: "unknownError", details: ["error": why])
-        case .recommendationExpired(let date):
-            return .init(id: "recommendationExpired", details: ["date": Self.issueDateFormatter.string(from: date)])
-        case .pumpInoperable:
-            return .init(id: "pumpInoperable")
-        case .pumpSuspended:
-            return .init(id: "pumpSuspended")
-        case .manualTempBasalRunning:
-            return .init(id: "manualTempBasalRunning")
-        case .pumpManagerUnconnected:
-            return .init(id: "configurationError", details: ["detail": "pumpManager"])
-        }
-    }
-
-    /// Stock `StoredDosingDecisionIssue.description(for:)`.
-    static func issueDescription(for error: Error) -> String {
-        if let localizedError = error as? LocalizedError {
-            return localizedError.errorDescription ?? String(describing: error)
-        } else {
-            return String(describing: error)
-        }
-    }
-
-    static let issueDateFormatter: ISO8601DateFormatter = {
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return dateFormatter
-    }()
 }
 
 /// A labelled copy of stock's `UIDevice.controllerStatus` (`Loop/Extensions/UIDevice+Loop.swift`).

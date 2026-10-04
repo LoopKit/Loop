@@ -174,12 +174,12 @@ extension WatchLoopManager {
             // Fill the recommendation before installing the context: the stock flow reads nil as zero.
             let recommendationResult = self.manualBolusRecommendationOnQueue()
             // As stock's context for the watch, the watchBolus decision built with it is kept.
-            self.noteContextDosingDecision(potentialCarbEntry: nil, recommendation: try? recommendationResult.get())
+            self.noteContextDosingDecision(potentialCarbEntry: nil, recommendation: (try? recommendationResult.get()) ?? nil)
             switch recommendationResult {
             case .success(let recommendation):
 
-                SportLog.event("loan", String(format: "REC bolus %.2f U — published to the stock bolus flow", recommendation.amount))
-                ctx.recommendedBolusDose = recommendation.amount
+                SportLog.event("loan", String(format: "REC bolus %.2f U — published to the stock bolus flow", recommendation?.amount ?? 0))
+                ctx.recommendedBolusDose = recommendation?.amount
             case .failure(let error):
 
                 SportLog.event("loan", "REC bolus UNAVAILABLE — \(error) (the flow will show 'REC: – U')")
