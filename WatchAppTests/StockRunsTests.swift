@@ -471,6 +471,41 @@ final class StockRunsTests: XCTestCase {
         XCTAssertTrue(enactor.calls.isEmpty, "the enactor is never called")
     }
 
+    // MARK: - Opening the loop, as stock `cancelActiveTempBasal`
+
+    func testOpeningTheLoopCancelsAnAutomaticTempAndStoresTheDecision() async throws {
+        let manager = await makeManager()
+        let automatic = UnfinalizedDose(decisionId: nil, tempBasalRate: 2.0, startTime: Date().addingTimeInterval(-.minutes(5)),
+                                        duration: .minutes(30), isHighTemp: true, automatic: true,
+                                        scheduledCertainty: .certain, insulinType: .novolog)
+        let enactor = RecordingDoseEnactor()
+        manager.pumpManager = try makePump(unfinalizedTemp: automatic)
+        manager.doseEnactor = enactor
+        manager.setClosedLoopEnabled(true, reason: "test")
+
+        manager.setClosedLoopEnabled(false, reason: "test")
+        manager.dataAccessQueue.sync {}
+
+        XCTAssertEqual(enactor.calls.count, 1, "one cancel")
+        XCTAssertEqual(enactor.calls.first?.tempBasal, .cancel)
+        let decisions = try await storedDecisions(manager)
+        let decision = try XCTUnwrap(decisions.first { $0.reason == "automaticDosingDisabled" })
+        XCTAssertEqual(enactor.decisionIds.first ?? nil, decision.id, "the cancel carries the decision's id")
+    }
+
+    func testOpeningTheLoopWithNoAutomaticTempSendsNothing() async throws {
+        let manager = await makeManager()
+        let enactor = RecordingDoseEnactor()
+        manager.pumpManager = try makePump()
+        manager.doseEnactor = enactor
+        manager.setClosedLoopEnabled(true, reason: "test")
+
+        manager.setClosedLoopEnabled(false, reason: "test")
+        manager.dataAccessQueue.sync {}
+
+        XCTAssertTrue(enactor.calls.isEmpty, "stock cancels only a running automatic temp")
+    }
+
     // MARK: - lastLoopCompleted, as stock
 
     func testAnOpenLoopCycleDoesNotMoveLastLoopCompleted() async {

@@ -216,6 +216,38 @@ extension WatchLoopManager {
         }
     }
 
+    /// A labelled copy of stock `LoopDataManager.cancelActiveTempBasal(for:)`: only an automatic
+    /// temp is cancelled, through `DeviceDataManager.enact`'s uncertain-delivery gate; the decision
+    /// is stored and the display run forced after. As stock, a failure stores nothing.
+    func cancelActiveTempBasalOnQueue(reason: String) {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+
+        guard let pumpManager, case .tempBasal(let dose)? = pumpManager.status.basalDeliveryState, (dose.automatic ?? true) else { return }
+
+        let recommendation = AutomaticDoseRecommendation(basalAdjustment: .cancel, direction: .decrease)
+
+        var dosingDecision = StoredDosingDecision(date: now(), reason: reason,
+                                                  settings: StoredDosingDecision.Settings(settingsProvider.settings))
+        dosingDecision.automaticDoseRecommendation = recommendation
+
+        do {
+            guard !pumpManager.status.deliveryIsUncertain else {
+                throw WatchLoopError.enactFailed("delivery uncertain")
+            }
+            try runBlocking {
+                try await self.doseEnactor.enact(decisionId: dosingDecision.id, bolus: recommendation.bolusUnits,
+                                                 tempBasal: recommendation.basalAdjustment, with: pumpManager)
+            }
+            SportLog.event("loop", "OPEN: running temp cancelled (\(reason)) — pod reverts to the user's schedule")
+        } catch {
+            SportLog.event("loop", "OPEN: temp cancel FAILED — \(String(describing: error)); the pod keeps its current rate until the temp expires")
+            return
+        }
+
+        storeDosingDecision(dosingDecision)
+        updateDisplayStateOnQueue(forceStoreRemoteRecommendation: true)
+    }
+
     /// Stock's `DeviceDataManager.enact` plus `loop()`'s gates before it, in stock's order:
     /// pump inoperable, suspended, manual temp basal running, delivery uncertain. As stock, they
     /// run on every closed-loop cycle, including one with nothing to send. One deliberate watch

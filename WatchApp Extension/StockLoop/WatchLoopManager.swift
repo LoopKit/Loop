@@ -290,7 +290,7 @@ final class WatchLoopManager {
     }
 
     /// Mirror written synchronously so an immediate hand-back carries the new value. Opening the
-    /// loop cancels the running temp, only on a real closed-to-open transition.
+    /// loop cancels an automatic temp, as stock, only on a real closed-to-open transition.
     func setClosedLoopEnabled(_ enabled: Bool, reason: String = "by user") {
         updateLoopState { $0.closedLoopEnabled = enabled }
 
@@ -312,13 +312,7 @@ final class WatchLoopManager {
             if wasEnabled != enabled { self.updateDisplayStateForChange() }
 
             guard wasEnabled, !enabled else { return }
-            let recommendation = AutomaticDoseRecommendation(basalAdjustment: .cancel, direction: .decrease)
-            self.recommendedAutomaticDose = (recommendation: recommendation, enactTempBasal: true, date: self.now())
-            if let error = self.enactRecommendedAutomaticDose() {
-                SportLog.event("loop", "OPEN: temp cancel FAILED — \(String(describing: error)); the pod keeps its current rate until the temp expires")
-            } else {
-                SportLog.event("loop", "OPEN: running temp cancelled — pod reverts to the user's schedule")
-            }
+            self.cancelActiveTempBasalOnQueue(reason: "automaticDosingDisabled")
         }
     }
 
