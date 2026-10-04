@@ -24,20 +24,16 @@ final class WorkoutKeepalive: NSObject, HKWorkoutSessionDelegate {
     var stateTag: String { tagLock.lock(); defer { tagLock.unlock() }; return _tag }
     private func setTag(_ s: String) { tagLock.lock(); _tag = s; tagLock.unlock() }
 
-    private var _held = false
-    var isHeld: Bool { tagLock.lock(); defer { tagLock.unlock() }; return _held }
-    private func setHeld(_ v: Bool) { tagLock.lock(); _held = v; tagLock.unlock() }
-
     override init() {
         super.init()
         RuntimeStateLog.keepaliveProbe = { [weak self] in self?.stateTag ?? "keepalive ?" }
     }
 
     /// Take a hold under `reason`; releasing one never stops a session another still wants.
-    func acquire(_ reason: String) { setHeld(true); onMain { self.holders.insert(reason); self.startSessionIfNeeded() } }
+    func acquire(_ reason: String) { onMain { self.holders.insert(reason); self.startSessionIfNeeded() } }
 
     /// Drop this reason's hold. The session ends only when the last holder goes.
-    func release(_ reason: String) { onMain { self.holders.remove(reason); if self.holders.isEmpty { self.setHeld(false); self.endSession() } } }
+    func release(_ reason: String) { onMain { self.holders.remove(reason); if self.holders.isEmpty { self.endSession() } } }
 
     /// Restart a session lost while suspended, without taking a hold.
     func ensureRunning() { onMain { self.startSessionIfNeeded() } }

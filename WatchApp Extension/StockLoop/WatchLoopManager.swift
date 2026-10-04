@@ -372,19 +372,6 @@ final class WatchLoopManager {
         let momentumMgdl: Double
         let retrospectiveMgdl: Double
 
-        /// What the named effects leave unexplained; not zero by construction.
-        let residualMgdl: Double
-
-        let insulinRawTailMgdl: Double?
-
-        /// Nil at the only site that builds one: the "-ISF x IOB" cross-check was never carried
-        /// over. Do not read them as if they were populated.
-        let insulinExpectedMgdl: Double?
-        let isfMgdlPerU: Double?
-        let iobUnits: Double?
-        let momentumPointCount: Int
-        let computedAt: Date
-
         /// Whole mg/dL for display. The last line folds -0 into 0: a row of small effects
         /// otherwise renders "-0" beside "+0" and reads as a sign error.
         static func round0(_ v: Double) -> Double {

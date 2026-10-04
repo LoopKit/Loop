@@ -63,10 +63,7 @@ extension WatchLoopManager {
                 settings: StoredDosingDecision.Settings(self.settingsProvider.settings)
             )
 
-            var error: WatchLoopError? = nil
-            if error == nil {
-                error = self.updatePredictedGlucoseAndRecommendedDose(dosingDecision: &dosingDecision)
-            }
+            var error: WatchLoopError? = self.updatePredictedGlucoseAndRecommendedDose(dosingDecision: &dosingDecision)
 
             if case .missingDataError(let what)? = error {
                 SportLog.event("loop", "NOT DOSING — prediction missing \(what)")

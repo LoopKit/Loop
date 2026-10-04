@@ -17,7 +17,6 @@ import os.log
 extension WatchLoopManager {
 
     /// The per-cycle prediction line: each effect's forward difference from the latest glucose.
-    /// `residualMgdl` is what the named effects do not explain; not zero by construction.
     /// Describes the automatic loop's run (`loopRunState`), never the display run.
     func logPredictionBreakdown(decided: AutomaticDoseRecommendation? = nil) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
@@ -70,31 +69,13 @@ extension WatchLoopManager {
             }
             guard let start = glucoseStore.latestGlucose?.quantity.doubleValue(for: mgdlU),
                   let eventualValue = predictedGlucose?.last?.quantity.doubleValue(for: mgdlU) else { return nil }
-            let insulin = delta(e?.insulin)
-            let carb = delta(e?.carbs)
-            let momentum = delta(e?.momentum)
-            let retro = delta(e?.retrospectiveCorrection)
-
-            let rawTail: Double? = {
-                guard let tail = e?.insulin, let last = tail.last else { return nil }
-                let base = tail.last(where: { $0.startDate <= now() }) ?? tail.first
-                guard let base else { return nil }
-                return last.quantity.doubleValue(for: mgdlU) - base.quantity.doubleValue(for: mgdlU)
-            }()
             return PredictionBreakdown(
                 startMgdl: start,
                 eventualMgdl: eventualValue,
-                insulinMgdl: insulin,
-                carbMgdl: carb,
-                momentumMgdl: momentum,
-                retrospectiveMgdl: retro,
-                residualMgdl: eventualValue - (start + insulin + carb + momentum + retro),
-                insulinRawTailMgdl: rawTail,
-                insulinExpectedMgdl: nil,
-                isfMgdlPerU: nil,
-                iobUnits: activeInsulin,
-                momentumPointCount: e?.momentum.count ?? 0,
-                computedAt: now())
+                insulinMgdl: delta(e?.insulin),
+                carbMgdl: delta(e?.carbs),
+                momentumMgdl: delta(e?.momentum),
+                retrospectiveMgdl: delta(e?.retrospectiveCorrection))
         }()
         SportLog.event("predict", "eventual \(eventual) · min \(minPredicted) · suspendThr \(suspendThr) · net effects: carbs \(net(e?.carbs)), insulin \(net(e?.insulin)), momentum \(net(e?.momentum)), RC \(net(e?.retrospectiveCorrection)) · IOB \(activeInsulin.map { String(format: "%.2f", $0) } ?? "—") · COB \(activeCarbs.map { String(format: "%.0f", $0) } ?? "—") · momPts \(e?.momentum.count ?? 0) · rcDisc \(e?.retrospectiveGlucoseDiscrepancies.count ?? 0) · rec \(rec)")
         SportLog.event("curve", curveSummary(predictedGlucose))
@@ -168,7 +149,6 @@ extension WatchLoopManager {
                 let doses = bookDoses
                     .map { $0.simpleDose(with: self.insulinModel(for: $0.insulinType)) }
                     .annotated(with: basalTimeline)
-                let uhr = LoopUnit.internationalUnit.unitDivided(by: .hour)
                 let tf = DateFormatter()
                 tf.dateFormat = "HH:mm:ss"
                 var netSum = 0.0
