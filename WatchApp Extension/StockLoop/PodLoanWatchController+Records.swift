@@ -107,7 +107,9 @@ extension PodLoanWatchController {
             let record = LoanDoseRecord(kind: .carb,
                                         startDate: entry.startDate,
                                         amount: grams,
-                                        absorptionTime: entry.absorptionTime)
+                                        absorptionTime: entry.absorptionTime,
+                                        note: entry.foodType,
+                                        userCreatedDate: entry.date)
             guard let event = try? self.journal.mintEvent(record: record, provenance: .confirmed, id: eventID) else {
                 SportLog.event("loan", String(format: "** CARB JOURNAL MINT FAILED (%.0f g) — the carb is LIVE on the watch but will NOT follow the pod home **", grams))
                 return

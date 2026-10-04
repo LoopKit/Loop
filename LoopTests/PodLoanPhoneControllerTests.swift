@@ -362,9 +362,11 @@ final class PodLoanPhoneControllerTests: XCTestCase {
     }
 
     /// Carbs the phone actually committed, for the watch->phone round-trip tests.
-    func carbEvent(seq: Int, grams: Double, at date: Date, absorption: TimeInterval) -> LoanEvent {
+    func carbEvent(seq: Int, grams: Double, at date: Date, absorption: TimeInterval,
+                   foodType: String? = nil, enteredAt: Date? = nil) -> LoanEvent {
         LoanEvent(id: UUID(), seq: seq, provenance: .confirmed,
-                  record: LoanDoseRecord(kind: .carb, startDate: date, amount: grams, absorptionTime: absorption),
+                  record: LoanDoseRecord(kind: .carb, startDate: date, amount: grams, absorptionTime: absorption,
+                                         note: foodType, userCreatedDate: enteredAt),
                   loggedAt: date)
     }
 
@@ -561,10 +563,12 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         let controller = makeController()
         let grant = establishLoan(controller)
         let mealAt = Date().addingTimeInterval(-.minutes(20))
+        let enteredAt = mealAt.addingTimeInterval(.minutes(5))
 
         let acked = expectSend()
         let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil, odometer: nil,
-                                  events: [carbEvent(seq: 1, grams: 42, at: mealAt, absorption: .hours(3))],
+                                  events: [carbEvent(seq: 1, grams: 42, at: mealAt, absorption: .hours(3),
+                                                     foodType: "🌮", enteredAt: enteredAt)],
                                   tombstones: [], recovered: false)
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
         wait(for: [acked], timeout: 5)
@@ -577,6 +581,9 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                        "meal time must survive — absorption is computed from it")
         XCTAssertEqual(carb.absorptionTime ?? -1, .hours(3), accuracy: 1,
                        "absorption interval must survive; without it the phone re-derives a default curve")
+        XCTAssertEqual(carb.date.timeIntervalSince1970, enteredAt.timeIntervalSince1970, accuracy: 1,
+                       "entered when the wrist entered it, not at the hand-back: stock filters on it")
+        XCTAssertEqual(carb.foodType, "🌮")
     }
 
     /// CarbStore cannot dedupe carbs, so a redelivered offer commits once via the committed-ID gate.

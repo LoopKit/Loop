@@ -55,6 +55,7 @@ public struct LoanDoseRecord: Codable, Equatable {
 
     public let absorptionTime: TimeInterval?
 
+    /// An override's name; a carb's food type.
     public let note: String?
 
     /// The dose's existing store identity, so seeding twice updates one row.
@@ -71,14 +72,18 @@ public struct LoanDoseRecord: Codable, Equatable {
     /// The dose's `DoseEntry.decisionId`: the dosing decision that commanded it. Absent on older
     /// records, and ignored by an older peer.
     public let decisionId: UUID?
+    /// Carb only: when the user entered it (`NewCarbEntry.date`), which stock reads as the
+    /// entry's `userCreatedDate`. Absent on older records, and ignored by an older peer.
+    public let userCreatedDate: Date?
 
     public init(kind: Kind, startDate: Date, endDate: Date? = nil, unitsPerHour: Double? = nil,
                 amount: Double? = nil, absorptionTime: TimeInterval? = nil, note: String? = nil,
                 syncIdentifier: String? = nil, insulinType: InsulinType? = nil,
                 deliveredUnits: Double? = nil, overrideRaw: Data? = nil, automatic: Bool? = nil,
-                decisionId: UUID? = nil) {
+                decisionId: UUID? = nil, userCreatedDate: Date? = nil) {
         self.automatic = automatic
         self.decisionId = decisionId
+        self.userCreatedDate = userCreatedDate
         self.kind = kind
         self.startDate = startDate
         self.endDate = endDate

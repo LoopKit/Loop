@@ -121,9 +121,10 @@ enum LoanReconciler {
                     outcome.carbs.append(IdentifiedCarb(
                         eventID: event.id,
                         entry: NewCarbEntry(
+                            date: event.record.userCreatedDate ?? Date(),
                             quantity: LoopQuantity(unit: .gram, doubleValue: grams),
                             startDate: event.record.startDate,
-                            foodType: nil,
+                            foodType: event.record.note,
                             absorptionTime: event.record.absorptionTime)))
                 }
             // Added and deleted in the same drain: cancels (seq order makes that safe).
