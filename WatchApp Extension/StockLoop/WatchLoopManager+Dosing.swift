@@ -143,11 +143,8 @@ extension WatchLoopManager {
                     if let error = error {
                         SportLog.event("loan", "MANUAL BOLUS FAILED — \(String(describing: error))")
                     } else {
+                        // As stock, no cycle follows: the dose store's change refreshes the display.
                         SportLog.event("loan", String(format: "MANUAL BOLUS %.2f U ACCEPTED by pod", rounded))
-
-                        // Re-run the moment the pod ACCEPTS, not when delivery finishes: the
-                        // temp the loop is running was computed without this bolus in it.
-                        self.loop()
                     }
                     self.setManualBolusInFlight(false)
                     DispatchQueue.main.async { completion(error) }
@@ -159,16 +156,13 @@ extension WatchLoopManager {
         }
     }
 
-    /// The local half, under the identity the caller journals it with. Re-runs the loop because
-    /// carb effects are only invalidated by new CGM data here.
+    /// The local half, under the identity the caller journals it with. As stock, no cycle
+    /// follows: the next reading runs one, and the carb store's change refreshes the display.
     func addLoanCarbEntry(_ entry: NewCarbEntry, syncIdentifier: String) {
         carbStore.addCarbEntry(entry, syncIdentifier: syncIdentifier) { result in
             switch result {
             case .success(let stored):
                 SportLog.event("loan", String(format: "carbs logged locally: %.0f g", stored.quantity.doubleValue(for: .gram)))
-
-                // Judged against the last pump report, without a fresh pod read.
-                self.loop()
             case .failure(let error):
                 SportLog.event("loan", "carb store add FAILED — \(String(describing: error))")
             }
@@ -192,7 +186,6 @@ extension WatchLoopManager {
             switch result {
             case .success:
                 SportLog.event("loan", String(format: "carb DELETED locally: %.0f g · lookup: %@", grams, lookupDiag))
-                self.loop()
 
                 let start = min(Calendar.current.startOfDay(for: self.now()),
                                 Date(timeIntervalSinceNow: -CarbMath.maximumAbsorptionTimeInterval))

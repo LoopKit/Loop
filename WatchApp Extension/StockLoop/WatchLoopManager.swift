@@ -653,8 +653,19 @@ final class WatchLoopManager {
     var lastLoopError: Error?
 
     /// Shared by BOTH glucose sources, so the 4.2-minute gate applies across them: a direct
-    /// reading and the phone's relay of the same reading must not each fire a cycle.
-    var lastCGMLoopTrigger: Date = .distantPast
+    /// reading and the phone's relay of the same reading must not each fire a cycle. Each source
+    /// claims it from its own background task, so it is read and written under one lock.
+    private let cgmLoopTriggerLock = NSLock()
+    private var lastCGMLoopTrigger: Date = .distantPast
+
+    /// Stock's 4.2-minute gate, checked and claimed in one step: true means this caller runs the cycle.
+    func claimCGMLoopTrigger(at now: Date) -> Bool {
+        cgmLoopTriggerLock.lock()
+        defer { cgmLoopTriggerLock.unlock() }
+        guard now.timeIntervalSince(lastCGMLoopTrigger) > .minutes(4.2) else { return false }
+        lastCGMLoopTrigger = now
+        return true
+    }
 
     /// The last phone-relayed sample taken, latched so the several copies that can arrive within
     /// milliseconds of each other are not each re-examined against an uncommitted store.

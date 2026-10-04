@@ -104,6 +104,53 @@ final class G7WatchAcquisitionTests: XCTestCase {
 final class G7RelayDedupTests: XCTestCase {
     private func message(_ hex: String) -> G7GlucoseMessage { G7GlucoseMessage(data: Data(hexadecimalString: hex)!)! }
 
+    private func reading(_ date: Date, id: String) -> NewGlucoseSample {
+        NewGlucoseSample(date: date, quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 150),
+                         condition: nil, trend: .flat, trendRate: nil, isDisplayOnly: false, wasUserEntered: false,
+                         syncIdentifier: id)
+    }
+
+    private func readingAskedForACycle(_ manager: WatchLoopManager) -> Bool {
+        manager.awaitedPumpLock.lock(); defer { manager.awaitedPumpLock.unlock() }
+        return manager.readingArrivedWithoutPump
+    }
+
+    /// Stock's `storedNewGlucose`: a CGM reading runs a cycle only when the store did not already
+    /// hold it (the relay usually lands first). Read through the rebuild seam, which notes a cycle
+    /// asked for with no pump.
+    func testAReadingTheStoreAlreadyHoldsRunsNoCycleAndANewOneDoes() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let cacheStore = PersistenceController(directoryURL: dir.appendingPathComponent("cache"))
+        let doseStore = await DoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                        longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
+                                        provenanceIdentifier: "G7RelayDedupTests")
+        let glucoseStore = await GlucoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                              cacheLength: 4 * 60 * 60, provenanceIdentifier: "G7RelayDedupTests")
+        let carbStore = CarbStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                  cacheLength: 24 * 60 * 60, provenanceIdentifier: "G7RelayDedupTests")
+        let wrist = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
+                                     defaults: UserDefaults(suiteName: "G7RelayDedupTests-\(UUID().uuidString)")!,
+                                     stateDirectory: dir)
+        let cgm = G7CGMManager()
+        let now = Date()
+        let held = reading(now.addingTimeInterval(-5 * 60), id: "held-\(UUID().uuidString)")
+        _ = try await glucoseStore.addGlucoseSamples([held])
+
+        wrist.beginAwaitingPumpManager()
+        wrist.deviceQueue.sync { wrist.cgmManager(cgm, hasNew: .newData([held])) }
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        XCTAssertFalse(readingAskedForACycle(wrist), "the store already held it: no cycle")
+
+        wrist.deviceQueue.sync { wrist.cgmManager(cgm, hasNew: .newData([reading(now, id: "new-\(UUID().uuidString)")])) }
+        var tries = 0
+        while !readingAskedForACycle(wrist), tries < 50 {
+            tries += 1
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
+        XCTAssertTrue(readingAskedForACycle(wrist), "a stored reading runs one")
+    }
+
     func testARelayedReadingAndTheWatchsOwnReadingOfItAreOneRow() async throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)

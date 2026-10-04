@@ -22,17 +22,15 @@ extension WatchLoopManager: CGMManagerDelegate {
     }
 
     /// Stock `DeviceDataManager.cgmManager(_:hasNew:)`, including the 4.2-minute gate; the cycle
-    /// runs after the store write lands.
+    /// runs after the store write lands, and only when it stored a reading the store lacked.
     func cgmManager(_ manager: CGMManager, hasNew readingResult: CGMReadingResult) {
         dispatchPrecondition(condition: .onQueue(deviceQueue))
         log.default("CGMManager:%{public}@ did update with %{public}@", String(describing: type(of: manager)), String(describing: readingResult))
-        processCGMReadingResult(manager, readingResult: readingResult) {
+        processCGMReadingResult(manager, readingResult: readingResult) { storedNewGlucose in
             let now = self.now()
 
-            if case .newData = readingResult, now.timeIntervalSince(self.lastCGMLoopTrigger) > .minutes(4.2) {
+            if storedNewGlucose, self.claimCGMLoopTrigger(at: now) {
                 self.log.default("Triggering loop from new CGM data at %{public}@", String(describing: now))
-                self.lastCGMLoopTrigger = now
-
                 self.checkPumpDataAndLoop()
             }
 
@@ -60,7 +58,8 @@ extension WatchLoopManager: CGMManagerDelegate {
     /// Stock `processCGMReadingResult` plus a source stamp and a post-write check; no staleness
     /// monitor. Glucose alerts see every delivered reading, as stock's do. The phone's relay of the
     /// same reading carries the same sync identifier, so the store's own dedup drops the second.
-    private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult, completion: @escaping () -> Void) {
+    /// Completes with stock's `storedNewGlucose`: whether the write stored anything.
+    private func processCGMReadingResult(_ manager: CGMManager, readingResult: CGMReadingResult, completion: @escaping (_ storedNewGlucose: Bool) -> Void) {
         switch readingResult {
         case .newData(let values):
             let deliveredCount = values.count
@@ -78,10 +77,11 @@ extension WatchLoopManager: CGMManagerDelegate {
 
             SportLog.event("glucose",
                 "INGEST src=direct-G7 n=\(deliveredCount) · latest \(latestDesc)\(batchTag)")
-            guard !values.isEmpty else { completion(); return }
+            guard !values.isEmpty else { completion(false); return }
             Task {
+                var storedNewGlucose = false
                 do {
-                    _ = try await self.glucoseStore.addGlucoseSamples(values)
+                    storedNewGlucose = try await !self.glucoseStore.addGlucoseSamples(values).isEmpty
 
                     // A successful write has left the store pinned to an older sample before; check it moved.
                     if let newest = values.map(\.date).max(),
@@ -94,19 +94,19 @@ extension WatchLoopManager: CGMManagerDelegate {
                 }
 
                 self.dataAccessQueue.async { self.publishOwnGlucoseContextWhenIdle() }
-                completion()
+                completion(storedNewGlucose)
             }
         case .unreliableData:
             // Stock cancels a high temp here; unreachable, as G7SensorKit never reports `.unreliableData`.
             log.default("CGM reported unreliable data")
-            completion()
+            completion(false)
         case .noData:
-            completion()
+            completion(false)
         case .error(let error):
             // Stock records this as the device manager's last error, for the phone's status UI.
             // There is no equivalent surface on the wrist, so it is logged and dropped.
             log.error("CGM reading error: %{public}@", String(describing: error))
-            completion()
+            completion(false)
         }
     }
 
@@ -144,9 +144,7 @@ extension WatchLoopManager: CGMManagerDelegate {
                 SportLog.event("glucose",
                     "INGEST src=phone-relay stored=1/1 · latest \(mgdl) mg/dL age \(Int(self.now().timeIntervalSince(sample.date)))s (direct-G7 gap)")
                 SportLog.event("loan", "phone-BG fallback: ingested \(mgdl) mg/dL syncId=\(sample.syncIdentifier ?? "?") (direct-G7 gap) — triggering loop")
-                let now = self.now()
-                if now.timeIntervalSince(self.lastCGMLoopTrigger) > .minutes(4.2) {
-                    self.lastCGMLoopTrigger = now
+                if self.claimCGMLoopTrigger(at: self.now()) {
                     self.checkPumpDataAndLoop()
                 }
             }
@@ -178,9 +176,7 @@ extension WatchLoopManager: CGMManagerDelegate {
                     self.log.error("SIM glucose add failed: %{public}@", String(describing: error))
                 }
 
-                let now = self.now()
-                if now.timeIntervalSince(self.lastCGMLoopTrigger) > .minutes(4.2) {
-                    self.lastCGMLoopTrigger = now
+                if self.claimCGMLoopTrigger(at: self.now()) {
                     SportLog.event("sim", "SIM CGM \(Int(quantity.doubleValue(for: .milligramsPerDeciliter))) mg/dL (phone sim) — triggering real loop")
                     self.checkPumpDataAndLoop()
                 }

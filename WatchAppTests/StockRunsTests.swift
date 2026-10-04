@@ -748,6 +748,100 @@ final class StockRunsTests: XCTestCase {
         XCTAssertTrue(Set(second.decisions.map(\.id)).isDisjoint(with: Set(first.decisions.map(\.id))), "only what was stored since")
     }
 
+    // MARK: - What runs a cycle, as stock
+
+    /// Every cycle with a pod held stores one "loop" decision, so the count is the cycles run.
+    private func cyclesRun(_ manager: WatchLoopManager) async throws -> Int {
+        manager.dataAccessQueue.sync {}
+        return try await storedDecisions(manager).filter { $0.reason == "loop" }.count
+    }
+
+    /// A held pod, the loop closed, recent glucose and a fresh pump report: a cycle would dose.
+    private func makeClosedLoopManager() async throws -> (WatchLoopManager, RecordingDoseEnactor) {
+        let manager = await makeManager()
+        await seedGlucose(manager)
+        await report(manager)
+        let enactor = RecordingDoseEnactor()
+        manager.pumpManager = try makePump()
+        manager.doseEnactor = enactor
+        manager.setClosedLoopEnabled(true, reason: "test")
+        manager.dataAccessQueue.sync {}
+        return (manager, enactor)
+    }
+
+    private func storedCarbs(_ manager: WatchLoopManager) async -> [StoredCarbEntry] {
+        await withCheckedContinuation { continuation in
+            manager.carbStore.getCarbEntries(start: Date().addingTimeInterval(-3600)) { result in
+                continuation.resume(returning: (try? result.get()) ?? [])
+            }
+        }
+    }
+
+    /// Stock runs no cycle when carbs are saved: on the bench, the wrist's extra cycle
+    /// auto-bolused for the meal before the manual bolus reached the pod.
+    func testSavingCarbsOnTheWristRunsNoCycle() async throws {
+        let (manager, enactor) = try await makeClosedLoopManager()
+
+        manager.addLoanCarbEntry(carbs(40), syncIdentifier: UUID().uuidString)
+        var tries = 0
+        while await storedCarbs(manager).isEmpty, tries < 50 {
+            tries += 1
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
+        let saved = await storedCarbs(manager)
+        XCTAssertEqual(saved.count, 1, "saved")
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let cycles = try await cyclesRun(manager)
+        XCTAssertEqual(cycles, 0, "no cycle on a carb save")
+        XCTAssertTrue(enactor.calls.isEmpty, "nothing sent to the pod")
+    }
+
+    /// Nor when carbs are deleted.
+    func testDeletingCarbsOnTheWristRunsNoCycle() async throws {
+        let (manager, enactor) = try await makeClosedLoopManager()
+        _ = try await manager.carbStore.addCarbEntry(carbs(40))
+        let stored = await storedCarbs(manager)
+        let entry = try XCTUnwrap(stored.first)
+
+        let deleted = expectation(description: "deleted")
+        manager.deleteLoanCarbEntry(entry) { ok in
+            XCTAssertTrue(ok)
+            deleted.fulfill()
+        }
+        await fulfillment(of: [deleted], timeout: 10)
+
+        let cycles = try await cyclesRun(manager)
+        XCTAssertEqual(cycles, 0, "no cycle on a carb delete")
+        XCTAssertTrue(enactor.calls.isEmpty)
+    }
+
+    /// Nor when the pod accepts a manual bolus.
+    func testAnAcceptedManualBolusRunsNoCycle() async throws {
+        let (manager, enactor) = try await makeClosedLoopManager()
+        manager.enactBolusCommand = { _, _, _, _, completion in completion(nil) }
+
+        let accepted = expectation(description: "bolus")
+        manager.enactManualBolus(units: 1.0, activationType: .manualNoRecommendation) { error in
+            XCTAssertNil(error)
+            accepted.fulfill()
+        }
+        await fulfillment(of: [accepted], timeout: 10)
+
+        let cycles = try await cyclesRun(manager)
+        XCTAssertEqual(cycles, 0, "no cycle after a bolus")
+        XCTAssertTrue(enactor.calls.isEmpty)
+    }
+
+    /// The gate both glucose sources share: one claim per 4.2 minutes.
+    func testTheCGMTriggerGateIsClaimedOncePerWindow() async {
+        let manager = await makeManager()
+        let now = Date()
+        XCTAssertTrue(manager.claimCGMLoopTrigger(at: now))
+        XCTAssertFalse(manager.claimCGMLoopTrigger(at: now.addingTimeInterval(4 * 60)))
+        XCTAssertTrue(manager.claimCGMLoopTrigger(at: now.addingTimeInterval(4.3 * 60)))
+    }
+
     @MainActor
     func testTheGlanceRingIsFreshInOpenLoopWithAnOldLastLoopCompleted() async {
         let manager = await makeManager()
