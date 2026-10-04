@@ -9,9 +9,7 @@
 
 import Foundation
 import os.log
-#if os(watchOS)
 import WatchKit
-#endif
 
 // Milliseconds: most questions are about ordering within a burst.
 private let logFmt: DateFormatter = {
@@ -30,7 +28,6 @@ func log(_ items: Any...) {
 
 /// A fixed-shape battery token for recurring lines; a negative level reads as "?".
 func batteryTag() -> String {
-    #if os(watchOS)
     let dev = WKInterfaceDevice.current()
     dev.isBatteryMonitoringEnabled = true
     let lvl = dev.batteryLevel
@@ -42,9 +39,6 @@ func batteryTag() -> String {
     default:         st = "?"
     }
     return lvl < 0 ? "pwr ?/\(st)" : "pwr \(Int(lvl * 100))%/\(st)"
-    #else
-    return "pwr n/a"
-    #endif
 }
 
 /// In Documents, capped at 512 KB and rotated to 256 KB.

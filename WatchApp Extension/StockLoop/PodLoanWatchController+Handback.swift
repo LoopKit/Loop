@@ -499,7 +499,7 @@ extension PodLoanWatchController {
         sendMessage(.statusReport(report))
     }
 
-    /// Always `.closedDirect` today — the other cases of `LoanDosingMode` are unimplemented.
+    /// `.closedDirect`, the only mode.
     func currentMode() -> LoanDosingMode {
         return .closedDirect
     }

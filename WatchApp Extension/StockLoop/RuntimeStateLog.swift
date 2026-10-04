@@ -7,23 +7,17 @@
 //
 
 import Foundation
-#if os(watchOS)
 import WatchKit
-#endif
 
 enum RuntimeStateLog {
     /// .inactive and .background behave differently for runtime, so they stay distinct.
     static func appStateName() -> String {
-        #if os(watchOS)
         switch WKExtension.shared().applicationState {
         case .active:     return "active"
         case .inactive:   return "inactive"
         case .background: return "background"
         @unknown default: return "unknown"
         }
-        #else
-        return "n/a"
-        #endif
     }
 
     /// App state, keepalive, battery, Low Power Mode.

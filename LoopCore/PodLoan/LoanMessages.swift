@@ -99,13 +99,9 @@ public struct LoanPodStatus: Codable, Equatable {
     }
 }
 
-/// How the holder of the pod is dosing.
+/// How the holder of the pod is dosing; the only mode built.
 public enum LoanDosingMode: String, Codable {
     case closedDirect
-    case closedPhoneFed
-    case cgmViewer
-    case pausedStale
-    case suspended
 }
 
 /// The watch asking for the pod.
