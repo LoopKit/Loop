@@ -10,7 +10,9 @@
 		50A90B7175FCB80797EA9931 /* LoanRemoteUploadsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 891F7590AA92FC7B832160F3 /* LoanRemoteUploadsTests.swift */; };
 		74EA67D0AD796D5DF8490015 /* DosingDecisionStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55EE24EDD6E60008715D /* DosingDecisionStoreProtocol.swift */; };
 		DA4417AF2C52F858F8242817 /* NightscoutServiceKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 028762051A01C56F4C39A986 /* NightscoutServiceKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		EA78F17B27EB57C30D6CC1AF /* TidepoolServiceKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5AE73BCF5BD85D409647BE21 /* TidepoolServiceKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		826D1F376E69DF9D410367B3 /* NightscoutServiceKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 028762051A01C56F4C39A986 /* NightscoutServiceKit.framework */; };
+		FFCA40ACFF54E0025FA58B14 /* TidepoolServiceKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AE73BCF5BD85D409647BE21 /* TidepoolServiceKit.framework */; };
 		616612D1AD65082CB8ED9C1C /* LoanRemoteUploads.swift in Sources */ = {isa = PBXBuildFile; fileRef = B998F036B1AFE137CE755FB6 /* LoanRemoteUploads.swift */; };
 		7DCBC50A4ED76D855495DAD5 /* RemoteDataServicesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 432E73CA1D24B3D6009AD15D /* RemoteDataServicesManager.swift */; };
 		6A643D509AA2E5CA5E93ABF4 /* GlucoseBasedApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */; };
@@ -919,6 +921,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				DA4417AF2C52F858F8242817 /* NightscoutServiceKit.framework in Embed Frameworks */,
+				EA78F17B27EB57C30D6CC1AF /* TidepoolServiceKit.framework in Embed Frameworks */,
 				FA2B53E0B7A546DB996D8B5E /* RileyLinkBLEKit.framework in Embed Frameworks */,
 				5E16C423E6FB4551BA3BCAD2 /* RileyLinkKit.framework in Embed Frameworks */,
 				101AA7370B0E499FBD88BB9F /* G7SensorKit.framework in Embed Frameworks */,
@@ -957,6 +960,7 @@
 /* Begin PBXFileReference section */
 		891F7590AA92FC7B832160F3 /* LoanRemoteUploadsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanRemoteUploadsTests.swift; sourceTree = "<group>"; };
 		028762051A01C56F4C39A986 /* NightscoutServiceKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutServiceKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5AE73BCF5BD85D409647BE21 /* TidepoolServiceKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TidepoolServiceKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B998F036B1AFE137CE755FB6 /* LoanRemoteUploads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanRemoteUploads.swift; path = "WatchApp Extension/StockLoop/LoanRemoteUploads.swift"; sourceTree = SOURCE_ROOT; };
 		00A28F30399B460CABF4EDD2 /* SettingsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsProvider.swift; path = Loop/Managers/SettingsProvider.swift; sourceTree = SOURCE_ROOT; };
 		036B897A66F14CAA9CD5CAD0 /* PodLoanWatchController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PodLoanWatchController.swift; path = "WatchApp Extension/StockLoop/PodLoanWatchController.swift"; sourceTree = SOURCE_ROOT; };
@@ -1757,6 +1761,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				826D1F376E69DF9D410367B3 /* NightscoutServiceKit.framework in Frameworks */,
+				FFCA40ACFF54E0025FA58B14 /* TidepoolServiceKit.framework in Frameworks */,
 				D96C7D3C9C4B414AAEAB3339 /* RileyLinkBLEKit.framework in Frameworks */,
 				D6A12EF6F5AD4B4CAABDD49B /* RileyLinkKit.framework in Frameworks */,
 				921B7FAE002E40EFAB3F50C6 /* G7SensorKit.framework in Frameworks */,
@@ -2651,6 +2656,7 @@
 				F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */,
 				A60E55AC77554C50A4196482 /* OmnipodKit.framework */,
 				028762051A01C56F4C39A986 /* NightscoutServiceKit.framework */,
+				5AE73BCF5BD85D409647BE21 /* TidepoolServiceKit.framework */,
 				53F9B5F8846B4124B8986783 /* LoanEventJournal.swift */,
 				C3D4E5F6A7B8C9D0E1F2A3B4 /* G7SilenceHint.swift */,
 				E7B75623E2144089A0471809 /* LoanDebugView.swift */,

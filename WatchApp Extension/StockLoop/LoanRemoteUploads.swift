@@ -17,6 +17,7 @@ import LoopKit
 import LoopAlgorithm
 import LoopCore
 import NightscoutServiceKit
+import TidepoolServiceKit
 
 /// Stock declares this in DeviceDataManager.swift, which the watch does not compile.
 protocol UploadEventListener {
@@ -29,7 +30,7 @@ final class LoanRemoteUploads {
     private let lock = UnfairLock()
 
     /// The services the wrist can adopt from the phone's shared configurations.
-    private static let adoptable: [DeviceConfigurationSharing.Type] = [NightscoutService.self]
+    private static let adoptable: [DeviceConfigurationSharing.Type] = [NightscoutService.self, TidepoolService.self]
 
     /// From accepted grants, by plugin identifier; consumed when each service starts. Cleared only by `end`.
     private var staged: [String: SharedDeviceConfiguration] = [:]
@@ -176,11 +177,16 @@ final class LoanRemoteUploads {
             return (running, activeLoop)
         }
 
-        // An upload already under way finds no credentials and returns.
+        // An upload already under way finds no credentials and returns. Tidepool's session is only
+        // dropped here, never logged out: that would end the phone's. Dropping it calls Tidepool's
+        // "reauthenticate" alert, which goes nowhere: the wrist never sets a serviceDelegate.
         for service in services {
             if let nightscout = service as? NightscoutService {
                 nightscout.siteURL = nil
                 nightscout.apiSecret = nil
+            }
+            if let tidepool = service as? TidepoolService {
+                Task { await tidepool.tapi.setSession(nil) }
             }
             SportLog.event("uploads", "uploads OFF — loan over, \(service.pluginIdentifier) dropped")
         }

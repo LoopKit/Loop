@@ -201,7 +201,7 @@ public struct LoanGrant: Codable, Equatable {
     /// The phone's settings over the last 24 h, up to the grant.
     public let settingsHistory: LoanSettingsHistory?
 
-    /// The phone's remote services that share their configuration (Nightscout), each a binary
+    /// The phone's remote services that share their configuration (Nightscout, Tidepool), each a binary
     /// property list of its `SharedDeviceConfiguration`, so the wrist uploads during the loan. They
     /// hold secrets: Start grants only, never the standing copy, never logged.
     public var serviceConfigurations: [Data]? = nil
