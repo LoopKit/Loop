@@ -136,6 +136,13 @@ extension PodLoanPhoneController {
             state = .reconciling
 
             handbackDiag(offer.epoch, "commit done — ACKing now; the watch cannot release the pod until this lands")
+            // Where the watch confirmed it uploaded this loan's glucose, the phone's uploads resume after
+            // the loan: Nightscout tells readings apart only by their time, which each device stamps
+            // from its own receipt, so the phone's copies would be a second row each. Elsewhere, and
+            // after a force reclaim, the phone uploads its own copies.
+            let glucoseUploaded = offer.servicesConfirming("Glucose")
+            if !glucoseUploaded.isEmpty { deps.skipLoanGlucoseUploads(glucoseUploaded) }
+            handbackDiag(offer.epoch, "uploads: the watch confirmed \(offer.uploadsConfirmed.map { $0.isEmpty ? "none" : $0.map { "\($0.key) \($0.value.joined(separator: "+"))" }.joined(separator: "; ") } ?? "nothing (older watch)") — the phone uploads the rest")
             // Loop mode and recency come home with the pod.
             if let watchClosed = offer.watchClosedLoopEnabled {
                 deps.noteWatchClosedLoop(watchClosed)
@@ -365,7 +372,7 @@ extension PodLoanPhoneController {
                     self.handbackDiag(transfer.epoch, "loan history IGNORED — \(transfer.decisions.count) dosing decision(s), \(alerts.count) alert(s), \(deviceLog.count) device log line(s) for e\(transfer.epoch), a loan this phone (e\(self.epoch)) never granted")
                     return
                 }
-                self.deps.addDosingDecisions(transfer.decisions) { [weak self] result in
+                self.deps.addDosingDecisions(transfer.decisions, transfer.servicesConfirming("DosingDecision")) { [weak self] result in
                     switch result {
                     case .success(let added):
                         self?.handbackDiag(transfer.epoch, "dosing decisions from the watch: \(added) of \(transfer.decisions.count) added (the rest already here)")
@@ -398,18 +405,28 @@ extension PodLoanPhoneController {
     }
 
     /// Adds the decisions this store does not already hold, by id, one batch at a time, so a
-    /// file delivered twice adds nothing the second time.
+    /// file delivered twice adds nothing the second time. With `skipUploads`, the uploaders hear of
+    /// the batch only after it has moved the bookmarks the watch's uploads cover.
     static func addNewDosingDecisions(_ decisions: [StoredDosingDecision], to store: DosingDecisionStore,
+                                      skipUploads: ((Set<UUID>) async -> Void)? = nil,
                                       completion: @escaping (Result<Int, Error>) -> Void) {
         loanHistoryIntakeQueue.async {
             let semaphore = DispatchSemaphore(value: 0)
             var result: Result<Int, Error> = .success(0)
             Task {
+                let delegate = store.delegate
+                if skipUploads != nil { store.delegate = nil }
+                defer { store.delegate = delegate }
                 do {
                     let present: [StoredDosingDecision] = try await store.findDosingDecisionsByIds(decisions.map(\.id))
                     var seen = Set(present.map(\.id))
                     let new = decisions.filter { seen.insert($0.id).inserted }
                     try await store.addStoredDosingDecisions(dosingDecisions: new)
+                    if let skipUploads {
+                        await skipUploads(Set(new.map(\.id)))
+                        store.delegate = delegate
+                        delegate?.dosingDecisionStoreHasUpdatedDosingDecisionData(store)
+                    }
                     result = .success(new.count)
                 } catch {
                     result = .failure(error)

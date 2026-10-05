@@ -14,8 +14,12 @@ import LoopKit
 extension LoanGrant {
     /// The pump's configuration, or nil if it does not decode.
     public var sharedPumpConfiguration: SharedDeviceConfiguration? {
-        let plist = try? PropertyListSerialization.propertyList(from: pumpConfiguration, options: [], format: nil)
-        return (plist as? SharedDeviceConfiguration.RawValue).flatMap(SharedDeviceConfiguration.init(rawValue:))
+        SharedDeviceConfiguration(propertyList: pumpConfiguration)
+    }
+
+    /// The services' configurations that decode.
+    public var sharedServiceConfigurations: [SharedDeviceConfiguration] {
+        (serviceConfigurations ?? []).compactMap(SharedDeviceConfiguration.init(propertyList:))
     }
 
     public func seedDoseEntries() -> [DoseEntry] {
@@ -197,6 +201,15 @@ public struct LoanGrant: Codable, Equatable {
     /// The phone's settings over the last 24 h, up to the grant.
     public let settingsHistory: LoanSettingsHistory?
 
+    /// The phone's remote services that share their configuration (Nightscout), each a binary
+    /// property list of its `SharedDeviceConfiguration`, so the wrist uploads during the loan. They
+    /// hold secrets: Start grants only, never the standing copy, never logged.
+    public var serviceConfigurations: [Data]? = nil
+
+    /// The phone's CGM's answer to "upload glucose?" (the CGM simulator's "Upload CGM Samples"),
+    /// which the wrist follows while it has no CGM of its own. Nil from an older phone.
+    public var phoneCGMUploadsGlucose: Bool? = nil
+
     public init(epoch: Int, expiresAt: Date, pumpConfiguration: Data, podAddress: UInt32,
                 therapySettingsRaw: Data, settingsTimeZoneID: String,
                 doseHistory: [LoanDoseRecord],
@@ -297,11 +310,17 @@ public struct HandbackOffer: Codable, Equatable {
 
     public let lastLoopCompleted: Date?
 
+    /// Per remote service (its `pluginIdentifier`), the data types the watch confirmed it uploaded
+    /// in full before releasing ("Glucose", "DosingDecision"): the phone skips those, and uploads
+    /// the rest itself. Released offers only; nil from an older watch.
+    public let uploadsConfirmed: [String: [String]]?
+
     public init(epoch: Int, handedBackAt: Date, finalStatus: LoanPodStatus?,
                 odometer: LoanOdometerSnapshot?, events: [LoanEvent], tombstones: [UUID],
                 recovered: Bool, released: Bool? = nil, watchClosedLoopEnabled: Bool? = nil,
                 seizeToken: UUID? = nil,
-                lastLoopCompleted: Date? = nil) {
+                lastLoopCompleted: Date? = nil,
+                uploadsConfirmed: [String: [String]]? = nil) {
         self.epoch = epoch
         self.handedBackAt = handedBackAt
         self.finalStatus = finalStatus
@@ -313,6 +332,12 @@ public struct HandbackOffer: Codable, Equatable {
         self.watchClosedLoopEnabled = watchClosedLoopEnabled
         self.seizeToken = seizeToken
         self.lastLoopCompleted = lastLoopCompleted
+        self.uploadsConfirmed = uploadsConfirmed
+    }
+
+    /// The services whose `type` the watch confirmed it uploaded in full.
+    public func servicesConfirming(_ type: String) -> Set<String> {
+        Set((uploadsConfirmed ?? [:]).filter { $0.value.contains(type) }.keys)
     }
 }
 
@@ -388,5 +413,18 @@ public struct LoanDiag: Codable, Equatable {
     public init(epoch: Int, text: String) {
         self.epoch = epoch
         self.text = text
+    }
+}
+
+extension SharedDeviceConfiguration {
+    /// As a grant carries it: a binary property list.
+    public var propertyList: Data? {
+        try? PropertyListSerialization.data(fromPropertyList: rawValue, format: .binary, options: 0)
+    }
+
+    public init?(propertyList data: Data) {
+        let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil)
+        guard let raw = plist as? RawValue else { return nil }
+        self.init(rawValue: raw)
     }
 }

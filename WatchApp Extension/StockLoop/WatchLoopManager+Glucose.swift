@@ -357,8 +357,9 @@ extension WatchLoopManager: DoseStoreDelegate {
         try await settingsProvider.getBasalHistory(startDate: start, endDate: end)
     }
 
-    /// Deliberately empty. Stock uses this to trigger a remote upload; the wrist has no upload
-    /// services, and its pump events travel home in the loan journal instead.
+    /// Stock uses this to trigger a remote upload. So does the wrist, while a loan carries
+    /// upload services; otherwise a no-op. Pump events also travel home in the loan journal.
     func doseStoreHasUpdatedPumpEventData(_ doseStore: DoseStore) {
+        LoanRemoteUploads.shared.trigger(.pumpEvent)
     }
 }

@@ -2,6 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Stock RemoteDataServicesManager keeps its query anchors in
+	     UserDefaults.appGroup, which force-unwraps this key. The wrist has no app group; a plain
+	     suite name gives the anchors their own local defaults domain, no entitlement needed. -->
+	<key>AppGroupIdentifier</key>
+	<string>$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch.uploads</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>

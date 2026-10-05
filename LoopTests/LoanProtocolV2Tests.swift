@@ -95,6 +95,63 @@ final class LoanProtocolV2Tests: XCTestCase {
         XCTAssertNil(g2.glucoseHistory)
     }
 
+    /// A service's shared configuration (its site and secret) survives the wire, and no textual or
+    /// reflected form of the grant shows it; a grant from an older phone decodes with none.
+    func testGrantServiceConfigurationsRoundTripRedacted() throws {
+        let now = Date(timeIntervalSince1970: 1_784_338_000.125)
+        let secret = "fixture-secret-0123456789"
+        let shared = SharedDeviceConfiguration(managerIdentifier: "NightscoutService", asOf: now,
+                                               state: ["siteURL": "https://fixture-site.example", "apiSecret": secret])
+        var grant = LoanGrant(epoch: 9, expiresAt: now.addingTimeInterval(300),
+                              pumpConfiguration: Data([1]), podAddress: 0,
+                              therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC",
+                              doseHistory: [])
+        grant.serviceConfigurations = [try XCTUnwrap(shared.propertyList)]
+        grant.phoneCGMUploadsGlucose = false
+        guard case .grant(let g) = try roundTrip(.grant(grant)) else { return XCTFail("not a grant") }
+        let decoded = try XCTUnwrap(g.sharedServiceConfigurations.first)
+        XCTAssertEqual(decoded.managerIdentifier, "NightscoutService")
+        XCTAssertEqual(decoded.state["apiSecret"] as? String, secret)
+        XCTAssertEqual(g.phoneCGMUploadsGlucose, false)
+
+        var dumped = ""
+        dump(grant, to: &dumped)
+        for text in [String(describing: grant), String(reflecting: grant), dumped] {
+            XCTAssertFalse(text.contains(secret), "the secret leaked")
+            XCTAssertFalse(text.contains("fixture-site"), "the site leaked")
+        }
+
+        let old = LoanGrant(epoch: 9, expiresAt: now.addingTimeInterval(300),
+                            pumpConfiguration: Data([1]), podAddress: 0,
+                            therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC",
+                            doseHistory: [])
+        guard case .grant(let g2) = try roundTrip(.grant(old)) else { return XCTFail("not a grant") }
+        XCTAssertTrue(g2.sharedServiceConfigurations.isEmpty)
+        XCTAssertNil(g2.phoneCGMUploadsGlucose)
+    }
+
+    /// The watch's upload confirmation survives the wire on the released offer and the loan history;
+    /// an older watch sends neither.
+    func testUploadConfirmationRoundTrips() throws {
+        let now = Date(timeIntervalSince1970: 1_784_338_000.125)
+        let confirmed = ["NightscoutService": ["Glucose", "DosingDecision"]]
+        let offer = HandbackOffer(epoch: 4, handedBackAt: now, finalStatus: nil, odometer: nil, events: [], tombstones: [],
+                                  recovered: false, released: true, uploadsConfirmed: confirmed)
+        guard case .handbackOffer(let o) = try roundTrip(.handbackOffer(offer)) else { return XCTFail("not an offer") }
+        XCTAssertEqual(o.uploadsConfirmed, confirmed)
+        XCTAssertEqual(o.servicesConfirming("Glucose"), ["NightscoutService"])
+
+        let older = HandbackOffer(epoch: 4, handedBackAt: now, finalStatus: nil, odometer: nil, events: [], tombstones: [],
+                                  recovered: false, released: true)
+        guard case .handbackOffer(let o2) = try roundTrip(.handbackOffer(older)) else { return XCTFail("not an offer") }
+        XCTAssertNil(o2.uploadsConfirmed)
+        XCTAssertEqual(o2.servicesConfirming("Glucose"), [])
+
+        let history = LoanHistory(epoch: 4, decisions: [], uploadsConfirmed: confirmed)
+        let decoded = try PropertyListDecoder().decode(LoanHistory.self, from: try history.encoded())
+        XCTAssertEqual(decoded.servicesConfirming("DosingDecision"), ["NightscoutService"])
+    }
+
     /// The grant seeds the algorithm's 12 h glucose window: every five minutes, with identifiers as
     /// long as a UUID, it fits inside the 60 KB urgent limit.
     func testTwelveHoursOfGlucoseStaySmallInTheGrant() throws {

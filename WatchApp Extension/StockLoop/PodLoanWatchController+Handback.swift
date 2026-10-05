@@ -28,6 +28,8 @@ extension PodLoanWatchController {
             guard !self.handbackRequested else { return }
             self.reunionPromptActive = false
             self.handbackRequested = true
+            // Anything not yet uploaded goes now, so the release below can confirm it.
+            LoanRemoteUploads.shared.flush()
             self.handbackFailure = nil
             self.handbackResendCount = 0
             self.handbackSawUnreachable = false
@@ -167,9 +169,14 @@ extension PodLoanWatchController {
 
         do {
             let finalize: (Bool) -> Void = { freshened in
-                self.queue.async {
-                    self.finalOfferSent = true
-                    self.sendHandbackOffer(freshened: freshened, recovered: false)
+                // What the watch uploaded in full: the phone uploads only the rest.
+                LoanRemoteUploads.shared.confirmUploads(within: 5) { confirmed in
+                    self.queue.async {
+                        self.uploadsConfirmed = confirmed
+                        SportLog.event("uploads", "hand-back: uploads confirmed \(confirmed.isEmpty ? "none — the phone uploads its own copies" : confirmed.map { "\($0.key): \($0.value.joined(separator: ", "))" }.joined(separator: "; "))")
+                        self.finalOfferSent = true
+                        self.sendHandbackOffer(freshened: freshened, recovered: false)
+                    }
                 }
             }
             // Read the odometer only over a link already up; otherwise a read dials the pod.
@@ -218,7 +225,8 @@ extension PodLoanWatchController {
             // Lets the phone retro-acknowledge a loan it never granted.
             seizeToken: persisted.seizeToken,
 
-            lastLoopCompleted: loopManager.lastLoopCompleted)
+            lastLoopCompleted: loopManager.lastLoopCompleted,
+            uploadsConfirmed: phase != .active ? uploadsConfirmed : nil)
         if offer.released == true, finalOfferSentAt == nil { finalOfferSentAt = self.now() }
         handbackResendCount += 1
 
@@ -393,7 +401,7 @@ extension PodLoanWatchController {
             let deviceLog = await Self.deviceLogEntries(in: loopManager.deviceLog, after: deviceLogAnchor, epoch: epoch)
             self.queue.async {
                 let history = LoanHistory(epoch: epoch, decisions: decisions?.decisions ?? [], alerts: alerts?.alerts ?? [],
-                                          deviceLog: deviceLog ?? [])
+                                          deviceLog: deviceLog ?? [], uploadsConfirmed: self.uploadsConfirmed)
                 let counts = "\(history.decisions.count) dosing decision(s), \(history.alerts?.count ?? 0) alert(s), \(history.deviceLog?.count ?? 0) device log line(s)"
                 guard !history.decisions.isEmpty || history.alerts?.isEmpty == false || history.deviceLog?.isEmpty == false else {
                     SportLog.event("loan", "no loan history to send home for e\(epoch)")

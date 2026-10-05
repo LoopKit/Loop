@@ -196,10 +196,15 @@ extension PodLoanPhoneController {
             guard let self = self else { return }
             // The loan moved on during assembly; drop the grant.
             guard self.state == .grantOffered, self.epoch == grantEpoch else { return }
-            guard let grant = grant else {
+            guard var grant = grant else {
                 self.abortGrant(reason: "snapshot encoding failed")
                 return
             }
+            // Start grants only; the standing copy never carries them.
+            let services = self.deps.serviceConfigurations()
+            grant.serviceConfigurations = services.compactMap(\.propertyList)
+            grant.phoneCGMUploadsGlucose = self.deps.cgmUploadsGlucose()
+            PhoneLog.event("loan", "[uploads] grant carries service configuration(s): \(services.isEmpty ? "none" : services.map(\.managerIdentifier).joined(separator: ", "))")
             self.sendMessage(.grant(grant))
             self.armT1(for: grantEpoch)
         }

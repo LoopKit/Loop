@@ -221,6 +221,9 @@ final class PodLoanWatchController {
 
     /// Guards against a duplicate interim ack closing the loan early.
     var finalOfferSent = false
+    /// What the watch confirmed it uploaded before releasing, per remote service; the released
+    /// offer and the loan history carry it. Cleared at each grant.
+    var uploadsConfirmed: [String: [String]]?
     /// The single armed resend.
     var resendWorkItem: DispatchWorkItem?
 
@@ -384,6 +387,8 @@ final class PodLoanWatchController {
     /// and wrist override, since WatchLoopManager outlives the loan.
     func teardownPump() {
         SportLog.event("handback", "teardownPump: releasing control of the pump explicitly")
+        // Uploads stop before the insulin book is reset below.
+        LoanRemoteUploads.shared.end()
         // The pod's alerts are the phone's from here: a repeating one left on the wrist would keep
         // sounding while the phone raises the same alert.
         if let pumpIdentifier = pumpManager?.pluginIdentifier {

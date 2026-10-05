@@ -219,13 +219,21 @@ public struct LoanHistory: Codable {
     public let alerts: [SyncAlertObject]?
     /// `PersistentDeviceLog`'s lines, oldest first. Absent from an older watch's file.
     public let deviceLog: [LoanDeviceLogEntry]?
+    /// As the released offer's: per remote service, the types the watch confirmed it uploaded.
+    public let uploadsConfirmed: [String: [String]]?
 
     public init(epoch: Int, decisions: [StoredDosingDecision], alerts: [SyncAlertObject] = [],
-                deviceLog: [LoanDeviceLogEntry] = []) {
+                deviceLog: [LoanDeviceLogEntry] = [], uploadsConfirmed: [String: [String]]? = nil) {
         self.epoch = epoch
         self.decisions = decisions
         self.alerts = alerts
         self.deviceLog = deviceLog
+        self.uploadsConfirmed = uploadsConfirmed
+    }
+
+    /// The services whose `type` the watch confirmed it uploaded in full.
+    public func servicesConfirming(_ type: String) -> Set<String> {
+        Set((uploadsConfirmed ?? [:]).filter { $0.value.contains(type) }.keys)
     }
 
     public var fileMetadata: [String: Any] { ["kind": Self.fileKind, "epoch": epoch] }
