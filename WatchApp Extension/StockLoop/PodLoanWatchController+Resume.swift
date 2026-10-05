@@ -74,6 +74,10 @@ extension PodLoanWatchController {
         loopManager.settingsProvider.history = payload.settingsHistory
         loopManager.restoreOverrideHistory()
 
+        // Staged before ACTIVE, which starts them as a grant's would.
+        LoanRemoteUploads.shared.stage(services: (payload.serviceConfigurations ?? []).compactMap(SharedDeviceConfiguration.init(propertyList:)),
+                                       phoneCGMUploadsGlucose: payload.phoneCGMUploadsGlucose)
+
         // Through the property, so its observers run.
         phase = .active
         onLoanActiveChanged?(true)

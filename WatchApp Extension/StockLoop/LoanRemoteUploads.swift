@@ -6,9 +6,9 @@
 //  into this target unchanged, drives services adopted from the configurations the Start grant
 //  carried. Its triggers are the store delegates stock's DeviceDataManager uses on the phone.
 //
-//  Nothing here persists a credential: the configurations live in memory from grant acceptance
-//  until the pump is torn down, and are never logged. A relaunch mid-loan therefore resumes
-//  without uploads. The query anchors are stock's, in this app's defaults, so a
+//  This file persists no credential. The loan's saved state keeps the grant's configurations
+//  beside the pump's own state, so a relaunch mid-loan stages them again; both go at teardown.
+//  Credentials are never logged. The query anchors are stock's, in this app's defaults, so a
 //  later loan carries on from where the last one stopped.
 //
 

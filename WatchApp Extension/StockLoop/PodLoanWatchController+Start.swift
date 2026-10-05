@@ -394,7 +394,9 @@ extension PodLoanWatchController {
             $0.grantedSettings = .init(therapySettingsRaw: grant.therapySettingsRaw,
                                        supplementRaw: grant.therapySettingsSupplementRaw,
                                        glucoseAlertSettings: grant.glucoseAlertSettings,
-                                       settingsHistory: grant.settingsHistory)
+                                       settingsHistory: grant.settingsHistory,
+                                       serviceConfigurations: grant.serviceConfigurations,
+                                       phoneCGMUploadsGlucose: grant.phoneCGMUploadsGlucose)
         }
         loopManager.settings = decodedSettings!
         loopManager.settingsProvider.history = grant.settingsHistory

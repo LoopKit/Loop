@@ -52,13 +52,18 @@ final class WakeResumeTests: XCTestCase {
         let history = LoanSettingsHistory(
             basal: [AbsoluteScheduleValue(startDate: now.addingTimeInterval(-.hours(24)), endDate: now, value: 0.8)],
             sensitivity: [], carbRatio: [], targetRange: [])
+        let nightscout = SharedDeviceConfiguration(managerIdentifier: "NightscoutService", asOf: now,
+                                                   state: ["siteURL": "https://fixture-site.example", "apiSecret": "fixture-secret"])
         saveState {
             $0.grantedSettings = .init(therapySettingsRaw: raw, supplementRaw: supplement,
-                                       settingsHistory: history)
+                                       settingsHistory: history,
+                                       serviceConfigurations: [nightscout.propertyList!],
+                                       phoneCGMUploadsGlucose: false)
         }
     }
 
     override func tearDown() async throws {
+        LoanRemoteUploads.shared.end()
         cacheStore = nil
         cacheDir = nil
         journalDir = nil
@@ -348,6 +353,7 @@ final class WakeResumeTests: XCTestCase {
         let override = halfNeeds(start: Date().addingTimeInterval(-.minutes(10)), duration: .indefinite)
         live.loopManager.applyWristOverride(override)
         saveState { $0.deliveredAtTakeover = 12.5 }
+        LoanRemoteUploads.shared.end()
 
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         XCTAssertNotNil(c.loopManager.settings.basalRateSchedule, "therapy settings")
@@ -363,6 +369,8 @@ final class WakeResumeTests: XCTestCase {
         XCTAssertEqual(c.loopManager.scheduleOverride?.syncIdentifier, override.syncIdentifier,
                        "the active override — else the resumed loan doses unscaled")
         XCTAssertTrue(c.isLoanActive, "the loan is live")
+        XCTAssertTrue(LoanRemoteUploads.shared.holdsServiceConfigurations, "the upload services — else the resumed loan uploads nothing")
+        XCTAssertFalse(LoanRemoteUploads.shared.shouldSyncGlucoseToRemoteService, "the phone's glucose-upload answer")
     }
 
     /// A loan resumed after a relaunch is live from launch, with no change of phase to announce it: the

@@ -27,6 +27,10 @@ struct PodLoanWatchState: RawRepresentable {
         var supplementRaw: Data?
         var glucoseAlertSettings: Data? = nil
         var settingsHistory: LoanSettingsHistory? = nil
+        /// The phone's shared upload services, so a relaunch mid-loan uploads again. Kept beside
+        /// the pump's own state, and gone with it at teardown.
+        var serviceConfigurations: [Data]? = nil
+        var phoneCGMUploadsGlucose: Bool? = nil
     }
     var grantedSettings: GrantedSettings?
 
@@ -72,6 +76,8 @@ struct PodLoanWatchState: RawRepresentable {
             d["supplement"] = $0.supplementRaw
             d["glucoseAlerts"] = $0.glucoseAlertSettings
             d["settingsHistory"] = $0.settingsHistory.flatMap { try? LoanProtocol.encoder.encode($0) }
+            d["serviceConfigurations"] = $0.serviceConfigurations
+            d["phoneCGMUploadsGlucose"] = $0.phoneCGMUploadsGlucose
             return d
         }
         raw["deliveredAtTakeover"] = deliveredAtTakeover
@@ -92,7 +98,9 @@ struct PodLoanWatchState: RawRepresentable {
                                glucoseAlertSettings: d["glucoseAlerts"] as? Data,
                                settingsHistory: (d["settingsHistory"] as? Data).flatMap {
                                    try? LoanProtocol.decoder.decode(LoanSettingsHistory.self, from: $0)
-                               })
+                               },
+                               serviceConfigurations: d["serviceConfigurations"] as? [Data],
+                               phoneCGMUploadsGlucose: d["phoneCGMUploadsGlucose"] as? Bool)
     }
 
 }
