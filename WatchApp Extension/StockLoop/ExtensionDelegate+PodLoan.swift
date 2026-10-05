@@ -102,6 +102,8 @@ extension ExtensionDelegate {
         SportLog.event("lifecycle", "didBecomeActive [lifecycle-crumb]")
         NotificationCenter.default.post(name: Self.didBecomeActiveNotification, object: self)
         SensorSearchAlert.disarm()
+        // Looking at the watch is the one wake left with the phone away: the sensor's acquisition re-checks.
+        watchCGMRecheckAcquisition(stockLoopSession?.stack.loopManager.cgmManager)
     }
 
     /// Called from `applicationWillResignActive()`.
