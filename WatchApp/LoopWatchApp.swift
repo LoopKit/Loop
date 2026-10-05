@@ -13,9 +13,11 @@ struct LoopWatchApp: App {
 
     var loopManager = LoopDataManager.shared
 
+    /// With Sport Mode on, the onboarding gate lives in ContentView, so Sport Mode and
+    /// diagnostics stay reachable while the phone is not onboarded.
     var body: some Scene {
         WindowGroup {
-            if loopManager.activeContext?.isOnboardingCompleted != true {
+            if !FeatureFlags.sportModeEnabled, loopManager.activeContext?.isOnboardingCompleted != true {
                 CompleteOnboardingView()
             } else {
                 ContentView()

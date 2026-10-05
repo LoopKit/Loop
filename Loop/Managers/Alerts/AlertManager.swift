@@ -181,13 +181,22 @@ public final class AlertManager {
 
     // MARK: - Loop Not Running alerts
 
+    /// True while a pod loan is active; set by WatchDataManager at wiring time — see `AlertManager+PodLoan.swift`.
+    var loopNotRunningSuppressionGate: (() -> Bool)?
+
     func loopDidComplete(_ lastLoopDate: Date? = nil) async {
+        if loopNotRunningSuppressionGate?() == true {
+            log.default("loopDidComplete during a pod loan — Loop Failure ladder NOT re-armed (the watch is the looper)")
+            return
+        }
         // use now if there is no lastLoopDate
         await rescheduleLoopNotRunningNotifications(lastLoopDate ?? Date())
     }
 
     private func rescheduleLoopNotRunningNotifications() {
         Task {
+            // Same gate as loopDidComplete: a muter config change can land mid-loan.
+            guard loopNotRunningSuppressionGate?() != true else { return }
             guard let lastLoopDate = getLastLoopDate() else { return }
             await rescheduleLoopNotRunningNotifications(lastLoopDate)
         }
