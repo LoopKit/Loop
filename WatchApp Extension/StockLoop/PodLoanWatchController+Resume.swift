@@ -72,6 +72,9 @@ extension PodLoanWatchController {
         loopManager.restoreOverrideHistory()
         phoneSupportsInterimHandback = payload.supportsInterimHandback
         phoneSupportsOverrideRecords = payload.supportsOverrideRecords
+        // Staged before ACTIVE, which starts them as a grant's would.
+        LoanRemoteUploads.shared.stage(services: (payload.serviceConfigurations ?? []).compactMap(SharedDeviceConfiguration.init(propertyList:)),
+                                       phoneCGMUploadsGlucose: payload.phoneCGMUploadsGlucose)
         manager.pumpManagerDelegate = self
         manager.delegateQueue = queue
         pumpManager = manager

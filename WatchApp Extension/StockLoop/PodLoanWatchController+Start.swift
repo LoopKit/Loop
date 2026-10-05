@@ -422,7 +422,9 @@ extension PodLoanWatchController {
                                        supportsInterimHandback: grant.supportsInterimHandback ?? false,
                                        supportsOverrideRecords: grant.supportsOverrideRecords ?? false,
                                        glucoseAlertSettings: grant.glucoseAlertSettings,
-                                       settingsHistory: grant.settingsHistory)
+                                       settingsHistory: grant.settingsHistory,
+                                       serviceConfigurations: grant.serviceConfigurations,
+                                       phoneCGMUploadsGlucose: grant.phoneCGMUploadsGlucose)
         }
         loopManager.settings = decodedSettings!
         loopManager.settingsProvider.history = grant.settingsHistory
