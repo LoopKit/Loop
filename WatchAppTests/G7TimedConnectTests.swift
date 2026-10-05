@@ -204,3 +204,53 @@ final class G7RelayDedupTests: XCTestCase {
         XCTAssertEqual(stored.count, 2)
     }
 }
+
+/// The phone's sensor settings ride in every context. The watch builds a new G7 manager only when
+/// they differ from the ones its current manager came from; a new manager has never connected, so
+/// it searches until the sensor is found, which is what the glance note and the alert report.
+final class WatchCGMAdoptionTests: XCTestCase {
+    private func makeWrist() async -> WatchLoopManager {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let cacheStore = PersistenceController(directoryURL: dir.appendingPathComponent("cache"))
+        let doseStore = await DoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                        longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
+                                        provenanceIdentifier: "WatchCGMAdoptionTests")
+        let glucoseStore = await GlucoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                              cacheLength: 4 * 60 * 60, provenanceIdentifier: "WatchCGMAdoptionTests")
+        let carbStore = CarbStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                  cacheLength: 24 * 60 * 60, provenanceIdentifier: "WatchCGMAdoptionTests")
+        return WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
+                                defaults: UserDefaults(suiteName: "WatchCGMAdoptionTests-\(UUID().uuidString)")!,
+                                stateDirectory: dir)
+    }
+
+    /// As the phone's G7CGMManager exports it; `asOf` differs on every context.
+    private func phoneExport(sensorID: String, code: String) -> SharedDeviceConfiguration {
+        var phone = G7CGMManagerState()
+        phone.sensorID = sensorID
+        phone.activatedAt = Date(timeIntervalSince1970: 1_791_000_000)
+        phone.pairingCode = code
+        return SharedDeviceConfiguration(managerIdentifier: "G7CGMManager", asOf: Date(), state: phone.sharedState)
+    }
+
+    func testOnlyANewSensorRebuildsTheWatchsManager() async throws {
+        let wrist = await makeWrist()
+
+        wrist.adoptCGMConfiguration(phoneExport(sensorID: "DXCMph", code: "1234"))
+        let first = try XCTUnwrap(wrist.cgmManager as? G7CGMManager)
+        XCTAssertEqual(first.state.sensorID, "DXCMph")
+        XCTAssertTrue(first.isConfiguredByAnotherController)
+        XCTAssertNil(first.state.peripheralIdentifier, "never connected, so it searches until the sensor is found")
+
+        wrist.adoptCGMConfiguration(phoneExport(sensorID: "DXCMph", code: "1234"))
+        XCTAssertTrue(wrist.cgmManager === first, "the same sensor in a later context kept the watch's own link")
+
+        wrist.adoptCGMConfiguration(phoneExport(sensorID: "DXCMqL", code: "5678"))
+        let second = try XCTUnwrap(wrist.cgmManager as? G7CGMManager)
+        XCTAssertFalse(second === first, "a new sensor rebuilt the manager")
+        XCTAssertEqual(second.state.sensorID, "DXCMqL")
+        XCTAssertNil(second.state.peripheralIdentifier, "the new sensor is searched for, not the old one's link")
+        XCTAssertNil(first.cgmManagerDelegate, "the old manager let go before the new one took over")
+    }
+}
