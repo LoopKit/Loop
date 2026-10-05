@@ -200,6 +200,8 @@ extension WatchLoopManager: CGMManagerDelegate {
     /// current manager was built from (a new sensor or code), so the watch keeps its own link.
     func adoptCGMConfiguration(_ configuration: SharedDeviceConfiguration) {
         if cgmManager != nil, let builtFrom = cgmBuiltFrom, (builtFrom as NSDictionary).isEqual(to: configuration.state) {
+            // Each phone context is a wake, loan or not: the sensor's acquisition re-checks itself.
+            watchCGMRecheckAcquisition(cgmManager)
             return
         }
         // No CGM kit keeps local state yet.
