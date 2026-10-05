@@ -142,7 +142,8 @@ struct StatusTableView: View {
             ActionTab(
                 title: "Add Carbs",
                 icon: "carbs",
-                tintColor: .carbTintColor
+                tintColor: .carbTintColor,
+                isEnabled: !viewModel.isPodLoanedToWatch
             ) {
                 viewController.userTappedAddCarbs()
             }
@@ -150,7 +151,8 @@ struct StatusTableView: View {
             ActionTab(
                 title: "Bolus",
                 icon: "bolus",
-                tintColor: .insulinTintColor
+                tintColor: .insulinTintColor,
+                isEnabled: !viewModel.isPodLoanedToWatch
             ) {
                 viewController.presentBolusScreen()
             }
@@ -160,7 +162,8 @@ struct StatusTableView: View {
                 icon: viewModel.temporaryPresetsManager.activeOverride != nil
                     ? "presets-selected"
                     : "presets",
-                tintColor: .presets
+                tintColor: .presets,
+                isEnabled: !viewModel.isPodLoanedToWatch
             ) {
                 viewController.presentPresets()
             }
@@ -168,7 +171,8 @@ struct StatusTableView: View {
             ActionTab(
                 title: "Settings",
                 icon: "settings",
-                tintColor: .secondaryLabel
+                tintColor: .secondaryLabel,
+                isEnabled: !viewModel.isPodLoanedToWatch
             ) {
                 viewController.presentSettings()
             }
@@ -181,6 +185,7 @@ struct ActionTab: Identifiable {
     let title: String
     let icon: String
     let tintColor: UIColor
+    var isEnabled: Bool = true
     let action: () -> Void
 }
 
@@ -199,6 +204,7 @@ struct ActionTabBar: UIViewRepresentable {
             for state in [layout.normal, layout.selected] {
                 state.titleTextAttributes = titleAttributes
             }
+            layout.disabled.titleTextAttributes = [.foregroundColor: UIColor.tertiaryLabel]
         }
         bar.standardAppearance = appearance
         bar.scrollEdgeAppearance = appearance
@@ -209,11 +215,13 @@ struct ActionTabBar: UIViewRepresentable {
         uiView.isHidden = isHidden
         context.coordinator.tabs = items
         uiView.items = items.enumerated().map { idx, item in
-            UITabBarItem(
+            let tabItem = UITabBarItem(
                 title: item.title,
-                image: UIImage(named: item.icon)?.scaledToFit(height: ActionTabBarMetrics.iconHeight).withTintColor(item.tintColor, renderingMode: .alwaysOriginal),
+                image: UIImage(named: item.icon)?.scaledToFit(height: ActionTabBarMetrics.iconHeight).withTintColor(item.isEnabled ? item.tintColor : item.tintColor.withAlphaComponent(0.3), renderingMode: .alwaysOriginal),
                 tag: idx
             )
+            tabItem.isEnabled = item.isEnabled
+            return tabItem
         }
     }
 
