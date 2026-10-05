@@ -43,7 +43,7 @@ struct LoopStatusModalView: View {
                 .environment(\.loopStatusColorPalette, loopStatusColors)
                 .padding(.bottom)
 
-            if viewModel.loopIconClosed,
+            if viewModel.loopIconClosed, !viewModel.isPodLoanedToWatch,
                let lastLoopCompletedFormattedTime = viewModel.lastLoopCompletedFormattedTime
             {
                 lastLoopCompleted(lastLoopCompletedString: lastLoopCompletedFormattedTime)
@@ -157,6 +157,10 @@ class LoopStatusModalViewModel {
     var lastLoopCompleted: Date? {
         loopManager?.lastLoopCompleted
     }
+
+    var isPodLoanedToWatch: Bool {
+        deviceManager?.isPodLoanedToWatch ?? false
+    }
     
     var mostRecentGlucoseDataDate: Date? {
         loopManager?.mostRecentGlucoseDataDate
@@ -215,7 +219,7 @@ class LoopStatusModalViewModel {
     }()
     
     var freshness: LoopCompletionFreshness {
-        guard loopIconClosed else {
+        guard loopIconClosed, !isPodLoanedToWatch else {
             return .fresh
         }
 
@@ -241,6 +245,10 @@ class LoopStatusModalViewModel {
     }
     
     func copy(appName: String) -> (title: String, message: String) {
+        if isPodLoanedToWatch {
+            return (titleSportMode, String(format: NSLocalizedString("Apple Watch is running the loop and controlling the pod. %1$@ on this phone will resume automation when the pod is reclaimed.", comment: "message when the pod is loaned to the watch (1: app name)"), appName))
+        }
+
         guard loopIconClosed else {
             if hasBluetoothIssue || isPumpInoperable || isPumpInSignalLoss {
                 return (titleDeviceIssue, NSLocalizedString("Tap your CGM or insulin pump status icons right away for more information and steps to resolve the issue.", comment: "message when automation is off and there is a bluetooth or pump issue"))
@@ -296,6 +304,10 @@ class LoopStatusModalViewModel {
         return NSLocalizedString("Automation was unsuccessful", comment: "title for when automation was unsuccessful")
     }
     
+    var titleSportMode: String {
+        return NSLocalizedString("Sport Mode Active", comment: "title for when the watch is running the loop")
+    }
+
     var titleAutomationOn: String {
         return NSLocalizedString("Automation is on", comment: "title for when automation is on")
     }

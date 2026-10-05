@@ -54,6 +54,9 @@ class MealDetectionManager {
 
     private lazy var cancellables = Set<AnyCancellable>()
 
+    /// True while another controller raises these notifications for this user; nothing runs here.
+    var alertsHandledElsewhere: () -> Bool = { false }
+
     // For testing only
     var test_currentDate: Date?
 
@@ -76,6 +79,7 @@ class MealDetectionManager {
     }
 
     func run() async {
+        guard !alertsHandledElsewhere() else { return }
         let algoState = await algorithmStateProvider.algorithmState
         guard let input = algoState.input, let output = algoState.output else {
             self.log.debug("Skipping run with missing algorithm input/output")

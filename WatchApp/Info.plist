@@ -24,6 +24,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CLKComplicationPrincipalClass</key>
 	<string>$(PRODUCT_MODULE_NAME).ComplicationController</string>
+	<key>LoopLocalCacheDurationDays</key>
+	<string>$(LOOP_LOCAL_CACHE_DURATION_DAYS)</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation. Sleep data from the Health database is used to optimize delivery of Apple Watch complication updates during the time you are awake.</string>
 	<key>NSHealthUpdateUsageDescription</key>
@@ -32,6 +34,10 @@
 	<array>
 		<string>com.loopkit.Loop.AddCarbEntryOnWatch</string>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
+	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -39,6 +45,10 @@
 	</array>
 	<key>WKApplication</key>
 	<true/>
+	<key>WKBackgroundModes</key>
+	<array>
+		<string>workout-processing</string>
+	</array>
 	<key>WKCompanionAppBundleIdentifier</key>
 	<string>$(MAIN_APP_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleIconName</key>
