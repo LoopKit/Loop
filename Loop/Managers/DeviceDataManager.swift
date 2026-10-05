@@ -1377,6 +1377,7 @@ struct CancelTempBasalFailedMaximumBasalRateChangedError: LocalizedError {
 
 extension DeviceDataManager : RemoteDataServicesManagerDelegate {
     var shouldSyncGlucoseToRemoteService: Bool {
+        guard !podLoanHoldsGlucoseUploads else { return false }
         guard let cgmManager = cgmManager else {
             return true
         }

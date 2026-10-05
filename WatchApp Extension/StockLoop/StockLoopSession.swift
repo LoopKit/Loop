@@ -116,7 +116,12 @@ final class StockLoopSession {
                 LoopStallWatchdog.refresh()
 
                 NotificationCenter.default.post(name: .podLoanPhaseDidChange, object: nil)
+
+                // Uploads, when the Start grant carried service configurations.
+                LoanRemoteUploads.shared.begin(loopManager: self.stack.loopManager)
             } else {
+                // Normally already done by teardownPump.
+                LoanRemoteUploads.shared.end()
                 LoopStallWatchdog.disarm()
 
                 // Loop mode is per session.

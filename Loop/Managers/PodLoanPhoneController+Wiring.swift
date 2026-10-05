@@ -57,6 +57,13 @@ extension WatchDataManager {
                 })
                 if ridesBothChannels { session.transferUserInfo(dictionary) }
             },
+            // Services only: the pump shares its configuration through the grant's own field. Never logged.
+            serviceConfigurations: { [weak self] in
+                (self?.deviceManager.allActivePlugins ?? []).compactMap { plugin in
+                    plugin is Service ? (plugin as? DeviceConfigurationSharing)?.exportConfiguration() : nil
+                }
+            },
+            cgmUploadsGlucose: { [weak self] in self?.deviceManager.cgmManager?.shouldSyncToRemoteService ?? true },
             addPumpEvents: { [weak self] events, lastReconciliation, completion in
                 guard let self = self else { completion(nil); return }
 
@@ -120,6 +127,7 @@ extension WatchDataManager {
                 self?.temporaryPresetsManager.setScheduleOverride(override, changedAt: changedAt)
             },
 
+            skipLoanGlucoseUploads: { [weak self] services in self?.deviceManager.skipLoanGlucoseUploads(services: services) },
             // The wrist's loop mode coming home.
             noteWatchClosedLoop: { [weak self] closed in
                 self?.settingsManager.mutateLoopSettings { $0.dosingEnabled = closed }
@@ -293,13 +301,17 @@ extension WatchDataManager {
                 }
             },
 
-            addDosingDecisions: { [weak self] decisions, completion in
-                guard let store = self?.loopDataManager.dosingDecisionStore as? DosingDecisionStore else {
+            addDosingDecisions: { [weak self] decisions, uploadedBy, completion in
+                guard let self, let store = self.loopDataManager.dosingDecisionStore as? DosingDecisionStore else {
                     return completion(.success(0))
                 }
+                let deviceManager = self.deviceManager
                 Task {
                     do {
-                        completion(.success(try await PodLoanPhoneController.addNewDosingDecisions(decisions, to: store)))
+                        completion(.success(try await PodLoanPhoneController.addNewDosingDecisions(
+                            decisions, to: store, skipUploads: uploadedBy.isEmpty ? nil : { ids in
+                                await deviceManager.skipLoanDosingDecisionUploads(ids, in: store, services: uploadedBy)
+                            })))
                     } catch {
                         completion(.failure(error))
                     }

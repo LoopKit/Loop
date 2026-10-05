@@ -29,6 +29,8 @@ extension PodLoanWatchController {
                 return
             }
             self.handbackRequested = true
+            // Anything not yet uploaded goes now, so the release below can confirm it.
+            LoanRemoteUploads.shared.flush()
             self.handbackFailure = nil
             self.handbackResendCount = 0
             self.handbackSawUnreachable = false
@@ -212,8 +214,15 @@ extension PodLoanWatchController {
         }
 
         // No pod read here: the phone judges the loan by its own read after it takes the pod back.
-        finalOfferSent = true
-        sendHandbackOffer(recovered: false)
+        // What the watch uploaded in full: the phone uploads only the rest.
+        LoanRemoteUploads.shared.confirmUploads(within: 5) { confirmed in
+            DispatchQueue.main.async {
+                self.uploadsConfirmed = confirmed
+                SportLog.event("uploads", "hand-back: uploads confirmed \(confirmed.isEmpty ? "none — the phone uploads its own copies" : confirmed.map { "\($0.key): \($0.value.joined(separator: ", "))" }.joined(separator: "; "))")
+                self.finalOfferSent = true
+                self.sendHandbackOffer(recovered: false)
+            }
+        }
     }
 
     /// Sends one offer, by every path, and arms the next: a late interim offer only stores records,
@@ -245,7 +254,8 @@ extension PodLoanWatchController {
             // Lets the phone retro-acknowledge a loan it never granted.
             seizeToken: persisted.seizeToken,
 
-            lastLoopCompleted: loopManager.lastLoopCompleted)
+            lastLoopCompleted: loopManager.lastLoopCompleted,
+            uploadsConfirmed: phase != .active ? uploadsConfirmed : nil)
         if offer.released == true, finalOfferSentAt == nil { finalOfferSentAt = self.now() }
         handbackResendCount += 1
 
@@ -401,7 +411,7 @@ extension PodLoanWatchController {
             let deviceLog = await Self.deviceLogEntries(in: loopManager.deviceLog, after: deviceLogAnchor, epoch: epoch)
             DispatchQueue.main.async {
                 let history = LoanHistory(epoch: epoch, decisions: decisions?.decisions ?? [], alerts: alerts?.alerts ?? [],
-                                          deviceLog: deviceLog ?? [])
+                                          deviceLog: deviceLog ?? [], uploadsConfirmed: self.uploadsConfirmed)
                 let counts = "\(history.decisions.count) dosing decision(s), \(history.alerts?.count ?? 0) alert(s), \(history.deviceLog?.count ?? 0) device log line(s)"
                 guard !history.decisions.isEmpty || history.alerts?.isEmpty == false || history.deviceLog?.isEmpty == false else {
                     return
