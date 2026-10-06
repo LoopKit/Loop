@@ -185,14 +185,18 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
 
     private func sendSetBolusUserInfo(carbEntry: NewCarbEntry?, bolus: Double) async throws {
         let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), contextDate: self.contextDate, carbEntry: carbEntry, activationType: .activationTypeFor(recommendedAmount: recommendedBolusAmount, bolusAmount: bolus))
-        let updatedContext = try await WCSession.default.sendBolusMessage(bolus)
+        // The phone saves the entry and pushes a context with it in COB before
+        // it replies, so stop treating it as pending before sending.
+        let pendingCarbEntry = carbEntryUnderConsideration
+        carbEntryUnderConsideration = nil
+        let updatedContext: WatchContext
+        do {
+            updatedContext = try await WCSession.default.sendBolusMessage(bolus)
+        } catch {
+            carbEntryUnderConsideration = pendingCarbEntry
+            throw error
+        }
         if bolus.carbEntry != nil {
-            // The carb entry has now been saved on the phone (and is reflected in
-            // COB). Stop treating it as a pending entry, otherwise the context
-            // update below re-requests a recommendation that passes it as a
-            // potential entry on top of the COB it is now part of — double
-            // counting the carbs and roughly doubling the recommended bolus.
-            carbEntryUnderConsideration = nil
             if bolus.value == 0 {
                 // Notify for a successful carb entry (sans bolus)
                 WKInterfaceDevice.current().play(.success)
