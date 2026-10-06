@@ -444,6 +444,10 @@ final class WatchDataManager: NSObject {
         dosingDecision.manualBolusRequested = bolus.value
         await loopDataManager.storeManualBolusDosingDecision(dosingDecision, withDate: bolus.startDate)
 
+        guard bolus.value > 0 else {
+            return
+        }
+
         try await deviceManager.enactBolus(units: bolus.value, decisionId: dosingDecision.id, activationType: bolus.activationType)
         self.analyticsServicesManager?.didBolus(source: "Watch", units: bolus.value)
     }
