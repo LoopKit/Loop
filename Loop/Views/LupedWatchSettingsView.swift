@@ -84,10 +84,7 @@ struct LupedWatchSettingsView: View {
         }
         .insetGroupedListStyle()
         .navigationTitle(NSLocalizedString("Pebble", comment: "Title of the Pebble smartwatch settings screen"))
-        .onAppear {
-            draft = watchfaceUUID
-            LupedPebbleTransport.shared.requestDiagnostics(automatic: true)
-        }
+        .onAppear { draft = watchfaceUUID }
     }
 
     private func save() {
@@ -199,7 +196,7 @@ struct LupedWatchInfoSection: View {
         } header: {
             Text(NSLocalizedString("Watch", comment: "Header for the Pebble watch info section"))
         } footer: {
-            Text(NSLocalizedString("Reported by the watchface. Counters cover at most the last 48 hours.", comment: "Footer for the Pebble watch info section"))
+            Text(NSLocalizedString("Reported by the watchface when you tap Refresh Watch Info. After Loop reconnects, the watchface restarts for a moment so it can reply. Counters cover at most the last 48 hours.", comment: "Footer for the Pebble watch info section"))
         }
     }
 

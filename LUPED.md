@@ -44,10 +44,13 @@ Settings → Devices → Pebble (shown only when `LUPED_PEBBLE` is set):
   trip, and the next retry. **Send Now** pushes the current reading
   immediately.
 - **Watch**: battery and counters from Luped's diagnostics snapshot
-  (`COMMAND: "diagnostics"`), requested when the screen opens and with
-  **Refresh Watch Info**. Alloy disables a watchface's outbox whenever Loop's
-  session reconnects, so after Loop restarts the watch acknowledges the
-  request but cannot reply until the watchface restarts; the screen says so.
+  (`COMMAND: "diagnostics"`), fetched only when **Refresh Watch Info** is
+  tapped. Alloy disables a watchface's outbox whenever Loop's session opens or
+  closes, so if Luped has not messaged Loop since the session opened, Loop
+  first restarts it over the app run-state endpoint (0x34: STOP, then RUN
+  1.5 s later). The fresh Luped's ready handshake re-enables its outbox, and
+  the request follows. This switches the watch to Luped if another face was
+  active.
 - **Send to Pebble** (on by default): turning it off removes Loop's PPoGATT
   service, which ends the watch session immediately, releases the Bluetooth
   peripheral manager and stops building payloads. Turning it on publishes the

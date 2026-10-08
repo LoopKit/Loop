@@ -93,6 +93,13 @@ private enum AppMessage {
     static let maximumRetryDelay: TimeInterval = 300
 }
 
+/// PebbleOS app run-state endpoint: start or stop an app by UUID.
+private enum AppRunState {
+    static let endpoint: UInt16 = 0x34
+    static let run: UInt8 = 0x01
+    static let stop: UInt8 = 0x02
+}
+
 /// The phone-version exchange PebbleOS starts on every new session.
 ///
 /// Without the 8 KiB AppMessage capability, PebbleOS limits a JS-free
@@ -184,10 +191,12 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
     private var inflightCommand: (transactionID: UInt8, command: String)?
     private var diagnosticsRequested = false
     private var diagnosticsReplyTimeout: Task<Void, Never>?
-    private var lastAutomaticDiagnosticsRequest = Date.distantPast
-    /// Set when the watch acknowledged a request but never replied (Alloy's
-    /// disabled outbox); cleared when the watch sends anything or a session opens.
-    private var watchOutboxBlocked = false
+    /// Whether Luped has messaged Loop since this session opened. Alloy disables
+    /// a watchface's outbox whenever a non-system session (like Loop's) opens or
+    /// closes; only a watchface restart re-enables it.
+    private var heardFromWatchThisSession = false
+    /// Waiting for Luped to start again after Loop restarted it.
+    private var awaitingWatchfaceRestart: Task<Void, Never>?
     private var pushAckTimeout: Task<Void, Never>?
     private var retryDelay: TimeInterval = 0
     /// Set after the full retry backoff got no ACK: pushes stop until the
@@ -626,7 +635,9 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
         paused = false
         status.retryAt = nil
         inflightCommand = nil
-        watchOutboxBlocked = false
+        heardFromWatchThisSession = false
+        awaitingWatchfaceRestart?.cancel()
+        awaitingWatchfaceRestart = nil
     }
 
     private func closeSession(reason: String) {
@@ -675,7 +686,12 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
             guard let tuples = tuples(in: message) else {
                 return
             }
-            watchOutboxBlocked = false
+            heardFromWatchThisSession = true
+            if awaitingWatchfaceRestart != nil {
+                awaitingWatchfaceRestart?.cancel()
+                awaitingWatchfaceRestart = nil
+                record(.info, "Watchface restarted; it can reply again")
+            }
             let hex = Self.hex(message.dropFirst(18))
             if let diagnostics = tuples[LupedMessageKey.diagnostics]?.string {
                 record(.fromWatch, "Watch diagnostics: \(diagnostics)")
@@ -770,9 +786,9 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
         diagnosticsReplyTimeout = Task { [weak self] in
             try? await Task.sleep(nanoseconds: 5_000_000_000)
             guard !Task.isCancelled, let self else { return }
-            self.watchOutboxBlocked = true
-            self.record(.error, "No diagnostics reply: the watchface cannot send until it restarts (Alloy disables its outbox after Loop's session reconnects)")
-            self.status.watchInfoNote = NSLocalizedString("The watchface received the request but cannot reply until it restarts. Switch to another watchface and back, then tap Refresh Watch Info.", comment: "Pebble watch info note: Alloy outbox disabled")
+            self.heardFromWatchThisSession = false
+            self.record(.error, "No diagnostics reply within 5 s; the next request restarts the watchface first")
+            self.status.watchInfoNote = NSLocalizedString("The watch did not reply. Tap Refresh Watch Info again to restart the watchface and retry.", comment: "Pebble watch info note: no reply")
         }
     }
 
@@ -791,25 +807,45 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
         }
     }
 
-    /// Asks Luped for its diagnostics snapshot (battery and counters).
-    /// `automatic` requests (the Pebble screen appearing) are limited to one a
-    /// minute and skipped while the watch is known to be unable to reply.
-    func requestDiagnostics(automatic: Bool = false) {
-        if automatic {
-            guard !watchOutboxBlocked, Date().timeIntervalSince(lastAutomaticDiagnosticsRequest) >= 60 else {
-                return
-            }
-            lastAutomaticDiagnosticsRequest = Date()
-            record(.info, "Watch info requested: Pebble screen opened")
-        } else {
-            record(.info, "Watch info requested: Refresh Watch Info tapped")
+    /// Asks Luped for its diagnostics snapshot (battery and counters). If Luped
+    /// has not messaged Loop since this session opened, its outbox is disabled,
+    /// so Loop first restarts the watchface over the app run-state endpoint.
+    func requestDiagnostics() {
+        record(.info, "Watch info requested")
+        status.watchInfoNote = nil
+        guard case .open = sessionState else {
+            status.watchInfoNote = NSLocalizedString("The watch is not connected.", comment: "Pebble watch info note: no session")
+            return
         }
         diagnosticsRequested = true
+        if !heardFromWatchThisSession, awaitingWatchfaceRestart == nil {
+            restartWatchface()
+        }
         sendPendingCommand()
     }
 
+    /// Stops and relaunches the watchface. On start, Alloy's ready handshake
+    /// reaches Loop and Loop's reply re-enables the watchface's outbox.
+    private func restartWatchface() {
+        status.watchInfoNote = NSLocalizedString("Restarting the watchface so it can reply…", comment: "Pebble watch info note: restarting the watchface")
+        record(.toWatch, "App run state STOP for \(appUUID.uuidString) (restart so the watchface can reply)")
+        sendFrame(endpoint: AppRunState.endpoint, payload: Data([AppRunState.stop]) + appUUID.bytes)
+        awaitingWatchfaceRestart = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            guard !Task.isCancelled, let self else { return }
+            self.record(.toWatch, "App run state RUN for \(self.appUUID.uuidString)")
+            self.sendFrame(endpoint: AppRunState.endpoint, payload: Data([AppRunState.run]) + self.appUUID.bytes)
+            try? await Task.sleep(nanoseconds: 15_000_000_000)
+            guard !Task.isCancelled else { return }
+            self.awaitingWatchfaceRestart = nil
+            self.diagnosticsRequested = false
+            self.record(.error, "The watchface did not start within 15 s")
+            self.status.watchInfoNote = NSLocalizedString("The watchface did not restart. Open it on the watch, then try again.", comment: "Pebble watch info note: restart failed")
+        }
+    }
+
     private func sendPendingCommand() {
-        guard diagnosticsRequested, inflightPush == nil, inflightCommand == nil, case .open = sessionState else {
+        guard diagnosticsRequested, awaitingWatchfaceRestart == nil, inflightPush == nil, inflightCommand == nil, case .open = sessionState else {
             return
         }
         diagnosticsRequested = false
