@@ -442,8 +442,28 @@ extension SettingsView {
             
             cgmSection
                 .accessibilityIdentifier("settingsViewCGM")
+
+            #if LUPED_PEBBLE
+            smartwatchSection
+                .accessibilityIdentifier("settingsViewSmartwatch")
+            #endif
         }
     }
+
+    #if LUPED_PEBBLE
+    private var smartwatchSection: some View {
+        NavigationLink(destination: LupedWatchSettingsView()) {
+            LargeButton(action: {},
+                        includeArrow: false,
+                        imageView: Image(systemName: "watch.analog")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 30),
+                        label: NSLocalizedString("Pebble", comment: "Title of the Pebble smartwatch row in settings"),
+                        descriptiveText: NSLocalizedString("Smartwatch", comment: "Descriptive text for the Pebble smartwatch row"))
+        }
+    }
+    #endif
     
     @ViewBuilder
     private var pumpSection: some View {

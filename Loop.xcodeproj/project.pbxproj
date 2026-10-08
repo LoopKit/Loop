@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8B4368DE3FB2D975D20BD272 /* LupedWatchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F387F22ED000ACCFB26D2C /* LupedWatchSettingsView.swift */; };
+		DBF66D3992F1C01B8DDC29F8 /* LupedPebbleTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 727A0CE532FB2B5D992DF4F2; };
+		3106C7700C417C5B7C2A7032 /* LupedPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA1BC278FA39D42953E2B83; };
 		01414522FC033F2B7A9B223A /* Loop/Resources/Sounds/crying.caf in Resources */ = {isa = PBXBuildFile; fileRef = 85203550670F2E9BE92F27D8 /* Loop/Resources/Sounds/crying.caf */; };
 		0A02E77AD7536C322933D49B /* Loop/Resources/Sounds/minimal.caf in Resources */ = {isa = PBXBuildFile; fileRef = 74145BE3C46270883D295A1F /* Loop/Resources/Sounds/minimal.caf */; };
 		124B300527D84BE2A1233A91 /* Loop/Resources/Sounds/urgent_low.caf in Resources */ = {isa = PBXBuildFile; fileRef = C9EA3F48338B49BD9C6BD0F9 /* Loop/Resources/Sounds/urgent_low.caf */; };
@@ -790,6 +793,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F7F387F22ED000ACCFB26D2C /* LupedWatchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LupedWatchSettingsView.swift; sourceTree = "<group>"; };
+		727A0CE532FB2B5D992DF4F2 /* LupedPebbleTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LupedPebbleTransport.swift; sourceTree = "<group>"; };
+		7DA1BC278FA39D42953E2B83 /* LupedPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LupedPayload.swift; sourceTree = "<group>"; };
 		0FC34B523FE5A50C920506D5 /* Loop/Resources/Sounds/alarm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/alarm.caf; sourceTree = SOURCE_ROOT; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
@@ -2058,6 +2064,7 @@
 				C1AF062229426300002C1B19 /* ManualGlucoseEntryRow.swift */,
 				DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */,
 				DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */,
+				F7F387F22ED000ACCFB26D2C /* LupedWatchSettingsView.swift */,
 				84DEB10C2C18FABA00170734 /* IOSFocusModesView.swift */,
 				84D1F1A62D09053A00CB271F /* StatusTableView.swift */,
 				B429CAB22E97C7F300FA988E /* LoopStatusModalView.swift */,
@@ -2078,6 +2085,8 @@
 				C16575702538A36B004AE16E /* CGMStalenessMonitor.swift */,
 				A977A2F324ACFECF0059C207 /* CriticalEventLogExportManager.swift */,
 				C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */,
+				727A0CE532FB2B5D992DF4F2 /* LupedPebbleTransport.swift */,
+				7DA1BC278FA39D42953E2B83 /* LupedPayload.swift */,
 				43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */,
 				C16B983D26B4893300256B05 /* DoseEnactor.swift */,
 				4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */,
@@ -2849,6 +2858,7 @@
 				C1D19800232CFA2A0096D646 /* Capture Build Details */,
 				C1092BFE29F88F0600AE3D1C /* Apply Info Customizations */,
 				4F70C1EC1DE8DCA8006380B7 /* Embed Foundation Extensions */,
+				5F267D6E3D58BF5A3B27DF05 /* Luped PebbleKit */,
 			);
 			buildRules = (
 			);
@@ -3235,6 +3245,26 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		5F267D6E3D58BF5A3B27DF05 /* Luped PebbleKit */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
+			);
+			name = "Luped PebbleKit";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Scripts/embed-luped-pebblekit.sh\"\n";
+		};
 		C1092BFE29F88F0600AE3D1C /* Apply Info Customizations */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -3473,6 +3503,9 @@
 				A9CBE45A248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift in Sources */,
 				A9C62D8A2331703100535612 /* ServicesManager.swift in Sources */,
 				C11445B22DA98A3400034864 /* CorrectionRangeInformationView.swift in Sources */,
+				DBF66D3992F1C01B8DDC29F8 /* LupedPebbleTransport.swift in Sources */,
+				3106C7700C417C5B7C2A7032 /* LupedPayload.swift in Sources */,
+				8B4368DE3FB2D975D20BD272 /* LupedWatchSettingsView.swift in Sources */,
 				43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */,
 				A9347F2F24E7508A00C99C34 /* WatchHistoricalCarbs.swift in Sources */,
 				C10509792D8B636900118A37 /* Environment+TemporaryPresetsManager.swift in Sources */,
