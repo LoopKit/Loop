@@ -15,9 +15,17 @@ extension UserDefaults {
     static let lupedPebbleFullScreenKey = "lupedPebbleFullScreen"
     static let lupedDefaultWatchfaceUUID = "bf32924c-4839-449e-9e56-ee190249acb2"
 
-    /// Enabled unless the user turned it off.
+    /// Whether a Pebble has been added in Settings → Devices; off until then.
     @objc dynamic var lupedPebbleEnabled: Bool {
-        object(forKey: Self.lupedPebbleEnabledKey) as? Bool ?? true
+        bool(forKey: Self.lupedPebbleEnabledKey)
+    }
+
+    /// Deletes the Pebble device: stops the transport and resets its settings.
+    func deleteLupedPebble() {
+        set(false, forKey: Self.lupedPebbleEnabledKey)
+        removeObject(forKey: Self.lupedPebbleAlarmsEnabledKey)
+        removeObject(forKey: Self.lupedPebbleFullScreenKey)
+        removeObject(forKey: Self.lupedPebbleWatchfaceUUIDKey)
     }
 
     /// Watch vibration alarms, on unless the user turned them off. Loop's own

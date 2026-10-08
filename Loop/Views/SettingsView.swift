@@ -23,6 +23,9 @@ struct SettingsView: View {
     @Environment(\.glucoseTintColor) private var glucoseTintColor
     @Environment(\.insulinTintColor) private var insulinTintColor
     @Environment(\.isInvestigationalDevice) private var isInvestigationalDevice
+    #if LUPED_PEBBLE
+    @AppStorage(UserDefaults.lupedPebbleEnabledKey) private var lupedPebbleAdded = false
+    #endif
 
     @State var viewModel: SettingsViewModel
     @ObservedObject var versionUpdateViewModel: VersionUpdateViewModel
@@ -451,16 +454,25 @@ extension SettingsView {
     }
 
     #if LUPED_PEBBLE
+    @ViewBuilder
     private var smartwatchSection: some View {
-        NavigationLink(destination: LupedWatchSettingsView()) {
-            LargeButton(action: {},
+        if lupedPebbleAdded {
+            NavigationLink(destination: LupedWatchSettingsView(glucoseAlertManager: viewModel.deviceManager?.glucoseAlertManager, alertPermissionsChecker: viewModel.alertPermissionsChecker)) {
+                LargeButton(action: {},
+                            includeArrow: false,
+                            imageView: Image(systemName: "watch.analog")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 30),
+                            label: NSLocalizedString("Pebble", comment: "Title of the Pebble smartwatch row in settings"),
+                            descriptiveText: NSLocalizedString("Smartwatch", comment: "Descriptive text for the Pebble smartwatch row"))
+            }
+        } else {
+            LargeButton(action: { lupedPebbleAdded = true },
                         includeArrow: false,
-                        imageView: Image(systemName: "watch.analog")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 30),
-                        label: NSLocalizedString("Pebble", comment: "Title of the Pebble smartwatch row in settings"),
-                        descriptiveText: NSLocalizedString("Smartwatch", comment: "Descriptive text for the Pebble smartwatch row"))
+                        imageView: plusImage,
+                        label: NSLocalizedString("Add Smartwatch", comment: "Title text for button to add a Pebble smartwatch"),
+                        descriptiveText: NSLocalizedString("Tap here to set up a Pebble watch", comment: "Descriptive text for button to add a Pebble smartwatch"))
         }
     }
     #endif

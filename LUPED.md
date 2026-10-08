@@ -37,43 +37,46 @@ The "Luped Background Mode" build phase (`Scripts/luped-background-mode.sh`) add
 
 ## Settings
 
-Settings → Devices → Pebble (shown only when `LUPED_PEBBLE` is set):
+Pebble is a device in Settings → Devices (shown only when `LUPED_PEBBLE` is
+set), like the pump and CGM. It is not set up by default: **Add Smartwatch**
+starts the transport, and **Delete Pebble** (with confirmation) stops it,
+which ends the watch session, releases the Bluetooth peripheral manager, stops
+building payloads, resets the Pebble settings and clears the log.
 
-- **Status**: link state (off, Bluetooth unavailable, waiting for the watch,
+Settings → Devices → Pebble:
+
+- **Status**: link state (Bluetooth unavailable, waiting for the watch,
   connecting, connected, paused), the last delivered reading with its round
   trip, and the next retry. **Send Now** pushes the current reading
   immediately.
-- **Watch**: battery and counters from Luped's diagnostics snapshot
-  (`COMMAND: "diagnostics"`), fetched only when **Refresh Watch Info** is
-  tapped. Alloy disables a watchface's outbox whenever Loop's session opens or
-  closes, so if Luped has not messaged Loop since the session opened, Loop
-  first restarts it over the app run-state endpoint (0x34: STOP, then RUN
-  1.5 s later). The fresh Luped's ready handshake re-enables its outbox, and
-  the request follows. This switches the watch to Luped if another face was
-  active.
-- **Send to Pebble** (on by default): turning it off removes Loop's PPoGATT
-  service, which ends the watch session immediately, releases the Bluetooth
-  peripheral manager and stops building payloads. Turning it on publishes the
-  service again and sends the current reading.
-- **Watch Alarms** (on by default): watch vibration using Loop's active glucose
-  alert profile. Off sends the alarm mask as `0`, which also silences Luped's
+- **Display → Full-Screen Ring** (off by default): `DATA` index 13; a large
+  glucose ring with the reading time inside it instead of the ring and trend
+  graph.
+- **Alarms → Watch Alarms** (on by default): watch vibration using Loop's
+  active glucose alert profile; **Glucose Alert Settings** opens Loop's alert
+  screen. Off sends the alarm mask as `0`, which also silences Luped's
   stale-data buzz; Loop's own alerts are unaffected.
-- **Full-Screen Ring** (off by default): `DATA` index 13; a large glucose ring
-  with the reading time inside it instead of the ring and trend graph.
-- **Watchface UUID** (default Luped CGM,
+- **Diagnostics**: battery and counters from Luped's diagnostics snapshot
+  (`COMMAND: "diagnostics"`), fetched only when **Refresh Watch Info** is
+  tapped, and the **Communication Log**: every event between Loop and the
+  watch since Loop started (session setup, handshakes, pushes with a decode of
+  every field, the watch's ACK/NACK with round trip, refresh requests,
+  retries, settings changes), newest first. The last 500 entries are kept in
+  memory; Share exports them as text. Alloy disables a watchface's outbox
+  whenever Loop's session opens or closes, so if Luped has not messaged Loop
+  since the session opened, Loop first restarts it over the app run-state
+  endpoint (0x34: STOP, then RUN 1.5 s later); the fresh Luped's ready
+  handshake re-enables its outbox, and the request follows. This switches the
+  watch to Luped if another face was active.
+- **Advanced → Watchface UUID** (default Luped CGM,
   `bf32924c-4839-449e-9e56-ee190249acb2`): the app UUID Loop's service and
   AppMessages use. Changing it republishes the service, and the watch opens a
   session for the new UUID. The watchface must use Luped's AppMessage keys and
   must not use PebbleKit JS.
 
-- **Log → Communication Log**: every event between Loop and the watch since
-  Loop started (session setup, handshakes, pushes with their payload, the
-  watch's ACK/NACK, refresh requests, retries, settings changes), newest
-  first, marked → to the watch, ← from the watch. The last 500 entries are
-  kept in memory; Share exports them as text.
-
 The settings are stored in standard user defaults (`lupedPebbleEnabled`,
-`lupedPebbleAlarmsEnabled`, `lupedPebbleFullScreen`, `lupedPebbleWatchfaceUUID`) and apply within half a second.
+`lupedPebbleAlarmsEnabled`, `lupedPebbleFullScreen`, `lupedPebbleWatchfaceUUID`)
+and apply within half a second.
 
 ## Delivery behavior
 

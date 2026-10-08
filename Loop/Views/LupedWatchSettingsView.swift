@@ -4,9 +4,98 @@ import SwiftUI
 
 /// Settings → Devices → Pebble: controls the Pebble watchface transport.
 struct LupedWatchSettingsView: View {
-    @AppStorage(UserDefaults.lupedPebbleEnabledKey) private var isEnabled = true
+    /// Loop's glucose alerts, whose thresholds and repeats the watch mirrors.
+    var glucoseAlertManager: GlucoseAlertManager?
+    var alertPermissionsChecker: AlertPermissionsChecker?
+
     @AppStorage(UserDefaults.lupedPebbleAlarmsEnabledKey) private var alarmsEnabled = true
     @AppStorage(UserDefaults.lupedPebbleFullScreenKey) private var fullScreen = false
+    @Environment(\.dismiss) private var dismiss
+    @State private var confirmingDelete = false
+
+    var body: some View {
+        List {
+            Group {
+                LupedLinkStatusSection(status: LupedPebbleTransport.shared.status)
+
+                Section {
+                    Toggle(NSLocalizedString("Full-Screen Ring", comment: "Toggle showing the Pebble glucose ring full screen"), isOn: $fullScreen)
+                } header: {
+                    Text(NSLocalizedString("Display", comment: "Header for the Pebble display settings"))
+                } footer: {
+                    Text(NSLocalizedString("Show a large glucose ring with the reading time inside it instead of the ring with a trend graph.", comment: "Footer for the Pebble full-screen ring toggle"))
+                }
+
+                Section {
+                    Toggle(NSLocalizedString("Watch Alarms", comment: "Toggle enabling Pebble watch vibration alarms"), isOn: $alarmsEnabled)
+                    if let glucoseAlertManager, let alertPermissionsChecker {
+                        NavigationLink(destination: GlucoseAlertSettingsView(manager: glucoseAlertManager, permissionsChecker: alertPermissionsChecker)) {
+                            Text(NSLocalizedString("Glucose Alert Settings", comment: "Row opening Loop's glucose alert settings from the Pebble screen"))
+                        }
+                    }
+                } header: {
+                    Text(NSLocalizedString("Alarms", comment: "Header for the Pebble alarm settings"))
+                } footer: {
+                    Text(NSLocalizedString("The watch vibrates using the thresholds, on/off switches and repeat intervals from Glucose Alert Settings. Turning Watch Alarms off silences the watch only; Loop's alerts are unaffected.", comment: "Footer for the Pebble alarm settings"))
+                }
+
+                Section {
+                    NavigationLink(destination: LupedDiagnosticsView()) {
+                        Text(NSLocalizedString("Diagnostics", comment: "Row opening Pebble diagnostics"))
+                    }
+                    NavigationLink(destination: LupedAdvancedSettingsView()) {
+                        Text(NSLocalizedString("Advanced", comment: "Row opening advanced Pebble settings"))
+                    }
+                }
+
+                Section {
+                    Button(role: .destructive) {
+                        confirmingDelete = true
+                    } label: {
+                        Text(NSLocalizedString("Delete Pebble", comment: "Button removing the Pebble smartwatch"))
+                            .foregroundColor(.red)
+                    }
+                } footer: {
+                    Text(NSLocalizedString("Loop sends glucose readings and glucose alert settings to a Pebble watchface over Bluetooth while the watch is paired with the Pebble app.", comment: "Footer explaining the Pebble smartwatch device"))
+                }
+            }
+        }
+        .insetGroupedListStyle()
+        .navigationTitle(NSLocalizedString("Pebble", comment: "Title of the Pebble smartwatch settings screen"))
+        .confirmationDialog(NSLocalizedString("Are you sure you want to delete this Pebble?", comment: "Delete Pebble confirmation title"), isPresented: $confirmingDelete, titleVisibility: .visible) {
+            Button(NSLocalizedString("Delete Pebble", comment: "Button removing the Pebble smartwatch"), role: .destructive) {
+                UserDefaults.standard.deleteLupedPebble()
+                LupedPebbleTransport.shared.communicationLog.clear()
+                LupedPebbleTransport.shared.status.diagnostics = nil
+                dismiss()
+            }
+        } message: {
+            Text(NSLocalizedString("Loop stops sending to the watch and resets the Pebble settings. You can add it again under Devices.", comment: "Delete Pebble confirmation message"))
+        }
+    }
+}
+
+/// Watch info and the communication log, for troubleshooting.
+struct LupedDiagnosticsView: View {
+    var body: some View {
+        List {
+            LupedWatchInfoSection(status: LupedPebbleTransport.shared.status)
+
+            Section {
+                NavigationLink(destination: LupedCommunicationLogView(log: LupedPebbleTransport.shared.communicationLog)) {
+                    Text(NSLocalizedString("Communication Log", comment: "Row opening the Pebble communication log"))
+                }
+            } footer: {
+                Text(NSLocalizedString("Everything Loop sends to and receives from the watch since Loop started, newest first.", comment: "Footer for the Pebble log section"))
+            }
+        }
+        .insetGroupedListStyle()
+        .navigationTitle(NSLocalizedString("Diagnostics", comment: "Title of the Pebble diagnostics screen"))
+    }
+}
+
+/// The watchface UUID, which most people never change.
+struct LupedAdvancedSettingsView: View {
     @AppStorage(UserDefaults.lupedPebbleWatchfaceUUIDKey) private var watchfaceUUID = UserDefaults.lupedDefaultWatchfaceUUID
     @State private var draft = ""
 
@@ -20,30 +109,6 @@ struct LupedWatchSettingsView: View {
 
     var body: some View {
         List {
-            LupedLinkStatusSection(status: LupedPebbleTransport.shared.status)
-
-            Section {
-                Toggle(NSLocalizedString("Send to Pebble", comment: "Toggle enabling the Pebble watchface transport"), isOn: $isEnabled)
-            } footer: {
-                Text(NSLocalizedString("Loop sends glucose readings and glucose alert settings to a Pebble watchface over Bluetooth. Keep the watch paired with the Pebble app.", comment: "Footer for the Pebble watchface transport toggle"))
-            }
-
-            LupedWatchInfoSection(status: LupedPebbleTransport.shared.status)
-
-            Section {
-                Toggle(NSLocalizedString("Watch Alarms", comment: "Toggle enabling Pebble watch vibration alarms"), isOn: $alarmsEnabled)
-            } footer: {
-                Text(NSLocalizedString("Vibrate on the watch using the thresholds and repeat intervals from Settings → Alert Management → Glucose Alerts. Turning this off silences the watch only; Loop's alerts are unaffected.", comment: "Footer for the Pebble watch alarms toggle"))
-            }
-            .disabled(!isEnabled)
-
-            Section {
-                Toggle(NSLocalizedString("Full-Screen Ring", comment: "Toggle showing the Pebble glucose ring full screen"), isOn: $fullScreen)
-            } footer: {
-                Text(NSLocalizedString("Show a large glucose ring with the reading time inside it instead of the ring with a trend graph.", comment: "Footer for the Pebble full-screen ring toggle"))
-            }
-            .disabled(!isEnabled)
-
             Section {
                 TextField(UserDefaults.lupedDefaultWatchfaceUUID, text: $draft)
                     .font(.body.monospaced())
@@ -70,20 +135,9 @@ struct LupedWatchSettingsView: View {
                     Text(NSLocalizedString("The UUID from the watchface's package.json. The watchface must use Luped's AppMessage keys and must not use PebbleKit JS.", comment: "Footer explaining the Pebble watchface UUID"))
                 }
             }
-            .disabled(!isEnabled)
-
-            Section {
-                NavigationLink(destination: LupedCommunicationLogView(log: LupedPebbleTransport.shared.communicationLog)) {
-                    Text(NSLocalizedString("Communication Log", comment: "Row opening the Pebble communication log"))
-                }
-            } header: {
-                Text(NSLocalizedString("Log", comment: "Header for the Pebble log section"))
-            } footer: {
-                Text(NSLocalizedString("Everything Loop sends to and receives from the watch since Loop started, newest first.", comment: "Footer for the Pebble log section"))
-            }
         }
         .insetGroupedListStyle()
-        .navigationTitle(NSLocalizedString("Pebble", comment: "Title of the Pebble smartwatch settings screen"))
+        .navigationTitle(NSLocalizedString("Advanced", comment: "Title of the advanced Pebble settings screen"))
         .onAppear { draft = watchfaceUUID }
     }
 
@@ -93,6 +147,7 @@ struct LupedWatchSettingsView: View {
         draft = watchfaceUUID
     }
 }
+
 /// Whether Loop is connected to the watch and when it last delivered a reading.
 struct LupedLinkStatusSection: View {
     @ObservedObject var status: LupedLinkStatus
