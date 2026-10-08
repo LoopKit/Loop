@@ -812,8 +812,12 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
             return
         }
         Task {
+            // A new reading is pushed by publish itself; force a re-send only
+            // when the latest reading was already delivered.
             await publish(unit: unit)
-            sendIfNeeded(force: true)
+            if inflightPush == nil {
+                sendIfNeeded(force: true)
+            }
         }
     }
 
