@@ -323,7 +323,9 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
             return
         }
         self.unit = unit
-        guard isEnabled else {
+        // Check the stored setting too: deleting the Pebble resets other settings,
+        // whose observers fire before the debounced disable is applied.
+        guard isEnabled, UserDefaults.standard.lupedPebbleEnabled else {
             return
         }
 
