@@ -12,6 +12,7 @@ extension UserDefaults {
     static let lupedPebbleEnabledKey = "lupedPebbleEnabled"
     static let lupedPebbleWatchfaceUUIDKey = "lupedPebbleWatchfaceUUID"
     static let lupedPebbleAlarmsEnabledKey = "lupedPebbleAlarmsEnabled"
+    static let lupedPebbleFullScreenKey = "lupedPebbleFullScreen"
     static let lupedDefaultWatchfaceUUID = "bf32924c-4839-449e-9e56-ee190249acb2"
 
     /// Enabled unless the user turned it off.
@@ -23,6 +24,11 @@ extension UserDefaults {
     /// alerts are unaffected.
     @objc dynamic var lupedPebbleAlarmsEnabled: Bool {
         object(forKey: Self.lupedPebbleAlarmsEnabledKey) as? Bool ?? true
+    }
+
+    /// Full-screen glucose ring instead of ring and graph; off by default.
+    @objc dynamic var lupedPebbleFullScreen: Bool {
+        bool(forKey: Self.lupedPebbleFullScreenKey)
     }
 
     @objc dynamic var lupedPebbleWatchfaceUUID: String {
@@ -240,6 +246,15 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
                     Task { await self.publish(unit: self.unit) }
                 }
                 .store(in: &settingsObservers)
+            UserDefaults.standard.publisher(for: \.lupedPebbleFullScreen)
+                .dropFirst()
+                .removeDuplicates()
+                .sink { [weak self] fullScreen in
+                    guard let self else { return }
+                    self.record(.info, "Watch display: \(fullScreen ? "full-screen ring" : "ring with graph")")
+                    Task { await self.publish(unit: self.unit) }
+                }
+                .store(in: &settingsObservers)
         }
         await publish(unit: displayGlucosePreference.unit)
     }
@@ -262,7 +277,7 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
         }
 
         let alarms = glucoseAlertManager.map(LupedAlarmSettings.init) ?? .disabled
-        guard let payload = LupedPayload(samples: samples, unit: unit, alarms: alarms) else {
+        guard let payload = LupedPayload(samples: samples, unit: unit, alarms: alarms, fullScreen: UserDefaults.standard.lupedPebbleFullScreen) else {
             record(.info, String(format: "No usable CGM readings among %ld stored samples; nothing to send", samples.count))
             return
         }

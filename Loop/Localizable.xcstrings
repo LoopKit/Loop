@@ -13380,6 +13380,10 @@
     "Combination of high and low intensity" : {
 
     },
+    "Communication Log" : {
+      "comment" : "Row opening the Pebble communication log\nTitle of the Pebble communication log",
+      "extractionState" : "manual"
+    },
     "Competition Stress" : {
 
     },
@@ -17851,6 +17855,10 @@
         }
       }
     },
+    "Enter a UUID such as bf32924c-4839-449e-9e56-ee190249acb2." : {
+      "comment" : "Footer shown for an invalid Pebble watchface UUID",
+      "extractionState" : "manual"
+    },
     "Enter Bolus" : {
       "comment" : "Button text to begin entering a bolus",
       "localizations" : {
@@ -18828,6 +18836,10 @@
           }
         }
       }
+    },
+    "Everything Loop sends to and receives from the watch since Loop started, newest first." : {
+      "comment" : "Footer for the Pebble log section",
+      "extractionState" : "manual"
     },
     "Example" : {
 
@@ -20346,6 +20358,10 @@
     },
     "Full out effort. No conversation possible." : {
 
+    },
+    "Full-Screen Ring" : {
+      "comment" : "Toggle showing the Pebble glucose ring full screen",
+      "extractionState" : "manual"
     },
     "g" : {
       "comment" : "The short unit display string for grams",
@@ -24980,6 +24996,10 @@
     "Lock Screen, Dynamic Island, and CarPlay display" : {
       "comment" : "Live Activity settings descriptive text"
     },
+    "Log" : {
+      "comment" : "Header for the Pebble log section",
+      "extractionState" : "manual"
+    },
     "Log Dose" : {
       "comment" : "Accessibility label for the manual dose entry button on the insulin delivery screen\nButton text to log a dose\nTitle for dose logging screen",
       "localizations" : {
@@ -25802,6 +25822,10 @@
           }
         }
       }
+    },
+    "Loop sends glucose readings and glucose alert settings to a Pebble watchface over Bluetooth. Keep the watch paired with the Pebble app." : {
+      "comment" : "Footer for the Pebble watchface transport toggle",
+      "extractionState" : "manual"
     },
     "Loop will automatically bolus when insulin needs are above scheduled basal, and will use temporary basal rates when needed to reduce insulin delivery below scheduled basal." : {
       "comment" : "Description string for automatic bolus dosing strategy",
@@ -28977,6 +29001,10 @@
         }
       }
     },
+    "No watch communication yet." : {
+      "comment" : "Shown when the Pebble communication log is empty",
+      "extractionState" : "manual"
+    },
     "No, edit amount" : {
       "comment" : "The title of the action used when rejecting the the amount of carbohydrates entered.",
       "localizations" : {
@@ -30314,6 +30342,10 @@
     },
     "Pay attention to your insulin needs before and after exercising, playing sports, or doing unusually hard physical labor." : {
 
+    },
+    "Pebble" : {
+      "comment" : "Title of the Pebble smartwatch settings screen\nTitle of the Pebble smartwatch row in settings",
+      "extractionState" : "manual"
     },
     "Performance History" : {
       "comment" : "The title of the view that shows the user's preset performance history.",
@@ -34811,6 +34843,10 @@
     "Self-Initiated Events" : {
 
     },
+    "Send to Pebble" : {
+      "comment" : "Toggle enabling the Pebble watchface transport",
+      "extractionState" : "manual"
+    },
     "Sensor Failed" : {
       "localizations" : {
         "da" : {
@@ -35192,6 +35228,10 @@
     },
     "She can do this by raising her **Overall Insulin** setting. This tells %@ to deliver more than her usual amount, making her insulin settings stronger." : {
 
+    },
+    "Show a large glucose ring with the reading time inside it instead of the ring with a trend graph." : {
+      "comment" : "Footer for the Pebble full-screen ring toggle",
+      "extractionState" : "manual"
     },
     "Showing %1$d days of data — not enough for the full %2$d-day period yet." : {
       "comment" : "Notice when the selected statistics range has incomplete data"
@@ -35761,6 +35801,10 @@
     },
     "Smaller glucose drop" : {
 
+    },
+    "Smartwatch" : {
+      "comment" : "Descriptive text for the Pebble smartwatch row",
+      "extractionState" : "manual"
     },
     "Snooze" : {
       "comment" : "A toggle that enables or disables snooze functionality for a glucose alert.",
@@ -38320,6 +38364,10 @@
     "The sound played when this alarm fires." : {
 
     },
+    "The UUID from the watchface's package.json. The watchface must use Luped's AppMessage keys and must not use PebbleKit JS." : {
+      "comment" : "Footer explaining the Pebble watchface UUID",
+      "extractionState" : "manual"
+    },
     "Therapy Settings" : {
       "comment" : "Title text for button to Therapy Settings",
       "localizations" : {
@@ -40606,6 +40654,10 @@
         }
       }
     },
+    "Use Luped CGM" : {
+      "comment" : "Button restoring the default Pebble watchface UUID",
+      "extractionState" : "manual"
+    },
     "Use Pre-Meal Preset" : {
       "comment" : "The title of the alert controller used to select a duration for pre-meal targets",
       "extractionState" : "stale",
@@ -40997,6 +41049,10 @@
     "Very Low" : {
       "comment" : "Time-in-range band label (<54 mg/dL)"
     },
+    "Vibrate on the watch using the thresholds and repeat intervals from Settings → Alert Management → Glucose Alerts. Turning this off silences the watch only; Loop's alerts are unaffected." : {
+      "comment" : "Footer for the Pebble watch alarms toggle",
+      "extractionState" : "manual"
+    },
     "Viewing entry %lld of %lld" : {
       "localizations" : {
         "en" : {
@@ -41216,6 +41272,14 @@
           }
         }
       }
+    },
+    "Watch Alarms" : {
+      "comment" : "Toggle enabling Pebble watch vibration alarms",
+      "extractionState" : "manual"
+    },
+    "Watchface UUID" : {
+      "comment" : "Header for the Pebble watchface UUID",
+      "extractionState" : "manual"
     },
     "What are examples of Critical Alerts and Time Sensitive Notifications?" : {
 

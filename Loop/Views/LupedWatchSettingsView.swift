@@ -6,6 +6,7 @@ import SwiftUI
 struct LupedWatchSettingsView: View {
     @AppStorage(UserDefaults.lupedPebbleEnabledKey) private var isEnabled = true
     @AppStorage(UserDefaults.lupedPebbleAlarmsEnabledKey) private var alarmsEnabled = true
+    @AppStorage(UserDefaults.lupedPebbleFullScreenKey) private var fullScreen = false
     @AppStorage(UserDefaults.lupedPebbleWatchfaceUUIDKey) private var watchfaceUUID = UserDefaults.lupedDefaultWatchfaceUUID
     @State private var draft = ""
 
@@ -29,6 +30,13 @@ struct LupedWatchSettingsView: View {
                 Toggle(NSLocalizedString("Watch Alarms", comment: "Toggle enabling Pebble watch vibration alarms"), isOn: $alarmsEnabled)
             } footer: {
                 Text(NSLocalizedString("Vibrate on the watch using the thresholds and repeat intervals from Settings → Alert Management → Glucose Alerts. Turning this off silences the watch only; Loop's alerts are unaffected.", comment: "Footer for the Pebble watch alarms toggle"))
+            }
+            .disabled(!isEnabled)
+
+            Section {
+                Toggle(NSLocalizedString("Full-Screen Ring", comment: "Toggle showing the Pebble glucose ring full screen"), isOn: $fullScreen)
+            } footer: {
+                Text(NSLocalizedString("Show a large glucose ring with the reading time inside it instead of the ring with a trend graph.", comment: "Footer for the Pebble full-screen ring toggle"))
             }
             .disabled(!isEnabled)
 

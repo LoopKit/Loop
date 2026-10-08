@@ -2858,7 +2858,7 @@
 				C1D19800232CFA2A0096D646 /* Capture Build Details */,
 				C1092BFE29F88F0600AE3D1C /* Apply Info Customizations */,
 				4F70C1EC1DE8DCA8006380B7 /* Embed Foundation Extensions */,
-				5F267D6E3D58BF5A3B27DF05 /* Luped PebbleKit */,
+				5F267D6E3D58BF5A3B27DF05 /* Luped Background Mode */,
 			);
 			buildRules = (
 			);
@@ -3245,7 +3245,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		5F267D6E3D58BF5A3B27DF05 /* Luped PebbleKit */ = {
+		5F267D6E3D58BF5A3B27DF05 /* Luped Background Mode */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -3256,14 +3256,14 @@
 			inputPaths = (
 				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
 			);
-			name = "Luped PebbleKit";
+			name = "Luped Background Mode";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Scripts/embed-luped-pebblekit.sh\"\n";
+			shellScript = "\"${SRCROOT}/Scripts/luped-background-mode.sh\"\n";
 		};
 		C1092BFE29F88F0600AE3D1C /* Apply Info Customizations */ = {
 			isa = PBXShellScriptBuildPhase;

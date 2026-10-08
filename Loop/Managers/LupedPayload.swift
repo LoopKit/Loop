@@ -58,7 +58,7 @@ struct LupedPayload: Equatable {
 
     private static let directionNames = ["DoubleDown", "SingleDown", "FortyFiveDown", "Flat", "FortyFiveUp", "SingleUp", "DoubleUp"]
 
-    init?(samples: [StoredGlucoseSample], unit: LoopUnit, alarms: LupedAlarmSettings) {
+    init?(samples: [StoredGlucoseSample], unit: LoopUnit, alarms: LupedAlarmSettings, fullScreen: Bool) {
         let readings = samples
             .filter { !$0.wasUserEntered && !$0.isDisplayOnly }
             .sorted { $0.startDate < $1.startDate }
@@ -95,7 +95,7 @@ struct LupedPayload: Equatable {
             minutes(alarms.lowRepeat),
             minutes(alarms.highRepeat),
             timestamp,
-            0,
+            fullScreen ? 1 : 0,
             minutes(alarms.urgentLowRepeat)
         ]
 
@@ -131,7 +131,7 @@ struct LupedPayload: Equatable {
             " 9 alarms (mask \(alarms.enabledMask)): \(zones.isEmpty ? "off" : zones.joined(separator: ", "))",
             "10-11 repeat: low \(repeatText(alarms.lowRepeat)), high \(repeatText(alarms.highRepeat))",
             "12 reading time: \(time) (\(timestamp))",
-            "13 display: graph",
+            "13 display: \(fullScreen ? "full-screen ring" : "ring with graph")",
             "14 urgent-low repeat: \(repeatText(alarms.urgentLowRepeat))",
         ].joined(separator: "\n")
     }

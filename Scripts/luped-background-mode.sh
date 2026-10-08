@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-#  embed-luped-pebblekit.sh
+#  luped-background-mode.sh
 #  Loop
 #
 #  Adds the bluetooth-peripheral background mode that the Luped PPoGATT

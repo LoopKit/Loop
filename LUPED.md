@@ -31,7 +31,7 @@ added.
    ```
 2. Pair the watch with the Pebble app and select the Luped watchface.
 
-The "Luped PebbleKit" build phase (`Scripts/embed-luped-pebblekit.sh`) adds the
+The "Luped Background Mode" build phase (`Scripts/luped-background-mode.sh`) adds the
 `bluetooth-peripheral` background mode the GATT service needs, only when
 `LUPED_PEBBLE` is set.
 
@@ -46,6 +46,8 @@ Settings → Devices → Pebble (shown only when `LUPED_PEBBLE` is set):
 - **Watch Alarms** (on by default): watch vibration using Loop's active glucose
   alert profile. Off sends the alarm mask as `0`, which also silences Luped's
   stale-data buzz; Loop's own alerts are unaffected.
+- **Full-Screen Ring** (off by default): `DATA` index 13; a large glucose ring
+  with the reading time inside it instead of the ring and trend graph.
 - **Watchface UUID** (default Luped CGM,
   `bf32924c-4839-449e-9e56-ee190249acb2`): the app UUID Loop's service and
   AppMessages use. Changing it republishes the service, and the watch opens a
@@ -59,7 +61,7 @@ Settings → Devices → Pebble (shown only when `LUPED_PEBBLE` is set):
   kept in memory; Share exports them as text.
 
 The settings are stored in standard user defaults (`lupedPebbleEnabled`,
-`lupedPebbleAlarmsEnabled`, `lupedPebbleWatchfaceUUID`) and apply within half a second.
+`lupedPebbleAlarmsEnabled`, `lupedPebbleFullScreen`, `lupedPebbleWatchfaceUUID`) and apply within half a second.
 
 ## Delivery behavior
 
