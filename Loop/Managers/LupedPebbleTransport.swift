@@ -45,6 +45,9 @@ private enum LupedMessageKey {
     static let command: UInt32 = 10_000
     static let data: UInt32 = 10_001
     static let configured: UInt32 = 10_003
+    static let diagnostics: UInt32 = 10_004
+    /// Alloy's startup handshake (`kPKJSReadyMessage`).
+    static let alloyReady: UInt32 = 15_025
 }
 
 /// PebbleOS "Pebble Protocol over GATT" (PPoGATT) constants.
@@ -125,12 +128,16 @@ private enum PhoneVersion {
 final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerDelegate {
     static let shared = LupedPebbleTransport()
 
-    private var isEnabled = UserDefaults.standard.lupedPebbleEnabled
+    private var isEnabled = UserDefaults.standard.lupedPebbleEnabled {
+        didSet { updateLink() }
+    }
     private var appUUID = UserDefaults.standard.lupedPebbleWatchfaceUUIDValue
 
     private let log = DiagnosticLog(category: "LupedPebbleTransport")
     /// The watch communication log shown in Settings → Devices → Pebble.
     let communicationLog = LupedCommunicationLog()
+    /// Live link state and watch diagnostics for Settings → Devices → Pebble.
+    let status = LupedLinkStatus()
     private var peripheralManager: CBPeripheralManager?
     private var dataCharacteristic: CBMutableCharacteristic?
     private var isServicePublished = false
@@ -144,8 +151,12 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
     }
 
     // PPoGATT session state
-    private var watch: CBCentral?
-    private var sessionState = SessionState.closed
+    private var watch: CBCentral? {
+        didSet { updateLink() }
+    }
+    private var sessionState = SessionState.closed {
+        didSet { updateLink() }
+    }
     private var nextInboundSequence: UInt8 = 0
     private var lastSentAck: UInt8?
     private var nextOutboundSequence: UInt8 = 0
@@ -169,8 +180,17 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
     private var deliveredGeneration = 0
     private var inflightPush: (transactionID: UInt8, generation: Int, payload: LupedPayload, sentAt: Date)?
     private var nextTransactionID: UInt8 = 0
+    /// A COMMAND push awaiting the watch's ACK; pushes are sent one at a time.
+    private var inflightCommand: (transactionID: UInt8, command: String)?
+    private var diagnosticsRequested = false
+    private var diagnosticsReplyTimeout: Task<Void, Never>?
     private var pushAckTimeout: Task<Void, Never>?
     private var retryDelay: TimeInterval = 0
+    /// Set after the full retry backoff got no ACK: pushes stop until the
+    /// watchface makes contact, a new session opens, or the user sends.
+    private var paused = false {
+        didSet { status.paused = paused }
+    }
     private var pushRetry: Task<Void, Never>?
 
     /// Writes to Loop's diagnostic log and to the in-app communication log.
@@ -197,6 +217,24 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
         .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
         .sink { [weak self] in self?.applySettings() }
         .store(in: &userSettingsObservers)
+    }
+
+    private func updateLink() {
+        let link: LupedLinkStatus.Link
+        if !isEnabled {
+            link = .off
+        } else if peripheralManager?.state != .poweredOn {
+            link = .bluetoothUnavailable
+        } else if case .open = sessionState {
+            link = .open
+        } else if watch != nil {
+            link = .connecting
+        } else {
+            link = .waitingForWatch
+        }
+        if status.link != link {
+            status.link = link
+        }
     }
 
     private func start() {
@@ -313,6 +351,7 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
             peripheralManager?.delegate = nil
             peripheralManager = nil
             latestPayload = nil
+            updateLink()
             record(.info, "Pebble support off: Bluetooth service removed")
             return
         }
@@ -358,6 +397,7 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
 
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         record(.info, String(format: "Bluetooth peripheral state %ld", peripheral.state.rawValue))
+        defer { updateLink() }
         switch peripheral.state {
         case .poweredOn:
             publishService(on: peripheral)
@@ -579,6 +619,9 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
         pushRetry?.cancel()
         pushRetry = nil
         retryDelay = 0
+        paused = false
+        status.retryAt = nil
+        inflightCommand = nil
     }
 
     private func closeSession(reason: String) {
@@ -624,18 +667,40 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
         case AppMessage.push:
             sendFrame(endpoint: AppMessage.endpoint, payload: Data([AppMessage.ack, transactionID]))
             record(.toWatch, "ACK for watch transaction \(transactionID)")
-            guard message.count >= 18, Data(message[2..<18]) == appUUID.bytes else {
+            guard let tuples = tuples(in: message) else {
                 return
+            }
+            let hex = Self.hex(message.dropFirst(18))
+            if let diagnostics = tuples[LupedMessageKey.diagnostics]?.string {
+                record(.fromWatch, "Watch diagnostics: \(diagnostics)")
+                status.diagnostics = LupedWatchDiagnostics(json: diagnostics)
+                status.watchInfoNote = nil
+                diagnosticsReplyTimeout?.cancel()
             }
             // Alloy sends a ready handshake (key 15025) when the watchface starts and
             // keeps its own outbox closed until the phone sends any message back;
-            // only then does Luped send its `refresh` command. Answer both, and any
-            // other Luped message, with the latest reading.
-            let tuples = message.dropFirst(18).map { String(format: "%02x", $0) }.joined()
-            record(.fromWatch, String(format: "Watchface requested refresh (COMMAND %@, tuples %@)", commandValue(in: message) ?? "absent", tuples))
-            sendIfNeeded(force: true)
+            // only then does Luped send its `refresh` command. Answer both with the
+            // latest reading.
+            let command = tuples[LupedMessageKey.command]?.string
+            if tuples[LupedMessageKey.alloyReady] != nil || command == "refresh" {
+                record(.fromWatch, "Watchface requested refresh (\(command.map { "COMMAND \($0)" } ?? "ready handshake"), tuples \(hex))")
+                sendIfNeeded(force: true)
+            } else if tuples[LupedMessageKey.diagnostics] == nil {
+                record(.fromWatch, "Watch message (tuples \(hex))")
+            }
         case AppMessage.ack, AppMessage.nack:
             let reply = command == AppMessage.ack ? "ACK" : "NACK"
+            if let pending = inflightCommand, pending.transactionID == transactionID {
+                inflightCommand = nil
+                record(.fromWatch, "\(reply) for transaction \(transactionID) (bytes \(Self.hex(message))): COMMAND \(pending.command)")
+                if command == AppMessage.nack {
+                    status.watchInfoNote = NSLocalizedString("The watch rejected the request; the watchface is probably not running.", comment: "Pebble watch info note: request rejected")
+                } else {
+                    awaitDiagnosticsReply()
+                }
+                sendIfNeeded()
+                return
+            }
             guard let push = inflightPush, push.transactionID == transactionID else {
                 record(.fromWatch, "\(reply) for transaction \(transactionID) (bytes \(Self.hex(message))) matches no pending push; ignored")
                 return
@@ -651,10 +716,15 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
                 pushRetry?.cancel()
                 pushRetry = nil
                 retryDelay = 0
+                paused = false
+                status.lastDelivery = .init(readingDate: push.payload.latestDate, deliveredAt: Date(), milliseconds: elapsed)
+                status.lastRejectedAt = nil
+                status.retryAt = nil
                 sendIfNeeded()
             } else {
                 // The watch rejects pushes while Luped is not the running watchface.
                 record(.fromWatch, "\(reply) for transaction \(transactionID) after \(elapsed) ms (bytes \(Self.hex(message))): watch rejected reading from \(readingTime); the watchface is probably not running")
+                status.lastRejectedAt = Date()
                 scheduleRetry()
             }
         default:
@@ -662,28 +732,87 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
         }
     }
 
-    /// The string value of the `COMMAND` tuple in an AppMessage push for this app.
-    private func commandValue(in message: [UInt8]) -> String? {
+    /// The tuples of an AppMessage push for this app, by key; `nil` for other apps.
+    private func tuples(in message: [UInt8]) -> [UInt32: AppMessageTuple]? {
         // [command][transaction][app UUID x16][tuple count][tuples...]
         guard message.count >= 19, Data(message[2..<18]) == appUUID.bytes else {
             return nil
         }
+        var tuples: [UInt32: AppMessageTuple] = [:]
         var offset = 19
         for _ in 0..<Int(message[18]) {
             // Tuple: [key u32 LE][type u8][length u16 LE][value]
-            guard offset + 7 <= message.count else { return nil }
+            guard offset + 7 <= message.count else { break }
             let key = UInt32(message[offset]) | UInt32(message[offset + 1]) << 8 | UInt32(message[offset + 2]) << 16 | UInt32(message[offset + 3]) << 24
             let type = message[offset + 4]
             let length = Int(message[offset + 5]) | Int(message[offset + 6]) << 8
             let valueStart = offset + 7
-            guard valueStart + length <= message.count else { return nil }
-            if key == LupedMessageKey.command, type == AppMessage.tupleCString {
-                let value = message[valueStart..<valueStart + length].prefix { $0 != 0 }
-                return String(decoding: value, as: UTF8.self)
-            }
+            guard valueStart + length <= message.count else { break }
+            tuples[key] = AppMessageTuple(type: type, value: message[valueStart..<valueStart + length])
             offset = valueStart + length
         }
-        return nil
+        return tuples
+    }
+
+    // MARK: - Commands
+
+    /// The Pebble SDK's Alloy runtime disables a watchface's outbox whenever a
+    /// non-system session (like Loop's) opens or closes, until the watchface
+    /// restarts. The watch still acknowledges the request but cannot answer.
+    private func awaitDiagnosticsReply() {
+        diagnosticsReplyTimeout?.cancel()
+        diagnosticsReplyTimeout = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 5_000_000_000)
+            guard !Task.isCancelled, let self else { return }
+            self.record(.error, "No diagnostics reply: the watchface cannot send until it restarts (Alloy disables its outbox after Loop's session reconnects)")
+            self.status.watchInfoNote = NSLocalizedString("The watchface received the request but cannot reply until it restarts. Switch to another watchface and back, then tap Refresh Watch Info.", comment: "Pebble watch info note: Alloy outbox disabled")
+        }
+    }
+
+    /// Pushes the current reading now, re-sending it even if already delivered.
+    func sendNow() {
+        record(.info, "Send Now requested")
+        status.lastResult = nil
+        guard case .open = sessionState else {
+            status.lastResult = "No watch session; the reading is sent as soon as the watch connects."
+            Task { await publish(unit: unit) }
+            return
+        }
+        Task {
+            await publish(unit: unit)
+            sendIfNeeded(force: true)
+        }
+    }
+
+    /// Asks Luped for its diagnostics snapshot (battery and counters).
+    func requestDiagnostics() {
+        diagnosticsRequested = true
+        sendPendingCommand()
+    }
+
+    private func sendPendingCommand() {
+        guard diagnosticsRequested, inflightPush == nil, inflightCommand == nil, case .open = sessionState else {
+            return
+        }
+        diagnosticsRequested = false
+        let transactionID = nextTransactionID
+        nextTransactionID &+= 1
+        inflightCommand = (transactionID, "diagnostics")
+
+        var message = Data([AppMessage.push, transactionID])
+        message.append(appUUID.bytes)
+        message.append(1)
+        message.appendTuple(key: LupedMessageKey.command, type: AppMessage.tupleCString, value: Data("diagnostics".utf8) + [0])
+        record(.toWatch, "Sending transaction \(transactionID): COMMAND diagnostics")
+        sendFrame(endpoint: AppMessage.endpoint, payload: message)
+
+        Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(AppMessage.ackTimeout * 1_000_000_000))
+            guard let self, self.inflightCommand?.transactionID == transactionID else { return }
+            self.record(.error, "No reply to transaction \(transactionID) within \(Int(AppMessage.ackTimeout)) s")
+            self.inflightCommand = nil
+            self.sendIfNeeded()
+        }
     }
 
     // MARK: - Delivery
@@ -698,12 +827,16 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
     private func sendIfNeeded(force: Bool = false) {
         if force {
             requestGeneration = max(requestGeneration, deliveredGeneration + 1)
+            paused = false
+        } else if paused {
+            return
         }
-        guard inflightPush == nil else {
-            record(.info, "Send deferred: previous send still in flight")
+        guard inflightPush == nil, inflightCommand == nil else {
+            record(.info, "Send deferred: previous message still in flight")
             return
         }
         guard deliveredGeneration < requestGeneration else {
+            sendPendingCommand()
             return
         }
         guard let payload = latestPayload else {
@@ -741,13 +874,25 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
     /// Re-sends the undelivered reading after a growing delay, so a watchface
     /// that starts later still receives it even if its refresh request is lost.
     private func scheduleRetry() {
+        guard !paused else { return }
+        guard retryDelay < AppMessage.maximumRetryDelay else {
+            // 30 s + 1 + 2 + 4 + 5 min of rejections: stop until the watch is back.
+            pushRetry?.cancel()
+            pushRetry = nil
+            status.retryAt = nil
+            paused = true
+            record(.info, "Paused sending: the watchface has not accepted a reading for about 12 minutes. Resumes when it starts, on a new watch session, or with Send Now.")
+            return
+        }
         retryDelay = retryDelay == 0 ? AppMessage.initialRetryDelay : min(retryDelay * 2, AppMessage.maximumRetryDelay)
         let delay = retryDelay
+        status.retryAt = Date().addingTimeInterval(delay)
         record(.info, String(format: "Retrying in %.0f s", delay))
         pushRetry?.cancel()
         pushRetry = Task { [weak self] in
             try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
             guard !Task.isCancelled else { return }
+            self?.status.retryAt = nil
             self?.sendIfNeeded()
         }
     }
@@ -776,6 +921,74 @@ extension LupedAlarmSettings {
             lowRepeat: configuration.lowSnoozeEnabled ? configuration.lowRepeatInterval : Self.oncePerEpisode,
             highRepeat: configuration.highSnoozeEnabled ? configuration.highRepeatInterval : Self.oncePerEpisode
         )
+    }
+}
+
+/// Link state and watch diagnostics shown in Settings → Devices → Pebble.
+@MainActor
+final class LupedLinkStatus: ObservableObject {
+    enum Link: Equatable {
+        case off, bluetoothUnavailable, waitingForWatch, connecting, open
+    }
+
+    struct Delivery {
+        let readingDate: Date
+        let deliveredAt: Date
+        let milliseconds: Int
+    }
+
+    @Published var link = Link.off
+    @Published var lastDelivery: Delivery?
+    @Published var lastRejectedAt: Date?
+    @Published var retryAt: Date?
+    /// Sending paused after the watchface stopped accepting readings.
+    @Published var paused = false
+    /// Feedback for Send Now or a watch request that could not complete.
+    @Published var lastResult: String?
+    @Published var diagnostics: LupedWatchDiagnostics?
+    /// Why the last watch-info request got no answer, if it did not.
+    @Published var watchInfoNote: String?
+}
+
+/// Luped's diagnostics snapshot (`DIAGNOSTICS`, format version 2).
+struct LupedWatchDiagnostics {
+    let receivedAt: Date
+    let battery: Int?
+    let countingSince: Date?
+    let readingsReceived: Int?
+    let refreshRequests: Int?
+    let urgentLowAlarms: Int?
+    let lowAlarms: Int?
+    let highAlarms: Int?
+    let messagesIn: Int?
+    let messagesOut: Int?
+    let staleTransitions: Int?
+    let phoneDisconnects: Int?
+    let phoneDisconnectedSeconds: Int?
+
+    init?(json: String) {
+        guard let data = json.data(using: .utf8),
+              let values = try? JSONSerialization.jsonObject(with: data) as? [Any],
+              (values.first as? NSNumber)?.intValue == 2
+        else {
+            return nil
+        }
+        func int(_ index: Int) -> Int? {
+            index < values.count ? (values[index] as? NSNumber)?.intValue : nil
+        }
+        receivedAt = Date()
+        battery = int(2)
+        countingSince = int(3).map { Date(timeIntervalSince1970: TimeInterval($0) / 1_000) }
+        readingsReceived = int(13)
+        refreshRequests = int(14)
+        urgentLowAlarms = int(16)
+        lowAlarms = int(17)
+        highAlarms = int(18)
+        messagesIn = int(19)
+        messagesOut = int(21)
+        staleTransitions = int(31)
+        phoneDisconnects = int(34)
+        phoneDisconnectedSeconds = int(35).map { $0 / 1_000 }
     }
 }
 
@@ -822,6 +1035,17 @@ final class LupedCommunicationLog: ObservableObject {
             }
             return "\(formatter.string(from: entry.date)) \(marker) \(entry.message)"
         }.joined(separator: "\n")
+    }
+}
+
+/// One AppMessage dictionary tuple.
+private struct AppMessageTuple {
+    let type: UInt8
+    let value: ArraySlice<UInt8>
+
+    /// The value of a C-string tuple, without its terminator.
+    var string: String? {
+        type == AppMessage.tupleCString ? String(decoding: value.prefix { $0 != 0 }, as: UTF8.self) : nil
     }
 }
 

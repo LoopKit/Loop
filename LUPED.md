@@ -39,6 +39,15 @@ The "Luped Background Mode" build phase (`Scripts/luped-background-mode.sh`) add
 
 Settings → Devices → Pebble (shown only when `LUPED_PEBBLE` is set):
 
+- **Status**: link state (off, Bluetooth unavailable, waiting for the watch,
+  connecting, connected, paused), the last delivered reading with its round
+  trip, and the next retry. **Send Now** pushes the current reading
+  immediately.
+- **Watch**: battery and counters from Luped's diagnostics snapshot
+  (`COMMAND: "diagnostics"`), requested when the screen opens and with
+  **Refresh Watch Info**. Alloy disables a watchface's outbox whenever Loop's
+  session reconnects, so after Loop restarts the watch acknowledges the
+  request but cannot reply until the watchface restarts; the screen says so.
 - **Send to Pebble** (on by default): turning it off removes Loop's PPoGATT
   service, which ends the watch session immediately, releases the Bluetooth
   peripheral manager and stops building payloads. Turning it on publishes the
@@ -74,8 +83,10 @@ when those readings are more than 15 minutes apart.
 
 The latest payload is always retained. A new watch session and Luped's startup
 `refresh` command re-send it. A failed or rejected send (for example while
-another watchface is active) is retried after 30 s, doubling up to 5 minutes,
-and immediately on the next glucose update, refresh, or session; a newer
+another watchface is active) is retried after 30 s, 1, 2, 4 and 5 minutes.
+If none is accepted, Loop pauses sending, including new readings, until
+Luped starts (its startup handshake), a new session opens, or Send Now is
+tapped; a newer
 reading that arrives while a send is in flight is sent as soon as that send
 completes. Values are rounded to the watchface's display precision (one
 decimal for mmol/L) and sent in Loop's display unit, re-sent when it changes.

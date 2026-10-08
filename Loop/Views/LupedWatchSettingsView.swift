@@ -20,11 +20,15 @@ struct LupedWatchSettingsView: View {
 
     var body: some View {
         List {
+            LupedLinkStatusSection(status: LupedPebbleTransport.shared.status)
+
             Section {
                 Toggle(NSLocalizedString("Send to Pebble", comment: "Toggle enabling the Pebble watchface transport"), isOn: $isEnabled)
             } footer: {
                 Text(NSLocalizedString("Loop sends glucose readings and glucose alert settings to a Pebble watchface over Bluetooth. Keep the watch paired with the Pebble app.", comment: "Footer for the Pebble watchface transport toggle"))
             }
+
+            LupedWatchInfoSection(status: LupedPebbleTransport.shared.status)
 
             Section {
                 Toggle(NSLocalizedString("Watch Alarms", comment: "Toggle enabling Pebble watch vibration alarms"), isOn: $alarmsEnabled)
@@ -80,7 +84,10 @@ struct LupedWatchSettingsView: View {
         }
         .insetGroupedListStyle()
         .navigationTitle(NSLocalizedString("Pebble", comment: "Title of the Pebble smartwatch settings screen"))
-        .onAppear { draft = watchfaceUUID }
+        .onAppear {
+            draft = watchfaceUUID
+            LupedPebbleTransport.shared.requestDiagnostics()
+        }
     }
 
     private func save() {
@@ -89,6 +96,132 @@ struct LupedWatchSettingsView: View {
         draft = watchfaceUUID
     }
 }
+/// Whether Loop is connected to the watch and when it last delivered a reading.
+struct LupedLinkStatusSection: View {
+    @ObservedObject var status: LupedLinkStatus
+
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .medium
+        return formatter
+    }()
+
+    private var watchfaceRejected: Bool {
+        guard let rejected = status.lastRejectedAt else { return false }
+        return rejected > (status.lastDelivery?.deliveredAt ?? .distantPast)
+    }
+
+    private var headline: String {
+        switch status.link {
+        case .off: return NSLocalizedString("Off", comment: "Pebble link status: disabled")
+        case .bluetoothUnavailable: return NSLocalizedString("Bluetooth unavailable", comment: "Pebble link status: Bluetooth off or unauthorized")
+        case .waitingForWatch: return NSLocalizedString("Waiting for the watch", comment: "Pebble link status: no watch session")
+        case .connecting: return NSLocalizedString("Connecting", comment: "Pebble link status: session handshake in progress")
+        case .open:
+            if status.paused {
+                return NSLocalizedString("Connected · paused, watchface not running", comment: "Pebble link status: sending paused after repeated rejections")
+            }
+            return watchfaceRejected
+                ? NSLocalizedString("Connected · watchface not running", comment: "Pebble link status: connected but the watch rejected the reading")
+                : NSLocalizedString("Connected", comment: "Pebble link status: session open")
+        }
+    }
+
+    private var color: Color {
+        switch status.link {
+        case .open: return status.paused || watchfaceRejected ? .orange : .green
+        case .connecting, .waitingForWatch: return .orange
+        case .bluetoothUnavailable: return .red
+        case .off: return .secondary
+        }
+    }
+
+    var body: some View {
+        Section {
+            HStack(spacing: 8) {
+                Circle().fill(color).frame(width: 10, height: 10)
+                Text(headline).bold()
+            }
+            if let delivery = status.lastDelivery {
+                Text(String(format: NSLocalizedString("Last reading %1$@ delivered at %2$@ in %3$d ms", comment: "Pebble status detail (1: reading time, 2: delivery time, 3: round trip)"), Self.timeFormatter.string(from: delivery.readingDate), Self.timeFormatter.string(from: delivery.deliveredAt), delivery.milliseconds))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+            if let retryAt = status.retryAt {
+                Text(String(format: NSLocalizedString("Next retry at %@", comment: "Pebble status detail (1: retry time)"), Self.timeFormatter.string(from: retryAt)))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+            Button(NSLocalizedString("Send Now", comment: "Button pushing the current reading to the Pebble watch")) {
+                LupedPebbleTransport.shared.sendNow()
+            }
+            .disabled(status.link == .off)
+            if let result = status.lastResult {
+                Text(result)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+        } header: {
+            Text(NSLocalizedString("Status", comment: "Header for the Pebble link status section"))
+        }
+    }
+}
+
+/// Battery and counters reported by the watchface.
+struct LupedWatchInfoSection: View {
+    @ObservedObject var status: LupedLinkStatus
+
+    var body: some View {
+        Section {
+            if let info = status.diagnostics {
+                row(NSLocalizedString("Battery", comment: "Pebble watch info: battery"), info.battery.map { "\($0)%" })
+                row(NSLocalizedString("Readings received", comment: "Pebble watch info: DATA messages received"), info.readingsReceived.map(String.init))
+                row(NSLocalizedString("Refresh requests", comment: "Pebble watch info: refresh requests sent"), info.refreshRequests.map(String.init))
+                row(NSLocalizedString("Alarms (urgent low / low / high)", comment: "Pebble watch info: alarm counts"), alarmCounts(info))
+                row(NSLocalizedString("Stale data events", comment: "Pebble watch info: stale transitions"), info.staleTransitions.map(String.init))
+                row(NSLocalizedString("Phone disconnects", comment: "Pebble watch info: disconnects and total time"), disconnects(info))
+                row(NSLocalizedString("Counting since", comment: "Pebble watch info: diagnostics window start"), info.countingSince.map { DateFormatter.localizedString(from: $0, dateStyle: .short, timeStyle: .short) })
+                row(NSLocalizedString("Updated", comment: "Pebble watch info: time the snapshot arrived"), DateFormatter.localizedString(from: info.receivedAt, dateStyle: .none, timeStyle: .medium))
+            } else {
+                Text(NSLocalizedString("No watch info yet.", comment: "Shown before the Pebble watch has sent diagnostics"))
+                    .foregroundColor(.secondary)
+            }
+            if let note = status.watchInfoNote {
+                Text(note)
+                    .font(.footnote)
+                    .foregroundColor(.orange)
+            }
+            Button(NSLocalizedString("Refresh Watch Info", comment: "Button requesting Pebble watch diagnostics")) {
+                LupedPebbleTransport.shared.requestDiagnostics()
+            }
+            .disabled(status.link != .open)
+        } header: {
+            Text(NSLocalizedString("Watch", comment: "Header for the Pebble watch info section"))
+        } footer: {
+            Text(NSLocalizedString("Reported by the watchface. Counters cover at most the last 48 hours.", comment: "Footer for the Pebble watch info section"))
+        }
+    }
+
+    @ViewBuilder
+    private func row(_ label: String, _ value: String?) -> some View {
+        if let value {
+            LabeledContent(label, value: value)
+        }
+    }
+
+    private func alarmCounts(_ info: LupedWatchDiagnostics) -> String? {
+        guard let urgentLow = info.urgentLowAlarms, let low = info.lowAlarms, let high = info.highAlarms else { return nil }
+        return "\(urgentLow) / \(low) / \(high)"
+    }
+
+    private func disconnects(_ info: LupedWatchDiagnostics) -> String? {
+        guard let count = info.phoneDisconnects else { return nil }
+        let seconds = info.phoneDisconnectedSeconds ?? 0
+        return String(format: NSLocalizedString("%1$d (%2$d min total)", comment: "Pebble watch info: disconnect count and total minutes"), count, seconds / 60)
+    }
+}
+
 /// The watch communication log, newest first.
 struct LupedCommunicationLogView: View {
     @ObservedObject var log: LupedCommunicationLog
