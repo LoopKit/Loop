@@ -86,7 +86,7 @@ struct LupedWatchSettingsView: View {
         .navigationTitle(NSLocalizedString("Pebble", comment: "Title of the Pebble smartwatch settings screen"))
         .onAppear {
             draft = watchfaceUUID
-            LupedPebbleTransport.shared.requestDiagnostics()
+            LupedPebbleTransport.shared.requestDiagnostics(automatic: true)
         }
     }
 

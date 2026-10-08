@@ -184,6 +184,10 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
     private var inflightCommand: (transactionID: UInt8, command: String)?
     private var diagnosticsRequested = false
     private var diagnosticsReplyTimeout: Task<Void, Never>?
+    private var lastAutomaticDiagnosticsRequest = Date.distantPast
+    /// Set when the watch acknowledged a request but never replied (Alloy's
+    /// disabled outbox); cleared when the watch sends anything or a session opens.
+    private var watchOutboxBlocked = false
     private var pushAckTimeout: Task<Void, Never>?
     private var retryDelay: TimeInterval = 0
     /// Set after the full retry backoff got no ACK: pushes stop until the
@@ -622,6 +626,7 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
         paused = false
         status.retryAt = nil
         inflightCommand = nil
+        watchOutboxBlocked = false
     }
 
     private func closeSession(reason: String) {
@@ -670,6 +675,7 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
             guard let tuples = tuples(in: message) else {
                 return
             }
+            watchOutboxBlocked = false
             let hex = Self.hex(message.dropFirst(18))
             if let diagnostics = tuples[LupedMessageKey.diagnostics]?.string {
                 record(.fromWatch, "Watch diagnostics: \(diagnostics)")
@@ -764,6 +770,7 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
         diagnosticsReplyTimeout = Task { [weak self] in
             try? await Task.sleep(nanoseconds: 5_000_000_000)
             guard !Task.isCancelled, let self else { return }
+            self.watchOutboxBlocked = true
             self.record(.error, "No diagnostics reply: the watchface cannot send until it restarts (Alloy disables its outbox after Loop's session reconnects)")
             self.status.watchInfoNote = NSLocalizedString("The watchface received the request but cannot reply until it restarts. Switch to another watchface and back, then tap Refresh Watch Info.", comment: "Pebble watch info note: Alloy outbox disabled")
         }
@@ -785,7 +792,18 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
     }
 
     /// Asks Luped for its diagnostics snapshot (battery and counters).
-    func requestDiagnostics() {
+    /// `automatic` requests (the Pebble screen appearing) are limited to one a
+    /// minute and skipped while the watch is known to be unable to reply.
+    func requestDiagnostics(automatic: Bool = false) {
+        if automatic {
+            guard !watchOutboxBlocked, Date().timeIntervalSince(lastAutomaticDiagnosticsRequest) >= 60 else {
+                return
+            }
+            lastAutomaticDiagnosticsRequest = Date()
+            record(.info, "Watch info requested: Pebble screen opened")
+        } else {
+            record(.info, "Watch info requested: Refresh Watch Info tapped")
+        }
         diagnosticsRequested = true
         sendPendingCommand()
     }
