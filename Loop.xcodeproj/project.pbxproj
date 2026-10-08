@@ -3299,6 +3299,7 @@
 				43A9437A1B926B7B0051FA24 /* Sources */,
 				43C667D71C5577280050C674 /* Embed Frameworks */,
 				DDBD0003000000000000BD03 /* Capture Build Details */,
+				DDBD0005000000000000BD05 /* Apply Info Customizations */,
 			);
 			buildRules = (
 			);
@@ -3689,6 +3690,26 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		DDBD0005000000000000BD05 /* Apply Info Customizations */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../InfoCustomizations",
+			);
+			name = "Apply Info Customizations";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Scripts/apply-info-customizations.sh\"\n";
+		};
 		C1092BFE29F88F0600AE3D1C /* Apply Info Customizations */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
