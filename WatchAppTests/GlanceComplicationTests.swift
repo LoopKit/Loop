@@ -56,8 +56,8 @@ final class GlanceComplicationTests: XCTestCase {
     func testAMissingLoanValueIsADash() {
         let s = GlanceComplicationPublisher.snapshot(loan: glanceData(iob: nil, tempRate: nil), cob: nil,
                                                      unit: .milligramsPerDeciliter, now: now)
-        XCTAssertEqual(s.line(.iobCob, at: now), "IOB — · COB —")
-        XCTAssertEqual(s.value(.temp, at: now), "—")
+        XCTAssertEqual(s.text([.iob, .cob], at: now), "—U · —g", "the unit stays, so a dash still says what it stands for")
+        XCTAssertEqual(s.text(.temp, at: now), "—U/h")
     }
 
     /// Outside a loan: the phone's context, formatted as the glance formats, and its override.
@@ -72,9 +72,12 @@ final class GlanceComplicationTests: XCTestCase {
                                                  enactTrigger: .local, syncIdentifier: UUID())
         let s = GlanceComplicationPublisher.snapshot(phone: context, override: override)
 
-        XCTAssertEqual(s.line(.bg, at: now), "BG 173→")
-        XCTAssertEqual(s.line(.iobCob, at: now), "IOB 0.0 · COB 23")
-        XCTAssertEqual(s.value(.temp, at: now), "-0.40")
+        XCTAssertEqual(s.text(.bg, at: now), "173→")
+        XCTAssertEqual(s.text([.iob, .cob], at: now), "0.0U · 23g")
+        XCTAssertEqual(s.text(.temp, at: now), "-0.40U/h")
+        var nearZero = s
+        nearZero.iobText = "-0.0"
+        XCTAssertEqual(nearZero.text(.iob, at: now), "0.0U", "a tiny negative IOB is not shown as -0.0")
         XCTAssertEqual(s.overrideLabel, "⏱ 70%")
         XCTAssertEqual(s.bgRange, .inRange, "coloured as during a loan; the icon says who holds the pod")
         XCTAssertFalse(s.watchHasPod)
@@ -94,7 +97,7 @@ final class GlanceComplicationTests: XCTestCase {
     func testAStaleReadingDashesWithItsEventual() {
         let s = GlanceComplicationPublisher.snapshot(loan: glanceData(glucoseAge: 16 * 60), cob: 10,
                                                      unit: .milligramsPerDeciliter, now: now)
-        XCTAssertEqual(s.line(.bgEventual, at: now), "— → —")
+        XCTAssertEqual(s.text([.bg, .eventual], at: now), "— →—")
         XCTAssertNotNil(s.iob(at: now), "the loop's values stand on their own clock")
     }
 
@@ -102,8 +105,8 @@ final class GlanceComplicationTests: XCTestCase {
     func testTheLoopsValuesDashWhenItsCycleIsOld() {
         let s = GlanceComplicationPublisher.snapshot(loan: glanceData(loopAge: 15.5 * 60), cob: 10,
                                                      unit: .milligramsPerDeciliter, now: now)
-        XCTAssertEqual(s.line(.iobCob, at: now), "IOB — · COB —")
-        XCTAssertEqual(s.value(.temp, at: now), "—")
+        XCTAssertEqual(s.text([.iob, .cob], at: now), "—U · —g")
+        XCTAssertEqual(s.text(.temp, at: now), "—U/h")
         XCTAssertEqual(s.freshness(at: now), .aging)
     }
 
@@ -128,11 +131,24 @@ final class GlanceComplicationTests: XCTestCase {
 
     // MARK: - Catalogue
 
-    /// Every metric is offered in the face editor, each with its own name.
-    func testEveryMetricIsRecommended() {
-        let titles = GlanceMetric.allCases.map(\.title)
-        XCTAssertEqual(Set(titles).count, GlanceMetric.allCases.count)
-        XCTAssertEqual(GlanceMetric.allCases.count, 11)
+    /// Each shape offers its own options, every one led by the reading and each with its own name.
+    func testEachShapeOffersItsOwnOptions() {
+        for shape in GlanceOption.Shape.allCases {
+            let options = GlanceOption.options(for: shape)
+            XCTAssertFalse(options.isEmpty, "\(shape)")
+            XCTAssertEqual(Set(options.map(\.title)).count, options.count, "\(shape): names are distinct")
+            XCTAssertTrue(options.allSatisfy { $0.values.first == .bg }, "\(shape): the reading leads")
+        }
+        XCTAssertEqual(GlanceOption.options(for: .corner).map(\.title), ["BG · Age", "BG · IOB", "BG · COB", "BG · IOB · Age", "BG · COB · Age", "BG · IOB · COB"])
+        XCTAssertEqual(GlanceOption.options(for: .rectangular).map(\.title), ["Big BG", "BG · Age · IOB · COB", "Glance"])
+    }
+
+    /// An option saved for one shape falls back to that shape's first when the slot is another shape.
+    func testAnOptionFromAnotherShapeFallsBack() {
+        XCTAssertEqual(GlanceOption.chosen("cornerIOB", for: .corner), .cornerIOB)
+        XCTAssertEqual(GlanceOption.chosen("cornerIOB", for: .rectangular), .bigBG)
+        XCTAssertEqual(GlanceOption.chosen("iob", for: .inline), .inlineAge, "a pre-10-09 preset name falls back")
+        XCTAssertEqual(GlanceOption.chosen(nil, for: .circular), .circleAge)
     }
 
     func testTheSnapshotRoundTripsThroughDefaults() {
@@ -165,26 +181,25 @@ final class GlanceComplicationTests: XCTestCase {
         XCTAssertEqual(s.loopAge(at: marks[0]), "1m")
     }
 
-    /// A rectangle shows its value large and BG → eventual beneath, or the loop's numbers under BG.
-    func testARectangleCarriesContext() {
-        let s = GlanceComplicationPublisher.snapshot(loan: glanceData(), cob: 15, unit: .milligramsPerDeciliter, now: now)
+    /// Units label the values; the age and the eventual sit beside the reading, the rest set apart.
+    func testValuesAreLabelledByTheirUnits() {
+        let s = GlanceComplicationPublisher.snapshot(loan: glanceData(glucoseAge: 130), cob: 15, unit: .milligramsPerDeciliter, now: now)
         let up = GlucoseTrend.up.symbol
-        XCTAssertEqual(s.headline(.iob, at: now), "2.3")
-        XCTAssertEqual(s.context(.iob, at: now), "106\(up) → 112")
-        XCTAssertEqual(s.headline(.bg, at: now), "106\(up)")
-        XCTAssertEqual(s.headline(.bigBG, at: now), "106\(up)", "Big BG is the reading and its trend alone")
-        XCTAssertEqual(s.context(.bg, at: now), "IOB 2.3 · COB 15")
+        XCTAssertEqual(s.text(GlanceOption.inlineAll.values, at: now), "106\(up) 2m · 2.3U · 15g")
+        XCTAssertEqual(s.text(GlanceOption.cornerIOBAge.values, at: now, tight: true), "106\(up) 2.3U 2m")
+        XCTAssertEqual(s.text([.bg, .eventual], at: now), "106\(up) →112")
+        XCTAssertEqual(s.text(GlanceOption.inlineAllOverride.values, at: now, capitalised: true),
+                       "106\(up) 2m · 2.3U · 15 g", "a slot in capitals spaces the grams, so 15g never reads as 15G")
+        XCTAssertEqual(s.text(GlanceOption.circleIOB.bezelValues, at: now), "15g 2m", "no override: the bezel carries what the circle leaves out")
     }
 
-    /// A circle shows an override as its symbol over the rest of the label.
-    func testAnOverrideSplitsForACircle() {
-        var s = GlanceComplicationSnapshot()
-        XCTAssertEqual(s.overrideParts.symbol, "—")
-        s.overrideLabel = "🏃 70% 140"
-        XCTAssertEqual(s.overrideParts.symbol, "🏃")
-        XCTAssertEqual(s.overrideParts.rest, "70% 140")
-        s.overrideLabel = "⏱"
-        XCTAssertEqual(s.overrideParts.rest, "")
+    /// An active override joins the lines that offer it; none, and nothing is drawn for it.
+    func testAnOverrideAppearsOnlyWhenActive() {
+        let off = GlanceComplicationPublisher.snapshot(loan: glanceData(glucoseAge: 130), cob: 15, unit: .milligramsPerDeciliter, now: now)
+        XCTAssertNil(off.text(.override, at: now))
+        let on = GlanceComplicationPublisher.snapshot(loan: glanceData(glucoseAge: 130, overrideLabel: "🏃 70% 140"), cob: 15,
+                                                      unit: .milligramsPerDeciliter, now: now)
+        XCTAssertTrue(on.text(GlanceOption.inlineAllOverride.values, at: now).hasSuffix(" · 🏃 70% 140"))
     }
 
     /// A reload is served within a second of the publish that asked for it: still counted.

@@ -129,25 +129,81 @@ struct GlanceComplicationSnapshot: Codable, Equatable {
     }
 }
 
-/// What the glance complication shows; the widget makes it an App Intent parameter.
-enum GlanceMetric: String, CaseIterable {
-    case bg, bigBG, bgEventual, eventual, iob, cob, iobCob, temp, loop, override, glance
+/// One value a complication can show. Units and the reading's arrow say what each is; nothing is titled.
+enum GlanceValue {
+    case bg, age, iob, cob, temp, eventual, override
 
-    /// The face editor's name for the preset (plain String, see the style rules).
+    /// The face editor's word for it.
+    var name: String {
+        switch self {
+        case .bg: return NSLocalizedString("BG", comment: "Glance complication value: glucose")
+        case .age: return NSLocalizedString("Age", comment: "Glance complication value: the reading's age")
+        case .iob: return NSLocalizedString("IOB", comment: "Glance complication value: insulin on board")
+        case .cob: return NSLocalizedString("COB", comment: "Glance complication value: carbs on board")
+        case .temp: return NSLocalizedString("Temp", comment: "Glance complication value: temp basal")
+        case .eventual: return NSLocalizedString("Eventual", comment: "Glance complication value: eventual glucose")
+        case .override: return NSLocalizedString("Override", comment: "Glance complication value: active override")
+        }
+    }
+}
+
+/// A complication's content, chosen in the face editor. The editor asks for the slot's shape first, so each
+/// shape has its own list: the reading always, then whatever fits beside it without shrinking the font, in
+/// the order BG; IOB, COB and age; override; temp and who holds the pod; eventual.
+enum GlanceOption: String, CaseIterable {
+    case cornerAge, cornerIOB, cornerCOB, cornerIOBAge, cornerCOBAge, cornerIOBCOB
+    case inlineAge, inlineAgeIOB, inlineAgeCOB, inlineIOBCOB, inlineAll, inlineAllOverride
+    case circleAge, circleIOB, circleCOB
+    case bigBG, balanced, glance
+
+    enum Shape: String, CaseIterable { case corner, inline, circular, rectangular }
+
+    var shape: Shape {
+        switch self {
+        case .cornerAge, .cornerIOB, .cornerCOB, .cornerIOBAge, .cornerCOBAge, .cornerIOBCOB: return .corner
+        case .inlineAge, .inlineAgeIOB, .inlineAgeCOB, .inlineIOBCOB, .inlineAll, .inlineAllOverride: return .inline
+        case .circleAge, .circleIOB, .circleCOB: return .circular
+        case .bigBG, .balanced, .glance: return .rectangular
+        }
+    }
+
+    /// In display order.
+    var values: [GlanceValue] {
+        switch self {
+        case .cornerAge, .inlineAge, .circleAge, .bigBG: return [.bg, .age]
+        case .cornerIOB, .circleIOB: return [.bg, .iob]
+        case .cornerCOB, .circleCOB: return [.bg, .cob]
+        case .cornerIOBAge: return [.bg, .iob, .age]
+        case .cornerCOBAge: return [.bg, .cob, .age]
+        case .cornerIOBCOB, .inlineIOBCOB: return [.bg, .iob, .cob]
+        case .inlineAgeIOB: return [.bg, .age, .iob]
+        case .inlineAgeCOB: return [.bg, .age, .cob]
+        case .inlineAll, .balanced: return [.bg, .age, .iob, .cob]
+        case .inlineAllOverride: return [.bg, .age, .iob, .cob, .override]
+        case .glance: return [.bg, .eventual, .age, .iob, .cob, .temp, .override]
+        }
+    }
+
+    /// A circle's curved bezel label, where the face has one: the IOB, COB and age the circle leaves out,
+    /// and an active override.
+    var bezelValues: [GlanceValue] {
+        [GlanceValue.iob, .cob, .age].filter { !values.contains($0) } + [.override]
+    }
+
+    /// The face editor's name for it (plain String, see the style rules).
     var title: String {
         switch self {
-        case .bg: return NSLocalizedString("BG", comment: "Glance complication: glucose")
-        case .bigBG: return NSLocalizedString("Big BG", comment: "Glance complication: glucose and trend alone, as large as the slot allows")
-        case .bgEventual: return NSLocalizedString("BG → Eventual", comment: "Glance complication: glucose and eventual glucose")
-        case .eventual: return NSLocalizedString("Eventual BG", comment: "Glance complication: eventual glucose")
-        case .iob: return NSLocalizedString("IOB", comment: "Glance complication: insulin on board")
-        case .cob: return NSLocalizedString("COB", comment: "Glance complication: carbs on board")
-        case .iobCob: return NSLocalizedString("IOB · COB", comment: "Glance complication: insulin and carbs on board")
-        case .temp: return NSLocalizedString("Temp Basal", comment: "Glance complication: net temp basal rate")
-        case .loop: return NSLocalizedString("Loop Status", comment: "Glance complication: glucose and loop freshness")
-        case .override: return NSLocalizedString("Override", comment: "Glance complication: active override")
-        case .glance: return NSLocalizedString("Glance", comment: "Glance complication: the glance's numbers together")
+        case .bigBG: return NSLocalizedString("Big BG", comment: "Glance complication: the reading as large as the slot allows")
+        case .glance: return NSLocalizedString("Glance", comment: "Glance complication: every value of the glance")
+        default: return values.map(\.name).joined(separator: " · ")
         }
+    }
+
+    static func options(for shape: Shape) -> [GlanceOption] { allCases.filter { $0.shape == shape } }
+
+    /// The saved choice if it belongs to this shape, else the shape's first (an unknown or older name too).
+    static func chosen(_ id: String?, for shape: Shape) -> GlanceOption {
+        id.flatMap(GlanceOption.init(rawValue:)).flatMap { $0.shape == shape ? $0 : nil } ?? options(for: shape)[0]
     }
 }
 
@@ -155,21 +211,30 @@ enum GlanceMetric: String, CaseIterable {
 
 extension GlanceComplicationSnapshot {
     func bgWithTrend(at date: Date) -> String { (bg(at: date) ?? Self.dash) + trend(at: date) }
-    private func or(_ text: String?) -> String { text ?? Self.dash }
-
-    /// The labelled line: inline slots, and a corner's curved label.
-    func line(_ metric: GlanceMetric, at date: Date, corner: Bool = false) -> String {
-        switch metric {
-        case .bg, .bigBG, .loop: return corner ? bgWithTrend(at: date) : "BG " + bgWithTrend(at: date)
-        case .bgEventual: return bgWithTrend(at: date) + " → " + or(eventual(at: date))
-        case .eventual: return (corner ? "EVENTUAL " : NSLocalizedString("Eventually ", comment: "Glance complication inline prefix: eventual glucose")) + or(eventual(at: date))
-        case .iob: return "IOB " + or(iob(at: date))
-        case .cob: return "COB " + or(cob(at: date))
-        case .iobCob: return "IOB " + or(iob(at: date)) + " · COB " + or(cob(at: date))
-        case .temp: return (corner ? "TEMP " : "Temp ") + or(temp(at: date))
-        case .override: return overrideLabel ?? NSLocalizedString("No override", comment: "Glance complication when no override is active")
-        case .glance: return bgWithTrend(at: date) + " · IOB " + or(iob(at: date)) + (corner ? "" : " · COB " + or(cob(at: date)))
+    /// A value as shown, its unit as its label; nil when there is nothing to show (no override, no age).
+    /// `capitalised`: the slot draws in capitals (inline, corner), where "4g" would read as "4G".
+    func text(_ value: GlanceValue, at date: Date, capitalised: Bool = false) -> String? {
+        switch value {
+        case .bg: return bgWithTrend(at: date)
+        case .age: return bgAge(at: date).isEmpty ? nil : bgAge(at: date)
+        case .iob: return (iob(at: date).map { $0 == "-0.0" ? "0.0" : $0 } ?? Self.dash) + "U"
+        case .cob: return (cob(at: date) ?? Self.dash) + (capitalised ? " g" : "g")
+        case .temp: return (temp(at: date) ?? Self.dash) + "U/h"
+        case .eventual: return "→" + (eventual(at: date) ?? Self.dash)
+        case .override: return overrideLabel
         }
+    }
+
+    /// Several values on one line. The age and the eventual belong to the reading, so they sit beside it;
+    /// the rest are set apart with a dot, or only a space where room is tight (a corner).
+    func text(_ values: [GlanceValue], at date: Date, tight: Bool = false, capitalised: Bool = false) -> String {
+        var line = ""
+        for value in values {
+            guard let part = text(value, at: date, capitalised: capitalised) else { continue }
+            if !line.isEmpty { line += tight || value == .age || value == .eventual ? " " : " · " }
+            line += part
+        }
+        return line
     }
 
     /// The loop's age in whole minutes ("now", "4m", "30m+"), not WidgetKit's ticking relative date
@@ -198,68 +263,11 @@ extension GlanceComplicationSnapshot {
         guard let start else { return [] }
         return (1...loopAgeMinutes).map { start.addingTimeInterval(TimeInterval($0 * 60)) }.filter { $0 > date }
     }
-
-    /// A rectangle's big value.
-    func headline(_ metric: GlanceMetric, at date: Date) -> String {
-        switch metric {
-        case .bg, .bigBG, .loop: return bgWithTrend(at: date)
-        case .bgEventual: return line(.bgEventual, at: date)
-        default: return value(metric, at: date)
-        }
-    }
-
-    /// A rectangle's line under the value: BG → eventual, or the loop's numbers when the value is BG.
-    func context(_ metric: GlanceMetric, at date: Date) -> String {
-        switch metric {
-        case .bg, .bigBG, .bgEventual, .eventual, .loop: return line(.iobCob, at: date)
-        default: return line(.bgEventual, at: date)
-        }
-    }
-
-    /// The mini glance's second line and the numbers under it.
-    func miniGlanceEventual(at date: Date) -> String { "→ " + or(eventual(at: date)) }
-    func miniGlanceNumbers(at date: Date) -> String {
-        let iob = "IOB " + or(iob(at: date))
-        let cob = "COB " + or(cob(at: date))
-        return [iob, cob, or(temp(at: date))].joined(separator: "  ")
-    }
-
-    /// The override label split for a circle: its leading symbol, then the rest ("70% 140"). A dash
-    /// when no override is active.
-    var overrideParts: (symbol: String, rest: String) {
-        guard let label = overrideLabel, !label.isEmpty else { return (Self.dash, "") }
-        let words = label.split(separator: " ", maxSplits: 1)
-        return (String(words[0]), words.count > 1 ? String(words[1]) : "")
-    }
-
-    /// A circular slot: a small caption over the value.
-    func caption(_ metric: GlanceMetric) -> String {
-        switch metric {
-        case .bg, .bigBG, .loop, .glance: return ""
-        case .bgEventual: return "→"
-        case .eventual: return "EVT"
-        case .iob: return "IOB"
-        case .cob: return "COB"
-        case .iobCob: return "IOB·COB"
-        case .temp: return "TEMP"
-        case .override: return ""
-        }
-    }
-
-    func value(_ metric: GlanceMetric, at date: Date) -> String {
-        switch metric {
-        case .bg, .bigBG, .loop, .glance: return or(bg(at: date))
-        case .bgEventual, .eventual: return or(eventual(at: date))
-        case .iob: return or(iob(at: date))
-        case .cob: return or(cob(at: date))
-        case .iobCob: return or(iob(at: date)) + "·" + or(cob(at: date))
-        case .temp: return or(temp(at: date))
-        case .override: return overrideLabel ?? Self.dash
-        }
-    }
 }
 
-/// The glance complication's widget kind, reloaded on its own (WidgetKit budgets reloads per widget).
+/// One widget kind per shape, so the face editor offers each shape only its own options. All are reloaded
+/// together; watchOS grants one free background reload per app either way.
 enum GlanceComplicationKind {
-    static let kind = "LoopGlance"
+    static func kind(_ shape: GlanceOption.Shape) -> String { "LoopGlance." + shape.rawValue }
+    static let all = GlanceOption.Shape.allCases.map(kind)
 }

@@ -171,7 +171,7 @@ enum GlanceComplicationPublisher {
         guard let plan = policy.plan(now: now, inFront: inFront, opened: false, sensorLinkUp: sensorLinkUp,
                                      inLoan: inLoan, lastRenderAt: GlanceComplicationSnapshot.lastServed()),
               plan.at.timeIntervalSince(now) <= 0.05 else { return }
-        WidgetCenter.shared.reloadTimelines(ofKind: GlanceComplicationKind.kind)
+        GlanceComplicationKind.all.forEach { WidgetCenter.shared.reloadTimelines(ofKind: $0) }
         let attached = GlanceReloadPolicy.attached(at: now, sensorLinkUp: sensorLinkUp, inLoan: inLoan)
         let release = holdProcess(reason: "glance complication check", upTo: GlanceReloadPolicy.renderCheck + 1)
         DispatchQueue.main.asyncAfter(deadline: .now() + GlanceReloadPolicy.renderCheck) {

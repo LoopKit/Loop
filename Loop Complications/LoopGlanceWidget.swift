@@ -2,14 +2,16 @@
 //  LoopGlanceWidget.swift
 //  Loop Complications
 //
-//  The Sport glance as ONE configurable complication: the metric is an App Intent parameter, and each
-//  preset in `recommendations()` appears in the face editor as its own choice ("Loop · IOB", …). One
-//  view per family covers every face. Adding a metric is one enum case plus its strings below.
+//  The Sport glance as complications. The face editor asks for a slot's shape first, so there is one
+//  widget per shape, each offering only its own options (GlanceOption); the option is an App Intent
+//  parameter and each recommendation is its own face-editor choice. watchOS refreshes one complication
+//  per app in the background, whatever the kinds, so the options pack what matters into one slot.
 //
-//  Style rules (each learned on the wrist or in the simulator, 2026-09-30 – 10-01): plain-String
-//  descriptions; a container background on every family; a corner's value rides its curved label with
-//  an empty tip (the face curves the label, not the content); no units; a dash after 15 min; meaning is
-//  never carried by colour alone (tinted faces drop it); accent parts are `widgetAccentable`.
+//  Style rules (learned on the wrist or in the simulator, 2026-09-30 – 10-09): plain-String descriptions; a
+//  container background on every family; a corner's value rides its curved label (the face curves the
+//  label, not the content); no titles — units label the values (112↗, 3m, 1.2U, 10g, +0.40U/h, →140); a
+//  dash after 15 min; meaning is never carried by colour alone (tinted faces drop it); accent parts are
+//  `widgetAccentable`; corner labels are drawn in capitals by watchOS.
 //
 
 import AppIntents
@@ -21,56 +23,58 @@ struct GlanceMetricIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Loop Value"
     static let description = IntentDescription("Which of the glance's values this complication shows.")
 
-    /// GlanceMetric's raw value. A String, not an AppEnum: with an AppEnum parameter every face-editor
+    /// GlanceOption's raw value. A String, not an AppEnum: with an AppEnum parameter every face-editor
     /// recommendation rendered as the default (watchOS 26.5 simulator, 2026-10-04 — the intent arrived
-    /// serialized as `iob`, `cob`, … but App Intents resolved the parameter to nil).
+    /// serialized, but App Intents resolved the parameter to nil).
     @Parameter(title: "Value")
     var metricID: String?
 
-    var metric: GlanceMetric { metricID.flatMap(GlanceMetric.init(rawValue:)) ?? .bgEventual }
+    func option(for shape: GlanceOption.Shape) -> GlanceOption { GlanceOption.chosen(metricID, for: shape) }
 
     init() {}
 
-    init(metric: GlanceMetric) {
-        self.metricID = metric.rawValue
+    init(option: GlanceOption) {
+        self.metricID = option.rawValue
     }
 }
 
 struct GlanceEntry: TimelineEntry {
     let date: Date
-    let metric: GlanceMetric
+    let option: GlanceOption
     let snapshot: GlanceComplicationSnapshot?
 }
 
 private let glanceWidgetLog = Logger(subsystem: "com.loopkit.Loop.Complications", category: "glance")
 
 struct GlanceProvider: AppIntentTimelineProvider {
+    let shape: GlanceOption.Shape
+
     func placeholder(in context: Context) -> GlanceEntry {
-        GlanceEntry(date: Date(), metric: .bgEventual, snapshot: .sample)
+        GlanceEntry(date: Date(), option: GlanceOption.options(for: shape)[0], snapshot: .sample)
     }
 
     func snapshot(for configuration: GlanceMetricIntent, in context: Context) async -> GlanceEntry {
-        glanceWidgetLog.notice("snapshot metric=\(configuration.metric.rawValue, privacy: .public) preview=\(context.isPreview, privacy: .public) family=\(String(describing: context.family), privacy: .public)")
-        return GlanceEntry(date: Date(), metric: configuration.metric,
-                           snapshot: context.isPreview ? .sample : GlanceComplicationSnapshot.load())
+        let option = configuration.option(for: shape)
+        glanceWidgetLog.notice("snapshot option=\(option.rawValue, privacy: .public) preview=\(context.isPreview, privacy: .public)")
+        return GlanceEntry(date: Date(), option: option, snapshot: context.isPreview ? .sample : GlanceComplicationSnapshot.load())
     }
 
-    /// Now, then each moment a value goes stale or the ring turns. New data comes by a reload.
+    /// Now, then each moment a value goes stale, the ring turns or an age ticks. New data comes by a reload.
     func timeline(for configuration: GlanceMetricIntent, in context: Context) async -> Timeline<GlanceEntry> {
         let now = Date()
+        let option = configuration.option(for: shape)
         let snapshot = GlanceComplicationSnapshot.load()
-        GlanceComplicationSnapshot.noteServed(configuration.metric.rawValue, at: now)
-        glanceWidgetLog.notice("timeline metric=\(configuration.metric.rawValue, privacy: .public) family=\(String(describing: context.family), privacy: .public)")
+        GlanceComplicationSnapshot.noteServed(option.rawValue, at: now)
+        glanceWidgetLog.notice("timeline option=\(option.rawValue, privacy: .public)")
         let marks = (snapshot?.changeMoments(after: now) ?? []) + (snapshot?.loopAgeMarks(after: now) ?? [])
-            + ([.bg, .bigBG].contains(configuration.metric) ? snapshot?.bgAgeMarks(after: now) ?? [] : [])
+            + (snapshot?.bgAgeMarks(after: now) ?? [])
         let moments = [now] + Set(marks).sorted()
-        return Timeline(entries: moments.map { GlanceEntry(date: $0, metric: configuration.metric, snapshot: snapshot) },
-                        policy: .never)
+        return Timeline(entries: moments.map { GlanceEntry(date: $0, option: option, snapshot: snapshot) }, policy: .never)
     }
 
     /// watchOS has no widget configuration UI: each recommendation is a separate face-editor choice.
     func recommendations() -> [AppIntentRecommendation<GlanceMetricIntent>] {
-        GlanceMetric.allCases.map { AppIntentRecommendation(intent: GlanceMetricIntent(metric: $0), description: $0.title) }
+        GlanceOption.options(for: shape).map { AppIntentRecommendation(intent: GlanceMetricIntent(option: $0), description: $0.title) }
     }
 }
 
@@ -92,7 +96,7 @@ struct GlanceComplicationView: View {
     @Environment(\.widgetFamily) private var family
 
     private var snapshot: GlanceComplicationSnapshot { entry.snapshot ?? GlanceComplicationSnapshot() }
-    private var metric: GlanceMetric { entry.metric }
+    private var option: GlanceOption { entry.option }
     private var date: Date { entry.date }
     private var bgColor: Color { snapshot.range(at: date)?.color ?? .primary }
 
@@ -103,113 +107,65 @@ struct GlanceComplicationView: View {
     @ViewBuilder private var content: some View {
         switch family {
         case .accessoryInline:
-            Text(metric == .loop ? snapshot.line(.bg, at: date) + " · loop " + snapshot.loopAge(at: date)
-                                 : snapshot.line(metric, at: date))
+            Text(snapshot.text(option.values, at: date, capitalised: true))
         case .accessoryCorner:
-            corner
+            holderIcon(size: 15).widgetLabel { cornerLabel }
         case .accessoryCircular:
-            circular
+            circular.widgetLabel { Text(snapshot.text(option.bezelValues, at: date, capitalised: true)) }
         case .accessoryRectangular:
-            metric == .glance ? AnyView(miniGlance) : metric == .bigBG ? AnyView(bigBG) : AnyView(rectangular)
+            switch option {
+            case .glance: glance
+            case .balanced: balanced
+            default: bigBG
+            }
         default:
-            Text(snapshot.value(metric, at: date))
+            Text(snapshot.bgWithTrend(at: date))
         }
     }
 
-    // The tip stays empty except for the loop ring, which is information rather than decoration.
-    // BG and Loop carry an age after the value, as the Big BG rectangle and the loop inline do.
-    @ViewBuilder private var corner: some View {
-        let label = Text(snapshot.line(metric, at: date, corner: true))
-        switch metric {
-        case .loop:
+    /// The reading bold, the other values beside it, the age smallest.
+    private var cornerLabel: Text {
+        option.values.reduce(Text("")) { label, value in
+            guard let part = snapshot.text(value, at: date, capitalised: true) else { return label }
+            let piece: Text
+            switch value {
+            case .bg: piece = Text(part).font(.system(size: 22, weight: .bold, design: .rounded))
+            case .age: piece = Text(" " + part).font(.system(size: 15, weight: .medium, design: .rounded))
+            default: piece = Text(" " + part).font(.system(size: 18, weight: .semibold, design: .rounded))
+            }
+            return label + piece
+        }
+    }
+
+    /// The loop's ring, the reading, and one more value beneath.
+    private var circular: some View {
+        ZStack {
+            AccessoryWidgetBackground()
             Circle()
                 .strokeBorder(snapshot.freshness(at: date).color, lineWidth: 3)
                 .widgetAccentable()
-                .widgetLabel { cornerValue(label, age: snapshot.loopAge(at: date)) }
-        case .bg, .bigBG:
-            holderIcon(size: 15).widgetLabel { cornerValue(label, age: snapshot.bgAge(at: date)) }
-        default:
-            holderIcon(size: 15).widgetLabel { label.font(.system(size: 18, weight: .bold, design: .rounded)) }
-        }
-    }
-
-    private func cornerValue(_ value: Text, age: String) -> Text {
-        value.font(.system(size: 22, weight: .bold, design: .rounded))
-            + Text(age.isEmpty ? "" : " " + age).font(.system(size: 15, weight: .medium, design: .rounded))
-    }
-
-    @ViewBuilder private var circular: some View {
-        ZStack {
-            AccessoryWidgetBackground()
-            if metric == .loop || metric == .glance {
-                Circle()
-                    .strokeBorder(snapshot.freshness(at: date).color, lineWidth: 3)
-                    .widgetAccentable()
-            }
             VStack(spacing: -1) {
-                if metric == .glance {
-                    Text(snapshot.value(.bg, at: date))
-                        .font(.system(size: 17, weight: .semibold, design: .rounded)).foregroundStyle(bgColor)
-                    Text(snapshot.iob(at: date) ?? GlanceComplicationSnapshot.dash).font(.system(size: 11, weight: .medium))
-                } else if metric == .bgEventual {
-                    // The reading on top, where it is to go beneath (circles are too small for one line).
-                    Text(snapshot.bgWithTrend(at: date))
-                        .font(.system(size: 15, weight: .semibold, design: .rounded)).foregroundStyle(bgColor)
-                    Text("→" + (snapshot.eventual(at: date) ?? GlanceComplicationSnapshot.dash))
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                } else if metric == .override {
-                    // The preset's symbol large, its scale and target beneath; no caption row.
-                    let parts = snapshot.overrideParts
-                    Text(parts.symbol).font(.system(size: 18))
-                    Text(parts.rest).font(.system(size: 12, weight: .semibold, design: .rounded))
-                } else if metric == .bg || metric == .bigBG || metric == .loop {
-                    Text(snapshot.value(metric, at: date))
-                        .font(.system(size: 18, weight: .semibold, design: .rounded)).foregroundStyle(bgColor)
-                    Text(snapshot.trend(at: date)).font(.system(size: 12, weight: .medium))
-                } else {
-                    Text(snapshot.caption(metric)).font(.system(size: 11, weight: .medium)).widgetAccentable()
-                    Text(snapshot.value(metric, at: date))
-                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                Text(snapshot.bgWithTrend(at: date))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded)).foregroundStyle(bgColor)
+                if let second = option.values.dropFirst().first, let text = snapshot.text(second, at: date) {
+                    Text(text).font(.system(size: 13, weight: .medium, design: .rounded))
                 }
             }
-            .minimumScaleFactor(0.5).lineLimit(1)
+            .lineLimit(1)
             .padding(4)
         }
     }
 
-    private var loopAge: some View {
-        Text(snapshot.loopAge(at: date))
-            .font(.system(size: 13, weight: .medium, design: .rounded))
-            .foregroundStyle(snapshot.freshness(at: date).color)
-    }
-
-    /// The metric's name and the loop's age, then the value large, then BG → eventual for context
-    /// (the loop's numbers when the value is BG itself).
-    private var rectangular: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                // The reading needs no name; the other values do (IOB and COB can read alike).
-                if metric != .bg {
-                    Text(metric.title.uppercased())
-                        .font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary).widgetAccentable()
-                }
-                Spacer(minLength: 4)
-                holderIcon(size: 12)
-                loopAge
-            }
-            Text(snapshot.headline(metric, at: date))
-                .font(.system(size: 26, weight: .semibold, design: .rounded))
-                .foregroundStyle(metric == .bg || metric == .loop ? bgColor : .primary)
-                .minimumScaleFactor(0.5).lineLimit(1)
-            Text(snapshot.context(metric, at: date))
-                .font(.system(size: 14, weight: .medium, design: .rounded)).foregroundStyle(.secondary)
-                .minimumScaleFactor(0.7).lineLimit(1)
+    private var ageAndHolder: some View {
+        HStack(spacing: 3) {
+            holderIcon(size: 12)
+            Text(snapshot.text(.age, at: date) ?? "")
+                .font(.system(size: 13, weight: .medium, design: .rounded)).foregroundStyle(.secondary)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .lineLimit(1).fixedSize()
     }
 
-    /// The reading and its trend, centred and as large as the slot allows, flanked by who holds the pod
-    /// and the reading's age (between reloads, which watchOS budgets, the number can be minutes old).
+    /// Bigger: the reading as large as the slot allows, who holds the pod and the reading's age beside it.
     private var bigBG: some View {
         HStack(spacing: 4) {
             holderIcon(size: 15)
@@ -218,11 +174,45 @@ struct GlanceComplicationView: View {
                 .foregroundStyle(bgColor).widgetAccentable()
                 .minimumScaleFactor(0.3).lineLimit(1)
                 .frame(maxWidth: .infinity)
-            Text(snapshot.bgAge(at: date))
+            Text(snapshot.text(.age, at: date) ?? "")
                 .font(.system(size: 13, weight: .medium, design: .rounded)).foregroundStyle(.secondary)
                 .lineLimit(1).fixedSize()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// Between: the reading large, IOB and COB beneath.
+    private var balanced: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(snapshot.bgWithTrend(at: date))
+                    .font(.system(size: 38, weight: .semibold, design: .rounded))
+                    .foregroundStyle(bgColor).widgetAccentable()
+                Spacer(minLength: 4)
+                ageAndHolder
+            }
+            Text(snapshot.text([.iob, .cob], at: date))
+                .font(.system(size: 20, weight: .medium, design: .rounded))
+        }
+        .lineLimit(1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// More: every value of the glance in three lines.
+    private var glance: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 4) {
+                Text(snapshot.text([.bg, .eventual], at: date)).font(.headline).foregroundStyle(bgColor).widgetAccentable()
+                Spacer(minLength: 4)
+                ageAndHolder
+            }
+            Text(snapshot.text([.iob, .cob, .temp], at: date))
+                .font(.system(size: 15, weight: .medium, design: .rounded))
+            Text(snapshot.text(.override, at: date) ?? "")
+                .font(.system(size: 13, weight: .medium, design: .rounded)).foregroundStyle(.secondary)
+        }
+        .lineLimit(1)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// Who holds the pod: the watch (a loan) or the phone. By shape, not colour, so tinted faces keep it.
@@ -230,37 +220,35 @@ struct GlanceComplicationView: View {
         Image(systemName: snapshot.watchHasPod ? "applewatch" : "iphone")
             .font(.system(size: size, weight: .semibold)).foregroundStyle(.secondary)
     }
-
-    /// The glance in three lines: BG → eventual, the loop's numbers, then override and loop age.
-    private var miniGlance: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 4) {
-                Text(snapshot.bgWithTrend(at: date)).font(.headline).foregroundStyle(bgColor).widgetAccentable()
-                Text(snapshot.miniGlanceEventual(at: date)).font(.headline)
-                Spacer(minLength: 0)
-                holderIcon(size: 12)
-            }
-            Text(snapshot.miniGlanceNumbers(at: date))
-                .font(.system(size: 15, weight: .medium, design: .rounded)).minimumScaleFactor(0.7).lineLimit(1)
-            HStack(spacing: 4) {
-                if let label = snapshot.overrideLabel {
-                    Text(label).font(.system(size: 13, weight: .medium, design: .rounded)).lineLimit(1)
-                }
-                Spacer(minLength: 4)
-                loopAge
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
 }
 
-struct LoopGlanceWidget: Widget {
+/// One widget per shape (a widget takes no parameters, so each shape is its own small type).
+protocol LoopGlanceWidget: Widget {
+    static var shape: GlanceOption.Shape { get }
+}
+
+extension LoopGlanceWidget {
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: GlanceComplicationKind.kind, intent: GlanceMetricIntent.self, provider: GlanceProvider()) { entry in
+        AppIntentConfiguration(kind: GlanceComplicationKind.kind(Self.shape), intent: GlanceMetricIntent.self,
+                               provider: GlanceProvider(shape: Self.shape)) { entry in
             GlanceComplicationView(entry: entry)
         }
         .configurationDisplayName(NSLocalizedString("Loop Glance", comment: "Watch complication name: values from the Sport glance"))
-        .description(NSLocalizedString("A value from Loop's glance: glucose, eventual, IOB, COB, temp basal, loop status or override.", comment: "Watch complication description: Loop Glance"))
-        .supportedFamilies([.accessoryInline, .accessoryCorner, .accessoryCircular, .accessoryRectangular])
+        .description(NSLocalizedString("The reading, with insulin, carbs, its age and more as the slot allows.", comment: "Watch complication description: the Sport glance"))
+        .supportedFamilies([Self.family])
+    }
+
+    private static var family: WidgetFamily {
+        switch shape {
+        case .corner: return .accessoryCorner
+        case .inline: return .accessoryInline
+        case .circular: return .accessoryCircular
+        case .rectangular: return .accessoryRectangular
+        }
     }
 }
+
+struct LoopGlanceCornerWidget: LoopGlanceWidget { static let shape = GlanceOption.Shape.corner }
+struct LoopGlanceInlineWidget: LoopGlanceWidget { static let shape = GlanceOption.Shape.inline }
+struct LoopGlanceCircularWidget: LoopGlanceWidget { static let shape = GlanceOption.Shape.circular }
+struct LoopGlanceRectangularWidget: LoopGlanceWidget { static let shape = GlanceOption.Shape.rectangular }
