@@ -104,6 +104,9 @@ extension ExtensionDelegate {
         SensorSearchAlert.disarm()
         // Looking at the watch is the one wake left with the phone away: the sensor's acquisition re-checks.
         watchCGMRecheckAcquisition(stockLoopSession?.stack.loopManager.cgmManager)
+        // In front the uploads may use cellular: send everything outstanding (the held set lives in
+        // memory and does not survive a relaunch; the uploader resumes from its own anchors).
+        LoanRemoteUploads.shared.releaseAll(reason: "app opened")
     }
 
     /// Called from `applicationWillResignActive()`.

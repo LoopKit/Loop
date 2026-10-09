@@ -14,6 +14,8 @@
 
 import Foundation
 import LoopKit
+import Network
+import WatchKit
 import LoopAlgorithm
 import LoopCore
 import NightscoutServiceKit
@@ -52,6 +54,18 @@ final class LoanRemoteUploads {
         let cacheStore = LoopKit.PersistenceController(directoryURL: documents.appendingPathComponent("LoanUploadsCgmEvents"), isReadOnly: false)
         return LoopKit.CgmEventStore(cacheStore: cacheStore)
     }()
+
+    /// The wrist's route to the internet, logged at each change once uploads first start. Uploads
+    /// wait for one, so this says why they waited.
+    private let pathMonitor = NWPathMonitor()
+    private var pathLogStarted = false
+
+    /// The route the wrist last reported, for the gate; `.unknown` until the monitor first reports.
+    private var route: Route = .unknown
+    /// Types whose upload was held because it could not succeed yet; sent when the way opens.
+    private var held: Set<RemoteDataType> = []
+
+    enum Route { case unknown, cellularOnly, other }
 
     init() {}
 
@@ -160,6 +174,7 @@ final class LoanRemoteUploads {
             running.append(service)
             return true
         }) else { return }
+        startPathLog()
         // As stock's addService: everything past the saved anchors goes up now.
         manager.addService(service)
         SportLog.event("uploads", "uploads ON — stock RemoteDataServicesManager driving \(service.pluginIdentifier) (credentials not logged)")
@@ -170,7 +185,7 @@ final class LoanRemoteUploads {
     func end() {
         let (services, loopManager) = lock.withLock { () -> ([RemoteDataService], WatchLoopManager?) in
             defer {
-                manager = nil; running = []; staged = [:]; activeLoop = nil; phoneUploadsGlucose = nil
+                manager = nil; running = []; staged = [:]; activeLoop = nil; phoneUploadsGlucose = nil; held = []
                 generation += 1
             }
             return (running, activeLoop)
@@ -238,9 +253,70 @@ final class LoanRemoteUploads {
         return types
     }
 
+    /// Whether a request made now can go out. watchOS refuses cellular to a backgrounded app's
+    /// requests ("Interface type 'cellular' is prohibited by parameters") and leaves them waiting until a
+    /// timeout or a route change; the phone link and Wi-Fi are allowed in the background, and a running
+    /// workout lifts the refusal. An unknown route never holds.
+    static func mayUpload(inFront: Bool, workoutRunning: Bool, route: Route) -> Bool {
+        inFront || workoutRunning || route != .cellularOnly
+    }
+
+    /// Every type goes up now, held or not: what a relaunch forgot, and what stock's own catch-up
+    /// left waiting in the background, both resume from stock's anchors. Free in front.
+    func releaseAll(reason: String) {
+        guard lock.withLock({ () -> Bool in held = []; return manager != nil }) else { return }
+        SportLog.event("uploads", "sending every upload type — \(reason)")
+        flush()
+    }
+
+    /// Held types go up now, through the gate again (it decides with the current state).
+    func releaseHeld(reason: String) {
+        let types = lock.withLock { () -> Set<RemoteDataType> in defer { held = [] }; return held }
+        guard !types.isEmpty else { return }
+        SportLog.event("uploads", "releasing \(types.count) held upload type(s) — \(reason)")
+        types.forEach { trigger($0) }
+    }
+
+    /// Stock's trigger, through its own awaitable variant so each outcome reaches this log; stock
+    /// reports a failure only to the system log. Held instead while it could only wait (see `mayUpload`).
     func trigger(_ type: RemoteDataType) {
         guard let manager = lock.withLock({ self.manager }) else { return }
-        Task { @MainActor in manager.triggerUpload(for: type) }
+        Task { @MainActor in
+            let inFront = WKApplication.shared().applicationState != .background
+            let workout = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.workoutRunning ?? false
+            let route = lock.withLock { self.route }
+            guard Self.mayUpload(inFront: inFront, workoutRunning: workout, route: route) else {
+                let first = lock.withLock { () -> Bool in held.insert(type).inserted }
+                if first {
+                    SportLog.event("uploads", "\(type.rawValue) upload HELD — in the background on cellular only, where it could only wait; it goes when the app opens or the route changes")
+                }
+                return
+            }
+            let started = Date()
+            await manager.performUpload(for: type)
+            let failing = manager.failedUploads.map { "\($0.serviceIdentifier) \($0.remoteDataType.rawValue)" }.sorted()
+            SportLog.event("uploads", "\(type.rawValue) upload settled in \(String(format: "%.1f", Date().timeIntervalSince(started))) s · failing: \(failing.isEmpty ? "none" : failing.joined(separator: ", "))")
+        }
+    }
+
+    private func startPathLog() {
+        guard lock.withLock({ () -> Bool in defer { pathLogStarted = true }; return !pathLogStarted }) else { return }
+        pathMonitor.pathUpdateHandler = { [weak self] path in
+            let available = path.availableInterfaces
+            let newRoute: Route = !available.isEmpty && available.allSatisfy({ $0.type == .cellular }) ? .cellularOnly : .other
+            if let self {
+                let opened = self.lock.withLock { () -> Bool in
+                    defer { self.route = newRoute }
+                    return self.route == .cellularOnly && newRoute == .other
+                }
+                if opened { self.releaseHeld(reason: "route no longer cellular-only") }
+            }
+            let kinds: [(NWInterface.InterfaceType, String)] = [(.wifi, "Wi-Fi"), (.cellular, "cellular"), (.wiredEthernet, "wired"), (.other, "other")]
+            let via = kinds.filter { path.usesInterfaceType($0.0) }.map(\.1)
+            let interfaces = path.availableInterfaces.map(\.name).joined(separator: ",")
+            SportLog.event("net", "internet path \(path.status) via \(via.isEmpty ? "nothing" : via.joined(separator: "+")) · interfaces [\(interfaces)]\(path.isExpensive ? " · expensive" : "")\(path.isConstrained ? " · constrained" : "")")
+        }
+        pathMonitor.start(queue: DispatchQueue(label: "LoanRemoteUploads.path", qos: .utility))
     }
 }
 
