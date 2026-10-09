@@ -35,7 +35,6 @@ extension PodLoanPhoneController {
             $0.holdLapseNoticedAt = nil
             $0.watchSilenceWarningsIssued = 0
             if let units {
-                $0.audit.checkpoints = 0
                 $0.audit.base = AuditBase(units: units, asOf: asOf)
                 $0.audit.baseEpoch = $0.epoch
                 $0.audit.loanStartedAt = asOf

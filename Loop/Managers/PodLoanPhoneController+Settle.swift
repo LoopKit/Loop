@@ -212,21 +212,15 @@ extension PodLoanPhoneController {
 
             let drift = pending.watchLatest.map { latest - $0 }
             handbackDiag(pending.epoch, String(format:
-                "reconcile[%@]: delivered=%.3f expected=%.3f residual=%+.3f (band ±0.20) · loan total %@ resid %@ · %d checkpoint(s) · loanMin=%.0f cycles=%d · odometer read by PHONE +%.0fs after reclaim · vs watch endpoint %@ (watch fresh=%@)",
+                "reconcile[%@]: delivered=%.3f expected=%.3f residual=%+.3f (band ±0.20) · loan total %@ resid %@ · loanMin=%.0f cycles=%d · odometer read by PHONE +%.0fs after reclaim · vs watch endpoint %@ (watch fresh=%@)",
                 pending.flavor == .forceReclaim ? "FORCE-RECLAIM" : "AUTHORITATIVE",
                 delivered, pending.expected, residual,
                 loanDelivered.map { String(format: "%.3f", $0) } ?? "n/a",
                 loanResidual.map { String(format: "%+.3f", $0) } ?? "n/a",
-                checkpointsThisLoan,
                 pending.loanMinutes, pending.cycles, elapsed,
                 drift.map { String(format: "%+.3f", $0) } ?? "n/a",
                 pending.watchFreshened ? "Y" : "N"))
 
-            // Diagnostic only: windows reconciled but the loan total drifted.
-            if let lr = loanResidual, abs(lr) > 0.5, abs(residual) <= Self.checkpointBand {
-                handbackDiag(pending.epoch, String(format:
-                    "** [checkpoint] loan-total residual %+.3f U exceeds ±0.5 while every window reconciled — possible systematic drip; diagnostic only **", lr))
-            }
             switch pending.flavor {
             case .handback:
                 applyReconciliationVerdict(residual: residual, epoch: pending.epoch)

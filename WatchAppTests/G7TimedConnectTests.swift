@@ -253,4 +253,29 @@ final class WatchCGMAdoptionTests: XCTestCase {
         XCTAssertNil(second.state.peripheralIdentifier, "the new sensor is searched for, not the old one's link")
         XCTAssertNil(first.cgmManagerDelegate, "the old manager let go before the new one took over")
     }
+
+    /// Each phone context with the same sensor is a wake that reaches the acquisition's re-check, so a
+    /// lost Bluetooth callback cannot leave the watch with no connect standing (2026-10-05: an hour).
+    func testEachPhoneContextRechecksTheSensorsAcquisition() async throws {
+        let wrist = await makeWrist()
+        let export = phoneExport(sensorID: "DXCMph", code: "1234")
+        let bluetooth = RecheckCountingBluetoothManager()
+        let adopted = G7CGMManagerState.adopted(from: export.state)
+        let g7 = G7CGMManager(state: adopted, sensor: G7Sensor(mode: .direct, credentials: adopted.sensorCredentials,
+                                                               bluetoothManager: bluetooth))
+        wrist.installCGMManager(g7, builtFrom: export.state)
+
+        wrist.adoptCGMConfiguration(phoneExport(sensorID: "DXCMph", code: "1234"))
+        wrist.adoptCGMConfiguration(phoneExport(sensorID: "DXCMph", code: "1234"))
+        XCTAssertEqual(bluetooth.rechecks, 2)
+        XCTAssertTrue(wrist.cgmManager === g7, "the same sensor kept its manager")
+    }
+}
+
+private final class RecheckCountingBluetoothManager: G7BluetoothManager {
+    var rechecks = 0
+    override func makeCentralManager(queue: DispatchQueue) -> CBCentralManager {
+        CBCentralManager(delegate: self, queue: queue)
+    }
+    override func recheckAcquisition() { rechecks += 1 }
 }

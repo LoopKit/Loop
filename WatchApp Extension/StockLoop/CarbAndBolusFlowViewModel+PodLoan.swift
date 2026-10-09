@@ -113,6 +113,9 @@ extension CarbAndBolusFlowViewModel {
     /// released the pod, so the bolus goes to the watch's pump, and the carbs to the local store
     /// and the loan journal rather than the stock relay.
     func podLoanDeliverOnWrist(carbEntry: NewCarbEntry?, bolus: Double, session: StockLoopSession) {
+        // As stock (#2556): the entry is no longer pending once sent. The watch saves it into COB and
+        // posts a context update, and a still-pending entry would be recommended for a second time.
+        carbEntryUnderConsideration = nil
         let activationType: BolusActivationType = .activationTypeFor(recommendedAmount: recommendedBolusAmount, bolusAmount: bolus)
         Self.podLoanDeliver(carbEntry: carbEntry, bolus: bolus, activationType: activationType, session: session)
     }
