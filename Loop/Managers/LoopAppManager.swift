@@ -178,7 +178,9 @@ class LoopAppManager: NSObject {
             await launchHomeScreen()
         }
 
-        askUserToConfirmLoopReset()
+        if isLaunchComplete {
+            askUserToConfirmLoopReset()
+        }
     }
 
     private func checkProtectedDataAvailable() {
