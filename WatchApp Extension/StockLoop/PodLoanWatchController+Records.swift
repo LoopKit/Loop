@@ -59,6 +59,10 @@ extension PodLoanWatchController {
                 continue
             }
             minted += 1
+            if record.kind == .tempBasal, record.endDate == record.startDate {
+                SportLog.event("loan", "cancel JOURNALED from the pump manager's report — back to the schedule, seq \(journaled.seq)")
+                continue
+            }
             let amount = record.kind == .bolus ? String(format: "%.2f U", record.amount ?? 0)
                                                : String(format: "%.2f U/hr", record.unitsPerHour ?? 0)
             SportLog.event("loan", "\(record.kind) JOURNALED from the pump manager's report — \(amount)\(dose.isMutable ? " (running)" : ""), seq \(journaled.seq)")
@@ -68,7 +72,7 @@ extension PodLoanWatchController {
 
     /// Identity is the hex of the pod-native raw. Delivered units and insulin type travel
     /// explicitly: the pod floors to whole pulses, and a rapid analogue must keep its own curve.
-    private static func loanRecord(for dose: DoseEntry, raw: Data) -> LoanDoseRecord? {
+    static func loanRecord(for dose: DoseEntry, raw: Data) -> LoanDoseRecord? {
         let identity = raw.map { String(format: "%02x", $0) }.joined()
         switch dose.type {
         case .bolus:
@@ -81,6 +85,12 @@ extension PodLoanWatchController {
                                   unitsPerHour: dose.unitsPerHour, syncIdentifier: identity,
                                   insulinType: dose.insulinType, deliveredUnits: dose.deliveredUnits,
                                   decisionId: dose.decisionId)
+        case .basal where dose.endDate <= dose.startDate:
+            // The schedule resuming: how the pump manager reports a cancelled temp (with the temp itself
+            // re-reported, shortened, under its own identity — which the journal does not re-mint). A
+            // zero-length rate record is the cancel the phone's books and audit already understand.
+            return LoanDoseRecord(kind: .tempBasal, startDate: dose.startDate, endDate: dose.startDate,
+                                  unitsPerHour: 0, syncIdentifier: identity, insulinType: dose.insulinType)
         default:
             SportLog.event("loan", "pump report carried a \(dose.type) dose — not a wrist command; not journaled")
             return nil

@@ -24,6 +24,8 @@ final class StockLoopSession {
 
     /// Restart a session the system ended while holders remain.
     func ensureKeepalive() { keepalive.ensureRunning() }
+
+    var workoutRunning: Bool { keepalive.isRunning }
     let loanController: PodLoanWatchController
 
     private let log = OSLog(subsystem: "com.loopkit.Loop", category: "StockLoopSession")

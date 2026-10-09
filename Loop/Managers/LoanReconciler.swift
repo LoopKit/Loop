@@ -3,7 +3,8 @@
 //  Loop
 //
 //  Two pure calculations behind a hand-back: `reconcile` turns drained records into writes;
-//  `expectedInsulin` says what the pod should have delivered over a window, in whole pulses.
+//  `expectedInsulin` predicts the pod's odometer over a window: temps in whole pulses, the schedule
+//  continuously.
 //
 
 import Foundation
@@ -162,7 +163,7 @@ enum LoanReconciler {
     }
 
     /// Insulin the records say the pump delivered between two instants, in whole `pulseUnits`.
-    /// `schedule` fills gaps (nil: journaled only); `includingBolusesAtEnd` is false at an interior checkpoint.
+    /// `schedule` fills gaps (nil: journaled only); `includingBolusesAtEnd` is false at a mid-loan reading.
     static func expectedInsulin(events: [LoanEvent], schedule: BasalRateSchedule?, pulseUnits: Double,
                                 from start: Date, to end: Date, includingBolusesAtEnd: Bool = true) -> Double {
         guard end > start else { return 0 }
@@ -183,27 +184,30 @@ enum LoanReconciler {
             switch event.record.kind {
             case .tempBasal, .suspend:
                 guard let rate = event.record.unitsPerHour,
-                      let segEnd = event.record.endDate else { continue }
-                let s = max(event.record.startDate, start)
-                let e = min(segEnd, end)
-
-                // `>=`: a zero-length record is a cancel and must truncate its temp.
-                if e >= s { segments.append(Segment(start: s, end: e, rate: rate)) }
+                      let segEnd = event.record.endDate, segEnd >= event.record.startDate else { continue }
+                // On the record's own span: a zero-length record is a cancel and must truncate its temp
+                // even when it falls just before the window (a mid-loan odometer is read a second
+                // after the cancel; clipping first dropped it — false OPEN LOOP 2026-09-05, 9b19f160).
+                segments.append(Segment(start: event.record.startDate, end: segEnd, rate: rate))
             default:
                 break
             }
         }
 
-        // Each rate record supersedes what was running.
+        // Each rate record supersedes what was running; resolved unclipped, then clipped to the window.
         segments.sort { $0.start < $1.start }
-        var resolved: [Segment] = []
+        var unclipped: [Segment] = []
         for seg in segments {
-            while let last = resolved.last, last.end > seg.start {
+            while let last = unclipped.last, last.end > seg.start {
                 let trimmed = Segment(start: last.start, end: seg.start, rate: last.rate)
-                resolved.removeLast()
-                if trimmed.end > trimmed.start { resolved.append(trimmed) }
+                unclipped.removeLast()
+                if trimmed.end > trimmed.start { unclipped.append(trimmed) }
             }
-            resolved.append(seg)
+            unclipped.append(seg)
+        }
+        let resolved: [Segment] = unclipped.compactMap { seg in
+            let s = max(seg.start, start), e = min(seg.end, end)
+            return e > s ? Segment(start: s, end: e, rate: seg.rate) : nil
         }
 
         for seg in resolved {
@@ -215,19 +219,20 @@ enum LoanReconciler {
             var cursor = start
             for seg in resolved {
                 if seg.start > cursor {
-                    total += scheduleInsulin(schedule, from: cursor, to: seg.start, pulseUnits: pulseUnits)
+                    total += scheduleInsulin(schedule, from: cursor, to: seg.start)
                 }
                 cursor = max(cursor, seg.end)
             }
             if end > cursor {
-                total += scheduleInsulin(schedule, from: cursor, to: end, pulseUnits: pulseUnits)
+                total += scheduleInsulin(schedule, from: cursor, to: end)
             }
         }
 
         return total
     }
 
-    /// Whole pulses: each new rate restarts the pump's pulse clock, so rate × time over-counts.
+    /// Whole pulses: a temp starts its own pulse clock (its first pulse one full interval in), so rate × time
+    /// over-counts it.
     private static func pulsedInsulin(rate: Double, seconds: TimeInterval, pulseUnits: Double) -> Double {
         guard rate > 0, seconds > 0 else { return 0 }
         let pulseInterval = 3600.0 * pulseUnits / rate
@@ -235,13 +240,16 @@ enum LoanReconciler {
         return pulses * pulseUnits
     }
 
-    /// Known gap: pulsed per schedule item, which can only make the expectation smaller.
-    private static func scheduleInsulin(_ schedule: BasalRateSchedule, from: Date, to: Date, pulseUnits: Double) -> Double {
+    /// Rate × time, not whole pulses: the pod runs its schedule on an ongoing grid whose phase the records
+    /// don't carry, so a stretch of schedule delivers the floor or one pulse more. Flooring it under-counted
+    /// by about half a pulse per stretch and per schedule item (false OPEN LOOPs on long loans, 2026-10-05/06);
+    /// rate × time is unbiased (Monte Carlo 2026-10-08: mean 0.000 U, p95 within 0.15 U at 6 h).
+    private static func scheduleInsulin(_ schedule: BasalRateSchedule, from: Date, to: Date) -> Double {
         return schedule.between(start: from, end: to).reduce(0) { partial, item in
             let s = max(item.startDate, from)
             let e = min(item.endDate, to)
             guard e > s else { return partial }
-            return partial + pulsedInsulin(rate: item.value, seconds: e.timeIntervalSince(s), pulseUnits: pulseUnits)
+            return partial + item.value * e.timeIntervalSince(s) / 3600
         }
     }
 }

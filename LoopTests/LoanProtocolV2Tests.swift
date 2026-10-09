@@ -502,6 +502,23 @@ final class LoanProtocolV2Tests: XCTestCase {
         XCTAssertEqual(expected, 3.0, accuracy: 0.01)
     }
 
+    /// The schedule between temps is counted continuously: the pod's schedule pulses run on a grid the records
+    /// don't place, so a 7-min stretch at 0.6 U/h delivers 1 or 2 pulses; flooring always said 1.
+    func testScheduleBetweenTempsCountsContinuously() {
+        let schedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 0.6)], timeZone: TimeZone(identifier: "GMT")!)!
+        let first = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                              record: LoanDoseRecord(kind: .tempBasal, startDate: loanStart,
+                                                     endDate: loanStart.addingTimeInterval(300), unitsPerHour: 0),
+                              loggedAt: loanStart)
+        let second = LoanEvent(id: UUID(), seq: 2, provenance: .confirmed,
+                               record: LoanDoseRecord(kind: .tempBasal, startDate: loanStart.addingTimeInterval(720),
+                                                      endDate: loanStart.addingTimeInterval(1020), unitsPerHour: 0),
+                               loggedAt: loanStart)
+        let expected = LoanReconciler.expectedInsulin(events: [first, second], schedule: schedule, pulseUnits: 0.05,
+                                                      from: loanStart, to: loanStart.addingTimeInterval(1020))
+        XCTAssertEqual(expected, 0.07, accuracy: 0.0001, "7 min of 0.6 U/h, not floored to one 0.05 U pulse")
+    }
+
     func testExpectedInsulinSuspendCountsAsZero() {
         // Suspend = rate-0 temp for hour 1: expected = 0 + 1.0 = 1.0.
         let suspend = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,

@@ -22,6 +22,9 @@ final class WorkoutKeepalive: NSObject, HKWorkoutSessionDelegate {
     private var _tag = "keepalive off"
 
     var stateTag: String { tagLock.lock(); defer { tagLock.unlock() }; return _tag }
+
+    /// A session is running: the app keeps running, and its requests may use cellular in the background.
+    var isRunning: Bool { stateTag.hasPrefix("keepalive running") || stateTag.hasPrefix("keepalive recovered") }
     private func setTag(_ s: String) { tagLock.lock(); _tag = s; tagLock.unlock() }
 
     override init() {
