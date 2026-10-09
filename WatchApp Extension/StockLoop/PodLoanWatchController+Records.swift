@@ -50,10 +50,9 @@ extension PodLoanWatchController {
     /// Once per pod-native raw; the running temp is re-reported and must not be re-minted.
     func journalPumpEvents(_ events: [NewPumpEvent]) {
         guard phase == .active else { return }
+        let reported = events.compactMap { event in event.dose.flatMap { Self.loanRecord(for: $0, raw: event.raw) } }
         var minted = 0
-        for event in events {
-            guard let dose = event.dose, let record = Self.loanRecord(for: dose, raw: event.raw),
-                  let identity = record.syncIdentifier, !journal.contains(syncIdentifier: identity) else { continue }
+        for record in Self.recordsToJournal(reported, journaled: journal.record(syncIdentifier:)) {
             guard let journaled = try? journal.mintEvent(record: record, provenance: .confirmed) else {
                 SportLog.event("loan", "** JOURNAL MINT FAILED for \(record.kind) — the dose is in the book but will NOT follow the pod home **")
                 continue
@@ -65,9 +64,27 @@ extension PodLoanWatchController {
             }
             let amount = record.kind == .bolus ? String(format: "%.2f U", record.amount ?? 0)
                                                : String(format: "%.2f U/hr", record.unitsPerHour ?? 0)
-            SportLog.event("loan", "\(record.kind) JOURNALED from the pump manager's report — \(amount)\(dose.isMutable ? " (running)" : ""), seq \(journaled.seq)")
+            SportLog.event("loan", "\(record.kind) JOURNALED from the pump manager's report — \(amount), seq \(journaled.seq)")
         }
         if minted > 0 { streamRecords() }
+    }
+
+    /// What a pump report adds to the loan's records: each dose not yet journaled, and a cancel back to the
+    /// schedule. The pump manager reports that cancel only by re-reporting the running temp, shortened, under
+    /// its own identity; a temp change reports the same shortened temp beside the new one, which ends it anyway.
+    /// So a journaled temp back with an earlier end, and no new temp in the report, is journaled as a
+    /// zero-length rate record at the new end: the cancel the phone's books and audit already understand.
+    static func recordsToJournal(_ reported: [LoanDoseRecord], journaled: (String) -> LoanDoseRecord?) -> [LoanDoseRecord] {
+        let setsATemp = reported.contains { $0.kind == .tempBasal && $0.syncIdentifier.flatMap(journaled) == nil }
+        return reported.compactMap { record in
+            guard let identity = record.syncIdentifier else { return nil }
+            guard let known = journaled(identity) else { return record }
+            let cancelIdentity = identity + "-cancel"
+            guard record.kind == .tempBasal, !setsATemp, let end = record.endDate, let knownEnd = known.endDate,
+                  end < knownEnd, journaled(cancelIdentity) == nil else { return nil }
+            return LoanDoseRecord(kind: .tempBasal, startDate: end, endDate: end, unitsPerHour: 0,
+                                  syncIdentifier: cancelIdentity, insulinType: record.insulinType)
+        }
     }
 
     /// Identity is the hex of the pod-native raw. Delivered units and insulin type travel
@@ -85,12 +102,6 @@ extension PodLoanWatchController {
                                   unitsPerHour: dose.unitsPerHour, syncIdentifier: identity,
                                   insulinType: dose.insulinType, deliveredUnits: dose.deliveredUnits,
                                   decisionId: dose.decisionId)
-        case .basal where dose.endDate <= dose.startDate:
-            // The schedule resuming: how the pump manager reports a cancelled temp (with the temp itself
-            // re-reported, shortened, under its own identity — which the journal does not re-mint). A
-            // zero-length rate record is the cancel the phone's books and audit already understand.
-            return LoanDoseRecord(kind: .tempBasal, startDate: dose.startDate, endDate: dose.startDate,
-                                  unitsPerHour: 0, syncIdentifier: identity, insulinType: dose.insulinType)
         default:
             SportLog.event("loan", "pump report carried a \(dose.type) dose — not a wrist command; not journaled")
             return nil
