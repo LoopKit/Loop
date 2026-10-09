@@ -17,56 +17,6 @@ import WatchConnectivity
 import WatchKit
 import os.log
 
-/// The cycle's failure vocabulary. The CYCLE VERDICT line reads these to say WHICH STAGE failed,
-/// so the distinction between a compute error and an enact error is load-bearing, not cosmetic.
-enum WatchLoopError: Error {
-    /// A therapy setting the grant did not carry. Denies dosing; nothing is ever defaulted.
-    case configurationError(String)
-
-    /// The prediction could not be produced. A COMPUTE failure — never use it for a pod refusal.
-    case missingDataError(String)
-
-    /// The pod refused, or the command failed. Counts as a good compute and a failed enact.
-    case enactFailed(String)
-
-    /// Not stock: the recommendation is older than the enact path will act on.
-    case recommendationExpired(date: Date)
-
-    /// Enact refusals, as stock `loop()` refuses: a faulted pod, a suspended pod, and a manual
-    /// temp basal the user is running (left alone).
-    case pumpInoperable
-    case pumpSuspended
-    case manualTempBasalRunning
-
-    /// No pod on this watch. The ordinary answer between loans, not a fault.
-    case pumpManagerUnconnected
-}
-
-/// What a failed manual bolus reports, in the pod's terms.
-extension WatchLoopError: LocalizedError {
-    var errorDescription: String? {
-        switch self {
-        case .configurationError(let field):
-            return String(format: NSLocalizedString("Missing setting: %@", comment: "Watch loop error (1: setting name)"), field)
-        case .missingDataError(let what):
-            return String(format: NSLocalizedString("Missing data: %@", comment: "Watch loop error (1: data name)"), what)
-        case .enactFailed(let why):
-
-            return String(format: NSLocalizedString("The pod did not accept the dose: %@", comment: "Watch loop error (1: pump error)"), why)
-        case .recommendationExpired:
-            return NSLocalizedString("The recommendation expired before enacting.", comment: "Watch loop error")
-        case .pumpInoperable:
-            return NSLocalizedString("The pod is not operable.", comment: "Watch loop error")
-        case .pumpSuspended:
-            return NSLocalizedString("Insulin delivery is suspended.", comment: "Watch loop error")
-        case .manualTempBasalRunning:
-            return NSLocalizedString("A manual temp basal is running.", comment: "Watch loop error")
-        case .pumpManagerUnconnected:
-            return NSLocalizedString("No pod connected to the watch.", comment: "Watch loop error")
-        }
-    }
-}
-
 final class WatchLoopManager {
     /// The WATCH's own stores, opened by `StockLoopStack` — not a view onto the phone's.
     let doseStore: DoseStore
@@ -174,23 +124,6 @@ final class WatchLoopManager {
     /// Fired when the wrist opens the loop (closed to open), where stock ends a pre-meal preset.
     var onLoopOpened: (() -> Void)?
 
-    // Glucose that arrives mid-rebuild runs the cycle once the pump manager is back.
-    let awaitedPumpLock = NSLock()
-    var awaitingPumpManager = false
-    var readingArrivedWithoutPump = false
-
-    func beginAwaitingPumpManager() {
-        awaitedPumpLock.lock(); awaitingPumpManager = true; readingArrivedWithoutPump = false; awaitedPumpLock.unlock()
-    }
-
-    /// Consumes the flag: it answers true ONCE, so two callers cannot each run a catch-up cycle.
-    func endAwaitingPumpManager() -> Bool {
-        awaitedPumpLock.lock(); defer { awaitedPumpLock.unlock() }
-        let waited = readingArrivedWithoutPump
-        awaitingPumpManager = false
-        readingArrivedWithoutPump = false
-        return waited
-    }
     /// Shared by the CGM and the pump managers, which log from several queues at once during a
     /// radio storm — the throttle has to be thread-safe on its own account.
     let deviceLogThrottle = DeviceLogThrottle()
@@ -404,12 +337,6 @@ final class WatchLoopManager {
         let overrideLabel: String?
     }
 
-    /// What the pod is running, from the pump's delivery state.
-    func runningTempBasal() -> DoseEntry? {
-        if case .some(.tempBasal(let dose)) = pumpManager?.status.basalDeliveryState { return dose }
-        return nil
-    }
-
     let glanceMirrorLock = NSLock()
     var _glanceMirror: GlanceData?
     var _glanceRefreshPending = false
@@ -483,6 +410,7 @@ final class WatchLoopManager {
         self._closedLoopEnabled = loopState.closedLoopEnabled
         self._closedLoopMirror = loopState.closedLoopEnabled
         self.integralRetrospectiveCorrectionEnabled = loopState.integralRetrospectiveCorrectionEnabled
+        self.glucoseBasedApplicationFactorEnabled = loopState.glucoseBasedApplicationFactorEnabled
 
         // The store asks us for the scheduled basal it nets doses against; see the
         // `DoseStoreDelegate` conformance.
@@ -539,11 +467,6 @@ final class WatchLoopManager {
         refreshGlanceData()
     }
 
-    /// For glucose that arrived outside the CGM delegate, e.g. the grant seed.
-    func notePhoneGlucoseDelivered() {
-        noteGlucoseSource(directG7: false)
-    }
-
     /// One-line "who is feeding this watch" for the log at the start of a loan.
     var g7ContentionSummary: String {
         let stamps = lastGlucoseSourceStamps
@@ -564,17 +487,22 @@ final class WatchLoopManager {
         settings.basalRateSchedule.map { overrideHistory.resolvingRecentBasalSchedule($0) }
     }
 
-    /// Applied on `dataAccessQueue`, ahead of the first prediction.
-    func setIntegralRetrospectiveCorrection(_ enabled: Bool) {
-        updateLoopState { $0.integralRetrospectiveCorrectionEnabled = enabled }
+    /// The phone's Algorithm Experiments. Applied on `dataAccessQueue`, ahead of the first prediction.
+    func setAlgorithmExperiments(integralRetrospectiveCorrection: Bool, glucoseBasedApplicationFactor: Bool) {
+        updateLoopState {
+            $0.integralRetrospectiveCorrectionEnabled = integralRetrospectiveCorrection
+            $0.glucoseBasedApplicationFactorEnabled = glucoseBasedApplicationFactor
+        }
         dataAccessQueue.async {
-            self.integralRetrospectiveCorrectionEnabled = enabled
-            SportLog.event("loan", "retrospective correction: \(enabled ? "INTEGRAL" : "standard") (from grant)")
+            self.integralRetrospectiveCorrectionEnabled = integralRetrospectiveCorrection
+            self.glucoseBasedApplicationFactorEnabled = glucoseBasedApplicationFactor
+            SportLog.event("loan", "retrospective correction: \(integralRetrospectiveCorrection ? "INTEGRAL" : "standard") · bolus application factor: \(glucoseBasedApplicationFactor ? "GLUCOSE-BASED" : "constant") (from grant)")
         }
     }
 
     /// Queue-owned.
     var integralRetrospectiveCorrectionEnabled = false
+    var glucoseBasedApplicationFactorEnabled = false
 
     /// Stock glucose alerts, built from the phone's settings for a loan; nil between loans.
     @MainActor var glucoseAlerts: GlucoseAlertManager?
@@ -594,12 +522,8 @@ final class WatchLoopManager {
 
     var lastPredictionBreakdown: PredictionBreakdown?
 
-    /// The pending command and WHEN it was decided. The date is not decoration — the enact path
-    /// refuses a recommendation older than five minutes.
-    var recommendedAutomaticDose: (recommendation: AutomaticDoseRecommendation, enactTempBasal: Bool, date: Date)?
-
-    /// The display's copy, kept because a successful enact clears `recommendedAutomaticDose` —
-    /// without it the glance would blank the recommended rate on exactly the cycles that dosed.
+    /// The last cycle's recommendation, for the glance; cleared when a cycle starts, so a cycle
+    /// whose compute failed shows none rather than the one before.
     var lastRecommendation: AutomaticDoseRecommendation?
 
     /// When a cycle last completed — the freshness ring's only input. Persisted on every write:
@@ -698,6 +622,7 @@ extension WatchLoopManager: TemporaryScheduleOverrideHistoryDelegate {
 struct WatchLoopState: RawRepresentable {
     var closedLoopEnabled = false
     var integralRetrospectiveCorrectionEnabled = false
+    var glucoseBasedApplicationFactorEnabled = false
     var lastLoopCompleted: Date?
     /// The override history's events, as LoopKit encodes them; read back only by a resume.
     var overrideEvents: Data?
@@ -707,40 +632,17 @@ struct WatchLoopState: RawRepresentable {
     init?(rawValue: [String: Any]) {
         closedLoopEnabled = rawValue["closedLoopEnabled"] as? Bool ?? false
         integralRetrospectiveCorrectionEnabled = rawValue["integralRetrospectiveCorrectionEnabled"] as? Bool ?? false
+        glucoseBasedApplicationFactorEnabled = rawValue["glucoseBasedApplicationFactorEnabled"] as? Bool ?? false
         lastLoopCompleted = rawValue["lastLoopCompleted"] as? Date
         overrideEvents = rawValue["overrideEvents"] as? Data
     }
 
     var rawValue: [String: Any] {
         var raw: [String: Any] = ["closedLoopEnabled": closedLoopEnabled,
-                                  "integralRetrospectiveCorrectionEnabled": integralRetrospectiveCorrectionEnabled]
+                                  "integralRetrospectiveCorrectionEnabled": integralRetrospectiveCorrectionEnabled,
+                                  "glucoseBasedApplicationFactorEnabled": glucoseBasedApplicationFactorEnabled]
         raw["lastLoopCompleted"] = lastLoopCompleted
         raw["overrideEvents"] = overrideEvents
         return raw
-    }
-}
-
-/// A labelled copy of stock's `AlgorithmDisplayState` (`Loop/Managers/LoopDataManager.swift`,
-/// phone-only): one algorithm run's input and output.
-struct AlgorithmDisplayState {
-    var input: StoredDataAlgorithmInput?
-    var output: AlgorithmOutput<StoredCarbEntry>?
-
-    var activeInsulin: InsulinValue? {
-        guard let input, let value = output?.activeInsulin else {
-            return nil
-        }
-        return InsulinValue(startDate: input.predictionStart, value: value)
-    }
-
-    var activeCarbs: CarbValue? {
-        guard let input, let value = output?.activeCarbs else {
-            return nil
-        }
-        return CarbValue(startDate: input.predictionStart, value: value)
-    }
-
-    var asTuple: (algoInput: StoredDataAlgorithmInput?, algoOutput: AlgorithmOutput<StoredCarbEntry>?) {
-        return (algoInput: input, algoOutput: output)
     }
 }

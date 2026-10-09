@@ -255,7 +255,7 @@ final class WakeResumeTests: XCTestCase {
         // One list, so a new grant field cannot be left out of the saved state.
         let live = await makeController()
         live.loopManager.setClosedLoopEnabled(true, reason: "test")
-        live.loopManager.setIntegralRetrospectiveCorrection(true)
+        live.loopManager.setAlgorithmExperiments(integralRetrospectiveCorrection: true, glucoseBasedApplicationFactor: true)
         let override = halfNeeds(start: Date().addingTimeInterval(-.minutes(10)), duration: .indefinite)
         live.loopManager.applyWristOverride(override)
         saveState { $0.deliveredAtTakeover = 12.5 }
@@ -266,6 +266,7 @@ final class WakeResumeTests: XCTestCase {
                        "the phone's settings history — else the resumed loan projects today's settings back")
         XCTAssertTrue(c.loopManager.closedLoopEnabledNonBlocking, "closed-loop mode — else a resumed loan comes back OPEN")
         XCTAssertTrue(c.loopManager.isIntegralRetrospectiveCorrectionEnabled, "retrospective-correction mode")
+        XCTAssertTrue(c.loopManager.isGlucoseBasedApplicationFactorEnabled, "application-factor mode")
         XCTAssertTrue(c.phoneSupportsInterimHandback, "the phone's interim hand-back capability")
         XCTAssertTrue(c.phoneSupportsOverrideRecords, "the phone's override-records capability")
         XCTAssertEqual(c.deliveredAtTakeover, 12.5, "the delivery baseline — else the hand-back audit reads delivered=n/a")
@@ -414,21 +415,7 @@ final class WakeResumeTests: XCTestCase {
         c.queue.sync { }
         XCTAssertFalse(c.isResumingNonBlocking)
         XCTAssertFalse(c.isLoanActiveNonBlocking, "a session that could not be rebuilt is not live")
-        XCTAssertFalse(c.loopManager.endAwaitingPumpManager(), "and nothing is left waiting for a pump")
-    }
-
-    func testAReadingThatArrivesDuringTheRebuildIsRemembered() async {
-        // Stock restores the pump before the CGM, so a reading can never find no pump. Here the
-        // sensor is wired first; the reading that arrives in between must not cost a cycle.
-        let c = await makeController()
-        let loop = c.loopManager
-        loop.checkPumpDataAndLoop()
-        XCTAssertFalse(loop.endAwaitingPumpManager(), "no rebuild pending: an idle reading is just an idle reading")
-
-        loop.beginAwaitingPumpManager()
-        loop.checkPumpDataAndLoop()             // the reading arrives; no pump yet
-        XCTAssertTrue(loop.endAwaitingPumpManager(), "remembered — the rebuild's last act runs its cycle")
-        XCTAssertFalse(loop.endAwaitingPumpManager(), "once")
+        XCTAssertTrue(c.wristOwnsAlarmsNonBlocking, "the phone still leaves the alarms here until the records land")
     }
 
     // MARK: the hold
@@ -472,7 +459,8 @@ final class WakeResumeTests: XCTestCase {
         c.beginHandback()
         c.queue.sync { }
         c.handleIncoming(userInfo: try LoanMessage.handbackAck(HandbackAck(epoch: 7, committedCursor: 0)).transportDictionary(), channel: .urgent)
-        c.queue.sync { }; c.queue.sync { }   // the ack finalizes; finalize sends the final offer on the queue
+        // The ack finalizes: dosing stops on the loop's queue, then the final offer goes from the loan's.
+        c.queue.sync { }; c.loopManager.dataAccessQueue.sync { }; c.queue.sync { }; c.queue.sync { }
         XCTAssertEqual(c.phase, .handingBack, "released: the final offer is out")
         XCTAssertNil(c.loopManager.pumpManager, "and dosing has stopped")
 

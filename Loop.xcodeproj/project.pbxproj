@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00FE80DB999DB15B4B435C6B /* LoopWarning.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B996EF27235191002DC09C /* LoopWarning.swift */; };
 		01414522FC033F2B7A9B223A /* crying.caf in Resources */ = {isa = PBXBuildFile; fileRef = 85203550670F2E9BE92F27D8 /* crying.caf */; };
 		0514DEEA3C0A404FBA775CD7 /* SettingsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CB27CFCF9F0424FBB930CFF /* SettingsProvider.swift */; };
 		0580A71C73134CBC9DE309C5 /* LoopStallWatchdog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8B06DC011B54C348CC2A48F /* LoopStallWatchdog.swift */; };
@@ -18,11 +19,14 @@
 		0FA5104ABA1346E891F759AD /* OmnipodKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A60E55AC77554C50A4196482 /* OmnipodKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		101AA7370B0E499FBD88BB9F /* G7SensorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		10B149E9B807E4BF43BAC1ED /* LoanMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */; };
+		11A602D57094373065D00D79 /* ApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */; };
 		124B300527D84BE2A1233A91 /* urgent_low.caf in Resources */ = {isa = PBXBuildFile; fileRef = C9EA3F48338B49BD9C6BD0F9 /* urgent_low.caf */; };
+		12C61123C2943C92D0D4E44F /* PumpTeardownReleaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA796C9BB12BE239713AF507 /* PumpTeardownReleaseTests.swift */; };
 		1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
 		142CB7592A60BF2E0075748A /* EditMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142CB7582A60BF2E0075748A /* EditMode.swift */; };
 		142CB75B2A60BFC30075748A /* FavoriteFoodsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */; };
+		1448372D5D6D9F7B8CB325D5 /* ComplicationPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401196C545ADA33FFF6A71A6 /* ComplicationPublisher.swift */; };
 		1452F4A92A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4A82A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift */; };
 		1452F4AB2A851EDF00F8B9E4 /* FavoriteFoodAddEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4AA2A851EDF00F8B9E4 /* FavoriteFoodAddEditView.swift */; };
 		1452F4AD2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1452F4AC2A851F8800F8B9E4 /* HowAbsorptionTimeWorksView.swift */; };
@@ -68,7 +72,6 @@
 		14C970862C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C970852C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift */; };
 		14D906F42A846510006EB79A /* FavoriteFoodsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */; };
 		14ED83F62C6421F9008B4A5C /* FavoriteFoodInsightsCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14ED83F52C6421F9008B4A5C /* FavoriteFoodInsightsCardView.swift */; };
-		15DA1307D4FD016D5CB20CD7 /* ComplicationPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F40DA5D6FA8FE9032B822FD /* ComplicationPublisher.swift */; };
 		16E5A3BC4D931CE6AED18518 /* trill.caf in Resources */ = {isa = PBXBuildFile; fileRef = 21F13EB666EBFDD03F99CB7E /* trill.caf */; };
 		18606676A16D24BF383CCCF8 /* WatchAlertPresenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */; };
 		1B377B11C88EA02BAD431175 /* LoanMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */; };
@@ -104,21 +107,25 @@
 		2497B7839C12276E55320CFF /* PodLoanWatchController+Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = A113A845D5DDEEDA9A76D9AD /* PodLoanWatchController+Debug.swift */; };
 		2595BA7C7FB24296BCB3601A /* PodLoanPhoneControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C8F1C82896495CA6E8AF8F /* PodLoanPhoneControllerTests.swift */; };
 		27504B321CD86993288F2739 /* CarbAndBolusFlowViewModel+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77E6F7DA42D67B9E4F86127 /* CarbAndBolusFlowViewModel+PodLoan.swift */; };
+		284A419C733EDEA877B83D7F /* GlanceComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA738E289DA1BD373E01AE31 /* GlanceComplicationSnapshot.swift */; };
 		2874504A2E4901CE1A4A590F /* CarbList+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = A097CC8A4ACD55666AB42A8C /* CarbList+PodLoan.swift */; };
-		28EAD7E064ED541AA9ABE58D /* LoopGlanceWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E508C6EB2C06F7554A9C1759 /* LoopGlanceWidget.swift */; };
+		290D9C5E7F6180BB7DAD0251 /* GlucoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380424EADF78005E2F50 /* GlucoseStoreProtocol.swift */; };
 		294A72DAEC84F7BD17DBBBF5 /* LoanHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 305A9DB231BAB48D79C199D7 /* LoanHistoryTests.swift */; };
 		29E7925FADC442E78B1BFA79 /* LoanDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B75623E2144089A0471809 /* LoanDebugView.swift */; };
 		2C694BFD5806E573AFAB5E2E /* dings.caf in Resources */ = {isa = PBXBuildFile; fileRef = 62F7CB5D5DC337E705032AC7 /* dings.caf */; };
 		2EE15DB9853743D7B999AF37 /* GlanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0ABB040AC55431083B36492 /* GlanceView.swift */; };
 		2F17426EF105437983CDF0BC /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42BE0808089545E7BE6AE359 /* NSBundle.swift */; };
+		30E7D7F07468F90D9F028878 /* LoopGlanceWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 187CCD9C8597F11EEBC15435 /* LoopGlanceWidget.swift */; };
 		335CB5BBEBED4922B20C0CEC /* StockLoopStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23412C23E024F9A9399C435 /* StockLoopStack.swift */; };
 		33644743F20B3706E3107FAC /* mood_synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = BEC0BA802BE613F144AC3A70 /* mood_synth.caf */; };
 		344ABCF8A638888D8C0AC47B /* WatchLoopManager+Cycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4975B7BB91A91CB21F89ED6 /* WatchLoopManager+Cycle.swift */; };
+		3672F37D7AD0ADCF799182C1 /* LoopConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C660D0252E4DD5009B5C32 /* LoopConstants.swift */; };
 		37F9E89015084C8ABF4404FB /* LoanProtocolV2Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1368A70B6E347BCB432DF4D /* LoanProtocolV2Tests.swift */; };
 		3AA2F2EB3EA44C712FCEF51E /* PodLoanPhoneController+Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74D589BFE7B5D4BD6BED3D3 /* PodLoanPhoneController+Notifications.swift */; };
 		3BD58D425AE24815B134F3E1 /* LoanBooksHarnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF6006BAC6EA4034BFD67C0E /* LoanBooksHarnessTests.swift */; };
 		3BEA49797B7BE2FE39B469BC /* PodLoanWatchController+Records.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4DFD0C69E0F5207A50AF31 /* PodLoanWatchController+Records.swift */; };
 		3DAF0D06E678E7616137C84A /* WatchLoopManager+Dosing.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89D20C8E12BA79EEB440570 /* WatchLoopManager+Dosing.swift */; };
+		3E0AFD48BBFA03B4F15AF0BC /* DoseStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380024EADE7C005E2F50 /* DoseStoreProtocol.swift */; };
 		3ED3198A2EB659E600820BCF /* GlucoseLiveActivityConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319882EB659E600820BCF /* GlucoseLiveActivityConfiguration.swift */; };
 		3ED3198B2EB659E600820BCF /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319872EB659E600820BCF /* ChartView.swift */; };
 		3ED3198C2EB659E600820BCF /* BasalViewActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319862EB659E600820BCF /* BasalViewActivity.swift */; };
@@ -235,12 +242,9 @@
 		43FCEEA9221A615B0013DD30 /* StatusChartsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FCEEA8221A615B0013DD30 /* StatusChartsManager.swift */; };
 		43FCEEAD221A66780013DD30 /* DateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FCEEAC221A66780013DD30 /* DateFormatter.swift */; };
 		447D9AEE9B70527210F55CBD /* PodLoanWatchController+Delegates.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF3B2F4493A5ABB7435DFD0 /* PodLoanWatchController+Delegates.swift */; };
-		44CA233C68157DDA296C98FE /* GlanceComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AC351285766326725D8073 /* GlanceComplicationSnapshot.swift */; };
 		4624A94E56A6ABB49478893A /* DoseEnactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16B983D26B4893300256B05 /* DoseEnactor.swift */; };
-		46596A54FBF8C7F5C89AF1D1 /* GlanceComplicationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 687DE1D14C48349AF99125E6 /* GlanceComplicationTests.swift */; };
 		474214211EDBB2939A45354A /* BuildDetails+SportMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED4A237EFD018441E29D616 /* BuildDetails+SportMode.swift */; };
 		4826A7044A3346FBA450497A /* PodLoanWatchController+Handback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28ADB7DA9E28C018C4707191 /* PodLoanWatchController+Handback.swift */; };
-		4D0555E77F94BD1752D8244D /* GlanceComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AC351285766326725D8073 /* GlanceComplicationSnapshot.swift */; };
 		4DDC23AB11E8E215F41D2E42 /* WatchLoopManager+Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9198C65DD7145352022F9854 /* WatchLoopManager+Diagnostics.swift */; };
 		4E2EBC6125D8F32220F01615 /* PodLoanPhoneController+Reclaim.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3251D935F398630AC07CA3E9 /* PodLoanPhoneController+Reclaim.swift */; };
 		4EBEFA1A38224E7E8CE432A7 /* WatchLoopManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B9D276E492E4C55A6858278 /* WatchLoopManager.swift */; };
@@ -272,10 +276,10 @@
 		4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FDDD23720DC51DF00D04B16 /* LoopDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */; };
 		4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
-		5155644B2FF8A562552905A3 /* GlanceComplicationPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216A392DC9F44D90F6448717 /* GlanceComplicationPublisher.swift */; };
 		53511B10978934B5A016FD0D /* DeviceDataManager+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6333EAA0FF7956C2DD4AC3E /* DeviceDataManager+PodLoan.swift */; };
 		54CB774C12C6459DB3AFF5C2 /* DeviceLogThrottle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40BA18B2486452C8083B70A /* DeviceLogThrottle.swift */; };
 		5784CCC929DD5EED549010EE /* ContentView+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB6D8790872D927B336A1E3 /* ContentView+PodLoan.swift */; };
+		5B6EB51819D374B45C074ACD /* GlanceComplicationPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B73561BB6CCB83F39AC3D80 /* GlanceComplicationPublisher.swift */; };
 		5B89FEA8E24089ACD31A5F4C /* ExtensionDelegate+BluetoothWake.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45233F060B2B2C98791BCC70 /* ExtensionDelegate+BluetoothWake.swift */; };
 		5C7A1E01302D82A800A03F53 /* StockRunsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7A1E00302D82A800A03F53 /* StockRunsTests.swift */; };
 		5CD53E8B45B61D0DF32D19BA /* OverrideHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8564B298B7F91A5B62826D45 /* OverrideHistoryTests.swift */; };
@@ -287,6 +291,10 @@
 		5E16C423E6FB4551BA3BCAD2 /* RileyLinkKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ACC381BA270149C9B0DDCB01 /* RileyLinkKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5F448E42359E9920D869F85D /* PodLoanPhoneController+Records.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32989AB666983848B534F128 /* PodLoanPhoneController+Records.swift */; };
 		5FDDEC8709A17CE196A2F202 /* WristGlucoseAlertTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94E05C050AF4C0CC0B314040 /* WristGlucoseAlertTests.swift */; };
+		61187AA02CA57CE29F83B4C0 /* ComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0AA86CC5C06B894FD3E71A /* ComplicationSnapshot.swift */; };
+		6415A8472B56990A7222D7A2 /* GlanceComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA738E289DA1BD373E01AE31 /* GlanceComplicationSnapshot.swift */; };
+		64AEC25D8B19CA4B37922FAD /* LoopComplications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5C8B042A463D36EE0A1E6B /* LoopComplications.swift */; };
+		6A643D509AA2E5CA5E93ABF4 /* GlucoseBasedApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */; };
 		6A838D32706E94DA476EF481 /* NetBasal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D601DF8D9A900A04910 /* NetBasal.swift */; };
 		70E4E9FE2ABE49DDBDF4B0A9 /* StoredDataAlgorithmInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37485C37C7ED4485A1EDFB19 /* StoredDataAlgorithmInput.swift */; };
 		7107C26D3A4713D7FB208B3F /* AlertManager+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1475514C54ADC466268A8652 /* AlertManager+PodLoan.swift */; };
@@ -301,8 +309,6 @@
 		7D23667D21250C7E0028B67D /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D23667C21250C7E0028B67D /* LocalizedString.swift */; };
 		7E69CFFC2A16A77E00203CBD /* ResetLoopManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */; };
 		8077722BF812D34BDD35AEE6 /* WristOverrideRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */; };
-		80B2E6EF250EE42CCBD666B5 /* ComplicationSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C2E493229639210A02C5EC2 /* ComplicationSnapshotTests.swift */; };
-		8221838C9CAA1898F5965B39 /* Loop Complications.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7C57FBF5047073FFBACB842F /* Loop Complications.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		824A01CBE97A4F7A9D32F7D6 /* clear_chimes.caf in Resources */ = {isa = PBXBuildFile; fileRef = 4A645E0E2DDA534A635C9201 /* clear_chimes.caf */; };
 		824F9EABE70A97638CA3B5DC /* BuildDetails+SportMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED4A237EFD018441E29D616 /* BuildDetails+SportMode.swift */; };
 		83470D3E3277A2B94515726E /* StoredAlert+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */; };
@@ -348,7 +354,6 @@
 		84EC162E2C9115CA00D220C5 /* DIYLoopUnitTestPlan.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 84EC162D2C9115CA00D220C5 /* DIYLoopUnitTestPlan.xctestplan */; };
 		84F20DFD2D0B9C3A0089DF02 /* EditPresetDurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F20DFC2D0B9C3A0089DF02 /* EditPresetDurationView.swift */; };
 		84FA9D332CF7FD0D004162B4 /* PresetsHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FA9D322CF7FD0D004162B4 /* PresetsHistoryView.swift */; };
-		864D90AA1D0CE4F7452BC1D2 /* ComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7751D027D687F417B2487D /* ComplicationSnapshot.swift */; };
 		891B508524342BE1005DA578 /* CarbAndBolusFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 891B508424342BE1005DA578 /* CarbAndBolusFlowViewModel.swift */; };
 		892A5D59222F0A27008961AB /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D58222F0A27008961AB /* Debug.swift */; };
 		892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D682230C41D008961AB /* RangeReplaceableCollection.swift */; };
@@ -402,8 +407,11 @@
 		89F9119424358E4500ECCAF3 /* CarbAbsorptionTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F9119324358E4500ECCAF3 /* CarbAbsorptionTime.swift */; };
 		89F9119624358E6900ECCAF3 /* BolusPickerValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */; };
 		89FE21AD24AC57E30033F501 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FE21AC24AC57E30033F501 /* Collection.swift */; };
+		8B352261A7F5BD9D6566293E /* PumpManagerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A999D40524663D18004C89D4 /* PumpManagerError.swift */; };
 		8B5CF0144D79477AACBE4A82 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4344628320A7A3BE00C4BE6F /* LoopKit.framework */; };
+		8BACA0014DF81FD4EF87D856 /* LoopAlgorithmSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */; };
 		8C844DFDB7274EB6A6B0A09E /* LoanEventJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F9B5F8846B4124B8986783 /* LoanEventJournal.swift */; };
+		8E2E2E3DF5D4A6551D194071 /* ConstantApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */; };
 		8EADBFF2925E675CBA2E77C4 /* CarbAndBolusFlow+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7EDF8F4E611C98701399C6 /* CarbAndBolusFlow+PodLoan.swift */; };
 		8F62A31C76E02015BD7A34A9 /* PodLoanWatchController+State.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C662F8AB0873870BB565A8 /* PodLoanWatchController+State.swift */; };
 		921B7FAE002E40EFAB3F50C6 /* G7SensorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */; };
@@ -412,6 +420,7 @@
 		983E18F38E193C0E5AFB0358 /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
 		992345AB303643A60064B448 /* BuildDetails.plist in Resources */ = {isa = PBXBuildFile; fileRef = C1EE9E802A38D0FB0064784A /* BuildDetails.plist */; };
 		992345AC303643A60064B448 /* BuildDetails.swift in Resources */ = {isa = PBXBuildFile; fileRef = C110888C2A3913C600BA4898 /* BuildDetails.swift */; };
+		9924D02917D093DAB0BB475E /* LoopError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436A0DA41D236A2A00104B24 /* LoopError.swift */; };
 		9960C6964DD51D81093FAD5D /* chime.caf in Resources */ = {isa = PBXBuildFile; fileRef = 3F7A1D72697082DC3A14587E /* chime.caf */; };
 		99A92794C3DBB3888B340AE6 /* GlucoseAlertManager+Watch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446048F44BAE9C66B12394F4 /* GlucoseAlertManager+Watch.swift */; };
 		9A7CE028302D82A800A03F53 /* DeviceLogThrottleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE014302D82A800A03F53 /* DeviceLogThrottleTests.swift */; };
@@ -427,6 +436,7 @@
 		9B8FCBDD6E3A9E603C4AABAD /* bright_alarm.caf in Resources */ = {isa = PBXBuildFile; fileRef = 270F994CD56D566028B3CB25 /* bright_alarm.caf */; };
 		9D327AEC023D4304B936E605 /* TempBasalRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D49A0BC23884B9DB40301B5 /* TempBasalRecommendation.swift */; };
 		9D70FCCAA141489A9E49ADA6 /* RuntimeStateLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F520419E66CD453A809324D1 /* RuntimeStateLog.swift */; };
+		9EE9EA1CADE8ED9E95C3D6B0 /* DosingDecisionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B996F127238705002DC09C /* DosingDecisionStore.swift */; };
 		9F0BBEE28E9F45FC8DB3D8C9 /* LoanReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBF9B08E9314F23AB94CF5A /* LoanReconciler.swift */; };
 		A1B2C3D40000000000000002 /* GlucoseAlertManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */; };
 		A2779286E117BD3627DA0618 /* simple.caf in Resources */ = {isa = PBXBuildFile; fileRef = 5181B60CBF3CB2DA537F0475 /* simple.caf */; };
@@ -484,7 +494,7 @@
 		A9F703752489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F703742489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift */; };
 		A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F703762489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift */; };
 		A9FB75F1252BE320004C7D3F /* BolusDosingDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */; };
-		B00E93C5203C01A43B8D1CF1 /* ComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7751D027D687F417B2487D /* ComplicationSnapshot.swift */; };
+		AC44A203AF37A510128D735D /* CarbStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */; };
 		B18A390A68A8C03E20643F4C /* PodLoanPhoneController+State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0817A2A6F276A886CA6A15 /* PodLoanPhoneController+State.swift */; };
 		B20CD77F806353E80916E596 /* GlucoseAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0275B13A9543390BC6 /* GlucoseAlertManager.swift */; };
 		B4001CEE28CBBC82002FB414 /* AlertManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4001CED28CBBC82002FB414 /* AlertManagementView.swift */; };
@@ -546,7 +556,6 @@
 		BADED19355C7566CF6CB0A19 /* LoopDataManager+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED34CEFF556A1454634CD73 /* LoopDataManager+PodLoan.swift */; };
 		BAF043BF0BC70EC99AE79F71 /* HealthAccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4854073AAE5C2CB97167F63 /* HealthAccessView.swift */; };
 		BB7CE081302D82A800A03F53 /* InsulinBookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7CE080302D82A800A03F53 /* InsulinBookTests.swift */; };
-		BC303C889B9D9DD4077D0EF4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B8B99E5921FA29722903162 /* Foundation.framework */; };
 		BC5C47547CCB49F9BA618108 /* StockLoopSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D15E99F644E4E50A306CA01 /* StockLoopSession.swift */; };
 		BDE04F37312A4F6C86EC7872 /* G7TimedConnectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E489814AB551420DA40399A4 /* G7TimedConnectTests.swift */; };
 		BEEF31A4482828274EBA9822 /* PodLoanWatchController+SimulatorDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE6EF1F35CE03240C2E5376 /* PodLoanWatchController+SimulatorDriver.swift */; };
@@ -711,12 +720,15 @@
 		C9A47B0480AAB1FC572D3F01 /* critical.caf in Resources */ = {isa = PBXBuildFile; fileRef = C9A47B0475B13A9543390BC8 /* critical.caf */; };
 		C9SCENED0000000000000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9SCENED0000000000000002 /* SceneDelegate.swift */; };
 		CB1AF8155B1761A30ACA5591 /* synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = 83081FFB0497A4596F597830 /* synth.caf */; };
+		CDE4A5793AA422FA954F4558 /* ComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0AA86CC5C06B894FD3E71A /* ComplicationSnapshot.swift */; };
 		CDF3506125404EE4B35ED4F3 /* WatchSettingsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47ED7BDEE1B2443E910FF0BA /* WatchSettingsProvider.swift */; };
 		CE6DF9FAD8C24F7ABFAF31FF /* UserDefaults+LoopIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A973A0F6CF644FFAA48989FC /* UserDefaults+LoopIntents.swift */; };
+		CF128D7A67098331B604F930 /* ComplicationSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 671EFEDD754F2E981FD38A3B /* ComplicationSnapshotTests.swift */; };
+		D03E5031106568CF6EEBC4DF /* LoopAlgorithmSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */; };
 		D188AB9E674D4E223C7E62AC /* PersistedProperty+Directory.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA25D2864BD992EA7BA12649 /* PersistedProperty+Directory.swift */; };
 		D1A4C5329F40C4F2C404F2BC /* PodLoanWatchController+Start.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18AE34D2EC6C2320D8244D5 /* PodLoanWatchController+Start.swift */; };
 		D1C318442145F5A2652A5DD6 /* GlucoseAlertManager+Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C71A6661AA828EAFD63C8F08 /* GlucoseAlertManager+Sharing.swift */; };
-		D39CFD9B282219368E92A81B /* ComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7751D027D687F417B2487D /* ComplicationSnapshot.swift */; };
+		D39608C7048E09834B4D45D4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6BD97C596B29B91D4958D3AC /* Foundation.framework */; };
 		D3A7A6C51CA176C05E9DDF04 /* AlertStore.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */; };
 		D4E5F6A7B8C9D0E1F2A3B4C5 /* G7SilenceHint.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5F6A7B8C9D0E1F2A3B4 /* G7SilenceHint.swift */; };
 		D6201CDD83934B508AC33A24 /* PodLoanPhoneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE577A60A96B49F3A608001B /* PodLoanPhoneController.swift */; };
@@ -734,11 +746,11 @@
 		DDC389FA2A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */; };
 		DDC389FC2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */; };
 		DDC389FE2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */; };
+		DE82D6C882B01AC9C523FECE /* GlanceComplicationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9535603E239FA4E3E4BC2191 /* GlanceComplicationTests.swift */; };
 		DE965737FE2DAE9FE692769E /* alarm.caf in Resources */ = {isa = PBXBuildFile; fileRef = 0FC34B523FE5A50C920506D5 /* alarm.caf */; };
 		DEEBD7E5F70AA942BC1437A2 /* WatchLoopManager+DosingDecisions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEFD1862AFEBB55667FB9627 /* WatchLoopManager+DosingDecisions.swift */; };
 		E0B65BDAF0DBA1D909EED8A7 /* LoopDataManager+PodLoanWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2504A04D46B59B5A068097 /* LoopDataManager+PodLoanWatch.swift */; };
 		E62787C09306EF6C572B00AE /* AlertStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219C2469F1F5000EBBDE /* AlertStore.swift */; };
-		E86C6FCDEF92676CB12ECA9D /* LoopComplications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C121F15126892808E037E1 /* LoopComplications.swift */; };
 		E93E865424DB6CBA00FF40C8 /* retrospective_output.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E865324DB6CBA00FF40C8 /* retrospective_output.json */; };
 		E93E865624DB731900FF40C8 /* predicted_glucose_without_retrospective.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E865524DB731900FF40C8 /* predicted_glucose_without_retrospective.json */; };
 		E93E865824DB75BE00FF40C8 /* predicted_glucose_very_negative.json in Resources */ = {isa = PBXBuildFile; fileRef = E93E865724DB75BD00FF40C8 /* predicted_glucose_very_negative.json */; };
@@ -789,9 +801,11 @@
 		F06FDE1F67AF4011937B1529 /* SportLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C940C6F431E6435B971D98B2 /* SportLog.swift */; };
 		F14FCF0777A86C00F21DD16A /* StoredAlert+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */; };
 		F6A7B8C9D0E1F2A3B4C5D6E7 /* G7SilenceHintTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F6A7B8C9D0E1F2A3B4C5D6 /* G7SilenceHintTests.swift */; };
+		F8EFD84EDF361CFDF158317C /* ComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0AA86CC5C06B894FD3E71A /* ComplicationSnapshot.swift */; };
 		FA2B53E0B7A546DB996D8B5E /* RileyLinkBLEKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C03823C4CE664226A1EDAF41 /* RileyLinkBLEKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FA37F6EC10FF02D4F985D724 /* honk.caf in Resources */ = {isa = PBXBuildFile; fileRef = 6D5FCC7207E50ACC682E9E6E /* honk.caf */; };
 		FADE0001000000000000DE02 /* DevelopmentBranchAlerter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADE0001000000000000DE01 /* DevelopmentBranchAlerter.swift */; };
+		FAECEE32E757B760B2D95042 /* Loop Complications.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EAD452C8E94AC2DC4377B9A9 /* Loop Complications.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		FBAA6DF0227E06A9B478E4DD /* PodLoanPhoneController+Settle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6470B4DA5621FAD246F50E7A /* PodLoanPhoneController+Settle.swift */; };
 		FEEDB0000000000000000000 /* GlucoseStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000000 /* GlucoseStatistics.swift */; };
 		FEEDB0000000000000000001 /* StatisticsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000001 /* StatisticsViewModel.swift */; };
@@ -844,11 +858,11 @@
 			remoteGlobalIDString = 4F75288A1DFE1DC600C322D6;
 			remoteInfo = LoopUI;
 		};
-		8C312C2C054C26BF41043A6B /* PBXContainerItemProxy */ = {
+		77E372DD7BF4850C90573BB8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 48538E227485CF0B389FACB3;
+			remoteGlobalIDString = BB8EB303D4FC4909D1962CF9;
 			remoteInfo = "Loop Complications";
 		};
 		9A7CE008302D82A800A03F53 /* PBXContainerItemProxy */ = {
@@ -882,6 +896,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		1C6A9B998775CB90AB2C6884 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				FAECEE32E757B760B2D95042 /* Loop Complications.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		43A9439C1B926B7B0051FA24 /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -928,17 +953,6 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4AEE95932969DE92B1F184F7 /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				8221838C9CAA1898F5965B39 /* Loop Complications.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		4F70C1EC1DE8DCA8006380B7 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -968,7 +982,6 @@
 		00510AC06A2395BC0C763323 /* ExtensionDelegate+PodLoan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ExtensionDelegate+PodLoan.swift"; path = "WatchApp Extension/StockLoop/ExtensionDelegate+PodLoan.swift"; sourceTree = SOURCE_ROOT; };
 		00A28F30399B460CABF4EDD2 /* SettingsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsProvider.swift; path = Loop/Managers/SettingsProvider.swift; sourceTree = SOURCE_ROOT; };
 		00E9C192B33D5FC41E45E7A9 /* GlanceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GlanceModel.swift; path = "WatchApp Extension/StockLoop/GlanceModel.swift"; sourceTree = SOURCE_ROOT; };
-		016E107E3969ACD98FA7DF5C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		036B897A66F14CAA9CD5CAD0 /* PodLoanWatchController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PodLoanWatchController.swift; path = "WatchApp Extension/StockLoop/PodLoanWatchController.swift"; sourceTree = SOURCE_ROOT; };
 		0CB27CFCF9F0424FBB930CFF /* SettingsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsProvider.swift; path = Loop/Managers/SettingsProvider.swift; sourceTree = SOURCE_ROOT; };
 		0FC34B523FE5A50C920506D5 /* alarm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/alarm.caf; sourceTree = SOURCE_ROOT; };
@@ -1007,6 +1020,7 @@
 		14C970852C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodInsightsChartsView.swift; sourceTree = "<group>"; };
 		14D906F32A846510006EB79A /* FavoriteFoodsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsViewModel.swift; sourceTree = "<group>"; };
 		14ED83F52C6421F9008B4A5C /* FavoriteFoodInsightsCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodInsightsCardView.swift; sourceTree = "<group>"; };
+		187CCD9C8597F11EEBC15435 /* LoopGlanceWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LoopGlanceWidget.swift; path = "Loop Complications/LoopGlanceWidget.swift"; sourceTree = SOURCE_ROOT; };
 		189DC312230FC44AEA615F04 /* PodLoanWatchController+Seize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanWatchController+Seize.swift"; path = "WatchApp Extension/StockLoop/PodLoanWatchController+Seize.swift"; sourceTree = SOURCE_ROOT; };
 		1D05219A2469E9DF000EBBDE /* StoredAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlert.swift; sourceTree = "<group>"; };
 		1D05219C2469F1F5000EBBDE /* AlertStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStore.swift; sourceTree = "<group>"; };
@@ -1018,7 +1032,6 @@
 		1D63DEA426E950D400F46FA5 /* SupportManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportManager.swift; sourceTree = "<group>"; };
 		1D6B1B6626866D89009AC446 /* AlertPermissionsChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPermissionsChecker.swift; sourceTree = "<group>"; };
 		1D70C40026EC0F9D00C62570 /* SupportManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportManagerTests.swift; sourceTree = "<group>"; };
-		1D7751D027D687F417B2487D /* ComplicationSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComplicationSnapshot.swift; sourceTree = "<group>"; };
 		1D80313C24746274002810DF /* AlertStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStoreTests.swift; sourceTree = "<group>"; };
 		1D82E69F25377C6B009131FB /* TrustedTimeChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedTimeChecker.swift; sourceTree = "<group>"; };
 		1D8D55BB252274650044DBB6 /* BolusEntryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusEntryViewModelTests.swift; sourceTree = "<group>"; };
@@ -1035,15 +1048,14 @@
 		1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1DFE9E162447B6270082C280 /* UserNotificationAlertSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserNotificationAlertSchedulerTests.swift; sourceTree = "<group>"; };
 		1F0000002FBA000100000001 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		1F5C8B042A463D36EE0A1E6B /* LoopComplications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoopComplications.swift; sourceTree = "<group>"; };
 		1FF82B359AC5A6738CEBD729 /* PodLoanPhoneController+Staging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Staging.swift"; path = "Loop/Managers/PodLoanPhoneController+Staging.swift"; sourceTree = SOURCE_ROOT; };
-		216A392DC9F44D90F6448717 /* GlanceComplicationPublisher.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GlanceComplicationPublisher.swift; path = "WatchApp Extension/StockLoop/GlanceComplicationPublisher.swift"; sourceTree = SOURCE_ROOT; };
 		21F13EB666EBFDD03F99CB7E /* trill.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/trill.caf; sourceTree = SOURCE_ROOT; };
 		22969076523D145599EA2FBF /* WristCarbDeleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WristCarbDeleteTests.swift; sourceTree = "<group>"; };
 		270F994CD56D566028B3CB25 /* bright_alarm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/bright_alarm.caf; sourceTree = SOURCE_ROOT; };
 		28ADB7DA9E28C018C4707191 /* PodLoanWatchController+Handback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanWatchController+Handback.swift"; path = "WatchApp Extension/StockLoop/PodLoanWatchController+Handback.swift"; sourceTree = SOURCE_ROOT; };
 		295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WristOverrideRecordTests.swift; sourceTree = "<group>"; };
 		29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAlertPresenterTests.swift; sourceTree = "<group>"; };
-		2B8B99E5921FA29722903162 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		305A9DB231BAB48D79C199D7 /* LoanHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanHistoryTests.swift; sourceTree = "<group>"; };
 		3251D935F398630AC07CA3E9 /* PodLoanPhoneController+Reclaim.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Reclaim.swift"; path = "Loop/Managers/PodLoanPhoneController+Reclaim.swift"; sourceTree = SOURCE_ROOT; };
 		32989AB666983848B534F128 /* PodLoanPhoneController+Records.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Records.swift"; path = "Loop/Managers/PodLoanPhoneController+Records.swift"; sourceTree = SOURCE_ROOT; };
@@ -1064,6 +1076,7 @@
 		3ED319A02EB65B4100820BCF /* Bootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bootstrap.swift; sourceTree = "<group>"; };
 		3ED319A22EB65DA300820BCF /* LiveActivityManagerProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManagerProxy.swift; sourceTree = "<group>"; };
 		3F7A1D72697082DC3A14587E /* chime.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/chime.caf; sourceTree = SOURCE_ROOT; };
+		401196C545ADA33FFF6A71A6 /* ComplicationPublisher.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComplicationPublisher.swift; sourceTree = "<group>"; };
 		42BE0808089545E7BE6AE359 /* NSBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NSBundle.swift; path = Common/Extensions/NSBundle.swift; sourceTree = SOURCE_ROOT; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
@@ -1230,7 +1243,6 @@
 		4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+StatusExtension.swift"; sourceTree = "<group>"; };
 		4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopDataManager.swift; sourceTree = "<group>"; };
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
-		504E9BE07C28A92D82753ED3 /* WatchApp.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = WatchApp.entitlements; sourceTree = "<group>"; };
 		5181B60CBF3CB2DA537F0475 /* simple.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/simple.caf; sourceTree = SOURCE_ROOT; };
 		53F9B5F8846B4124B8986783 /* LoanEventJournal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanEventJournal.swift; path = "WatchApp Extension/StockLoop/LoanEventJournal.swift"; sourceTree = SOURCE_ROOT; };
 		5601535EB4FC12903ED69946 /* PodLoanPhoneController+Reconciliation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Reconciliation.swift"; path = "Loop/Managers/PodLoanPhoneController+Reconciliation.swift"; sourceTree = SOURCE_ROOT; };
@@ -1241,18 +1253,16 @@
 		5E12EA71302D82A800A03F53 /* WakeResumeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeResumeTests.swift; sourceTree = "<group>"; };
 		5E12EA740000000000000049 /* PodReturnsWithUnknownDeliveryStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodReturnsWithUnknownDeliveryStateTests.swift; sourceTree = "<group>"; };
 		5E12EA760000000000000050 /* PodLoanPhoneController+Hold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Hold.swift"; path = "Loop/Managers/PodLoanPhoneController+Hold.swift"; sourceTree = SOURCE_ROOT; };
-		5F40DA5D6FA8FE9032B822FD /* ComplicationPublisher.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComplicationPublisher.swift; sourceTree = "<group>"; };
 		62F7CB5D5DC337E705032AC7 /* dings.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/dings.caf; sourceTree = SOURCE_ROOT; };
-		63AC351285766326725D8073 /* GlanceComplicationSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GlanceComplicationSnapshot.swift; path = "Loop Complications/GlanceComplicationSnapshot.swift"; sourceTree = SOURCE_ROOT; };
 		6470B4DA5621FAD246F50E7A /* PodLoanPhoneController+Settle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Settle.swift"; path = "Loop/Managers/PodLoanPhoneController+Settle.swift"; sourceTree = SOURCE_ROOT; };
-		687DE1D14C48349AF99125E6 /* GlanceComplicationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GlanceComplicationTests.swift; path = WatchAppTests/GlanceComplicationTests.swift; sourceTree = SOURCE_ROOT; };
+		671EFEDD754F2E981FD38A3B /* ComplicationSnapshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ComplicationSnapshotTests.swift; path = LoopTests/ComplicationSnapshotTests.swift; sourceTree = SOURCE_ROOT; };
 		6BB5940F7EE8E813C6C458FE /* StatusTableViewController+PodLoan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "StatusTableViewController+PodLoan.swift"; path = "Loop/Managers/PodLoan/StatusTableViewController+PodLoan.swift"; sourceTree = SOURCE_ROOT; };
+		6BD97C596B29B91D4958D3AC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		6D5FCC7207E50ACC682E9E6E /* honk.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/honk.caf; sourceTree = SOURCE_ROOT; };
 		74145BE3C46270883D295A1F /* minimal.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/minimal.caf; sourceTree = SOURCE_ROOT; };
 		7704035FC96A99586EB69961 /* PodLoanPhoneController+Grant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Grant.swift"; path = "Loop/Managers/PodLoanPhoneController+Grant.swift"; sourceTree = SOURCE_ROOT; };
 		7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstContactNoteTests.swift; sourceTree = "<group>"; };
 		7B9D276E492E4C55A6858278 /* WatchLoopManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WatchLoopManager.swift; path = "WatchApp Extension/StockLoop/WatchLoopManager.swift"; sourceTree = SOURCE_ROOT; };
-		7C57FBF5047073FFBACB842F /* Loop Complications.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Loop Complications.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C9DDCE80C384964BDDF1C8B /* PhoneLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PhoneLog.swift; path = Loop/Managers/PhoneLog.swift; sourceTree = SOURCE_ROOT; };
 		7D23667C21250C7E0028B67D /* LocalizedString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LocalizedString.swift; path = LoopUI/Common/LocalizedString.swift; sourceTree = SOURCE_ROOT; };
 		7D49A0BC23884B9DB40301B5 /* TempBasalRecommendation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TempBasalRecommendation.swift; path = Loop/Extensions/TempBasalRecommendation.swift; sourceTree = SOURCE_ROOT; };
@@ -1265,6 +1275,7 @@
 		7D9BF13A23370E8B005DCFD6 /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/Intents.strings; sourceTree = "<group>"; };
 		7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetLoopManager.swift; sourceTree = "<group>"; };
 		7F2504A04D46B59B5A068097 /* LoopDataManager+PodLoanWatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LoopDataManager+PodLoanWatch.swift"; path = "WatchApp Extension/StockLoop/LoopDataManager+PodLoanWatch.swift"; sourceTree = SOURCE_ROOT; };
+		812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAlgorithmSupport.swift; sourceTree = "<group>"; };
 		83081FFB0497A4596F597830 /* synth.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/synth.caf; sourceTree = SOURCE_ROOT; };
 		840A2F0D2C0F978E003D5E90 /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		841306BA2F7F0D9C00AF0320 /* ReferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferencesView.swift; sourceTree = "<group>"; };
@@ -1368,15 +1379,15 @@
 		89F9119324358E4500ECCAF3 /* CarbAbsorptionTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbAbsorptionTime.swift; sourceTree = "<group>"; };
 		89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusPickerValues.swift; sourceTree = "<group>"; };
 		89FE21AC24AC57E30033F501 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
+		8B73561BB6CCB83F39AC3D80 /* GlanceComplicationPublisher.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GlanceComplicationPublisher.swift; path = "WatchApp Extension/StockLoop/GlanceComplicationPublisher.swift"; sourceTree = SOURCE_ROOT; };
 		8C77C38CD576410EA92A5B9A /* WorkoutKeepalive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WorkoutKeepalive.swift; path = "WatchApp Extension/StockLoop/WorkoutKeepalive.swift"; sourceTree = SOURCE_ROOT; };
 		8FB2394478FF679F436E8EF1 /* bloom.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/bloom.caf; sourceTree = SOURCE_ROOT; };
 		8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanMessages.swift; path = LoopCore/PodLoan/LoanMessages.swift; sourceTree = SOURCE_ROOT; };
 		9198C65DD7145352022F9854 /* WatchLoopManager+Diagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+Diagnostics.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+Diagnostics.swift"; sourceTree = SOURCE_ROOT; };
-		93C121F15126892808E037E1 /* LoopComplications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoopComplications.swift; sourceTree = "<group>"; };
 		93EE7F32577A574C35B4926C /* DeviceDataManager+PodLoanStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "DeviceDataManager+PodLoanStatus.swift"; path = "Loop/Managers/PodLoan/DeviceDataManager+PodLoanStatus.swift"; sourceTree = SOURCE_ROOT; };
 		9471E156FC10D6D0FF219C77 /* spring.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/spring.caf; sourceTree = SOURCE_ROOT; };
 		94E05C050AF4C0CC0B314040 /* WristGlucoseAlertTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WristGlucoseAlertTests.swift; sourceTree = "<group>"; };
-		96EBD502CA2642582DDF6476 /* LoopComplications.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = LoopComplications.entitlements; sourceTree = "<group>"; };
+		9535603E239FA4E3E4BC2191 /* GlanceComplicationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GlanceComplicationTests.swift; path = WatchAppTests/GlanceComplicationTests.swift; sourceTree = SOURCE_ROOT; };
 		97C8F1C82896495CA6E8AF8F /* PodLoanPhoneControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PodLoanPhoneControllerTests.swift; path = LoopTests/PodLoanPhoneControllerTests.swift; sourceTree = SOURCE_ROOT; };
 		98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WristAlertAcknowledgementTests.swift; sourceTree = "<group>"; };
 		9A7CE002302D82A800A03F53 /* WatchAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WatchAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1390,7 +1401,7 @@
 		9A7CE060302D82A800A03F53 /* WristAlertScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WristAlertScheduler.swift; path = "WatchApp Extension/StockLoop/WristAlertScheduler.swift"; sourceTree = SOURCE_ROOT; };
 		9A7CE070302D82A800A03F53 /* RecordingWristAlertScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingWristAlertScheduler.swift; sourceTree = "<group>"; };
 		9A7CE080302D82A800A03F53 /* GlanceSurfaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlanceSurfaceTests.swift; sourceTree = "<group>"; };
-		9C2E493229639210A02C5EC2 /* ComplicationSnapshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ComplicationSnapshotTests.swift; path = LoopTests/ComplicationSnapshotTests.swift; sourceTree = SOURCE_ROOT; };
+		9E6B9A089C25A3CBA27B8A08 /* WatchApp.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = WatchApp.entitlements; sourceTree = "<group>"; };
 		A097CC8A4ACD55666AB42A8C /* CarbList+PodLoan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CarbList+PodLoan.swift"; path = "WatchApp Extension/StockLoop/CarbList+PodLoan.swift"; sourceTree = SOURCE_ROOT; };
 		A113A845D5DDEEDA9A76D9AD /* PodLoanWatchController+Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanWatchController+Debug.swift"; path = "WatchApp Extension/StockLoop/PodLoanWatchController+Debug.swift"; sourceTree = SOURCE_ROOT; };
 		A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseAlertManagerTests.swift; sourceTree = "<group>"; };
@@ -1490,6 +1501,7 @@
 		B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothStateManager.swift; sourceTree = "<group>"; };
 		B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceDataManager+DeviceStatus.swift"; sourceTree = "<group>"; };
 		B579C199D790911890AE3F3A /* WatchAlertPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WatchAlertPresenter.swift; path = "WatchApp Extension/StockLoop/WatchAlertPresenter.swift"; sourceTree = SOURCE_ROOT; };
+		B6339D115A64136D01E4CB2B /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B6656C6C2FB3EE1300FFC8BE /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Intents.strings; sourceTree = "<group>"; };
 		B6656C6D2FB3EE1400FFC8BE /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Main.strings; sourceTree = "<group>"; };
 		B6656C6E2FB3EE1500FFC8BE /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1514,8 +1526,11 @@
 		B74D589BFE7B5D4BD6BED3D3 /* PodLoanPhoneController+Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Notifications.swift"; path = "Loop/Managers/PodLoanPhoneController+Notifications.swift"; sourceTree = SOURCE_ROOT; };
 		B77E6F7DA42D67B9E4F86127 /* CarbAndBolusFlowViewModel+PodLoan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CarbAndBolusFlowViewModel+PodLoan.swift"; path = "WatchApp Extension/StockLoop/CarbAndBolusFlowViewModel+PodLoan.swift"; sourceTree = SOURCE_ROOT; };
 		B88AF199D1DE958D1FAA9A72 /* PodLoanPhoneController+Mirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Mirror.swift"; path = "Loop/Managers/PodLoanPhoneController+Mirror.swift"; sourceTree = SOURCE_ROOT; };
+		BA796C9BB12BE239713AF507 /* PumpTeardownReleaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpTeardownReleaseTests.swift; sourceTree = "<group>"; };
 		BB7CE080302D82A800A03F53 /* InsulinBookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinBookTests.swift; sourceTree = "<group>"; };
+		BE0AA86CC5C06B894FD3E71A /* ComplicationSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComplicationSnapshot.swift; sourceTree = "<group>"; };
 		BE577A60A96B49F3A608001B /* PodLoanPhoneController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PodLoanPhoneController.swift; path = Loop/Managers/PodLoanPhoneController.swift; sourceTree = SOURCE_ROOT; };
+		BE856CFE29FA56C568460A33 /* LoopComplications.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = LoopComplications.entitlements; sourceTree = "<group>"; };
 		BEC0BA802BE613F144AC3A70 /* mood_synth.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/mood_synth.caf; sourceTree = SOURCE_ROOT; };
 		C03823C4CE664226A1EDAF41 /* RileyLinkBLEKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RileyLinkBLEKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1004DEF2981F5B700B8CF94 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -1677,6 +1692,7 @@
 		CCE6EF1F35CE03240C2E5376 /* PodLoanWatchController+SimulatorDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanWatchController+SimulatorDriver.swift"; path = "WatchApp Extension/StockLoop/PodLoanWatchController+SimulatorDriver.swift"; sourceTree = SOURCE_ROOT; };
 		D0861EE8E371426287E4542F /* LoanTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanTransport.swift; path = LoopCore/PodLoan/LoanTransport.swift; sourceTree = SOURCE_ROOT; };
 		D1368A70B6E347BCB432DF4D /* LoanProtocolV2Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanProtocolV2Tests.swift; path = LoopTests/LoanProtocolV2Tests.swift; sourceTree = SOURCE_ROOT; };
+		DA738E289DA1BD373E01AE31 /* GlanceComplicationSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GlanceComplicationSnapshot.swift; path = "Loop Complications/GlanceComplicationSnapshot.swift"; sourceTree = SOURCE_ROOT; };
 		DAB6D8790872D927B336A1E3 /* ContentView+PodLoan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ContentView+PodLoan.swift"; path = "WatchApp Extension/StockLoop/ContentView+PodLoan.swift"; sourceTree = SOURCE_ROOT; };
 		DC6E574D826158B33EE53EF6 /* WatchLoopManager+GlucoseAlerts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+GlucoseAlerts.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+GlucoseAlerts.swift"; sourceTree = SOURCE_ROOT; };
 		DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegralRetrospectiveCorrectionSelectionView.swift; sourceTree = "<group>"; };
@@ -1690,7 +1706,6 @@
 		E18AE34D2EC6C2320D8244D5 /* PodLoanWatchController+Start.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanWatchController+Start.swift"; path = "WatchApp Extension/StockLoop/PodLoanWatchController+Start.swift"; sourceTree = SOURCE_ROOT; };
 		E4854073AAE5C2CB97167F63 /* HealthAccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthAccessView.swift; sourceTree = "<group>"; };
 		E489814AB551420DA40399A4 /* G7TimedConnectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = G7TimedConnectTests.swift; sourceTree = "<group>"; };
-		E508C6EB2C06F7554A9C1759 /* LoopGlanceWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LoopGlanceWidget.swift; path = "Loop Complications/LoopGlanceWidget.swift"; sourceTree = SOURCE_ROOT; };
 		E5F6A7B8C9D0E1F2A3B4C5D6 /* G7SilenceHintTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = G7SilenceHintTests.swift; sourceTree = "<group>"; };
 		E7B75623E2144089A0471809 /* LoanDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanDebugView.swift; path = "WatchApp Extension/StockLoop/LoanDebugView.swift"; sourceTree = SOURCE_ROOT; };
 		E90AACBD349B6B4DF8C52236 /* PodLoanPhoneController+Wiring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Wiring.swift"; path = "Loop/Managers/PodLoanPhoneController+Wiring.swift"; sourceTree = SOURCE_ROOT; };
@@ -1735,6 +1750,7 @@
 		E9C58A7924DB529A00487A17 /* dynamic_glucose_effect_partially_observed.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = dynamic_glucose_effect_partially_observed.json; sourceTree = "<group>"; };
 		E9C58A7A24DB529A00487A17 /* counteraction_effect_falling_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = counteraction_effect_falling_glucose.json; sourceTree = "<group>"; };
 		E9C58A7B24DB529A00487A17 /* insulin_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = insulin_effect.json; sourceTree = "<group>"; };
+		EAD452C8E94AC2DC4377B9A9 /* Loop Complications.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Loop Complications.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED4DFD0C69E0F5207A50AF31 /* PodLoanWatchController+Records.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanWatchController+Records.swift"; path = "WatchApp Extension/StockLoop/PodLoanWatchController+Records.swift"; sourceTree = SOURCE_ROOT; };
 		EDBF9B08E9314F23AB94CF5A /* LoanReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanReconciler.swift; path = Loop/Managers/LoanReconciler.swift; sourceTree = SOURCE_ROOT; };
 		F0ABB040AC55431083B36492 /* GlanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GlanceView.swift; path = "WatchApp Extension/StockLoop/GlanceView.swift"; sourceTree = SOURCE_ROOT; };
@@ -1840,18 +1856,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		9A04501AF267295EA3894BD3 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				BC303C889B9D9DD4077D0EF4 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		9A7CE005302D82A800A03F53 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E0F4BF0E1657C41A5D2DC4E0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D39608C7048E09834B4D45D4 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1865,6 +1881,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		020370CADFAB8A218344E638 /* Loop Complications */ = {
+			isa = PBXGroup;
+			children = (
+				1F5C8B042A463D36EE0A1E6B /* LoopComplications.swift */,
+				BE0AA86CC5C06B894FD3E71A /* ComplicationSnapshot.swift */,
+				B6339D115A64136D01E4CB2B /* Info.plist */,
+				BE856CFE29FA56C568460A33 /* LoopComplications.entitlements */,
+				DA738E289DA1BD373E01AE31 /* GlanceComplicationSnapshot.swift */,
+				187CCD9C8597F11EEBC15435 /* LoopGlanceWidget.swift */,
+			);
+			name = "Loop Complications";
+			path = "Loop Complications";
+			sourceTree = "<group>";
+		};
 		14B1736128AED9EC006CCD7C /* Loop Widget Extension */ = {
 			isa = PBXGroup;
 			children = (
@@ -2068,7 +2098,7 @@
 				437D9BA11D7B5203007245E8 /* Loop.xcconfig */,
 				A951C5FF23E8AB51003E26DC /* Version.xcconfig */,
 				84957A16300D5CDF0040E2EF /* Recovered References */,
-				5E067D1BFAFA1CC2C91906FE /* Loop Complications */,
+				020370CADFAB8A218344E638 /* Loop Complications */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2084,7 +2114,7 @@
 				43D9002A21EB209400AF44BF /* LoopCore.framework */,
 				E9B07F7C253BBA6500BAD8F8 /* Loop Intent Extension.appex */,
 				14B1735C28AED9EC006CCD7C /* Loop Widget Extension.appex */,
-				7C57FBF5047073FFBACB842F /* Loop Complications.appex */,
+				EAD452C8E94AC2DC4377B9A9 /* Loop Complications.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2126,7 +2156,7 @@
 				43F5C2D61B92A4DC003EB13D /* Info.plist */,
 				A966152823EA5A37005D8B29 /* DefaultAssets.xcassets */,
 				A966152923EA5A37005D8B29 /* DerivedAssets.xcassets */,
-				504E9BE07C28A92D82753ED3 /* WatchApp.entitlements */,
+				9E6B9A089C25A3CBA27B8A08 /* WatchApp.entitlements */,
 			);
 			path = WatchApp;
 			sourceTree = "<group>";
@@ -2403,6 +2433,7 @@
 				C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */,
 				43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */,
 				C16B983D26B4893300256B05 /* DoseEnactor.swift */,
+				812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */,
 				4F70C20F1DE8FAC5006380B7 /* ExtensionDataManager.swift */,
 				A9C62D862331703000535612 /* LoggingServicesManager.swift */,
 				A9D5C5B525DC6C6A00534873 /* LoopAppManager.swift */,
@@ -2533,8 +2564,8 @@
 			children = (
 				4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */,
 				898ECA62218ABD21001E9D35 /* ComplicationChartManager.swift */,
-				5F40DA5D6FA8FE9032B822FD /* ComplicationPublisher.swift */,
-				216A392DC9F44D90F6448717 /* GlanceComplicationPublisher.swift */,
+				401196C545ADA33FFF6A71A6 /* ComplicationPublisher.swift */,
+				8B73561BB6CCB83F39AC3D80 /* GlanceComplicationPublisher.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -2585,20 +2616,6 @@
 				E9B08015253BBD7300BAD8F8 /* UserDefaults+LoopIntents.swift */,
 			);
 			path = Extensions;
-			sourceTree = "<group>";
-		};
-		5E067D1BFAFA1CC2C91906FE /* Loop Complications */ = {
-			isa = PBXGroup;
-			children = (
-				93C121F15126892808E037E1 /* LoopComplications.swift */,
-				1D7751D027D687F417B2487D /* ComplicationSnapshot.swift */,
-				016E107E3969ACD98FA7DF5C /* Info.plist */,
-				96EBD502CA2642582DDF6476 /* LoopComplications.entitlements */,
-				63AC351285766326725D8073 /* GlanceComplicationSnapshot.swift */,
-				E508C6EB2C06F7554A9C1759 /* LoopGlanceWidget.swift */,
-			);
-			name = "Loop Complications";
-			path = "Loop Complications";
 			sourceTree = "<group>";
 		};
 		7D23667B21250C5A0028B67D /* Common */ = {
@@ -2748,7 +2765,7 @@
 				FF6006BAC6EA4034BFD67C0E /* LoanBooksHarnessTests.swift */,
 				97C8F1C82896495CA6E8AF8F /* PodLoanPhoneControllerTests.swift */,
 				D1368A70B6E347BCB432DF4D /* LoanProtocolV2Tests.swift */,
-				9C2E493229639210A02C5EC2 /* ComplicationSnapshotTests.swift */,
+				671EFEDD754F2E981FD38A3B /* ComplicationSnapshotTests.swift */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -3016,7 +3033,7 @@
 				E9B07F86253BBA6500BAD8F8 /* IntentsUI.framework */,
 				14B1735D28AED9EC006CCD7C /* WidgetKit.framework */,
 				14B1735F28AED9EC006CCD7C /* SwiftUI.framework */,
-				D4EAA4355D48D87943902241 /* watchOS */,
+				E26E7B8942E380BE913AA92A /* watchOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -3043,12 +3060,13 @@
 				9A7CE01B302D82A800A03F53 /* WatchdogArmingTests.swift */,
 				29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */,
 				7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */,
+				BA796C9BB12BE239713AF507 /* PumpTeardownReleaseTests.swift */,
 				98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */,
 				295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */,
 				8564B298B7F91A5B62826D45 /* OverrideHistoryTests.swift */,
 				22969076523D145599EA2FBF /* WristCarbDeleteTests.swift */,
 				94E05C050AF4C0CC0B314040 /* WristGlucoseAlertTests.swift */,
-				687DE1D14C48349AF99125E6 /* GlanceComplicationTests.swift */,
+				9535603E239FA4E3E4BC2191 /* GlanceComplicationTests.swift */,
 			);
 			path = WatchAppTests;
 			sourceTree = "<group>";
@@ -3165,10 +3183,10 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		D4EAA4355D48D87943902241 /* watchOS */ = {
+		E26E7B8942E380BE913AA92A /* watchOS */ = {
 			isa = PBXGroup;
 			children = (
-				2B8B99E5921FA29722903162 /* Foundation.framework */,
+				6BD97C596B29B91D4958D3AC /* Foundation.framework */,
 			);
 			name = watchOS;
 			sourceTree = "<group>";
@@ -3343,13 +3361,13 @@
 				43A9437A1B926B7B0051FA24 /* Sources */,
 				43C667D71C5577280050C674 /* Embed Frameworks */,
 				DDBD0003000000000000BD03 /* Capture Build Details */,
-				4AEE95932969DE92B1F184F7 /* Embed Foundation Extensions */,
+				1C6A9B998775CB90AB2C6884 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				C16E94F92E7DBBA600AA4E6E /* PBXTargetDependency */,
-				D80E3ACDE914867F83E20FBB /* PBXTargetDependency */,
+				BAD81AABA8FC9AC7CE8B0E17 /* PBXTargetDependency */,
 			);
 			name = WatchApp;
 			productName = WatchApp;
@@ -3414,23 +3432,6 @@
 			productReference = 43E2D90B1D20C581004DA55F /* LoopTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		48538E227485CF0B389FACB3 /* Loop Complications */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = BADC146A95966ED239976E5A /* Build configuration list for PBXNativeTarget "Loop Complications" */;
-			buildPhases = (
-				B68F679E2DFC586669A3A370 /* Sources */,
-				9A04501AF267295EA3894BD3 /* Frameworks */,
-				96667682EB41B91A351CB1DE /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "Loop Complications";
-			productName = "Loop Complications";
-			productReference = 7C57FBF5047073FFBACB842F /* Loop Complications.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 		4F75288A1DFE1DC600C322D6 /* LoopUI */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4F7528921DFE1DC600C322D6 /* Build configuration list for PBXNativeTarget "LoopUI" */;
@@ -3470,6 +3471,23 @@
 			productName = WatchAppTests;
 			productReference = 9A7CE002302D82A800A03F53 /* WatchAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		BB8EB303D4FC4909D1962CF9 /* Loop Complications */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2AE072E019094DFE521511AA /* Build configuration list for PBXNativeTarget "Loop Complications" */;
+			buildPhases = (
+				CA34911B5605139DD2DC02E1 /* Sources */,
+				E0F4BF0E1657C41A5D2DC4E0 /* Frameworks */,
+				C089FE41C5CEFE9715BD2EEA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Loop Complications";
+			productName = "Loop Complications";
+			productReference = EAD452C8E94AC2DC4377B9A9 /* Loop Complications.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 		E9B07F7B253BBA6500BAD8F8 /* Loop Intent Extension */ = {
 			isa = PBXNativeTarget;
@@ -3611,7 +3629,7 @@
 				4F75288A1DFE1DC600C322D6 /* LoopUI */,
 				43E2D90A1D20C581004DA55F /* LoopTests */,
 				9A7CE001302D82A800A03F53 /* WatchAppTests */,
-				48538E227485CF0B389FACB3 /* Loop Complications */,
+				BB8EB303D4FC4909D1962CF9 /* Loop Complications */,
 			);
 		};
 /* End PBXProject section */
@@ -3734,14 +3752,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		96667682EB41B91A351CB1DE /* Resources */ = {
+		9A7CE006302D82A800A03F53 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		9A7CE006302D82A800A03F53 /* Resources */ = {
+		C089FE41C5CEFE9715BD2EEA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -4072,6 +4090,7 @@
 				84DF48C32F6A0AF600BEDB40 /* Image+Crop.swift in Sources */,
 				439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */,
 				C16B983E26B4893300256B05 /* DoseEnactor.swift in Sources */,
+				D03E5031106568CF6EEBC4DF /* LoopAlgorithmSupport.swift in Sources */,
 				3ED319962EB65A5C00820BCF /* LiveActivityManagementViewModel.swift in Sources */,
 				E98A55EF24EDD6E60008715D /* DosingDecisionStoreProtocol.swift in Sources */,
 				B4001CEE28CBBC82002FB414 /* AlertManagementView.swift in Sources */,
@@ -4226,6 +4245,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6A643D509AA2E5CA5E93ABF4 /* GlucoseBasedApplicationFactorStrategy.swift in Sources */,
+				3672F37D7AD0ADCF799182C1 /* LoopConstants.swift in Sources */,
+				8E2E2E3DF5D4A6551D194071 /* ConstantApplicationFactorStrategy.swift in Sources */,
+				11A602D57094373065D00D79 /* ApplicationFactorStrategy.swift in Sources */,
+				290D9C5E7F6180BB7DAD0251 /* GlucoseStoreProtocol.swift in Sources */,
+				AC44A203AF37A510128D735D /* CarbStoreProtocol.swift in Sources */,
+				3E0AFD48BBFA03B4F15AF0BC /* DoseStoreProtocol.swift in Sources */,
 				E62787C09306EF6C572B00AE /* AlertStore.swift in Sources */,
 				D3A7A6C51CA176C05E9DDF04 /* AlertStore.xcdatamodeld in Sources */,
 				983E18F38E193C0E5AFB0358 /* StoredAlert.swift in Sources */,
@@ -4264,6 +4290,11 @@
 				F06FDE1F67AF4011937B1529 /* SportLog.swift in Sources */,
 				DBA92856969B47C19B2BD581 /* WorkoutKeepalive.swift in Sources */,
 				4624A94E56A6ABB49478893A /* DoseEnactor.swift in Sources */,
+				8BACA0014DF81FD4EF87D856 /* LoopAlgorithmSupport.swift in Sources */,
+				9924D02917D093DAB0BB475E /* LoopError.swift in Sources */,
+				00FE80DB999DB15B4B435C6B /* LoopWarning.swift in Sources */,
+				8B352261A7F5BD9D6566293E /* PumpManagerError.swift in Sources */,
+				9EE9EA1CADE8ED9E95C3D6B0 /* DosingDecisionStore.swift in Sources */,
 				6A838D32706E94DA476EF481 /* NetBasal.swift in Sources */,
 				BA74C0C0BF4E8CFCB0D9EBAD /* BasalDeliveryState.swift in Sources */,
 				C5A82FBEC2AE43769A416B01 /* PodLoanWatchController.swift in Sources */,
@@ -4377,10 +4408,10 @@
 				894F6DD3243BCBDB00CCE676 /* Environment+SizeClass.swift in Sources */,
 				C17D52042E7F0578001D2AD2 /* LabelValueRow.swift in Sources */,
 				895788B2242E69A2002CB114 /* CircularAccessoryButtonStyle.swift in Sources */,
-				864D90AA1D0CE4F7452BC1D2 /* ComplicationSnapshot.swift in Sources */,
-				15DA1307D4FD016D5CB20CD7 /* ComplicationPublisher.swift in Sources */,
-				44CA233C68157DDA296C98FE /* GlanceComplicationSnapshot.swift in Sources */,
-				5155644B2FF8A562552905A3 /* GlanceComplicationPublisher.swift in Sources */,
+				CDE4A5793AA422FA954F4558 /* ComplicationSnapshot.swift in Sources */,
+				1448372D5D6D9F7B8CB325D5 /* ComplicationPublisher.swift in Sources */,
+				284A419C733EDEA877B83D7F /* GlanceComplicationSnapshot.swift in Sources */,
+				5B6EB51819D374B45C074ACD /* GlanceComplicationPublisher.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4520,8 +4551,8 @@
 				E93E86B224DDE21D00FF40C8 /* MockCarbStore.swift in Sources */,
 				C1DA43592B1A784900CBD33F /* MockDeliveryDelegate.swift in Sources */,
 				C18859A02AF1612B0010F21F /* PersistenceController.swift in Sources */,
-				B00E93C5203C01A43B8D1CF1 /* ComplicationSnapshot.swift in Sources */,
-				80B2E6EF250EE42CCBD666B5 /* ComplicationSnapshotTests.swift in Sources */,
+				61187AA02CA57CE29F83B4C0 /* ComplicationSnapshot.swift in Sources */,
+				CF128D7A67098331B604F930 /* ComplicationSnapshotTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4592,23 +4623,24 @@
 				9A7CE02F302D82A800A03F53 /* WatchdogArmingTests.swift in Sources */,
 				18606676A16D24BF383CCCF8 /* WatchAlertPresenterTests.swift in Sources */,
 				DB66EB0397D54C94B49ADEF8 /* FirstContactNoteTests.swift in Sources */,
+				12C61123C2943C92D0D4E44F /* PumpTeardownReleaseTests.swift in Sources */,
 				73E0AA9C0C5503C0A38FDCA6 /* WristAlertAcknowledgementTests.swift in Sources */,
 				8077722BF812D34BDD35AEE6 /* WristOverrideRecordTests.swift in Sources */,
 				5CD53E8B45B61D0DF32D19BA /* OverrideHistoryTests.swift in Sources */,
 				7AF2FE0D12D46279AA80608B /* WristCarbDeleteTests.swift in Sources */,
 				5FDDEC8709A17CE196A2F202 /* WristGlucoseAlertTests.swift in Sources */,
-				46596A54FBF8C7F5C89AF1D1 /* GlanceComplicationTests.swift in Sources */,
+				DE82D6C882B01AC9C523FECE /* GlanceComplicationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B68F679E2DFC586669A3A370 /* Sources */ = {
+		CA34911B5605139DD2DC02E1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E86C6FCDEF92676CB12ECA9D /* LoopComplications.swift in Sources */,
-				D39CFD9B282219368E92A81B /* ComplicationSnapshot.swift in Sources */,
-				4D0555E77F94BD1752D8244D /* GlanceComplicationSnapshot.swift in Sources */,
-				28EAD7E064ED541AA9ABE58D /* LoopGlanceWidget.swift in Sources */,
+				64AEC25D8B19CA4B37922FAD /* LoopComplications.swift in Sources */,
+				F8EFD84EDF361CFDF158317C /* ComplicationSnapshot.swift in Sources */,
+				6415A8472B56990A7222D7A2 /* GlanceComplicationSnapshot.swift in Sources */,
+				30E7D7F07468F90D9F028878 /* LoopGlanceWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4665,6 +4697,12 @@
 			target = 43A943711B926B7B0051FA24 /* WatchApp */;
 			targetProxy = 9A7CE008302D82A800A03F53 /* PBXContainerItemProxy */;
 		};
+		BAD81AABA8FC9AC7CE8B0E17 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Loop Complications";
+			target = BB8EB303D4FC4909D1962CF9 /* Loop Complications */;
+			targetProxy = 77E372DD7BF4850C90573BB8 /* PBXContainerItemProxy */;
+		};
 		C16E94F92E7DBBA600AA4E6E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 43D9001A21EB209400AF44BF /* LoopCore-watchOS */;
@@ -4674,12 +4712,6 @@
 			isa = PBXTargetDependency;
 			target = 43D9FFCE21EAE05D00AF44BF /* LoopCore */;
 			targetProxy = C1CCF1142858FA900035389C /* PBXContainerItemProxy */;
-		};
-		D80E3ACDE914867F83E20FBB /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "Loop Complications";
-			target = 48538E227485CF0B389FACB3 /* Loop Complications */;
-			targetProxy = 8C312C2C054C26BF41043A6B /* PBXContainerItemProxy */;
 		};
 		E9B07F93253BBA6500BAD8F8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5417,56 +5449,6 @@
 			};
 			name = Release;
 		};
-		5A0AF37C301E891C26F6D26D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_ENTITLEMENTS = "Loop Complications/LoopComplications.entitlements";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "Loop Complications/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch.Complications";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 10.6;
-			};
-			name = Release;
-		};
-		5E418A2AFDF46B83D9FA650D /* Testflight */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_ENTITLEMENTS = "Loop Complications/LoopComplications.entitlements";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "Loop Complications/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch.Complications";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 10.6;
-			};
-			name = Testflight;
-		};
 		99E99BDF30360FDA00BF56C6 /* Testflight */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -5857,7 +5839,32 @@
 			};
 			name = Testflight;
 		};
-		BC0A8846007B74948DD5ECC2 /* Debug */ = {
+		D963914342666636E6ACFC7C /* Testflight */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = "Loop Complications/LoopComplications.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Loop Complications/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch.Complications";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.6;
+			};
+			name = Testflight;
+		};
+		E2FCFE2A70DA83DB4DD3BA95 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
@@ -5935,6 +5942,31 @@
 			};
 			name = Release;
 		};
+		F5F3C914675460EA43922F61 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = "Loop Complications/LoopComplications.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Loop Complications/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch.Complications";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.6;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -5944,6 +5976,16 @@
 				14B1736A28AED9EE006CCD7C /* Debug */,
 				B4E7CF962AD00A39009B4DF2 /* Testflight */,
 				14B1736B28AED9EE006CCD7C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2AE072E019094DFE521511AA /* Build configuration list for PBXNativeTarget "Loop Complications" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F5F3C914675460EA43922F61 /* Release */,
+				E2FCFE2A70DA83DB4DD3BA95 /* Debug */,
+				D963914342666636E6ACFC7C /* Testflight */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -6024,16 +6066,6 @@
 				9A7CE009302D82A800A03F53 /* Debug */,
 				9A7CE00A302D82A800A03F53 /* Release */,
 				99E99BDF30360FDA00BF56C6 /* Testflight */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		BADC146A95966ED239976E5A /* Build configuration list for PBXNativeTarget "Loop Complications" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				5A0AF37C301E891C26F6D26D /* Release */,
-				BC0A8846007B74948DD5ECC2 /* Debug */,
-				5E418A2AFDF46B83D9FA650D /* Testflight */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

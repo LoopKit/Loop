@@ -23,14 +23,6 @@ extension LoopDataManager {
         }
     }
 
-    /// Called from `updateContext(_:)`.
-    func podLoanNotePhoneRelayContext(_ context: WatchContext) {
-        // Keep the phone's relay apart from the active context, which is the watch's during a loan.
-        if !context.isWatchAuthored {
-            phoneRelayContext = context
-        }
-    }
-
     /// Called from `updateContext(_:)`: the phone's CGM configuration rides in each context.
     func podLoanAdoptCGMConfiguration(from context: WatchContext) {
         guard !context.isWatchAuthored,
@@ -38,16 +30,26 @@ extension LoopDataManager {
         ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager.adoptCGMConfiguration(configuration)
     }
 
-    /// Called from `updateContext(_:)` when a phone context is refused mid-loan: the relayed
-    /// reading is still stored here, and offered to the wrist's loop.
+    /// While the wrist owns the alarms (taking over, live, handing back, draining, resuming) the
+    /// phone's reading is stored here and evaluated. Only while the loan is live does the phone's
+    /// context never replace the watch's: `shouldReplace` compares only glucoseDate with `>=`, so
+    /// an equal-timestamp relay would discard the watch's prediction.
+    func podLoanAbsorbsPhoneContext(_ context: WatchContext) -> Bool {
+        guard let loan = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController,
+              loan.wristOwnsAlarmsNonBlocking, !context.isWatchAuthored else { return false }
+        podLoanAbsorbPhoneContextDuringLoan(context)
+        return loan.isLoanActiveNonBlocking
+    }
+
+    /// A phone context during a loan: the relayed reading is stored here, and offered to the wrist's
+    /// loop and alarms.
     func podLoanAbsorbPhoneContextDuringLoan(_ context: WatchContext) {
-        if let newGlucoseSample = context.newGlucoseSample {
-            Task {
-                try? await self.glucoseStore?.addGlucoseSamples([newGlucoseSample])
-            }
+        guard let newGlucoseSample = context.newGlucoseSample else { return }
+        Task {
+            try? await self.glucoseStore?.addGlucoseSamples([newGlucoseSample])
         }
         #if !targetEnvironment(simulator)
-        ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager.ingestPhoneGlucoseFromContext()
+        ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.stack.loopManager.ingestPhoneGlucose(newGlucoseSample)
         #endif
     }
 

@@ -168,33 +168,31 @@ extension WatchLoopManager {
             ctx.lastNetTempBasalDose = netBasal.rate
         }
 
-        do {
-            if let cob = displayState.activeCarbs?.value {
-                ctx.cob = cob
+        if let cob = displayState.activeCarbs?.value {
+            ctx.cob = cob
 
-                if cob > 0.05 { SportLog.event("loop", String(format: "COB %.1f g on board", cob)) }
-            }
+            if cob > 0.05 { SportLog.event("loop", String(format: "COB %.1f g on board", cob)) }
+        }
 
-            // Fill the recommendation before installing the context: the stock flow reads nil as zero.
-            let recommendationResult = self.manualBolusRecommendationOnQueue()
-            // As stock's context for the watch, the watchBolus decision built with it is kept.
-            self.noteContextDosingDecision(potentialCarbEntry: nil, recommendation: try? recommendationResult.get())
-            switch recommendationResult {
-            case .success(let recommendation):
+        // Fill the recommendation before installing the context: the stock flow reads nil as zero.
+        let recommendationResult = self.manualBolusRecommendationOnQueue()
+        // As stock's context for the watch, the watchBolus decision built with it is kept.
+        self.noteContextDosingDecision(potentialCarbEntry: nil, recommendation: (try? recommendationResult.get()) ?? nil)
+        switch recommendationResult {
+        case .success(let recommendation):
 
-                SportLog.event("loan", String(format: "REC bolus %.2f U — published to the stock bolus flow", recommendation.amount))
-                ctx.recommendedBolusDose = recommendation.amount
-            case .failure(let error):
+            SportLog.event("loan", String(format: "REC bolus %.2f U — published to the stock bolus flow", recommendation?.amount ?? 0))
+            ctx.recommendedBolusDose = recommendation?.amount
+        case .failure(let error):
 
-                SportLog.event("loan", "REC bolus UNAVAILABLE — \(error) (the flow will show 'REC: – U')")
-            }
-            DispatchQueue.main.async {
-                guard let loopDataManager = ExtensionDelegate.sharedIfAvailable()?.loopManager else { return }
-                // The phone's display unit.
-                ctx.displayGlucoseUnit = loopDataManager.activeContext?.displayGlucoseUnit ?? ctx.displayGlucoseUnit
-                loopDataManager.updateContext(ctx)
-                NotificationCenter.default.post(name: LoopDataManager.didUpdateContextNotification, object: loopDataManager)
-            }
+            SportLog.event("loan", "REC bolus UNAVAILABLE — \(error) (the flow will show 'REC: – U')")
+        }
+        DispatchQueue.main.async {
+            guard let loopDataManager = ExtensionDelegate.sharedIfAvailable()?.loopManager else { return }
+            // The phone's display unit.
+            ctx.displayGlucoseUnit = loopDataManager.activeContext?.displayGlucoseUnit ?? ctx.displayGlucoseUnit
+            loopDataManager.updateContext(ctx)
+            NotificationCenter.default.post(name: LoopDataManager.didUpdateContextNotification, object: loopDataManager)
         }
     }
 }

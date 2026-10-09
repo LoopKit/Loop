@@ -163,3 +163,27 @@ final class WristOverrideRecordTests: XCTestCase {
                                       stateDirectory: dir)
     }
 }
+
+/// A cancelled temp reaches the phone as a zero-length rate record (2026-10-09: six cancels in an overnight
+/// loan were never journaled, leaving the cancelled temps standing in the phone's books).
+final class LoanCancelRecordTests: XCTestCase {
+    private let now = Date()
+
+    /// The schedule resuming — how the pump manager reports a cancel — is journaled as a zero-length temp.
+    func testTheScheduleResumingIsJournaledAsACancel() {
+        let resume = DoseEntry(type: .basal, startDate: now, endDate: now, value: 0.6, unit: .unitsPerHour, decisionId: nil)
+        let record = PodLoanWatchController.loanRecord(for: resume, raw: Data([0x01, 0x02]))
+        XCTAssertEqual(record?.kind, .tempBasal)
+        XCTAssertEqual(record?.startDate, now)
+        XCTAssertEqual(record?.endDate, now)
+        XCTAssertEqual(record?.unitsPerHour, 0)
+        XCTAssertEqual(record?.syncIdentifier, "0102")
+    }
+
+    /// Scheduled basal over a span is still not a wrist command.
+    func testScheduledBasalOverASpanIsNotJournaled() {
+        let basal = DoseEntry(type: .basal, startDate: now, endDate: now.addingTimeInterval(300), value: 0.6,
+                              unit: .unitsPerHour, decisionId: nil)
+        XCTAssertNil(PodLoanWatchController.loanRecord(for: basal, raw: Data([0x03])))
+    }
+}

@@ -83,7 +83,8 @@ extension PodLoanWatchController: PumpManagerDelegate {
 
     /// Refused: the schedule is frozen to the grant, and the phone's audit uses the same one.
     func pumpManager(_ pumpManager: PumpManager, didRequestBasalRateScheduleChange basalRateSchedule: BasalRateSchedule, completion: @escaping (Error?) -> Void) {
-        completion(WatchLoopError.configurationError("basal schedule changes are phone-only"))
+        // Basal schedule changes are the phone's; the closest stock error.
+        completion(LoopError.configurationError(.basalRateSchedule))
     }
 
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
@@ -105,10 +106,11 @@ extension PodLoanWatchController: PumpManagerDelegate {
         return phase == .active && loopManager.closedLoopEnabledNonBlocking
     }
 
-    /// Judged against the override-applied schedule.
+    /// Judged against the override-applied schedule. Simpler than stock's: only MockKit's phone UI
+    /// reads this, and nothing reads it on the watch.
     var automatedTreatmentState: AutomatedTreatmentState? {
         guard phase == .active else { return nil }
-        guard let dose = loopManager.runningTempBasal() else { return .neutralNoOverride }
+        guard let dose = loopManager.pumpManager?.status.basalDeliveryState?.currentTempBasal else { return .neutralNoOverride }
         let scheduled = loopManager.basalRateScheduleApplyingOverrideHistory?.value(at: now()) ?? 0
         if dose.unitsPerHour == 0 { return .minimumDelivery }
         if dose.unitsPerHour > scheduled { return .increasedInsulin }
@@ -184,6 +186,7 @@ extension LoanGrant {
                   supportsInterimHandback: supportsInterimHandback,
                   supportsOverrideRecords: supportsOverrideRecords,
                   integralRetrospectiveCorrectionEnabled: integralRetrospectiveCorrectionEnabled,
+                  glucoseBasedApplicationFactorEnabled: glucoseBasedApplicationFactorEnabled,
                   phoneClosedLoopEnabled: phoneClosedLoopEnabled, carbHistory: carbHistory,
                   glucoseHistory: glucoseHistory,
                   activeOverrideRaw: activeOverrideRaw,

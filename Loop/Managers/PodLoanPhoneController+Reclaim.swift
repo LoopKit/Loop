@@ -272,7 +272,7 @@ extension PodLoanPhoneController {
     @discardableResult
     private func armForceReclaimAudit() -> Bool {
         let start = loanStartedAt ?? deps.now().addingTimeInterval(-.hours(2))
-        // Prefer the running audit base: checkpoints already reconciled what came before it.
+        // The base is the takeover reading, or the grant's before one arrives.
         let anchor: (units: Double, asOf: Date)?
         if let base = auditBase {
             anchor = (base.units, base.asOf)
@@ -305,10 +305,8 @@ extension PodLoanPhoneController {
             takeoverUnits: takeoverUnits, wholeLoanExpected: wholeLoanExpected)
 
         handbackDiag(epoch, String(format:
-            "force-reclaim audit armed — expected %.3f U from %d record(s) + schedule fill over window since %@ (%d checkpoint(s)); verdict on the reclaim round-trip",
-            expected, allEvents.count,
-            checkpointsThisLoan > 0 ? String(format: "last sync %.0f min ago", deps.now().timeIntervalSince(anchor.asOf) / 60) : "takeover",
-            checkpointsThisLoan))
+            "force-reclaim audit armed — expected %.3f U from %d record(s) + schedule fill over %.0f min since takeover; verdict on the reclaim round-trip",
+            expected, allEvents.count, deps.now().timeIntervalSince(anchor.asOf) / 60))
         return true
     }
 

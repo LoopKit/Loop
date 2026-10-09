@@ -80,10 +80,6 @@ class LoopDataManager {
     private let log = OSLog(category: "LoopDosingManager")
 
     // Main queue only
-    /// The last context the PHONE sent, regardless of what is currently active.
-    /// Written by LoopDataManager+PodLoanWatch.swift.
-    var phoneRelayContext: WatchContext?
-
     private(set) var activeContext: WatchContext? {
         didSet {
             podLoanNoteContextChange(oldValue)
@@ -149,16 +145,8 @@ extension LoopDataManager {
     func updateContext(_ context: WatchContext) {
         dispatchPrecondition(condition: .onQueue(.main))
 
-        podLoanNotePhoneRelayContext(context)
         podLoanAdoptCGMConfiguration(from: context)
-
-        // During a loan the phone's context never replaces the watch's: `shouldReplace` compares only
-        // glucoseDate with `>=`, so an equal-timestamp relay would discard the watch's prediction.
-        let onLoan = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController.isLoanActiveNonBlocking ?? false
-        if onLoan, !context.isWatchAuthored {
-            podLoanAbsorbPhoneContextDuringLoan(context)
-            return
-        }
+        if podLoanAbsorbsPhoneContext(context) { return }
 
         if activeContext == nil || context.shouldReplace(activeContext!) {
             if let newGlucoseSample = context.newGlucoseSample {

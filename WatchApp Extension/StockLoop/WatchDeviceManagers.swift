@@ -52,6 +52,12 @@ func watchCGMManager(rawValue: [String: Any]) -> CGMManager? {
     return watchCGMManagersByIdentifier[identifier]?.init(rawState: rawState)
 }
 
+/// On a wake that is not the CGM's own, its acquisition re-checks itself (G7: a lost Bluetooth
+/// callback can leave no connect standing and nothing to notice).
+func watchCGMRecheckAcquisition(_ manager: CGMManager?) {
+    (manager as? G7CGMManager)?.recheckAcquisition()
+}
+
 extension DeviceManager {
     /// What the watch saves, as stock saves a manager: `managerIdentifier` and `state`.
     var watchRawValue: [String: Any] {

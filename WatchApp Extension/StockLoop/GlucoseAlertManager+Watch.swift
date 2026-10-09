@@ -9,12 +9,7 @@
 import Foundation
 import LoopAlgorithm
 
-extension Notification.Name {
-    /// The phone's name; nothing on the wrist posts it.
-    static let LoopCycleCompleted = Notification.Name(rawValue: "com.loopkit.Loop.LoopCycleCompleted")
-}
-
 extension LoopDataManager {
-    /// Read only by the listener above, which never fires here.
+    /// Read only by stock's predicted-low listener, which never fires here.
     nonisolated var predictedGlucose: [PredictedGlucoseValue]? { nil }
 }

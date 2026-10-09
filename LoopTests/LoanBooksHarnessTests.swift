@@ -341,6 +341,63 @@ final class LoanBooksHarnessTests: XCTestCase {
                                storeDelegate: delegate)
     }
 
+    private let cancelTestSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.0)])!
+
+    /// Field 2026-09-05 (9b19f160, ported 2026-10-09): a cancel one second before the checkpoint window still
+    /// terminates its temp. The checkpoint's odometer is read just after the cancel, so the next window starts
+    /// after it; clipping before resolving dropped the cancel and kept the zero temp standing.
+    func testACancelOneSecondBeforeTheCheckpointWindowStillTerminatesTheTemp() {
+        let t0 = Date()
+        let zeroTemp = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                                 record: LoanDoseRecord(kind: .tempBasal, startDate: t0,
+                                                        endDate: t0.addingTimeInterval(1800), unitsPerHour: 0.0),
+                                 loggedAt: t0)
+        let cancel = LoanEvent(id: UUID(), seq: 2, provenance: .confirmed,
+                               record: LoanDoseRecord(kind: .tempBasal, startDate: t0.addingTimeInterval(600),
+                                                      endDate: t0.addingTimeInterval(600), unitsPerHour: 0.0),
+                               loggedAt: t0.addingTimeInterval(600))
+        // The window opens one second after the cancel and runs 25 min, all on the 1.0 U/h schedule.
+        let expected = LoanReconciler.expectedInsulin(events: [zeroTemp, cancel], schedule: cancelTestSchedule, pulseUnits: 0.05,
+                                                      from: t0.addingTimeInterval(601), to: t0.addingTimeInterval(2101),
+                                                      includingBolusesAtEnd: false)
+        XCTAssertEqual(expected, 1500.0 / 3600, accuracy: 0.001, "a whole window of schedule, not the zero temp's tail")
+    }
+
+    /// 2026-10-09: the watch journals a cancel (the schedule resuming) as a zero-length temp. Through the real
+    /// store, as the phone writes a loan — commit by pump events, then the identified backfill trimmed at the
+    /// next rate record — the store takes it and the cancelled temp ends at the cancel.
+    func testACancelRecordThroughTheRealStoreEndsTheTemp() {
+        let now = Date()
+        let loanStart = now.addingTimeInterval(-.minutes(40))
+        let tempStart = loanStart.addingTimeInterval(.minutes(2))
+        let cancelAt = tempStart.addingTimeInterval(.minutes(5))
+        let syncTemp = "loanv2-\(UUID().uuidString)", syncCancel = "loanv2-\(UUID().uuidString)"
+        let events = [
+            LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                      record: LoanDoseRecord(kind: .tempBasal, startDate: tempStart, endDate: tempStart.addingTimeInterval(.minutes(30)),
+                                             unitsPerHour: 0.0, syncIdentifier: syncTemp), loggedAt: tempStart),
+            LoanEvent(id: UUID(), seq: 2, provenance: .confirmed,
+                      record: LoanDoseRecord(kind: .tempBasal, startDate: cancelAt, endDate: cancelAt,
+                                             unitsPerHour: 0.0, syncIdentifier: syncCancel), loggedAt: cancelAt),
+        ]
+        let outcome = LoanReconciler.reconcile(.init(events: events, schedule: cancelTestSchedule, loanStart: loanStart,
+                                                     loanEnd: now, isFinalHandback: true))
+        XCTAssertEqual(outcome.doses.count, 2, "the temp and the zero-length cancel")
+
+        let driver = makeDriver()
+        driver.storeEvents(outcome.doses.map {
+            NewPumpEvent(date: $0.startDate, dose: $0, raw: Data(($0.syncIdentifier ?? "").utf8), title: "Temp Basal")
+        }, lastReconciliation: now)
+        driver.backfill([DoseEntry(type: .tempBasal, startDate: tempStart, endDate: cancelAt, value: 0.0,
+                                   unit: .unitsPerHour, decisionId: nil, syncIdentifier: hexString(Data(syncTemp.utf8)))])
+
+        let temps = driver.normalizedDoses(start: loanStart, end: now)
+            .filter { $0.type == .tempBasal && $0.startDate >= tempStart && $0.startDate < cancelAt }
+        XCTAssertFalse(temps.isEmpty, "the temp is in the books")
+        XCTAssertEqual(temps.map(\.endDate).max(), cancelAt, "and it ends at the cancel, not its programmed 30 min")
+    }
+
+
     // MARK: - 1. The inherited running temp — both spans, both books
 
     // MARK: - 2. The bolus twin pair

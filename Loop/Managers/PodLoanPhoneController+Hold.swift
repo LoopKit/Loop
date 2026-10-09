@@ -45,6 +45,13 @@ extension PodLoanPhoneController {
         set { updateState { $0.watchSilenceWarningsIssued = newValue } }
     }
 
+    /// The watch raises this user's glucose alerts while it has the pod and is being heard from: any
+    /// loan, unless the phone has noticed the watch silent beside the body. Read on main by the
+    /// phone's alert managers, so it never waits on the loan queue.
+    var watchOwnsAlerts: Bool {
+        isLoanedOutForUI && persisted.holdLapseNoticedAt == nil
+    }
+
     /// An audit describes one loan, so every path that ends a loan clears its anchors.
     func clearAuditAnchors() {
         updateState { $0.audit = .init() }
@@ -59,7 +66,7 @@ extension PodLoanPhoneController {
         holdRenewedAt = stamp
         if holdLapseNoticedAt != nil, now.timeIntervalSince(stamp) <= Self.watchSilenceThreshold {
             holdLapseNoticedAt = nil
-            handbackDiag(epoch, "watch REPORTING again — the silence warning stands down")
+            handbackDiag(epoch, "watch REPORTING again — the silence warning stands down; glucose alerts back to the watch")
         }
     }
 
@@ -87,7 +94,7 @@ extension PodLoanPhoneController {
         // First sight of the silence: start the clock, warn at the next cycle that still sees it.
         guard let noticed = holdLapseNoticedAt else {
             holdLapseNoticedAt = now
-            handbackDiag(epoch, String(format: "watch SILENT — no report for %.0f min with this phone beside the body; first warning in %.0f min unless it reports",
+            handbackDiag(epoch, String(format: "watch SILENT — no report for %.0f min with this phone beside the body; glucose alerts back on this phone; first warning in %.0f min unless it reports",
                                        silence / 60, Self.watchSilenceGrace / 60))
             return
         }

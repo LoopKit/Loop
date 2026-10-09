@@ -51,7 +51,7 @@ enum SensorSearchAlert {
     static func arm() {
         WristAlerts.arm(identifier, after: interval,
                         title: NSLocalizedString("Sensor Not Found", comment: "Watch sensor-search alert title"),
-                        body: NSLocalizedString("Loop on your watch is still looking for your sensor. Open Loop and keep it open until it connects.", comment: "Watch sensor-search alert body"))
+                        body: NSLocalizedString("Loop on your watch hasn't found your sensor yet. Open Loop on your watch and keep it open until it connects. If your watch asks to pair with the sensor, accept.", comment: "Watch sensor-search alert body"))
     }
 
     static func disarm() {

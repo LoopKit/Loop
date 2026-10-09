@@ -116,14 +116,11 @@ extension WatchLoopManager: CGMManagerDelegate {
         log.default("CGM event(s): %{public}d", events.count)
     }
 
-    /// The phone's reading as a gap-filler while a pod is held, from `phoneRelayContext`. Guards,
-    /// in order: syncId latch (correct under the async-add race), newer than stored, the store's dedup.
-    @MainActor
-    func ingestPhoneGlucoseFromContext() {
-        guard pumpManager != nil else { return }
-
-        guard let ctx = ExtensionDelegate.sharedIfAvailable()?.loopManager.phoneRelayContext,
-              let sample = ctx.newGlucoseSample else { return }
+    /// The phone's reading as a gap-filler while the wrist owns the alarms (the caller gates on the
+    /// loan), including mid-takeover and mid-resume. Guards, in order: syncId latch (correct under
+    /// the async-add race), newer than stored, the store's dedup. A stored reading goes to the
+    /// glucose alerts too, as the watch's own readings do; it runs a cycle only once a pod is held.
+    func ingestPhoneGlucose(_ sample: NewGlucoseSample) {
         deviceQueue.async {
             if sample.syncIdentifier == self.lastPhoneFallbackSyncId { return }
             self.lastPhoneFallbackSyncId = sample.syncIdentifier
@@ -141,6 +138,7 @@ extension WatchLoopManager: CGMManagerDelegate {
                 // Stamped AFTER the write, unlike the direct path. The relay arrives constantly;
                 // only a reading that actually filled a gap counts as the phone having delivered.
                 self.noteGlucoseSource(directG7: false)
+                self.evaluateGlucoseAlerts([sample])
                 SportLog.event("glucose",
                     "INGEST src=phone-relay stored=1/1 · latest \(mgdl) mg/dL age \(Int(self.now().timeIntervalSince(sample.date)))s (direct-G7 gap)")
                 SportLog.event("loan", "phone-BG fallback: ingested \(mgdl) mg/dL syncId=\(sample.syncIdentifier ?? "?") (direct-G7 gap) — triggering loop")
@@ -202,6 +200,8 @@ extension WatchLoopManager: CGMManagerDelegate {
     /// current manager was built from (a new sensor or code), so the watch keeps its own link.
     func adoptCGMConfiguration(_ configuration: SharedDeviceConfiguration) {
         if cgmManager != nil, let builtFrom = cgmBuiltFrom, (builtFrom as NSDictionary).isEqual(to: configuration.state) {
+            // Each phone context is a wake, loan or not: the sensor's acquisition re-checks itself.
+            watchCGMRecheckAcquisition(cgmManager)
             return
         }
         // No CGM kit keeps local state yet.
@@ -288,6 +288,12 @@ extension WatchLoopManager: CGMManagerDelegate {
         SportLog.event("alert", "RETRACTED \(identifier.value)")
         WatchAlertPresenter.retract(identifier)
         recordAlert { try? await $0.recordRetraction(of: identifier) }
+    }
+
+    /// Every alert from one manager still standing on the wrist, withdrawn.
+    func retractStandingAlerts(managerIdentifier: String) async {
+        let standing = (try? await lookupAllUnretracted(managerIdentifier: managerIdentifier)) ?? []
+        for persisted in standing { await retractAlert(identifier: persisted.alert.identifier) }
     }
 
     /// The wrist's OK or dismissal, recorded as stock `AlertManager.acknowledgeAlert` records it,

@@ -157,6 +157,7 @@ extension PodLoanWatchController {
     func phaseDidChange(from oldValue: Phase, to phase: Phase) {
         loanActiveMirrorLock.lock()
         _loanActiveMirror = (phase == .active)
+        _wristAlarmsMirror = [.takingOver, .active, .handingBack, .recoveredDrain].contains(phase)
         loanActiveMirrorLock.unlock()
         // Holds are edge-triggered, so re-asserting a phase cannot double-acquire.
         if (oldValue == .takingOver) != (phase == .takingOver) {

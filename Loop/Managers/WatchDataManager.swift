@@ -562,13 +562,7 @@ extension WatchDataManager: WCSessionDelegate {
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         Task { @MainActor in
             self.log.default("Received message: %{public}@", message)
-            // Loan handshake messages, handled before the stock message handling.
-            if FeatureFlags.sportModeEnabled, (try? LoanMessage.decode(fromTransport: message)) != nil {
-                lockedLastWatchContact.value = Date()
-                podLoanController.handleIncoming(userInfo: message)
-                replyHandler([:])
-                return
-            }
+            if podLoanHandlesMessage(message, replyHandler: replyHandler) { return }
             do {
                 replyHandler(try await handleWatchMessage(message))
             } catch {

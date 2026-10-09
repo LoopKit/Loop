@@ -136,18 +136,28 @@ extension PodLoanWatchController {
             sendHandbackOffer(freshened: false, recovered: false)
             return
         }
+        // Dosing stops on the loop's own queue, behind any cycle already sending: its dose is then
+        // journaled while the loan is still live, and rides in the final offer. Never a sync here:
+        // the pump manager reports to this queue.
+        loopManager.dataAccessQueue.async { [loopManager] in
+            loopManager.pumpManager = nil
+            self.queue.async { self.finalizeHandback(releasing: manager) }
+        }
+    }
+
+    private func finalizeHandback(releasing manager: PumpManager) {
+        // A second trigger while the first waited for the loop.
+        guard phase == .active else { return }
         handbackRequested = false
         phase = .handingBack
 
         loopManager.dumpIOBDecomp("HAND-BACK", at: self.now())
-        SportLog.event("loan", "drain complete — finalizing hand-back (loop dosing stops now)")
+        SportLog.event("loan", "drain complete — finalizing hand-back (loop dosing has stopped)")
 
         let runningTemp: DoseEntry? = {
             if case .tempBasal(let dose) = manager.status.basalDeliveryState { return dose }
             return nil
         }()
-        // Dosing stops here: from this line the loop has no pump, whatever becomes of the offer.
-        loopManager.pumpManager = nil
 
         if runningTemp != nil {
             SportLog.event("loan", String(format: "hand-back: our temp (%.2f U/hr until %@) stays live until the phone cancels it on reclaim (phone-enforced)",

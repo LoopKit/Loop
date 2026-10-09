@@ -272,14 +272,7 @@ extension ExtensionDelegate: WCSessionDelegate {
 
     // This method is called on a background thread of your app
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
-        // Loan traffic first: it is addressed to the loan controller, not to the context
-        // machinery below, and the switch's default arm would otherwise swallow it.
-        if let session = stockLoopSession {
-            if session.handleIncomingIfLoanMessage(userInfo, channel: .queued) { return }
-        } else if userInfo[LoanProtocol.userInfoKey] != nil {
-            podLoanNoteEarlyPayload()
-            return
-        }
+        if podLoanRoutesUserInfo(userInfo) { return }
 
         let name = userInfo["name"] as? String ?? "WatchContext"
 

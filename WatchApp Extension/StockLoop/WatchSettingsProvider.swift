@@ -56,7 +56,7 @@ extension WatchSettingsProvider: SettingsProvider {
     /// The phone's flag; the wrist gates on its own loop switch, `WatchLoopManager._closedLoopEnabled`.
     var dosingEnabled: Bool { storedSettings.dosingEnabled }
 
-    /// Splits at midnight as stock does; `WatchLoopManager.fetchData` collapses same-rate runs.
+    /// Splits at midnight as stock does; the shared `StoredDataAlgorithmInput.fetch` collapses same-rate runs.
     func getBasalHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<Double>] {
         guard let schedule = storedSettings.basalRateSchedule else { return [] }
         return Self.stitch(history?.basal, startDate, endDate) { start, end in
@@ -79,7 +79,7 @@ extension WatchSettingsProvider: SettingsProvider {
         return Self.stitch(past, startDate, endDate) { schedule.quantitiesBetween(start: $0, end: $1) }
     }
 
-    /// In the schedule's own unit; overrides are applied in `WatchLoopManager.fetchData`.
+    /// In the schedule's own unit; overrides are applied in the shared `StoredDataAlgorithmInput.fetch`.
     func getTargetRangeHistory(startDate: Date, endDate: Date) async throws -> [AbsoluteScheduleValue<ClosedRange<LoopQuantity>>] {
         guard let schedule = storedSettings.glucoseTargetRangeSchedule else { return [] }
         let past = history?.targetRange.map {

@@ -266,53 +266,29 @@ extension PodLoanPhoneController {
         let asOf: Date
     }
 
-    /// Same band as the final verdict.
-    static let checkpointBand: Double = 0.20
-
     /// The lent pump's delivery pulse; nil with no pump, which no audit can be judged without.
     var pumpPulseUnits: Double? { (deps.pumpManager() as? PumpDeliveryOdometer)?.deliveryPulseUnits }
 
-    /// Reconciles the stretch since the last base using a mid-loan reading; a match advances
-    /// the base, a mismatch is carried.
-    func considerCheckpoint(_ snap: LoanOdometerSnapshot, context: String) {
-        guard let asOf = snap.asOf else { return }
-        guard let base = auditBase, let pulseUnits = pumpPulseUnits else { return }
-        // A reading no newer than the base closes no window.
-        guard asOf > base.asOf else { return }
-        // A total that went backwards is not a reading of this pod.
-        guard snap.deliveredLatest >= base.units else {
-            PhoneLog.event("loan", String(format: "e%d [checkpoint] REJECTED (%@): odometer regressed %.3f → %.3f",
-                                          epoch, context, base.units, snap.deliveredLatest))
-            return
-        }
-        // All staged records: what the pod was asked to deliver.
+    /// Logs the loan's running residual at a mid-loan reading. Diagnostic only: the verdict is
+    /// judged once, over the whole loan, at the hand-back or force reclaim.
+    func logRunningAudit(_ snap: LoanOdometerSnapshot, context: String) {
+        guard let asOf = snap.asOf, let base = auditBase, asOf > base.asOf,
+              let pulseUnits = pumpPulseUnits else { return }
         let events = staged.values
             .filter { !stagedTombstones.contains($0.id) }
             .sorted { $0.seq < $1.seq }
-        // A bolus exactly at the boundary belongs to the next window.
+        // The records count a bolus whole at its start, so a read mid-bolus runs negative.
+        let delivering = events.contains {
+            $0.record.kind == .bolus && $0.record.startDate <= asOf && asOf < ($0.record.endDate ?? $0.record.startDate)
+        }
         let expected = LoanReconciler.expectedInsulin(events: events, schedule: deps.settings().basalRateSchedule,
                                                       pulseUnits: pulseUnits, from: base.asOf, to: asOf,
                                                       includingBolusesAtEnd: false)
         let delivered = snap.deliveredLatest - base.units
-
-        // Milli-units, so float error cannot decide the band.
-        let residual = ((delivered - expected) * 1000).rounded() / 1000
-        if abs(residual) <= Self.checkpointBand {
-            checkpointsThisLoan += 1
-            auditBase = AuditBase(units: snap.deliveredLatest, asOf: asOf)
-            os_log("Checkpoint ACCEPTED (%{public}@): window %.1f min reconciled (delivered %.3f expected %.3f residual %+.3f) — base → %.3f U",
-                   log: log, type: .default, context, asOf.timeIntervalSince(base.asOf) / 60,
-                   delivered, expected, residual, snap.deliveredLatest)
-            PhoneLog.event("loan", String(format: "e%d [checkpoint] #%d ACCEPTED (%@): %.1f min window, residual %+.3f — base %.3f U",
-                                          epoch, checkpointsThisLoan, context,
-                                          asOf.timeIntervalSince(base.asOf) / 60, residual, snap.deliveredLatest))
-        } else {
-            os_log("Checkpoint CARRIED (%{public}@): window residual %+.3f exceeds ±%.2f (delivered %.3f expected %.3f) — base stays at %.3f U",
-                   log: log, type: .error, context, residual, Self.checkpointBand,
-                   delivered, expected, base.units)
-            PhoneLog.event("loan", String(format: "e%d [checkpoint] CARRIED (%@): residual %+.3f beyond ±%.2f — window stays open",
-                                          epoch, context, residual, Self.checkpointBand))
-        }
+        PhoneLog.event("loan", String(format: "e%d [odometer] (%@) loan so far %.1f min: delivered %.3f expected %.3f residual %+.3f%@",
+                                      epoch, context, asOf.timeIntervalSince(base.asOf) / 60, delivered, expected,
+                                      ((delivered - expected) * 1000).rounded() / 1000,
+                                      delivering ? " · a bolus was delivering" : ""))
     }
 
     /// A verdict waiting for the reclaim round-trip to read the pod.
@@ -320,7 +296,7 @@ extension PodLoanPhoneController {
         /// Only `.forceReclaim` survives a relaunch and books a placeholder.
         enum Flavor: String { case handback, forceReclaim }
         let epoch: Int
-        /// Start of the verdict window, possibly moved by checkpoints.
+        /// Start of the verdict window: the pod's total at takeover.
         let deliveredAtStart: Double
         let expected: Double
         let loanMinutes: Double

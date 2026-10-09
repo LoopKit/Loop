@@ -73,12 +73,20 @@ extension CarbAndBolusFlowViewModel {
         return content
     }
 
-    /// Local recommendation during a loan; a failure is announced, not left as a 0 dial.
+    /// The Sport Mode session while a loan is live; nil otherwise.
+    var loanSessionIfActive: StockLoopSession? {
+        guard let session = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession,
+              session.loanController.isLoanActive else { return nil }
+        return session
+    }
+
+    /// During a loan the watch computes the recommendation: the phone's books are frozen, and it
+    /// may be off. A failure is announced, not left as a 0 dial.
     func recommendLoanBolus(with entry: NewCarbEntry?, session: StockLoopSession) async {
         isComputingRecommendedBolus = true
         defer { isComputingRecommendedBolus = false }
 
-        let result: Swift.Result<ManualBolusRecommendation, Swift.Error> = await withCheckedContinuation { continuation in
+        let result: Swift.Result<ManualBolusRecommendation?, Swift.Error> = await withCheckedContinuation { continuation in
             session.stack.loopManager.recommendManualBolus(potentialCarbEntry: entry) { result in
                 continuation.resume(returning: result)
             }
@@ -91,9 +99,9 @@ extension CarbAndBolusFlowViewModel {
         case .success(let recommendation):
             SportLog.event("bolus-ui", String(format: "REC carb %.0fg (watch-local): %.2f U",
                                               entry?.quantity.doubleValue(for: .gram) ?? 0,
-                                              recommendation.amount))
-            if recommendedBolusAmount != recommendation.amount {
-                recommendedBolusAmount = recommendation.amount
+                                              recommendation?.amount ?? 0))
+            if recommendedBolusAmount != recommendation?.amount {
+                recommendedBolusAmount = recommendation?.amount
             }
         case .failure(let error):
             SportLog.event("bolus-ui", "REC carb (watch-local) FAILED — \(error) · dial stays 0, button reads Save")
@@ -101,8 +109,13 @@ extension CarbAndBolusFlowViewModel {
         }
     }
 
-    /// Called from `sendSetBolusUserInfo(carbEntry:bolus:)` while a loan is live.
+    /// Called from `sendSetBolusUserInfo(carbEntry:bolus:)` while a loan is live: the phone has
+    /// released the pod, so the bolus goes to the watch's pump, and the carbs to the local store
+    /// and the loan journal rather than the stock relay.
     func podLoanDeliverOnWrist(carbEntry: NewCarbEntry?, bolus: Double, session: StockLoopSession) {
+        // As stock (#2556): the entry is no longer pending once sent. The watch saves it into COB and
+        // posts a context update, and a still-pending entry would be recommended for a second time.
+        carbEntryUnderConsideration = nil
         let activationType: BolusActivationType = .activationTypeFor(recommendedAmount: recommendedBolusAmount, bolusAmount: bolus)
         Self.podLoanDeliver(carbEntry: carbEntry, bolus: bolus, activationType: activationType, session: session)
     }

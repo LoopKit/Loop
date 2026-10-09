@@ -141,6 +141,15 @@ extension WatchDataManager {
         }
     }
 
+    /// Loan handshake messages, handled before the stock message handling; false for anything else.
+    func podLoanHandlesMessage(_ message: [String: Any], replyHandler: ([String: Any]) -> Void) -> Bool {
+        guard FeatureFlags.sportModeEnabled, (try? LoanMessage.decode(fromTransport: message)) != nil else { return false }
+        lockedLastWatchContact.value = Date()
+        podLoanController.handleIncoming(userInfo: message)
+        replyHandler([:])
+        return true
+    }
+
     /// The QUEUED channel, `session(_:didReceiveUserInfo:)`'s whole body.
     nonisolated func podLoanHandleReceivedUserInfo(_ userInfo: [String: Any]) {
         // Loan traffic arrives on the queued channel. Route ours, log anything else; never drop

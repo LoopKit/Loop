@@ -41,10 +41,10 @@ extension WatchLoopManager {
     /// Queue hop; the contract is `manualBolusRecommendationOnQueue`. Like stock's recommendation
     /// for the watch, it also keeps the watchBolus decision built with it.
     func recommendManualBolus(potentialCarbEntry: NewCarbEntry? = nil,
-                              completion: @escaping (Swift.Result<ManualBolusRecommendation, Error>) -> Void) {
+                              completion: @escaping (Swift.Result<ManualBolusRecommendation?, Error>) -> Void) {
         dataAccessQueue.async {
             let result = self.manualBolusRecommendationOnQueue(potentialCarbEntry: potentialCarbEntry)
-            self.noteContextDosingDecision(potentialCarbEntry: potentialCarbEntry, recommendation: try? result.get())
+            self.noteContextDosingDecision(potentialCarbEntry: potentialCarbEntry, recommendation: (try? result.get()) ?? nil)
             completion(result)
         }
     }
@@ -54,10 +54,10 @@ extension WatchLoopManager {
     /// running temp is credited through its scheduled end, since the bolus goes on top of a temp
     /// that keeps running), the potential carb entry added, `.manualBolus`. It stores nothing:
     /// no displayed value changes. Differences from stock: no manual glucose sample or edited
-    /// original entry (the wrist has no UI for either); a nil recommendation is an error rather
-    /// than nil; the amount is rounded by the pump manager when one is held, as in stock.
+    /// original entry (the wrist has no UI for either); the amount is rounded by the pump manager
+    /// when one is held, as in stock.
     func manualBolusRecommendationOnQueue(potentialCarbEntry: NewCarbEntry? = nil,
-                                          truncatingActiveOverride: Bool = false) -> Swift.Result<ManualBolusRecommendation, Error> {
+                                          truncatingActiveOverride: Bool = false) -> Swift.Result<ManualBolusRecommendation?, Error> {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         do {
@@ -69,7 +69,7 @@ extension WatchLoopManager {
             switch output.recommendationResult {
             case .success(let prediction):
                 guard var manualBolusRecommendation = prediction.manual else {
-                    return .failure(WatchLoopError.missingDataError("no manual bolus recommendation"))
+                    return .success(nil)
                 }
                 if let pump = self.pumpManager {
                     manualBolusRecommendation.amount = pump.roundToSupportedBolusVolume(units: manualBolusRecommendation.amount)
@@ -113,26 +113,16 @@ extension WatchLoopManager {
     /// (`true`) is what the phone runs; the watch matches that.
     var usePositiveMomentumAndRCForManualBoluses: Bool { true }
 
-    /// Stock `DeviceDataManager.enactBolus`, straight to the pump manager, plus a cap at the
-    /// grant's `maximumBolus` (stock relies on the picker). As stock's watch bolus, the watchBolus
-    /// decision is stored first, with the carb entry as stored, and its id goes with the command.
+    /// Stock `DeviceDataManager.enactBolus`, straight to the pump manager; as stock, the picker
+    /// caps the amount. As stock's watch bolus, the watchBolus decision is stored first, with the
+    /// carb entry as stored, and its id goes with the command.
     func enactManualBolus(units: Double, activationType: BolusActivationType, carbEntry: NewCarbEntry? = nil,
                           storedCarbEntry: StoredCarbEntry? = nil, completion: @escaping (Error?) -> Void) {
         dataAccessQueue.async {
             let decisionId = self.storeWatchBolusDosingDecision(carbEntry: carbEntry, storedCarbEntry: storedCarbEntry, requested: units)
 
             guard let pumpManager = self.pumpManager else {
-                DispatchQueue.main.async { completion(WatchLoopError.pumpManagerUnconnected) }
-                return
-            }
-            guard let maxBolus = self.settings.maximumBolus else {
-                DispatchQueue.main.async { completion(WatchLoopError.configurationError("maximumBolus")) }
-                return
-            }
-            // The slack is for the exact-maximum case: a picker offering precisely the limit
-            // must not be refused by floating-point representation.
-            guard units <= maxBolus + .ulpOfOne else {
-                DispatchQueue.main.async { completion(WatchLoopError.configurationError("bolus exceeds therapy maximum")) }
+                DispatchQueue.main.async { completion(LoopError.configurationError(.pumpManager)) }
                 return
             }
             let rounded = pumpManager.roundToSupportedBolusVolume(units: units)
@@ -231,7 +221,7 @@ extension WatchLoopManager {
 
         do {
             guard !pumpManager.status.deliveryIsUncertain else {
-                throw WatchLoopError.enactFailed("delivery uncertain")
+                throw LoopError.connectionError
             }
             try runBlocking {
                 try await self.doseEnactor.enact(decisionId: dosingDecision.id, bolus: recommendation.bolusUnits,
@@ -249,14 +239,13 @@ extension WatchLoopManager {
 
     /// Stock's `DeviceDataManager.enact` plus `loop()`'s gates before it, in stock's order:
     /// pump inoperable, suspended, manual temp basal running, delivery uncertain. As stock, they
-    /// run on every closed-loop cycle, including one with nothing to send. One deliberate watch
-    /// difference: a recommendation older than five minutes is refused. Failures must be enact
-    /// refusals or `.enactFailed`, never `.missingDataError`.
-    func enactRecommendedAutomaticDose(decisionId: UUID? = nil) -> WatchLoopError? {
+    /// run on every closed-loop cycle, including one with nothing to send (the enactor then sends
+    /// no command). Errors are stock's, as stock's `loop()` records them.
+    func enactAutomaticDose(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?) -> LoopError? {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         guard let pumpManager = pumpManager else {
-            return .pumpManagerUnconnected
+            return .configurationError(.pumpManager)
         }
 
         // Stock `loop()` compares with `== .pumpInoperable`, so a nil delivery state passes.
@@ -278,79 +267,32 @@ extension WatchLoopManager {
         // Unacknowledged last command: OmnipodKit resolves it next session; don't guess.
         guard !pumpManager.status.deliveryIsUncertain else {
             SportLog.event("dose", "enact refused — the pod's last command is unacknowledged (delivery uncertain); the pump manager resolves it on its next session")
-            return .enactFailed("delivery uncertain")
+            return .connectionError
         }
-
-        // Nothing to send: the checks above have passed, as in stock's `loop()`.
-        guard let recommendedDose = self.recommendedAutomaticDose else {
-            return nil
-        }
-
-        // Not stock: a recommendation older than five minutes has been overtaken by its own
-        // inputs. The wrist can be suspended between compute and enact, which the phone cannot.
-        guard abs(recommendedDose.date.timeIntervalSince(now())) < TimeInterval(minutes: 5) else {
-            return .recommendationExpired(date: recommendedDose.date)
-        }
-
-        var enactError: WatchLoopError?
-
-        let recommendation = recommendedDose.recommendation
 
         // Logged BEFORE the send, so a command that never comes back still leaves a record of
         // what was asked for.
-        let temp: TempBasalRecommendation? = recommendedDose.enactTempBasal ? recommendation.basalAdjustment : nil
-        if let temp {
-            SportLog.event("dose", String(format: "enacting temp %.2f U/hr × %.0f min", temp.unitsPerHour, temp.duration / 60))
+        if let tempBasal {
+            SportLog.event("dose", String(format: "enacting temp %.2f U/hr × %.0f min", tempBasal.unitsPerHour, tempBasal.duration / 60))
         }
-        // Rounded when it was decided, as stock.
-        let bolus: Double? = recommendation.bolusUnits.flatMap { $0 > 0 ? $0 : nil }
-        if let bolus {
+        if let bolus, bolus > 0 {
             SportLog.event("dose", String(format: "enacting automatic bolus %.2f U", bolus))
         }
         do {
             try runBlocking {
-                try await self.doseEnactor.enact(decisionId: decisionId, bolus: bolus, tempBasal: temp, with: pumpManager)
-            }
-            if let temp {
-                SportLog.event("dose", String(format: "temp %.2f U/hr ACCEPTED by pod", temp.unitsPerHour))
-            }
-            if let bolus {
-                SportLog.event("dose", String(format: "automatic bolus %.2f U ACCEPTED by pod", bolus))
+                try await self.doseEnactor.enact(decisionId: decisionId, bolus: bolus, tempBasal: tempBasal, with: pumpManager)
             }
         } catch {
             SportLog.event("dose", "enact FAILED — \(String(describing: error))")
-            enactError = .enactFailed(String(describing: error))
+            // As stock's `loop()` catch.
+            return error as? LoopError ?? .unknownError(error)
         }
-
-        // Cleared only on success. A failed recommendation stays visible to the display, and the
-        // expiry guard above is what stops it being enacted later by some other path.
-        if enactError == nil {
-            self.recommendedAutomaticDose = nil
+        if let tempBasal {
+            SportLog.event("dose", String(format: "temp %.2f U/hr ACCEPTED by pod", tempBasal.unitsPerHour))
         }
-
-        return enactError
-    }
-}
-
-/// Labelled copies of stock's helpers (`Loop/Managers/LoopDataManager.swift`, phone-only).
-extension NewCarbEntry {
-    var asStoredCarbEntry: StoredCarbEntry {
-        StoredCarbEntry(
-            startDate: startDate,
-            quantity: quantity,
-            foodType: foodType,
-            absorptionTime: absorptionTime,
-            userCreatedDate: date
-        )
-    }
-}
-
-extension StoredDataAlgorithmInput {
-    func addingCarbEntry(carbEntry: CarbType?) -> StoredDataAlgorithmInput {
-        var rval = self
-        if let carbEntry {
-            rval.carbEntries = carbEntries + [carbEntry]
+        if let bolus, bolus > 0 {
+            SportLog.event("dose", String(format: "automatic bolus %.2f U ACCEPTED by pod", bolus))
         }
-        return rval
+        return nil
     }
 }

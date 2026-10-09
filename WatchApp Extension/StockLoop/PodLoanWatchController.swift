@@ -276,8 +276,8 @@ final class PodLoanWatchController {
             loanActiveMirrorLock.lock()
             _loanActiveMirror = true
             _resumingMirror = true
+            _wristAlarmsMirror = true
             loanActiveMirrorLock.unlock()
-            loopManager.beginAwaitingPumpManager()
         } else if journal.hasUndrainedEvents {
             // Records outlived their loan: park as a drain and say so.
             _persisted.phase = .recoveredDrain
@@ -384,6 +384,12 @@ final class PodLoanWatchController {
     /// and wrist override, since WatchLoopManager outlives the loan.
     func teardownPump() {
         SportLog.event("handback", "teardownPump: releasing control of the pump explicitly")
+        // The pod's alerts are the phone's from here: a repeating one left on the wrist would keep
+        // sounding while the phone raises the same alert.
+        if let pumpIdentifier = pumpManager?.pluginIdentifier {
+            let loopManager = self.loopManager
+            Task { await loopManager.retractStandingAlerts(managerIdentifier: pumpIdentifier) }
+        }
         pumpControl?.releaseControl()
         pumpManager?.pumpManagerDelegate = nil
         pumpManager = nil
@@ -435,6 +441,9 @@ final class PodLoanWatchController {
     var _loanActiveMirror = false
 
     var _resumingMirror = false
+
+    /// Taking over, live, handing back, draining or resuming: the phone has left the alarms here.
+    var _wristAlarmsMirror = false
 
     /// The debug page's snapshot, published from the queue.
     let snapshotMirrorLock = NSLock()

@@ -11,6 +11,7 @@ import XCTest
 import LoopKit
 import LoopAlgorithm
 import UserNotifications
+@testable import OmnipodKit
 @testable import WatchApp
 
 @MainActor
@@ -45,9 +46,9 @@ final class WristGlucoseAlertTests: XCTestCase {
                                         longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
                                         provenanceIdentifier: "WristGlucoseAlertTests")
         let glucoseStore = await GlucoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
-                                              cacheLength: .hours(4), provenanceIdentifier: "WristGlucoseAlertTests")
+                                              cacheLength: 4 * 60 * 60, provenanceIdentifier: "WristGlucoseAlertTests")
         let carbStore = CarbStore(healthKitSampleStore: nil, cacheStore: cacheStore,
-                                  cacheLength: .hours(24), provenanceIdentifier: "WristGlucoseAlertTests")
+                                  cacheLength: 24 * 60 * 60, provenanceIdentifier: "WristGlucoseAlertTests")
         let manager = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
                                        defaults: defaults, stateDirectory: dir)
         manager.now = { [unowned self] in self.clock }
@@ -146,6 +147,44 @@ final class WristGlucoseAlertTests: XCTestCase {
         await manager.evaluateGlucoseAlerts([reading(65)]).value
 
         XCTAssertNotNil(request(GlucoseAlertManager.lowAlertIdentifier), "the next loan's low sounds")
+    }
+
+    /// During a loan the wrist owns the alarms, so a reading relayed by the phone alarms there too:
+    /// a loan without the watch's own sensor must not run without low alarms.
+    func testARelayedLowDuringALoanRaisesTheLowOnTheWrist() async throws {
+        let manager = await makeManager()
+        manager.configureGlucoseAlerts(from: phoneSettings)
+        var podState = PodState(address: 0x1f0b3557, firmwareVersion: "2.7.0", iFirmwareVersion: "2.7.0",
+                                lotNo: 1, lotSeq: 1, insulinType: .novolog, podType: dashType)
+        podState.setupProgress = .completed
+        let raw: [String: Any] = ["basalSchedule": ["entries": [["rate": 0.7, "startTime": 0.0]]],
+                                  "controllerId": UInt32(0x1234_5678), "podId": UInt32(0x1234_5679),
+                                  "podState": podState.rawValue]
+        manager.pumpManager = try XCTUnwrap(OmniPumpManager(rawState: raw))
+
+        manager.ingestPhoneGlucose(reading(65))
+
+        let deadline = Date().addingTimeInterval(5)
+        while request(GlucoseAlertManager.lowAlertIdentifier) == nil, Date() < deadline {
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        XCTAssertNotNil(request(GlucoseAlertManager.lowAlertIdentifier), "the relayed low alarms on the wrist")
+    }
+
+    /// Mid-takeover or mid-resume the phone has already left the alarms to the wrist, so a relayed
+    /// low alarms before the pod is held.
+    func testARelayedLowAlarmsBeforeThePodIsHeld() async throws {
+        let manager = await makeManager()
+        manager.configureGlucoseAlerts(from: phoneSettings)
+        XCTAssertNil(manager.pumpManager)
+
+        manager.ingestPhoneGlucose(reading(65))
+
+        let deadline = Date().addingTimeInterval(5)
+        while request(GlucoseAlertManager.lowAlertIdentifier) == nil, Date() < deadline {
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        XCTAssertNotNil(request(GlucoseAlertManager.lowAlertIdentifier), "the relayed low alarms with no pod yet")
     }
 
     func testAPredictedLowFromTheWristsForecastIsRaised() async {

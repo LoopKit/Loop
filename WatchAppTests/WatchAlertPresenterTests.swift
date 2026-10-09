@@ -159,8 +159,8 @@ final class WristBolusFailureWordingTests: XCTestCase {
     }
 
     func testAnErrorThatIsNotThePumpsIsWordedFromItsDescription() {
-        let content = CarbAndBolusFlowViewModel.bolusFailureContent(units: 2, carbGrams: nil, error: WatchLoopError.pumpManagerUnconnected)
+        let content = CarbAndBolusFlowViewModel.bolusFailureContent(units: 2, carbGrams: nil, error: LoopError.configurationError(.pumpManager))
         XCTAssertEqual(content.title, "Bolus Issue")
-        XCTAssertEqual(content.body, "No pod connected to the watch.")
+        XCTAssertEqual(content.body, "Configuration Error: Pump Manager.")
     }
 }
