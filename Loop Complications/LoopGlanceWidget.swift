@@ -62,6 +62,7 @@ struct GlanceProvider: AppIntentTimelineProvider {
         GlanceComplicationSnapshot.noteServed(configuration.metric.rawValue, at: now)
         glanceWidgetLog.notice("timeline metric=\(configuration.metric.rawValue, privacy: .public) family=\(String(describing: context.family), privacy: .public)")
         let marks = (snapshot?.changeMoments(after: now) ?? []) + (snapshot?.loopAgeMarks(after: now) ?? [])
+            + ([.bg, .bigBG].contains(configuration.metric) ? snapshot?.bgAgeMarks(after: now) ?? [] : [])
         let moments = [now] + Set(marks).sorted()
         return Timeline(entries: moments.map { GlanceEntry(date: $0, metric: configuration.metric, snapshot: snapshot) },
                         policy: .never)
@@ -109,13 +110,14 @@ struct GlanceComplicationView: View {
         case .accessoryCircular:
             circular
         case .accessoryRectangular:
-            metric == .glance ? AnyView(miniGlance) : AnyView(rectangular)
+            metric == .glance ? AnyView(miniGlance) : metric == .bigBG ? AnyView(bigBG) : AnyView(rectangular)
         default:
             Text(snapshot.value(metric, at: date))
         }
     }
 
     // The tip stays empty except for the loop ring, which is information rather than decoration.
+    // BG and Loop carry an age after the value, as the Big BG rectangle and the loop inline do.
     @ViewBuilder private var corner: some View {
         let label = Text(snapshot.line(metric, at: date, corner: true))
         switch metric {
@@ -123,12 +125,17 @@ struct GlanceComplicationView: View {
             Circle()
                 .strokeBorder(snapshot.freshness(at: date).color, lineWidth: 3)
                 .widgetAccentable()
-                .widgetLabel { label.font(.system(size: 22, weight: .bold, design: .rounded)) }
-        case .bg:
-            Color.clear.widgetLabel { label.font(.system(size: 22, weight: .bold, design: .rounded)) }
+                .widgetLabel { cornerValue(label, age: snapshot.loopAge(at: date)) }
+        case .bg, .bigBG:
+            holderIcon(size: 15).widgetLabel { cornerValue(label, age: snapshot.bgAge(at: date)) }
         default:
-            Color.clear.widgetLabel { label }
+            holderIcon(size: 15).widgetLabel { label.font(.system(size: 18, weight: .bold, design: .rounded)) }
         }
+    }
+
+    private func cornerValue(_ value: Text, age: String) -> Text {
+        value.font(.system(size: 22, weight: .bold, design: .rounded))
+            + Text(age.isEmpty ? "" : " " + age).font(.system(size: 15, weight: .medium, design: .rounded))
     }
 
     @ViewBuilder private var circular: some View {
@@ -155,7 +162,7 @@ struct GlanceComplicationView: View {
                     let parts = snapshot.overrideParts
                     Text(parts.symbol).font(.system(size: 18))
                     Text(parts.rest).font(.system(size: 12, weight: .semibold, design: .rounded))
-                } else if metric == .bg || metric == .loop {
+                } else if metric == .bg || metric == .bigBG || metric == .loop {
                     Text(snapshot.value(metric, at: date))
                         .font(.system(size: 18, weight: .semibold, design: .rounded)).foregroundStyle(bgColor)
                     Text(snapshot.trend(at: date)).font(.system(size: 12, weight: .medium))
@@ -181,9 +188,13 @@ struct GlanceComplicationView: View {
     private var rectangular: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text(metric.title.uppercased())
-                    .font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary).widgetAccentable()
+                // The reading needs no name; the other values do (IOB and COB can read alike).
+                if metric != .bg {
+                    Text(metric.title.uppercased())
+                        .font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary).widgetAccentable()
+                }
                 Spacer(minLength: 4)
+                holderIcon(size: 12)
                 loopAge
             }
             Text(snapshot.headline(metric, at: date))
@@ -197,6 +208,29 @@ struct GlanceComplicationView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    /// The reading and its trend, centred and as large as the slot allows, flanked by who holds the pod
+    /// and the reading's age (between reloads, which watchOS budgets, the number can be minutes old).
+    private var bigBG: some View {
+        HStack(spacing: 4) {
+            holderIcon(size: 15)
+            Text(snapshot.bgWithTrend(at: date))
+                .font(.system(size: 60, weight: .semibold, design: .rounded))
+                .foregroundStyle(bgColor).widgetAccentable()
+                .minimumScaleFactor(0.3).lineLimit(1)
+                .frame(maxWidth: .infinity)
+            Text(snapshot.bgAge(at: date))
+                .font(.system(size: 13, weight: .medium, design: .rounded)).foregroundStyle(.secondary)
+                .lineLimit(1).fixedSize()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// Who holds the pod: the watch (a loan) or the phone. By shape, not colour, so tinted faces keep it.
+    private func holderIcon(size: CGFloat) -> some View {
+        Image(systemName: snapshot.watchHasPod ? "applewatch" : "iphone")
+            .font(.system(size: size, weight: .semibold)).foregroundStyle(.secondary)
+    }
+
     /// The glance in three lines: BG → eventual, the loop's numbers, then override and loop age.
     private var miniGlance: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -204,8 +238,7 @@ struct GlanceComplicationView: View {
                 Text(snapshot.bgWithTrend(at: date)).font(.headline).foregroundStyle(bgColor).widgetAccentable()
                 Text(snapshot.miniGlanceEventual(at: date)).font(.headline)
                 Spacer(minLength: 0)
-                // Who holds the pod, by shape rather than colour (tinted faces drop colour).
-                Text(snapshot.watchHasPod ? "⌚︎" : "📱").font(.caption2)
+                holderIcon(size: 12)
             }
             Text(snapshot.miniGlanceNumbers(at: date))
                 .font(.system(size: 15, weight: .medium, design: .rounded)).minimumScaleFactor(0.7).lineLimit(1)

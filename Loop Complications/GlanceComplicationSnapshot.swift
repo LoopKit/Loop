@@ -18,6 +18,8 @@ struct GlanceComplicationSnapshot: Codable, Equatable {
     var bgRange: BGRange?
     /// After this the reading, and the eventual computed from it, show a dash.
     var bgStaleAt: Date?
+    /// When the sensor took the reading (Big BG shows its age).
+    var bgDate: Date?
 
     var eventualText: String?
     var iobText: String?
@@ -90,10 +92,11 @@ struct GlanceComplicationSnapshot: Codable, Equatable {
     static let servedKey = "GlanceComplicationServed"
 
     /// Called by the widget each time it serves a timeline: "epochSeconds metric", newest last, capped.
+    /// Fractional seconds: the reload is served within a second of the publish that requested it.
     static func noteServed(_ metric: String, at date: Date = Date(), defaults: UserDefaults? = ComplicationSnapshot.sharedDefaults) {
         guard let defaults else { return }
         var list = defaults.stringArray(forKey: servedKey) ?? []
-        list.append("\(Int(date.timeIntervalSince1970)) \(metric)")
+        list.append("\(date.timeIntervalSince1970) \(metric)")
         if list.count > 200 { list.removeFirst(list.count - 200) }
         defaults.set(list, forKey: servedKey)
     }
@@ -108,10 +111,16 @@ struct GlanceComplicationSnapshot: Codable, Equatable {
         }
     }
 
+    /// When the widget last built a timeline: the face shows whatever was saved before that.
+    static func lastServed(defaults: UserDefaults? = ComplicationSnapshot.sharedDefaults) -> Date? {
+        served(after: .distantPast, defaults: defaults).last?.date
+    }
+
     static var sample: GlanceComplicationSnapshot {
         let now = Date()
         return GlanceComplicationSnapshot(bgText: "106", trendSymbol: "↗", bgRange: .inRange,
-                                          bgStaleAt: now.addingTimeInterval(15 * 60), eventualText: "112",
+                                          bgStaleAt: now.addingTimeInterval(15 * 60), bgDate: now,
+                                          eventualText: "112",
                                           iobText: "2.3", cobText: "15", tempText: "+0.75",
                                           loopValuesStaleAt: now.addingTimeInterval(15 * 60),
                                           overrideLabel: "🏃 70% 140", watchHasPod: true, loopClosed: true,
@@ -122,12 +131,13 @@ struct GlanceComplicationSnapshot: Codable, Equatable {
 
 /// What the glance complication shows; the widget makes it an App Intent parameter.
 enum GlanceMetric: String, CaseIterable {
-    case bg, bgEventual, eventual, iob, cob, iobCob, temp, loop, override, glance
+    case bg, bigBG, bgEventual, eventual, iob, cob, iobCob, temp, loop, override, glance
 
     /// The face editor's name for the preset (plain String, see the style rules).
     var title: String {
         switch self {
         case .bg: return NSLocalizedString("BG", comment: "Glance complication: glucose")
+        case .bigBG: return NSLocalizedString("Big BG", comment: "Glance complication: glucose and trend alone, as large as the slot allows")
         case .bgEventual: return NSLocalizedString("BG → Eventual", comment: "Glance complication: glucose and eventual glucose")
         case .eventual: return NSLocalizedString("Eventual BG", comment: "Glance complication: eventual glucose")
         case .iob: return NSLocalizedString("IOB", comment: "Glance complication: insulin on board")
@@ -150,7 +160,7 @@ extension GlanceComplicationSnapshot {
     /// The labelled line: inline slots, and a corner's curved label.
     func line(_ metric: GlanceMetric, at date: Date, corner: Bool = false) -> String {
         switch metric {
-        case .bg, .loop: return corner ? bgWithTrend(at: date) : "BG " + bgWithTrend(at: date)
+        case .bg, .bigBG, .loop: return corner ? bgWithTrend(at: date) : "BG " + bgWithTrend(at: date)
         case .bgEventual: return bgWithTrend(at: date) + " → " + or(eventual(at: date))
         case .eventual: return (corner ? "EVENTUAL " : NSLocalizedString("Eventually ", comment: "Glance complication inline prefix: eventual glucose")) + or(eventual(at: date))
         case .iob: return "IOB " + or(iob(at: date))
@@ -164,25 +174,35 @@ extension GlanceComplicationSnapshot {
 
     /// The loop's age in whole minutes ("now", "4m", "30m+"), not WidgetKit's ticking relative date
     /// ("33sec"). The timeline carries an entry at each minute mark, which costs no reload budget.
-    func loopAge(at date: Date) -> String {
-        guard let loopDate else { return Self.dash }
-        let minutes = Int(max(0, date.timeIntervalSince(loopDate)) / 60)
-        if minutes < 1 { return "now" }
-        return minutes >= Self.loopAgeMinutes ? "\(Self.loopAgeMinutes)m+" : "\(minutes)m"
-    }
+    func loopAge(at date: Date) -> String { Self.age(since: loopDate, at: date) }
+
+    /// The reading's age, as `loopAge`. Empty once the reading shows a dash.
+    func bgAge(at date: Date) -> String { bg(at: date) == nil ? "" : Self.age(since: bgDate, at: date) }
 
     static let loopAgeMinutes = 30
 
     /// The minute marks after `date` at which `loopAge` changes.
-    func loopAgeMarks(after date: Date) -> [Date] {
-        guard let loopDate else { return [] }
-        return (1...Self.loopAgeMinutes).map { loopDate.addingTimeInterval(TimeInterval($0 * 60)) }.filter { $0 > date }
+    func loopAgeMarks(after date: Date) -> [Date] { Self.minuteMarks(from: loopDate, after: date) }
+
+    /// The minute marks after `date` at which `bgAge` changes.
+    func bgAgeMarks(after date: Date) -> [Date] { Self.minuteMarks(from: bgDate, after: date) }
+
+    private static func age(since start: Date?, at date: Date) -> String {
+        guard let start else { return dash }
+        let minutes = Int(max(0, date.timeIntervalSince(start)) / 60)
+        if minutes < 1 { return "now" }
+        return minutes >= loopAgeMinutes ? "\(loopAgeMinutes)m+" : "\(minutes)m"
+    }
+
+    private static func minuteMarks(from start: Date?, after date: Date) -> [Date] {
+        guard let start else { return [] }
+        return (1...loopAgeMinutes).map { start.addingTimeInterval(TimeInterval($0 * 60)) }.filter { $0 > date }
     }
 
     /// A rectangle's big value.
     func headline(_ metric: GlanceMetric, at date: Date) -> String {
         switch metric {
-        case .bg, .loop: return bgWithTrend(at: date)
+        case .bg, .bigBG, .loop: return bgWithTrend(at: date)
         case .bgEventual: return line(.bgEventual, at: date)
         default: return value(metric, at: date)
         }
@@ -191,7 +211,7 @@ extension GlanceComplicationSnapshot {
     /// A rectangle's line under the value: BG → eventual, or the loop's numbers when the value is BG.
     func context(_ metric: GlanceMetric, at date: Date) -> String {
         switch metric {
-        case .bg, .bgEventual, .eventual, .loop: return line(.iobCob, at: date)
+        case .bg, .bigBG, .bgEventual, .eventual, .loop: return line(.iobCob, at: date)
         default: return line(.bgEventual, at: date)
         }
     }
@@ -215,7 +235,7 @@ extension GlanceComplicationSnapshot {
     /// A circular slot: a small caption over the value.
     func caption(_ metric: GlanceMetric) -> String {
         switch metric {
-        case .bg, .loop, .glance: return ""
+        case .bg, .bigBG, .loop, .glance: return ""
         case .bgEventual: return "→"
         case .eventual: return "EVT"
         case .iob: return "IOB"
@@ -228,7 +248,7 @@ extension GlanceComplicationSnapshot {
 
     func value(_ metric: GlanceMetric, at date: Date) -> String {
         switch metric {
-        case .bg, .loop, .glance: return or(bg(at: date))
+        case .bg, .bigBG, .loop, .glance: return or(bg(at: date))
         case .bgEventual, .eventual: return or(eventual(at: date))
         case .iob: return or(iob(at: date))
         case .cob: return or(cob(at: date))

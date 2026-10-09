@@ -104,6 +104,9 @@ extension ExtensionDelegate {
         SensorSearchAlert.disarm()
         // Looking at the watch is the one wake left with the phone away: the sensor's acquisition re-checks.
         watchCGMRecheckAcquisition(stockLoopSession?.stack.loopManager.cgmManager)
+        // In front, a complication reload costs no budget: refresh it on every open, so the face matches
+        // the app after any look at it, even when an earlier budgeted request was never carried out.
+        GlanceComplicationPublisher.publish(from: self, onOpen: true)
     }
 
     /// Called from `applicationWillResignActive()`.
