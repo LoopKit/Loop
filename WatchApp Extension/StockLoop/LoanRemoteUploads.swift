@@ -179,6 +179,26 @@ final class LoanRemoteUploads {
         // As stock's addService: everything past the saved anchors goes up now.
         manager.addService(service)
         SportLog.event("uploads", "uploads ON — stock RemoteDataServicesManager driving \(service.pluginIdentifier) (credentials not logged)")
+        if let tidepool = service as? TidepoolService { Self.logTidepoolSession(tidepool) }
+    }
+
+    /// Whether the wrist can renew Tidepool's session itself: a refresh token from the grant, and the
+    /// client ID the renewal is made under. Presence and the access token's remaining minutes only.
+    private static func logTidepoolSession(_ tidepool: TidepoolService) {
+        let session = tidepool.session
+        let clientID = Bundle.main.url(forResource: "BuildDetails", withExtension: "plist")
+            .flatMap { NSDictionary(contentsOf: $0)?["TidepoolServiceClientId"] as? String } != nil
+        // The access token is a JWT; its `exp` claim is not secret.
+        let minutesLeft = session.flatMap { s -> String? in
+            let parts = s.accessToken.split(separator: ".")
+            guard parts.count == 3 else { return nil }
+            var payload = String(parts[1]).replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+            payload += String(repeating: "=", count: (4 - payload.count % 4) % 4)
+            guard let data = Data(base64Encoded: payload),
+                  let exp = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["exp"] as? Double else { return nil }
+            return String(Int((exp - Date().timeIntervalSince1970) / 60))
+        }
+        SportLog.event("uploads", "Tidepool session: refresh token \(session?.refreshToken == nil ? "ABSENT" : "present") · client ID \(clientID ? "present" : "ABSENT") · access token \(minutesLeft.map { "expires in \($0) min" } ?? "expiry unknown")")
     }
 
     /// Pump teardown or loan end. Synchronous, so nothing the teardown writes afterwards is
