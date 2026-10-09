@@ -13,12 +13,19 @@ extension ExtensionDelegate {
     /// A held task older than this is from a previous wake.
     private static let bluetoothWakeStaleAfter: TimeInterval = 60
 
-    /// Tasks already completed this wake. WatchKit can hand the same task over again, and
-    /// completing one twice throws (crash 2026-09-29, mid certificate exchange).
-    private static var completedBluetoothTasks = Set<ObjectIdentifier>()
+    /// Tasks already completed, kept (not just their identities) so a freed address cannot be
+    /// mistaken for a new task. WatchKit can hand a task over again, also in a LATER wake, and
+    /// completing one twice throws: crash 2026-09-29, and 2026-10-07 13:26 ("NSMapTable count
+    /// underflow") six completions after a new wake had cleared this list. So it is never cleared.
+    private static var completedBluetoothTasks: [WKBluetoothAlertRefreshBackgroundTask] = []
 
     private func completeOnce(_ task: WKBluetoothAlertRefreshBackgroundTask) {
-        guard Self.completedBluetoothTasks.insert(ObjectIdentifier(task)).inserted else { return }
+        guard !Self.completedBluetoothTasks.contains(where: { $0 === task }) else {
+            SportLog.event("radio", "Bluetooth task handed over again after completion — not completed twice [bt-task]")
+            return
+        }
+        Self.completedBluetoothTasks.append(task)
+        if Self.completedBluetoothTasks.count > 256 { Self.completedBluetoothTasks.removeFirst(64) }
         task.setTaskCompletedWithSnapshot(false)
     }
 
@@ -49,7 +56,6 @@ extension ExtensionDelegate {
             bluetoothDeliveriesThisWake = 1
         }
         let delivered = Date()
-        Self.completedBluetoothTasks.removeAll()
         heldBluetoothTask = task
         heldBluetoothTaskSince = delivered
         SportLog.event("radio", "WOKEN BY BLUETOOTH — WKBluetoothAlertRefreshBackgroundTask; holding one task 25 s [bt-task]")
