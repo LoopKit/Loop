@@ -71,8 +71,9 @@ final class LoanRemoteUploadsTests: XCTestCase {
     }
 
     /// The phone's Tidepool service exports its session and data set; the wrist's, built from that
-    /// export, uploads into the same data set as the same user, and is given no refresh token.
-    func testTheWristAdoptsThePhonesTidepoolServiceWithoutItsRefreshToken() throws {
+    /// export, uploads into the same data set as the same user, and can renew the session itself:
+    /// an access token outlives no loan, and the phone may be out of reach when it expires.
+    func testTheWristAdoptsThePhonesTidepoolServiceWithItsRefreshToken() throws {
         let phone = TidepoolService(hostIdentifier: "com.example.phone-host", hostVersion: "3.4")
         phone.session = TSession(environment: TEnvironment(host: "fixture.example", port: 443), accessToken: "fixture-access",
                                  accessTokenExpiration: Date().addingTimeInterval(3600), refreshToken: "fixture-refresh",
@@ -81,7 +82,7 @@ final class LoanRemoteUploadsTests: XCTestCase {
         let wrist = try XCTUnwrap(TidepoolService(adopting: phone.exportConfiguration(), localState: nil))
         XCTAssertEqual(wrist.session?.accessToken, "fixture-access")
         XCTAssertEqual(wrist.session?.userId, "fixture-user")
-        XCTAssertNil(wrist.session?.refreshToken, "only the phone renews the session")
+        XCTAssertEqual(wrist.session?.refreshToken, "fixture-refresh", "the wrist renews the session itself")
         XCTAssertTrue(wrist.isOnboarded)
         XCTAssertTrue(wrist.isConfiguredByAnotherController)
         XCTAssertNil(TidepoolService(adopting: TidepoolService(hostIdentifier: "h", hostVersion: "1").exportConfiguration(),
