@@ -3,7 +3,8 @@
 //  Loop
 //
 //  Two pure calculations behind a hand-back: `reconcile` turns drained records into writes;
-//  `expectedInsulin` says what the pod should have delivered over a window, in whole pulses.
+//  `expectedInsulin` predicts the pod's odometer over a window: temps in whole pulses, the schedule
+//  continuously.
 //
 
 import Foundation
@@ -215,19 +216,20 @@ enum LoanReconciler {
             var cursor = start
             for seg in resolved {
                 if seg.start > cursor {
-                    total += scheduleInsulin(schedule, from: cursor, to: seg.start, pulseUnits: pulseUnits)
+                    total += scheduleInsulin(schedule, from: cursor, to: seg.start)
                 }
                 cursor = max(cursor, seg.end)
             }
             if end > cursor {
-                total += scheduleInsulin(schedule, from: cursor, to: end, pulseUnits: pulseUnits)
+                total += scheduleInsulin(schedule, from: cursor, to: end)
             }
         }
 
         return total
     }
 
-    /// Whole pulses: each new rate restarts the pump's pulse clock, so rate × time over-counts.
+    /// Whole pulses: a temp starts its own pulse clock (its first pulse one full interval in), so rate × time
+    /// over-counts it.
     private static func pulsedInsulin(rate: Double, seconds: TimeInterval, pulseUnits: Double) -> Double {
         guard rate > 0, seconds > 0 else { return 0 }
         let pulseInterval = 3600.0 * pulseUnits / rate
@@ -235,13 +237,16 @@ enum LoanReconciler {
         return pulses * pulseUnits
     }
 
-    /// Known gap: pulsed per schedule item, which can only make the expectation smaller.
-    private static func scheduleInsulin(_ schedule: BasalRateSchedule, from: Date, to: Date, pulseUnits: Double) -> Double {
+    /// Rate × time, not whole pulses: the pod runs its schedule on an ongoing grid whose phase the records
+    /// don't carry, so a stretch of schedule delivers the floor or one pulse more. Flooring it under-counted
+    /// by about half a pulse per stretch and per schedule item (false OPEN LOOPs on long loans, 2026-10-05/06);
+    /// rate × time is unbiased (Monte Carlo 2026-10-08: mean 0.000 U, p95 within 0.15 U at 6 h).
+    private static func scheduleInsulin(_ schedule: BasalRateSchedule, from: Date, to: Date) -> Double {
         return schedule.between(start: from, end: to).reduce(0) { partial, item in
             let s = max(item.startDate, from)
             let e = min(item.endDate, to)
             guard e > s else { return partial }
-            return partial + pulsedInsulin(rate: item.value, seconds: e.timeIntervalSince(s), pulseUnits: pulseUnits)
+            return partial + item.value * e.timeIntervalSince(s) / 3600
         }
     }
 }
