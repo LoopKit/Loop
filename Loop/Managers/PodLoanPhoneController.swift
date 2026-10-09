@@ -274,9 +274,8 @@ final class PodLoanPhoneController {
         loadStaged()
 
         // Only a base from this epoch.
-        if _persisted.audit.baseEpoch != epoch, _persisted.audit.base != nil || _persisted.audit.checkpoints != 0 {
+        if _persisted.audit.baseEpoch != epoch, _persisted.audit.base != nil {
             _persisted.audit.base = nil
-            _persisted.audit.checkpoints = 0
             stateStore.wrappedValue = _persisted.rawValue
         }
         installPodLinkCensus()

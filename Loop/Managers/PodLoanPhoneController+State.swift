@@ -42,10 +42,9 @@ struct PodLoanPhoneState: RawRepresentable {
         var deliveredAtGrant: Double?
         /// The total as the watch first read it: the preferred origin.
         var deliveredAtTakeover: Double?
-        /// The running base, read back only in the epoch it was set under.
+        /// The verdict's base (grant, then takeover), read back only in the epoch it was set under.
         var base: PodLoanPhoneController.AuditBase?
         var baseEpoch: Int?
-        var checkpoints = 0
     }
     var audit = AuditAnchors()
 
@@ -89,7 +88,6 @@ struct PodLoanPhoneState: RawRepresentable {
                 audit.base = .init(units: units, asOf: asOf)
             }
             audit.baseEpoch = a["baseEpoch"] as? Int
-            audit.checkpoints = a["checkpoints"] as? Int ?? 0
         }
         pendingForceAudit = (rawValue["pendingForceAudit"] as? [String: Any]).flatMap(Self.forceAudit(from:))
         gapBooking = (rawValue["gapBooking"] as? [String: Any]).flatMap(Self.gapBooking(from:))
@@ -104,7 +102,7 @@ struct PodLoanPhoneState: RawRepresentable {
         raw["seizeToken"] = seizeToken?.uuidString
         raw["holdRenewedAt"] = holdRenewedAt
         raw["holdLapseNoticedAt"] = holdLapseNoticedAt
-        var a: [String: Any] = ["checkpoints": audit.checkpoints]
+        var a: [String: Any] = [:]
         a["loanStartedAt"] = audit.loanStartedAt
         a["deliveredAtGrant"] = audit.deliveredAtGrant
         a["deliveredAtTakeover"] = audit.deliveredAtTakeover
@@ -205,11 +203,6 @@ extension PodLoanPhoneController {
             let owner = epoch
             updateState { $0.audit.base = newValue; $0.audit.baseEpoch = owner }
         }
-    }
-
-    var checkpointsThisLoan: Int {
-        get { persisted.audit.checkpoints }
-        set { updateState { $0.audit.checkpoints = newValue } }
     }
 
     /// Applies one change and writes the whole value once, before returning.

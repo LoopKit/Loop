@@ -163,7 +163,7 @@ enum LoanReconciler {
     }
 
     /// Insulin the records say the pump delivered between two instants, in whole `pulseUnits`.
-    /// `schedule` fills gaps (nil: journaled only); `includingBolusesAtEnd` is false at an interior checkpoint.
+    /// `schedule` fills gaps (nil: journaled only); `includingBolusesAtEnd` is false at a mid-loan reading.
     static func expectedInsulin(events: [LoanEvent], schedule: BasalRateSchedule?, pulseUnits: Double,
                                 from start: Date, to end: Date, includingBolusesAtEnd: Bool = true) -> Double {
         guard end > start else { return 0 }
@@ -186,7 +186,7 @@ enum LoanReconciler {
                 guard let rate = event.record.unitsPerHour,
                       let segEnd = event.record.endDate, segEnd >= event.record.startDate else { continue }
                 // On the record's own span: a zero-length record is a cancel and must truncate its temp
-                // even when it falls just before the window (a checkpoint's odometer is read a second
+                // even when it falls just before the window (a mid-loan odometer is read a second
                 // after the cancel; clipping first dropped it — false OPEN LOOP 2026-09-05, 9b19f160).
                 segments.append(Segment(start: event.record.startDate, end: segEnd, rate: rate))
             default:

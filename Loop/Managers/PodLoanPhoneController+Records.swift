@@ -43,9 +43,8 @@ extension PodLoanPhoneController {
         noteHoldRenewal(sentAt: batch.sentAt)
         stage(events: batch.events, tombstones: batch.tombstones)
 
-        // A mid-loan reading can close off an audit window.
         if let snap = batch.odometer {
-            considerCheckpoint(snap, context: "batch")
+            logRunningAudit(snap, context: "batch")
         }
     }
 
@@ -92,7 +91,6 @@ extension PodLoanPhoneController {
                 $0.holdLapseNoticedAt = nil
                 $0.watchSilenceWarningsIssued = 0
                 $0.audit.base = nil
-                $0.audit.checkpoints = 0
                 $0.audit.deliveredAtTakeover = nil
                 $0.audit.loanStartedAt = anchor
             }
@@ -153,9 +151,8 @@ extension PodLoanPhoneController {
 
         stage(events: offer.events, tombstones: offer.tombstones)
 
-        // Only an interim drain may advance the audit base.
         if !isStale, offer.epoch == epoch, offer.released == false, let snap = offer.odometer {
-            considerCheckpoint(snap, context: "interim-offer")
+            logRunningAudit(snap, context: "interim-offer")
         }
 
         // A stale offer speaks only for its own events.
@@ -206,11 +203,6 @@ extension PodLoanPhoneController {
                     LoanReconciler.expectedInsulin(events: allStagedEvents, schedule: deps.settings().basalRateSchedule,
                                                    pulseUnits: pulseUnits, from: $0.asOf, to: offer.handedBackAt)
                 } ?? expected
-                if checkpointsThisLoan > 0 {
-                    handbackDiag(offer.epoch, String(format:
-                        "[checkpoint] verdict window narrowed by %d checkpoint(s): anchor %.3f U (loan start %.3f), window expected %.3f (loan %.3f)",
-                        checkpointsThisLoan, windowStart, start, windowExpected, expected))
-                }
                 pendingHandbackAudit = PendingHandbackAudit(
                     epoch: offer.epoch, deliveredAtStart: windowStart, expected: windowExpected,
                     loanMinutes: loanMin, cycles: allStagedEvents.count,
