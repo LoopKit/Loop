@@ -100,4 +100,14 @@ final class LoanRemoteUploadsTests: XCTestCase {
         controller.teardownPump()
         XCTAssertFalse(LoanRemoteUploads.shared.holdsServiceConfigurations, "uploads outlived the pump's teardown")
     }
+
+    /// Only a background request on cellular alone is held: watchOS refuses it cellular and it waits.
+    /// In front, over Wi-Fi or the phone link, or with the route not yet known, it goes.
+    func testTheUploadGateHoldsOnlyBackgroundCellular() {
+        typealias U = LoanRemoteUploads
+        XCTAssertFalse(U.mayUpload(inFront: false, route: .cellularOnly))
+        XCTAssertTrue(U.mayUpload(inFront: true, route: .cellularOnly))
+        XCTAssertTrue(U.mayUpload(inFront: false, route: .other))
+        XCTAssertTrue(U.mayUpload(inFront: false, route: .unknown))
+    }
 }
