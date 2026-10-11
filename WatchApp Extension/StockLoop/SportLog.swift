@@ -98,4 +98,17 @@ enum SportLog {
         os_log("%{public}@ %{public}@", log: oslog, type: .default, category, message)
         log("[\(category)] \(message)")
     }
+
+    private static let lastLock = NSLock()
+    private static var lastByKey: [String: String] = [:]
+
+    /// As `event`, but only when the message differs from the last one logged under `key`: for lines
+    /// written on every wake that rarely change.
+    static func eventOnChange(_ category: String, key: String, _ message: String) {
+        lastLock.lock()
+        let changed = lastByKey[key] != message
+        if changed { lastByKey[key] = message }
+        lastLock.unlock()
+        if changed { event(category, message) }
+    }
 }

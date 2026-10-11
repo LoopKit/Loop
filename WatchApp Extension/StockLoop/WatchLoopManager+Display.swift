@@ -177,7 +177,7 @@ extension WatchLoopManager {
         if let cob = displayState.activeCarbs?.value {
             ctx.cob = cob
 
-            if cob > 0.05 { SportLog.event("loop", String(format: "COB %.1f g on board", cob)) }
+            if cob > 0.05 { SportLog.eventOnChange("loop", key: "hud.cob", String(format: "COB %.1f g on board", cob)) }
         }
 
         // Fill the recommendation before installing the context: the stock flow reads nil as zero.
@@ -187,11 +187,11 @@ extension WatchLoopManager {
         switch recommendationResult {
         case .success(let recommendation):
 
-            SportLog.event("loan", String(format: "REC bolus %.2f U — published to the stock bolus flow", recommendation?.amount ?? 0))
+            SportLog.eventOnChange("loan", key: "hud.rec", String(format: "REC bolus %.2f U — published to the stock bolus flow", recommendation?.amount ?? 0))
             ctx.recommendedBolusDose = recommendation?.amount
         case .failure(let error):
 
-            SportLog.event("loan", "REC bolus UNAVAILABLE — \(error) (the flow will show 'REC: – U')")
+            SportLog.eventOnChange("loan", key: "hud.rec", "REC bolus UNAVAILABLE — \(error) (the flow will show 'REC: – U')")
         }
         DispatchQueue.main.async {
             guard let loopDataManager = ExtensionDelegate.sharedIfAvailable()?.loopManager else { return }
