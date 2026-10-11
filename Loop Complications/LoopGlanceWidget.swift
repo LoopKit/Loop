@@ -198,21 +198,34 @@ struct GlanceComplicationView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// More: every value of the glance in three lines.
+    /// Dosing values bright, status (who holds the pod, the reading's age) dimmed at the sides.
+    /// More: the reading large in the middle and everything else around it — an active override and eBG
+    /// above, who holds the pod and the reading's age at its sides, IOB, COB and temp below.
     private var glance: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(spacing: 0) {
             HStack(spacing: 4) {
-                Text(snapshot.text([.bg, .eventual], at: date)).font(.headline).foregroundStyle(bgColor).widgetAccentable()
+                Text(snapshot.text(.override, at: date) ?? "")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                 Spacer(minLength: 4)
-                ageAndHolder
+                Text("eBG " + (snapshot.eventual(at: date) ?? GlanceComplicationSnapshot.dash))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+            }
+            HStack(spacing: 2) {
+                holderIcon(size: 16).frame(minWidth: 28)
+                Spacer(minLength: 0)
+                Text(snapshot.bgWithTrend(at: date))
+                    .font(.system(size: 34, weight: .semibold, design: .rounded))
+                    .foregroundStyle(bgColor).widgetAccentable()
+                Spacer(minLength: 0)
+                Text(snapshot.text(.age, at: date) ?? "")
+                    .font(.system(size: 14, weight: .medium, design: .rounded)).foregroundStyle(.secondary)
+                    .frame(minWidth: 28)
             }
             Text(snapshot.text([.iob, .cob, .temp], at: date))
-                .font(.system(size: 15, weight: .medium, design: .rounded))
-            Text(snapshot.text(.override, at: date) ?? "")
-                .font(.system(size: 13, weight: .medium, design: .rounded)).foregroundStyle(.secondary)
+                .font(.system(size: 13, weight: .medium, design: .rounded))
         }
         .lineLimit(1)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     /// Who holds the pod: the watch (a loan) or the phone. By shape, not colour, so tinted faces keep it.
