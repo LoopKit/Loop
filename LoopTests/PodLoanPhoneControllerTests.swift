@@ -1077,7 +1077,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         connectionReady = true
         waitUntil(timeout: 8, "reclaim temp cancel") { self.lock.lock(); defer { self.lock.unlock() }; return self.cancelCalls > 0 }
         XCTAssertEqual(cancelCalls, 1, "cancel exactly once per loan, on the verified round-trip")
-        XCTAssertNotNil(diagMatching("temp cancelled — pod reverts to the user's schedule until"), "the cancel's outcome must be in the log")
+        // The outcome is logged on the controller's queue after the cancel returns.
+        waitUntil(timeout: 5, "cancel outcome logged") { self.diagMatching("temp cancelled — pod reverts to the user's schedule until") != nil }
 
         // The chase keeps ticking after verification; the audit must not re-fire on later ticks.
         let settle = expectation(description: "no second cancel")
