@@ -285,10 +285,13 @@ extension PodLoanPhoneController {
                                                       pulseUnits: pulseUnits, from: base.asOf, to: asOf,
                                                       includingBolusesAtEnd: false)
         let delivered = snap.deliveredLatest - base.units
-        PhoneLog.event("loan", String(format: "e%d [odometer] (%@) loan so far %.1f min: delivered %.3f expected %.3f residual %+.3f%@",
-                                      epoch, context, asOf.timeIntervalSince(base.asOf) / 60, delivered, expected,
-                                      ((delivered - expected) * 1000).rounded() / 1000,
-                                      delivering ? " · a bolus was delivering" : ""))
+        let line = String(format: "e%d [odometer] (%@) loan so far %.1f min: delivered %.3f expected %.3f residual %+.3f%@",
+                          epoch, context, asOf.timeIntervalSince(base.asOf) / 60, delivered, expected,
+                          ((delivered - expected) * 1000).rounded() / 1000,
+                          delivering ? " · a bolus was delivering" : "")
+        guard line != lastRunningAuditLine else { return }
+        lastRunningAuditLine = line
+        PhoneLog.event("loan", line)
     }
 
     /// A verdict waiting for the reclaim round-trip to read the pod.
