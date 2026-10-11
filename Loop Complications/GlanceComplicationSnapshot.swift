@@ -31,6 +31,8 @@ struct GlanceComplicationSnapshot: Codable, Equatable {
 
     /// The glance's override line ("🏓 70% 128"), set only while it is active.
     var overrideLabel: String?
+    /// The Apple symbol the override's preset is drawn with, when it has one rather than an emoji.
+    var overrideSymbol: String?
     /// The watch holds the pod (a loan); otherwise the phone loops.
     var watchHasPod = false
 
@@ -221,7 +223,7 @@ extension GlanceComplicationSnapshot {
         case .cob: return (cob(at: date) ?? Self.dash) + (capitalised ? " g" : "g")
         case .temp: return (temp(at: date) ?? Self.dash) + "U/h"
         case .eventual: return "→" + (eventual(at: date) ?? Self.dash)
-        case .override: return overrideLabel
+        case .override: return overrideLabel.flatMap { $0.isEmpty ? nil : $0 }
         }
     }
 

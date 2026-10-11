@@ -78,7 +78,8 @@ final class GlanceComplicationTests: XCTestCase {
         var nearZero = s
         nearZero.iobText = "-0.0"
         XCTAssertEqual(nearZero.text(.iob, at: now), "0.0U", "a tiny negative IOB is not shown as -0.0")
-        XCTAssertEqual(s.overrideLabel, "⏱ 70%")
+        XCTAssertEqual(s.overrideLabel, "70%", "no clock in place of a symbol")
+        XCTAssertNil(s.overrideSymbol)
         XCTAssertEqual(s.bgRange, .inRange, "coloured as during a loan; the icon says who holds the pod")
         XCTAssertFalse(s.watchHasPod)
 
@@ -200,6 +201,30 @@ final class GlanceComplicationTests: XCTestCase {
         let on = GlanceComplicationPublisher.snapshot(loan: glanceData(glucoseAge: 130, overrideLabel: "🏃 70% 140"), cob: 15,
                                                       unit: .milligramsPerDeciliter, now: now)
         XCTAssertTrue(on.text(GlanceOption.inlineAllOverride.values, at: now).hasSuffix(" · 🏃 70% 140"))
+    }
+
+    /// A preset drawn with an Apple symbol: the symbol travels beside the label, which has no clock.
+    func testAPresetsAppleSymbolIsCarried() {
+        let preset = TemporaryPreset(symbol: PresetSymbol(symbolType: .systemImage, value: "figure.run"), name: "Run",
+                                     settings: TemporaryPresetSettings(unit: .milligramsPerDeciliter, targetRange: nil,
+                                                                       insulinNeedsScaleFactor: 0.5),
+                                     duration: .indefinite)
+        let override = TemporaryScheduleOverride(context: .preset(preset), settings: preset.settings,
+                                                 startDate: now.addingTimeInterval(-600), duration: .indefinite,
+                                                 enactTrigger: .local, syncIdentifier: UUID())
+        let context = WatchContext(glucose: mgdl(120), displayGlucoseUnit: .milligramsPerDeciliter, glucoseTrend: .flat,
+                                   glucoseDate: now.addingTimeInterval(-60), loopLastRunDate: now.addingTimeInterval(-120),
+                                   lastNetTempBasalDose: 0, cob: 0, iob: 0, isClosedLoop: true)
+        let s = GlanceComplicationPublisher.snapshot(phone: context, override: override)
+        XCTAssertEqual(s.overrideSymbol, "figure.run")
+        XCTAssertEqual(s.overrideLabel, "50%")
+
+        let emoji = TemporaryScheduleOverride(context: .preset(TemporaryPreset(symbol: PresetSymbol(symbolType: .emoji, value: "🏃"),
+                                                  name: "Run", settings: preset.settings, duration: .indefinite)),
+                                              settings: preset.settings, startDate: now.addingTimeInterval(-600),
+                                              duration: .indefinite, enactTrigger: .local, syncIdentifier: UUID())
+        XCTAssertNil(WatchLoopManager.overrideSymbol(for: emoji))
+        XCTAssertEqual(WatchLoopManager.overrideLabel(for: emoji), "🏃 50%")
     }
 
     /// A reload is served within a second of the publish that asked for it: still counted.

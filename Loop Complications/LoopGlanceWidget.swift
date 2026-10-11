@@ -107,11 +107,11 @@ struct GlanceComplicationView: View {
     @ViewBuilder private var content: some View {
         switch family {
         case .accessoryInline:
-            Text(snapshot.text(option.values, at: date, capitalised: true))
+            line(option.values, capitalised: true)
         case .accessoryCorner:
             holderIcon(size: 15).widgetLabel { cornerLabel }
         case .accessoryCircular:
-            circular.widgetLabel { Text(snapshot.text(option.bezelValues, at: date, capitalised: true)) }
+            circular.widgetLabel { line(option.bezelValues, capitalised: true) }
         case .accessoryRectangular:
             switch option {
             case .glance: glance
@@ -121,6 +121,23 @@ struct GlanceComplicationView: View {
         default:
             Text(snapshot.bgWithTrend(at: date))
         }
+    }
+
+    /// The active override: its preset's Apple symbol, when it has one, before the label.
+    private var overrideText: Text? {
+        let label = snapshot.text(.override, at: date)
+        guard let symbol = snapshot.overrideSymbol else { return label.map { Text($0) } }
+        let image = Text(Image(systemName: symbol))
+        return label.map { image + Text(" " + $0) } ?? image
+    }
+
+    /// A line of values; an override, always last, keeps its preset's symbol.
+    private func line(_ values: [GlanceValue], capitalised: Bool) -> Text {
+        guard values.last == .override, let override = overrideText else {
+            return Text(snapshot.text(values, at: date, capitalised: capitalised))
+        }
+        let rest = snapshot.text(Array(values.dropLast()), at: date, capitalised: capitalised)
+        return rest.isEmpty ? override : Text(rest + " · ") + override
     }
 
     /// The reading bold, the other values beside it, the age smallest.
@@ -204,7 +221,7 @@ struct GlanceComplicationView: View {
     private var glance: some View {
         VStack(spacing: 0) {
             HStack(spacing: 4) {
-                Text(snapshot.text(.override, at: date) ?? "")
+                (overrideText ?? Text(""))
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                 Spacer(minLength: 4)
                 Text("eBG " + (snapshot.eventual(at: date) ?? GlanceComplicationSnapshot.dash))

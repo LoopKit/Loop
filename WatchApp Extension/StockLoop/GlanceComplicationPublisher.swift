@@ -72,6 +72,7 @@ enum GlanceComplicationPublisher {
         s.cobText = cob == nil ? nil : glance.cobText
         s.tempText = data.tempRate == nil ? nil : glance.tempText
         s.overrideLabel = glance.overrideLabel
+        s.overrideSymbol = data.overrideSymbol
         s.watchHasPod = true
         return s
     }
@@ -95,6 +96,7 @@ enum GlanceComplicationPublisher {
         s.cobText = context.cob.map { String(format: "%.0f", $0) }
         s.tempText = context.lastNetTempBasalDose.map { String(format: "%+.2f", $0) }
         s.overrideLabel = WatchLoopManager.overrideLabel(for: override)
+        s.overrideSymbol = WatchLoopManager.overrideSymbol(for: override)
         return s
     }
 
