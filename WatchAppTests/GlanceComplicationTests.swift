@@ -323,17 +323,32 @@ final class GlanceComplicationTests: XCTestCase {
         XCTAssertTrue(policy.behind(lastRenderAt: now.addingTimeInterval(2)))
     }
 
-    /// In front, only a reading the face hasn't built is requested: opening the app with a current face
-    /// leaves the slot alone, and a face stuck on an old reading is caught up whatever we asked before.
-    func testInFrontOnlyAnUnbuiltReadingIsRequested() {
+    /// In front, any change the face hasn't drawn is requested — an override or an IOB change as well as a reading.
+    func testInFrontAnyUnbuiltChangeIsRequested() {
         var policy = GlanceReloadPolicy()
         _ = policy.save(reading(100), at: now)
+        XCTAssertNil(policy.plan(now: now.addingTimeInterval(10), inFront: true, opened: true, sensorLinkUp: now,
+                                 inLoan: false, lastRenderAt: now.addingTimeInterval(2)), "already drawn")
         _ = policy.save(reading(100, iob: "2.0"), at: now.addingTimeInterval(30))
-        XCTAssertNil(policy.plan(now: now.addingTimeInterval(60), inFront: true, opened: true, sensorLinkUp: now,
-                                 inLoan: false, lastRenderAt: now.addingTimeInterval(2)))
-        _ = policy.save(reading(108, at: now.addingTimeInterval(300)), at: now.addingTimeInterval(301))
-        XCTAssertEqual(policy.plan(now: now.addingTimeInterval(320), inFront: true, opened: true, sensorLinkUp: now,
-                                   inLoan: false, lastRenderAt: now.addingTimeInterval(2))?.reason, "opened")
+        XCTAssertEqual(policy.plan(now: now.addingTimeInterval(60), inFront: true, opened: false, sensorLinkUp: now,
+                                   inLoan: false, lastRenderAt: now.addingTimeInterval(2))?.reason, "free")
+    }
+
+    /// A wake publishes many times; while a request awaits its build check, no second one is planned.
+    func testOneRequestAtATime() {
+        var policy = GlanceReloadPolicy()
+        _ = policy.save(reading(100), at: now.addingTimeInterval(1.3))
+        let first = policy.plan(now: now.addingTimeInterval(1.3), inFront: false, opened: false, sensorLinkUp: now,
+                                inLoan: false, lastRenderAt: now.addingTimeInterval(-400))
+        XCTAssertNotNil(first)
+        policy.asked(at: now.addingTimeInterval(1.3))
+        _ = policy.save(reading(100, iob: "2.0"), at: now.addingTimeInterval(2.0))
+        XCTAssertNil(policy.plan(now: now.addingTimeInterval(2.0), inFront: false, opened: false, sensorLinkUp: now,
+                                 inLoan: false, lastRenderAt: now.addingTimeInterval(-400)), "the first is still out")
+        XCTAssertNil(policy.plan(now: now.addingTimeInterval(2.0), inFront: true, opened: false, sensorLinkUp: now,
+                                 inLoan: false, lastRenderAt: now.addingTimeInterval(-400)), "in front too")
+        XCTAssertNotNil(policy.plan(now: now.addingTimeInterval(3.9), inFront: true, opened: false, sensorLinkUp: now,
+                                    inLoan: false, lastRenderAt: now.addingTimeInterval(-400)), "after its check")
     }
 
     /// Connected by timing: the link's first seconds and, in a loan, the pod exchange; not the gap after.

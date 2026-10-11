@@ -134,8 +134,10 @@ enum GlanceComplicationPublisher {
         if let plan { schedule(plan.at, sensorLinkUp: sensorLinkUp, inLoan: inLoan, retry: false) }
 
         // Requested vs served redraws, and how old the shown values are. Only when something happened:
-        // the glance republishes on every 2 s repaint while it is on screen.
-        guard changed || plan != nil else { return }
+        // the glance republishes on every 2 s repaint while it is on screen, and a wake publishes many
+        // times while one request is already waiting.
+        let waiting = plan.flatMap { p in pendingAt.map { $0 <= p.at } } ?? false
+        guard changed || (plan != nil && !waiting) else { return }
         let served = GlanceComplicationSnapshot.served(after: lastLoggedAt)
         lastLoggedAt = now
         func age(_ date: Date?) -> String { date.map { "\(Int(now.timeIntervalSince($0)))s" } ?? "n/a" }
@@ -174,6 +176,7 @@ enum GlanceComplicationPublisher {
                                      inLoan: inLoan, lastRenderAt: GlanceComplicationSnapshot.lastServed()),
               plan.at.timeIntervalSince(now) <= 0.05 else { return }
         GlanceComplicationKind.all.forEach { WidgetCenter.shared.reloadTimelines(ofKind: $0) }
+        policy.asked(at: now)
         let attached = GlanceReloadPolicy.attached(at: now, sensorLinkUp: sensorLinkUp, inLoan: inLoan)
         let release = holdProcess(reason: "glance complication check", upTo: GlanceReloadPolicy.renderCheck + 1)
         DispatchQueue.main.asyncAfter(deadline: .now() + GlanceReloadPolicy.renderCheck) {
@@ -240,20 +243,22 @@ struct GlanceReloadPolicy {
     static let renderCheck: TimeInterval = 2.5
 
     private(set) var lastSaved: GlanceComplicationSnapshot?
-    /// When the saved snapshot last changed, and when its reading did.
+    /// When the saved snapshot last changed.
     private(set) var changedAt: Date?
-    private(set) var readingChangedAt: Date?
     /// Our last request the widget built while connected: the daemon's 300-s period runs from it.
     private(set) var lastConfirmedAt: Date?
+    /// Our last request. Until its build check, a second would only be refused (or charged).
+    private(set) var askedAt: Date?
 
     /// Keeps the snapshot; true when it changed.
     mutating func save(_ snapshot: GlanceComplicationSnapshot, at now: Date) -> Bool {
         guard snapshot != lastSaved else { return false }
-        if snapshot.bgDate != lastSaved?.bgDate { readingChangedAt = now }
         lastSaved = snapshot
         changedAt = now
         return true
     }
+
+    mutating func asked(at t: Date) { askedAt = t }
 
     /// The widget built after our request at `t`; while connected, that started the daemon's period.
     mutating func confirmed(at t: Date, attached: Bool) {
@@ -264,12 +269,6 @@ struct GlanceReloadPolicy {
     func behind(lastRenderAt: Date?) -> Bool {
         guard let changedAt else { return false }
         return (lastRenderAt ?? .distantPast) < changedAt
-    }
-
-    /// Nothing built since the reading changed.
-    func readingBehind(lastRenderAt: Date?) -> Bool {
-        guard let readingChangedAt else { return false }
-        return (lastRenderAt ?? .distantPast) < readingChangedAt
     }
 
     /// The windows after link-up in which the app was seen connected.
@@ -286,8 +285,12 @@ struct GlanceReloadPolicy {
 
     /// When to ask, and why; nil = not now and not in this cycle's windows.
     func plan(now: Date, inFront: Bool, opened: Bool, sensorLinkUp: Date?, inLoan: Bool, lastRenderAt: Date?) -> (at: Date, reason: String)? {
+        // One request at a time: the last one's build check decides what follows it.
+        if let askedAt, now.timeIntervalSince(askedAt) < Self.renderCheck - 0.2 { return nil }
+        // In front a reload is free and has its own allowance (a foreground grant does not delay the next
+        // connected one: 2026-10-09 20:46:12 connected, 20:47:35 foreground, 20:51:12 connected), so any change goes.
         if inFront {
-            guard readingBehind(lastRenderAt: lastRenderAt) else { return nil }
+            guard behind(lastRenderAt: lastRenderAt) else { return nil }
             return (now, opened ? "opened" : "free")
         }
         guard behind(lastRenderAt: lastRenderAt), let linkUp = sensorLinkUp else { return nil }
