@@ -192,6 +192,10 @@ struct ActionTabBar: UIViewRepresentable {
     func makeUIView(context: Context) -> UITabBar {
         let bar = UITabBar()
         bar.delegate = context.coordinator
+        let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
+        tap.cancelsTouchesInView = false
+        tap.delegate = context.coordinator
+        bar.addGestureRecognizer(tap)
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
         let titleAttributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.label]
@@ -219,15 +223,51 @@ struct ActionTabBar: UIViewRepresentable {
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
-    final class Coordinator: NSObject, UITabBarDelegate {
+    final class Coordinator: NSObject, UITabBarDelegate, UIGestureRecognizerDelegate {
         var tabs: [ActionTab] = []
 
+        /// The bar selects an item even when the touch turns into a home swipe, so an action
+        /// only runs once a tap is also recognized, which a moving or cancelled touch fails.
+        private var selectedTag: Int?
+        private var tapped = false
+
         func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
-            guard tabs.indices.contains(item.tag) else { return }
-            tabs[item.tag].action()
             DispatchQueue.main.async {
                 tabBar.selectedItem = nil
             }
+            if UIAccessibility.isVoiceOverRunning || UIAccessibility.isSwitchControlRunning {
+                run(item.tag)
+                return
+            }
+            selectedTag = item.tag
+            runIfTapped()
+        }
+
+        @objc func handleTap(_ recognizer: UITapGestureRecognizer) {
+            tapped = true
+            runIfTapped()
+        }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            selectedTag = nil
+            tapped = false
+            return true
+        }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+            true
+        }
+
+        private func runIfTapped() {
+            guard tapped, let tag = selectedTag else { return }
+            selectedTag = nil
+            tapped = false
+            run(tag)
+        }
+
+        private func run(_ tag: Int) {
+            guard tabs.indices.contains(tag) else { return }
+            tabs[tag].action()
         }
     }
 }
