@@ -361,6 +361,8 @@ final class PodLoanPhoneController {
 
     var staged: [UUID: LoanEvent] = [:]
     var stagedTombstones: Set<UUID> = []
+    /// The last running-audit line; a wake delivers several batches with the same reading.
+    var lastRunningAuditLine: String?
     var t1WorkItem: DispatchWorkItem?
     var reclaimTimeoutWork: DispatchWorkItem?
     var reclaimResendWork: DispatchWorkItem?

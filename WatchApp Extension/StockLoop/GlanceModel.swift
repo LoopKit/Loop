@@ -88,6 +88,7 @@ struct GlanceUIState {
     var bolusDelivery: (units: Double, reporter: DoseProgressReporter)? = nil
 
     var overrideLabel: String? = nil
+    var overrideSymbol: String? = nil
 
     /// A hand-back is draining while the watch keeps dosing. This is the cancellable window, and
     /// it is why the top-right chip becomes Cancel instead of End.
@@ -564,6 +565,7 @@ final class GlanceViewModel: ObservableObject {
     static func activeState(data: WatchLoopManager.GlanceData, cob: Double?, now: Date, phoneGlucoseDate: Date? = nil) -> GlanceUIState {
         var s = GlanceUIState()
         s.overrideLabel = data.overrideLabel
+        s.overrideSymbol = data.overrideSymbol
         s.phase = .active
 
         if let iob = data.iob { s.iobText = String(format: "%.1f", iob) }

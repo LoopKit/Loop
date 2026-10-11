@@ -335,6 +335,7 @@ final class WatchLoopManager {
         let retrospectiveDiscrepancyCount: Int
 
         let overrideLabel: String?
+        var overrideSymbol: String? = nil
     }
 
     let glanceMirrorLock = NSLock()

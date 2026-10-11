@@ -104,10 +104,11 @@ final class LoanEventJournal {
         return event
     }
 
-    /// Stops the re-reported running temp from being minted twice.
-    func contains(syncIdentifier: String) -> Bool {
+    /// The journaled record under this identity: stops a re-reported dose being minted twice, and shows a
+    /// re-reported temp's earlier end.
+    func record(syncIdentifier: String) -> LoanDoseRecord? {
         lock.lock(); defer { lock.unlock() }
-        return state?.events.contains { $0.record.syncIdentifier == syncIdentifier } ?? false
+        return state?.events.first { $0.record.syncIdentifier == syncIdentifier }?.record
     }
 
     /// Above the cursor, in seq order.

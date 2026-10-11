@@ -81,11 +81,13 @@ extension WatchLoopManager {
                 retrospectiveCorrectionIsIntegral: integralRetrospectiveCorrectionEnabled,
                 retrospectiveDiscrepancyCount: loopOutput?.effects.retrospectiveGlucoseDiscrepancies.count ?? 0,
                 // Only while the override is active.
-                overrideLabel: Self.overrideLabel(for: scheduleOverride))
+                overrideLabel: Self.overrideLabel(for: scheduleOverride),
+                overrideSymbol: Self.overrideSymbol(for: scheduleOverride))
     }
 
     /// The glance's override line ("🏓 70% 128"), only while the override is active. Also used for the
-    /// Sport complications when the phone holds the pod.
+    /// Sport complications when the phone holds the pod. A preset's emoji leads it; a preset drawn with an
+    /// Apple symbol has it in `overrideSymbol` instead.
     static func overrideLabel(for override: TemporaryScheduleOverride?) -> String? {
         guard let o = override, o.isActive() else { return nil }
 
@@ -93,8 +95,6 @@ extension WatchLoopManager {
         if case .preset(let p) = o.context,
            let symbol = p.symbol?.textualRepresentation, !symbol.isEmpty {
             parts.append(symbol)
-        } else {
-            parts.append("⏱")
         }
         if let scale = o.settings.insulinNeedsScaleFactor {
             parts.append("\(Int((scale * 100).rounded()))%")
@@ -105,6 +105,13 @@ extension WatchLoopManager {
             parts.append(String(format: "%.0f", mid))
         }
         return parts.joined(separator: " ")
+    }
+
+    /// The Apple symbol an active preset is drawn with ("figure.run"), which a string can't carry.
+    static func overrideSymbol(for override: TemporaryScheduleOverride?) -> String? {
+        guard let o = override, o.isActive(), case .preset(let p) = o.context,
+              let symbol = p.symbol, symbol.symbolType == .systemImage, !symbol.value.isEmpty else { return nil }
+        return symbol.value
     }
 
     /// COB from the display run, as stock's `LoopDataManager.activeCarbs`.
@@ -171,7 +178,7 @@ extension WatchLoopManager {
         if let cob = displayState.activeCarbs?.value {
             ctx.cob = cob
 
-            if cob > 0.05 { SportLog.event("loop", String(format: "COB %.1f g on board", cob)) }
+            if cob > 0.05 { SportLog.eventOnChange("loop", key: "hud.cob", String(format: "COB %.1f g on board", cob)) }
         }
 
         // Fill the recommendation before installing the context: the stock flow reads nil as zero.
@@ -181,11 +188,11 @@ extension WatchLoopManager {
         switch recommendationResult {
         case .success(let recommendation):
 
-            SportLog.event("loan", String(format: "REC bolus %.2f U — published to the stock bolus flow", recommendation?.amount ?? 0))
+            SportLog.eventOnChange("loan", key: "hud.rec", String(format: "REC bolus %.2f U — published to the stock bolus flow", recommendation?.amount ?? 0))
             ctx.recommendedBolusDose = recommendation?.amount
         case .failure(let error):
 
-            SportLog.event("loan", "REC bolus UNAVAILABLE — \(error) (the flow will show 'REC: – U')")
+            SportLog.eventOnChange("loan", key: "hud.rec", "REC bolus UNAVAILABLE — \(error) (the flow will show 'REC: – U')")
         }
         DispatchQueue.main.async {
             guard let loopDataManager = ExtensionDelegate.sharedIfAvailable()?.loopManager else { return }
