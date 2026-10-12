@@ -83,8 +83,6 @@ class MealDetectionManager {
         }
 
         let date = test_currentDate ?? Date()
-        let samplesStart = date.addingTimeInterval(-MissedMealSettings.maxRecency)
-
         guard let sensitivitySchedule = settingsProvider.insulinSensitivityScheduleApplyingOverrideHistory,
               let carbRatioSchedule = settingsProvider.carbRatioSchedule,
               let maxBolus = settingsProvider.maximumBolus else

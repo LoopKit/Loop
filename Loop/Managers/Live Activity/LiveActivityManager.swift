@@ -562,24 +562,28 @@ extension TemporaryScheduleOverride {
     func liveActivityTitleAndSymbol() -> (title: String, systemSymbolName: String?) {
         switch context {
         case .preset(let preset):
-            guard let symbol = preset.symbol else {
-                return (preset.name, nil)
-            }
-            switch symbol.symbolType {
-            case .emoji:
-                return ("\(symbol.value) \(preset.name)", nil)
-            case .systemImage:
-                return (preset.name, symbol.value)
-            case .image:
-                // Asset-image symbols can't be loaded from the widget bundle; render name only.
-                return (preset.name, nil)
-            }
+            return Self.titleAndSymbol(for: preset)
+        case .activity(let activity):
+            return Self.titleAndSymbol(for: activity.preset)
         case .custom:
             return (NSLocalizedString("Custom preset", comment: "The title of the cell indicating a generic custom preset is enabled"), nil)
         case .preMeal:
             return (NSLocalizedString("Pre-meal Preset", comment: "Status row title for premeal override enabled"), "fork.knife")
-        @unknown default:
-            return ("", nil)
+        }
+    }
+
+    private static func titleAndSymbol(for preset: TemporaryPreset) -> (title: String, systemSymbolName: String?) {
+        guard let symbol = preset.symbol else {
+            return (preset.name, nil)
+        }
+        switch symbol.symbolType {
+        case .emoji:
+            return ("\(symbol.value) \(preset.name)", nil)
+        case .systemImage:
+            return (preset.name, symbol.value)
+        case .image:
+            // Asset-image symbols can't be loaded from the widget bundle; render name only.
+            return (preset.name, nil)
         }
     }
 }

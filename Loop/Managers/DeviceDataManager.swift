@@ -1292,9 +1292,7 @@ extension DeviceDataManager {
     }
     
     func deleteTestingCarbData(before: Date = Date()) async throws {
-        guard let testingCGMManager = cgmManager as? TestingCGMManager,
-              let testingPumpManager = pumpManager as? TestingPumpManager
-        else {
+        guard cgmManager is TestingCGMManager, pumpManager is TestingPumpManager else {
             return
         }
         
@@ -1302,9 +1300,7 @@ extension DeviceDataManager {
     }
     
     func deleteTestingAlertData() async throws {
-        guard let testingCGMManager = cgmManager as? TestingCGMManager,
-              let testingPumpManager = pumpManager as? TestingPumpManager
-        else {
+        guard cgmManager is TestingCGMManager, pumpManager is TestingPumpManager else {
             return
         }
         
