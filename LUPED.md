@@ -7,7 +7,7 @@ watchface. It uses the watchface app UUID
 ## How it reaches the watch
 
 Loop publishes its own PebbleOS PPoGATT ("Pebble Protocol over GATT") service
-with CoreBluetooth (`LupedPebbleTransport.swift`). The watch stays paired with
+with CoreBluetooth. The watch stays paired with
 and connected to the Pebble app, which keeps its own session for
 notifications, PebbleKit JS and other watchfaces. PebbleOS discovers Loop's
 service on the same Bluetooth connection, reads the app UUID from its meta
@@ -17,6 +17,20 @@ AppMessages.
 The legacy PebbleKit iOS SDK is not used: its watch discovery does not
 recognize Core Devices watches (Pebble Time 2, Pebble Round 2, Pebble 2 Duo),
 so it never reports a connected watch.
+
+The code has two layers:
+
+- `PebbleTransport.swift` is a generic link for any JS-free watch app: the
+  PPoGATT service and session, Pebble Protocol framing, the phone-version
+  reply, AppMessage encoding/decoding and ACKs, and app run-state commands.
+  It knows nothing about Luped or Loop. It reports its link state, session
+  open/reset, incoming messages, push replies and log lines to a delegate.
+- `LupedPebbleTransport.swift` builds on it: Luped's message keys and `DATA`
+  payload, the refresh and diagnostics commands, delivery with retry and
+  pausing, the alarm-reason log, and Settings → Devices → Pebble state. It
+  mirrors the generic link state into the status row and writes the generic
+  log lines (session open, watch subscribed, phone-version exchange) to the
+  communication log unchanged.
 
 ## Enable
 

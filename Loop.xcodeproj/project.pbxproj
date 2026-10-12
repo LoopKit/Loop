@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8B4368DE3FB2D975D20BD272 /* LupedWatchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F387F22ED000ACCFB26D2C /* LupedWatchSettingsView.swift */; };
 		DBF66D3992F1C01B8DDC29F8 /* LupedPebbleTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 727A0CE532FB2B5D992DF4F2; };
+		1713F2004F174EEFA9DE19DF /* PebbleTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6341C3C814013463242E4937 /* PebbleTransport.swift */; };
 		3106C7700C417C5B7C2A7032 /* LupedPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA1BC278FA39D42953E2B83; };
 		01414522FC033F2B7A9B223A /* Loop/Resources/Sounds/crying.caf in Resources */ = {isa = PBXBuildFile; fileRef = 85203550670F2E9BE92F27D8 /* Loop/Resources/Sounds/crying.caf */; };
 		0A02E77AD7536C322933D49B /* Loop/Resources/Sounds/minimal.caf in Resources */ = {isa = PBXBuildFile; fileRef = 74145BE3C46270883D295A1F /* Loop/Resources/Sounds/minimal.caf */; };
@@ -795,6 +796,7 @@
 /* Begin PBXFileReference section */
 		F7F387F22ED000ACCFB26D2C /* LupedWatchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LupedWatchSettingsView.swift; sourceTree = "<group>"; };
 		727A0CE532FB2B5D992DF4F2 /* LupedPebbleTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LupedPebbleTransport.swift; sourceTree = "<group>"; };
+		6341C3C814013463242E4937 /* PebbleTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PebbleTransport.swift; sourceTree = "<group>"; };
 		7DA1BC278FA39D42953E2B83 /* LupedPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LupedPayload.swift; sourceTree = "<group>"; };
 		0FC34B523FE5A50C920506D5 /* Loop/Resources/Sounds/alarm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/alarm.caf; sourceTree = SOURCE_ROOT; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
@@ -2086,6 +2088,7 @@
 				A977A2F324ACFECF0059C207 /* CriticalEventLogExportManager.swift */,
 				C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */,
 				727A0CE532FB2B5D992DF4F2 /* LupedPebbleTransport.swift */,
+				6341C3C814013463242E4937 /* PebbleTransport.swift */,
 				7DA1BC278FA39D42953E2B83 /* LupedPayload.swift */,
 				43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */,
 				C16B983D26B4893300256B05 /* DoseEnactor.swift */,
@@ -3504,6 +3507,7 @@
 				A9C62D8A2331703100535612 /* ServicesManager.swift in Sources */,
 				C11445B22DA98A3400034864 /* CorrectionRangeInformationView.swift in Sources */,
 				DBF66D3992F1C01B8DDC29F8 /* LupedPebbleTransport.swift in Sources */,
+				1713F2004F174EEFA9DE19DF /* PebbleTransport.swift in Sources */,
 				3106C7700C417C5B7C2A7032 /* LupedPayload.swift in Sources */,
 				8B4368DE3FB2D975D20BD272 /* LupedWatchSettingsView.swift in Sources */,
 				43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */,
