@@ -9,6 +9,7 @@ struct LupedWatchSettingsView: View {
     var alertPermissionsChecker: AlertPermissionsChecker?
 
     @AppStorage(UserDefaults.lupedPebbleAlarmsEnabledKey) private var alarmsEnabled = true
+    @AppStorage(UserDefaults.lupedPebbleFollowAlertMuteKey) private var followAlertMute = true
     @AppStorage(UserDefaults.lupedPebbleFullScreenKey) private var fullScreen = false
     @Environment(\.dismiss) private var dismiss
     @State private var confirmingDelete = false
@@ -28,6 +29,9 @@ struct LupedWatchSettingsView: View {
 
                 Section {
                     Toggle(NSLocalizedString("Watch Alarms", comment: "Toggle enabling Pebble watch vibration alarms"), isOn: $alarmsEnabled)
+                    if alarmsEnabled {
+                        Toggle(NSLocalizedString("Follow Loop Alert Mute", comment: "Toggle muting Pebble watch alarms while Loop's alerts are muted"), isOn: $followAlertMute)
+                    }
                     if let glucoseAlertManager, let alertPermissionsChecker {
                         NavigationLink(destination: GlucoseAlertSettingsView(manager: glucoseAlertManager, permissionsChecker: alertPermissionsChecker)) {
                             Text(NSLocalizedString("Glucose Alert Settings", comment: "Row opening Loop's glucose alert settings from the Pebble screen"))
@@ -36,7 +40,7 @@ struct LupedWatchSettingsView: View {
                 } header: {
                     Text(NSLocalizedString("Alarms", comment: "Header for the Pebble alarm settings"))
                 } footer: {
-                    Text(NSLocalizedString("The watch vibrates using the thresholds, on/off switches and repeat intervals from Glucose Alert Settings. Turning Watch Alarms off silences the watch only; Loop's alerts are unaffected.", comment: "Footer for the Pebble alarm settings"))
+                    Text(NSLocalizedString("The watch vibrates using the thresholds, on/off switches and repeat intervals from Glucose Alert Settings. Turning Watch Alarms off silences the watch only; Loop's alerts are unaffected. With Follow Loop Alert Mute, the watch stays silent while Loop's alerts are muted and resumes when the mute ends.", comment: "Footer for the Pebble alarm settings"))
                 }
 
                 Section {

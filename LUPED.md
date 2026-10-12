@@ -54,8 +54,21 @@ Settings → Devices → Pebble:
   graph.
 - **Alarms → Watch Alarms** (on by default): watch vibration using Loop's
   active glucose alert profile; **Glucose Alert Settings** opens Loop's alert
-  screen. Off sends the alarm mask as `0`, which also silences Luped's
-  stale-data buzz; Loop's own alerts are unaffected.
+  screen. Off sends the alarm mask as `0`; Loop's own alerts are unaffected.
+  Luped 0.1.1 and later always give one short buzz when the latest reading
+  becomes 15 minutes old, whatever the mask; 0.1.0 also silenced that buzz
+  with mask `0`.
+- **Alarms → Follow Loop Alert Mute** (on by default, shown while Watch Alarms
+  is on): while Loop's alerts are muted, Loop sends the alarm mask as `0`, so
+  the watch skips glucose alarms (but not the no-recent-data buzz). Loop alone
+  decides the mute; when the mute ends or is cancelled, Loop resends the
+  reading with the alert profile's mask. The watch has no mute state of its
+  own: if Loop cannot reach it, the watch keeps the last mask it received,
+  but it still buzzes when its reading becomes 15 minutes old.
+  The communication log records why watch alarms are on, off or muted (Watch
+  Alarms off, CGM-owned alerts, all zones off, or Loop's mute and its end
+  time) each time that reason changes; a push's index 9 decode also shows the
+  mute end.
 - **Diagnostics**: battery and counters from Luped's diagnostics snapshot
   (`COMMAND: "diagnostics"`), fetched only when **Refresh Watch Info** is
   tapped, and the **Communication Log**: every event between Loop and the
@@ -75,7 +88,8 @@ Settings → Devices → Pebble:
   must not use PebbleKit JS.
 
 The settings are stored in standard user defaults (`lupedPebbleEnabled`,
-`lupedPebbleAlarmsEnabled`, `lupedPebbleFullScreen`, `lupedPebbleWatchfaceUUID`)
+`lupedPebbleAlarmsEnabled`, `lupedPebbleFollowAlertMute`,
+`lupedPebbleFullScreen`, `lupedPebbleWatchfaceUUID`)
 and apply within half a second.
 
 ## Delivery behavior

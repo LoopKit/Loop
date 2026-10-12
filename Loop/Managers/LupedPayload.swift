@@ -23,6 +23,9 @@ struct LupedAlarmSettings: Equatable {
     var urgentLowRepeat: TimeInterval
     var lowRepeat: TimeInterval
     var highRepeat: TimeInterval
+    /// End of Loop's alert mute while it silences the watch. Loop sends the mask
+    /// as `0` until then and restores it when the mute ends.
+    var mutedUntil: Date? = nil
 
     /// Display-only defaults with alarms off, used without alert settings.
     static let disabled = LupedAlarmSettings(
@@ -128,7 +131,7 @@ struct LupedPayload: Equatable {
             " 4 history: \(values.count) readings, oldest first: \(values.map(\.stringValue).joined(separator: " "))",
             " 5 unit: \(unitName)",
             " 6-8 thresholds: urgent low \(converted(alarms.urgentLowMgDL).stringValue), low \(converted(alarms.lowMgDL).stringValue), high \(converted(alarms.highMgDL).stringValue)",
-            " 9 alarms (mask \(alarms.enabledMask)): \(zones.isEmpty ? "off" : zones.joined(separator: ", "))",
+            " 9 alarms (mask \(alarms.enabledMask)): \(zones.isEmpty ? "off" : zones.joined(separator: ", "))\(alarms.mutedUntil.map { ", muted until \(DateFormatter.localizedString(from: $0, dateStyle: .none, timeStyle: .short))" } ?? "")",
             "10-11 repeat: low \(repeatText(alarms.lowRepeat)), high \(repeatText(alarms.highRepeat))",
             "12 reading time: \(time) (\(timestamp))",
             "13 display: \(fullScreen ? "full-screen ring" : "ring with graph")",

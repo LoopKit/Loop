@@ -12,6 +12,7 @@ extension UserDefaults {
     static let lupedPebbleEnabledKey = "lupedPebbleEnabled"
     static let lupedPebbleWatchfaceUUIDKey = "lupedPebbleWatchfaceUUID"
     static let lupedPebbleAlarmsEnabledKey = "lupedPebbleAlarmsEnabled"
+    static let lupedPebbleFollowAlertMuteKey = "lupedPebbleFollowAlertMute"
     static let lupedPebbleFullScreenKey = "lupedPebbleFullScreen"
     static let lupedDefaultWatchfaceUUID = "bf32924c-4839-449e-9e56-ee190249acb2"
 
@@ -24,6 +25,7 @@ extension UserDefaults {
     func deleteLupedPebble() {
         set(false, forKey: Self.lupedPebbleEnabledKey)
         removeObject(forKey: Self.lupedPebbleAlarmsEnabledKey)
+        removeObject(forKey: Self.lupedPebbleFollowAlertMuteKey)
         removeObject(forKey: Self.lupedPebbleFullScreenKey)
         removeObject(forKey: Self.lupedPebbleWatchfaceUUIDKey)
     }
@@ -32,6 +34,12 @@ extension UserDefaults {
     /// alerts are unaffected.
     @objc dynamic var lupedPebbleAlarmsEnabled: Bool {
         object(forKey: Self.lupedPebbleAlarmsEnabledKey) as? Bool ?? true
+    }
+
+    /// Mutes watch alarms while Loop's alerts are muted; on unless the user
+    /// turned it off.
+    @objc dynamic var lupedPebbleFollowAlertMute: Bool {
+        object(forKey: Self.lupedPebbleFollowAlertMuteKey) as? Bool ?? true
     }
 
     /// Full-screen glucose ring instead of ring and graph; off by default.
@@ -185,6 +193,9 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
     // AppMessage delivery state
     private var glucoseStore: GlucoseStore?
     private weak var glucoseAlertManager: GlucoseAlertManager?
+    private weak var alertMuter: AlertMuter?
+    /// Last logged alarm state, so the log records each change once.
+    private var alarmStatus: String?
     private var unit = LoopUnit.milligramsPerDeciliter
     private var settingsObservers: Set<AnyCancellable> = []
     private var userSettingsObservers: Set<AnyCancellable> = []
@@ -270,10 +281,11 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
     /// Starts the GATT service if needed and sends the latest stored CGM readings
     /// in Loop's display unit with the active glucose alert settings, re-sending
     /// them whenever the unit or those settings change.
-    func publish(from glucoseStore: GlucoseStore, displayGlucosePreference: DisplayGlucosePreference, glucoseAlertManager: GlucoseAlertManager) async {
+    func publish(from glucoseStore: GlucoseStore, displayGlucosePreference: DisplayGlucosePreference, glucoseAlertManager: GlucoseAlertManager, alertMuter: AlertMuter?) async {
         start()
         self.glucoseStore = glucoseStore
         self.glucoseAlertManager = glucoseAlertManager
+        self.alertMuter = alertMuter
         if settingsObservers.isEmpty {
             // Loop starts in mg/dL and switches to the HealthKit unit once it has loaded.
             displayGlucosePreference.$unit
@@ -302,6 +314,24 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
                 .sink { [weak self] enabled in
                     guard let self else { return }
                     self.record(.info, "Watch alarms \(enabled ? "enabled" : "disabled")")
+                    Task { await self.publish(unit: self.unit) }
+                }
+                .store(in: &settingsObservers)
+            // Muting and its timed end republish, restoring the watch's alarms.
+            alertMuter?.$configuration
+                .dropFirst()
+                .removeDuplicates()
+                .sink { [weak self] _ in
+                    guard let self else { return }
+                    Task { await self.publish(unit: self.unit) }
+                }
+                .store(in: &settingsObservers)
+            UserDefaults.standard.publisher(for: \.lupedPebbleFollowAlertMute)
+                .dropFirst()
+                .removeDuplicates()
+                .sink { [weak self] follow in
+                    guard let self else { return }
+                    self.record(.info, "Follow Loop alert mute \(follow ? "enabled" : "disabled")")
                     Task { await self.publish(unit: self.unit) }
                 }
                 .store(in: &settingsObservers)
@@ -337,7 +367,14 @@ final class LupedPebbleTransport: NSObject, @preconcurrency CBPeripheralManagerD
             return
         }
 
-        let alarms = glucoseAlertManager.map(LupedAlarmSettings.init) ?? .disabled
+        let muteEnd = alertMuter.flatMap { $0.configuration.shouldMute ? $0.configuration.mutingEndTime : nil }
+        let followMute = UserDefaults.standard.lupedPebbleFollowAlertMute
+        let alarms = glucoseAlertManager.map { LupedAlarmSettings($0, mutedUntil: followMute ? muteEnd : nil) } ?? .disabled
+        let status = LupedAlarmSettings.status(alarms, manager: glucoseAlertManager, loopMuteEnd: muteEnd)
+        if status != alarmStatus {
+            alarmStatus = status
+            record(.info, status)
+        }
         guard let payload = LupedPayload(samples: samples, unit: unit, alarms: alarms, fullScreen: UserDefaults.standard.lupedPebbleFullScreen) else {
             record(.info, String(format: "No usable CGM readings among %ld stored samples; nothing to send", samples.count))
             return
@@ -970,9 +1007,10 @@ extension LupedAlarmSettings {
     /// Mirrors Loop's active glucose alert profile. Low and high alerts repeat
     /// only when their snooze is enabled; urgent low always repeats. All watch
     /// alarms are off while Loop defers glucose alerts to the CGM's own alerts,
-    /// or when the user turned off watch alarms.
+    /// or when the user turned off watch alarms, and until a followed Loop alert
+    /// mute ends.
     @MainActor
-    init(_ manager: GlucoseAlertManager) {
+    init(_ manager: GlucoseAlertManager, mutedUntil: Date?) {
         let configuration = manager.activeConfiguration()
         var mask = 0
         if manager.effectiveLoopAlertsEnabled, UserDefaults.standard.lupedPebbleAlarmsEnabled {
@@ -980,15 +1018,42 @@ extension LupedAlarmSettings {
             if configuration.lowEnabled { mask |= Self.lowBit }
             if configuration.highEnabled { mask |= Self.highBit }
         }
+        let muted = mask != 0 && mutedUntil != nil
         self.init(
             urgentLowMgDL: configuration.urgentLowThresholdMgDL,
             lowMgDL: configuration.lowThresholdMgDL,
             highMgDL: configuration.highThresholdMgDL,
-            enabledMask: mask,
+            enabledMask: muted ? 0 : mask,
             urgentLowRepeat: configuration.urgentLowRepeatInterval,
             lowRepeat: configuration.lowSnoozeEnabled ? configuration.lowRepeatInterval : Self.oncePerEpisode,
-            highRepeat: configuration.highSnoozeEnabled ? configuration.highRepeatInterval : Self.oncePerEpisode
+            highRepeat: configuration.highSnoozeEnabled ? configuration.highRepeatInterval : Self.oncePerEpisode,
+            mutedUntil: muted ? mutedUntil : nil
         )
+    }
+
+    /// Whether the watch alarms are on, off or muted, and why, for the communication log.
+    @MainActor
+    static func status(_ alarms: LupedAlarmSettings, manager: GlucoseAlertManager?, loopMuteEnd: Date?) -> String {
+        let time = { DateFormatter.localizedString(from: $0, dateStyle: .none, timeStyle: .short) }
+        guard let manager else {
+            return "Watch alarms off: Loop's glucose alert settings are not available"
+        }
+        if !UserDefaults.standard.lupedPebbleAlarmsEnabled {
+            return "Watch alarms off: Watch Alarms is turned off"
+        }
+        if !manager.effectiveLoopAlertsEnabled {
+            return "Watch alarms off: Loop leaves glucose alerts to the CGM's own alerts"
+        }
+        if let mutedUntil = alarms.mutedUntil {
+            return "Watch alarms muted until \(time(mutedUntil)): Loop's alerts are muted"
+        }
+        if alarms.enabledMask == 0 {
+            return "Watch alarms off: urgent low, low and high alerts are all turned off in Glucose Alert Settings"
+        }
+        if let loopMuteEnd {
+            return "Watch alarms on: Loop's alerts are muted until \(time(loopMuteEnd)), but Follow Loop Alert Mute is turned off"
+        }
+        return "Watch alarms on"
     }
 }
 

@@ -307,7 +307,7 @@ final class DeviceDataManager {
         setupPump()
         setupCGM()
         #if LUPED_PEBBLE
-        Task { await LupedPebbleTransport.shared.publish(from: glucoseStore, displayGlucosePreference: displayGlucosePreference, glucoseAlertManager: glucoseAlertManager) }
+        Task { await LupedPebbleTransport.shared.publish(from: glucoseStore, displayGlucosePreference: displayGlucosePreference, glucoseAlertManager: glucoseAlertManager, alertMuter: alertManager.alertMuter) }
         #endif
     }
 
@@ -476,7 +476,7 @@ final class DeviceDataManager {
             do {
                 storedNewGlucose = try await !glucoseStore.addGlucoseSamples(values).isEmpty
                 #if LUPED_PEBBLE
-                await LupedPebbleTransport.shared.publish(from: glucoseStore, displayGlucosePreference: displayGlucosePreference, glucoseAlertManager: glucoseAlertManager)
+                await LupedPebbleTransport.shared.publish(from: glucoseStore, displayGlucosePreference: displayGlucosePreference, glucoseAlertManager: glucoseAlertManager, alertMuter: alertManager?.alertMuter)
                 #endif
             } catch {
                 log.error("Unable to store glucose: %{public}@", String(describing: error))
