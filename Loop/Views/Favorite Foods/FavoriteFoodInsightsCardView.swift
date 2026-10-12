@@ -20,24 +20,15 @@ struct FavoriteFoodInsightsCardView: View {
         if presentInSection {
             Section {
                 content
-                    .overlay(border)
-                    .contentShape(Rectangle())
                     .listRowInsets(EdgeInsets())
-                    .buttonStyle(PlainButtonStyle())
+                    .listRowBackground(Color.clear)
             }
         }
         else {
             content
-                .background(CardBackground())
-                .overlay(border)
+                .containerShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .padding(.horizontal)
-                .contentShape(Rectangle())
         }
-    }
-    
-    private var border: some View {
-        RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .strokeBorder(Color.accentColor, lineWidth: 2)
     }
     
     private var content: some View {
@@ -66,6 +57,7 @@ struct FavoriteFoodInsightsCardView: View {
             .padding(.vertical, 12)
             .padding(.horizontal)
         }
+        .buttonStyle(FavoriteFoodInsightsButtonStyle())
     }
     
     private func attributedFoodInsightsDescription(for food: String, timeAgo: String) -> AttributedString {
@@ -78,5 +70,22 @@ struct FavoriteFoodInsightsCardView: View {
         attributedString.append(AttributedString(" \(timeAgo)\n Tap to see more"))
         
         return attributedString
+    }
+}
+
+private struct FavoriteFoodInsightsButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        let shape = ContainerRelativeShape()
+
+        configuration.label
+            .background(Color(.secondarySystemGroupedBackground), in: shape)
+            .overlay {
+                shape.fill(Color.primary.opacity(configuration.isPressed ? 0.08 : 0))
+            }
+            .overlay {
+                shape.strokeBorder(Color.accentColor, lineWidth: 2)
+            }
+            .contentShape(shape)
+            .clipShape(shape)
     }
 }

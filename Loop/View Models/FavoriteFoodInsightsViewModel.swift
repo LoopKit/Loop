@@ -90,7 +90,7 @@ class FavoriteFoodInsightsViewModel: ObservableObject {
         let doseChart = LegacyDoseChart()
         let carbEffectChart = CarbEffectChart()
         carbEffectChart.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBound
-        return ChartsManager(colors: .primary, settings: .default, charts: [glucoseChart, iobChart, doseChart, carbEffectChart], traitCollection: .current)
+        return ChartsManager(colors: .primary(background: .secondarySystemGroupedBackground), settings: .default, charts: [glucoseChart, iobChart, doseChart, carbEffectChart], traitCollection: .current)
     }()
     
     private weak var delegate: FavoriteFoodInsightsViewModelDelegate?
