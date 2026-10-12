@@ -766,7 +766,11 @@ extension AlertManager: AlertPermissionsCheckerDelegate {
             retractionHandler: { alert in
                 // need to dismiss the in-app alert outside of the alert system
                 Task {
-                    try await self.recordRetractedAlert(alert, at: Date())
+                    do {
+                        try await self.recordRetractedAlert(alert, at: Date())
+                    } catch {
+                        self.log.error("Error recording retracted alert: %{public}@", String(describing: error))
+                    }
                     await self.dismissUnsafeNotificationPermissionsInAppAlert()
                 }
             }
@@ -800,7 +804,11 @@ extension AlertManager: AlertPermissionsCheckerDelegate {
             let alertController = AlertPermissionsChecker.constructUnsafeNotificationPermissionsInAppAlert(alert: alert) { [weak self] alert in
                 UserDefaults.standard.hasIssuedNotificationPermissionsAlert = false
                 Task {
-                    try await self?.acknowledgeAlert(identifier: alert.alertIdentifier)
+                    do {
+                        try await self?.acknowledgeAlert(identifier: alert.alertIdentifier)
+                    } catch {
+                        self?.log.error("Error acknowledging alert: %{public}@", String(describing: error))
+                    }
                 }
             }
 

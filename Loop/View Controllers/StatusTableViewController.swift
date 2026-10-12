@@ -499,7 +499,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         var cobValues: [CarbValue]?
         var carbsOnBoard: LoopQuantity?
         let startDate = charts.startDate
-        let basalDeliveryState = self.basalDeliveryState
         let automaticDosingEnabled = settingsManager.dosingEnabled
 
         let state = await loopManager.algorithmDisplayState
@@ -1363,7 +1362,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                 Task {
                                     var dosingDecision: StoredDosingDecision?
                                     if let decisionId = doseEntry.decisionId {
-                                        dosingDecision = try await self.loopManager.dosingDecisionStore.findDosingDecisionsById(decisionId)
+                                        do {
+                                            dosingDecision = try await self.loopManager.dosingDecisionStore.findDosingDecisionsById(decisionId)
+                                        } catch {
+                                            self.log.error("Error finding dosing decision: %{public}@", String(describing: error))
+                                        }
                                     }
                                     
                                     let viewController = CommandResponseViewController(command: { (completionHandler) -> String in

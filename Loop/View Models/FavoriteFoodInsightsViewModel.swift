@@ -132,7 +132,7 @@ class FavoriteFoodInsightsViewModel: ObservableObject {
         Task { @MainActor in
             do {
                 if let historicalChartsData = try await delegate?.getHistoricalChartsData(start: dateInterval.start, end: dateInterval.end) {
-                    var carbEntriesWithCorrectedFavoriteFoods = historicalChartsData.carbEntries.map({ historicalCarbEntry in
+                    let carbEntriesWithCorrectedFavoriteFoods = historicalChartsData.carbEntries.map({ historicalCarbEntry in
                         // only show a favorite food icon in the glcuose-carb chart if carb entry is currently viewed favorite food
                         StoredCarbEntry(
                             startDate: historicalCarbEntry.startDate,

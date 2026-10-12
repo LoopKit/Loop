@@ -47,7 +47,7 @@ class SleepStore {
                     // if there were no .inBed samples, check if there are any .asleep samples that could be used to estimate bedtime
                     let asleepPredicate = HKQuery.predicateForCategorySamples(
                         with: .equalTo,
-                        value: HKCategoryValueSleepAnalysis.asleep.rawValue
+                        value: HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue
                     )
                     self.getAverageSleepStartTime(matching: asleepPredicate, sampleLimit: sampleLimit, completion)
                 default:
