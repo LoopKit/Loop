@@ -136,7 +136,7 @@ final class BolusEntryViewModel: ObservableObject {
                                                           yAxisStepSizeMGDLOverride: FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil)
         predictedGlucoseChart.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayRangeWide
         return ChartsManager(
-            colors: ChartColorPalette.primary,
+            colors: .primary(background: .secondarySystemGroupedBackground),
             settings: ChartSettings.default,
             charts: [predictedGlucoseChart],
             traitCollection: UITraitCollection.current)
