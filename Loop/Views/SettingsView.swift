@@ -13,6 +13,9 @@ import MockKit
 import SwiftUI
 import LoopUI
 import UIKit
+#if LUPED_PEBBLE
+import LupedKit
+#endif
 
 struct SettingsView: View {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference

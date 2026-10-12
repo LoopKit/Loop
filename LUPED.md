@@ -18,19 +18,21 @@ The legacy PebbleKit iOS SDK is not used: its watch discovery does not
 recognize Core Devices watches (Pebble Time 2, Pebble Round 2, Pebble 2 Duo),
 so it never reports a connected watch.
 
-The code has two layers:
+The code lives in the [elbbepTransport](https://github.com/dabear/elbbepTransport)
+Swift package, which Loop links as a remote package, so other apps such as
+Trio can share it:
 
-- `PebbleTransport.swift` is a generic link for any JS-free watch app: the
-  PPoGATT service and session, Pebble Protocol framing, the phone-version
-  reply, AppMessage encoding/decoding and ACKs, and app run-state commands.
-  It knows nothing about Luped or Loop. It reports its link state, session
-  open/reset, incoming messages, push replies and log lines to a delegate.
-- `LupedPebbleTransport.swift` builds on it: Luped's message keys and `DATA`
-  payload, the refresh and diagnostics commands, delivery with retry and
-  pausing, the alarm-reason log, and Settings → Devices → Pebble state. It
-  mirrors the generic link state into the status row and writes the generic
-  log lines (session open, watch subscribed, phone-version exchange) to the
-  communication log unchanged.
+- `ElbbepTransport` is a generic link for any JS-free watch app: the PPoGATT
+  service and session, Pebble Protocol framing, the phone-version reply,
+  AppMessage encoding/decoding and ACKs, and app run-state commands.
+- `LupedKit` builds on it: Luped's message keys and `DATA` payload, the alarm
+  mask and alert-mute handling with alarm-reason log lines, the refresh and
+  diagnostics commands, delivery with retry and pausing, link status, watch
+  diagnostics, the communication log, and the `lupedPebble…` settings.
+- In Loop, `LupedPebbleTransport.swift` is only an adapter: it supplies stored
+  CGM readings in Loop's display unit, the active glucose alert profile and
+  Loop's alert mute, and asks LupedKit to re-send when any of them change.
+  `LupedWatchSettingsView.swift` is the settings screen.
 
 ## Enable
 

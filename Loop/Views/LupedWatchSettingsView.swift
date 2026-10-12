@@ -1,5 +1,6 @@
 #if LUPED_PEBBLE
 import LoopKitUI
+import LupedKit
 import SwiftUI
 
 /// Settings → Devices → Pebble: controls the Pebble watchface transport.
