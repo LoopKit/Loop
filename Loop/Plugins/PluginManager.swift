@@ -71,11 +71,18 @@ class PluginManager {
     var availablePumpManagers: [PumpManagerDescriptor] {
         pluginBundles.compactMap({ (bundle) -> PumpManagerDescriptor? in
             guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerDisplayName.rawValue) as? String,
-                let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerIdentifier.rawValue) as? String else {
-                    return nil
+                  let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerIdentifier.rawValue) as? String else {
+                return nil
             }
-
-            return PumpManagerDescriptor(identifier: identifier, localizedTitle: title)
+            
+            return PumpManagerDescriptor(
+                identifier: identifier,
+                localizedTitle: title,
+                manufacturer: bundle.object(
+                    forInfoDictionaryKey: LoopPluginBundleKey.deviceManufacturer.rawValue
+                ) as? String,
+                image: getPumpManagerTypeByIdentifier(identifier)?.pickerImage
+            )
         })
     }
     
@@ -107,11 +114,16 @@ class PluginManager {
     var availableCGMManagers: [CGMManagerDescriptor] {
         pluginBundles.compactMap({ (bundle) -> CGMManagerDescriptor? in
             guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerDisplayName.rawValue) as? String,
-                let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerIdentifier.rawValue) as? String else {
-                    return nil
+                  let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerIdentifier.rawValue) as? String else {
+                return nil
             }
-
-            return CGMManagerDescriptor(identifier: identifier, localizedTitle: title)
+            
+            return CGMManagerDescriptor(
+                identifier: identifier,
+                localizedTitle: title,
+                manufacturer: bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.deviceManufacturer.rawValue) as? String,
+                image: getCGMManagerTypeByIdentifier(identifier)?.pickerImage
+            )
         })
     }
 
@@ -141,16 +153,30 @@ class PluginManager {
     }
 
     var availableServices: [ServiceDescriptor] {
-        return pluginBundles.compactMap({ (bundle) -> ServiceDescriptor? in
+        pluginBundles.compactMap({ (bundle) -> ServiceDescriptor? in
             guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.serviceDisplayName.rawValue) as? String,
-                let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.serviceIdentifier.rawValue) as? String else {
-                    return nil
+                  let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.serviceIdentifier.rawValue) as? String else {
+                return nil
             }
-
-            return ServiceDescriptor(identifier: identifier, localizedTitle: title)
+            
+            return ServiceDescriptor(
+                identifier: identifier,
+                localizedTitle: title,
+                category: bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.serviceCategory.rawValue) as? String,
+                image: getServiceTypeByIdentifier(identifier)?.image
+            )
         })
     }
     
+    func pluginBundle(forIdentifier identifier: String) -> Bundle? {
+        let identifierKeys: [LoopPluginBundleKey] = [.pumpManagerIdentifier, .cgmManagerIdentifier, .serviceIdentifier]
+        return pluginBundles.first { bundle in
+            identifierKeys.contains { key in
+                (bundle.object(forInfoDictionaryKey: key.rawValue) as? String) == identifier
+            }
+        }
+    }
+
     func getStatefulPluginTypeByIdentifier(_ identifier: String) -> StatefulPluggable.Type? {
         for bundle in pluginBundles {
             if let name = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.statefulPluginIdentifier.rawValue) as? String, name == identifier {
