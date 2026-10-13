@@ -128,9 +128,9 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// Force-reclaim verdict: lifts the reclaim pause, and books a placeholder for unexplained insulin.
+    /// Force-reclaim verdict: books a placeholder for unexplained insulin. The dosing hold lifts
+    /// when the pending audit is cleared.
     func applyForceReclaimVerdict(residual: Double, epoch: Int) {
-        deps.setAutomaticDosingPaused(false)
         if residual > Self.openLoopPositiveResidual {
             handbackDiag(epoch, String(format:
                 "** OPEN LOOP — force-reclaim residual %+.3f U exceeds +%.2f: the pod delivered insulin the records cannot explain (watch died mid-session?). Automatic dosing STOPPED. **",

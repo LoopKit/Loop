@@ -40,9 +40,8 @@ extension PodLoanPhoneController {
                 $0.audit.loanStartedAt = asOf
             }
         }
-        deps.setAutomaticDosingPaused(true)
 
-        // Dosing authority and the radio go together.
+        // Dosing authority and the radio go together: the release is what holds the phone's dosing.
         (deps.pumpManager() as? ExclusiveDeviceControl)?.releaseControl()
         deps.pumpControlChanged(true)
 

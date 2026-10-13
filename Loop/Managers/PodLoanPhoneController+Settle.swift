@@ -93,7 +93,6 @@ extension PodLoanPhoneController {
         // The dosing hold lifts last, after the loop-open is dispatched.
         defer { pendingHandbackAudit = nil }
         handbackDiag(pending.epoch, "** force-reclaim audit NEVER RAN — \(why). Session UNVERIFIED, loop OPENS **")
-        deps.setAutomaticDosingPaused(false)
         deps.openLoopForUncertainReconciliation()
         armOpenLoopReminder()
         deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)
@@ -230,7 +229,6 @@ extension PodLoanPhoneController {
         } else if pending.flavor == .forceReclaim {
             // No delivery total: a force reclaim is still unverified.
             handbackDiag(pending.epoch, "** force-reclaim round-trip landed but no odometer — session UNVERIFIED, loop OPENS **")
-            deps.setAutomaticDosingPaused(false)
             deps.openLoopForUncertainReconciliation()
             armOpenLoopReminder()
             deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)

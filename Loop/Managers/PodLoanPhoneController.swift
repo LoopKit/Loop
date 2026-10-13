@@ -57,9 +57,6 @@ final class PodLoanPhoneController {
 
         var settings: () -> LoopSettings
 
-        /// The loan's dosing pause; distinct from the user's closed-loop setting.
-        var setAutomaticDosingPaused: (Bool) -> Void
-
         /// Called right after this phone releases the pump (true) or takes it back (false).
         var pumpControlChanged: (_ released: Bool) -> Void
 
@@ -228,7 +225,6 @@ final class PodLoanPhoneController {
         clearAuditAnchors()
         reclaimPodConnection()
         state = .owner
-        deps.setAutomaticDosingPaused(false)
         if let alert = alert { deps.issueNotice(alert.title, alert.body) }
     }
 
@@ -307,8 +303,6 @@ final class PodLoanPhoneController {
         }
 
         if podIsOnLoan {
-            deps.setAutomaticDosingPaused(true)
-
             // Heal only transient states; a relaunch during a real loan is ordinary.
             if state == .reconciling || state == .reclaimPending {
                 let stranded = state

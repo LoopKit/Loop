@@ -19,7 +19,6 @@ extension WatchDataManager {
         return PodLoanPhoneController(dependencies: .init(
             pumpManager: { [weak self] in self?.deviceManager.pumpManager },
             settings: { [weak self] in self?.settingsManager.loopSettings ?? LoopSettings() },
-            setAutomaticDosingPaused: { _ in },
             // A phone that has released the pump does not warn that it is not looping.
             pumpControlChanged: { [weak self] released in
                 Task { @MainActor in

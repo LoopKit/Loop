@@ -63,7 +63,6 @@ final class PodLoanPhoneControllerTests: XCTestCase {
     var addedDoses: [[DoseEntry]] = []
     /// Every NewCarbEntry the controller committed, for round-trip assertions.
     var addedCarbs: [NewCarbEntry] = []
-    var pauseCalls: [Bool] = []
     var controlCalls: [Bool] = []
     var notices: [String] = []
     /// Drives Dependencies.isConnectionReady — false = pod still returning from a reclaim.
@@ -157,7 +156,6 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         phoneScheduleOverride = nil
         appliedOverrideChanges = []
         addedDoses = []
-        pauseCalls = []
         controlCalls = []
         notices = []
         connectionReady = true
@@ -202,10 +200,6 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         return PodLoanPhoneController(dependencies: .init(
             pumpManager: { [weak self] in self?.pump },
             settings: { [weak self] in self?.settings ?? LoopSettings() },
-            setAutomaticDosingPaused: { [weak self] paused in
-                guard let self = self else { return }
-                self.lock.lock(); self.pauseCalls.append(paused); self.lock.unlock()
-            },
             pumpControlChanged: { [weak self] released in
                 guard let self = self else { return }
                 self.lock.lock(); self.controlCalls.append(released); self.lock.unlock()
@@ -425,7 +419,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
 
         XCTAssertEqual(grant.epoch, 1)
         XCTAssertTrue(MockPumpManager.testConnectionReleased, "grant must release the pod connection")
-        XCTAssertEqual(pauseCalls, [true], "dosing paused exactly once at grant")
+        XCTAssertTrue(controller.holdsAutomaticDosing, "the phone's dosing is held from the grant")
         XCTAssertEqual(controlCalls, [true], "the release is announced once, for the phone's Loop-Failure warnings")
         XCTAssertEqual(grant.sharedPumpConfiguration?.managerIdentifier, pump.pluginIdentifier,
                        "the grant carries the pump's exported configuration")
@@ -449,7 +443,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         }
         wait(for: [refused], timeout: 5)
         XCTAssertEqual(controller.state, .owner)
-        XCTAssertTrue(pauseCalls.isEmpty, "denied grant must not touch dosing")
+        XCTAssertFalse(controller.holdsAutomaticDosing, "denied grant must not touch dosing")
         XCTAssertTrue(controlCalls.isEmpty, "the pump was never released, so the warnings stand")
         XCTAssertFalse(notices.contains("Sport Mode Not Started"), "the phone must not duplicate the watch's refusal reason")
         if case .grant? = lastSent() { XCTFail("no grant may be sent on refusal") }
@@ -791,7 +785,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         waitForState(controller, .owner)
         XCTAssertFalse(MockPumpManager.testConnectionReleased, "pod reclaimed on force")
         // Dosing waits for the audit's verdict; unverified opens the loop.
-        waitUntil(timeout: 5, "audit verdict") { self.pauseCalls.last == false }
+        waitUntil(timeout: 5, "audit verdict") { !controller.holdsAutomaticDosing }
         XCTAssertEqual(openLoopCalls, 1, "unverifiable session opens the loop rather than resuming closed")
         XCTAssertTrue(urgentNotices.contains { $0.contains("Unverified") })
     }
@@ -967,8 +961,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertEqual(addedDoses.count, 1)
         XCTAssertEqual(addedDoses[0].count, 1, "the bolus event enters the store before the ack")
         waitForState(controller, .owner)
-        waitUntil(timeout: 5, "dosing resumed") { self.lock.lock(); defer { self.lock.unlock() }; return self.pauseCalls.last == false }
-        XCTAssertEqual(pauseCalls, [true, false], "dosing restored only after commit")
+        waitUntil(timeout: 5, "dosing resumed") { !controller.holdsAutomaticDosing }
         XCTAssertEqual(controlCalls, [true, false], "the take-back is announced once, so the warnings are armed again")
         XCTAssertFalse(MockPumpManager.testConnectionReleased, "pod reclaimed at loan close")
     }
@@ -1025,7 +1018,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertEqual(p.seizeToken, token)
         XCTAssertEqual(p.audit.base?.units, 13.0, "a base from this epoch is kept")
         XCTAssertEqual(controller.queue.sync { controller.pendingHandbackAudit?.flavor }, .forceReclaim, "the owed verdict re-arms")
-        XCTAssertEqual(pauseCalls, [true], "dosing pauses at launch")
+        XCTAssertTrue(controller.holdsAutomaticDosing, "dosing is held from launch")
         XCTAssertTrue(controlCalls.isEmpty, "a relaunch mid-loan changes nothing: the pump manager keeps the release itself")
     }
 
@@ -1184,8 +1177,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
 
         waitForState(controller, .owner)
         XCTAssertFalse(MockPumpManager.testConnectionReleased, "the pod comes straight back")
-        waitUntil(timeout: 5, "dosing resumed") { self.lock.lock(); defer { self.lock.unlock() }; return self.pauseCalls.last == false }
-        XCTAssertEqual(pauseCalls.last, false, "and the phone resumes its own dosing")
+        waitUntil(timeout: 5, "dosing resumed") { !controller.holdsAutomaticDosing }
     }
 
     /// A watch mid-takeover also reports `holdsPod: false`; that is not a lost grant.
@@ -1551,8 +1543,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
 
         XCTAssertEqual(addedDoses.flatMap { $0 }.count, 1, "the legacy offer's records are committed")
         waitForState(controller, .owner)
-        waitUntil(timeout: 5, "dosing resumed") { self.lock.lock(); defer { self.lock.unlock() }; return self.pauseCalls.last == false }
-        XCTAssertEqual(pauseCalls, [true, false], "dosing is restored — the loan is not left open")
+        waitUntil(timeout: 5, "dosing is restored — the loan is not left open") { !controller.holdsAutomaticDosing }
     }
 
     /// A final offer with no events still acks and closes the loan.
@@ -1573,8 +1564,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         waitForState(controller, .owner)
         // The unpause lands a few ms AFTER the state flip (notification-center XPC sits between
         // them), so an instant read here races it — wait for the value, then assert the shape.
-        waitUntil(timeout: 5, "dosing resumed") { self.lock.lock(); defer { self.lock.unlock() }; return self.pauseCalls.contains(false) }
-        XCTAssertEqual(pauseCalls, [true, false], "the loan still closes and dosing resumes")
+        waitUntil(timeout: 5, "the loan still closes and dosing resumes") { !controller.holdsAutomaticDosing }
         XCTAssertFalse(MockPumpManager.testConnectionReleased, "pod reclaimed on the empty close")
     }
 
@@ -1941,8 +1931,8 @@ extension PodLoanPhoneControllerTests {
         lock.lock()
         let opened = openLoopCalls
         let booked = bookedGapDoses
-        let resumed = pauseCalls.contains(false)
         lock.unlock()
+        let resumed = !controller.holdsAutomaticDosing
 
         XCTAssertEqual(opened, 0, "a clean audit does not open the loop")
         XCTAssertTrue(booked.isEmpty, "nothing to book")
@@ -1964,15 +1954,14 @@ extension PodLoanPhoneControllerTests {
         XCTAssertFalse(MockPumpManager.testConnectionReleased, "the link is the phone's again, so the release no longer gates")
         XCTAssertTrue(controller.holdsAutomaticDosing, "no verdict, no automatic dosing — 'cannot verify' must never become 'assume fine'")
         lock.lock()
-        let resumedEarly = pauseCalls.contains(false)
+        let warningsArmed = controlCalls.contains(false)
         lock.unlock()
-        XCTAssertFalse(resumedEarly, "nor are the loop-not-running reminders re-armed")
+        XCTAssertTrue(warningsArmed, "the Loop Failure warnings are armed again at the take-back, so a pod that never returns is noticed")
 
         lock.lock(); connectionReady = true; lock.unlock()    // the pod comes back
         waitUntil(timeout: 8, "verdict after pod returns") { !controller.holdsAutomaticDosing }
-        lock.lock(); let opened = openLoopCalls; let resumed = pauseCalls.contains(false); lock.unlock()
+        lock.lock(); let opened = openLoopCalls; lock.unlock()
         XCTAssertEqual(opened, 1, "and the verdict still opens on the unexplained 2.5 U")
-        XCTAssertTrue(resumed)
     }
 
     /// The returning watch's real records replace the placeholder.
@@ -2549,8 +2538,7 @@ extension PodLoanPhoneControllerTests {
         XCTAssertTrue(controller.isPodLoanedOut, "pill reads Pod on Watch")
         XCTAssertEqual(controller.state, .owner, "…while the state machine stays truthful (retro-ack needs .owner)")
         XCTAssertTrue(MockPumpManager.testConnectionReleased, "authority and radio travel together — BLE released")
-        lock.lock(); let paused = pauseCalls; lock.unlock()
-        XCTAssertEqual(paused, [true], "automatic dosing paused")
+        XCTAssertTrue(controller.holdsAutomaticDosing, "automatic dosing held")
 
         // An interim offer with a token: retro-ack adopts the loan and `.loaned` holds.
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(
@@ -2573,10 +2561,7 @@ extension PodLoanPhoneControllerTests {
         waitUntil(timeout: 5, "force landed") {
             controller.state == .owner && !controller.yieldingToInferredLoan && !MockPumpManager.testConnectionReleased
         }
-        waitUntil(timeout: 5, "dosing resumed") {
-            self.lock.lock(); defer { self.lock.unlock() }
-            return self.pauseCalls.last == false
-        }
+        waitUntil(timeout: 5, "dosing resumed") { !controller.holdsAutomaticDosing }
 
         XCTAssertFalse(controller.podIsOnLoan)
         XCTAssertFalse(MockPumpManager.testConnectionReleased, "the pod bid re-armed")
@@ -2601,10 +2586,7 @@ extension PodLoanPhoneControllerTests {
             controller.state == .owner && !controller.yieldingToInferredLoan && !MockPumpManager.testConnectionReleased
         }
         XCTAssertFalse(controller.isPodLoanedOutForUI, "tile is the phone's own again")
-        waitUntil(timeout: 5, "dosing resumed") {
-            self.lock.lock(); defer { self.lock.unlock() }
-            return self.pauseCalls.last == false
-        }
+        waitUntil(timeout: 5, "dosing resumed") { !controller.holdsAutomaticDosing }
     }
 
     /// A stale final offer draining during a live successor loan closes the books but yields
@@ -2635,8 +2617,7 @@ extension PodLoanPhoneControllerTests {
 
         XCTAssertEqual(controller.state, .owner, "books closed at .owner…")
         XCTAssertTrue(MockPumpManager.testConnectionReleased, "…but custody NOT resumed — the pod stays the live loan's")
-        lock.lock(); let paused = pauseCalls; lock.unlock()
-        XCTAssertNotEqual(paused.last, false, "and dosing never resumed under the live loan")
+        XCTAssertTrue(controller.holdsAutomaticDosing, "and dosing never resumed under the live loan")
     }
 
     /// Every epoch advance re-issues the dormant credential.

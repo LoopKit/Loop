@@ -127,14 +127,11 @@ extension PodLoanPhoneController {
 
         // Cancel the phone's temp and wait for the pod to acknowledge it before releasing.
         grantInFlight = true
-        deps.setAutomaticDosingPaused(true)
         deps.cancelTempBasalForGrant { [weak self] error in
             guard let self = self else { return }
             self.queue.async {
                 self.grantInFlight = false
                 if let error = error {
-                    self.deps.setAutomaticDosingPaused(false)
-
                     self.deny("The iPhone couldn't reach its pod (\(error.localizedDescription)). The phone kept the pod.")
                     return
                 }

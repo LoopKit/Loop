@@ -251,16 +251,11 @@ extension PodLoanPhoneController {
                 NSLocalizedString("Automatic dosing is paused while Loop checks the pod's insulin total. This usually takes seconds.", comment: "Phone notice body after a force reclaim salvaged staged records"))
         }
 
-        let auditArmed = armForceReclaimAudit()
+        armForceReclaimAudit()
 
         reclaimPodConnection()
         pendingRevoke = false
         state = .owner
-
-        // Without an audit the pause lifts here, but the loop is already open.
-        if !auditArmed {
-            deps.setAutomaticDosingPaused(false)
-        }
         beginReclaimSettleWindow()
         // Clear staging only after the audit has read it.
         staged = [:]
