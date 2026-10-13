@@ -471,7 +471,9 @@ final class DeviceDataManager {
         switch readingResult {
         case .newData(let values):
             do {
-                storedNewGlucose = try await !glucoseStore.addGlucoseSamples(values).isEmpty
+                let storedSamples = try await glucoseStore.addGlucoseSamples(values)
+                storedNewGlucose = !storedSamples.isEmpty
+                analyticsServicesManager.didStoreGlucose(storedSamples)
             } catch {
                 log.error("Unable to store glucose: %{public}@", String(describing: error))
             }
@@ -630,10 +632,6 @@ final class DeviceDataManager {
         }
 
         let result = await cgmManager.fetchNewDataIfNeeded()
-
-        if case .newData = result {
-            self.analyticsServicesManager.didFetchNewCGMData()
-        }
 
         let storedNewGlucose = await self.processCGMReadingResult(cgmManager, readingResult: result)
 
