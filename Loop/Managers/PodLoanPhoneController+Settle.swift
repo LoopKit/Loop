@@ -86,9 +86,9 @@ extension PodLoanPhoneController {
         syncUIMirror()
     }
 
-    /// The window closed without the pod answering. The check stays owed and dosing stays held: a
-    /// phone that cannot reach the pod cannot dose it. `considerOwedForceReclaimAudit` runs it later.
-    /// A stopgap: a take-back that first makes sure the pod is in reach would not get here.
+    /// The window closed without the pod answering, its link lost after the take-back. The check
+    /// stays owed and dosing stays held: a phone that cannot reach the pod cannot dose it.
+    /// `considerOwedForceReclaimAudit` runs it later.
     func noteForceReclaimAuditStillOwed(why: String) {
         guard let pending = pendingHandbackAudit, pending.flavor == .forceReclaim else { return }
         handbackDiag(pending.epoch, "force-reclaim audit still OWED — \(why). It runs when the pod next answers; dosing stays held until then")

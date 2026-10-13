@@ -33,7 +33,7 @@ final class WatchDataManager: NSObject {
 
     // MARK: - Pod loan (stored state only — the behaviour is in WatchDataManager+PodLoan.swift)
 
-    var reclaimBackgroundTask: UIBackgroundTaskIdentifier = .invalid   // held across the pod-loan reclaim ladder's wall-clock rungs
+    var reclaimBackgroundTask: UIBackgroundTaskIdentifier = .invalid   // held across a pod-loan take-back and its settle
     let lockedLastWatchContact = Locked<Date?>(nil)   // when the watch was last heard from — the pod loan's liveness signal
     private(set) lazy var podLoanController: PodLoanPhoneController = makePodLoanController()   // pod-loan dependency wiring in PodLoanPhoneController+Wiring.swift
 

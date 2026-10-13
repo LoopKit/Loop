@@ -170,15 +170,6 @@ extension PodLoanPhoneController {
                 handbackDiag(epoch, "ghost grant e\(epoch) ABANDONED — the watch answered holdsPod e\(report.epoch); yielding instead of waiting on a takeover that cannot come [mirror]")
                 state = .owner
                 engageInferredLoanYield(evidence: "statusReport — watch holds e\(report.epoch), ghost grant abandoned")
-            // Re-aim the revoke at the watch's newer epoch; a stale-epoch revoke would be refused.
-            case .reclaimPending:
-
-                if var ladder = reclaimLadder, !ladder.forced, ladder.attempts < 2 {
-                    sendMessage(.revoke(Revoke(epoch: report.epoch)))
-                    ladder.attempts += 1
-                    reclaimLadder = ladder
-                    handbackDiag(epoch, "reclaim revoke RE-AIMED at e\(report.epoch) (attempt \(ladder.attempts) of 2) — the watch holds a newer loan than the one this reclaim named")
-                }
             default:
                 break
             }

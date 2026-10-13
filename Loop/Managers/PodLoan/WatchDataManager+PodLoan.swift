@@ -173,7 +173,6 @@ extension WatchDataManager {
         guard FeatureFlags.sportModeEnabled else { return }
         if session.isReachable {
             lockedLastWatchContact.value = Date()
-            podLoanController.watchDidBecomeReachable()
         }
     }
 
