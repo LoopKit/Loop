@@ -91,6 +91,25 @@ class AlertStoreTests: XCTestCase {
         XCTAssertEqual(999, newAnchor?.modificationCounter)
     }
 
+    func testLookupScheduledAlertsDue() async throws {
+        let issued = Self.historicDate
+        let due = issued.addingTimeInterval(Self.delayedAlertDelay)
+        await alertStore.recordIssued(alert: alert1, at: issued)
+        await alertStore.recordIssued(alert: delayedAlert, at: issued)
+        await alertStore.recordIssued(alert: repeatingAlert, at: issued)
+        try await alertStore.recordRetraction(of: Self.repeatingAlertIdentifier, at: due.addingTimeInterval(-1))
+
+        var dueAlerts = try await alertStore.lookupScheduledAlertsDue(after: issued, through: due.addingTimeInterval(1))
+        XCTAssertEqual([Self.delayedAlertIdentifier], dueAlerts.map { $0.identifier })
+
+        dueAlerts = try await alertStore.lookupScheduledAlertsDue(after: issued, through: due.addingTimeInterval(-1))
+        XCTAssertTrue(dueAlerts.isEmpty)
+
+        await alertStore.recordIssued(alert: delayedAlert, at: issued.addingTimeInterval(10))
+        dueAlerts = try await alertStore.lookupScheduledAlertsDue(after: issued, through: due.addingTimeInterval(1))
+        XCTAssertTrue(dueAlerts.isEmpty)
+    }
+
     func testRecordIssued() async throws {
         await alertStore.recordIssued(alert: alert1, at: Self.historicDate)
         let storedAlerts = try await self.alertStore.fetch(identifier: Self.identifier1)

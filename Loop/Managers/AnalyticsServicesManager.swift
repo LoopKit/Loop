@@ -255,21 +255,8 @@ final class AnalyticsServicesManager {
         }
     }
 
-    func didIssueAlert(identifier: String, interruptionLevel: Alert.InterruptionLevel, trigger: Alert.Trigger) {
-        var properties: [String: Any] = ["identifier": identifier, "interruptionLevel": interruptionLevel.rawValue]
-
-        switch trigger {
-        case .immediate:
-            properties["trigger"] = "immediate"
-        case .delayed(let interval):
-            properties["trigger"] = "delayed"
-            properties["delayMinutes"] = Int(interval.minutes)
-        case .repeating(let repeatInterval):
-            properties["trigger"] = "repeating"
-            properties["delayMinutes"] = Int(repeatInterval.minutes)
-        }
-
-        logEvent("Alert Issued", withProperties: properties)
+    func didDisplayAlert(identifier: String, interruptionLevel: Alert.InterruptionLevel, scheduled: Bool) {
+        logEvent("Alert Displayed", withProperties: ["identifier": identifier, "interruptionLevel": interruptionLevel.rawValue, "scheduled": scheduled], outOfSession: scheduled)
     }
 
     func didEnactOverride(kind: String, duration: TemporaryScheduleOverride.Duration, activityType: String? = nil) {
@@ -360,6 +347,12 @@ struct AnalyticsDailySummary: Codable, Equatable {
 
 extension UserDefaults {
     private static let analyticsDailySummaryKey = "com.loopkit.Loop.AnalyticsDailySummary"
+    private static let scheduledAlertsReportedThroughKey = "com.loopkit.Loop.AnalyticsScheduledAlertsReportedThrough"
+
+    var scheduledAlertsReportedThrough: Date? {
+        get { object(forKey: Self.scheduledAlertsReportedThroughKey) as? Date }
+        set { set(newValue, forKey: Self.scheduledAlertsReportedThroughKey) }
+    }
 
     var analyticsDailySummary: AnalyticsDailySummary? {
         get {

@@ -184,6 +184,19 @@ public final class AlertManager {
     func loopDidComplete(_ lastLoopDate: Date? = nil) async {
         // use now if there is no lastLoopDate
         await rescheduleLoopNotRunningNotifications(lastLoopDate ?? Date())
+        await reportDisplayedScheduledAlerts()
+    }
+
+    private func reportDisplayedScheduledAlerts() async {
+        let now = getCurrentDate()
+        let start = UserDefaults.standard.scheduledAlertsReportedThrough ?? now
+        UserDefaults.standard.scheduledAlertsReportedThrough = now
+        guard start < now, let alerts = try? await alertStore.lookupScheduledAlertsDue(after: start, through: now) else {
+            return
+        }
+        for alert in alerts {
+            analyticsServicesManager.didDisplayAlert(identifier: alert.identifier.value, interruptionLevel: alert.interruptionLevel, scheduled: true)
+        }
     }
 
     private func rescheduleLoopNotRunningNotifications() {
@@ -271,6 +284,7 @@ public final class AlertManager {
                 let interruptionLevel: Alert.InterruptionLevel = notification.isCritical ? .critical : .timeSensitive
                 let alert = Alert(identifier: alertIdentifier, foregroundContent: nil, backgroundContent: content, trigger: .immediate, interruptionLevel: interruptionLevel)
                 await recordIssued(alert: alert, at: notification.alertAt)
+                analyticsServicesManager.didDisplayAlert(identifier: alertIdentifier.value, interruptionLevel: interruptionLevel, scheduled: true)
             } else {
                 stillPendingNotifications.append(notification)
             }
@@ -384,7 +398,9 @@ extension AlertManager: AlertIssuer {
             deferredAlerts.append(alert)
             return
         }
-        analyticsServicesManager.didIssueAlert(identifier: alert.identifier.value, interruptionLevel: alert.interruptionLevel, trigger: alert.trigger)
+        if alert.trigger == .immediate {
+            analyticsServicesManager.didDisplayAlert(identifier: alert.identifier.value, interruptionLevel: alert.interruptionLevel, scheduled: false)
+        }
         scheduleAlertWithSchedulers(alert)
         await alertStore.recordIssued(alert: alert)
     }
