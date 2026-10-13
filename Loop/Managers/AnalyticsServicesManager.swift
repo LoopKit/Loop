@@ -187,8 +187,19 @@ final class AnalyticsServicesManager {
     // MARK: - Daily Summary
 
     @MainActor
-    func didFetchNewCGMData() {
-        updateDailySummary { $0.cgmFetchCount += 1 }
+    func didStoreGlucose(_ samples: [StoredGlucoseSample]) {
+        updateDailySummary { summary in
+            for sample in samples where !sample.wasUserEntered {
+                summary.glucoseCount += 1
+                guard sample.isBackfill else {
+                    continue
+                }
+                summary.backfillCount += 1
+                if let receivedDate = sample.receivedDate {
+                    summary.maxBackfillAge = max(summary.maxBackfillAge, receivedDate.timeIntervalSince(sample.startDate))
+                }
+            }
+        }
     }
 
     @MainActor
@@ -321,7 +332,9 @@ struct AnalyticsDailySummary: Codable, Equatable {
     var totalLoopDuration: TimeInterval = 0
     var maxLoopDuration: TimeInterval = 0
     var loopErrorCounts: [String: Int] = [:]
-    var cgmFetchCount = 0
+    var glucoseCount = 0
+    var backfillCount = 0
+    var maxBackfillAge: TimeInterval = 0
     var state: AnalyticsState?
 
     var properties: [AnyHashable: Any] {
@@ -333,7 +346,9 @@ struct AnalyticsDailySummary: Codable, Equatable {
             "maxLoopDuration": maxLoopDuration,
             "loopErrorCount": loopErrorCounts.values.reduce(0, +),
             "loopErrorCounts": loopErrorCounts,
-            "cgmFetchCount": cgmFetchCount
+            "glucoseCount": glucoseCount,
+            "backfillCount": backfillCount,
+            "maxBackfillAgeMinutes": Int(maxBackfillAge.minutes)
         ]
         if let state {
             properties["closedLoop"] = state.closedLoop
