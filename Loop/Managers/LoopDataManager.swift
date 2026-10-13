@@ -693,7 +693,7 @@ final class LoopDataManager: ObservableObject {
                 dosingStrategy = settingsProvider.settings.automaticDosingStrategy
             }
             input.recommendationType = dosingStrategy.recommendationType
-            dosingDecision.algorithmExperiments = algorithmExperiments(for: dosingStrategy, applicationFactor: input.automaticBolusApplicationFactor)
+            dosingDecision.algorithmExperiments = algorithmExperiments(for: dosingStrategy)
 
             guard let latestGlucose = input.glucoseHistory.last else {
                 throw LoopError.missingDataError(.glucose)
@@ -890,7 +890,7 @@ final class LoopDataManager: ObservableObject {
 
         if let output = displayState.output {
             var dosingDecision = StoredDosingDecision(date: now, reason: "updateRemoteRecommendation")
-            dosingDecision.algorithmExperiments = algorithmExperiments(for: currentDosingStrategy, applicationFactor: displayState.input?.automaticBolusApplicationFactor)
+            dosingDecision.algorithmExperiments = algorithmExperiments(for: currentDosingStrategy)
             dosingDecision.predictedGlucose = output.predictedGlucose
             dosingDecision.insulinOnBoard = displayState.activeInsulin
             dosingDecision.carbsOnBoard = displayState.activeCarbs
@@ -1032,13 +1032,15 @@ extension LoopDataManager {
     }
 
     /// Glucose based partial application only affects automatic boluses, so it is in effect only with that strategy
-    private func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy, applicationFactor: Double?) -> StoredDosingDecision.AlgorithmExperiments {
-        let glucoseBasedApplicationFactor = UserDefaults.standard.glucoseBasedApplicationFactorEnabled && dosingStrategy == .automaticBolus
-        return StoredDosingDecision.AlgorithmExperiments(
-            integralRetrospectiveCorrection: UserDefaults.standard.integralRetrospectiveCorrectionEnabled,
-            glucoseBasedApplicationFactor: glucoseBasedApplicationFactor,
-            applicationFactor: glucoseBasedApplicationFactor ? applicationFactor : nil
-        )
+    private func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy) -> [AlgorithmExperiment] {
+        var experiments: [AlgorithmExperiment] = []
+        if UserDefaults.standard.integralRetrospectiveCorrectionEnabled {
+            experiments.append(AlgorithmExperiment(identifier: "integralRetrospectiveCorrection"))
+        }
+        if UserDefaults.standard.glucoseBasedApplicationFactorEnabled && dosingStrategy == .automaticBolus {
+            experiments.append(AlgorithmExperiment(identifier: "glucoseBasedApplicationFactor"))
+        }
+        return experiments
     }
 
     func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) async {
@@ -1061,7 +1063,7 @@ extension LoopDataManager {
                                                   predictedGlucose: bolusDosingDecision.predictedGlucose,
                                                   manualBolusRecommendation: bolusDosingDecision.manualBolusRecommendation,
                                                   manualBolusRequested: bolusDosingDecision.manualBolusRequested)
-        dosingDecision.algorithmExperiments = algorithmExperiments(for: currentDosingStrategy, applicationFactor: nil)
+        dosingDecision.algorithmExperiments = algorithmExperiments(for: currentDosingStrategy)
         Task { await dosingDecisionStore.storeDosingDecision(dosingDecision) }
     }
 
