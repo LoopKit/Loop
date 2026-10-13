@@ -59,7 +59,7 @@ extension ServicesViewModel {
         required init() {}
         required init?(rawState: RawStateValue) {}
         let isOnboarded = true
-        var available: ServiceDescriptor { ServiceDescriptor(identifier: pluginIdentifier, localizedTitle: localizedTitle) }
+        var available: ServiceDescriptor { ServiceDescriptor(identifier: pluginIdentifier, localizedTitle: localizedTitle, category: nil, image: nil) }
     }
     fileprivate class FakeService2: Service {
         static var localizedTitle: String = "Service 2"
@@ -70,7 +70,7 @@ extension ServicesViewModel {
         required init() {}
         required init?(rawState: RawStateValue) {}
         let isOnboarded = true
-        var available: ServiceDescriptor { ServiceDescriptor(identifier: pluginIdentifier, localizedTitle: localizedTitle) }
+        var available: ServiceDescriptor { ServiceDescriptor(identifier: pluginIdentifier, localizedTitle: localizedTitle, category: nil, image: nil) }
     }
 
     static var preview: ServicesViewModel {
