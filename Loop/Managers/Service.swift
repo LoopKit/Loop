@@ -23,6 +23,7 @@ var availableStaticServices: [ServiceDescriptor] {
             ServiceDescriptor(
                 identifier: MockService.serviceIdentifier,
                 localizedTitle: MockService.localizedTitle,
+                subtitle: NSLocalizedString("For testing", comment: "Picker subtitle for the service simulator"),
                 category: "Simulator",
                 image: MockService.image
             )

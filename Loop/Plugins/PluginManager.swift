@@ -78,6 +78,7 @@ class PluginManager {
             return PumpManagerDescriptor(
                 identifier: identifier,
                 localizedTitle: title,
+                subtitle: bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pluginSubtitle.rawValue) as? String,
                 manufacturer: bundle.object(
                     forInfoDictionaryKey: LoopPluginBundleKey.deviceManufacturer.rawValue
                 ) as? String,
@@ -121,6 +122,7 @@ class PluginManager {
             return CGMManagerDescriptor(
                 identifier: identifier,
                 localizedTitle: title,
+                subtitle: bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pluginSubtitle.rawValue) as? String,
                 manufacturer: bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.deviceManufacturer.rawValue) as? String,
                 image: getCGMManagerTypeByIdentifier(identifier)?.pickerImage
             )
@@ -162,6 +164,7 @@ class PluginManager {
             return ServiceDescriptor(
                 identifier: identifier,
                 localizedTitle: title,
+                subtitle: bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.pluginSubtitle.rawValue) as? String,
                 category: bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.serviceCategory.rawValue) as? String,
                 image: getServiceTypeByIdentifier(identifier)?.image
             )

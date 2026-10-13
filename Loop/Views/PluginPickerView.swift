@@ -46,6 +46,7 @@ struct PluginPickerView: View {
     struct Item: Identifiable {
         let id: String
         let title: String
+        let subtitle: String?
 
         /// The section this item is listed under: the manufacturer for devices, the category for services
         let group: String?
@@ -118,14 +119,24 @@ struct PluginPickerView: View {
             Button(action: { onSelect(item) }) {
                 HStack(spacing: 12) {
                     PluginIconView(image: item.image, fallbackSystemImage: pluginType.fallbackSystemImage)
-                    Text(item.title)
-                        .foregroundColor(.primary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.title)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        if let subtitle = item.subtitle {
+                            Text(subtitle)
+                                .font(.callout)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.footnote.weight(.semibold))
                         .foregroundColor(Color(UIColor.tertiaryLabel))
                 }
+                .padding(.vertical, 4)
                 .contentShape(Rectangle())
+                .accessibilityElement(children: .combine)
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier("pluginPickerItem-\(item.id)")
@@ -145,6 +156,7 @@ private struct PluginIconView: View {
                 Image(uiImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
+                    .foregroundColor(.accentColor)
                     .padding(6)
             } else {
                 Image(systemName: fallbackSystemImage)
@@ -168,14 +180,14 @@ private struct PluginIconView: View {
 
 extension PluginPickerView.Item {
     init(_ descriptor: PumpManagerDescriptor) {
-        self.init(id: descriptor.identifier, title: descriptor.localizedTitle, group: descriptor.manufacturer, image: descriptor.image)
+        self.init(id: descriptor.identifier, title: descriptor.localizedTitle, subtitle: descriptor.subtitle, group: descriptor.manufacturer, image: descriptor.image)
     }
 
     init(_ descriptor: CGMManagerDescriptor) {
-        self.init(id: descriptor.identifier, title: descriptor.localizedTitle, group: descriptor.manufacturer, image: descriptor.image)
+        self.init(id: descriptor.identifier, title: descriptor.localizedTitle, subtitle: descriptor.subtitle, group: descriptor.manufacturer, image: descriptor.image)
     }
 
     init(_ descriptor: ServiceDescriptor) {
-        self.init(id: descriptor.identifier, title: descriptor.localizedTitle, group: descriptor.category, image: descriptor.image)
+        self.init(id: descriptor.identifier, title: descriptor.localizedTitle, subtitle: descriptor.subtitle, group: descriptor.category, image: descriptor.image)
     }
 }

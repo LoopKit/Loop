@@ -20,6 +20,7 @@ var availableStaticCGMManagers: [CGMManagerDescriptor] {
             CGMManagerDescriptor(
                 identifier: MockCGMManager.managerIdentifier,
                 localizedTitle: MockCGMManager.localizedTitle,
+                subtitle: NSLocalizedString("For testing; generates glucose values", comment: "Picker subtitle for the CGM simulator"),
                 manufacturer: "Simulator",
                 image: MockCGMManager.pickerImage
             )
