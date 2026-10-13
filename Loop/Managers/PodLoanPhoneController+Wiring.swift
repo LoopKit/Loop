@@ -264,14 +264,6 @@ extension WatchDataManager {
                     }
                 }
             },
-            // Turns the user's setting off (not the loan pause); turning it back on is the user's act.
-            openLoopForUncertainReconciliation: { [weak self] in
-                guard let self = self else { return }
-
-                DispatchQueue.main.async {
-                    self.settingsManager.mutateLoopSettings { $0.dosingEnabled = false }
-                }
-            },
             issueUrgentNotice: { [weak self] title, body in
 
                 self?.log.error("PodLoan URGENT: %{public}@ - %{public}@", title, body)

@@ -2,8 +2,9 @@
 //  PodLoanPhoneController+Reconciliation.swift
 //  Loop
 //
-//  Getting the watch's insulin into the phone's books and judging it. Unexplained delivery
-//  opens the loop; over-claimed records only warn.
+//  Getting the watch's insulin into the phone's books and judging it. Unexplained delivery is
+//  reported, and booked when the watch's records are missing; over-claimed records are reported.
+//  Automatic dosing continues either way.
 //
 
 import Foundation
@@ -100,24 +101,23 @@ extension PodLoanPhoneController {
         return Self.reclaimProgress(from: queue.sync { uiSnapshot() }, now: deps.now())
     }
 
-    /// Unexplained delivery beyond this opens the loop.
-    private static let openLoopPositiveResidual: Double = 0.20
+    /// The pod delivered this much more than the records explain: reported, and booked when the
+    /// watch's records are missing.
+    private static let unexplainedInsulinBand: Double = 0.20
 
-    /// Over-claimed records beyond this only warn: phantom IOB is self-limiting.
+    /// Records claim this much more than the pod delivered: reported. Phantom IOB is self-limiting.
     private static let warnNegativeResidual: Double = 0.20
 
-    /// Clean hand-back verdict; both directions notify time-sensitive. No placeholder: the
-    /// records arrived.
+    /// Hand-back verdict: the watch's records are complete, so nothing is booked. Both directions
+    /// notify time-sensitive; automatic dosing continues.
     func applyReconciliationVerdict(residual: Double, epoch: Int) {
-        if residual > Self.openLoopPositiveResidual {
+        if residual > Self.unexplainedInsulinBand {
             handbackDiag(epoch, String(format:
-                "** OPEN LOOP — residual %+.3f U exceeds +%.2f: the pod delivered insulin our records do not contain. Automatic dosing STOPPED. **",
-                residual, Self.openLoopPositiveResidual))
-            deps.openLoopForUncertainReconciliation()
-            armOpenLoopReminder()
+                "** WARN — residual %+.3f U exceeds +%.2f: the pod delivered insulin the watch's complete records do not contain. Nothing booked; still looping. **",
+                residual, Self.unexplainedInsulinBand))
 
-            deps.issueUrgentNotice("Loop Open — Unexplained Insulin",
-                             String(format: "The pod delivered %.2f U more than the watch session's records account for. Automatic dosing is off until you turn it back on. Check your insulin on board before dosing.", residual))
+            deps.issueUrgentNotice("Unexplained Insulin",
+                             String(format: "The pod delivered %.2f U more than the watch session's records account for. It is not counted in insulin on board. Automatic dosing continues.", residual))
         } else if residual < -Self.warnNegativeResidual {
             handbackDiag(epoch, String(format:
                 "** WARN — residual %+.3f U beyond -%.2f: records claim more delivery than the pod made (phantom IOB). Still looping — this direction under-doses and decays out. **",
@@ -128,25 +128,22 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// Force-reclaim verdict: books a placeholder for unexplained insulin. The dosing hold lifts
-    /// when the pending audit is cleared.
+    /// Force-reclaim verdict: the watch's records are missing, so insulin they would have explained
+    /// is booked as a placeholder. Automatic dosing continues on it.
     func applyForceReclaimVerdict(residual: Double, epoch: Int) {
-        if residual > Self.openLoopPositiveResidual {
+        if residual > Self.unexplainedInsulinBand {
             handbackDiag(epoch, String(format:
-                "** OPEN LOOP — force-reclaim residual %+.3f U exceeds +%.2f: the pod delivered insulin the records cannot explain (watch died mid-session?). Automatic dosing STOPPED. **",
-                residual, Self.openLoopPositiveResidual))
-            deps.openLoopForUncertainReconciliation()
-            armOpenLoopReminder()
+                "** WARN — force-reclaim residual %+.3f U exceeds +%.2f: the pod delivered insulin the records cannot explain (watch died mid-session?). Still looping. **",
+                residual, Self.unexplainedInsulinBand))
 
-            var body = String(format:
-                "%.2f U on the pod isn't in the watch's records, so automatic dosing is OFF.", residual)
+            var body = String(format: "%.2f U on the pod isn't in the watch's records.", residual)
             if Self.bookUnattributedInsulinOnForceReclaim {
                 bookGapDose(units: residual, epoch: epoch)
-                body += " It's booked as a bolus to keep IOB conservative; the watch's real records replace it about 2 min after the phone sees the watch again."
+                body += " It's booked as a bolus now, so insulin on board errs high and automatic dosing continues cautiously. Bring the watch near this phone: its records replace the estimate."
             } else {
-                body += " Check your insulin on board before dosing."
+                body += " It is not counted in insulin on board. Automatic dosing continues."
             }
-            deps.issueUrgentNotice("Loop Open — Unverified Insulin", body)
+            deps.issueUrgentNotice("Insulin Estimated After Sport Mode", body)
         } else if residual < -Self.warnNegativeResidual {
             handbackDiag(epoch, String(format:
                 "** WARN — force-reclaim residual %+.3f U beyond -%.2f: records claim more than the pod delivered (phantom IOB). Looping resumes — this direction under-doses and decays out. **",
@@ -156,7 +153,7 @@ extension PodLoanPhoneController {
                              String(format: "After the watch session ended abruptly, records account for %.2f U more than the pod delivered. Automatic dosing resumes; expect it to run cautious until this clears.", -residual))
         } else {
             handbackDiag(epoch, String(format:
-                "force-reclaim audit CLEAN — residual %+.3f U within ±%.2f; automatic dosing resumes", residual, Self.openLoopPositiveResidual))
+                "force-reclaim audit CLEAN — residual %+.3f U within ±%.2f; automatic dosing resumes", residual, Self.unexplainedInsulinBand))
         }
     }
 
@@ -177,7 +174,7 @@ extension PodLoanPhoneController {
                     self.armPlaceholderReminders(units: units, bookedAt: now)
                     self.handbackDiag(epoch, String(format: "force-reclaim gap BOOKED — %.2f U bolus @ reclaim (sync %@); retired if the watch returns", units, sync))
                 } else {
-                    self.handbackDiag(epoch, String(format: "** force-reclaim gap booking FAILED to save — %.2f U is NOT in the books. Loop is open; dose by hand with that in mind. **", units))
+                    self.handbackDiag(epoch, String(format: "** force-reclaim gap booking FAILED to save — %.2f U is NOT in the books. **", units))
                 }
             }
         }

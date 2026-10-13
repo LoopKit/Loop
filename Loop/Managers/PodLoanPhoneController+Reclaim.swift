@@ -64,7 +64,6 @@ extension PodLoanPhoneController {
         static let t1 = "podloan.t1"
         static let paused = "podloan.paused1h"
 
-        static let openLoop = "podloan.openloop"
 
         /// One identifier per rung.
         static func placeholder(_ index: Int) -> String { "podloan.placeholder.\(index)" }
@@ -73,7 +72,6 @@ extension PodLoanPhoneController {
     enum ReminderLadder {
         /// Within the insulin action duration.
         static let placeholderRungs: [TimeInterval] = [.hours(2), .hours(4)]
-        static let openLoopDelay: TimeInterval = .hours(1)
     }
 
     /// Offered, not yet confirmed: neither device is dosing.
@@ -263,7 +261,7 @@ extension PodLoanPhoneController {
         persistStaged()
     }
 
-    /// Arms the owed verdict. With no starting reading or schedule the loop opens instead.
+    /// Arms the owed verdict. With no starting reading or schedule there is nothing to check against.
     @discardableResult
     private func armForceReclaimAudit() -> Bool {
         let start = loanStartedAt ?? deps.now().addingTimeInterval(-.hours(2))
@@ -277,9 +275,7 @@ extension PodLoanPhoneController {
             anchor = nil
         }
         guard let anchor = anchor, let schedule = deps.settings().basalRateSchedule, let pulseUnits = pumpPulseUnits else {
-            handbackDiag(epoch, "** force-reclaim audit IMPOSSIBLE — no start odometer/schedule/pump; loop OPENS on principle (cannot verify => do not resume) **")
-            deps.openLoopForUncertainReconciliation()
-            armOpenLoopReminder()
+            handbackDiag(epoch, "** force-reclaim audit IMPOSSIBLE — no start odometer/schedule/pump; session UNVERIFIED **")
             deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)
             return false
         }

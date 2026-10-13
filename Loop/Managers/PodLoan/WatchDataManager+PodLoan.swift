@@ -83,6 +83,7 @@ extension WatchDataManager {
         // The watch's hold on the pod lapses by itself when its renewals stop — same pulse.
         podLoanController.considerHoldLapse()
         podLoanController.logOwnRunningAudit()
+        podLoanController.considerOwedForceReclaimAudit()
     }
 
     // MARK: - Context

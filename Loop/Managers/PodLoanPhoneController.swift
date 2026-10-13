@@ -107,9 +107,6 @@ final class PodLoanPhoneController {
 
         var cancelTempBasalForGrant: (@escaping (Error?) -> Void) -> Void = { $0(nil) }
 
-        /// Turns the user's closed-loop setting off; not the loan pause, which a later resume would undo.
-        var openLoopForUncertainReconciliation: () -> Void = {}
-
         /// Time-sensitive, so a Focus mode cannot swallow a recording failure.
         var issueUrgentNotice: (_ title: String, _ body: String) -> Void = { _, _ in }
 
@@ -297,8 +294,6 @@ final class PodLoanPhoneController {
             guard let self = self else { return }
             self.queue.async {
                 self.retryPersistedGapDeleteIfAny()
-
-                self.cancelOpenLoopReminderIfLoopClosed()
             }
         }
 

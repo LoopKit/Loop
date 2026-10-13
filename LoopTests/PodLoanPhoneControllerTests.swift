@@ -72,8 +72,6 @@ final class PodLoanPhoneControllerTests: XCTestCase {
     /// How many times the phone enacted the post-return temp cancel, and its result.
     var cancelCalls = 0
     var cancelError: Error?
-    /// How many times the phone stopped automatic dosing over a reconciliation difference.
-    var openLoopCalls = 0
     var pump: MockPumpManager!
     var settings: LoopSettings!
     /// Captures for the dead-watch reclaim audit.
@@ -162,7 +160,6 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         diags = []
         cancelCalls = 0
         cancelError = nil
-        openLoopCalls = 0
         clock = Date()
         holdPumpEventWrites = false
         heldPumpEventWrite = nil
@@ -267,10 +264,6 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                 guard let self = self else { return completion(nil) }
                 self.lock.lock(); self.cancelCalls += 1; let error = self.cancelError; self.lock.unlock()
                 completion(error)
-            },
-            openLoopForUncertainReconciliation: { [weak self] in
-                guard let self = self else { return }
-                self.lock.lock(); self.openLoopCalls += 1; self.lock.unlock()
             },
             issueUrgentNotice: { [weak self] title, body in
                 guard let self = self else { return }
@@ -746,7 +739,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertNil(diagMatching("force-reclaim audit armed"),
                      "no second audit — its expectation is bare schedule fill against an emptied staging area")
         XCTAssertNil(diagMatching("force-reclaim audit IMPOSSIBLE"))
-        XCTAssertEqual(openLoopCalls, 0, "a hand-back that went perfectly must not open the loop")
+        XCTAssertTrue(urgentNotices.isEmpty, "a hand-back that went perfectly raises no urgent notice")
     }
 
     /// A stale offer commits no carbs.
@@ -784,9 +777,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         controller.reclaimNow()
         waitForState(controller, .owner)
         XCTAssertFalse(MockPumpManager.testConnectionReleased, "pod reclaimed on force")
-        // Dosing waits for the audit's verdict; unverified opens the loop.
-        waitUntil(timeout: 5, "audit verdict") { !controller.holdsAutomaticDosing }
-        XCTAssertEqual(openLoopCalls, 1, "unverifiable session opens the loop rather than resuming closed")
+        // With no delivered total to check against, the user is told; the loop is not turned off.
+        waitUntil(timeout: 5, "dosing resumed") { !controller.holdsAutomaticDosing }
         XCTAssertTrue(urgentNotices.contains { $0.contains("Unverified") })
     }
 
@@ -1254,20 +1246,21 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         waitUntil(timeout: 8, "authoritative audit") { self.diagMatching("reconcile[AUTHORITATIVE]") != nil }
     }
 
-    /// POSITIVE beyond the bound: the pod delivered insulin the books do not contain, so closed
-    /// loop would dose on top of insulin it cannot see. Stop the machine.
-    func testLargePositiveResidualOpensTheLoop() throws {
+    /// POSITIVE beyond the bound at an ordinary hand-back: the watch's records are complete, so the
+    /// difference is reported and nothing is booked. Automatic dosing continues.
+    func testLargePositiveResidualAtAHandbackIsReportedNotBooked() throws {
         let controller = makeController()
         try runLoanToAudit(controller, deliveredDuringLoan: 2.0)   // vs ~0 expected
 
-        // The verdict logs first, then stops dosing, then notifies: wait on the last of the three.
-        waitUntil(timeout: 5, "open-loop verdict") {
-            guard self.diagMatching("OPEN LOOP — residual") != nil else { return false }
+        // The verdict logs first, then notifies: wait on the second.
+        waitUntil(timeout: 5, "verdict") {
+            guard self.diagMatching("exceeds +0.20") != nil else { return false }
             self.lock.lock(); defer { self.lock.unlock() }
-            return self.urgentNotices.contains("Loop Open — Unexplained Insulin")
+            return self.urgentNotices.contains("Unexplained Insulin")
         }
-        lock.lock(); let openLoops = openLoopCalls; lock.unlock()
-        XCTAssertEqual(openLoops, 1, "automatic dosing must be stopped exactly once")
+        lock.lock(); let booked = bookedGapDoses; lock.unlock()
+        XCTAssertTrue(booked.isEmpty, "complete records: nothing is booked")
+        XCTAssertFalse(controller.holdsAutomaticDosing, "automatic dosing continues")
     }
 
     /// NEGATIVE beyond the bound: the books carry phantom IOB, so the loop runs CAUTIOUS. Opening
@@ -1290,8 +1283,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         waitForState(controller, .owner)
 
         waitUntil(timeout: 8, "warn verdict") { self.diagMatching("WARN — residual") != nil }
-        XCTAssertEqual(openLoopCalls, 0, "a shortfall must NOT open the loop — that worsens under-treatment")
-        // "Overstated": the pod delivered less than the records. Urgent both ways; only positive opens the loop.
+        // "Overstated": the pod delivered less than the records. Reported; dosing continues.
         XCTAssertTrue(urgentNotices.contains("Insulin On Board May Be Overstated"))
     }
 
@@ -1301,8 +1293,6 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         let controller = makeController()
         try runLoanToAudit(controller, deliveredDuringLoan: 0.10)
 
-        XCTAssertEqual(openLoopCalls, 0)
-        XCTAssertNil(diagMatching("OPEN LOOP — residual"))
         XCTAssertNil(diagMatching("WARN — residual"))
         XCTAssertTrue(notices.isEmpty, "a normal loan must produce no notice at all, got \(notices)")
     }
@@ -1323,9 +1313,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         let controller = makeController()
         try runLoanToAudit(controller, deliveredDuringLoan: 0.25)
 
-        waitUntil(timeout: 5, "open-loop verdict") { self.diagMatching("OPEN LOOP — residual") != nil }
-        XCTAssertEqual(openLoopCalls, 1, "+0.25 U is over the 0.20 U bound — the loop must open")
-        XCTAssertTrue(urgentNotices.contains("Loop Open — Unexplained Insulin"))
+        waitUntil(timeout: 5, "verdict") { self.diagMatching("exceeds +0.20") != nil }
+        waitUntil(timeout: 5, "notice") { self.lock.lock(); defer { self.lock.unlock() }; return self.urgentNotices.contains("Unexplained Insulin") }
     }
 
     /// +0.200 with float dust stays inside the band.
@@ -1346,8 +1335,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         waitForState(controller, .owner)
         waitUntil(timeout: 8, "authoritative audit") { self.diagMatching("reconcile[AUTHORITATIVE]") != nil }
 
-        XCTAssertEqual(openLoopCalls, 0, "exactly ±0.200 is ON the band, not beyond it — float dust must not open the loop")
-        XCTAssertNil(diagMatching("OPEN LOOP — residual"))
+        XCTAssertNil(diagMatching("WARN — residual"), "exactly +0.200 is ON the band, not beyond it — float dust must not report")
     }
 
     /// The negative twin: −0.2000000000000007 stays inside the band.
@@ -1367,7 +1355,6 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         waitForState(controller, .owner)
         waitUntil(timeout: 8, "authoritative audit") { self.diagMatching("reconcile[AUTHORITATIVE]") != nil }
 
-        XCTAssertEqual(openLoopCalls, 0)
         XCTAssertNil(diagMatching("WARN — residual"), "exactly −0.200 is ON the band — float dust must not warn")
     }
 
@@ -1406,8 +1393,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         try sendMidLoanReading(controller, epoch: grant.epoch, latest: 10.15, asOf: Date().addingTimeInterval(2))
         try finishLoan(controller, epoch: grant.epoch, finalOdometer: 10.30)
 
-        waitUntil(timeout: 5, "open-loop verdict") { self.diagMatching("OPEN LOOP — residual") != nil }
-        XCTAssertEqual(openLoopCalls, 1, "+0.30 over the whole loan must open, whatever the mid-loan reading said")
+        waitUntil(timeout: 5, "verdict") { self.diagMatching("exceeds +0.20") != nil }
     }
 
     /// A loan that synced then died: the force audit judges the whole loan, not the tail since the sync.
@@ -1424,12 +1410,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         MockPumpManager.testOdometer = 11.30
         controller.forceReclaimToOwner(reason: "test: watch dead after a synced stretch")
         waitForState(controller, .owner)
-        waitUntil(timeout: 8, "force verdict") { self.diagMatching("OPEN LOOP — force-reclaim") != nil }
-
-        lock.lock()
-        let opened = openLoopCalls
-        lock.unlock()
-        XCTAssertEqual(opened, 1, "+0.30 over the whole loan is unexplained — the loop must open")
+        waitUntil(timeout: 8, "force verdict") { self.diagMatching("force-reclaim residual +0.300 U exceeds") != nil }
     }
 
     /// Row 10: the same offer redelivered (lost ack) re-acks the same cursor and
@@ -1696,13 +1677,14 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertFalse(notices.contains("Watch Message Unreadable"))
     }
 
-    /// Nothing doses automatically until the user acts, so the reminder is time-sensitive.
-    func testTheClosedLoopIsOffReminderIsTimeSensitive() throws {
+    /// Dosing is running on an estimate, so the reminders that it still stands are time-sensitive.
+    func testTheEstimateStillBookedRemindersAreTimeSensitive() throws {
         let controller = makeController()
-        controller.queue.sync { controller.armOpenLoopReminder() }
+        controller.queue.sync { controller.armPlaceholderReminders(units: 1.5, bookedAt: Date()) }
         lock.lock(); let added = addedNotifications; lock.unlock()
-        let reminder = try XCTUnwrap(added.first { $0.content.title == "Closed Loop Is Off" })
-        XCTAssertEqual(reminder.content.interruptionLevel, .timeSensitive)
+        let reminders = added.filter { $0.content.title == "Estimated Insulin Still Booked" }
+        XCTAssertEqual(reminders.count, 2, "at 2 h and 4 h")
+        XCTAssertTrue(reminders.allSatisfy { $0.content.interruptionLevel == .timeSensitive })
     }
 
     // MARK: - Glucose alarms on the wrist
@@ -1883,13 +1865,13 @@ final class PodLoanPhoneControllerTests: XCTestCase {
 }
 
 // MARK: - The dead-watch reclaim audit
-// The hand-back audit applied to a force reclaim: dosing held for the verdict, urgent alerts, and
-// unexplained insulin booked as a placeholder the watch's return retires.
+// The hand-back audit applied to a force reclaim: dosing held until the pod is read, then insulin
+// the missing records would have explained is booked as a placeholder the watch's return retires.
 extension PodLoanPhoneControllerTests {
 
-    /// The watch delivered 2.5 U it never streamed, then died. The odometer knows. The phone
-    /// must open the loop, alert urgently, and book the gap under a deterministic identity.
-    func testForceReclaimWithUnstreamedInsulinOpensLoopAndBooksTheGap() throws {
+    /// The watch delivered 2.5 U it never streamed, then died. The odometer knows. The phone books
+    /// the gap under a deterministic identity, tells the user, and keeps looping on the estimate.
+    func testForceReclaimWithUnstreamedInsulinBooksTheGapAndKeepsLooping() throws {
         let controller = makeController()
         let grant = establishLoan(controller)   // takeoverComplete banks deliveredAtStart = 10
 
@@ -1901,20 +1883,42 @@ extension PodLoanPhoneControllerTests {
         waitUntil(timeout: 5, "gap booked") { self.lock.lock(); defer { self.lock.unlock() }; return !self.bookedGapDoses.isEmpty }
 
         lock.lock()
-        let opened = openLoopCalls
         let urgent = urgentNotices
         let booked = bookedGapDoses
         lock.unlock()
 
-        XCTAssertEqual(opened, 1, "unexplained insulin beyond +0.20 U opens the loop")
-        XCTAssertTrue(urgent.contains { $0.contains("Unverified Insulin") },
+        XCTAssertTrue(urgent.contains("Insulin Estimated After Sport Mode"),
                       "the alert rides the URGENT channel — the watch is dead, the phone must get attention")
+        waitUntil(timeout: 5, "dosing resumed") { !controller.holdsAutomaticDosing }
         XCTAssertEqual(booked.count, 1, "the gap books as a placeholder bolus")
         XCTAssertEqual(booked.first?.deliveredUnits ?? 0, 2.5, accuracy: 0.1, "booked amount = the odometer gap")
         XCTAssertEqual(booked.first?.syncIdentifier, "LOAN-AUDIT-GAP-e\(grant.epoch)",
                        "deterministic identity, so the watch's return can retire it")
         XCTAssertEqual(booked.first?.manuallyEntered, true,
                        "manual-entry namespace — pump events overwrite syncIdentifier with hex(raw); manual doses keep it")
+    }
+
+    /// The pod stays out of reach past the settle window: the check stays owed and dosing stays held
+    /// (a phone that cannot reach the pod cannot dose it). It runs when the pod next answers.
+    func testAnOwedCheckWaitsForThePodInsteadOfGivingUp() throws {
+        let controller = makeController()
+        establishLoan(controller)
+        MockPumpManager.testOdometer = 12.5
+        lock.lock(); connectionReady = false; lock.unlock()
+
+        controller.forceReclaimToOwner(reason: "test: watch dead, pod out of reach")
+        waitForState(controller, .owner)
+        controller.queue.sync { controller.closeReclaimSettleWindow(reason: "test: the window closed") }
+
+        XCTAssertTrue(controller.holdsAutomaticDosing, "still owed, still held")
+        XCTAssertNotNil(diagMatching("force-reclaim audit still OWED"))
+        lock.lock(); let noticesSoFar = urgentNotices; lock.unlock()
+        XCTAssertFalse(noticesSoFar.contains { $0.contains("Unverified") }, "nothing is declared unverified")
+
+        lock.lock(); connectionReady = true; lock.unlock()   // the pod comes back, later
+        controller.considerOwedForceReclaimAudit()
+        waitUntil(timeout: 8, "verdict after the pod returns") { !controller.holdsAutomaticDosing }
+        waitUntil(timeout: 5, "gap booked") { self.lock.lock(); defer { self.lock.unlock() }; return !self.bookedGapDoses.isEmpty }
     }
 
     /// The clean case: the odometer matches the books. Dosing resumes, nothing books, no alarm.
@@ -1929,12 +1933,10 @@ extension PodLoanPhoneControllerTests {
         waitUntil(timeout: 5, "clean verdict") { self.diagMatching("force-reclaim audit CLEAN") != nil }
 
         lock.lock()
-        let opened = openLoopCalls
         let booked = bookedGapDoses
         lock.unlock()
         let resumed = !controller.holdsAutomaticDosing
 
-        XCTAssertEqual(opened, 0, "a clean audit does not open the loop")
         XCTAssertTrue(booked.isEmpty, "nothing to book")
         XCTAssertTrue(resumed, "automatic dosing resumes on the clean verdict")
     }
@@ -1960,8 +1962,7 @@ extension PodLoanPhoneControllerTests {
 
         lock.lock(); connectionReady = true; lock.unlock()    // the pod comes back
         waitUntil(timeout: 8, "verdict after pod returns") { !controller.holdsAutomaticDosing }
-        lock.lock(); let opened = openLoopCalls; lock.unlock()
-        XCTAssertEqual(opened, 1, "and the verdict still opens on the unexplained 2.5 U")
+        waitUntil(timeout: 5, "gap booked") { self.lock.lock(); defer { self.lock.unlock() }; return !self.bookedGapDoses.isEmpty }
     }
 
     /// The returning watch's real records replace the placeholder.
