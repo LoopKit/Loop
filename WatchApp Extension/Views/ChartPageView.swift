@@ -11,6 +11,7 @@ import LoopKit
 import LoopCore
 import LoopAlgorithm
 import SpriteKit
+import WatchConnectivity
 
 struct ChartPageView: View {
     @Environment(\.sizeClass) private var sizeClass
@@ -30,6 +31,10 @@ struct ChartPageView: View {
             return nil
         }
         
+        guard WCSession.default.isReachable else {
+            return "- - -"
+        }
+
         let ago = min(abs(min(0, date.timeIntervalSinceNow)), TimeInterval.days(7))
 
         guard let timeString = ago.truncatedTimeAgoString else {
@@ -180,8 +185,7 @@ struct ChartPageView: View {
                     if let lastSyncString {
                         LabelValueRow("Last Loop") {
                             // ⚠️ arrow.triangle.2.circlepath is deprecated -- replace with "arrow.trianglehead.2.clockwise.rotate.90" once watchOS 10 is dropped as a supported platform.
-                            Text(Image(systemName: "arrow.triangle.2.circlepath")) +
-                            Text(" " + lastSyncString)
+                            (WCSession.default.isReachable ? Text("\(Image(systemName: "arrow.triangle.2.circlepath")) ") : Text("")) + Text(lastSyncString)
                         }
                         Divider()
                     }
