@@ -388,7 +388,7 @@ final class BolusEntryViewModel: ObservableObject {
             }
             if let storedCarbEntry = await saveCarbEntry(carbEntry, replacingEntry: originalCarbEntry) {
                 self.dosingDecision.carbEntry = storedCarbEntry
-                self.analyticsServicesManager?.didAddCarbs(source: "Phone", amount: storedCarbEntry.quantity.doubleValue(for: .gram), isFavoriteFood: storedCarbEntry.favoriteFoodID != nil)
+                self.analyticsServicesManager?.didAddCarbs(source: "Phone", isFavoriteFood: storedCarbEntry.favoriteFoodID != nil)
             } else {
                 self.presentAlert(.carbEntryPersistenceFailure)
                 return false
@@ -407,7 +407,7 @@ final class BolusEntryViewModel: ObservableObject {
             } catch {
                 log.error("Failed to enact bolus: %{public}@", String(describing: error))
             }
-            self.analyticsServicesManager?.didBolus(source: "Phone", units: amountToDeliver)
+            self.analyticsServicesManager?.didBolus(source: "Phone")
         }
         return true
     }
