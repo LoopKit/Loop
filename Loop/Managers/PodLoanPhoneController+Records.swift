@@ -31,12 +31,8 @@ extension PodLoanPhoneController {
                 engageInferredLoanYield(evidence: "future-epoch batch e\(batch.epoch) at .owner (live seized loan streaming)")
             }
 
-            // Records for a closed loan: resend the revoke, throttled.
-            if state == .owner, batch.epoch <= epoch,
-               lastClosedSessionRevokeAt.map({ deps.now().timeIntervalSince($0) >= 20 }) ?? true {
-                lastClosedSessionRevokeAt = deps.now()
-                handbackDiag(batch.epoch, "records from a CLOSED session — the watch still thinks it holds the pod; revoke e\(batch.epoch) sent again")
-                sendMessage(.revoke(Revoke(epoch: batch.epoch)))
+            if state == .owner, batch.epoch <= epoch {
+                resendRevokeForClosedSession(epoch: batch.epoch, evidence: "records")
             }
             return
         }

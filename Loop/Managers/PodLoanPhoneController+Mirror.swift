@@ -56,6 +56,15 @@ extension PodLoanPhoneController {
         PhoneLog.event("mirror", "YIELDING to an inferred loan — \(evidence); pill=Pod on Watch, dosing paused, pod BLE released, exits: pill tap / watch revival / reunion prompt; on conflict the phone yields [mirror]")
     }
 
+    /// The stop message can be lost on the way to a watch that was off. Anything the watch sends
+    /// for a loan this phone has ended gets it again, at most every 20 s.
+    func resendRevokeForClosedSession(epoch closed: Int, evidence: String) {
+        guard lastClosedSessionRevokeAt.map({ deps.now().timeIntervalSince($0) >= 20 }) ?? true else { return }
+        lastClosedSessionRevokeAt = deps.now()
+        handbackDiag(closed, "\(evidence) from a CLOSED session — the watch still thinks it holds the pod; revoke e\(closed) resent")
+        sendMessage(.revoke(Revoke(epoch: closed)))
+    }
+
     /// Take the radio back; every route back to ownership must call it.
     func reclaimPodConnection() {
         guard let control = deps.pumpManager() as? ExclusiveDeviceControl else { return }
@@ -173,6 +182,10 @@ extension PodLoanPhoneController {
             default:
                 break
             }
+        }
+        // The watch says it holds the pod on a loan this phone has ended: tell it again to stop.
+        if report.holdsPod, report.epoch <= epoch, state == .owner, !yieldingToInferredLoan {
+            resendRevokeForClosedSession(epoch: report.epoch, evidence: "a status report")
         }
         guard report.epoch == epoch else { return }
 

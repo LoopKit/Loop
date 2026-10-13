@@ -2941,6 +2941,36 @@ extension PodLoanPhoneControllerTests {
         XCTAssertEqual(controller.state, .owner, "the phone keeps the pod throughout")
     }
 
+    /// A watch that reports holding the pod on a loan the phone has ended is told again to stop.
+    func testAHoldsPodReportFromAClosedSessionIsAnsweredWithTheRevoke() throws {
+        let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
+        let grant = establishLoan(controller)
+        controller.reclaimNow()
+        waitForState(controller, .owner)
+        controller.queue.sync { }
+        func revokes() -> Int {
+            lock.lock(); defer { lock.unlock() }
+            return sent.filter { if case .revoke(let r) = $0 { return r.epoch == grant.epoch }; return false }.count
+        }
+        XCTAssertEqual(revokes(), 1, "the take-back's own")
+
+        let report = try LoanMessage.statusReport(StatusReport(
+            epoch: grant.epoch, mode: .closedDirect, lastDirectGlucoseAge: 30, lastEventSeq: 1,
+            podFault: nil, holdsPod: true)).transportDictionary()
+        controller.handleIncoming(userInfo: report)
+        controller.queue.sync { }
+        XCTAssertEqual(revokes(), 2, "the watch never heard the first one")
+        XCTAssertEqual(controller.state, .owner, "the phone keeps the pod")
+
+        let idle = try LoanMessage.statusReport(StatusReport(
+            epoch: grant.epoch, mode: .closedDirect, lastDirectGlucoseAge: 30, lastEventSeq: 1,
+            podFault: nil, holdsPod: false)).transportDictionary()
+        clock = clock.addingTimeInterval(.minutes(5))
+        controller.handleIncoming(userInfo: idle)
+        controller.queue.sync { }
+        XCTAssertEqual(revokes(), 2, "a watch that no longer holds the pod is left alone")
+    }
+
     /// The standing copy refreshes on a bolus or carb, collapses bursts, and loses nothing.
     func testTheStandingCopyFollowsTheBook() {
         saveState { $0.watchSupportsSeize = true }

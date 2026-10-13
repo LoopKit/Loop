@@ -157,6 +157,7 @@ extension ExtensionDelegate {
             return session.handleIncomingIfLoanMessage(userInfo, channel: .queued)
         }
         guard userInfo[LoanProtocol.userInfoKey] != nil else { return false }
+        SportLog.event("loan", "queued \(LoanMessage.peekKind(transport: userInfo) ?? "?") arrived before the Sport Mode stack was ready — DISCARDED")
         podLoanNoteEarlyPayload()
         return true
     }
