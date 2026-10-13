@@ -2549,6 +2549,44 @@ extension PodLoanPhoneControllerTests {
         XCTAssertFalse(controller.yieldingToInferredLoan, "the inferred loan became the adopted loan")
     }
 
+    /// The watch's hand-back offer can reach the phone before any other word of a loan it started
+    /// alone. While the watch still holds the pod, adopting that loan releases the pump, so the
+    /// phone's dosing is held.
+    func testAdoptingALiveWatchStartedLoanReleasesThePump() throws {
+        let token = seizeCredentialOutstanding()
+        let controller = makeController()
+
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(
+            HandbackOffer(epoch: 5, handedBackAt: Date(), finalStatus: nil, odometer: nil,
+                          events: [], tombstones: [], recovered: false, released: false,
+                          seizeToken: token)).transportDictionary())
+        waitUntil(timeout: 5, "adopted") { controller.state == .loaned }
+
+        XCTAssertTrue(MockPumpManager.testConnectionReleased, "the watch has the pod, so the phone releases it")
+        XCTAssertTrue(controller.holdsAutomaticDosing, "and the phone's dosing is held")
+        lock.lock(); let calls = controlCalls; lock.unlock()
+        XCTAssertEqual(calls, [true], "the release is announced once")
+    }
+
+    /// The records of a watch-started loan that is already over (the watch died and came back, or
+    /// has handed the pod back) come in without the phone giving up the pump.
+    func testRecordsOfAFinishedWatchStartedLoanDoNotReleaseThePump() throws {
+        let token = seizeCredentialOutstanding()
+        let controller = makeController()
+
+        let ackSent = expectSend()
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(
+            HandbackOffer(epoch: 5, handedBackAt: Date(), finalStatus: nil, odometer: nil,
+                          events: [], tombstones: [], recovered: true, released: true,
+                          seizeToken: token)).transportDictionary())
+        wait(for: [ackSent], timeout: 5)
+        waitForState(controller, .owner)
+
+        XCTAssertFalse(MockPumpManager.testConnectionReleased, "the phone keeps the pod throughout")
+        lock.lock(); let calls = controlCalls; lock.unlock()
+        XCTAssertFalse(calls.contains(true), "nothing was released")
+    }
+
     /// A pill tap from the yield takes the ordinary dead-branch reclaim.
     func testInferredYieldPillTapTakesTheInheritedRoad() throws {
         _ = seizeCredentialOutstanding()

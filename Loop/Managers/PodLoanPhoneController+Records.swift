@@ -95,6 +95,14 @@ extension PodLoanPhoneController {
                 $0.audit.loanStartedAt = anchor
             }
             stateDidChange(from: previous)
+
+            // A live offer means the watch still holds the pod: dosing authority and the radio go
+            // together. A final or recovered offer is a loan already over; only its records come in.
+            if offer.released != true, !offer.recovered,
+               let control = deps.pumpManager() as? ExclusiveDeviceControl, !control.isControlReleased {
+                control.releaseControl()
+                deps.pumpControlChanged(true)
+            }
         }
 
         // An offer ahead of this phone's epoch cannot be committed.
