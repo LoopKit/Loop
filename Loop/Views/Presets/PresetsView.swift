@@ -49,6 +49,11 @@ enum ActiveSheet: Identifiable {
 
 struct PresetsView: View {
 
+    // Define navigation routes
+    enum NavigationDestination: Hashable {
+        case presetsHistory
+    }
+
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
     @Environment(\.appName) private var appName
     @Environment(\.settingsManager) private var settingsManager
@@ -182,13 +187,33 @@ struct PresetsView: View {
                         }
                     }
                     
-                    if trainingCompletion.isComplete {
-                        // Support Section
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Support")
-                                .font(.headline.weight(.semibold))
-                                .padding(.horizontal, 10)
-
+                    // Support Section
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Support")
+                            .font(.headline.weight(.semibold))
+                            .padding(.horizontal, 10)
+                        
+                        NavigationLink(value: NavigationDestination.presetsHistory) {
+                            HStack {
+                                Image("performance-history-empty")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 32, height: 32)
+                                
+                                Text("Performance History")
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .padding(10)
+                        .foregroundStyle(.primary)
+                        .background(RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(UIColor.tertiarySystemBackground))
+                            .stroke(Color(UIColor.secondarySystemBackground), lineWidth: 1)
+                            .frame(maxWidth: .infinity))
+                        
+                        if trainingCompletion.isComplete {
                             Button {
                                 activeSheet = .training()
                             } label: {
@@ -197,7 +222,7 @@ struct PresetsView: View {
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 32, height: 32)
-
+                                    
                                     Text("Learning Hub")
                                     Spacer()
                                     Image(systemName: "chevron.right")
@@ -219,6 +244,18 @@ struct PresetsView: View {
             .background(Color(UIColor.secondarySystemBackground))
             .navigationTitle(Text("Presets", comment: "Presets screen title"))
             .navigationBarItems(trailing: dismissButton)
+            .navigationDestination(for: NavigationDestination.self) { route in
+                switch route {
+                case .presetsHistory:
+                    PresetsHistoryView(
+                        temporaryPresetsManager: temporaryPresetsManager,
+                        glucoseStore: glucoseStore,
+                        carbStore: carbStore,
+                        doseStore: doseStore,
+                        automationHistory: automationHistory
+                    )
+                }
+            }
         }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
