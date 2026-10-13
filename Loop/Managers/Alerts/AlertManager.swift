@@ -384,7 +384,7 @@ extension AlertManager: AlertIssuer {
             deferredAlerts.append(alert)
             return
         }
-        analyticsServicesManager.didIssueAlert(identifier: alert.identifier.value, interruptionLevel: alert.interruptionLevel)
+        analyticsServicesManager.didIssueAlert(identifier: alert.identifier.value, interruptionLevel: alert.interruptionLevel, trigger: alert.trigger)
         scheduleAlertWithSchedulers(alert)
         await alertStore.recordIssued(alert: alert)
     }

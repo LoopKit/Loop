@@ -156,6 +156,7 @@ final class AnalyticsServicesManager {
 
     func pumpWasRemoved() {
         logEvent("Pump Removed")
+        identifyPumpType("None")
     }
 
     func pumpWasAdded(identifier: String) {
@@ -164,6 +165,7 @@ final class AnalyticsServicesManager {
 
     func cgmWasRemoved() {
         logEvent("CGM Removed")
+        identifyCGMType("None")
     }
 
     func cgmWasAdded(identifier: String) {
@@ -253,8 +255,21 @@ final class AnalyticsServicesManager {
         }
     }
 
-    func didIssueAlert(identifier: String, interruptionLevel: Alert.InterruptionLevel) {
-        logEvent("Alert Issued", withProperties: ["identifier": identifier, "interruptionLevel": interruptionLevel.rawValue])
+    func didIssueAlert(identifier: String, interruptionLevel: Alert.InterruptionLevel, trigger: Alert.Trigger) {
+        var properties: [String: Any] = ["identifier": identifier, "interruptionLevel": interruptionLevel.rawValue]
+
+        switch trigger {
+        case .immediate:
+            properties["trigger"] = "immediate"
+        case .delayed(let interval):
+            properties["trigger"] = "delayed"
+            properties["delayMinutes"] = Int(interval.minutes)
+        case .repeating(let repeatInterval):
+            properties["trigger"] = "repeating"
+            properties["delayMinutes"] = Int(repeatInterval.minutes)
+        }
+
+        logEvent("Alert Issued", withProperties: properties)
     }
 
     func didEnactOverride(kind: String, duration: TemporaryScheduleOverride.Duration, activityType: String? = nil) {
