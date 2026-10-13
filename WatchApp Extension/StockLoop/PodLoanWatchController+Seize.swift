@@ -70,8 +70,9 @@ extension PodLoanWatchController {
         }
     }
 
-    /// The phone returning during a seized loan: a prompt after a 30 s debounce, one per
-    /// transition, none once End was asked for.
+    /// The phone returning during a seized loan: it is told at once that this watch holds the pod,
+    /// so it stops dosing; the prompt follows after a 30 s debounce, one per transition, none once
+    /// End was asked for.
     func noteReachabilityChanged(_ reachable: Bool) {
         queue.async {
             guard reachable else { return }
@@ -80,6 +81,7 @@ extension PodLoanWatchController {
                   !self.handbackRequested, !self.reunionPromptActive else { return }
             guard !self.seizeReunionDebounceArmed else { return }
             self.seizeReunionDebounceArmed = true
+            self.sendHoldsPodStatusReport(reason: "phone reachable")
             SportLog.event("seize", "phone REACHABLE during a seized loan — reunion prompt in 30s unless it flickers away [seize]")
             self.schedule(after: 30, label: "seize-reunion-debounce") { [weak self] in
                 guard let self = self else { return }
@@ -95,8 +97,6 @@ extension PodLoanWatchController {
                 SportLog.event("seize", "phone is back — REUNION PROMPT raised (the hand-back stays the user's deliberate act) [seize]")
                 self.notifyUI()
                 self.issueReunionPromptAlert()
-
-                self.sendHoldsPodStatusReport(reason: "reunion prompt raised")
             }
         }
     }
