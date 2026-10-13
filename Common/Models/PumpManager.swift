@@ -18,7 +18,13 @@ let staticPumpManagersByIdentifier: [String: PumpManagerUI.Type] = [
 var availableStaticPumpManagers: [PumpManagerDescriptor] {
     if FeatureFlags.allowSimulators {
         return [
-            PumpManagerDescriptor(identifier: MockPumpManager.managerIdentifier, localizedTitle: MockPumpManager.localizedTitle)
+            PumpManagerDescriptor(
+                identifier: MockPumpManager.managerIdentifier,
+                localizedTitle: MockPumpManager.localizedTitle,
+                subtitle: NSLocalizedString("For testing; delivers no insulin", comment: "Picker subtitle for the pump simulator"),
+                manufacturer: "Simulator",
+                image: MockPumpManager.pickerImage
+            )
         ]
     } else {
         return []

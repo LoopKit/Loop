@@ -70,7 +70,7 @@ struct FavoriteFoodsView: View {
         .sheet(isPresented: $viewModel.isAddViewActive) {
             FavoriteFoodAddEditView(onSave: viewModel.onFoodSave(_:))
         }
-        .onChange(of: editMode) { newValue in
+        .onChange(of: editMode) { _, newValue in
             if !newValue.isEditing {
                 foodToConfirmDeleteId = nil
             }

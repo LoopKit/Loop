@@ -21,7 +21,7 @@ final class SettingsManagerTests: XCTestCase {
         let settingsManager = SettingsManager(cacheStore: persistenceController, expireAfter: .days(1), alertMuter: AlertMuter())
 
         let exp = expectation(description: #function)
-        let observer = NotificationCenter.default.addObserver(forName: .LoopDataUpdated, object: nil, queue: nil) { _ in
+        let observer = NotificationCenter.default.addObserver(forName: .LoopDataUpdated, object: settingsManager, queue: nil) { _ in
             exp.fulfill()
         }
 

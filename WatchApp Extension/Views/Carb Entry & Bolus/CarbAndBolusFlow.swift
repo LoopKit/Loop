@@ -99,7 +99,7 @@ struct CarbAndBolusFlow: View {
             activity.becomeCurrent()
         }
 
-        .onReceive(NotificationCenter.default.publisher(for: WKExtension.applicationWillResignActiveNotification)) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: WKApplication.willResignActiveNotification)) { _ in
             dismiss()
         }
     }

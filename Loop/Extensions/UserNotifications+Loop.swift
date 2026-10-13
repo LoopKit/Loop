@@ -31,7 +31,7 @@ extension UNUserNotificationCenter {
     }
 }
 
-extension UNAuthorizationStatus: CustomStringConvertible {
+extension UNAuthorizationStatus: @retroactive CustomStringConvertible {
     public var description: String {
         switch self {
         case .notDetermined:
@@ -50,7 +50,7 @@ extension UNAuthorizationStatus: CustomStringConvertible {
     }
 }
 
-extension UNShowPreviewsSetting: CustomStringConvertible {
+extension UNShowPreviewsSetting: @retroactive CustomStringConvertible {
     public var description: String {
         switch self {
         case .always:
@@ -65,7 +65,7 @@ extension UNShowPreviewsSetting: CustomStringConvertible {
     }
 }
 
-extension UNNotificationSetting: CustomStringConvertible {
+extension UNNotificationSetting: @retroactive CustomStringConvertible {
     public var description: String {
         switch self {
         case .notSupported:
@@ -80,7 +80,7 @@ extension UNNotificationSetting: CustomStringConvertible {
     }
 }
 
-extension UNAlertStyle: CustomStringConvertible {
+extension UNAlertStyle: @retroactive CustomStringConvertible {
     public var description: String {
         switch self {
         case .none:

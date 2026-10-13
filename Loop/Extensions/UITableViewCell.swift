@@ -10,4 +10,4 @@ import UIKit
 import LoopCore
 
 
-extension UITableViewCell: IdentifiableClass { }
+extension UITableViewCell: @retroactive IdentifiableClass { }

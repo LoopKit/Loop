@@ -462,6 +462,10 @@ final class WatchDataManager: NSObject {
         // Loan-time refusal: the decision and any carbs are stored above; delivery is not attempted.
         guard !deliveryRefusedForLoan else { return }
 
+        guard bolus.value > 0 else {
+            return
+        }
+
         try await deviceManager.enactBolus(units: bolus.value, decisionId: dosingDecision.id, activationType: bolus.activationType)
         self.analyticsServicesManager?.didBolus(source: "Watch", units: bolus.value)
     }
