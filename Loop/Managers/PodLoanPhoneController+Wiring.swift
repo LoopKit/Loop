@@ -19,15 +19,15 @@ extension WatchDataManager {
         return PodLoanPhoneController(dependencies: .init(
             pumpManager: { [weak self] in self?.deviceManager.pumpManager },
             settings: { [weak self] in self?.settingsManager.loopSettings ?? LoopSettings() },
-            setAutomaticDosingPaused: { [weak self] paused in
-                guard let self = self else { return }
-                if paused {
-                    self.deviceManager.alertManager?.clearLoopNotRunningNotificationsForLoanGrant()
-                } else {
-                    // Hop to main: the reschedule reads a gate that dispatches back onto this queue.
-                    DispatchQueue.main.async { [weak self] in
-
-                        Task { await self?.deviceManager.alertManager?.rescheduleLoopNotRunningNotifications(Date()) }
+            setAutomaticDosingPaused: { _ in },
+            // A phone that has released the pump does not warn that it is not looping.
+            pumpControlChanged: { [weak self] released in
+                Task { @MainActor in
+                    guard let alertManager = self?.deviceManager.alertManager else { return }
+                    if released {
+                        alertManager.removeLoopNotRunningNotificationsForReleasedPump()
+                    } else {
+                        await alertManager.rescheduleLoopNotRunningNotifications(Date())
                     }
                 }
             },

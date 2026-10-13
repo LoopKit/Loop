@@ -154,6 +154,7 @@ extension PodLoanPhoneController {
         let releaseEpoch = epoch + 1
         handbackDiag(releaseEpoch, "GRANT — releasing pod BLE (wasReleased=\(control.isControlReleased))")
         control.releaseControl()
+        deps.pumpControlChanged(true)
         // A link still up here predicts a refused takeover (the pod accepts one central).
         queue.asyncAfter(deadline: .now() + 3) { [weak self, weak pump] in
             guard let self = self, let control = pump as? ExclusiveDeviceControl else { return }

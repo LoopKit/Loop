@@ -20,19 +20,13 @@ import LoopCore
 
 extension WatchDataManager {
 
-    /// Wires the Loop-Failure suppression gate to the loan state, once.
+    /// Wires the Loop-Failure suppression gate to the pump's release flag, once.
     func wireLoopFailureSuppressionGate() {
         guard FeatureFlags.sportModeEnabled else { return }
         deviceManager.alertManager?.loopNotRunningSuppressionGate = { [weak self] in
-            self?.podLoanController.isLoanedOutForUI ?? false
-        }
-        Self.loanLadderSweep = { [weak self] in
-            self?.deviceManager.alertManager?.sweepLoopNotRunningNotificationsDuringLoan()
+            (self?.deviceManager.pumpManager as? ExclusiveDeviceControl)?.isControlReleased ?? false
         }
     }
-
-    /// Written once on main at wiring; read from the census queue.
-    nonisolated(unsafe) private static var loanLadderSweep: (() -> Void)?
 
     /// Brought up with WatchDataManager, after the session is activated.
     func podLoanStartup() {
@@ -230,7 +224,6 @@ extension WatchDataManager {
             guard WCSession.isSupported() else { return }
             let s = WCSession.default
             let pod = Self.podLinkCensus.map { " · pod: \($0())" } ?? ""
-            Self.loanLadderSweep?()
             PhoneLog.event("link", "watch reachable=\(s.isReachable) activation=\(s.activationState.rawValue) paired=\(s.isPaired) appInstalled=\(s.isWatchAppInstalled)\(pod)")
         }
         t.resume()

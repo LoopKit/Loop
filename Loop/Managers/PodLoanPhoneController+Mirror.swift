@@ -44,6 +44,7 @@ extension PodLoanPhoneController {
 
         // Dosing authority and the radio go together.
         (deps.pumpManager() as? ExclusiveDeviceControl)?.releaseControl()
+        deps.pumpControlChanged(true)
 
         // A settle window left open would escalate at +12 s and re-take the radio and the dosing gate.
         closeReclaimSettleWindow(reason: "yielding to an inferred loan — this phone is not reaching for the pod")
@@ -58,7 +59,10 @@ extension PodLoanPhoneController {
 
     /// Take the radio back; every route back to ownership must call it.
     func reclaimPodConnection() {
-        (deps.pumpManager() as? ExclusiveDeviceControl)?.takeControl()
+        guard let control = deps.pumpManager() as? ExclusiveDeviceControl else { return }
+        let wasReleased = control.isControlReleased
+        control.takeControl()
+        if wasReleased { deps.pumpControlChanged(false) }
     }
 
     /// Does not re-take the radio or resume dosing; callers differ on both.

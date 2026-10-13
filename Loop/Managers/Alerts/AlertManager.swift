@@ -181,12 +181,12 @@ public final class AlertManager {
 
     // MARK: - Loop Not Running alerts
 
-    /// True while a pod loan is active; set by WatchDataManager at wiring time — see `AlertManager+PodLoan.swift`.
+    /// True while the pump's control is released; set by WatchDataManager at wiring time — see `AlertManager+PodLoan.swift`.
     var loopNotRunningSuppressionGate: (() -> Bool)?
 
     func loopDidComplete(_ lastLoopDate: Date? = nil) async {
         if loopNotRunningSuppressionGate?() == true {
-            log.default("loopDidComplete during a pod loan — Loop Failure ladder NOT re-armed (the watch is the looper)")
+            log.default("loopDidComplete with the pump released — Loop Failure ladder NOT re-armed")
             return
         }
         // use now if there is no lastLoopDate
