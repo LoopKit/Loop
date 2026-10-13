@@ -29,7 +29,7 @@ protocol BolusEntryViewModelDelegate: AnyObject {
 
     func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date)
     
-    func enactBolus(units: Double, activationType: BolusActivationType, completion: @escaping (_ error: Error?) -> Void)
+    func enactBolus(units: Double, activationType: BolusActivationType, origin: BolusOrigin?, completion: @escaping (_ error: Error?) -> Void)
     
     func getGlucoseSamples(start: Date?, end: Date?, completion: @escaping (_ samples: Swift.Result<[StoredGlucoseSample], Error>) -> Void)
 
@@ -421,7 +421,7 @@ final class BolusEntryViewModel: ObservableObject {
 
         if amountToDeliver > 0 {
             savedPreMealOverride = nil
-            delegate.enactBolus(units: amountToDeliver, activationType: activationType, completion: { _ in
+            delegate.enactBolus(units: amountToDeliver, activationType: activationType, origin: .manual, completion: { _ in
                 self.analyticsServicesManager?.didBolus(source: "Phone", units: amountToDeliver)
             })
         }

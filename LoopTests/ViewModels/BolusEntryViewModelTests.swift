@@ -911,7 +911,7 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
 
     var enactedBolusUnits: Double?
     var enactedBolusActivationType: BolusActivationType?
-    func enactBolus(units: Double, activationType: BolusActivationType, completion: @escaping (Error?) -> Void) {
+    func enactBolus(units: Double, activationType: BolusActivationType, origin: BolusOrigin?, completion: @escaping (Error?) -> Void) {
         enactedBolusUnits = units
         enactedBolusActivationType = activationType
     }

@@ -16,7 +16,8 @@ extension DeviceDataManager: SimpleBolusViewModelDelegate {
     }
     
     func enactBolus(units: Double, activationType: BolusActivationType) {
-        enactBolus(units: units, activationType: activationType) { (_) in }
+        // The simple bolus calculator is only ever driven by the user on the phone.
+        enactBolus(units: units, activationType: activationType, origin: .manual) { (_) in }
     }
     
     func computeSimpleBolusRecommendation(at date: Date, mealCarbs: HKQuantity?, manualGlucose: HKQuantity?) -> BolusDosingDecision? {
