@@ -387,6 +387,9 @@ final class PodLoanPhoneController {
     /// The pod fault already announced, as "epoch fault", so a repeated report stays quiet.
     var podFaultNoticed: String?
 
+    /// The pump's delivered total as this phone last read it while it held the pump. Diagnostic only.
+    var lastOwnPumpTotal: (units: Double, at: Date)?
+
     /// Only the force-reclaim flavour persists.
     var pendingHandbackAudit: PendingHandbackAudit? {
         didSet {

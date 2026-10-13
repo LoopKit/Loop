@@ -2587,6 +2587,22 @@ extension PodLoanPhoneControllerTests {
         XCTAssertFalse(calls.contains(true), "nothing was released")
     }
 
+    /// The comparison both devices use: what the pump's total rose by, less what the records and
+    /// the schedule explain. Signed, so a pump that delivered less than the records reads negative.
+    func testInsulinNotInRecordsIsSigned() {
+        let then = Date(timeIntervalSince1970: 1_790_000_000), now = then.addingTimeInterval(.minutes(10))
+        let schedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.2)])!
+        func residual(_ totalNow: Double, _ records: [LoanDoseRecord] = []) -> Double {
+            LoanReconciler.insulinNotInRecords(totalThen: 10, then: then, totalNow: totalNow, now: now,
+                                               records: records, schedule: schedule, pulseUnits: 0.05)
+        }
+        XCTAssertEqual(residual(10.2), 0, accuracy: 0.001, "ten minutes of 1.2 U/h is 0.2 U")
+        XCTAssertEqual(residual(11.2), 1.0, accuracy: 0.001, "a unit the records do not hold")
+        XCTAssertEqual(residual(10.0), -0.2, accuracy: 0.001, "the pump delivered less than the schedule")
+        let bolus = LoanDoseRecord(kind: .bolus, startDate: then.addingTimeInterval(60), amount: 1.0)
+        XCTAssertEqual(residual(11.2, [bolus]), 0, accuracy: 0.001, "a recorded bolus explains it")
+    }
+
     /// A pill tap from the yield takes the ordinary dead-branch reclaim.
     func testInferredYieldPillTapTakesTheInheritedRoad() throws {
         _ = seizeCredentialOutstanding()

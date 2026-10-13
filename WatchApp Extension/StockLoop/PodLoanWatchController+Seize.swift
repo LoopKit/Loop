@@ -179,23 +179,8 @@ extension PodLoanWatchController {
                                             records: [LoanDoseRecord], schedule: BasalRateSchedule?,
                                             pulseUnits: Double) -> Double {
         guard now > copyAt, podTotal >= copyTotal else { return 0 }
-        // Synthetic events; only their order matters.
-        let rateEvents = records.filter { $0.kind != .bolus }.enumerated().map {
-            LoanEvent(id: UUID(), seq: $0.offset + 1, provenance: .confirmed, record: $0.element, loggedAt: now)
-        }
-        var expected = LoanReconciler.expectedInsulin(events: rateEvents, schedule: schedule, pulseUnits: pulseUnits,
-                                                      from: copyAt, to: now)
-        for bolus in records where bolus.kind == .bolus {
-            guard let amount = bolus.amount, amount > 0 else { continue }
-            let end = bolus.endDate ?? bolus.startDate
-            if end > bolus.startDate {
-                let overlap = min(end, now).timeIntervalSince(max(bolus.startDate, copyAt))
-                if overlap > 0 { expected += amount * overlap / end.timeIntervalSince(bolus.startDate) }
-            } else if bolus.startDate >= copyAt, bolus.startDate <= now {
-                expected += amount
-            }
-        }
-        let unexplained = ((podTotal - copyTotal - expected) * 1000).rounded() / 1000
+        let unexplained = LoanReconciler.insulinNotInRecords(totalThen: copyTotal, then: copyAt, totalNow: podTotal, now: now,
+                                                             records: records, schedule: schedule, pulseUnits: pulseUnits)
         return unexplained > unexplainedInsulinBand ? unexplained : 0
     }
 

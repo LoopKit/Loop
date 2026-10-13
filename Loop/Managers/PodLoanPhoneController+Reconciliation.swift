@@ -294,6 +294,35 @@ extension PodLoanPhoneController {
         PhoneLog.event("loan", line)
     }
 
+    /// Called every phone cycle. While this phone holds the pump, logs what the pump's delivered
+    /// total rose by since the last cycle against what the phone's own records explain. Diagnostic
+    /// only: nothing acts on it.
+    func logOwnRunningAudit() {
+        queue.async {
+            guard self.state == .owner,
+                  let pump = self.deps.pumpManager() as? PumpDeliveryOdometer,
+                  (pump as? ExclusiveDeviceControl)?.isControlReleased != true,
+                  let reading = pump.deliveredUnits else {
+                self.lastOwnPumpTotal = nil
+                return
+            }
+            guard let last = self.lastOwnPumpTotal else { self.lastOwnPumpTotal = reading; return }
+            guard reading.at > last.at else { return }
+            self.lastOwnPumpTotal = reading
+            let schedule = self.deps.settings().basalRateSchedule
+            let pulseUnits = pump.deliveryPulseUnits
+            // Doses that began before the window can still run into it.
+            self.deps.doseHistory(last.at.addingTimeInterval(-.hours(1))) { doses in
+                let records = doses.compactMap(Self.loanRecord(from:))
+                let residual = LoanReconciler.insulinNotInRecords(totalThen: last.units, then: last.at,
+                                                                  totalNow: reading.units, now: reading.at,
+                                                                  records: records, schedule: schedule, pulseUnits: pulseUnits)
+                PhoneLog.event("loan", String(format: "[odometer] (own) %.1f min: pump total %.2f → %.2f, residual %+.3f",
+                                              reading.at.timeIntervalSince(last.at) / 60, last.units, reading.units, residual))
+            }
+        }
+    }
+
     /// A verdict waiting for the reclaim round-trip to read the pod.
     struct PendingHandbackAudit {
         /// Only `.forceReclaim` survives a relaunch and books a placeholder.
