@@ -155,11 +155,8 @@ final class PodLoanWatchController {
     /// Fired when a loan starts and when it ends, for whoever owns app-level runtime and UI.
     var onLoanActiveChanged: ((Bool) -> Void)?
 
-    /// Runtime for the whole takeover.
+    /// Fired when a takeover starts and when it ends.
     var onTakeoverRadioHold: ((Bool) -> Void)?
-
-    /// Runtime for the whole hand-back.
-    var onHandbackRuntimeHold: ((Bool) -> Void)?
 
     /// Transient glance notes, stamped so they age out.
     var handbackFailure: (at: Date, text: String)?
