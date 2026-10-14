@@ -74,7 +74,7 @@ extension UIDevice.BatteryState {
     }
 }
 
-extension UIDevice.BatteryState: CustomStringConvertible {
+extension UIDevice.BatteryState: @retroactive CustomStringConvertible {
     public var description: String {
         switch self {
         case .unknown:

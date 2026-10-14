@@ -40,10 +40,10 @@ extension PodLoanPhoneController {
                 $0.audit.loanStartedAt = asOf
             }
         }
-        deps.setAutomaticDosingPaused(true)
 
-        // Dosing authority and the radio go together.
+        // Dosing authority and the radio go together: the release is what holds the phone's dosing.
         (deps.pumpManager() as? ExclusiveDeviceControl)?.releaseControl()
+        deps.pumpControlChanged(true)
 
         // A settle window left open would escalate at +12 s and re-take the radio and the dosing gate.
         closeReclaimSettleWindow(reason: "yielding to an inferred loan — this phone is not reaching for the pod")
@@ -56,9 +56,21 @@ extension PodLoanPhoneController {
         PhoneLog.event("mirror", "YIELDING to an inferred loan — \(evidence); pill=Pod on Watch, dosing paused, pod BLE released, exits: pill tap / watch revival / reunion prompt; on conflict the phone yields [mirror]")
     }
 
+    /// The stop message can be lost on the way to a watch that was off. Anything the watch sends
+    /// for a loan this phone has ended gets it again, at most every 20 s.
+    func resendRevokeForClosedSession(epoch closed: Int, evidence: String) {
+        guard lastClosedSessionRevokeAt.map({ deps.now().timeIntervalSince($0) >= 20 }) ?? true else { return }
+        lastClosedSessionRevokeAt = deps.now()
+        handbackDiag(closed, "\(evidence) from a CLOSED session — the watch still thinks it holds the pod; revoke e\(closed) resent")
+        sendMessage(.revoke(Revoke(epoch: closed)))
+    }
+
     /// Take the radio back; every route back to ownership must call it.
     func reclaimPodConnection() {
-        (deps.pumpManager() as? ExclusiveDeviceControl)?.takeControl()
+        guard let control = deps.pumpManager() as? ExclusiveDeviceControl else { return }
+        let wasReleased = control.isControlReleased
+        control.takeControl()
+        if wasReleased { deps.pumpControlChanged(false) }
     }
 
     /// Does not re-take the radio or resume dosing; callers differ on both.
@@ -167,18 +179,13 @@ extension PodLoanPhoneController {
                 handbackDiag(epoch, "ghost grant e\(epoch) ABANDONED — the watch answered holdsPod e\(report.epoch); yielding instead of waiting on a takeover that cannot come [mirror]")
                 state = .owner
                 engageInferredLoanYield(evidence: "statusReport — watch holds e\(report.epoch), ghost grant abandoned")
-            // Re-aim the revoke at the watch's newer epoch; a stale-epoch revoke would be refused.
-            case .reclaimPending:
-
-                if var ladder = reclaimLadder, !ladder.forced, ladder.attempts < 2 {
-                    sendMessage(.revoke(Revoke(epoch: report.epoch)))
-                    ladder.attempts += 1
-                    reclaimLadder = ladder
-                    handbackDiag(epoch, "reclaim revoke RE-AIMED at e\(report.epoch) (attempt \(ladder.attempts) of 2) — the watch holds a newer loan than the one this reclaim named")
-                }
             default:
                 break
             }
+        }
+        // The watch says it holds the pod on a loan this phone has ended: tell it again to stop.
+        if report.holdsPod, report.epoch <= epoch, state == .owner, !yieldingToInferredLoan {
+            resendRevokeForClosedSession(epoch: report.epoch, evidence: "a status report")
         }
         guard report.epoch == epoch else { return }
 

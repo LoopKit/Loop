@@ -167,23 +167,43 @@ final class WristOverrideRecordTests: XCTestCase {
 /// A cancelled temp reaches the phone as a zero-length rate record (2026-10-09: six cancels in an overnight
 /// loan were never journaled, leaving the cancelled temps standing in the phone's books).
 final class LoanCancelRecordTests: XCTestCase {
-    private let now = Date()
-
-    /// The schedule resuming — how the pump manager reports a cancel — is journaled as a zero-length temp.
-    func testTheScheduleResumingIsJournaledAsACancel() {
-        let resume = DoseEntry(type: .basal, startDate: now, endDate: now, value: 0.6, unit: .unitsPerHour, decisionId: nil)
-        let record = PodLoanWatchController.loanRecord(for: resume, raw: Data([0x01, 0x02]))
-        XCTAssertEqual(record?.kind, .tempBasal)
-        XCTAssertEqual(record?.startDate, now)
-        XCTAssertEqual(record?.endDate, now)
-        XCTAssertEqual(record?.unitsPerHour, 0)
-        XCTAssertEqual(record?.syncIdentifier, "0102")
+    private let start = Date()
+    private func temp(_ rate: Double, from start: Date, minutes: Double, id: String) -> LoanDoseRecord {
+        LoanDoseRecord(kind: .tempBasal, startDate: start, endDate: start.addingTimeInterval(minutes * 60),
+                       unitsPerHour: rate, syncIdentifier: id)
+    }
+    private func journaled(_ records: [LoanDoseRecord]) -> (String) -> LoanDoseRecord? {
+        { id in records.first { $0.syncIdentifier == id } }
     }
 
-    /// Scheduled basal over a span is still not a wrist command.
-    func testScheduledBasalOverASpanIsNotJournaled() {
-        let basal = DoseEntry(type: .basal, startDate: now, endDate: now.addingTimeInterval(300), value: 0.6,
-                              unit: .unitsPerHour, decisionId: nil)
-        XCTAssertNil(PodLoanWatchController.loanRecord(for: basal, raw: Data([0x03])))
+    /// OmnipodKit's cancel back to the schedule: the running temp alone, shortened, under its own identity.
+    func testACancelBackToTheScheduleIsJournaledAsACancel() {
+        let running = temp(0.2, from: start, minutes: 30, id: "t1")
+        let shortened = temp(0.2, from: start, minutes: 5, id: "t1")
+        let added = PodLoanWatchController.recordsToJournal([shortened], journaled: journaled([running]))
+        XCTAssertEqual(added.count, 1)
+        XCTAssertEqual(added.first?.kind, .tempBasal)
+        XCTAssertEqual(added.first?.startDate, shortened.endDate)
+        XCTAssertEqual(added.first?.endDate, shortened.endDate)
+        XCTAssertEqual(added.first?.unitsPerHour, 0)
+        XCTAssertEqual(added.first?.syncIdentifier, "t1-cancel")
+    }
+
+    /// A temp change reports the old temp shortened beside the new one; the new temp ends the old, no cancel.
+    func testATempChangeJournalsOnlyTheNewTemp() {
+        let running = temp(0.2, from: start, minutes: 30, id: "t1")
+        let shortened = temp(0.2, from: start, minutes: 5, id: "t1")
+        let next = temp(0.65, from: start.addingTimeInterval(301), minutes: 30, id: "t2")
+        let added = PodLoanWatchController.recordsToJournal([shortened, next], journaled: journaled([running]))
+        XCTAssertEqual(added.map(\.syncIdentifier), ["t2"])
+    }
+
+    /// The running temp re-reported unchanged adds nothing, and a cancel already journaled is not journaled again.
+    func testRepeatsAddNothing() {
+        let running = temp(0.2, from: start, minutes: 30, id: "t1")
+        XCTAssertTrue(PodLoanWatchController.recordsToJournal([running], journaled: journaled([running])).isEmpty)
+        let shortened = temp(0.2, from: start, minutes: 5, id: "t1")
+        let cancel = PodLoanWatchController.recordsToJournal([shortened], journaled: journaled([running]))
+        XCTAssertTrue(PodLoanWatchController.recordsToJournal([shortened], journaled: journaled([running] + cancel)).isEmpty)
     }
 }

@@ -283,8 +283,10 @@ extension AlertPermissionsChecker {
                                                 message: alert.alertBody,
                                                 preferredStyle: .alert)
         let titleImageAttachment = NSTextAttachment()
-        titleImageAttachment.image = UIImage(systemName: "exclamationmark.triangle.fill")?.withTintColor(.critical, renderingMode: .alwaysOriginal)
-        titleImageAttachment.bounds = CGRect(x: titleImageAttachment.bounds.origin.x, y: -10, width: 40, height: 35)
+        let iconSize = CGSize(width: 40, height: 35)
+        titleImageAttachment.image = UIImage(systemName: "exclamationmark.triangle.fill")?
+            .tintedForTextAttachment(.critical, size: iconSize)
+        titleImageAttachment.bounds = CGRect(x: titleImageAttachment.bounds.origin.x, y: -10, width: iconSize.width, height: iconSize.height)
         let titleWithImage = NSMutableAttributedString(attachment: titleImageAttachment)
         titleWithImage.append(NSMutableAttributedString(string: "\n\n", attributes: [.font: UIFont.systemFont(ofSize: 8)]))
         titleWithImage.append(NSMutableAttributedString(string: alert.alertTitle, attributes: [.font: UIFont.preferredFont(forTextStyle: .headline)]))

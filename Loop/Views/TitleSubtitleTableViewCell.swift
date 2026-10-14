@@ -34,12 +34,9 @@ class TitleSubtitleTableViewCell: UITableViewCell {
         backgroundView?.layer.insertSublayer(gradient, at: 0)
 
         updateColors()
-    }
-
-    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-
-        updateColors()
+        registerForTraitChanges(UITraitCollection.systemTraitsAffectingColorAppearance) { (cell: Self, _: UITraitCollection) in
+            cell.updateColors()
+        }
     }
 
     private func updateColors() {

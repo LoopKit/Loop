@@ -162,6 +162,29 @@ enum LoanReconciler {
         return event.record.syncIdentifier ?? "loanv2-\(event.id.uuidString)"
     }
 
+    /// What the pump's delivered total rose by between two readings, less what `records` and the
+    /// schedule explain. Positive: the pump delivered insulin the records do not hold. Boluses still
+    /// delivering are pro-rated. Milli-unit quantized.
+    static func insulinNotInRecords(totalThen: Double, then: Date, totalNow: Double, now: Date,
+                                    records: [LoanDoseRecord], schedule: BasalRateSchedule?, pulseUnits: Double) -> Double {
+        // Synthetic events; only their order matters.
+        let rateEvents = records.filter { $0.kind != .bolus }.enumerated().map {
+            LoanEvent(id: UUID(), seq: $0.offset + 1, provenance: .confirmed, record: $0.element, loggedAt: now)
+        }
+        var expected = expectedInsulin(events: rateEvents, schedule: schedule, pulseUnits: pulseUnits, from: then, to: now)
+        for bolus in records where bolus.kind == .bolus {
+            guard let amount = bolus.amount, amount > 0 else { continue }
+            let end = bolus.endDate ?? bolus.startDate
+            if end > bolus.startDate {
+                let overlap = min(end, now).timeIntervalSince(max(bolus.startDate, then))
+                if overlap > 0 { expected += amount * overlap / end.timeIntervalSince(bolus.startDate) }
+            } else if bolus.startDate >= then, bolus.startDate <= now {
+                expected += amount
+            }
+        }
+        return ((totalNow - totalThen - expected) * 1000).rounded() / 1000
+    }
+
     /// Insulin the records say the pump delivered between two instants, in whole `pulseUnits`.
     /// `schedule` fills gaps (nil: journaled only); `includingBolusesAtEnd` is false at a mid-loan reading.
     static func expectedInsulin(events: [LoanEvent], schedule: BasalRateSchedule?, pulseUnits: Double,

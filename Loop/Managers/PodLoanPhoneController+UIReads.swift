@@ -19,10 +19,7 @@ extension PodLoanPhoneController {
         var isLoanedOut = false
         var isTakeoverInProgress = false
         var isSettlingOnly = false
-        var ladderIsRunning = false
-        var ladderStartedAt: Date?
-        var ladderPhase: ReclaimProgress.Phase = .draining
-        var ladderForceAt: Date?
+        var takeBackStartedAt: Date?
         var isOwner = true
         var reclaimStartedAt: Date?
         var reclaimVerified = true
@@ -38,12 +35,7 @@ extension PodLoanPhoneController {
         s.isLoanedOut = state != .owner || yieldingToInferredLoan
         s.isTakeoverInProgress = state == .grantOffered
         s.isSettlingOnly = state == .owner && reclaimStartedAt != nil && reclaimVerifiedAt == nil
-        if let ladder = reclaimLadder {
-            s.ladderIsRunning = state == .reclaimPending || state == .reconciling
-            s.ladderStartedAt = ladder.startedAt
-            s.ladderPhase = ladder.phase
-            s.ladderForceAt = ladder.forceAt
-        }
+        s.takeBackStartedAt = state == .reclaimPending ? takeBackStartedAt : nil
         s.isOwner = state == .owner
         s.reclaimStartedAt = reclaimStartedAt
         s.reclaimVerified = reclaimVerifiedAt != nil
@@ -79,23 +71,13 @@ extension PodLoanPhoneController {
         return uiMirror
     }
 
-    /// Pure: snapshot plus clock. Covers the drain (ladder) and the settle after it.
+    /// Pure: snapshot plus clock. Covers a take-back's reach for the pod and the settle after it.
     static func reclaimProgress(from s: UISnapshot, now: Date) -> ReclaimProgress? {
-        if s.ladderIsRunning, let ladderStartedAt = s.ladderStartedAt {
-            let elapsed = max(now.timeIntervalSince(ladderStartedAt), 0)
-
-            var phase = s.ladderPhase
-            var fraction: Double?
-            // Only the drain has an expectation; overrun shows the force deadline instead.
-            if phase == .draining {
-                fraction = min(elapsed / Self.liveHandoverExpectation, 0.95)
-                if elapsed >= Self.liveHandoverExpectation { phase = .watchNotAnswering }
-            }
-            return ReclaimProgress(phase: phase, startedAt: ladderStartedAt,
-                                   expectedBy: phase == .draining
-                                       ? ladderStartedAt.addingTimeInterval(Self.liveHandoverExpectation)
-                                       : (s.ladderForceAt ?? ladderStartedAt),
-                                   fraction: fraction,
+        if let started = s.takeBackStartedAt {
+            let elapsed = max(now.timeIntervalSince(started), 0)
+            return ReclaimProgress(phase: .reachingPod, startedAt: started,
+                                   expectedBy: started.addingTimeInterval(Self.takeBackLinkLimit),
+                                   fraction: min(elapsed / Self.takeBackLinkLimit, 0.95),
                                    elapsed: elapsed)
         }
 
@@ -104,7 +86,6 @@ extension PodLoanPhoneController {
            now.timeIntervalSince(started) < Self.reclaimSettleTimeout {
             let elapsed = max(now.timeIntervalSince(started), 0)
 
-            // A force reclaim is worded as the phone taking the pod.
             if s.auditIsForceReclaim {
                 return ReclaimProgress(
                     phase: .forceReclaimingPod, startedAt: started,
@@ -127,10 +108,10 @@ extension PodLoanPhoneController {
 
     var isLoanedOutForUI: Bool { return uiState.isLoanedOut }
 
-    /// True across the ladder and the settle, so the tile does not flicker between them.
+    /// True across the reach and the settle, so the tile does not flicker between them.
     var isReclaimActivityForUI: Bool {
         let s = uiState
-        return s.isSettlingOnly || s.ladderIsRunning
+        return s.isSettlingOnly || s.takeBackStartedAt != nil
     }
     var isPodLoanedOutForUI: Bool { return uiState.isLoanedOut }
     var isPodTakeoverInProgressForUI: Bool { return uiState.isTakeoverInProgress }
