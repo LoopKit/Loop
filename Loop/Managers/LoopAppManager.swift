@@ -494,9 +494,11 @@ class LoopAppManager: NSObject {
         analyticsServicesManager.identifyState()
         if let pumpManager = deviceDataManager.pumpManager {
             analyticsServicesManager.identifyPumpType(pumpManager.pluginIdentifier)
+            analyticsServicesManager.identifyPumpModel(pumpManager.status.device.model)
         }
         if let cgmManager = deviceDataManager.cgmManager {
             analyticsServicesManager.identifyCGMType(cgmManager.pluginIdentifier)
+            analyticsServicesManager.identifyCGMModel(cgmManager.cgmManagerStatus.device?.model)
         }
         let serviceNames = servicesManager.activeServices.map { $0.pluginIdentifier }
         analyticsServicesManager.identify("Services", array: serviceNames)
