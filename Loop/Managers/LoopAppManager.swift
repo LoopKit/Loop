@@ -192,6 +192,15 @@ class LoopAppManager: NSObject {
             return
         }
 
+        // Starting the managers on data this version can't read would loop without dose history
+        guard !PersistenceController.isAppGroupStoreFromNewerVersion else {
+            log.error("Data is from a newer version of Loop; not launching")
+            if !(rootViewController is NewerDataVersionViewController) {
+                rootViewController = NewerDataVersionViewController()
+            }
+            return
+        }
+
         self.state = state.next
     }
 

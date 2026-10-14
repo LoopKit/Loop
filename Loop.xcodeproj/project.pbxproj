@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D1A0B0000000000000000091 /* NewerDataVersionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A0B0000000000000000090 /* NewerDataVersionView.swift */; };
 		01414522FC033F2B7A9B223A /* Loop/Resources/Sounds/crying.caf in Resources */ = {isa = PBXBuildFile; fileRef = 85203550670F2E9BE92F27D8 /* Loop/Resources/Sounds/crying.caf */; };
 		0A02E77AD7536C322933D49B /* Loop/Resources/Sounds/minimal.caf in Resources */ = {isa = PBXBuildFile; fileRef = 74145BE3C46270883D295A1F /* Loop/Resources/Sounds/minimal.caf */; };
 		124B300527D84BE2A1233A91 /* Loop/Resources/Sounds/urgent_low.caf in Resources */ = {isa = PBXBuildFile; fileRef = C9EA3F48338B49BD9C6BD0F9 /* Loop/Resources/Sounds/urgent_low.caf */; };
@@ -791,6 +792,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D1A0B0000000000000000090 /* NewerDataVersionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewerDataVersionView.swift; sourceTree = "<group>"; };
 		0FC34B523FE5A50C920506D5 /* Loop/Resources/Sounds/alarm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/alarm.caf; sourceTree = SOURCE_ROOT; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
@@ -2050,6 +2052,7 @@
 				B43B5C532EAFBF110096A6AE /* RecentGlucoseTableViewCell.xib */,
 				C151634D2FA2C9C800FEECE8 /* RequiredVersionUpdateView.swift */,
 				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
+				D1A0B0000000000000000090 /* NewerDataVersionView.swift */,
 				FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */,
 				FEEDF0000000000000000003 /* Statistics/AGPChartView.swift */,
 				FEEDF0000000000000000002 /* Statistics/StatisticsView.swift */,
@@ -3589,6 +3592,7 @@
 				1D12D3B92548EFDD00B53E8B /* main.swift in Sources */,
 				A9DCF32A25B0FABF00C89088 /* LoopUIColorPalette+Default.swift in Sources */,
 				1DDE273E24AEA4B000796622 /* SettingsView.swift in Sources */,
+				D1A0B0000000000000000091 /* NewerDataVersionView.swift in Sources */,
 				FEEDB0000000000000000004 /* Statistics/TimeInRangeBar.swift in Sources */,
 				FEEDB0000000000000000003 /* Statistics/AGPChartView.swift in Sources */,
 				FEEDB0000000000000000002 /* Statistics/StatisticsView.swift in Sources */,

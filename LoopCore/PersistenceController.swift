@@ -21,6 +21,13 @@ extension PersistenceController {
         return self.init(directoryURL: directoryURL.appendingPathComponent("com.loopkit.LoopKit", isDirectory: true), isReadOnly: isReadOnly)
     }
 
+    public class var isAppGroupStoreFromNewerVersion: Bool {
+        guard let directoryURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Bundle.main.appGroupSuiteName) else {
+            return false
+        }
+        return isStoreFromNewerVersion(inDirectory: directoryURL.appendingPathComponent("com.loopkit.LoopKit", isDirectory: true))
+    }
+
     public class func controllerInLocalDirectory(named name: String = "com.loopkit.LoopKit") -> PersistenceController {
         guard let directoryURL = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true) else {
             fatalError("Could not access the document directory of the current process")
