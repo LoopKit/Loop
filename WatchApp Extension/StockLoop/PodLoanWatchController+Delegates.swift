@@ -64,7 +64,7 @@ extension PodLoanWatchController: PumpManagerDelegate {
     func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {
     }
 
-    /// Runtime comes from the workout keepalive.
+    /// Runtime comes from the sensor's and the pod's own Bluetooth wakes.
     func pumpManagerMustProvideBLEHeartbeat(_ pumpManager: PumpManager) -> Bool {
         return false
     }
