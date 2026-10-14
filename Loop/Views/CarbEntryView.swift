@@ -298,7 +298,7 @@ extension CarbEntryView {
             .padding(.horizontal)
             .background(CardBackground())
             .padding(.horizontal)
-            .onChange(of: viewModel.selectedFavoriteFoodIndex, perform: collapseFavoriteFoodsRowIfNeeded(_:))
+            .onChange(of: viewModel.selectedFavoriteFoodIndex) { _, newIndex in collapseFavoriteFoodsRowIfNeeded(newIndex) }
         }
     }
     

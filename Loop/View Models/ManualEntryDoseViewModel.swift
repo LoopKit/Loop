@@ -59,7 +59,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
         let predictedGlucoseChart = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil,
                                                           yAxisStepSizeMGDLOverride: FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil)
         predictedGlucoseChart.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayRangeWide
-        return ChartsManager(colors: .primary, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
+        return ChartsManager(colors: .primary(background: .secondarySystemGroupedBackground), settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
     }()
     
     // MARK: - External Insulin

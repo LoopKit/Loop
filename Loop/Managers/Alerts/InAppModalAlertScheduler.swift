@@ -113,10 +113,14 @@ extension InAppModalAlertScheduler {
                 // the completion is called after the alert is acknowledged
                 self?.clearPresentedAlert(identifier: alert.identifier)
                 Task {
-                    if action.identifier == "acknowledge" {
-                        try await self?.alertManagerResponder?.acknowledgeAlert(identifier: alert.identifier)
-                    } else {
-                        try await self?.alertManagerResponder?.userDidSelectAction(alertIdentifier: alert.identifier, actionIdentifier: action.identifier)
+                    do {
+                        if action.identifier == "acknowledge" {
+                            try await self?.alertManagerResponder?.acknowledgeAlert(identifier: alert.identifier)
+                        } else {
+                            try await self?.alertManagerResponder?.userDidSelectAction(alertIdentifier: alert.identifier, actionIdentifier: action.identifier)
+                        }
+                    } catch {
+                        self?.log.error("Error responding to alert action: %{public}@", String(describing: error))
                     }
                 }
             }

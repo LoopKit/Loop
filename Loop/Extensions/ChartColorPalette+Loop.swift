@@ -8,10 +8,15 @@
 
 import LoopUI
 import LoopKitUI
+import UIKit
 
 
 extension ChartColorPalette {
     static var primary: ChartColorPalette {
-        return ChartColorPalette(axisLine: .axisLineColor, axisLabel: .axisLabelColor, grid: .gridColor, presetTint: .presets, glucoseTint: .glucoseTintColor, insulinTint: .insulinTintColor, carbTint: .carbTintColor)
+        primary(background: .systemBackground)
+    }
+
+    static func primary(background: UIColor) -> ChartColorPalette {
+        return ChartColorPalette(axisLine: .axisLineColor, axisLabel: .axisLabelColor, grid: .gridColor, presetTint: .presets, glucoseTint: .glucoseTintColor, insulinTint: .insulinTintColor, carbTint: .carbTintColor, background: background)
     }
 }

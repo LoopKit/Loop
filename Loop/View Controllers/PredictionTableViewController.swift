@@ -220,7 +220,6 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         switch Section(rawValue: indexPath.section)! {
         case .charts:
             let cell = tableView.dequeueReusableCell(withIdentifier: ChartTableViewCell.className, for: indexPath) as! ChartTableViewCell
-            cell.contentView.layoutMargins.left = tableView.separatorInset.left
             cell.setChartGenerator(generator: { [weak self] (frame) in
                 return self?.charts.chart(atIndex: 0, frame: frame)?.view
             })

@@ -9,7 +9,7 @@ import LoopKit
 import LoopAlgorithm
 
 
-extension GlucoseEffectVelocity: RawRepresentable {
+extension GlucoseEffectVelocity: @retroactive RawRepresentable {
     public typealias RawValue = [String: Any]
 
     static let unit = LoopUnit.milligramsPerDeciliterPerMinute

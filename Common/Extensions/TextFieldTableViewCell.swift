@@ -9,4 +9,4 @@ import LoopKitUI
 import LoopUI
 
 
-extension TextFieldTableViewCell: NibLoadable { }
+extension TextFieldTableViewCell: @retroactive NibLoadable { }
