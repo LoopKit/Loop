@@ -31,12 +31,8 @@ extension PodLoanPhoneController {
                 engageInferredLoanYield(evidence: "future-epoch batch e\(batch.epoch) at .owner (live seized loan streaming)")
             }
 
-            // Records for a closed loan: resend the revoke, throttled.
-            if state == .owner, batch.epoch <= epoch,
-               lastClosedSessionRevokeAt.map({ deps.now().timeIntervalSince($0) >= 20 }) ?? true {
-                lastClosedSessionRevokeAt = deps.now()
-                handbackDiag(batch.epoch, "records from a CLOSED session — the watch still thinks it holds the pod; revoke e\(batch.epoch) sent again")
-                sendMessage(.revoke(Revoke(epoch: batch.epoch)))
+            if state == .owner, batch.epoch <= epoch {
+                resendRevokeForClosedSession(epoch: batch.epoch, evidence: "records")
             }
             return
         }
@@ -74,8 +70,8 @@ extension PodLoanPhoneController {
         if let token = offer.seizeToken, state == .owner || state == .reclaimPending, offer.epoch > epoch,
            token == persisted.seizeToken {
             if state == .reclaimPending {
-                cancelReclaimLadder()
-                handbackDiag(offer.epoch, "[seize] retro-ack arrived MID-RECLAIM — ladder stood down; the aimed revoke got its drain")
+                cancelTakeBackAttempt()
+                handbackDiag(offer.epoch, "[seize] retro-ack arrived MID-RECLAIM — take-back attempt stood down; the watch is handing back")
             }
             handbackDiag(offer.epoch, "[seize] RETRO-ACK — offer for a SEIZED loan (token …\(String(token.uuidString.suffix(8)))); adopting epoch \(epoch)→\(offer.epoch) as .loaned, reconciling on the normal path")
 
@@ -95,6 +91,14 @@ extension PodLoanPhoneController {
                 $0.audit.loanStartedAt = anchor
             }
             stateDidChange(from: previous)
+
+            // A live offer means the watch still holds the pod: dosing authority and the radio go
+            // together. A final or recovered offer is a loan already over; only its records come in.
+            if offer.released != true, !offer.recovered,
+               let control = deps.pumpManager() as? ExclusiveDeviceControl, !control.isControlReleased {
+                control.releaseControl()
+                deps.pumpControlChanged(true)
+            }
         }
 
         // An offer ahead of this phone's epoch cannot be committed.
@@ -512,7 +516,7 @@ extension PodLoanPhoneController {
 
     /// The final records are in: take the link back, resume dosing, clear staging.
     private func finishLoanAfterCommit() {
-        cancelReclaimLadder()
+        cancelTakeBackAttempt()
         cancelNotification(id: NotificationID.paused)
 
         // A force deferred behind this commit is satisfied by the close.
@@ -521,7 +525,6 @@ extension PodLoanPhoneController {
         // A newer loan is live: commit the books but do not take the pod.
         if supersededByLiveLoan(epoch) {
             let liveEpoch = newestForeignLoanEvidence?.epoch ?? epoch + 1
-            pendingRevoke = false
             state = .owner
             staged = [:]
             stagedTombstones = []
@@ -534,9 +537,7 @@ extension PodLoanPhoneController {
         }
         // The state observer opens the settle window.
         reclaimPodConnection()
-        pendingRevoke = false
         state = .owner
-        deps.setAutomaticDosingPaused(false)
         staged = [:]
         stagedTombstones = []
         persistStaged()

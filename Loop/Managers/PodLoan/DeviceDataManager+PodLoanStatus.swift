@@ -61,15 +61,9 @@ extension DeviceDataManager {
         /// nil phase: inside the drain's store commit, which has no deadline to name.
         init(phase: PodLoanPhoneController.ReclaimProgress.Phase? = nil) {
             switch phase {
-            case .forcing?, .forceReclaimingPod?:
-                // One label for the force and the settle after it.
-                localizedMessage = NSLocalizedString("Forcing…", comment: "Title text for the pump tile while the phone force-reclaims the pod")
-            case .reconnectingToPod?, .draining?:
-                // The same label across handover and settle: one wait, one bar.
-                localizedMessage = NSLocalizedString("Reclaiming…", comment: "Title text for the pump tile while the pod is coming back from the watch")
-            case .watchNotAnswering?:
-                localizedMessage = NSLocalizedString("No watch reply…", comment: "Title text for the pump tile when the watch has not answered within the drain promise")
-            case .none:
+            case .reachingPod?:
+                localizedMessage = NSLocalizedString("Reaching pod…", comment: "Title text for the pump tile while a take-back waits for the pod's link")
+            case .reconnectingToPod?, .forceReclaimingPod?, .none:
                 localizedMessage = NSLocalizedString("Reclaiming…", comment: "Title text for the pump tile while the pod is coming back from the watch")
             }
         }

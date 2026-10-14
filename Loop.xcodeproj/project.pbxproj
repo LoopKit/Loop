@@ -306,6 +306,7 @@
 		7B29B5CF4AAA4DA0B6E2F1A9 /* LoanTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0861EE8E371426287E4542F /* LoanTransport.swift */; };
 		7BE5EC4CA7BFBB16E8018091 /* WatchLoopManager+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5744C796822627F1C74D802F /* WatchLoopManager+Display.swift */; };
 		7CC4501AABA3438A9291A003 /* LoanTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0861EE8E371426287E4542F /* LoanTransport.swift */; };
+		5021CA8C264146C9DFF33E9D /* PluginPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE102E23D8C1C1291EF66387 /* PluginPickerView.swift */; };
 		7D23667D21250C7E0028B67D /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D23667C21250C7E0028B67D /* LocalizedString.swift */; };
 		7E69CFFC2A16A77E00203CBD /* ResetLoopManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */; };
 		8077722BF812D34BDD35AEE6 /* WristOverrideRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */; };
@@ -570,7 +571,6 @@
 		C10C57FC2E70B8B900A4825C /* EnvironmentValues+GlucoseDisplayUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10C57FB2E70B87500A4825C /* EnvironmentValues+GlucoseDisplayUnit.swift */; };
 		C10C57FE2E71E87D00A4825C /* ActiveOverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10C57FD2E71E87400A4825C /* ActiveOverrideView.swift */; };
 		C110888D2A3913C600BA4898 /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = C110888C2A3913C600BA4898 /* BuildDetails.swift */; };
-		C11445B22DA98A3400034864 /* CorrectionRangeInformationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11445B12DA98A2D00034864 /* CorrectionRangeInformationView.swift */; };
 		C11B9D5B286778A800500CF8 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C11B9D5A286778A800500CF8 /* SwiftCharts */; };
 		C11B9D5E286778D000500CF8 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D5D286778D000500CF8 /* LoopKitUI.framework */; };
 		C11B9D62286779C000500CF8 /* MockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D60286779C000500CF8 /* MockKit.framework */; };
@@ -1554,7 +1554,6 @@
 		C10C57FB2E70B87500A4825C /* EnvironmentValues+GlucoseDisplayUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EnvironmentValues+GlucoseDisplayUnit.swift"; sourceTree = "<group>"; };
 		C10C57FD2E71E87400A4825C /* ActiveOverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveOverrideView.swift; sourceTree = "<group>"; };
 		C110888C2A3913C600BA4898 /* BuildDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildDetails.swift; sourceTree = "<group>"; };
-		C11445B12DA98A2D00034864 /* CorrectionRangeInformationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CorrectionRangeInformationView.swift; sourceTree = "<group>"; };
 		C11AA5C7258736CF00BDE12F /* DerivedAssetsBase.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssetsBase.xcassets; sourceTree = "<group>"; };
 		C11B9D5D286778D000500CF8 /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C11B9D60286779C000500CF8 /* MockKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MockKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1695,6 +1694,7 @@
 		DA738E289DA1BD373E01AE31 /* GlanceComplicationSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GlanceComplicationSnapshot.swift; path = "Loop Complications/GlanceComplicationSnapshot.swift"; sourceTree = SOURCE_ROOT; };
 		DAB6D8790872D927B336A1E3 /* ContentView+PodLoan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ContentView+PodLoan.swift"; path = "WatchApp Extension/StockLoop/ContentView+PodLoan.swift"; sourceTree = SOURCE_ROOT; };
 		DC6E574D826158B33EE53EF6 /* WatchLoopManager+GlucoseAlerts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WatchLoopManager+GlucoseAlerts.swift"; path = "WatchApp Extension/StockLoop/WatchLoopManager+GlucoseAlerts.swift"; sourceTree = SOURCE_ROOT; };
+		CE102E23D8C1C1291EF66387 /* PluginPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PluginPickerView.swift; sourceTree = "<group>"; };
 		DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegralRetrospectiveCorrectionSelectionView.swift; sourceTree = "<group>"; };
 		DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationFactorStrategy.swift; sourceTree = "<group>"; };
 		DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorStrategy.swift; sourceTree = "<group>"; };
@@ -2414,6 +2414,7 @@
 				84DEB10C2C18FABA00170734 /* IOSFocusModesView.swift */,
 				84D1F1A62D09053A00CB271F /* StatusTableView.swift */,
 				B429CAB22E97C7F300FA988E /* LoopStatusModalView.swift */,
+				CE102E23D8C1C1291EF66387 /* PluginPickerView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2841,7 +2842,6 @@
 		84E8BBAF2CC979300078E6CF /* Presets */ = {
 			isa = PBXGroup;
 			children = (
-				C11445B12DA98A2D00034864 /* CorrectionRangeInformationView.swift */,
 				84FA9D322CF7FD0D004162B4 /* PresetsHistoryView.swift */,
 				84B67A8C2F63558A004C783B /* PresetPerformanceHistoryView.swift */,
 				8446319E2F5A2AA9003825AE /* PresetsPerformanceHistoryViewModel.swift */,
@@ -4053,7 +4053,6 @@
 				A96DAC242838325900D94E38 /* DiagnosticLog.swift in Sources */,
 				A9CBE45A248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift in Sources */,
 				A9C62D8A2331703100535612 /* ServicesManager.swift in Sources */,
-				C11445B22DA98A3400034864 /* CorrectionRangeInformationView.swift in Sources */,
 				43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */,
 				A9347F2F24E7508A00C99C34 /* WatchHistoricalCarbs.swift in Sources */,
 				C10509792D8B636900118A37 /* Environment+TemporaryPresetsManager.swift in Sources */,
@@ -4238,6 +4237,7 @@
 				B40D07C7251A89D500C1C6D7 /* GlucoseDisplay.swift in Sources */,
 				43C2FAE11EB656A500364AFF /* GlucoseEffectVelocity.swift in Sources */,
 				14C970862C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift in Sources */,
+				5021CA8C264146C9DFF33E9D /* PluginPickerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5004,7 +5004,6 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				LOCALIZED_STRING_MACRO_NAMES = (
 					NSLocalizedString,
@@ -5116,7 +5115,6 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				LOCALIZED_STRING_MACRO_NAMES = (
 					NSLocalizedString,
@@ -5585,7 +5583,6 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZED_STRING_MACRO_NAMES = (
 					NSLocalizedString,
 					CFLocalizedString,

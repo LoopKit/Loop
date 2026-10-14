@@ -102,6 +102,10 @@ final class AnalyticsServicesManager {
         logEvent("Pump battery replacement", outOfSession: true)
     }
 
+    func deviceManagerDidRecordEvent(_ name: String, properties: [AnyHashable: Any]?) {
+        logEvent(name, withProperties: properties, outOfSession: true)
+    }
+
     func reservoirWasRewound() {
         logEvent("Pump reservoir rewind", outOfSession: true)
     }

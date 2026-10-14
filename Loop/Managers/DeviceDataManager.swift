@@ -499,7 +499,16 @@ final class DeviceDataManager {
     var availableCGMManagers: [CGMManagerDescriptor] {
         var availableCGMManagers = pluginManager.availableCGMManagers + availableStaticCGMManagers
         if let pumpManagerAsCGMManager = pumpManager as? CGMManager {
-            availableCGMManagers.append(CGMManagerDescriptor(identifier: pumpManagerAsCGMManager.pluginIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle))
+            let identifier = pumpManagerAsCGMManager.pluginIdentifier
+            let manufacturer = pluginManager.pluginBundle(forIdentifier: identifier)?.object(forInfoDictionaryKey: LoopPluginBundleKey.deviceManufacturer.rawValue) as? String
+            availableCGMManagers.append(
+                CGMManagerDescriptor(
+                    identifier: identifier,
+                    localizedTitle: pumpManagerAsCGMManager.localizedTitle,
+                    manufacturer: manufacturer,
+                    image: (type(of: pumpManagerAsCGMManager) as? CGMManagerUI.Type)?.pickerImage
+                )
+            )
         }
         
         availableCGMManagers = availableCGMManagers.filter({ cgmManager in
@@ -884,7 +893,11 @@ extension DeviceDataManager: DeviceManagerDelegate {
             deviceLog.log(managerIdentifier: manager.pluginIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
         }
     }
-    
+
+    func deviceManager(_ manager: DeviceManager, recordAnalyticsEvent name: String, properties: [AnyHashable: Any]?) {
+        analyticsServicesManager.deviceManagerDidRecordEvent(name, properties: properties)
+    }
+
     var allowDebugFeatures: Bool {
         FeatureFlags.allowDebugFeatures // NOTE: DEBUG FEATURES - DEBUG AND TEST ONLY
     }
@@ -1291,9 +1304,7 @@ extension DeviceDataManager {
     }
     
     func deleteTestingCarbData(before: Date = Date()) async throws {
-        guard let testingCGMManager = cgmManager as? TestingCGMManager,
-              let testingPumpManager = pumpManager as? TestingPumpManager
-        else {
+        guard cgmManager is TestingCGMManager, pumpManager is TestingPumpManager else {
             return
         }
         
@@ -1301,9 +1312,7 @@ extension DeviceDataManager {
     }
     
     func deleteTestingAlertData() async throws {
-        guard let testingCGMManager = cgmManager as? TestingCGMManager,
-              let testingPumpManager = pumpManager as? TestingPumpManager
-        else {
+        guard cgmManager is TestingCGMManager, pumpManager is TestingPumpManager else {
             return
         }
         

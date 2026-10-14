@@ -13,13 +13,6 @@ class PotentialCarbEntryTableViewCell: UITableViewCell {
     @IBOutlet weak var valueLabel: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-
-        contentView.layoutMargins.left = separatorInset.left
-        contentView.layoutMargins.right = separatorInset.left
-    }
-
     override func awakeFromNib() {
         super.awakeFromNib()
 

@@ -181,12 +181,12 @@ public final class AlertManager {
 
     // MARK: - Loop Not Running alerts
 
-    /// True while a pod loan is active; set by WatchDataManager at wiring time — see `AlertManager+PodLoan.swift`.
+    /// True while the pump's control is released; set by WatchDataManager at wiring time — see `AlertManager+PodLoan.swift`.
     var loopNotRunningSuppressionGate: (() -> Bool)?
 
     func loopDidComplete(_ lastLoopDate: Date? = nil) async {
         if loopNotRunningSuppressionGate?() == true {
-            log.default("loopDidComplete during a pod loan — Loop Failure ladder NOT re-armed (the watch is the looper)")
+            log.default("loopDidComplete with the pump released — Loop Failure ladder NOT re-armed")
             return
         }
         // use now if there is no lastLoopDate
@@ -775,7 +775,11 @@ extension AlertManager: AlertPermissionsCheckerDelegate {
             retractionHandler: { alert in
                 // need to dismiss the in-app alert outside of the alert system
                 Task {
-                    try await self.recordRetractedAlert(alert, at: Date())
+                    do {
+                        try await self.recordRetractedAlert(alert, at: Date())
+                    } catch {
+                        self.log.error("Error recording retracted alert: %{public}@", String(describing: error))
+                    }
                     await self.dismissUnsafeNotificationPermissionsInAppAlert()
                 }
             }
@@ -809,7 +813,11 @@ extension AlertManager: AlertPermissionsCheckerDelegate {
             let alertController = AlertPermissionsChecker.constructUnsafeNotificationPermissionsInAppAlert(alert: alert) { [weak self] alert in
                 UserDefaults.standard.hasIssuedNotificationPermissionsAlert = false
                 Task {
-                    try await self?.acknowledgeAlert(identifier: alert.alertIdentifier)
+                    do {
+                        try await self?.acknowledgeAlert(identifier: alert.alertIdentifier)
+                    } catch {
+                        self?.log.error("Error acknowledging alert: %{public}@", String(describing: error))
+                    }
                 }
             }
 

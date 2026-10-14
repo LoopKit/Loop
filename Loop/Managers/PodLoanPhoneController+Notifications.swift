@@ -41,9 +41,9 @@ extension PodLoanPhoneController {
             NSLocalizedString("Loop can't read a message from the watch. The apps may be on different builds — check both are current.", comment: "Phone notice body when a loan message cannot be decoded"))
     }
 
-    /// Shared by every way an audit can fail to reach a verdict.
+    /// For a pump that gave no delivered total to check against.
     static let sessionUnverifiedBody = NSLocalizedString(
-        "Loop couldn't verify the watch's insulin delivery. Automatic dosing is off until you turn it back on.",
+        "Loop couldn't check the watch's insulin delivery against the pump. Check your insulin on board. Automatic dosing continues.",
         comment: "Phone notice when a watch session's insulin could not be verified after reclaim")
 
     /// Reminders to re-time the unexplained-insulin placeholder, within the insulin duration.
@@ -55,7 +55,7 @@ extension PodLoanPhoneController {
                 id: NotificationID.placeholder(index),
                 title: NSLocalizedString("Estimated Insulin Still Booked", comment: "Phone reminder title while an unexplained gap bolus stands"),
                 body: String(format: NSLocalizedString("%1$@ U is booked as a bolus at %2$@ — the pod's total, not real timing. If you remember the session, correct it in Insulin Delivery.", comment: "Phone reminder body while an unexplained gap bolus stands (1: units, 2: time booked)"), amount, time),
-                delay: delay, repeats: false)
+                delay: delay, repeats: false, interruptionLevel: .timeSensitive)
         }
     }
 
@@ -63,22 +63,6 @@ extension PodLoanPhoneController {
         for index in ReminderLadder.placeholderRungs.indices {
             cancelNotification(id: NotificationID.placeholder(index))
         }
-    }
-
-    /// Fires once; the phone already announced the open loop. Time-sensitive: nothing doses
-    /// automatically until the user acts.
-    func armOpenLoopReminder() {
-        scheduleNotification(
-            id: NotificationID.openLoop,
-            title: NSLocalizedString("Closed Loop Is Off", comment: "Phone reminder title after an audit opened the loop"),
-            body: NSLocalizedString("Loop couldn't verify the watch session's insulin, so it stopped dosing. Turn Closed Loop back on when you're ready.", comment: "Phone reminder body after an audit opened the loop"),
-            delay: ReminderLadder.openLoopDelay, repeats: false, interruptionLevel: .timeSensitive)
-    }
-
-    /// At launch, in case the user already closed the loop.
-    func cancelOpenLoopReminderIfLoopClosed() {
-        guard deps.settings().dosingEnabled else { return }
-        cancelNotification(id: NotificationID.openLoop)
     }
 
     private static let reminderTimeFormatter: DateFormatter = {

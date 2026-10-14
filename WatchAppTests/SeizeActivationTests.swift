@@ -411,8 +411,8 @@ final class SeizeActivationTests: XCTestCase {
                        "max(credential 3, high-water 5, revoked 7) + 1 — every guard cleared, nothing reused")
     }
 
-    /// Detector C (fix 2): the reunion prompt and Keep each SEND a holdsPod status
-    /// report, so the phone's yield never waits on dose-stream evidence.
+    /// The phone is told the watch holds the pod as soon as it is reachable, and again at Keep: it
+    /// never waits on the dose stream or on the prompt's debounce.
     func testReunionPromptAndKeepSendHoldsPodReports() async {
         let controller = await makeController()
         controller.simFakeLoanFlow = true
@@ -438,9 +438,13 @@ final class SeizeActivationTests: XCTestCase {
 
         controller.noteReachabilityChanged(true)
         _ = controller.debugSnapshot()
+        XCTAssertEqual(holdsPodEpochs.count, 1, "told at once, before the debounce")
+        controller.noteReachabilityChanged(true)
+        _ = controller.debugSnapshot()
+        XCTAssertEqual(holdsPodEpochs.count, 1, "flapping reachability does not repeat it")
         pendingDebounce[0].perform()
         _ = controller.debugSnapshot()
-        XCTAssertEqual(holdsPodEpochs.count, 1, "the prompt raise tells the phone outright")
+        XCTAssertEqual(holdsPodEpochs.count, 1, "the prompt is for the user; the phone already knows")
 
         controller.dismissReunionPrompt()
         _ = controller.debugSnapshot()
