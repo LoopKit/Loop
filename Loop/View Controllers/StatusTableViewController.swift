@@ -1634,6 +1634,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     func presentSettings() {
+        analyticsServicesManager?.didDisplaySettingsScreen()
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: statusTableViewModel.settingsViewModel, localizedAppNameAndVersion: supportManager.localizedAppNameAndVersion)
                 .environmentObject(deviceManager.displayGlucosePreference)
