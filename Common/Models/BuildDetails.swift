@@ -66,6 +66,10 @@ class BuildDetails {
         return dict["com-loopkit-LoopWorkspace-git-branch"] as? String
     }
 
+    var customizations: [String] {
+        return dict["com-loopkit-Loop-customizations"] as? [String] ?? []
+    }
+
     /// Returns a dictionary of submodule details.
     /// The keys are the submodule names, and the values are tuples (branch, commitSHA).
     var submodules: [String: (branch: String, commitSHA: String)] {
