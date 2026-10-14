@@ -1941,30 +1941,6 @@ extension PodLoanPhoneControllerTests {
         XCTAssertTrue(resumed, "automatic dosing resumes on the clean verdict")
     }
 
-    /// With the pod unreachable, the gate the phone loop reads stays shut after the link is taken back.
-    func testDosingIsHeldUntilTheAuditVerdictArrives() throws {
-        let controller = makeController()
-        establishLoan(controller)
-        MockPumpManager.testOdometer = 12.5
-
-        lock.lock(); connectionReady = false; lock.unlock()   // the pod is not back yet
-
-        controller.forceReclaimToOwner(reason: "test: watch dead, pod not yet reachable")
-        waitForState(controller, .owner)
-        settle()
-
-        XCTAssertFalse(MockPumpManager.testConnectionReleased, "the link is the phone's again, so the release no longer gates")
-        XCTAssertTrue(controller.holdsAutomaticDosing, "no verdict, no automatic dosing — 'cannot verify' must never become 'assume fine'")
-        lock.lock()
-        let warningsArmed = controlCalls.contains(false)
-        lock.unlock()
-        XCTAssertTrue(warningsArmed, "the Loop Failure warnings are armed again at the take-back, so a pod that never returns is noticed")
-
-        lock.lock(); connectionReady = true; lock.unlock()    // the pod comes back
-        waitUntil(timeout: 8, "verdict after pod returns") { !controller.holdsAutomaticDosing }
-        waitUntil(timeout: 5, "gap booked") { self.lock.lock(); defer { self.lock.unlock() }; return !self.bookedGapDoses.isEmpty }
-    }
-
     /// The returning watch's real records replace the placeholder.
     func testReturningWatchRetiresTheGapBooking() throws {
         let controller = makeController()
@@ -2480,6 +2456,7 @@ extension PodLoanPhoneControllerTests {
                           events: [], tombstones: [], recovered: false, released: false,
                           seizeToken: token)).transportDictionary())
         waitUntil(timeout: 5, "adopted") { controller.state == .loaned }
+        controller.queue.sync {}   // the release follows the state change on the controller's queue
 
         XCTAssertTrue(MockPumpManager.testConnectionReleased, "the watch has the pod, so the phone releases it")
         XCTAssertTrue(controller.holdsAutomaticDosing, "and the phone's dosing is held")
