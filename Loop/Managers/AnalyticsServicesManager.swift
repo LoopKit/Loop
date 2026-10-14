@@ -74,6 +74,14 @@ final class AnalyticsServicesManager {
         identify("CGM Type", value: cgmType)
     }
 
+    func identifyPumpModel(_ model: String?) {
+        identify("Pump Model", value: model ?? "Unknown")
+    }
+
+    func identifyCGMModel(_ model: String?) {
+        identify("CGM Model", value: model ?? "Unknown")
+    }
+
     // MARK: - Screens
 
     func didDisplayBolusScreen() {
@@ -157,6 +165,7 @@ final class AnalyticsServicesManager {
     func pumpWasRemoved() {
         logEvent("Pump Removed")
         identifyPumpType("None")
+        identifyPumpModel("None")
     }
 
     func pumpWasAdded(identifier: String) {
@@ -166,6 +175,7 @@ final class AnalyticsServicesManager {
     func cgmWasRemoved() {
         logEvent("CGM Removed")
         identifyCGMType("None")
+        identifyCGMModel("None")
     }
 
     func cgmWasAdded(identifier: String) {

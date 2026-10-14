@@ -68,6 +68,8 @@ final class DeviceDataManager {
     
     @Published var cgmHasValidSensorSession: Bool
 
+    private var cgmDeviceModel: String?
+
     @Published var pumpIsAllowingAutomation: Bool
 
     private var lastCGMLoopTrigger: Date = .distantPast
@@ -684,6 +686,8 @@ private extension DeviceDataManager {
             cgmHasValidSensorSession = cgmManager.cgmManagerStatus.hasValidSensorSession
 
             analyticsServicesManager.identifyCGMType(cgmManager.pluginIdentifier)
+            cgmDeviceModel = cgmManager.cgmManagerStatus.device?.model
+            analyticsServicesManager.identifyCGMModel(cgmDeviceModel)
         }
         // Refresh the GlucoseAlertManager's view of whether the active
         // CGM does its own alerting. No active CGM ⇒ treat as "no
@@ -717,6 +721,7 @@ private extension DeviceDataManager {
             deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, alertPresenter: alertPresenter)
 
             analyticsServicesManager.identifyPumpType(pumpManager.pluginIdentifier)
+            analyticsServicesManager.identifyPumpModel(pumpManager.status.device.model)
 
             updatePumpManagerBLEHeartbeatPreference()
         }
@@ -999,6 +1004,10 @@ extension DeviceDataManager: CGMManagerDelegate {
             if self.cgmHasValidSensorSession != status.hasValidSensorSession {
                 self.cgmHasValidSensorSession = status.hasValidSensorSession
             }
+            if self.cgmDeviceModel != status.device?.model {
+                self.cgmDeviceModel = status.device?.model
+                self.analyticsServicesManager.identifyCGMModel(self.cgmDeviceModel)
+            }
         }
     }
 }
@@ -1074,6 +1083,10 @@ extension DeviceDataManager: PumpManagerDelegate {
             log.default("PumpManager:%{public}@ did update status: %{public}@", String(describing: type(of: pumpManager)), String(describing: status))
 
             doseStore.device = status.device
+
+            if status.device.model != oldStatus.device.model {
+                analyticsServicesManager.identifyPumpModel(status.device.model)
+            }
 
             if let newBatteryValue = status.pumpBatteryChargeRemaining,
                let oldBatteryValue = oldStatus.pumpBatteryChargeRemaining,
