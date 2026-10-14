@@ -14,18 +14,6 @@ import os.log
 final class StockLoopSession {
     let stack: StockLoopStack.Stack
 
-    /// Held only across takeover and hand-back; timers during a loan fire late.
-    private let keepalive = WorkoutKeepalive()
-
-    /// Holds are refcounted by `reason`, which must be stable per caller.
-    private func setKeepalive(_ holding: Bool, reason: String) {
-        holding ? keepalive.acquire(reason) : keepalive.release(reason)
-    }
-
-    /// Restart a session the system ended while holders remain.
-    func ensureKeepalive() { keepalive.ensureRunning() }
-
-    var workoutRunning: Bool { keepalive.isRunning }
     let loanController: PodLoanWatchController
 
     private let log = OSLog(subsystem: "com.loopkit.Loop", category: "StockLoopSession")
@@ -124,18 +112,9 @@ final class StockLoopSession {
             return true
         }
 
-        // Runtime for the whole takeover, bracketed by log snapshots.
+        // The takeover, bracketed by log snapshots.
         loanController.onTakeoverRadioHold = { [weak self] holding in
-            self?.setKeepalive(holding, reason: "takeover")
-
             self?.sendLogSnapshot(holding ? "takeover start" : "takeover verdict")
-        }
-
-        loanController.onHandbackRuntimeHold = { [weak self] holding in
-            self?.setKeepalive(holding, reason: "handback")
-            SportLog.event("loan", holding
-                ? "hand-back runtime hold ACQUIRED — staying reachable for the phone's ack"
-                : "hand-back runtime hold released")
         }
 
         // Everything that holds only for the length of a loan, armed and disarmed together.
@@ -217,15 +196,13 @@ final class StockLoopSession {
 
     private var logPulse: DispatchSourceTimer?
 
-    /// Every five minutes during a loan; also re-drives the keepalive. Its lateness is data.
+    /// Every five minutes during a loan. Its lateness is data.
     private func startLogPulse() {
         stopLogPulse()
         let timer = DispatchSource.makeTimerSource(queue: .main)
         timer.schedule(deadline: .now() + 300, repeating: 300, leeway: .seconds(20))
         timer.setEventHandler { [weak self] in
             self?.sendLogSnapshot("loan pulse")
-
-            self?.keepalive.ensureRunning()
         }
         timer.resume()
         logPulse = timer

@@ -125,10 +125,9 @@ final class LoanRemoteUploadsTests: XCTestCase {
     /// In front, during a workout, over Wi-Fi or the phone link, or with the route not yet known, it goes.
     func testTheUploadGateHoldsOnlyBackgroundCellular() {
         typealias U = LoanRemoteUploads
-        XCTAssertFalse(U.mayUpload(inFront: false, workoutRunning: false, route: .cellularOnly))
-        XCTAssertTrue(U.mayUpload(inFront: true, workoutRunning: false, route: .cellularOnly))
-        XCTAssertTrue(U.mayUpload(inFront: false, workoutRunning: true, route: .cellularOnly))
-        XCTAssertTrue(U.mayUpload(inFront: false, workoutRunning: false, route: .other))
-        XCTAssertTrue(U.mayUpload(inFront: false, workoutRunning: false, route: .unknown))
+        XCTAssertFalse(U.mayUpload(inFront: false, route: .cellularOnly))
+        XCTAssertTrue(U.mayUpload(inFront: true, route: .cellularOnly))
+        XCTAssertTrue(U.mayUpload(inFront: false, route: .other))
+        XCTAssertTrue(U.mayUpload(inFront: false, route: .unknown))
     }
 }

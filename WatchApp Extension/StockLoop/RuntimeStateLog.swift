@@ -20,11 +20,11 @@ enum RuntimeStateLog {
         }
     }
 
-    /// App state, keepalive, battery, Low Power Mode.
+    /// App state, battery, Low Power Mode.
     static func snapshot() -> String {
         let lowPower = ProcessInfo.processInfo.isLowPowerModeEnabled ? " · LOW-POWER" : ""
 
-        return "state \(appStateName()) · \(keepaliveTag()) · \(batteryTag())\(lowPower)"
+        return "state \(appStateName()) · \(batteryTag())\(lowPower)"
     }
 
     private static var timer: DispatchSourceTimer?
@@ -41,10 +41,6 @@ enum RuntimeStateLog {
     /// Rate limit on "alive in background" lines.
     private static let backgroundProofInterval: TimeInterval = 120
 
-    /// Set by the keepalive's owner; unset reads "?".
-    static var keepaliveProbe: (() -> String)?
-
-    private static func keepaliveTag() -> String { keepaliveProbe?() ?? "keepalive ?" }
 
     /// Reports how late a short timer fired; silent when on time, except "start" labels.
     static func probeTimerDeferral(_ label: String, requested: TimeInterval = 3.0,
@@ -55,8 +51,8 @@ enum RuntimeStateLog {
             let late = actual - requested
             guard late > tolerance || label.contains("start") else { return }
             SportLog.event("runtime", String(format:
-                "timer-probe [%@] asked %.1fs got %.1fs (late %+.1fs) · %@ · %@",
-                label, requested, actual, late, keepaliveTag(), snapshot()))
+                "timer-probe [%@] asked %.1fs got %.1fs (late %+.1fs) · %@",
+                label, requested, actual, late, snapshot()))
         }
     }
 
@@ -106,8 +102,8 @@ enum RuntimeStateLog {
                     let markAge = Date().timeIntervalSince(mainMarkAt)
                     stallLock.unlock()
                     SportLog.event("runtime", String(format:
-                        "MAIN STALLED — main thread has not run for %.1fs (still stuck) · last main entry: %@ (%.1fs ago) · %@",
-                        stuckFor, where_, markAge, keepaliveTag()))
+                        "MAIN STALLED — main thread has not run for %.1fs (still stuck) · last main entry: %@ (%.1fs ago)",
+                        stuckFor, where_, markAge))
                 }
 
                 else if stuckFor > stallThreshold, let last = lastStallReportAt,
@@ -165,19 +161,19 @@ enum RuntimeStateLog {
 
             if gap > tolerance {
                 SportLog.event("runtime", String(format:
-                    "GAP %.0fs (expected %.0fs) — app was NOT executing · went down in state %@ · woke in %@ · %@ · %@",
-                    gap, interval, wentDownIn, state, keepaliveTag(), snapshot()))
+                    "GAP %.0fs (expected %.0fs) — app was NOT executing · went down in state %@ · woke in %@ · %@",
+                    gap, interval, wentDownIn, state, snapshot()))
                 return
             }
 
             if state == "background", now.timeIntervalSince(lastBackgroundProof) >= backgroundProofInterval {
                 lastBackgroundProof = now
-                SportLog.event("runtime", "BG-ALIVE — executing while backgrounded · \(keepaliveTag()) · \(snapshot())")
+                SportLog.event("runtime", "BG-ALIVE — executing while backgrounded · \(snapshot())")
             }
         }
         t.resume()
         timer = t
-        SportLog.event("runtime", "heartbeat armed (30s; gaps >45s + BG-ALIVE every 2min while backgrounded) · \(keepaliveTag()) · \(snapshot())")
+        SportLog.event("runtime", "heartbeat armed (30s; gaps >45s + BG-ALIVE every 2min while backgrounded) · \(snapshot())")
     }
 
     static func stopHeartbeat() {

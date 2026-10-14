@@ -742,7 +742,6 @@
 		D6A12EF6F5AD4B4CAABDD49B /* RileyLinkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACC381BA270149C9B0DDCB01 /* RileyLinkKit.framework */; };
 		D6E28676C2C7751C77C7F2FB /* Loop/Resources/Sounds/spring.caf in Resources */ = {isa = PBXBuildFile; fileRef = 9471E156FC10D6D0FF219C77 /* Loop/Resources/Sounds/spring.caf */; };
 		D96C7D3C9C4B414AAEAB3339 /* RileyLinkBLEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C03823C4CE664226A1EDAF41 /* RileyLinkBLEKit.framework */; };
-		DBA92856969B47C19B2BD581 /* WorkoutKeepalive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C77C38CD576410EA92A5B9A /* WorkoutKeepalive.swift */; };
 		DD3DBD292A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */; };
 		DDBD0001000000000000BD01 /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = C110888C2A3913C600BA4898 /* BuildDetails.swift */; };
 		824F9EABE70A97638CA3B5DC /* BuildDetails+SportMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED4A237EFD018441E29D616 /* BuildDetails+SportMode.swift */; };
@@ -1351,7 +1350,6 @@
 		89F9119324358E4500ECCAF3 /* CarbAbsorptionTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbAbsorptionTime.swift; sourceTree = "<group>"; };
 		89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusPickerValues.swift; sourceTree = "<group>"; };
 		89FE21AC24AC57E30033F501 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
-		8C77C38CD576410EA92A5B9A /* WorkoutKeepalive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WorkoutKeepalive.swift; path = "WatchApp Extension/StockLoop/WorkoutKeepalive.swift"; sourceTree = SOURCE_ROOT; };
 		8FB2394478FF679F436E8EF1 /* Loop/Resources/Sounds/bloom.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/bloom.caf; sourceTree = SOURCE_ROOT; };
 		9471E156FC10D6D0FF219C77 /* Loop/Resources/Sounds/spring.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/spring.caf; sourceTree = SOURCE_ROOT; };
 		97C8F1C82896495CA6E8AF8F /* PodLoanPhoneControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PodLoanPhoneControllerTests.swift; path = LoopTests/PodLoanPhoneControllerTests.swift; sourceTree = SOURCE_ROOT; };
@@ -2685,7 +2683,6 @@
 				F89D20C8E12BA79EEB440570 /* WatchLoopManager+Dosing.swift */,
 				C4975B7BB91A91CB21F89ED6 /* WatchLoopManager+Cycle.swift */,
 				C940C6F431E6435B971D98B2 /* SportLog.swift */,
-				8C77C38CD576410EA92A5B9A /* WorkoutKeepalive.swift */,
 				036B897A66F14CAA9CD5CAD0 /* PodLoanWatchController.swift */,
 				5B7EDF8F4E611C98701399C6 /* CarbAndBolusFlow+PodLoan.swift */,
 				DAB6D8790872D927B336A1E3 /* ContentView+PodLoan.swift */,
@@ -4223,7 +4220,6 @@
 				3DAF0D06E678E7616137C84A /* WatchLoopManager+Dosing.swift in Sources */,
 				344ABCF8A638888D8C0AC47B /* WatchLoopManager+Cycle.swift in Sources */,
 				F06FDE1F67AF4011937B1529 /* SportLog.swift in Sources */,
-				DBA92856969B47C19B2BD581 /* WorkoutKeepalive.swift in Sources */,
 				4624A94E56A6ABB49478893A /* DoseEnactor.swift in Sources */,
 				8BACA0014DF81FD4EF87D856 /* LoopAlgorithmSupport.swift in Sources */,
 				9924D02917D093DAB0BB475E /* LoopError.swift in Sources */,
