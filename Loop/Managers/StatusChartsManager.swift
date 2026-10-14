@@ -26,6 +26,8 @@ class StatusChartsManager: ChartsManager {
     let iob: IOBChart
     let cob: COBChart
 
+    fileprivate var lastPredictedGlucoseValues: [GlucoseValue] = []
+
     init(colors: ChartColorPalette, settings: ChartSettings, traitCollection: UITraitCollection) {
         let glucose = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil,
                                             yAxisStepSizeMGDLOverride: FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil)
@@ -59,6 +61,13 @@ extension StatusChartsManager {
     }
 
     func setPredictedGlucoseValues(_ glucoseValues: [GlucoseValue]) {
+        // Skip invalidating the chart when the prediction is unchanged to avoid needless redraws
+        if glucoseValues.count == lastPredictedGlucoseValues.count,
+           zip(glucoseValues, lastPredictedGlucoseValues).allSatisfy({ $0.startDate == $1.startDate && $0.quantity == $1.quantity })
+        {
+            return
+        }
+        lastPredictedGlucoseValues = glucoseValues
         glucose.setPredictedGlucoseValues(glucoseValues)
         invalidateChart(atIndex: ChartIndex.glucose.rawValue)
     }

@@ -3,8 +3,8 @@
 //  Loop
 //
 //  The settle window: from the phone owning the pod again until a fresh pod read proves it.
-//  No grant starts and no audit rules until then; a settle that never verifies opens the loop
-//  where a verdict was owed.
+//  No grant starts and no audit rules until then; a verdict still owed when the window closes
+//  waits, with dosing held, for the pod to answer.
 //
 
 import Foundation
@@ -59,7 +59,7 @@ extension PodLoanPhoneController {
             self.reclaimDisplayAnchor = nil
             self.deps.endReclaimBackgroundTask()
 
-            self.resolveOwedForceReclaimAudit(why: "pod unreachable through the settle window")
+            self.noteForceReclaimAuditStillOwed(why: "pod unreachable through the settle window")
             self.deps.ownershipDidChange()
         }
         reclaimSettleWork = work
@@ -82,21 +82,27 @@ extension PodLoanPhoneController {
         reclaimVerifyInFlight = false
         deps.endReclaimBackgroundTask()
 
-        // The ceiling would have resolved an owed verdict; closing early inherits that duty.
-        resolveOwedForceReclaimAudit(why: reason)
+        noteForceReclaimAuditStillOwed(why: reason)
         syncUIMirror()
     }
 
-    /// A force-reclaim verdict the pod will never answer: lift the pause, open the loop, tell the user.
-    func resolveOwedForceReclaimAudit(why: String) {
+    /// The window closed without the pod answering, its link lost after the take-back. The check
+    /// stays owed and dosing stays held: a phone that cannot reach the pod cannot dose it.
+    /// `considerOwedForceReclaimAudit` runs it later.
+    func noteForceReclaimAuditStillOwed(why: String) {
         guard let pending = pendingHandbackAudit, pending.flavor == .forceReclaim else { return }
-        // The dosing hold lifts last, after the loop-open is dispatched.
-        defer { pendingHandbackAudit = nil }
-        handbackDiag(pending.epoch, "** force-reclaim audit NEVER RAN — \(why). Session UNVERIFIED, loop OPENS **")
-        deps.setAutomaticDosingPaused(false)
-        deps.openLoopForUncertainReconciliation()
-        armOpenLoopReminder()
-        deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)
+        handbackDiag(pending.epoch, "force-reclaim audit still OWED — \(why). It runs when the pod next answers; dosing stays held until then")
+    }
+
+    /// Called every phone cycle. Reopens the settle for a check still owed once the pod is reachable.
+    func considerOwedForceReclaimAudit() {
+        queue.async {
+            guard let pending = self.pendingHandbackAudit, pending.flavor == .forceReclaim,
+                  self.reclaimStartedAt == nil, self.state == .owner, !self.yieldingToInferredLoan,
+                  self.deps.isConnectionReady() else { return }
+            self.handbackDiag(pending.epoch, "force-reclaim audit owed and the pod is reachable — reading it now")
+            self.beginReclaimSettleWindow()
+        }
     }
 
     /// Polls every 2 s until the round-trip lands or the ceiling fires; `started` names the window.
@@ -195,7 +201,7 @@ extension PodLoanPhoneController {
     func finishPendingHandbackAudit(elapsed: TimeInterval) {
         defer { clearAuditAnchors() }
         guard let pending = pendingHandbackAudit else { return }
-        // The dosing hold lifts last, after the verdict (and any loop-open) is dispatched.
+        // The dosing hold lifts last, after the verdict is dispatched.
         defer { pendingHandbackAudit = nil }
 
         if let latest = (deps.pumpManager() as? PumpDeliveryOdometer)?.deliveredUnits?.units {
@@ -228,11 +234,8 @@ extension PodLoanPhoneController {
                 applyForceReclaimVerdict(residual: residual, epoch: pending.epoch)
             }
         } else if pending.flavor == .forceReclaim {
-            // No delivery total: a force reclaim is still unverified.
-            handbackDiag(pending.epoch, "** force-reclaim round-trip landed but no odometer — session UNVERIFIED, loop OPENS **")
-            deps.setAutomaticDosingPaused(false)
-            deps.openLoopForUncertainReconciliation()
-            armOpenLoopReminder()
+            // A pump that gives no delivered total: nothing to check against.
+            handbackDiag(pending.epoch, "** force-reclaim round-trip landed but no odometer — session UNVERIFIED **")
             deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)
         } else {
             // A clean hand-back keeps its committed records; nothing opens.

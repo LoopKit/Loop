@@ -271,7 +271,7 @@ extension RemoteDataServicesManager {
                 case .failure(let error):
                     self.log.error("Error querying alert data: %{public}@", String(describing: error))
                     semaphore.signal()
-                case .success(let queryAnchor, let data):
+                case .success((let queryAnchor, let data)):
                     Task {
                         do {
                             try await remoteDataService.uploadAlertData(data)

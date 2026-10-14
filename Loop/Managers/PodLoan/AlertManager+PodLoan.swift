@@ -2,8 +2,8 @@
 //  AlertManager+PodLoan.swift
 //  Loop
 //
-//  The Loop-Failure ladder during a loan: cleared at the grant, gated while the phone's loop
-//  is idle (`loopNotRunningSuppressionGate`), swept each minute, re-armed at the reclaim.
+//  The Loop-Failure warnings while this phone has released the pump: removed at the release,
+//  not scheduled while released (`loopNotRunningSuppressionGate`), scheduled again at the take-back.
 //  Also the watch's alert records, added to the phone's `AlertStore` when a loan closes.
 //
 
@@ -14,25 +14,21 @@ import UserNotifications
 
 extension AlertManager {
 
-    /// Removes and logs any Loop-Failure rung found pending during a loan, once a minute.
-    func sweepLoopNotRunningNotificationsDuringLoan() {
-        guard loopNotRunningSuppressionGate?() == true else { return }
+    /// The pump was released: this phone's silence is expected. Removes the warnings still to
+    /// fire as well as any delivered, and clears the saved list so none is recorded as issued.
+    func removeLoopNotRunningNotificationsForReleasedPump() {
+        UserDefaults.appGroup?.loopNotRunningNotifications = []
         Task {
             let center = UNUserNotificationCenter.current()
-            let prefix = LoopNotificationCategory.loopNotRunning.rawValue
-            let ids = await center.pendingNotificationRequests()
-                .filter { $0.identifier.hasPrefix(prefix) }
-                .map(\.identifier)
-            guard !ids.isEmpty else { return }
-            center.removePendingNotificationRequests(withIdentifiers: ids)
-            PhoneLog.event("deadman", "swept \(ids.count) stale phone Loop-Failure rung(s) mid-loan — these escaped the grant clear and the gate [deadman-sweep]")
+            let category = LoopNotificationCategory.loopNotRunning.rawValue
+            let pending = await center.pendingNotificationRequests()
+                .filter { $0.content.categoryIdentifier == category }.map(\.identifier)
+            center.removePendingNotificationRequests(withIdentifiers: pending)
+            let delivered = await center.deliveredNotifications()
+                .filter { $0.request.content.categoryIdentifier == category }.map(\.request.identifier)
+            center.removeDeliveredNotifications(withIdentifiers: delivered)
+            PhoneLog.event("deadman", "pump released — \(pending.count) pending, \(delivered.count) delivered Loop-Failure warning(s) removed [deadman]")
         }
-    }
-
-    /// The watch has the pod, so the phone's silence is expected; clears the persisted list too.
-    func clearLoopNotRunningNotificationsForLoanGrant() {
-        UserDefaults.appGroup?.loopNotRunningNotifications = []
-        Task { await clearLoopNotRunningNotifications() }
     }
 }
 

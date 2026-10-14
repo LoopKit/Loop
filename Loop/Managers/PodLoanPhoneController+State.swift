@@ -19,7 +19,6 @@ struct PodLoanPhoneState: RawRepresentable {
     /// Exactly-once record of committed events: the only dedup test.
     var committedIDs: Set<UUID> = []
     /// A relaunch re-sends the revoke.
-    var pendingRevoke = false
     /// Standing aside for a loan this phone never granted; survives a phone reboot.
     var yieldingToInferredLoan = false
 
@@ -73,7 +72,6 @@ struct PodLoanPhoneState: RawRepresentable {
         epoch = rawValue["epoch"] as? Int ?? 0
         committedCursor = rawValue["committedCursor"] as? Int ?? 0
         committedIDs = Set((rawValue["committedIDs"] as? [String] ?? []).compactMap(UUID.init(uuidString:)))
-        pendingRevoke = rawValue["pendingRevoke"] as? Bool ?? false
         yieldingToInferredLoan = rawValue["yieldingToInferredLoan"] as? Bool ?? false
         holdRenewedAt = rawValue["holdRenewedAt"] as? Date
         holdLapseNoticedAt = rawValue["holdLapseNoticedAt"] as? Date
@@ -95,7 +93,7 @@ struct PodLoanPhoneState: RawRepresentable {
 
     var rawValue: [String: Any] {
         var raw: [String: Any] = ["phase": phase.rawValue, "epoch": epoch, "committedCursor": committedCursor,
-                                  "committedIDs": committedIDs.map(\.uuidString), "pendingRevoke": pendingRevoke,
+                                  "committedIDs": committedIDs.map(\.uuidString),
                                   "yieldingToInferredLoan": yieldingToInferredLoan,
                                   "watchSilenceWarningsIssued": watchSilenceWarningsIssued,
                                   "watchSupportsSeize": watchSupportsSeize]
@@ -178,11 +176,6 @@ extension PodLoanPhoneController {
     var committedIDs: Set<UUID> {
         get { persisted.committedIDs }
         set { updateState { $0.committedIDs = newValue } }
-    }
-
-    var pendingRevoke: Bool {
-        get { persisted.pendingRevoke }
-        set { updateState { $0.pendingRevoke = newValue } }
     }
 
     var yieldingToInferredLoan: Bool {

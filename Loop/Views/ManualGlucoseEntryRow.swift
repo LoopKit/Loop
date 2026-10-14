@@ -40,16 +40,16 @@ struct ManualGlucoseEntryRow: View {
                     maxLength: 4,
                     doneButtonColor: .loopAccent
                 )
-                .onChange(of: valueText, perform: { value in
+                .onChange(of: valueText) {
                     if let manualGlucoseValue = displayGlucosePreference.formatter.numberFormatter.number(from: valueText)?.doubleValue {
                         quantity = LoopQuantity(unit: displayGlucosePreference.unit, doubleValue: manualGlucoseValue)
                     } else {
                         quantity = nil
                     }
-                })
-                .onChange(of: displayGlucosePreference.unit, perform: { value in
+                }
+                .onChange(of: displayGlucosePreference.unit) {
                     unitsChanged()
-                })
+                }
                 .accessibilityIdentifier("textField_FingerstickGlucose")
                 
                 Text(displayGlucosePreference.formatter.localizedUnitStringWithPlurality())

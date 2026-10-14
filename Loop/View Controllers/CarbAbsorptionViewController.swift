@@ -291,7 +291,6 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
             return cell
         case .entries:
-            let unit = LoopUnit.gram
             let cell = tableView.dequeueReusableCell(withIdentifier: CarbEntryTableViewCell.className, for: indexPath) as! CarbEntryTableViewCell
             cell.accessibilityIdentifier = "cell_CarbEntry"
 

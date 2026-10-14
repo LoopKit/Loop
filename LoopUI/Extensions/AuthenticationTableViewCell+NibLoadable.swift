@@ -10,4 +10,4 @@ import LoopKitUI
 
 
 /// Allow AuthenticationTableViewCell to be loaded from nib
-extension AuthenticationTableViewCell: NibLoadable { }
+extension AuthenticationTableViewCell: @retroactive NibLoadable { }

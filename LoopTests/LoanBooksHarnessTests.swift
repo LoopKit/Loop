@@ -1440,7 +1440,7 @@ private final class PhoneOverrideHarness {
         controller = PodLoanPhoneController(dependencies: .init(
             pumpManager: { nil },
             settings: { settings },
-            setAutomaticDosingPaused: { _ in },
+            pumpControlChanged: { _ in },
             send: { _ in },
             addPumpEvents: { _, _, completion in completion(nil) },
             addCarb: { _, _, completion in completion(nil) },

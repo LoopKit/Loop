@@ -70,8 +70,9 @@ extension PodLoanWatchController {
         }
     }
 
-    /// The phone returning during a seized loan: a prompt after a 30 s debounce, one per
-    /// transition, none once End was asked for.
+    /// The phone returning during a seized loan: it is told at once that this watch holds the pod,
+    /// so it stops dosing; the prompt follows after a 30 s debounce, one per transition, none once
+    /// End was asked for.
     func noteReachabilityChanged(_ reachable: Bool) {
         queue.async {
             guard reachable else { return }
@@ -80,6 +81,7 @@ extension PodLoanWatchController {
                   !self.handbackRequested, !self.reunionPromptActive else { return }
             guard !self.seizeReunionDebounceArmed else { return }
             self.seizeReunionDebounceArmed = true
+            self.sendHoldsPodStatusReport(reason: "phone reachable")
             SportLog.event("seize", "phone REACHABLE during a seized loan — reunion prompt in 30s unless it flickers away [seize]")
             self.schedule(after: 30, label: "seize-reunion-debounce") { [weak self] in
                 guard let self = self else { return }
@@ -95,8 +97,6 @@ extension PodLoanWatchController {
                 SportLog.event("seize", "phone is back — REUNION PROMPT raised (the hand-back stays the user's deliberate act) [seize]")
                 self.notifyUI()
                 self.issueReunionPromptAlert()
-
-                self.sendHoldsPodStatusReport(reason: "reunion prompt raised")
             }
         }
     }
@@ -179,23 +179,8 @@ extension PodLoanWatchController {
                                             records: [LoanDoseRecord], schedule: BasalRateSchedule?,
                                             pulseUnits: Double) -> Double {
         guard now > copyAt, podTotal >= copyTotal else { return 0 }
-        // Synthetic events; only their order matters.
-        let rateEvents = records.filter { $0.kind != .bolus }.enumerated().map {
-            LoanEvent(id: UUID(), seq: $0.offset + 1, provenance: .confirmed, record: $0.element, loggedAt: now)
-        }
-        var expected = LoanReconciler.expectedInsulin(events: rateEvents, schedule: schedule, pulseUnits: pulseUnits,
-                                                      from: copyAt, to: now)
-        for bolus in records where bolus.kind == .bolus {
-            guard let amount = bolus.amount, amount > 0 else { continue }
-            let end = bolus.endDate ?? bolus.startDate
-            if end > bolus.startDate {
-                let overlap = min(end, now).timeIntervalSince(max(bolus.startDate, copyAt))
-                if overlap > 0 { expected += amount * overlap / end.timeIntervalSince(bolus.startDate) }
-            } else if bolus.startDate >= copyAt, bolus.startDate <= now {
-                expected += amount
-            }
-        }
-        let unexplained = ((podTotal - copyTotal - expected) * 1000).rounded() / 1000
+        let unexplained = LoanReconciler.insulinNotInRecords(totalThen: copyTotal, then: copyAt, totalNow: podTotal, now: now,
+                                                             records: records, schedule: schedule, pulseUnits: pulseUnits)
         return unexplained > unexplainedInsulinBand ? unexplained : 0
     }
 

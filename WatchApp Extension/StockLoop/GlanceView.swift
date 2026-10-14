@@ -64,7 +64,8 @@ struct GlanceView: View {
             Spacer(minLength: 2)
 
             if let label = model.state.overrideLabel {
-                Text(label)
+                ((model.state.overrideSymbol.map { Text(Image(systemName: $0)) + Text(label.isEmpty ? "" : " ") } ?? Text(""))
+                    + Text(label))
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.glanceInk)
                     .lineLimit(1)

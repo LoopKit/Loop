@@ -73,6 +73,10 @@ public class BolusProgressTableViewCell: UITableViewCell {
 
         (progressLabel.superview as? UIStackView)?.addArrangedSubview(infoButton)
 
+        registerForTraitChanges(UITraitCollection.systemTraitsAffectingColorAppearance) { (cell: Self, _: UITraitCollection) in
+            cell.updateColors()
+        }
+
         paddedView.layer.masksToBounds = true
         paddedView.layer.cornerRadius = 10
         paddedView.layer.borderWidth = 1
@@ -83,12 +87,6 @@ public class BolusProgressTableViewCell: UITableViewCell {
 
     public override func tintColorDidChange() {
         super.tintColorDidChange()
-        updateColors()
-    }
-
-    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-
         updateColors()
     }
 

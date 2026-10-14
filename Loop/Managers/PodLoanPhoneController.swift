@@ -24,19 +24,13 @@ final class PodLoanPhoneController {
     /// Derived from a snapshot and a clock (see +UIReads).
     struct ReclaimProgress: Equatable {
         enum Phase: Equatable {
-            /// The watch is being asked to hand back and is expected to answer.
-            case draining
-
-            /// The drain overran; the tile shows the force deadline.
-            case watchNotAnswering
-
-            /// Taking the pod without the watch; where a dead-branch ladder starts.
-            case forcing
+            /// A take-back reaching for the pod's link, before anything is committed.
+            case reachingPod
 
             /// The settle after a hand-back: the phone re-establishing the pod link.
             case reconnectingToPod
 
-            /// The settle after a force reclaim.
+            /// The settle after a take-back.
             case forceReclaimingPod
         }
         let phase: Phase
@@ -57,8 +51,8 @@ final class PodLoanPhoneController {
 
         var settings: () -> LoopSettings
 
-        /// The loan's dosing pause; distinct from the user's closed-loop setting.
-        var setAutomaticDosingPaused: (Bool) -> Void
+        /// Called right after this phone releases the pump (true) or takes it back (false).
+        var pumpControlChanged: (_ released: Bool) -> Void
 
         var send: ([String: Any]) -> Void
 
@@ -117,9 +111,6 @@ final class PodLoanPhoneController {
         var cancelTempBasalAfterPodReturn: (@escaping (Error?) -> Void) -> Void = { $0(nil) }
 
         var cancelTempBasalForGrant: (@escaping (Error?) -> Void) -> Void = { $0(nil) }
-
-        /// Turns the user's closed-loop setting off; not the loan pause, which a later resume would undo.
-        var openLoopForUncertainReconciliation: () -> Void = {}
 
         /// Time-sensitive, so a Focus mode cannot swallow a recording failure.
         var issueUrgentNotice: (_ title: String, _ body: String) -> Void = { _, _ in }
@@ -230,14 +221,13 @@ final class PodLoanPhoneController {
     func reclaimToOwner(alert: (title: String, body: String)?, reason: String) {
         handbackDiag(epoch, "loan ABANDONED — back to phone control: \(reason)")
 
-        cancelReclaimLadder()
+        cancelTakeBackAttempt()
         deps.endReclaimBackgroundTask()
 
         grantOfferedAt = nil
         clearAuditAnchors()
         reclaimPodConnection()
         state = .owner
-        deps.setAutomaticDosingPaused(false)
         if let alert = alert { deps.issueNotice(alert.title, alert.body) }
     }
 
@@ -310,20 +300,21 @@ final class PodLoanPhoneController {
             guard let self = self else { return }
             self.queue.async {
                 self.retryPersistedGapDeleteIfAny()
-
-                self.cancelOpenLoopReminderIfLoopClosed()
             }
         }
 
         if podIsOnLoan {
-            deps.setAutomaticDosingPaused(true)
-
             // Heal only transient states; a relaunch during a real loan is ordinary.
-            if state == .reconciling || state == .reclaimPending {
-                let stranded = state
+            if state == .reconciling {
                 queue.asyncAfter(deadline: .now() + 120) { [weak self] in
-                    guard let self = self, self.state == stranded else { return }
-                    self.forceReclaimToOwner(reason: "relaunched into \(stranded.rawValue), no hand-back")
+                    guard let self = self, self.state == .reconciling else { return }
+                    self.forceReclaimToOwner(reason: "relaunched into reconciling, no hand-back")
+                }
+            } else if state == .reclaimPending {
+                // A take-back cut short by the relaunch: finish the attempt, which refuses if the pod is away.
+                queue.async { [weak self] in
+                    guard let self = self, self.state == .reclaimPending else { return }
+                    self.beginTakeBack(from: self.yieldingToInferredLoan ? .owner : .loaned)
                 }
             } else if state == .grantOffered {
                 armT1(for: epoch)
@@ -373,14 +364,13 @@ final class PodLoanPhoneController {
 
     var staged: [UUID: LoanEvent] = [:]
     var stagedTombstones: Set<UUID> = []
+    /// The last running-audit line; a wake delivers several batches with the same reading.
+    var lastRunningAuditLine: String?
     var t1WorkItem: DispatchWorkItem?
-    var reclaimTimeoutWork: DispatchWorkItem?
-    var reclaimResendWork: DispatchWorkItem?
 
-    var reclaimLadder: ReclaimLadder?
-
-    /// Test seam for the reclaim ladder's timing. nil in the app, where rungs use wall deadlines.
-    var scheduler: ((_ delay: TimeInterval, _ label: String, _ work: DispatchWorkItem) -> Void)?
+    /// A take-back attempt in progress, and the phase to restore if the pod does not answer.
+    var takeBackStartedAt: Date?
+    var takeBackFrom: State?
 
     var lastDormantRefreshAt: Date?
 
@@ -399,6 +389,9 @@ final class PodLoanPhoneController {
 
     /// The pod fault already announced, as "epoch fault", so a repeated report stays quiet.
     var podFaultNoticed: String?
+
+    /// The pump's delivered total as this phone last read it while it held the pump. Diagnostic only.
+    var lastOwnPumpTotal: (units: Double, at: Date)?
 
     /// Only the force-reclaim flavour persists.
     var pendingHandbackAudit: PendingHandbackAudit? {

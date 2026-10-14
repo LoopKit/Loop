@@ -64,7 +64,7 @@ struct PresetActivateCrownConfirm: View {
                 // are being dismissed, treat the dismissal as an acknowledgement
                 loopManager.pendingPresetReminder = nil
                 Task {
-                    try await loopManager.acknowledgeAlert(alertIdentifier: reminder.alertIdentifier, managerIdentifier: reminder.managerIdentifier)
+                    try? await loopManager.acknowledgeAlert(alertIdentifier: reminder.alertIdentifier, managerIdentifier: reminder.managerIdentifier)
                 }
             }
         }
