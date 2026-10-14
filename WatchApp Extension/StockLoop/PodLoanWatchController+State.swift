@@ -159,13 +159,10 @@ extension PodLoanWatchController {
         _loanActiveMirror = (phase == .active)
         _wristAlarmsMirror = [.takingOver, .active, .handingBack, .recoveredDrain].contains(phase)
         loanActiveMirrorLock.unlock()
-        // Holds are edge-triggered, so re-asserting a phase cannot double-acquire.
+        // Edge-triggered, so re-asserting a phase cannot fire twice.
         if (oldValue == .takingOver) != (phase == .takingOver) {
             onTakeoverRadioHold?(phase == .takingOver)
             setTakeoverSessionListener(phase == .takingOver)
-        }
-        if (oldValue == .handingBack) != (phase == .handingBack) {
-            onHandbackRuntimeHold?(phase == .handingBack)
         }
         if oldValue != phase {
             NotificationCenter.default.post(name: .podLoanPhaseDidChange, object: nil)

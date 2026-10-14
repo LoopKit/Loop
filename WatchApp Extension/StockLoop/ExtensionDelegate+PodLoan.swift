@@ -96,9 +96,7 @@ extension ExtensionDelegate {
     /// Called from `applicationDidBecomeActive()`.
     func podLoanDidBecomeActive() {
         guard FeatureFlags.sportModeEnabled else { return }
-        // Foreground: re-assert the workout session if anything holds it.
         startStockLoopSession()
-        stockLoopSession?.ensureKeepalive()
         SportLog.event("lifecycle", "didBecomeActive [lifecycle-crumb]")
         NotificationCenter.default.post(name: Self.didBecomeActiveNotification, object: self)
         SensorSearchAlert.disarm()
