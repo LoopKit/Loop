@@ -2273,6 +2273,10 @@ extension StatusTableViewController: SettingsViewModelDelegate {
             self.presentIssueReport()
         }
     }
+
+    func generateDiagnosticReport() async -> String {
+        await diagnosticReportGenerator.generateDiagnosticReport()
+    }
 }
 
 // MARK: - Services delegation
