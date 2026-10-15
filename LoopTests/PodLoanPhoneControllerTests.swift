@@ -3127,6 +3127,32 @@ extension PodLoanPhoneControllerTests {
         XCTAssertFalse(controller.holdsAutomaticDosing, "looping continues")
     }
 
+    func testAnEstimatePastInsulinsActionTimeGivesUpItsPlace() throws {
+        _ = seizeCredentialOutstanding()
+        saveState { $0.gapBooking = .init(epoch: 3, units: 0.34, bookedAt: Date().addingTimeInterval(-.hours(9)), anyLaterLoan: true) }
+        let controller = makeController()
+        let back = Date()
+        readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(30)))
+        readPod(controller, units: 12.0, at: back)
+
+        waitUntil(timeout: 5, "gap booked") { self.lock.lock(); defer { self.lock.unlock() }; return !self.bookedGapDoses.isEmpty }
+        lock.lock(); let booked = bookedGapDoses; lock.unlock()
+        XCTAssertEqual(booked.first?.deliveredUnits ?? 0, 1.5, accuracy: 0.05)
+    }
+
+    func testARecentEstimateStillHoldsItsPlace() throws {
+        _ = seizeCredentialOutstanding()
+        saveState { $0.gapBooking = .init(epoch: 3, units: 0.34, bookedAt: Date().addingTimeInterval(-.hours(1)), anyLaterLoan: true) }
+        let controller = makeController()
+        let back = Date()
+        readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(30)))
+        readPod(controller, units: 12.0, at: back)
+
+        waitUntil(timeout: 5, "refused") { self.diagMatching("gap NOT booked") != nil }
+        lock.lock(); let booked = bookedGapDoses; lock.unlock()
+        XCTAssertTrue(booked.isEmpty)
+    }
+
     func testNoCheckOnAPhoneNotSetUpForSportModeAwayFromIt() throws {
         let controller = makeController()
         let back = Date()

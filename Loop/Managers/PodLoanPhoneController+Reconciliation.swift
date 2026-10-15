@@ -11,6 +11,7 @@ import Foundation
 import HealthKit
 import LoopKit
 import LoopCore
+import LoopAlgorithm
 import UserNotifications
 import os.log
 
@@ -161,9 +162,14 @@ extension PodLoanPhoneController {
             handbackDiag(epoch, String(format:
                 "** WARN — back with the pod after %.0f min: %+.3f U the phone's records cannot explain (Sport Mode started away from the phone?). Still looping. **",
                 gapMinutes, residual))
-            guard persisted.gapBooking == nil else {
-                handbackDiag(epoch, "gap NOT booked — an earlier estimate still stands, and only one is kept")
-                return
+            if let earlier = persisted.gapBooking {
+                // Past insulin's action time it no longer counts in insulin on board, so it gives up the place.
+                guard let at = earlier.bookedAt, deps.now().timeIntervalSince(at) >= InsulinMath.defaultInsulinActivityDuration else {
+                    handbackDiag(epoch, "gap NOT booked — an earlier estimate still stands, and only one is kept")
+                    return
+                }
+                handbackDiag(epoch, String(format: "earlier estimate (%.2f U, e%d) is past insulin's action time — released", earlier.units, earlier.epoch))
+                updateState { $0.gapBooking = nil }
             }
             bookGapDose(units: residual, epoch: epoch, gapFrom: gapFrom)
             deps.issueUrgentNotice(Self.estimatedTitle, String(format: "Sport Mode probably started away from the phone: %@", Self.bookedSentences(residual)))
