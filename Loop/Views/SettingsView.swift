@@ -457,10 +457,12 @@ extension SettingsView {
     
     private var supportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "The title of the support section in settings"))) {
-            Button(action: {
-                self.viewModel.didTapIssueReport()
-            }) {
-                Text("Issue Report", comment: "The title text for the issue report menu item")
+            NavigationLink(destination: SendIssueReportView(
+                context: viewModel.issueReportContext,
+                generateDiagnosticReport: viewModel.generateDiagnosticReport,
+                exportLocally: viewModel.didTapIssueReport
+            )) {
+                Text(NSLocalizedString("Report Issue", comment: "The title text for the issue report menu item"))
             }
 
             ForEach(pluginMenuItems.filter( { $0.section == .support })) {
