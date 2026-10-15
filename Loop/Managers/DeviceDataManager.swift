@@ -1008,6 +1008,7 @@ extension DeviceDataManager: CGMManagerDelegate {
                 self.cgmDeviceModel = status.device?.model
                 self.analyticsServicesManager.identifyCGMModel(self.cgmDeviceModel)
             }
+            self.glucoseStore.managedDataInterval = manager.managedDataInterval
         }
     }
 }
