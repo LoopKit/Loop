@@ -393,15 +393,20 @@ final class PodLoanPhoneControllerTests: XCTestCase {
             XCTFail("expected a grant, got \(String(describing: lastSent()))")
             fatalError()
         }
+        // takeoverComplete sends nothing, so poll the state. Setup, not the thing under test: a slow
+        // simulator gets time, and the confirmation is resent (ignored once loaned).
         let status = LoanPodStatus(timestamp: Date(), deliveredUnits: 10, reservoirLevel: nil, isSuspended: false, faultCode: nil)
-        controller.handleIncoming(userInfo: try! LoanMessage.takeoverComplete(TakeoverComplete(epoch: grant.epoch, firstPodStatus: status)).transportDictionary())
-        // takeoverComplete sends nothing; poll state.
-        let loaned = expectation(description: "loaned")
-        DispatchQueue.global().async {
-            while controller.state != .loaned { usleep(20_000) }
-            loaned.fulfill()
+        let confirmation = try! LoanMessage.takeoverComplete(TakeoverComplete(epoch: grant.epoch, firstPodStatus: status)).transportDictionary()
+        let deadline = Date().addingTimeInterval(15)
+        var lastSentAt = Date.distantPast
+        while controller.state != .loaned, Date() < deadline {
+            if Date().timeIntervalSince(lastSentAt) >= 2 {
+                controller.handleIncoming(userInfo: confirmation)
+                lastSentAt = Date()
+            }
+            usleep(20_000)
         }
-        wait(for: [loaned], timeout: 5)
+        XCTAssertEqual(controller.state, .loaned, "setup: the loan did not become active")
         return grant
     }
 
