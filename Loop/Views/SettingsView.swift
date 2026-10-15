@@ -614,14 +614,46 @@ extension SettingsView {
                 Text(NSLocalizedString("Export Critical Event Logs", comment: "The title of the export critical event logs in support"))
             }
 
-            HStack {
-                Text(NSLocalizedString("Version", comment: "Label for the app version row in the Support section"))
-                Spacer()
-                Text(localizedAppNameAndVersion)
-                    .foregroundColor(.secondary)
+            supportInfoRow(NSLocalizedString("Version", comment: "Label for the app version row in the Support section"), value: Text(localizedAppNameAndVersion))
+
+            if let branch = BuildDetails.default.workspaceGitBranch ?? BuildDetails.default.gitBranch {
+                supportInfoRow(NSLocalizedString("Branch", comment: "Label for the git branch row in the Support section"), value: Text(branch))
             }
+
+            if let revision = BuildDetails.default.workspaceGitRevision ?? BuildDetails.default.gitRevision {
+                supportInfoRow(NSLocalizedString("Revision", comment: "Label for the git revision row in the Support section"), value: Text(revision))
+            }
+
+            if !BuildDetails.default.customizations.isEmpty {
+                supportInfoRow(NSLocalizedString("Customizations", comment: "Label for the build customizations row in the Support section"), value: Text(BuildDetails.default.customizations.joined(separator: ", ")))
+            }
+
+            supportInfoRow(NSLocalizedString("Launched", comment: "Label for the app launch time row in the Support section"), value: Text(Self.launchDate.formatted(date: .abbreviated, time: .shortened)))
+
+            supportInfoRow(NSLocalizedString("Running For", comment: "Label for the time since app launch row in the Support section"), value: Text(Self.launchDate, style: .relative))
         }
     }
+
+    private func supportInfoRow(_ label: String, value: Text) -> some View {
+        HStack {
+            Text(label)
+            Spacer()
+            value
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.trailing)
+        }
+    }
+
+    private static let launchDate: Date = {
+        var info = kinfo_proc()
+        var size = MemoryLayout<kinfo_proc>.size
+        var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()]
+        guard sysctl(&mib, u_int(mib.count), &info, &size, nil, 0) == 0 else {
+            return Date()
+        }
+        let start = info.kp_proc.p_un.__p_starttime
+        return Date(timeIntervalSince1970: TimeInterval(start.tv_sec) + TimeInterval(start.tv_usec) / 1_000_000)
+    }()
     
     /*
      DIY loop specific component to show users the amount of time remaining on their build before a rebuild is necessary.
