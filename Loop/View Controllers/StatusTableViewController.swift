@@ -2233,6 +2233,20 @@ extension StatusTableViewController: SettingsViewModelDelegate {
             self.show(vc, sender: nil)
         }
     }
+
+    func generateDiagnosticReport() async -> String {
+        await withCheckedContinuation { continuation in
+            deviceManager.generateDiagnosticReport { continuation.resume(returning: $0) }
+        }
+    }
+
+    var pumpModel: String? {
+        deviceManager.pumpManager.map { $0.status.device.model ?? "Unknown" }
+    }
+
+    var cgmModel: String? {
+        deviceManager.cgmManager.map { $0.cgmManagerStatus.device?.model ?? "Unknown" }
+    }
 }
 
 // MARK: - Services delegation
