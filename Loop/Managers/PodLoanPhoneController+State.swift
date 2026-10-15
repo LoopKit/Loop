@@ -62,8 +62,18 @@ struct PodLoanPhoneState: RawRepresentable {
         let units: Double
         let bookedAt: Date?
         var deleteFailedAfterRecords = false
+        /// Booked on regaining the pod after a gap: the loan it stands for is a later one the phone
+        /// has not heard of yet, so a later loan's records retire it if they cover the gap.
+        var anyLaterLoan = false
+        /// Start of that gap: the phone's last reading before it.
+        var gapFrom: Date?
     }
     var gapBooking: GapBooking?
+
+    /// The pump's delivered total as this phone last read it while it held the pump. Kept across a
+    /// relaunch, since the phone is often relaunched by the time the body comes back.
+    var ownPumpTotal: Double?
+    var ownPumpTotalAt: Date?
 
     init() {}
 
@@ -89,6 +99,8 @@ struct PodLoanPhoneState: RawRepresentable {
         }
         pendingForceAudit = (rawValue["pendingForceAudit"] as? [String: Any]).flatMap(Self.forceAudit(from:))
         gapBooking = (rawValue["gapBooking"] as? [String: Any]).flatMap(Self.gapBooking(from:))
+        ownPumpTotal = rawValue["ownPumpTotal"] as? Double
+        ownPumpTotalAt = rawValue["ownPumpTotalAt"] as? Date
     }
 
     var rawValue: [String: Any] {
@@ -112,10 +124,14 @@ struct PodLoanPhoneState: RawRepresentable {
             ["epoch": $0.epoch, "atStart": $0.deliveredAtStart, "expected": $0.expected, "loanMinutes": $0.loanMinutes]
         }
         raw["gapBooking"] = gapBooking.map {
-            var d: [String: Any] = ["epoch": $0.epoch, "units": $0.units, "deleteFailedAfterRecords": $0.deleteFailedAfterRecords]
+            var d: [String: Any] = ["epoch": $0.epoch, "units": $0.units, "deleteFailedAfterRecords": $0.deleteFailedAfterRecords,
+                                    "anyLaterLoan": $0.anyLaterLoan]
             d["bookedAt"] = $0.bookedAt?.timeIntervalSince1970
+            d["gapFrom"] = $0.gapFrom?.timeIntervalSince1970
             return d
         }
+        raw["ownPumpTotal"] = ownPumpTotal
+        raw["ownPumpTotalAt"] = ownPumpTotalAt
         return raw
     }
 
@@ -129,7 +145,9 @@ struct PodLoanPhoneState: RawRepresentable {
     static func gapBooking(from d: [String: Any]) -> GapBooking? {
         guard let e = d["epoch"] as? Int, let units = d["units"] as? Double else { return nil }
         return GapBooking(epoch: e, units: units, bookedAt: (d["bookedAt"] as? TimeInterval).map(Date.init(timeIntervalSince1970:)),
-                          deleteFailedAfterRecords: d["deleteFailedAfterRecords"] as? Bool ?? false)
+                          deleteFailedAfterRecords: d["deleteFailedAfterRecords"] as? Bool ?? false,
+                          anyLaterLoan: d["anyLaterLoan"] as? Bool ?? false,
+                          gapFrom: (d["gapFrom"] as? TimeInterval).map(Date.init(timeIntervalSince1970:)))
     }
 }
 

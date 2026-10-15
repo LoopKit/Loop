@@ -54,7 +54,7 @@ extension PodLoanPhoneController {
             scheduleNotification(
                 id: NotificationID.placeholder(index),
                 title: NSLocalizedString("Estimated Insulin Still Booked", comment: "Phone reminder title while an unexplained gap bolus stands"),
-                body: String(format: NSLocalizedString("%1$@ U is booked as a bolus at %2$@ — the pod's total, not real timing. If you remember the session, correct it in Insulin Delivery.", comment: "Phone reminder body while an unexplained gap bolus stands (1: units, 2: time booked)"), amount, time),
+                body: String(format: NSLocalizedString("%1$@ U still booked as a bolus at %2$@. When the watch is back, its records update and IOB is exact.", comment: "Phone reminder body while an unexplained gap bolus stands (1: units, 2: time booked)"), amount, time),
                 delay: delay, repeats: false, interruptionLevel: .timeSensitive)
         }
     }

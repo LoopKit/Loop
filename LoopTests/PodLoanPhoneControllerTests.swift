@@ -20,6 +20,8 @@ extension MockPumpManager {
     static var testConnectionReleased = false
     /// The odometer the PHONE reads on its reclaim round-trip. nil = pump reports none.
     static var testOdometer: Double?
+    /// When the phone read it. nil = now.
+    static var testOdometerAt: Date?
     /// PHONE MIRROR: the books-dirty primitive (SQN-resync stamp) the inferred-loan
     /// detector reads. nil = no foreign sessions observed.
     static var testForeignSessionAt: Date?
@@ -41,7 +43,7 @@ final class LendableMockPumpManager: MockPumpManager, ExclusiveDeviceControl, Pu
     var isControlReleased: Bool { Self.testConnectionReleased }
     func releaseControl() { Self.testConnectionReleased = true }
     func takeControl() { Self.testConnectionReleased = false }
-    var deliveredUnits: (units: Double, at: Date)? { Self.testOdometer.map { ($0, Date()) } }
+    var deliveredUnits: (units: Double, at: Date)? { Self.testOdometer.map { ($0, Self.testOdometerAt ?? Date()) } }
     var deliveryPulseUnits: Double { 0.05 }
     var lastForeignSessionAt: Date? { Self.testForeignSessionAt }
     /// Like the real one, lifts the release.
@@ -167,6 +169,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         pump = LendableMockPumpManager()
         MockPumpManager.testConnectionReleased = false
         MockPumpManager.testOdometer = nil
+        MockPumpManager.testOdometerAt = nil
         MockPumpManager.testEscalations = 0
 
         let timeZone = TimeZone(identifier: "GMT")!
@@ -3094,3 +3097,97 @@ extension PodLoanPhoneController {
         }
     }
 }
+
+// MARK: - Back with the pod after a gap
+// The forced take-back's check, run when the phone reads the pod again after a gap, on a phone a
+// watch could have started Sport Mode without.
+extension PodLoanPhoneControllerTests {
+
+    /// Reads the pod at `at`, then waits for the check to have run.
+    private func readPod(_ controller: PodLoanPhoneController, units: Double, at: Date) {
+        MockPumpManager.testOdometer = units
+        MockPumpManager.testOdometerAt = at
+        controller.checkOwnPumpTotal()
+        waitUntil(timeout: 5, "reading kept") { controller.persisted.ownPumpTotalAt == at }
+    }
+
+    func testBackWithThePodAfterAGapBooksWhatTheRecordsCannotExplain() throws {
+        _ = seizeCredentialOutstanding()
+        let controller = makeController()
+        let back = Date()
+        readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(30)))
+        readPod(controller, units: 12.0, at: back)   // the schedule explains 0.5 U of the 2.0
+
+        waitUntil(timeout: 5, "gap booked") { self.lock.lock(); defer { self.lock.unlock() }; return !self.bookedGapDoses.isEmpty }
+        lock.lock(); let booked = bookedGapDoses; let titles = urgentNotices; let bodies = urgentNoticeBodies; lock.unlock()
+        XCTAssertEqual(booked.first?.deliveredUnits ?? 0, 1.5, accuracy: 0.05)
+        XCTAssertTrue(booked.first?.syncIdentifier?.hasPrefix("LOAN-AUDIT-GAP-after-") ?? false)
+        XCTAssertTrue(titles.contains("Insulin Estimated After Sport Mode"))
+        XCTAssertTrue(bodies.contains { $0.hasPrefix("Sport Mode probably started away from the phone") })
+        XCTAssertFalse(controller.holdsAutomaticDosing, "looping continues")
+    }
+
+    func testNoCheckOnAPhoneNotSetUpForSportModeAwayFromIt() throws {
+        let controller = makeController()
+        let back = Date()
+        readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(30)))
+        readPod(controller, units: 12.0, at: back)
+        controller.queue.sync {}
+        usleep(300_000)
+        lock.lock(); let booked = bookedGapDoses; lock.unlock()
+        XCTAssertTrue(booked.isEmpty)
+    }
+
+    func testAShortGapIsOnlyLogged() throws {
+        _ = seizeCredentialOutstanding()
+        let controller = makeController()
+        let back = Date()
+        readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(5)))
+        readPod(controller, units: 11.0, at: back)
+        controller.queue.sync {}
+        usleep(300_000)
+        lock.lock(); let booked = bookedGapDoses; lock.unlock()
+        XCTAssertTrue(booked.isEmpty)
+    }
+
+    func testTheWatchStartedLoansRecordsRetireTheGapBooking() throws {
+        let token = seizeCredentialOutstanding()
+        let controller = makeController()
+        let back = Date()
+        readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(30)))
+        readPod(controller, units: 12.0, at: back)
+        waitUntil(timeout: 5, "gap booked") { self.lock.lock(); defer { self.lock.unlock() }; return !self.bookedGapDoses.isEmpty }
+
+        // The watch comes back with the records of the loan it started alone.
+        let realTail = tempEvent(seq: 1, rate: 4.0, start: back.addingTimeInterval(-.minutes(30)), durationMinutes: 30)
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(
+            HandbackOffer(epoch: 5, handedBackAt: back, finalStatus: nil, odometer: nil,
+                          events: [realTail], tombstones: [], recovered: true, released: true,
+                          seizeToken: token)).transportDictionary())
+
+        waitUntil(timeout: 5, "gap retired") { self.lock.lock(); defer { self.lock.unlock() }; return !self.deletedGapSyncs.isEmpty }
+        lock.lock(); let deleted = deletedGapSyncs; lock.unlock()
+        XCTAssertTrue(deleted.first?.hasPrefix("LOAN-AUDIT-GAP-after-") ?? false)
+    }
+
+    func testAGapBookingStandsAgainstRecordsOutsideTheGap() throws {
+        let token = seizeCredentialOutstanding()
+        let controller = makeController()
+        let back = Date()
+        readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(30)))
+        readPod(controller, units: 12.0, at: back)
+        waitUntil(timeout: 5, "gap booked") { self.lock.lock(); defer { self.lock.unlock() }; return !self.bookedGapDoses.isEmpty }
+
+        // A later loan whose insulin was all given after the gap.
+        let later = tempEvent(seq: 1, rate: 2.0, start: back.addingTimeInterval(.minutes(60)), durationMinutes: 30)
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(
+            HandbackOffer(epoch: 5, handedBackAt: back.addingTimeInterval(.minutes(90)), finalStatus: nil, odometer: nil,
+                          events: [later], tombstones: [], recovered: true, released: true,
+                          seizeToken: token)).transportDictionary())
+
+        waitUntil(timeout: 5, "the estimate stands") { self.diagMatching("gap estimate STANDS") != nil }
+        lock.lock(); let deleted = deletedGapSyncs; lock.unlock()
+        XCTAssertTrue(deleted.isEmpty)
+    }
+}
+

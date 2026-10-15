@@ -82,7 +82,7 @@ extension WatchDataManager {
         podLoanController.considerDormantRefresh(bookChanged: updateContext == .insulin || updateContext == .carbs)
         // The watch's hold on the pod lapses by itself when its renewals stop — same pulse.
         podLoanController.considerHoldLapse()
-        podLoanController.logOwnRunningAudit()
+        podLoanController.checkOwnPumpTotal()
         podLoanController.considerOwedForceReclaimAudit()
     }
 
