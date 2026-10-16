@@ -118,6 +118,12 @@ final class PodLoanWatchController {
     /// Sets the request timeout and refuses to queue a live offer; never gates a start.
     var isPhoneReachable: () -> Bool = { true }
 
+    /// Whether the link to the phone is set up; until it is, "unreachable" means nothing.
+    var isPhoneLinkActivated: () -> Bool = { true }
+
+    /// How long a Start waits for the phone's grant before offering the offline start.
+    static let requestTimeout: TimeInterval = 10
+
     /// Logs reachability transitions, not every resend.
     var lastHandbackReachable: Bool?
 

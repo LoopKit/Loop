@@ -182,8 +182,8 @@ final class SeizeActivationTests: XCTestCase {
 
     // MARK: - The shortened timeout
 
-    /// Unreachable shortens the timeout to 8 s but the request is still sent.
-    func testUnreachablePhoneShortensTheRequestTimeout() async {
+    /// Unreachable offers the offline start at once, but the request is still sent.
+    func testUnreachablePhoneOffersTheOfflineStartAtOnce() async {
         let controller = await makeController()
         controller.isPhoneReachable = { false }
 
@@ -197,8 +197,42 @@ final class SeizeActivationTests: XCTestCase {
         wait(for: [timerArmed], timeout: 5)
 
         XCTAssertEqual(sent, 1, "unreachable is advisory — the request still goes out")
-        XCTAssertEqual(captured.map(\.0), [8], "unreachable phone → the short timeout")
+        XCTAssertEqual(captured.map(\.0), [0], "unreachable phone → offered at once")
         XCTAssertEqual(captured.map(\.1), ["request-timeout"])
+    }
+
+    /// Just after launch the link is not set up and reads unreachable: that is not believed.
+    func testUnreachableBeforeTheLinkIsSetUpWaitsTheNormalTimeout() async {
+        let controller = await makeController()
+        controller.isPhoneReachable = { false }
+        controller.isPhoneLinkActivated = { false }
+        controller.send = { _ in }
+        var captured: [TimeInterval] = []
+        let timerArmed = expectation(description: "timeout armed")
+        controller.scheduler = { delay, _, _ in captured.append(delay); timerArmed.fulfill() }
+
+        controller.requestLoan(watchBuild: "seize-test")
+        wait(for: [timerArmed], timeout: 5)
+
+        XCTAssertEqual(captured, [PodLoanWatchController.requestTimeout])
+    }
+
+    /// The phone looked reachable at the tap, then went away: the offer comes when it does.
+    func testThePhoneGoingOutOfReachDuringTheRequestOffersAtOnce() async {
+        let controller = await makeController()
+        controller.isPhoneReachable = { true }
+        controller.send = { _ in }
+        let timerArmed = expectation(description: "timeout armed")
+        controller.scheduler = { _, _, _ in timerArmed.fulfill() }   // the 10 s deadline never comes
+        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-600)))
+
+        controller.requestLoan(watchBuild: "seize-test")
+        wait(for: [timerArmed], timeout: 5)
+        XCTAssertNil(controller.debugSnapshot().seizeOfferIssuedAt, "no offer while the phone looks reachable")
+
+        controller.isPhoneReachable = { false }
+        controller.noteReachabilityChanged(false)
+        XCTAssertNotNil(controller.debugSnapshot().seizeOfferIssuedAt, "offered when the phone went out of reach")
     }
 
     // MARK: - Reunion-token hygiene

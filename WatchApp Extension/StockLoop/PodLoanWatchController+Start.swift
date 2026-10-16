@@ -179,8 +179,9 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Timeout is 60 s with the phone reachable, 8 s without; the grant includes a pod round-trip.
-    /// Reachability only shortens the timeout, it never gates the request.
+    /// The offline start is a backup, offered when the phone does not answer: at once if it looks
+    /// unreachable, when it goes out of reach during the wait (`noteReachabilityChanged`), or after
+    /// 10 s. The request still goes out; a phone that answers before the confirm wins (`confirmSeize`).
     func requestLoan(watchBuild: String) {
         #if targetEnvironment(simulator)
 
@@ -201,10 +202,11 @@ extension PodLoanWatchController {
             self.lastIdleNote = nil
             self.withdrawSeizeOffer(reason: "a new Start request went out")
 
-            let reachable = self.isPhoneReachable()
+            // "Unreachable" is believed only once the link to the phone is set up: just after launch it reads false.
+            let unreachable = !self.isPhoneReachable() && self.isPhoneLinkActivated()
 
-            let timeout: TimeInterval = reachable ? 60 : 8
-            SportLog.event("loan", "REQUEST sent (build \(watchBuild)) — awaiting grant\(reachable ? "" : " (phone unreachable — short \(Int(timeout))s timeout)")")
+            let timeout: TimeInterval = unreachable ? 0 : Self.requestTimeout
+            SportLog.event("loan", "REQUEST sent (build \(watchBuild)) — awaiting grant\(unreachable ? " (phone unreachable — offline start offered now)" : "")")
             self.sendMessage(.request(LoanRequest(watchBuild: watchBuild, supportsSeize: true, sentAt: self.now())))
 
             self.requestTimeoutWork?.cancel()

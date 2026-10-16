@@ -75,7 +75,15 @@ extension PodLoanWatchController {
     /// End was asked for.
     func noteReachabilityChanged(_ reachable: Bool) {
         queue.async {
-            guard reachable else { return }
+            guard reachable else {
+                // The phone went out of reach while a Start waited: offer the offline start now.
+                if self.phase == .requested, let work = self.requestTimeoutWork, !work.isCancelled {
+                    SportLog.event("seize", "phone went out of reach during the request — offline start offered now [seize]")
+                    work.perform()
+                    work.cancel()
+                }
+                return
+            }
             guard self.phase == .active,
                   self.persisted.seizeToken != nil,
                   !self.handbackRequested, !self.reunionPromptActive else { return }
