@@ -71,8 +71,8 @@ extension PodLoanWatchController {
     }
 
     /// The phone returning during a seized loan: it is told at once that this watch holds the pod,
-    /// so it stops dosing; the prompt follows after a 30 s debounce, one per transition, none once
-    /// End was asked for.
+    /// so it stops dosing, and the prompt asks the user. From the watch's side reachability drops
+    /// whenever the app leaves the screen, so it is not required to last.
     func noteReachabilityChanged(_ reachable: Bool) {
         queue.async {
             guard reachable else {
@@ -84,29 +84,22 @@ extension PodLoanWatchController {
                 }
                 return
             }
-            guard self.phase == .active,
-                  self.persisted.seizeToken != nil,
+            guard self.phase == .active, self.persisted.seizeToken != nil,
                   !self.handbackRequested, !self.reunionPromptActive else { return }
-            guard !self.seizeReunionDebounceArmed else { return }
-            self.seizeReunionDebounceArmed = true
             self.sendHoldsPodStatusReport(reason: "phone reachable")
-            SportLog.event("seize", "phone REACHABLE during a seized loan — reunion prompt in 30s unless it flickers away [seize]")
-            self.schedule(after: 30, label: "seize-reunion-debounce") { [weak self] in
-                guard let self = self else { return }
-                self.seizeReunionDebounceArmed = false
-                guard self.phase == .active,
-                      self.persisted.seizeToken != nil,
-                      !self.handbackRequested, !self.reunionPromptActive else { return }
-                guard self.isPhoneReachable() else {
-                    SportLog.event("seize", "phone flickered away before the reunion debounce — seized loan continues [seize]")
-                    return
-                }
-                self.reunionPromptActive = true
-                SportLog.event("seize", "phone is back — REUNION PROMPT raised (the hand-back stays the user's deliberate act) [seize]")
-                self.notifyUI()
-                self.issueReunionPromptAlert()
-            }
+            self.raiseReunionPrompt(because: "phone REACHABLE")
         }
+    }
+
+    /// The phone has been heard during a seized loan: ask the user, once per loan. Keep is the
+    /// answer for the rest of it; End on the watch stays available. On `queue`.
+    func raiseReunionPrompt(because why: String) {
+        guard phase == .active, persisted.seizeToken != nil,
+              !handbackRequested, !reunionPromptActive, !reunionKeepChosen else { return }
+        reunionPromptActive = true
+        SportLog.event("seize", "\(why) during a seized loan — REUNION PROMPT raised (the hand-back stays the user's deliberate act) [seize]")
+        notifyUI()
+        issueReunionPromptAlert()
     }
 
     /// Tell the phone this watch holds the pod, so it does not read silence as a dead watch.
@@ -134,11 +127,12 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Keep: the loan continues and the phone is told again.
+    /// Keep: the loan continues, the phone is told again, and the prompt is not raised again this loan.
     func dismissReunionPrompt() {
         queue.async {
             guard self.reunionPromptActive else { return }
             self.reunionPromptActive = false
+            self.reunionKeepChosen = true
             SportLog.event("seize", "reunion prompt: KEEP chosen — seized loan continues [seize]")
             self.notifyUI()
 

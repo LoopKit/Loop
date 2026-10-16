@@ -582,6 +582,7 @@ extension PodLoanWatchController {
     func recordTakeoverActive(delivered: Double, at: Date?) {
         let token = pendingSeizeToken
         pendingSeizeToken = nil
+        reunionKeepChosen = false
         updateState {
             $0.deliveredAtTakeover = delivered
             $0.deliveredAtTakeoverAt = at

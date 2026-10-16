@@ -327,6 +327,9 @@ final class PodLoanWatchController {
         guard let message = message else { return }
 
         SportLog.event("loan", "RX \(message.kindLabel) ch=\(channel.rawValue) — ours ev=\(epoch.map(String.init) ?? "nil") phase=\(phase.rawValue)")
+        // Any message is the phone heard; reachability alone flickers with this app's screen. Not a
+        // revoke: the phone has taken the pod back, so there is nothing to ask.
+        if case .revoke = message {} else { raiseReunionPrompt(because: "phone heard (\(message.kindLabel))") }
 
         switch message {
         case .grant(let grant):
@@ -419,10 +422,9 @@ final class PodLoanWatchController {
     /// Persisted only once the loan is active (a fold persists at once).
     var pendingSeizeToken: UUID?
 
-    /// One prompt per reachability transition.
-    var seizeReunionDebounceArmed = false
-
     var reunionPromptActive = false
+    /// Keep was the answer: no second prompt this loan. Cleared when a loan becomes active.
+    var reunionKeepChosen = false
 
     /// Simulator only: Start and End drive the fake flow in +SimulatorDriver. Set by tests, or
     /// by the `-simFakeLoanFlow` launch argument.
