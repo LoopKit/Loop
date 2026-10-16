@@ -73,6 +73,8 @@ extension PodLoanWatchController {
         // Off for longer than insulin's action time: the loan is stale and whatever another device gave
         // in that time cannot be timed, so the records go home and the watch does not resume.
         if let lastReading, now().timeIntervalSince(lastReading.at) > InsulinMath.defaultInsulinActivityDuration {
+            // Built only to read the total: it connects at construction, so it lets the pod go.
+            (manager as? ExclusiveDeviceControl)?.releaseControl()
             pumpStateStore.wrappedValue = nil
             updateState { $0.grantedSettings = nil }
             phase = .recoveredDrain
