@@ -14,7 +14,7 @@ protocol CarbStoreProtocol: AnyObject {
 
     func replaceCarbEntry(_ oldEntry: StoredCarbEntry, withEntry newEntry: NewCarbEntry) async throws -> StoredCarbEntry
 
-    func addCarbEntry(_ entry: NewCarbEntry) async throws -> StoredCarbEntry
+    func addCarbEntry(_ entry: NewCarbEntry, syncIdentifier: String) async throws -> StoredCarbEntry
 
     func deleteCarbEntry(_ oldEntry: StoredCarbEntry) async throws -> Bool
 

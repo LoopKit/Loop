@@ -31,7 +31,7 @@ class MockCarbStore: CarbStoreProtocol {
         return stored
     }
 
-    func addCarbEntry(_ entry: NewCarbEntry) async throws -> StoredCarbEntry {
+    func addCarbEntry(_ entry: NewCarbEntry, syncIdentifier: String) async throws -> StoredCarbEntry {
         let stored = entry.asStoredCarbEntry
         carbHistory.append(stored)
         return stored

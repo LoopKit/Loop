@@ -52,6 +52,12 @@ class SetBolusUserInfoTests: XCTestCase {
         XCTAssertEqual(info?.carbEntry, carbEntry)
     }
 
+    func testCarbEntrySyncIdentifierRoundTrips() {
+        let info = SetBolusUserInfo(value: value, startDate: startDate, contextDate: contextDate, carbEntry: carbEntry, carbEntrySyncIdentifier: "watch-entry", activationType: activationType)
+        XCTAssertEqual(SetBolusUserInfo(rawValue: info.rawValue)?.carbEntrySyncIdentifier, "watch-entry")
+        XCTAssertNil(SetBolusUserInfo(rawValue: rawValue)?.carbEntrySyncIdentifier)
+    }
+
     func testRawValueInitializerMissingVersion() {
         var rawValue = self.rawValue
         rawValue["v"] = nil

@@ -30,7 +30,7 @@ protocol BolusEntryViewModelDelegate: AnyObject {
     func fetchData(for baseTime: Date?, presumePresetEndingNow: Bool, ensureDosingCoverageStart: Date?, projectOngoingDoses: Bool) async throws -> StoredDataAlgorithmInput
     func effectiveGlucoseTargetRangeSchedule(presumingMealEntry: Bool) -> GlucoseRangeSchedule?
 
-    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?) async throws -> StoredCarbEntry
+    func addCarbEntry(_ carbEntry: NewCarbEntry, syncIdentifier: String, replacing replacingEntry: StoredCarbEntry?) async throws -> StoredCarbEntry
     func saveGlucose(sample: NewGlucoseSample) async throws -> StoredGlucoseSample
     func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) async
     func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws
@@ -109,6 +109,7 @@ final class BolusEntryViewModel: ObservableObject {
 
     let originalCarbEntry: StoredCarbEntry?
     let potentialCarbEntry: NewCarbEntry?
+    private let potentialCarbEntrySyncIdentifier = UUID().uuidString
     let selectedCarbAbsorptionTimeEmoji: String?
 
     @Published var recommendedBolus: LoopQuantity?
@@ -299,7 +300,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     func saveCarbEntry(_ entry: NewCarbEntry, replacingEntry: StoredCarbEntry?) async -> StoredCarbEntry? {
-        try? await delegate?.addCarbEntry(entry, replacing: replacingEntry)
+        try? await delegate?.addCarbEntry(entry, syncIdentifier: potentialCarbEntrySyncIdentifier, replacing: replacingEntry)
     }
 
     // returns true if action succeeded

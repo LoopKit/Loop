@@ -991,14 +991,14 @@ extension LoopDataManager {
     ///
     /// - Parameters:
     ///   - carbEntry: The new carb value
-    ///   - completion: A closure called once upon completion
-    ///   - result: The bolus recommendation
-    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry? = nil) async throws -> StoredCarbEntry {
+    ///   - syncIdentifier: The entry's identity, chosen by the caller so that a retried save is stored once
+    ///   - replacingEntry: An entry to replace instead; the replacement keeps its identity
+    func addCarbEntry(_ carbEntry: NewCarbEntry, syncIdentifier: String, replacing replacingEntry: StoredCarbEntry? = nil) async throws -> StoredCarbEntry {
         let storedCarbEntry: StoredCarbEntry
         if let replacingEntry = replacingEntry {
             storedCarbEntry = try await carbStore.replaceCarbEntry(replacingEntry, withEntry: carbEntry)
         } else {
-            storedCarbEntry = try await carbStore.addCarbEntry(carbEntry)
+            storedCarbEntry = try await carbStore.addCarbEntry(carbEntry, syncIdentifier: syncIdentifier)
         }
         self.temporaryPresetsManager.endPreMealOverride()
         return storedCarbEntry
@@ -1388,7 +1388,7 @@ extension LoopDataManager: ServicesManagerDelegate {
         let quantity = LoopQuantity(unit: .gram, doubleValue: amountInGrams)
         let candidateCarbEntry = NewCarbEntry(quantity: quantity, startDate: startDate ?? now, foodType: foodType, absorptionTime: absorptionTime)
 
-        let _ = try await carbStore.addCarbEntry(candidateCarbEntry)
+        let _ = try await carbStore.addCarbEntry(candidateCarbEntry, syncIdentifier: UUID().uuidString)
     }
     
     enum CarbActionError: LocalizedError {

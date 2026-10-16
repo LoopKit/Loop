@@ -434,7 +434,7 @@ final class WatchDataManager: NSObject {
         }
 
         if let carbEntry = bolus.carbEntry {
-            let storedCarbEntry = try await loopDataManager.addCarbEntry(carbEntry)
+            let storedCarbEntry = try await loopDataManager.addCarbEntry(carbEntry, syncIdentifier: bolus.carbEntrySyncIdentifier ?? UUID().uuidString)
             dosingDecision.carbEntry = storedCarbEntry
             self.analyticsServicesManager?.didAddCarbs(source: "Watch")
         } else {

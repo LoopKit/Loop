@@ -885,7 +885,7 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     
     var carbEntriesAdded = [(NewCarbEntry, StoredCarbEntry?)]()
     var addCarbEntryResult: Result<StoredCarbEntry,Error> = .failure(BolusEntryViewTestError.responseUndefined)
-    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry?) async throws -> StoredCarbEntry {
+    func addCarbEntry(_ carbEntry: NewCarbEntry, syncIdentifier: String, replacing replacingEntry: StoredCarbEntry?) async throws -> StoredCarbEntry {
         carbEntriesAdded.append((carbEntry, replacingEntry))
         switch addCarbEntryResult {
         case .success(let success):

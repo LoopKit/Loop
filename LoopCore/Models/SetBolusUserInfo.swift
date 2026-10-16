@@ -15,13 +15,15 @@ public struct SetBolusUserInfo {
     public let startDate: Date
     public let contextDate: Date?
     public let carbEntry: NewCarbEntry?
+    public let carbEntrySyncIdentifier: String?
     public let activationType: BolusActivationType
 
-    public init(value: Double, startDate: Date, contextDate: Date?, carbEntry: NewCarbEntry?, activationType: BolusActivationType) {
+    public init(value: Double, startDate: Date, contextDate: Date?, carbEntry: NewCarbEntry?, carbEntrySyncIdentifier: String? = nil, activationType: BolusActivationType) {
         self.value = value
         self.startDate = startDate
         self.contextDate = contextDate
         self.carbEntry = carbEntry
+        self.carbEntrySyncIdentifier = carbEntrySyncIdentifier
         self.activationType = activationType
     }
 }
@@ -48,6 +50,7 @@ extension SetBolusUserInfo: RawRepresentable {
         self.startDate = startDate
         self.contextDate = rawValue["cd"] as? Date
         self.carbEntry = (rawValue["ce"] as? NewCarbEntry.RawValue).flatMap(NewCarbEntry.init(rawValue:))
+        self.carbEntrySyncIdentifier = rawValue["cs"] as? String
         self.activationType = activationType
     }
 
@@ -61,6 +64,7 @@ extension SetBolusUserInfo: RawRepresentable {
 
         raw["cd"] = contextDate
         raw["ce"] = carbEntry?.rawValue
+        raw["cs"] = carbEntrySyncIdentifier
         raw["at"] = activationType.rawValue
 
         return raw
