@@ -67,6 +67,21 @@ extension PodLoanWatchController {
             return
         }
         SportLog.event("loan", "RESUME: pump manager built")
+        // The pod's total as this watch last read it, before anything reads the pod again.
+        let lastReading = (manager as? PumpDeliveryOdometer)?.deliveredUnits
+
+        // Off for longer than insulin's action time: the loan is stale and whatever another device gave
+        // in that time cannot be timed, so the records go home and the watch does not resume.
+        if let lastReading, now().timeIntervalSince(lastReading.at) > InsulinMath.defaultInsulinActivityDuration {
+            pumpStateStore.wrappedValue = nil
+            updateState { $0.grantedSettings = nil }
+            phase = .recoveredDrain
+            issueSessionEndedAlert()
+            SportLog.event("loan", String(format: "RESUME declined — the watch last read the pod %.1f h ago, past insulin's action time; records go home as a recovered hand-back",
+                                          now().timeIntervalSince(lastReading.at) / 3600))
+            return
+        }
+
         loopManager.settings = settings
         loopManager.settingsProvider.history = payload.settingsHistory
         loopManager.restoreOverrideHistory()
@@ -85,11 +100,54 @@ extension PodLoanWatchController {
         let lastSync = manager.lastSync
         Task { [loopManager] in
             if let lastSync { try? await loopManager.recordPumpEvents([], lastReconciliation: lastSync, replacePendingEvents: false) }
+            // Before the first cycle: book what the pod delivered while this watch was off that its records cannot explain.
+            await self.bookInsulinGivenWhileOff(manager: manager, lastReading: lastReading)
             loopManager.updateDisplayState()
             // As stock at launch: a cycle now, not at the next reading.
             loopManager.checkPumpDataAndLoop()
         }
         SportLog.event("loan", "RESUMED — epoch \(epoch ?? -1) rebuilt from saved pod state after a relaunch (stock relaunch) · \(RuntimeStateLog.snapshot())")
+    }
+
+    /// The pod's total now, against its total when this watch last read it plus what the watch's own
+    /// records and the schedule explain. The rest, in practice a phone's doses while the watch was off,
+    /// is booked as a bolus now. One read; if the pod does not answer, the check is skipped and logged.
+    func bookInsulinGivenWhileOff(manager: PumpManager, lastReading: (units: Double, at: Date)?) async {
+        guard let odometer = manager as? PumpDeliveryOdometer, let last = lastReading else {
+            SportLog.event("loan", "resume check SKIPPED — no earlier pod total to compare against")
+            return
+        }
+        let read = await odometer.refreshDeliveredUnits()
+        guard read, let now = odometer.deliveredUnits, now.at > last.at, now.units >= last.units else {
+            SportLog.event("loan", "resume check SKIPPED — the pod did not answer with a newer total")
+            return
+        }
+        let records = journal.doseRecords()
+        let unexplained = LoanReconciler.insulinNotInRecords(totalThen: last.units, then: last.at, totalNow: now.units, now: now.at,
+                                                             records: records, schedule: loopManager.settings.basalRateSchedule,
+                                                             pulseUnits: odometer.deliveryPulseUnits)
+        let minutes = now.at.timeIntervalSince(last.at) / 60
+        guard unexplained > Self.unexplainedInsulinBand else {
+            SportLog.event("loan", String(format: "resume check CLEAN — pod total %.2f → %.2f U over %.1f min, residual %+.3f", last.units, now.units, minutes, unexplained))
+            return
+        }
+        let at = self.now()
+        let entry = DoseEntry(type: .bolus, startDate: at, endDate: at, value: unexplained, unit: .units,
+                              decisionId: nil, deliveredUnits: unexplained,
+                              syncIdentifier: "LOAN-WATCH-GAP-resume-\(Int(at.timeIntervalSince1970))",
+                              insulinType: manager.status.insulinType)
+        do {
+            try await loopManager.seedInsulinHistory([entry])
+        } catch {
+            SportLog.event("loan", String(format: "** resume check: %.2f U UNEXPLAINED and the booking FAILED — %@ **", unexplained, String(describing: error)))
+            return
+        }
+        SportLog.event("loan", String(format: "** resume check: pod total %.2f → %.2f U over %.1f min while the watch was off; %.2f U its records cannot explain — BOOKED as a bolus now **",
+                                      last.units, now.units, minutes, unexplained))
+        queue.async {
+            self.startNote = (at, String(format: NSLocalizedString("%.2f U the watch had no record of — counted as insulin on board", comment: "Glance: unexplained insulin booked at takeover (1: units)"), unexplained))
+            self.notifyUI()
+        }
     }
 
     /// For a session that cannot resume: records may not have reached the phone yet.
