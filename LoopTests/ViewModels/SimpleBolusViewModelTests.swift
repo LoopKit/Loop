@@ -267,14 +267,14 @@ extension SimpleBolusViewModelTests: SimpleBolusViewModelDelegate {
         return sample.asStoredGlucoseSample
     }
 
-    func addCarbEntry(_ carbEntry: NewCarbEntry, syncIdentifier: String, replacing replacingEntry: StoredCarbEntry?) async throws -> StoredCarbEntry {
+    func addCarbEntry(_ carbEntry: NewCarbEntry) async throws -> StoredCarbEntry {
         addedCarbEntry = carbEntry
         let storedCarbEntry = StoredCarbEntry(
             startDate: carbEntry.startDate,
             quantity: carbEntry.quantity,
             uuid: UUID(),
             provenanceIdentifier: UUID().uuidString,
-            syncIdentifier: syncIdentifier,
+            syncIdentifier: carbEntry.syncIdentifier,
             syncVersion: 1,
             foodType: carbEntry.foodType,
             absorptionTime: carbEntry.absorptionTime,

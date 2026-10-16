@@ -17,7 +17,6 @@ import LoopCore
 enum WatchDataManagerError: Error {
     case decodingError
     case expiredBolusRecommendation
-    case missingCarbEntrySyncIdentifier
 }
 
 @MainActor
@@ -308,8 +307,7 @@ final class WatchDataManager: NSObject {
 
         if let recommendedBolus = try? await loopDataManager.recommendManualBolus(
             manualGlucoseSample: nil,
-            potentialCarbEntry: potentialCarbEntry,
-            originalCarbEntry: nil
+            carbEntryChange: potentialCarbEntry.map { .add($0) }
         ) {
             context.recommendedBolusDose = recommendedBolus.amount
             dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(
@@ -427,11 +425,6 @@ final class WatchDataManager: NSObject {
             throw WatchDataManagerError.expiredBolusRecommendation
         }
 
-        guard bolus.carbEntry == nil || bolus.carbEntrySyncIdentifier != nil else {
-            log.error("Could not add carbs from a watch app that does not identify its carb entry: %{public}@", String(describing: message))
-            throw WatchDataManagerError.missingCarbEntrySyncIdentifier
-        }
-
         var dosingDecision: BolusDosingDecision
         if let contextDate = bolus.contextDate, let contextDosingDecision = contextDosingDecisions[contextDate] {
             dosingDecision = contextDosingDecision
@@ -439,8 +432,8 @@ final class WatchDataManager: NSObject {
             dosingDecision = BolusDosingDecision(for: .watchBolus)  // The user saved without waiting for recommendation (no bolus)
         }
 
-        if let carbEntry = bolus.carbEntry, let syncIdentifier = bolus.carbEntrySyncIdentifier {
-            let storedCarbEntry = try await loopDataManager.addCarbEntry(carbEntry, syncIdentifier: syncIdentifier)
+        if let carbEntry = bolus.carbEntry {
+            let storedCarbEntry = try await loopDataManager.addCarbEntry(carbEntry)
             dosingDecision.carbEntry = storedCarbEntry
             self.analyticsServicesManager?.didAddCarbs(source: "Watch")
         } else {

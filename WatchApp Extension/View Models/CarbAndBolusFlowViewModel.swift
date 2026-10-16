@@ -30,7 +30,6 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     // MARK: - Other state
     let interactionStartDate = Date()
     private var carbEntryUnderConsideration: NewCarbEntry?
-    private var carbEntrySyncIdentifier = UUID().uuidString
     private var contextUpdateObservation: AnyObject?
     private var contextDate: Date?
 
@@ -115,6 +114,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     func recommendBolus(forGrams grams: Int, eatenAt carbEntryDate: Date, absorptionTime carbAbsorptionTime: CarbAbsorptionTime, lastEntryDate: Date) async {
         let entry = NewCarbEntry(
             date: lastEntryDate,
+            syncIdentifier: UUID().uuidString,
             quantity: LoopQuantity(unit: .gram, doubleValue: Double(grams)),
             startDate: carbEntryDate,
             foodType: carbAbsorptionTime.emoji,
@@ -126,7 +126,6 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
         }
 
         carbEntryUnderConsideration = entry
-        carbEntrySyncIdentifier = UUID().uuidString
         await recommendBolus(with: entry)
     }
 
@@ -186,7 +185,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func sendSetBolusUserInfo(carbEntry: NewCarbEntry?, bolus: Double) async throws {
-        let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), contextDate: self.contextDate, carbEntry: carbEntry, carbEntrySyncIdentifier: carbEntry.map { _ in carbEntrySyncIdentifier }, activationType: .activationTypeFor(recommendedAmount: recommendedBolusAmount, bolusAmount: bolus))
+        let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), contextDate: self.contextDate, carbEntry: carbEntry, activationType: .activationTypeFor(recommendedAmount: recommendedBolusAmount, bolusAmount: bolus))
         // The phone saves the entry and pushes a context with it in COB before
         // it replies, so stop treating it as pending before sending.
         let pendingCarbEntry = carbEntryUnderConsideration

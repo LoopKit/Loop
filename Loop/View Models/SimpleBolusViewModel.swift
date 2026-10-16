@@ -21,7 +21,7 @@ protocol SimpleBolusViewModelDelegate: AnyObject {
     
     func saveGlucose(sample: NewGlucoseSample) async throws -> StoredGlucoseSample
 
-    func addCarbEntry(_ carbEntry: NewCarbEntry, syncIdentifier: String, replacing replacingEntry: StoredCarbEntry?) async throws -> StoredCarbEntry
+    func addCarbEntry(_ carbEntry: NewCarbEntry) async throws -> StoredCarbEntry
 
     func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) async
     
@@ -391,10 +391,10 @@ class SimpleBolusViewModel: ObservableObject {
                 log.error("Failed to donate intent: %{public}@", String(describing: error))
             }
 
-            let carbEntry = NewCarbEntry(date: saveDate, quantity: carbs, startDate: saveDate, foodType: nil, absorptionTime: nil)
+            let carbEntry = NewCarbEntry(date: saveDate, syncIdentifier: UUID().uuidString, quantity: carbs, startDate: saveDate, foodType: nil, absorptionTime: nil)
 
             do {
-                self.dosingDecision?.carbEntry = try await delegate.addCarbEntry(carbEntry, syncIdentifier: UUID().uuidString, replacing: nil)
+                self.dosingDecision?.carbEntry = try await delegate.addCarbEntry(carbEntry)
             } catch {
                 self.presentAlert(.carbEntryPersistenceFailure)
                 self.log.error("Failed to add carb entry: %{public}@", String(describing: error))
