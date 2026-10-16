@@ -91,9 +91,9 @@ extension PodLoanWatchController {
         manager.delegateQueue = queue
         pumpManager = manager
 
-        // Through the property, so didSet updates the main-safe mirrors.
+        // Through the property, so didSet updates the main-safe mirrors. The loop gets the pod only after
+        // the check below: until then a cycle started by a reading finds no pod and does nothing.
         phase = .active
-        loopManager.pumpManager = manager
         onLoanActiveChanged?(true)
 
         // Seed the reconciliation stamp, or the first cycle refuses with "pump data too old".
@@ -102,9 +102,14 @@ extension PodLoanWatchController {
             if let lastSync { try? await loopManager.recordPumpEvents([], lastReconciliation: lastSync, replacePendingEvents: false) }
             // Before the first cycle: book what the pod delivered while this watch was off that its records cannot explain.
             await self.bookInsulinGivenWhileOff(manager: manager, lastReading: lastReading)
-            loopManager.updateDisplayState()
-            // As stock at launch: a cycle now, not at the next reading.
-            loopManager.checkPumpDataAndLoop()
+            self.queue.async {
+                // The loan may have ended while the check ran.
+                guard self.phase == .active, self.pumpManager === manager else { return }
+                loopManager.pumpManager = manager
+                loopManager.updateDisplayState()
+                // As stock at launch: a cycle now, not at the next reading.
+                loopManager.checkPumpDataAndLoop()
+            }
         }
         SportLog.event("loan", "RESUMED — epoch \(epoch ?? -1) rebuilt from saved pod state after a relaunch (stock relaunch) · \(RuntimeStateLog.snapshot())")
     }
