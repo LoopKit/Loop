@@ -69,11 +69,11 @@ extension PodLoanWatchController {
     /// Verified by reading identities back, not by comparing COB.
     func ingestGrantCarbs(_ grant: LoanGrant) {
         let carbs = grant.carbHistory ?? []
-        // Seeded entries are the phone's, so deleting one skips stock's authorship check.
+        // Each entry keeps the phone's authorship: Loop's own can be deleted here, another app's cannot.
         let objects: [SyncCarbObject] = carbs.map { c in
             SyncCarbObject(
                 absorptionTime: c.absorptionTime,
-                createdByCurrentApp: false,
+                createdByCurrentApp: c.createdByCurrentApp ?? false,
                 foodType: c.foodType,
                 grams: c.grams,
                 startDate: c.startDate,
@@ -598,7 +598,10 @@ extension PodLoanWatchController {
         let maxAttempts = 14
         let control = manager as? ExclusiveDeviceControl
         let odometer = manager as? PumpDeliveryOdometer
-        let refresh: (@escaping (Bool) -> Void) -> Void = odometer?.refreshDeliveredUnits ?? { completion in completion(false) }
+        let refresh: (@escaping (Bool) -> Void) -> Void = { completion in
+            guard let odometer else { return completion(false) }
+            Task { completion(await odometer.refreshDeliveredUnits()) }
+        }
         refresh { [weak self] success in
             guard let self = self else { return }
             self.queue.async {

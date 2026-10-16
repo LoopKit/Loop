@@ -150,7 +150,10 @@ extension PodLoanPhoneController {
             // Force a real read where offered: `ensureCurrentPumpData` alone can return a cached `lastSync`.
             if let odometer = pump as? PumpDeliveryOdometer {
                 read = { done in
-                    odometer.refreshDeliveredUnits { _ in pump.ensureCurrentPumpData { done($0) } }
+                    Task {
+                        _ = await odometer.refreshDeliveredUnits()
+                        pump.ensureCurrentPumpData { done($0) }
+                    }
                 }
             } else {
                 read = { done in pump.ensureCurrentPumpData { done($0) } }

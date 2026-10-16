@@ -174,11 +174,12 @@ extension PodLoanWatchController {
             }
             // Read the odometer only over a link already up; otherwise a read dials the pod.
             if let odometer = manager as? PumpDeliveryOdometer, (manager as? ExclusiveDeviceControl)?.isControlReady == true {
-                odometer.refreshDeliveredUnits { first in
+                Task {
+                    let first = await odometer.refreshDeliveredUnits()
                     let delivered = odometer.deliveredUnits?.units
                     // A total equal to the takeover reading is probably stale: read once more.
                     if first, delivered != nil, delivered == self.deliveredAtTakeover {
-                        odometer.refreshDeliveredUnits { second in finalize(second) }
+                        finalize(await odometer.refreshDeliveredUnits())
                     } else {
                         finalize(first)
                     }

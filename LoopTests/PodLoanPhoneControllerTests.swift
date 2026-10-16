@@ -52,9 +52,9 @@ final class LendableMockPumpManager: MockPumpManager, ExclusiveDeviceControl, Pu
         Self.testConnectionReleased = false
         return "test escalation"
     }
-    func refreshDeliveredUnits(completion: @escaping (Bool) -> Void) {
+    func refreshDeliveredUnits() async -> Bool {
         Self.testForcedReadCount += 1
-        completion(true)
+        return true
     }
 }
 
