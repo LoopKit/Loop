@@ -47,7 +47,14 @@ extension SetBolusUserInfo: RawRepresentable {
         self.value = value
         self.startDate = startDate
         self.contextDate = rawValue["cd"] as? Date
-        self.carbEntry = (rawValue["ce"] as? NewCarbEntry.RawValue).flatMap(NewCarbEntry.init(rawValue:))
+        if let rawCarbEntry = rawValue["ce"] {
+            guard let carbEntry = (rawCarbEntry as? NewCarbEntry.RawValue).flatMap(NewCarbEntry.init(rawValue:)) else {
+                return nil
+            }
+            self.carbEntry = carbEntry
+        } else {
+            self.carbEntry = nil
+        }
         self.activationType = activationType
     }
 

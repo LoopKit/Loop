@@ -147,23 +147,39 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     var originalCarbEntry: StoredCarbEntry? = nil
-    
-    private var updatedCarbEntry: NewCarbEntry? {
+    private let newEntrySyncIdentifier = UUID().uuidString
+
+    private var carbEntryChange: CarbEntryChange? {
         if let quantity = carbsQuantity, quantity != 0 {
             let favoriteFoodID = selectedFavoriteFoodIndex == -1 ? nil : favoriteFoods[selectedFavoriteFoodIndex].id
 
             if let o = originalCarbEntry, o.quantity.doubleValue(for: preferredCarbUnit) == quantity && o.startDate == time && o.foodType == foodType && o.absorptionTime == absorptionTime, o.favoriteFoodID == favoriteFoodID {
                 return nil  // No changes were made
             }
-            
-            return NewCarbEntry(
+
+            let carbsQuantity = LoopQuantity(unit: preferredCarbUnit, doubleValue: quantity)
+            let entryFoodType = usesCustomFoodType ? foodType : selectedDefaultAbsorptionTimeEmoji
+
+            guard let originalCarbEntry else {
+                return .add(NewCarbEntry(
+                    date: date,
+                    syncIdentifier: newEntrySyncIdentifier,
+                    quantity: carbsQuantity,
+                    startDate: time,
+                    foodType: entryFoodType,
+                    absorptionTime: absorptionTime,
+                    favoriteFoodID: favoriteFoodID
+                ))
+            }
+
+            return .edit(originalCarbEntry, CarbEntryUpdate(
                 date: date,
-                quantity: LoopQuantity(unit: preferredCarbUnit, doubleValue: quantity),
+                quantity: carbsQuantity,
                 startDate: time,
-                foodType: usesCustomFoodType ? foodType : selectedDefaultAbsorptionTimeEmoji,
+                foodType: entryFoodType,
                 absorptionTime: absorptionTime,
                 favoriteFoodID: favoriteFoodID
-            )
+            ))
         }
         else {
             return nil
@@ -180,12 +196,12 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     var continueButtonDisabled: Bool {
-        get { updatedCarbEntry == nil }
+        get { carbEntryChange == nil }
     }
     
     // MARK: - Continue to Bolus and Carb Quantity Warnings
     func continueToBolus() {
-        guard updatedCarbEntry != nil else {
+        guard carbEntryChange != nil else {
             return
         }
         
@@ -217,8 +233,7 @@ final class CarbEntryViewModel: ObservableObject {
         let viewModel = BolusEntryViewModel(
             delegate: delegate,
             screenWidth: UIScreen.main.bounds.width,
-            originalCarbEntry: originalCarbEntry,
-            potentialCarbEntry: updatedCarbEntry,
+            carbEntryChange: carbEntryChange,
             selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji
         )
         

@@ -387,6 +387,7 @@
 		A9F703752489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F703742489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift */; };
 		A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F703762489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift */; };
 		A9FB75F1252BE320004C7D3F /* BolusDosingDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */; };
+		2437A340C1560EEDE55E3F7B /* CarbEntryChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8378B7D1F532A5F47CEBB6AE /* CarbEntryChange.swift */; };
 		B4001CEE28CBBC82002FB414 /* AlertManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4001CED28CBBC82002FB414 /* AlertManagementView.swift */; };
 		A1E47000000000000000A001 /* AlertHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1E47000000000000000A002 /* AlertHistoryView.swift */; };
 		B405E35A24D2B1A400DD058D /* HUDAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F2C15961E09E94E00E160D4 /* HUDAssets.xcassets */; };
@@ -1199,6 +1200,7 @@
 		A9F703742489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GlucoseStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A9F703762489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PersistentDeviceLog+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusDosingDecision.swift; sourceTree = "<group>"; };
+		8378B7D1F532A5F47CEBB6AE /* CarbEntryChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryChange.swift; sourceTree = "<group>"; };
 		AF16A5EDEB9DF756890E0C09 /* Loop/Resources/Sounds/bloop.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/bloop.caf; sourceTree = SOURCE_ROOT; };
 		B4001CED28CBBC82002FB414 /* AlertManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManagementView.swift; sourceTree = "<group>"; };
 		A1E47000000000000000A002 /* AlertHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertHistoryView.swift; sourceTree = "<group>"; };
@@ -1708,6 +1710,7 @@
 				DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */,
 				FEEDF0000000000000000000 /* GlucoseStatistics.swift */,
 				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
+				8378B7D1F532A5F47CEBB6AE /* CarbEntryChange.swift */,
 				DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */,
 				C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */,
 				1455ACB12C667BEE004F44F2 /* Deeplink.swift */,
@@ -3636,6 +3639,7 @@
 				1455ACB22C667BEE004F44F2 /* Deeplink.swift in Sources */,
 				43DFB62320D4CAE7008A7BAE /* PumpManager.swift in Sources */,
 				A9FB75F1252BE320004C7D3F /* BolusDosingDecision.swift in Sources */,
+				2437A340C1560EEDE55E3F7B /* CarbEntryChange.swift in Sources */,
 				892A5D59222F0A27008961AB /* Debug.swift in Sources */,
 				431A8C401EC6E8AB00823B9C /* CircleMaskView.swift in Sources */,
 				1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */,

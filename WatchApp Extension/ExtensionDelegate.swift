@@ -282,7 +282,7 @@ extension ExtensionDelegate: UNUserNotificationCenterDelegate {
                 let mealTime = userInfo[LoopNotificationUserInfoKey.missedMealTime.rawValue] as? Date,
                 let carbAmount = userInfo[LoopNotificationUserInfoKey.missedMealCarbAmount.rawValue] as? Double
             {
-                let missedEntry = NewCarbEntry(quantity: LoopQuantity(unit: .gram,
+                let missedEntry = NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram,
                                                                          doubleValue: carbAmount),
                                                     startDate: mealTime,
                                                     foodType: nil,
