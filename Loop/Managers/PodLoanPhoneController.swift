@@ -154,9 +154,6 @@ final class PodLoanPhoneController {
         }
     }
 
-    /// Book a placeholder bolus for unexplained insulin after a force reclaim.
-    static let bookUnattributedInsulinOnForceReclaim = true
-
     let log = OSLog(subsystem: "com.loopkit.Loop", category: "PodLoanPhoneController")
 
     /// All state mutation happens here; the UI reads a mirror instead.

@@ -137,12 +137,8 @@ extension PodLoanPhoneController {
                 "** WARN — force-reclaim residual %+.3f U exceeds +%.2f: the pod delivered insulin the records cannot explain (watch died mid-session?). Still looping. **",
                 residual, Self.unexplainedInsulinBand))
 
-            if Self.bookUnattributedInsulinOnForceReclaim {
-                bookGapDose(units: residual, epoch: epoch)
-                deps.issueUrgentNotice(Self.estimatedTitle, String(format: "The watch's records haven't arrived: %@", Self.bookedSentences(residual)))
-            } else {
-                deps.issueUrgentNotice(Self.estimatedTitle, String(format: "%.2f U on the pod isn't in the watch's records. It is not counted in insulin on board. Automatic dosing continues.", residual))
-            }
+            bookGapDose(units: residual, epoch: epoch)
+            deps.issueUrgentNotice(Self.estimatedTitle, String(format: "The watch's records haven't arrived: %@", Self.bookedSentences(residual)))
         } else if residual < -Self.warnNegativeResidual {
             handbackDiag(epoch, String(format:
                 "** WARN — force-reclaim residual %+.3f U beyond -%.2f: records claim more than the pod delivered (phantom IOB). Looping resumes — this direction under-doses and decays out. **",
