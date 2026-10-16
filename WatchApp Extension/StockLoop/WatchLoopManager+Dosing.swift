@@ -170,8 +170,8 @@ extension WatchLoopManager {
         }
     }
 
-    /// Skips stock's authorship checks, which refuse phone-seeded entries. The caller must
-    /// journal the delete, or the next takeover re-seeds it.
+    /// Stock's delete: Loop's own entries only, as on the phone. The caller must journal the
+    /// delete, or the next takeover re-seeds it.
     func deleteLoanCarbEntry(_ entry: StoredCarbEntry, completion: @escaping (Bool) -> Void) {
         let grams = entry.quantity.doubleValue(for: .gram)
 
@@ -183,10 +183,10 @@ extension WatchLoopManager {
                                       String(entry.provenanceIdentifier.prefix(12)),
                                       entry.createdByCurrentApp ? "y" : "n"))
 
-        carbStore.deleteCarbEntrySkippingAuthorshipCheck(entry) { result, lookupDiag in
+        carbStore.deleteCarbEntry(entry) { result in
             switch result {
             case .success:
-                SportLog.event("loan", String(format: "carb DELETED locally: %.0f g · lookup: %@", grams, lookupDiag))
+                SportLog.event("loan", String(format: "carb DELETED locally: %.0f g", grams))
 
                 let start = min(Calendar.current.startOfDay(for: self.now()),
                                 Date(timeIntervalSinceNow: -CarbMath.maximumAbsorptionTimeInterval))
@@ -199,7 +199,7 @@ extension WatchLoopManager {
                 }
                 completion(true)
             case .failure(let error):
-                SportLog.event("loan", "carb store delete FAILED — \(String(describing: error)) · lookup: \(lookupDiag)")
+                SportLog.event("loan", "carb store delete FAILED — \(String(describing: error))")
                 completion(false)
             }
         }

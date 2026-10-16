@@ -920,6 +920,36 @@ final class StockRunsTests: XCTestCase {
         XCTAssertTrue(enactor.calls.isEmpty)
     }
 
+    /// Seeded from the phone with its own authorship: Loop's entries can be deleted on the
+    /// watch, another app's cannot, as on the phone.
+    func testOnlyLoopsOwnSeededCarbsCanBeDeleted() async throws {
+        let (manager, _) = try await makeClosedLoopManager()
+        let now = Date()
+        func seeded(_ grams: Double, mine: Bool, _ id: String) -> SyncCarbObject {
+            SyncCarbObject(absorptionTime: TimeInterval(3 * 60 * 60), createdByCurrentApp: mine, foodType: nil, grams: grams,
+                           startDate: now.addingTimeInterval(-.minutes(20)), uuid: nil,
+                           provenanceIdentifier: mine ? "com.loopkit.Loop" : "com.example.FoodApp",
+                           syncIdentifier: id, syncVersion: 1, userCreatedDate: now, userUpdatedDate: nil,
+                           userDeletedDate: nil, operation: .create, addedDate: nil, supercededDate: nil)
+        }
+        let set = expectation(description: "seeded")
+        manager.carbStore.setSyncCarbObjects([seeded(30, mine: true, "loop-entry"), seeded(20, mine: false, "food-app-entry")]) { _ in set.fulfill() }
+        await fulfillment(of: [set], timeout: 10)
+        let stored = await storedCarbs(manager)
+        let loopEntry = try XCTUnwrap(stored.first { $0.syncIdentifier == "loop-entry" })
+        let foodAppEntry = try XCTUnwrap(stored.first { $0.syncIdentifier == "food-app-entry" })
+
+        var results: [Bool] = []
+        for entry in [loopEntry, foodAppEntry] {
+            let done = expectation(description: "delete")
+            manager.deleteLoanCarbEntry(entry) { ok in results.append(ok); done.fulfill() }
+            await fulfillment(of: [done], timeout: 10)
+        }
+        XCTAssertEqual(results, [true, false], "Loop's own entry deletes; another app's is refused")
+        let remaining = await storedCarbs(manager).compactMap(\.syncIdentifier)
+        XCTAssertEqual(remaining, ["food-app-entry"])
+    }
+
     /// Nor when the pod accepts a manual bolus.
     func testAnAcceptedManualBolusRunsNoCycle() async throws {
         let (manager, enactor) = try await makeClosedLoopManager()

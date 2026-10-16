@@ -238,10 +238,13 @@ public struct LoanCarbRecord: Codable, Equatable {
     public let foodType: String?
     public let userCreatedDate: Date?
     public let userUpdatedDate: Date?
+    /// The phone's own flag: Loop entered it (editable), or another app did (read-only). Absent
+    /// from an older phone, which reads as another app's.
+    public let createdByCurrentApp: Bool?
 
     public init(syncIdentifier: String?, provenanceIdentifier: String, syncVersion: Int?,
                 startDate: Date, grams: Double, absorptionTime: TimeInterval?, foodType: String?,
-                userCreatedDate: Date?, userUpdatedDate: Date?) {
+                userCreatedDate: Date?, userUpdatedDate: Date?, createdByCurrentApp: Bool? = nil) {
         self.syncIdentifier = syncIdentifier
         self.provenanceIdentifier = provenanceIdentifier
         self.syncVersion = syncVersion
@@ -251,6 +254,7 @@ public struct LoanCarbRecord: Codable, Equatable {
         self.foodType = foodType
         self.userCreatedDate = userCreatedDate
         self.userUpdatedDate = userUpdatedDate
+        self.createdByCurrentApp = createdByCurrentApp
     }
 }
 
