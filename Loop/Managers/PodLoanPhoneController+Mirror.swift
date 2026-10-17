@@ -35,9 +35,8 @@ extension PodLoanPhoneController {
             $0.holdLapseNoticedAt = nil
             $0.watchSilenceWarningsIssued = 0
             if let units {
-                $0.audit.base = AuditBase(units: units, asOf: asOf)
-                $0.audit.baseEpoch = $0.epoch
-                $0.audit.loanStartedAt = asOf
+                $0.ledger.last = .init(units: units, at: asOf)
+                $0.loanStartedAt = asOf
             }
         }
 
@@ -141,9 +140,7 @@ extension PodLoanPhoneController {
         cancelNotification(id: NotificationID.t1)
 
         if let atTakeover = complete.firstPodStatus.deliveredUnits {
-            updateState { $0.audit.deliveredAtTakeover = atTakeover }
-
-            auditBase = AuditBase(units: atTakeover, asOf: complete.firstPodStatus.timestamp)
+            noteTakeoverReading(units: atTakeover, at: complete.firstPodStatus.timestamp)
         }
         state = .loaned
 

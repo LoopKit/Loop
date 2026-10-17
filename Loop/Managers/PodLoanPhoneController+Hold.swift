@@ -52,11 +52,6 @@ extension PodLoanPhoneController {
         isLoanedOutForUI && persisted.holdLapseNoticedAt == nil
     }
 
-    /// An audit describes one loan, so every path that ends a loan clears its anchors.
-    func clearAuditAnchors() {
-        updateState { $0.audit = .init() }
-    }
-
     /// Judged by send time: a batch that sat in a queue renews nothing.
     func noteHoldRenewal(sentAt: Date?) {
         let now = deps.now()

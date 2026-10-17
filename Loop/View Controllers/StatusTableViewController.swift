@@ -463,7 +463,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         // A loan starting or ending changes what the charts may show; refetch everything.
         if lastReloadPodLoanedToWatch != deviceManager.isPodLoanedToWatch {
             lastReloadPodLoanedToWatch = deviceManager.isPodLoanedToWatch
-            refreshContext = RefreshContext.all
+            refreshContext.formUnion(RefreshContext.all)
         }
 
         // This should be kept up to date immediately

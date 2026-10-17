@@ -58,7 +58,8 @@ final class LoanProtocolV2Tests: XCTestCase {
         let now = Date(timeIntervalSince1970: 1_784_338_000.125)
         let carb = LoanCarbRecord(syncIdentifier: "carb-abc", provenanceIdentifier: "com.loopkit.Loop",
                                   syncVersion: 1, startDate: now, grams: 25, absorptionTime: .hours(3),
-                                  foodType: "🍕", userCreatedDate: now, userUpdatedDate: nil)
+                                  foodType: "🍕", userCreatedDate: now, userUpdatedDate: nil,
+                                  createdByCurrentApp: true)
         let grant = LoanGrant(epoch: 7, expiresAt: now.addingTimeInterval(300),
                               pumpConfiguration: Data([1]), podAddress: 0,
                               therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC",

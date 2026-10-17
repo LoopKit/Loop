@@ -196,43 +196,27 @@ extension PodLoanPhoneController {
         persistStaged()
     }
 
-    /// Arms the owed verdict. With no starting reading or schedule there is nothing to check against.
+    /// Arms the owed verdict over the window from the ledger's last reading: the watch's takeover
+    /// reading, or the grant's before one arrived. With no reading or schedule there is nothing to check against.
     @discardableResult
     private func armForceReclaimAudit() -> Bool {
         let start = loanStartedAt ?? deps.now().addingTimeInterval(-.hours(2))
-        // The base is the takeover reading, or the grant's before one arrives.
-        let anchor: (units: Double, asOf: Date)?
-        if let base = auditBase {
-            anchor = (base.units, base.asOf)
-        } else if let units = persisted.audit.deliveredAtTakeover ?? persisted.audit.deliveredAtGrant {
-            anchor = (units, start)
-        } else {
-            anchor = nil
-        }
-        guard let anchor = anchor, let schedule = deps.settings().basalRateSchedule, let pulseUnits = pumpPulseUnits else {
+        guard let anchor = ledgerLast, let schedule = deps.settings().basalRateSchedule, let pulseUnits = pumpPulseUnits else {
             handbackDiag(epoch, "** force-reclaim audit IMPOSSIBLE — no start odometer/schedule/pump; session UNVERIFIED **")
             deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)
             return false
         }
         let allEvents = staged.values.sorted { $0.seq < $1.seq }
         let expected = LoanReconciler.expectedInsulin(events: allEvents, schedule: schedule, pulseUnits: pulseUnits,
-                                                      from: anchor.asOf, to: deps.now())
-
-        // Whole-loan figure for the drift check only.
-        let takeoverUnits = persisted.audit.deliveredAtTakeover
-        let wholeLoanExpected = takeoverUnits.map {
-            _ in LoanReconciler.expectedInsulin(events: allEvents, schedule: schedule, pulseUnits: pulseUnits,
-                                                from: start, to: deps.now())
-        }
+                                                      from: anchor.at, to: deps.now())
         pendingHandbackAudit = PendingHandbackAudit(
-            epoch: epoch, deliveredAtStart: anchor.units, expected: expected,
+            epoch: epoch, deliveredAtStart: anchor.units, windowStart: anchor.at, expected: expected,
             loanMinutes: deps.now().timeIntervalSince(start) / 60, cycles: 0,
-            watchLatest: nil, watchFreshened: false, flavor: .forceReclaim,
-            takeoverUnits: takeoverUnits, wholeLoanExpected: wholeLoanExpected)
+            watchLatest: nil, watchFreshened: false, flavor: .forceReclaim)
 
         handbackDiag(epoch, String(format:
             "force-reclaim audit armed — expected %.3f U from %d record(s) + schedule fill over %.0f min since takeover; verdict on the reclaim round-trip",
-            expected, allEvents.count, deps.now().timeIntervalSince(anchor.asOf) / 60))
+            expected, allEvents.count, deps.now().timeIntervalSince(anchor.at) / 60))
         return true
     }
 }

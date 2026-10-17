@@ -166,9 +166,6 @@ final class PodLoanPhoneController {
         }
     }
 
-    /// Book a placeholder bolus for unexplained insulin after a force reclaim.
-    static let bookUnattributedInsulinOnForceReclaim = true
-
     let log = OSLog(subsystem: "com.loopkit.Loop", category: "PodLoanPhoneController")
 
     /// All state mutation happens here; the UI reads a mirror instead.
@@ -216,8 +213,7 @@ final class PodLoanPhoneController {
         }
     }
 
-    /// Back to the phone without a hand-back, for a loan that never really started. Clears the
-    /// audit anchors, which describe one loan.
+    /// Back to the phone without a hand-back, for a loan that never really started.
     func reclaimToOwner(alert: (title: String, body: String)?, reason: String) {
         handbackDiag(epoch, "loan ABANDONED — back to phone control: \(reason)")
 
@@ -225,7 +221,7 @@ final class PodLoanPhoneController {
         deps.endReclaimBackgroundTask()
 
         grantOfferedAt = nil
-        clearAuditAnchors()
+        loanStartedAt = nil
         reclaimPodConnection()
         state = .owner
         if let alert = alert { deps.issueNotice(alert.title, alert.body) }
@@ -274,19 +270,13 @@ final class PodLoanPhoneController {
         self._persisted = store.wrappedValue.flatMap(PodLoanPhoneState.init(rawValue:)) ?? PodLoanPhoneState()
         self.stateStore = store
         loadStaged()
-
-        // Only a base from this epoch.
-        if _persisted.audit.baseEpoch != epoch, _persisted.audit.base != nil {
-            _persisted.audit.base = nil
-            stateStore.wrappedValue = _persisted.rawValue
-        }
         installPodLinkCensus()
 
         // Re-arm an unruled force-reclaim audit.
         if let saved = _persisted.pendingForceAudit {
             let e = saved.epoch
             pendingHandbackAudit = PendingHandbackAudit(
-                epoch: e, deliveredAtStart: saved.deliveredAtStart, expected: saved.expected,
+                epoch: e, deliveredAtStart: saved.deliveredAtStart, windowStart: saved.from, expected: saved.expected,
                 loanMinutes: saved.loanMinutes, cycles: 0,
                 watchLatest: nil, watchFreshened: false, flavor: .forceReclaim)
             queue.async { [weak self] in
@@ -299,7 +289,7 @@ final class PodLoanPhoneController {
         deps.whenProtectedDataAvailable { [weak self] in
             guard let self = self else { return }
             self.queue.async {
-                self.retryPersistedGapDeleteIfAny()
+                self.settleEstimatesAtLaunch()
             }
         }
 
@@ -387,17 +377,17 @@ final class PodLoanPhoneController {
     /// Per grant; cleared wherever a loan is abandoned.
     var grantOfferedAt: Date?
 
+    /// The highest loan number the watch reported in its last Start request.
+    var watchKnownEpoch: Int?
+
     /// The pod fault already announced, as "epoch fault", so a repeated report stays quiet.
     var podFaultNoticed: String?
-
-    /// The pump's delivered total as this phone last read it while it held the pump. Diagnostic only.
-    var lastOwnPumpTotal: (units: Double, at: Date)?
 
     /// Only the force-reclaim flavour persists.
     var pendingHandbackAudit: PendingHandbackAudit? {
         didSet {
             if let p = pendingHandbackAudit, p.flavor == .forceReclaim {
-                updateState { $0.pendingForceAudit = .init(epoch: p.epoch, deliveredAtStart: p.deliveredAtStart,
+                updateState { $0.pendingForceAudit = .init(epoch: p.epoch, deliveredAtStart: p.deliveredAtStart, from: p.windowStart,
                                                             expected: p.expected, loanMinutes: p.loanMinutes) }
             } else if oldValue?.flavor == .forceReclaim {
                 updateState { $0.pendingForceAudit = nil }

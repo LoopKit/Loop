@@ -30,7 +30,7 @@ extension PodLoanWatchController {
         if let start = deliveredAtTakeover, let reading = pumpOdometer?.deliveredUnits {
             let latest = reading.units, asOf = reading.at
             odometer = LoanOdometerSnapshot(deliveredAtStart: start, deliveredLatest: latest,
-                                            freshenSucceeded: false, asOf: asOf)
+                                            freshenSucceeded: false, asOf: asOf, deliveredAtStartAt: persisted.deliveredAtTakeoverAt)
         }
         if !empty {
             SportLog.event("handback", String(format: "stream: %d event(s), %d tombstone(s)%@", events.count, tombstones.count,

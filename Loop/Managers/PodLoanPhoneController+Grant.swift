@@ -42,6 +42,7 @@ extension PodLoanPhoneController {
         if let seize = request.supportsSeize {
             updateState { $0.watchSupportsSeize = seize }
         }
+        watchKnownEpoch = request.knownEpoch
         // Version skew ends here with a nack; the apps install separately.
         guard request.supportedVersions.contains(LoanProtocol.version) else {
             sendMessage(.nack(ProtocolNack(seenVersion: request.supportedVersions.max())))
@@ -125,7 +126,9 @@ extension PodLoanPhoneController {
             return
         }
 
-        // Cancel the phone's temp and wait for the pod to acknowledge it before releasing.
+        // Cancel the phone's temp and wait for the pod to acknowledge it before releasing. From here the
+        // phone's own loop doses nothing: a temp set between the cancel and the release went
+        // unacknowledged (2026-10-16 23:24), and the driver's recovery then dialed the lent pod.
         grantInFlight = true
         deps.cancelTempBasalForGrant { [weak self] error in
             guard let self = self else { return }
@@ -148,7 +151,8 @@ extension PodLoanPhoneController {
         // This loan's origin; the previous loan's takeover reading is cleared with it.
         let deliveredAtGrant = (pump as? PumpDeliveryOdometer)?.deliveredUnits?.units
 
-        let releaseEpoch = epoch + 1
+        // Above anything the watch knows: a loan it started alone may have run past this phone's count.
+        let releaseEpoch = max(epoch, watchKnownEpoch ?? 0) + 1
         handbackDiag(releaseEpoch, "GRANT — releasing pod BLE (wasReleased=\(control.isControlReleased))")
         control.releaseControl()
         deps.pumpControlChanged(true)
@@ -165,13 +169,12 @@ extension PodLoanPhoneController {
         // New epoch, empty dedup state, this loan's anchors: one save, before the grant goes out.
         let previous = state
         updateState {
-            $0.epoch += 1
+            $0.epoch = releaseEpoch
             $0.phase = .grantOffered
             $0.committedCursor = 0
             $0.committedIDs = []
-            $0.audit = .init(loanStartedAt: handedOverAt, deliveredAtGrant: deliveredAtGrant,
-                             base: deliveredAtGrant.map { AuditBase(units: $0, asOf: handedOverAt) })
-            $0.audit.baseEpoch = $0.epoch
+            $0.loanStartedAt = handedOverAt
+            if let deliveredAtGrant { $0.ledger.last = .init(units: deliveredAtGrant, at: handedOverAt) }
             $0.holdRenewedAt = handedOverAt
             $0.holdLapseNoticedAt = nil
             $0.watchSilenceWarningsIssued = 0

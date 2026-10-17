@@ -49,8 +49,8 @@ extension CarbList {
     /// The swipe action's content, from `body`.
     @ViewBuilder
     func podLoanDeleteButton(_ entry: StoredCarbEntry) -> some View {
-        // Only while the wrist holds the pod.
-        if loanSession != nil {
+        // Only while the wrist holds the pod, and only Loop's own entries, as on the phone.
+        if loanSession != nil, entry.createdByCurrentApp {
             Button(role: .destructive) {
                 delete(entry)
             } label: {

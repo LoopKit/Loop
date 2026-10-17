@@ -27,6 +27,7 @@ final class StockLoopSession {
         RuntimeStateLog.startMainStallDetector()
 
         loanController.isPhoneReachable = { WCSession.default.isReachable }
+        loanController.isPhoneLinkActivated = { WCSession.default.activationState == .activated }
 
         // The per-cycle renewal is the phone's liveness signal.
         stack.loopManager.onCycleLanded = { [weak loanController] in loanController?.renewHold() }

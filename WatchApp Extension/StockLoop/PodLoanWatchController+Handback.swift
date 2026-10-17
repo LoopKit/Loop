@@ -181,11 +181,12 @@ extension PodLoanWatchController {
             }
             // Read the odometer only over a link already up; otherwise a read dials the pod.
             if let odometer = manager as? PumpDeliveryOdometer, (manager as? ExclusiveDeviceControl)?.isControlReady == true {
-                odometer.refreshDeliveredUnits { first in
+                Task {
+                    let first = await odometer.refreshDeliveredUnits()
                     let delivered = odometer.deliveredUnits?.units
                     // A total equal to the takeover reading is probably stale: read once more.
                     if first, delivered != nil, delivered == self.deliveredAtTakeover {
-                        odometer.refreshDeliveredUnits { second in finalize(second) }
+                        finalize(await odometer.refreshDeliveredUnits())
                     } else {
                         finalize(first)
                     }
@@ -206,7 +207,8 @@ extension PodLoanWatchController {
         if let start = deliveredAtTakeover,
            let latest = pumpOdometer?.deliveredUnits?.units ?? revokeCapturedDelivered {
             odometer = LoanOdometerSnapshot(deliveredAtStart: start, deliveredLatest: latest, freshenSucceeded: freshened,
-                                            asOf: pumpOdometer?.deliveredUnits?.at ?? revokeCapturedDeliveredAt)
+                                            asOf: pumpOdometer?.deliveredUnits?.at ?? revokeCapturedDeliveredAt,
+                                            deliveredAtStartAt: persisted.deliveredAtTakeoverAt)
         }
         let offerEvents = journal.unackedEvents()
         let offer = HandbackOffer(
@@ -279,6 +281,7 @@ extension PodLoanWatchController {
                     $0.phase = .idle
                     $0.epoch = nil
                     $0.deliveredAtTakeover = nil
+                    $0.deliveredAtTakeoverAt = nil
                     $0.seizeToken = nil
                 }
                 self.handbackDeadline = nil
@@ -343,6 +346,7 @@ extension PodLoanWatchController {
             $0.phase = .idle
             $0.epoch = nil
             $0.deliveredAtTakeover = nil
+            $0.deliveredAtTakeoverAt = nil
             $0.seizeToken = nil
         }
         handbackDeadline = nil
