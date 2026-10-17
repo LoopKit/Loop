@@ -28,9 +28,14 @@ struct CarbList: View {
 
     @State var entries: [StoredCarbEntry] = []
 
-    private func reloadCarbEntries() async {
+    /// Set when a delete could not be journaled — the one case the user must be told about,
+    /// because the carb is gone here and still live on the phone.
+    @State var warning: String?   // CarbList+PodLoan.swift sets and shows it
+
+    func reloadCarbEntries() async {
         let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -CarbMath.maximumAbsorptionTimeInterval))
-        entries = (try? await loopManager.carbStore.getCarbEntries(start: start)) ?? []
+        let store = loanSession?.stack.loopManager.carbStore ?? loopManager.carbStore
+        entries = (try? await store.getCarbEntries(start: start)) ?? []
     }
 
     var activeCarbs: String? {
@@ -60,6 +65,9 @@ struct CarbList: View {
                         Spacer()
                         Text(carbFormatter.string(from: entry.quantity) ?? "-")
                     }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        podLoanDeleteButton(entry)
+                    }
                 }
             } header: {
                 VStack {
@@ -85,6 +93,8 @@ struct CarbList: View {
                     }
                     .padding(.bottom, 4)
                 }
+            } footer: {
+                podLoanWarningFooter
             }
         }
         .onAppear {

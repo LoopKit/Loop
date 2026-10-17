@@ -82,6 +82,7 @@ class LoopDataManager {
     // Main queue only
     private(set) var activeContext: WatchContext? {
         didSet {
+            podLoanNoteContextChange(oldValue)
             rawWatchContext = activeContext?.rawValue
             needsDidUpdateContextNotification = true
             sendDidUpdateContextNotificationIfNecessary()
@@ -143,6 +144,9 @@ extension LoopDataManager {
 extension LoopDataManager {
     func updateContext(_ context: WatchContext) {
         dispatchPrecondition(condition: .onQueue(.main))
+
+        podLoanAdoptCGMConfiguration(from: context)
+        if podLoanAbsorbsPhoneContext(context) { return }
 
         if activeContext == nil || context.shouldReplace(activeContext!) {
             if let newGlucoseSample = context.newGlucoseSample {
@@ -259,6 +263,10 @@ extension LoopDataManager {
     func clearOverride() async throws {
         var watchInfoUpdate = self.watchInfo
         watchInfoUpdate.scheduleOverride = nil
+        if let loan = loanControllerIfActive {
+            return await applyOverrideDuringLoan(loan, TemporaryScheduleOverride?.none, watchInfoUpdate,
+                                                 presetId: String?.none, alertIdentifier: String?.none)
+        }
         try await WCSession.default.sendSetPreset(presetIdentifier: nil, alertIdentifier: nil)
         watchInfo = watchInfoUpdate
     }
@@ -266,6 +274,11 @@ extension LoopDataManager {
     func activateOverride(_ override: TemporaryScheduleOverride, alertIdentifierToAcknowledge: String? = nil) async throws {
         var watchInfoUpdate = self.watchInfo
         watchInfoUpdate.scheduleOverride = override
+        if let loan = loanControllerIfActive {
+            return await applyOverrideDuringLoan(loan, override, watchInfoUpdate,
+                                                 presetId: override.presetId,
+                                                 alertIdentifier: alertIdentifierToAcknowledge)
+        }
         try await WCSession.default.sendSetPreset(presetIdentifier: override.presetId, alertIdentifier: alertIdentifierToAcknowledge)
         watchInfo = watchInfoUpdate
     }
@@ -355,7 +368,8 @@ extension LoopDataManager {
             correctionRange: self.watchInfo.loopSettings.glucoseTargetRangeSchedule,
             scheduleOverride: self.watchInfo.scheduleOverride,
             historicalGlucose: historicalGlucose,
-            predictedGlucose: (activeContext.isClosedLoop ?? false) ? activeContext.predictedGlucose?.values : nil
+            // With Sport Mode, draw the prediction in any loop mode, as the phone does.
+            predictedGlucose: (FeatureFlags.sportModeEnabled || (activeContext.isClosedLoop ?? false)) ? activeContext.predictedGlucose?.values : nil
         )
         return chartData
     }
