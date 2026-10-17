@@ -227,7 +227,7 @@ final class GlucoseAlertManager: ObservableObject {
     private static let lowSoundKey = "GlucoseAlertLowSound"
     private static let highSoundKey = "GlucoseAlertHighSound"
     private static let predictedLowSoundKey = "GlucoseAlertPredictedLowSound"
-    private static let episodeStateKey = "GlucoseAlertEpisodeState"
+    static let episodeStateKey = "GlucoseAlertEpisodeState"
 
     // Per-alarm sound defaults. Urgent low keeps the loud critical tone;
     // the rest get a gentler default the user can change.
@@ -299,6 +299,9 @@ final class GlucoseAlertManager: ObservableObject {
     var effectiveLoopAlertsEnabled: Bool {
         !cgmProvidesOwnAlerts || loopAlertsOverrideForOwnAlertingCGM
     }
+
+    /// True while another controller raises these alerts for this user; nothing is evaluated here.
+    var alertsHandledElsewhere: () -> Bool = { false }
 
     // MARK: - Profile access
 
@@ -575,10 +578,19 @@ final class GlucoseAlertManager: ObservableObject {
         userDefaults.set(data, forKey: Self.episodeStateKey)
     }
 
+    private func forgetEpisodes() {
+        lowState = AlertState()
+        urgentLowState = AlertState()
+        highState = AlertState()
+        predictedLowInEpisode = false
+    }
+
     // MARK: - Evaluation
 
     func evaluate(samples: [NewGlucoseSample], now: Date = Date()) async {
         guard effectiveLoopAlertsEnabled else { return }
+        // Readings evaluated elsewhere close no episode here, so the next spell starts from none.
+        guard !alertsHandledElsewhere() else { forgetEpisodes(); return }
         checkSchedule(at: now)
         guard let latest = samples.max(by: { $0.date < $1.date }) else { return }
         guard now.timeIntervalSince(latest.date) < 6 * 60 else {
@@ -688,7 +700,7 @@ final class GlucoseAlertManager: ObservableObject {
     }
 
     func evaluatePredictedGlucose(_ predicted: [PredictedGlucoseValue], now: Date = Date()) async {
-        guard effectiveLoopAlertsEnabled else { return }
+        guard effectiveLoopAlertsEnabled, !alertsHandledElsewhere() else { return }
         let config = activeConfiguration(at: now)
         guard config.predictedLowEnabled else { return }
 
