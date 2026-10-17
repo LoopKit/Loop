@@ -104,11 +104,13 @@ extension PodLoanPhoneController {
         return Self.reclaimProgress(from: queue.sync { uiSnapshot() }, now: deps.now())
     }
 
-    /// The phone loop's dosing gate: the pod is lent out, a take-back is reaching for it, or a
-    /// take-back's audit has not ruled. Never blocks: it reads the pump and the locked state.
+    /// The phone loop's dosing gate: a grant is under way, the pod is lent out, a take-back is
+    /// reaching for it, or a take-back's audit has not ruled. Never blocks: it reads the pump and the
+    /// locked state (`grantInFlight` is a plain flag; a torn read costs one cycle, never a dose).
     var holdsAutomaticDosing: Bool {
         let saved = persisted
-        return (deps.pumpManager() as? ExclusiveDeviceControl)?.isControlReleased == true
+        return grantInFlight
+            || (deps.pumpManager() as? ExclusiveDeviceControl)?.isControlReleased == true
             || saved.phase == .reclaimPending || saved.pendingForceAudit != nil
     }
 
