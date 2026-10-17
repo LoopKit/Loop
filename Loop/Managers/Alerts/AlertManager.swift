@@ -53,6 +53,9 @@ public final class AlertManager {
     private let criticalAlertAlarmScheduler = CriticalAlertAlarmScheduler()
     var alertMuter: AlertMuter
 
+    /// Non-critical alerts that should play their sound in-app, through the silent switch and Focus.
+    var playsThroughSilent: (Alert) -> Bool = { _ in false }
+
     let alertStore: AlertStore
 
     private let bluetoothPoweredOffIdentifier = Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "bluetoothPoweredOff")
@@ -432,8 +435,24 @@ extension AlertManager: AlertIssuer {
     private func scheduleAlertWithSchedulers(_ alert: Alert, issuedDate: Date = Date()) {
         modalAlertScheduler.scheduleAlert(alert)
         let muted = alertMuter.shouldMuteAlert(alert, issuedDate: issuedDate)
-        userNotificationAlertScheduler.scheduleAlert(alert, muted: muted)
+        let inAppSound = muted ? nil : inAppSoundThroughSilent(for: alert)
+        // The notification stays silent when the app plays the sound, so it isn't heard twice
+        userNotificationAlertScheduler.scheduleAlert(alert, muted: muted || inAppSound != nil)
+        if let inAppSound {
+            log.default("Playing %{public}@ through silent mode for %{public}@", inAppSound, String(describing: alert.identifier))
+            criticalAlertAudioPlayer.play(soundNamed: inAppSound, boostVolume: false)
+        }
         playCriticalAlertAudioFallbackIfNeeded(for: alert, muted: muted, issuedDate: issuedDate)
+    }
+
+    private func inAppSoundThroughSilent(for alert: Alert) -> String? {
+        guard alert.interruptionLevel != .critical, case .immediate = alert.trigger, playsThroughSilent(alert) else {
+            return nil
+        }
+        guard case .sound(let name) = alert.sound else {
+            return nil
+        }
+        return name
     }
 
     private func unscheduleAlertWithSchedulers(identifier: Alert.Identifier) async {
