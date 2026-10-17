@@ -365,6 +365,9 @@ final class PodLoanPhoneController {
     /// Per grant; cleared wherever a loan is abandoned.
     var grantOfferedAt: Date?
 
+    /// The highest loan number the watch reported in its last Start request.
+    var watchKnownEpoch: Int?
+
     /// The pod fault already announced, as "epoch fault", so a repeated report stays quiet.
     var podFaultNoticed: String?
 

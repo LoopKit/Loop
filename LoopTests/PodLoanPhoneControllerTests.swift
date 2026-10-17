@@ -1189,6 +1189,20 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertEqual(relaunched.ledgerLast?.units, 10.0, "the grant's reading survives the relaunch")
     }
 
+    /// A loan the watch started alone can be numbered past this phone's count: the grant goes above
+    /// the highest number the watch reports, or the watch would refuse it as already seen.
+    func testAGrantIsNumberedAboveTheWatchsKnownEpoch() throws {
+        saveState { $0.epoch = 109 }
+        let controller = makeController()
+        let grantSent = expectSend()
+        controller.handleIncoming(userInfo: try LoanMessage.request(LoanRequest(watchBuild: "t", knownEpoch: 111)).transportDictionary())
+        wait(for: [grantSent], timeout: 5)
+        controller.queue.sync { }
+        guard case .grant(let grant)? = lastSent() else { return XCTFail("expected a grant") }
+        XCTAssertEqual(grant.epoch, 112)
+        XCTAssertEqual(controller.epoch, 112)
+    }
+
     /// The fix: an explicit "I never got it" reclaims immediately instead of after 5 min 15 s.
     func testExplicitGrantLostReportReclaimsImmediately() throws {
         let controller = makeController()
