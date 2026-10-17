@@ -197,7 +197,7 @@ final class SeizeActivationTests: XCTestCase {
         wait(for: [timerArmed], timeout: 5)
 
         XCTAssertEqual(sent, 1, "unreachable is advisory — the request still goes out")
-        XCTAssertEqual(captured.map(\.0), [0], "unreachable phone → offered at once")
+        XCTAssertEqual(captured.map(\.0), [PodLoanWatchController.unreachableRecheck], "unreachable phone → read again in a second, then offered")
         XCTAssertEqual(captured.map(\.1), ["request-timeout"])
     }
 
@@ -406,6 +406,68 @@ final class SeizeActivationTests: XCTestCase {
         let snap = controller.debugSnapshot()
         XCTAssertTrue(snap.reunionPromptVisible, "a message from the phone raises it")
         XCTAssertEqual(snap.phase, .active, "and does not touch the loan")
+    }
+
+    /// A grant numbered at or below a loan this watch already knows is answered as failed, so the
+    /// phone takes its pod back at once instead of holding it released until its dead-man runs out.
+    func testAStaleGrantIsAnsweredWithATakeoverFailure() async throws {
+        let controller = await makeController()
+        var failedEpochs: [Int] = []
+        controller.send = { dict in
+            if let message = try? LoanMessage.decode(fromTransport: dict), case .takeoverFailed(let f) = message {
+                failedEpochs.append(f.epoch)
+            }
+        }
+        controller.updateState { $0.epoch = 111 }   // a loan started alone that the phone never heard of
+
+        let grant = fixtureDormant(issuedAt: Date().addingTimeInterval(600), epoch: 110).grant
+        controller.handleIncoming(userInfo: try LoanMessage.grant(grant).transportDictionary(), channel: .urgent)
+        _ = controller.debugSnapshot()
+        XCTAssertEqual(failedEpochs, [110])
+        XCTAssertEqual(controller.debugSnapshot().phase, .idle)
+    }
+
+    /// Just after the app comes on screen, reachability reads false for a moment with the phone
+    /// there: an unreachable read at the tap is checked again before the offline start is offered.
+    func testAnUnreachableReadAtTheTapIsCheckedAgainBeforeTheOffer() async {
+        let controller = await makeController()
+        controller.send = { _ in }
+        controller.isPhoneReachable = { false }
+        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-600), completeSettings: true))
+        var armed: [(delay: TimeInterval, work: DispatchWorkItem)] = []
+        controller.scheduler = { delay, label, work in
+            if label == "request-timeout" { armed.append((delay, work)) }
+        }
+
+        controller.requestLoan(watchBuild: "recheck-test")
+        _ = controller.debugSnapshot()
+        XCTAssertEqual(armed.map(\.delay), [PodLoanWatchController.unreachableRecheck], "a quick re-check, not the offer")
+
+        // The phone was there after all: the request waits the normal time, no offer yet.
+        controller.isPhoneReachable = { true }
+        armed[0].work.perform()
+        XCTAssertNil(controller.debugSnapshot().seizeOfferIssuedAt, "no offer on a stale unreachable read")
+        XCTAssertEqual(armed.map(\.delay), [PodLoanWatchController.unreachableRecheck, PodLoanWatchController.requestTimeout])
+
+        // No grant in the normal time: the offer, as before.
+        armed[1].work.perform()
+        XCTAssertNotNil(controller.debugSnapshot().seizeOfferIssuedAt)
+    }
+
+    /// Still unreachable at the re-check: the offer comes then.
+    func testAnUnreachablePhoneGetsTheOfferAtTheRecheck() async {
+        let controller = await makeController()
+        controller.send = { _ in }
+        controller.isPhoneReachable = { false }
+        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-600), completeSettings: true))
+        var armed: [DispatchWorkItem] = []
+        controller.scheduler = { _, label, work in if label == "request-timeout" { armed.append(work) } }
+
+        controller.requestLoan(watchBuild: "recheck-test")
+        _ = controller.debugSnapshot()
+        armed[0].perform()
+        XCTAssertNotNil(controller.debugSnapshot().seizeOfferIssuedAt)
+        XCTAssertEqual(armed.count, 1)
     }
 
     /// A seize epoch clears the high-water mark and the recorded revoke.

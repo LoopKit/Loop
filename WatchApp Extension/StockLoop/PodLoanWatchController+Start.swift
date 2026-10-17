@@ -205,39 +205,56 @@ extension PodLoanWatchController {
             // "Unreachable" is believed only once the link to the phone is set up: just after launch it reads false.
             let unreachable = !self.isPhoneReachable() && self.isPhoneLinkActivated()
 
-            let timeout: TimeInterval = unreachable ? 0 : Self.requestTimeout
+            let timeout: TimeInterval = unreachable ? Self.unreachableRecheck : Self.requestTimeout
             SportLog.event("loan", "REQUEST sent (build \(watchBuild)) — awaiting grant\(unreachable ? " (phone unreachable — offline start offered now)" : "")")
-            self.sendMessage(.request(LoanRequest(watchBuild: watchBuild, supportsSeize: true, sentAt: self.now())))
+            let known = max(self.epoch ?? 0, self.journal.activeEpoch ?? 0, self.persisted.highWaterEpoch, self.lastRevokedEpoch ?? 0)
+            self.sendMessage(.request(LoanRequest(watchBuild: watchBuild, supportsSeize: true, sentAt: self.now(), knownEpoch: known)))
 
-            self.requestTimeoutWork?.cancel()
-            let work = DispatchWorkItem { [weak self] in
-                guard let self = self, self.phase == .requested else { return }
-
-                defer { self.notifyUI() }
-                self.returnToRestingPhase()
-
-                // A queued request delivered later would grant a fresh epoch over whatever happens next.
-                self.cancelStaleQueuedRequests(context: "request timed out")
-
-                // A stored credential turns the timeout into a phoneless-start offer; its age is shown, not enforced.
-                if let dormant = self.storedDormantGrant() {
-                    self.seizeOffer = (issuedAt: dormant.issuedAt, token: dormant.seizeToken)
-                    self.lastIdleNote = nil
-                    SportLog.event("seize", String(format: "REQUEST TIMED OUT (reachable=%@) — offering offline start (credential issued %@) [seize]",
-                                                   self.isPhoneReachable() ? "Y" : "N",
-                                                   DateFormatter.localizedString(from: dormant.issuedAt, dateStyle: .short, timeStyle: .short)))
-                    return
-                }
-
-                if self.isPhoneReachable() {
-                    SportLog.event("loan", "REQUEST TIMED OUT with phone REACHABLE — one-way wedge signature")
-                }
-                self.lastIdleNote = NSLocalizedString("No response from iPhone — check the phone (loan refused, or busy) and try again.", comment: "Glance: loan request timed out")
-                SportLog.event("loan", "REQUEST TIMED OUT — no grant in \(Int(timeout))s (phone refused / busy / unreachable)")
-            }
-            self.requestTimeoutWork = work
-            self.schedule(after: timeout, label: "request-timeout", execute: work)
+            self.armRequestTimeout(timeout)
         }
+    }
+
+    /// An unreachable phone at the tap is read again this much later: just after the app comes on
+    /// screen, reachability reads false for a moment with the phone there.
+    static let unreachableRecheck: TimeInterval = 1
+
+    /// On `queue`. The timeout ends the request; a stored credential turns it into the offline offer.
+    private func armRequestTimeout(_ timeout: TimeInterval) {
+        requestTimeoutWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self = self, self.phase == .requested else { return }
+
+            // The quick re-check found the phone after all: wait the normal time for its answer.
+            if timeout == Self.unreachableRecheck, self.isPhoneReachable() {
+                SportLog.event("seize", "phone reachable after all — waiting the normal \(Int(Self.requestTimeout)) s for its grant [seize]")
+                self.armRequestTimeout(Self.requestTimeout)
+                return
+            }
+
+            defer { self.notifyUI() }
+            self.returnToRestingPhase()
+
+            // A queued request delivered later would grant a fresh epoch over whatever happens next.
+            self.cancelStaleQueuedRequests(context: "request timed out")
+
+            // A stored credential turns the timeout into a phoneless-start offer; its age is shown, not enforced.
+            if let dormant = self.storedDormantGrant() {
+                self.seizeOffer = (issuedAt: dormant.issuedAt, token: dormant.seizeToken)
+                self.lastIdleNote = nil
+                SportLog.event("seize", String(format: "REQUEST TIMED OUT (reachable=%@) — offering offline start (credential issued %@) [seize]",
+                                               self.isPhoneReachable() ? "Y" : "N",
+                                               DateFormatter.localizedString(from: dormant.issuedAt, dateStyle: .short, timeStyle: .short)))
+                return
+            }
+
+            if self.isPhoneReachable() {
+                SportLog.event("loan", "REQUEST TIMED OUT with phone REACHABLE — one-way wedge signature")
+            }
+            self.lastIdleNote = NSLocalizedString("No response from iPhone — check the phone (loan refused, or busy) and try again.", comment: "Glance: loan request timed out")
+            SportLog.event("loan", "REQUEST TIMED OUT — no grant in \(Int(timeout))s (phone refused / busy / unreachable)")
+        }
+        requestTimeoutWork = work
+        schedule(after: timeout, label: "request-timeout", execute: work)
     }
 
     /// The offer answers one unanswered request; a later grant or Start makes it stale. On `queue`.
@@ -334,8 +351,9 @@ extension PodLoanWatchController {
             rejectGrant("grant expired", notifyPhone: true)
             return
         }
+        // Told to the phone: left waiting, it would hold the pod released until its dead-man ran out.
         if let known = epoch, grant.epoch <= known, !seizeActivationInFlight {
-            rejectGrant("stale epoch \(grant.epoch) (known \(known))", notifyPhone: false)
+            rejectGrant("stale epoch \(grant.epoch) (known \(known))", notifyPhone: true)
             return
         }
 
