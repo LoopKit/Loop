@@ -210,6 +210,42 @@ public class AlertStore {
         }
     }
     
+    /// Delayed and repeating alerts that came due in (start, end] without being retracted first.
+    /// Only the latest issue of each identifier counts, since re-issuing replaces the scheduled alert.
+    public func lookupScheduledAlertsDue(after start: Date, through end: Date, completion: @escaping (Result<[(identifier: Alert.Identifier, interruptionLevel: Alert.InterruptionLevel)], Error>) -> Void) {
+        managedObjectContext.perform {
+            do {
+                let fetchRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
+                fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+                    NSPredicate(format: "triggerType != %d", Alert.Trigger.immediate.storedType),
+                    NSPredicate(format: "issuedDate > %@ AND issuedDate <= %@", end.addingTimeInterval(-.days(30)) as NSDate, end as NSDate)
+                ])
+                fetchRequest.sortDescriptors = [ NSSortDescriptor(key: "issuedDate", ascending: true) ]
+
+                var latest: [Alert.Identifier: StoredAlert] = [:]
+                for alert in try self.managedObjectContext.fetch(fetchRequest) {
+                    latest[alert.identifier] = alert
+                }
+
+                completion(.success(latest.values.compactMap { alert in
+                    guard let interval = alert.triggerInterval?.doubleValue else {
+                        return nil
+                    }
+                    let due = alert.issuedDate.addingTimeInterval(interval)
+                    guard due > start, due <= end else {
+                        return nil
+                    }
+                    if let retractedDate = alert.retractedDate, retractedDate <= due {
+                        return nil
+                    }
+                    return (alert.identifier, alert.interruptionLevel)
+                }))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
     public func lookupAllAcknowledgedUnretractedRepeatingAlerts(completion: @escaping (Result<[StoredAlert], Error>) -> Void) {
         managedObjectContext.perform {
             do {
