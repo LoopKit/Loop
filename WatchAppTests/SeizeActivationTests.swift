@@ -152,7 +152,7 @@ final class SeizeActivationTests: XCTestCase {
             }
         }
         defer { NotificationCenter.default.removeObserver(observer) }
-        controller.queue.sync { controller.recordTakeoverActive(delivered: 10) }
+        controller.queue.sync { controller.recordTakeoverActive(delivered: 10, at: Date()) }
         XCTAssertEqual(savedAtActive?.seizeToken, token, "the first save that reads active already holds the token")
         XCTAssertEqual(savedAtActive?.deliveredAtTakeover, 10)
         XCTAssertNil(controller.pendingSeizeToken)

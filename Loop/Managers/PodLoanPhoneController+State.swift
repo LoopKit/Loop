@@ -33,47 +33,42 @@ struct PodLoanPhoneState: RawRepresentable {
     /// Minted once and echoed by a watch that started alone: this phone's reunion credential.
     var seizeToken: UUID?
 
-    /// One loan's audit inputs; every path that ends a loan resets them together.
-    struct AuditAnchors {
-        /// Start of the audit window, and the floor for every expectation over it.
-        var loanStartedAt: Date?
-        /// The pod's total at the grant: the fallback origin.
-        var deliveredAtGrant: Double?
-        /// The total as the watch first read it: the preferred origin.
-        var deliveredAtTakeover: Double?
-        /// The verdict's base (grant, then takeover), read back only in the epoch it was set under.
-        var base: PodLoanPhoneController.AuditBase?
-        var baseEpoch: Int?
-    }
-    var audit = AuditAnchors()
+    /// When the current loan began; for the loan minutes in the log.
+    var loanStartedAt: Date?
 
     /// A force-reclaim verdict still owed; re-armed at launch.
     struct ForceAudit: Equatable {
         let epoch: Int
+        /// The window: the pod's total at the watch's takeover, and when.
         let deliveredAtStart: Double
+        let from: Date
         let expected: Double
         let loanMinutes: Double
     }
     var pendingForceAudit: ForceAudit?
 
-    /// The placeholder bolus for insulin a lost watch never reported.
-    struct GapBooking: Equatable {
-        let epoch: Int
-        let units: Double
-        let bookedAt: Date?
-        var deleteFailedAfterRecords = false
-        /// Booked on regaining the pod after a gap: the loan it stands for is a later one the phone
-        /// has not heard of yet, so a later loan's records retire it if they cover the gap.
-        var anyLaterLoan = false
-        /// Start of that gap: the phone's last reading before it.
-        var gapFrom: Date?
-    }
-    var gapBooking: GapBooking?
+    /// The insulin ledger: the pod's total at the last reading, and the estimates standing in the dose
+    /// store. Each reading at a change of custody ends one window and starts the next.
+    struct Ledger: Equatable {
+        struct Reading: Equatable {
+            let units: Double
+            let at: Date
+        }
+        /// The open window's start.
+        var last: Reading?
 
-    /// The pump's delivered total as this phone last read it while it held the pump. Kept across a
-    /// relaunch, since the phone is often relaunched by the time the body comes back.
-    var ownPumpTotal: Double?
-    var ownPumpTotalAt: Date?
+        /// A bolus standing in for insulin the records could not explain over `window`; retired by
+        /// late records of that window.
+        struct Booking: Equatable {
+            let sync: String
+            let units: Double
+            let bookedAt: Date
+            let window: DateInterval
+            var deleteFailed = false
+        }
+        var bookings: [Booking] = []
+    }
+    var ledger = Ledger()
 
     init() {}
 
@@ -88,19 +83,14 @@ struct PodLoanPhoneState: RawRepresentable {
         watchSilenceWarningsIssued = rawValue["watchSilenceWarningsIssued"] as? Int ?? 0
         watchSupportsSeize = rawValue["watchSupportsSeize"] as? Bool ?? false
         seizeToken = (rawValue["seizeToken"] as? String).flatMap(UUID.init(uuidString:))
-        if let a = rawValue["audit"] as? [String: Any] {
-            audit.loanStartedAt = a["loanStartedAt"] as? Date
-            audit.deliveredAtGrant = a["deliveredAtGrant"] as? Double
-            audit.deliveredAtTakeover = a["deliveredAtTakeover"] as? Double
-            if let units = a["baseUnits"] as? Double, let asOf = a["baseAsOf"] as? Date {
-                audit.base = .init(units: units, asOf: asOf)
-            }
-            audit.baseEpoch = a["baseEpoch"] as? Int
-        }
+        loanStartedAt = rawValue["loanStartedAt"] as? Date
         pendingForceAudit = (rawValue["pendingForceAudit"] as? [String: Any]).flatMap(Self.forceAudit(from:))
-        gapBooking = (rawValue["gapBooking"] as? [String: Any]).flatMap(Self.gapBooking(from:))
-        ownPumpTotal = rawValue["ownPumpTotal"] as? Double
-        ownPumpTotalAt = rawValue["ownPumpTotalAt"] as? Date
+        if let l = rawValue["ledger"] as? [String: Any] {
+            if let units = l["lastUnits"] as? Double, let at = l["lastAt"] as? Date {
+                ledger.last = .init(units: units, at: at)
+            }
+            ledger.bookings = (l["bookings"] as? [[String: Any]] ?? []).compactMap(Self.booking(from:))
+        }
     }
 
     var rawValue: [String: Any] {
@@ -112,42 +102,32 @@ struct PodLoanPhoneState: RawRepresentable {
         raw["seizeToken"] = seizeToken?.uuidString
         raw["holdRenewedAt"] = holdRenewedAt
         raw["holdLapseNoticedAt"] = holdLapseNoticedAt
-        var a: [String: Any] = [:]
-        a["loanStartedAt"] = audit.loanStartedAt
-        a["deliveredAtGrant"] = audit.deliveredAtGrant
-        a["deliveredAtTakeover"] = audit.deliveredAtTakeover
-        a["baseUnits"] = audit.base?.units
-        a["baseAsOf"] = audit.base?.asOf
-        a["baseEpoch"] = audit.baseEpoch
-        raw["audit"] = a
+        raw["loanStartedAt"] = loanStartedAt
         raw["pendingForceAudit"] = pendingForceAudit.map {
-            ["epoch": $0.epoch, "atStart": $0.deliveredAtStart, "expected": $0.expected, "loanMinutes": $0.loanMinutes]
+            ["epoch": $0.epoch, "atStart": $0.deliveredAtStart, "from": $0.from, "expected": $0.expected, "loanMinutes": $0.loanMinutes]
         }
-        raw["gapBooking"] = gapBooking.map {
-            var d: [String: Any] = ["epoch": $0.epoch, "units": $0.units, "deleteFailedAfterRecords": $0.deleteFailedAfterRecords,
-                                    "anyLaterLoan": $0.anyLaterLoan]
-            d["bookedAt"] = $0.bookedAt?.timeIntervalSince1970
-            d["gapFrom"] = $0.gapFrom?.timeIntervalSince1970
-            return d
-        }
-        raw["ownPumpTotal"] = ownPumpTotal
-        raw["ownPumpTotalAt"] = ownPumpTotalAt
+        var l: [String: Any] = ["bookings": ledger.bookings.map { b -> [String: Any] in
+            ["sync": b.sync, "units": b.units, "bookedAt": b.bookedAt, "from": b.window.start, "to": b.window.end,
+             "deleteFailed": b.deleteFailed]
+        }]
+        l["lastUnits"] = ledger.last?.units
+        l["lastAt"] = ledger.last?.at
+        raw["ledger"] = l
         return raw
     }
 
     /// Dictionary shapes in the state file.
     static func forceAudit(from d: [String: Any]) -> ForceAudit? {
-        guard let e = d["epoch"] as? Int, let atStart = d["atStart"] as? Double,
+        guard let e = d["epoch"] as? Int, let atStart = d["atStart"] as? Double, let from = d["from"] as? Date,
               let expected = d["expected"] as? Double, let minutes = d["loanMinutes"] as? Double else { return nil }
-        return ForceAudit(epoch: e, deliveredAtStart: atStart, expected: expected, loanMinutes: minutes)
+        return ForceAudit(epoch: e, deliveredAtStart: atStart, from: from, expected: expected, loanMinutes: minutes)
     }
 
-    static func gapBooking(from d: [String: Any]) -> GapBooking? {
-        guard let e = d["epoch"] as? Int, let units = d["units"] as? Double else { return nil }
-        return GapBooking(epoch: e, units: units, bookedAt: (d["bookedAt"] as? TimeInterval).map(Date.init(timeIntervalSince1970:)),
-                          deleteFailedAfterRecords: d["deleteFailedAfterRecords"] as? Bool ?? false,
-                          anyLaterLoan: d["anyLaterLoan"] as? Bool ?? false,
-                          gapFrom: (d["gapFrom"] as? TimeInterval).map(Date.init(timeIntervalSince1970:)))
+    static func booking(from d: [String: Any]) -> Ledger.Booking? {
+        guard let sync = d["sync"] as? String, let units = d["units"] as? Double, let bookedAt = d["bookedAt"] as? Date,
+              let from = d["from"] as? Date, let to = d["to"] as? Date, to >= from else { return nil }
+        return Ledger.Booking(sync: sync, units: units, bookedAt: bookedAt, window: DateInterval(start: from, end: to),
+                              deleteFailed: d["deleteFailed"] as? Bool ?? false)
     }
 }
 
@@ -201,19 +181,10 @@ extension PodLoanPhoneController {
         set { updateState { $0.yieldingToInferredLoan = newValue } }
     }
 
-    /// Start of the current loan's audit window.
+    /// When the current loan began.
     var loanStartedAt: Date? {
-        get { persisted.audit.loanStartedAt }
-        set { updateState { $0.audit.loanStartedAt = newValue } }
-    }
-
-    /// Tagged with the epoch it is set under, so a base can never be adopted by another loan.
-    var auditBase: AuditBase? {
-        get { persisted.audit.base }
-        set {
-            let owner = epoch
-            updateState { $0.audit.base = newValue; $0.audit.baseEpoch = owner }
-        }
+        get { persisted.loanStartedAt }
+        set { updateState { $0.loanStartedAt = newValue } }
     }
 
     /// Applies one change and writes the whole value once, before returning.

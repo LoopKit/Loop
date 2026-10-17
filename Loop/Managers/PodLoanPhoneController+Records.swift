@@ -86,9 +86,15 @@ extension PodLoanPhoneController {
                 $0.holdRenewedAt = offer.handedBackAt
                 $0.holdLapseNoticedAt = nil
                 $0.watchSilenceWarningsIssued = 0
-                $0.audit.base = nil
-                $0.audit.deliveredAtTakeover = nil
-                $0.audit.loanStartedAt = anchor
+                $0.loanStartedAt = anchor
+            }
+            // The watch's window starts at its takeover reading when the offer carries it. With an older
+            // watch it starts at this phone's last reading, so the phone's own doses before it stay its own.
+            if let odometer = offer.odometer, let startAt = odometer.deliveredAtStartAt {
+                noteTakeoverReading(units: odometer.deliveredAtStart, at: startAt)
+            } else if let last = ledgerLast {
+                handbackDiag(offer.epoch, String(format: "audit base kept — the phone's last reading while it held the pod, %.2f U at %@",
+                                                 last.units, ISO8601DateFormatter().string(from: last.at)))
             }
             stateDidChange(from: previous)
 
@@ -200,19 +206,19 @@ extension PodLoanPhoneController {
                 drainCont, drainFloor,
                 loanMin, allStagedEvents.count, offer.odometer?.freshenSucceeded == true ? "Y" : "N"))
 
-            // The verdict waits for the phone's own pod read.
+            // The verdict waits for the phone's own pod read, over the window from the ledger's last reading.
             if isFinal, let start = offer.odometer?.deliveredAtStart {
-                let windowStart = auditBase?.units ?? start
-                let windowExpected = auditBase.map {
+                let base = ledgerLast
+                let windowExpected = base.map {
                     LoanReconciler.expectedInsulin(events: allStagedEvents, schedule: deps.settings().basalRateSchedule,
-                                                   pulseUnits: pulseUnits, from: $0.asOf, to: offer.handedBackAt)
+                                                   pulseUnits: pulseUnits, from: $0.at, to: offer.handedBackAt)
                 } ?? expected
                 pendingHandbackAudit = PendingHandbackAudit(
-                    epoch: offer.epoch, deliveredAtStart: windowStart, expected: windowExpected,
+                    epoch: offer.epoch, deliveredAtStart: base?.units ?? start, windowStart: base?.at ?? loanStart,
+                    expected: windowExpected,
                     loanMinutes: loanMin, cycles: allStagedEvents.count,
                     watchLatest: offer.odometer?.deliveredLatest,
-                    watchFreshened: offer.odometer?.freshenSucceeded == true,
-                    takeoverUnits: start, wholeLoanExpected: expected)
+                    watchFreshened: offer.odometer?.freshenSucceeded == true)
             }
         }
 
@@ -317,10 +323,7 @@ extension PodLoanPhoneController {
                             self.deps.insulinHistoryRewritten(earliest)
                         }
 
-                        self.retireGapBookingIfExplained(
-                            offerEpoch: offer.epoch,
-                            dosesJustCommitted: sane,
-                            carbsJustCommitted: isStale ? 0 : outcome.carbs.count)
+                        self.retireEstimates(coveredBy: sane, carbs: isStale ? 0 : outcome.carbs.count, epoch: offer.epoch)
                         self.drainAfterCommit()
                     }
                 }
@@ -530,7 +533,6 @@ extension PodLoanPhoneController {
             stagedTombstones = []
             persistStaged()
             pendingHandbackAudit = nil
-            clearAuditAnchors()
             PhoneLog.event("mirror", "drain e\(epoch) closed UNDER live e\(liveEpoch) — books committed, audit moot, custody NOT resumed [mirror]")
             engageInferredLoanYield(evidence: "superseding loan e\(liveEpoch) streamed during the e\(epoch) drain")
             return
@@ -541,8 +543,6 @@ extension PodLoanPhoneController {
         staged = [:]
         stagedTombstones = []
         persistStaged()
-
-        updateState { $0.audit.deliveredAtGrant = nil }
     }
 
 }

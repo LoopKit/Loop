@@ -579,11 +579,12 @@ extension PodLoanWatchController {
 
     /// The takeover's one save: odometer, `.active` and a seized loan's reunion token together.
     /// The token is persisted only here: an aborted activation never touched the pod.
-    func recordTakeoverActive(delivered: Double) {
+    func recordTakeoverActive(delivered: Double, at: Date?) {
         let token = pendingSeizeToken
         pendingSeizeToken = nil
         updateState {
             $0.deliveredAtTakeover = delivered
+            $0.deliveredAtTakeoverAt = at
             $0.phase = .active
             if let token { $0.seizeToken = token }
         }
@@ -626,11 +627,12 @@ extension PodLoanWatchController {
                     self.sendMessage(.takeoverFailed(TakeoverFailed(epoch: grant.epoch, reason: "grant expired mid-takeover")))
                     return
                 }
-                if success, let odometer, let delivered = odometer.deliveredUnits?.units {
+                if success, let odometer, let reading = odometer.deliveredUnits {
+                    let delivered = reading.units
                     // The base for every later audit of this loan.
                     self.revokeCapturedDelivered = nil
                     self.revokeCapturedDeliveredAt = nil
-                    self.recordTakeoverActive(delivered: delivered)
+                    self.recordTakeoverActive(delivered: delivered, at: reading.at)
                     self.onLoanActiveChanged?(true)
                     let takeoverSecs = self.attemptStartedAt.map { self.now().timeIntervalSince($0) } ?? -1
                     SportLog.event("loan", String(format: "ACTIVE — epoch %d, pod taken after %d read(s) in %.1fs [takeover-timing], odometer %.2f U, final read driver=%@ · %@",

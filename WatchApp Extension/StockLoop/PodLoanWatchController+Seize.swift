@@ -192,8 +192,8 @@ extension PodLoanWatchController {
         return unexplained > unexplainedInsulinBand ? unexplained : 0
     }
 
-    /// Books the unexplained insulin as a bolus now, before the first cycle. Seeded, not journaled:
-    /// the phone already has these units. Does not open the loop.
+    /// Books, before the first cycle, what the pod delivered since the copy that the copy's records
+    /// cannot explain. Blocking: the first cycle must see the booking.
     func bookInsulinTheCopyCannotExplain(podTotal: Double, pulseUnits: Double, epoch: Int) {
         defer { takeoverCopyTotal = nil; takeoverCopyRecords = [] }
         guard let copy = takeoverCopyTotal else {
@@ -201,36 +201,53 @@ extension PodLoanWatchController {
             return
         }
         let at = self.now()
-        let unexplained = Self.insulinTheCopyCannotExplain(copyTotal: copy.units, copyAt: copy.asOf, podTotal: podTotal, now: at,
-                                                           records: takeoverCopyRecords,
-                                                           schedule: loopManager.settings.basalRateSchedule,
-                                                           pulseUnits: pulseUnits)
-        let age = at.timeIntervalSince(copy.asOf) / 60
-        guard unexplained > 0 else {
-            SportLog.event("loan", String(format: "takeover book check CLEAN — pod total %.2f → %.2f U over %.1f min is explained by the copy's records and the schedule",
-                                          copy.units, podTotal, age))
+        guard at > copy.asOf, podTotal >= copy.units else {
+            SportLog.event("loan", "takeover book check SKIPPED — the copy's reading is not older than the pod's")
             return
         }
-        let entry = DoseEntry(type: .bolus, startDate: at, endDate: at, value: unexplained, unit: .units,
-                              decisionId: nil, deliveredUnits: unexplained,
-                              syncIdentifier: "LOAN-WATCH-GAP-e\(epoch)",
-                              insulinType: pumpManager?.status.insulinType)
-        // Blocking: the first cycle must see the booking.
+        let records = takeoverCopyRecords
+        let insulinType = pumpManager?.status.insulinType
         let gate = DispatchSemaphore(value: 0)
-        var failure: Error?
-        let loopManager = self.loopManager
+        var booked: Double?
         Task {
-            do { try await loopManager.seedInsulinHistory([entry]) } catch { failure = error }
+            booked = await self.bookInsulinNotInRecords(from: (copy.units, copy.asOf), to: (podTotal, at), records: records,
+                                                        pulseUnits: pulseUnits, insulinType: insulinType, context: "takeover book")
             gate.signal()
         }
         gate.wait()
-        if let failure {
-            SportLog.event("loan", String(format: "** takeover book check: %.2f U UNEXPLAINED and the booking FAILED — %@ **", unexplained, String(describing: failure)))
-            return
+        if let booked {
+            startNote = (at, String(format: NSLocalizedString("%.2f U the watch had no record of — counted as insulin on board", comment: "Glance: unexplained insulin booked at takeover (1: units)"), booked))
         }
-        SportLog.event("loan", String(format: "** takeover book check: pod total %.2f → %.2f U over %.1f min; %.2f U the copy cannot explain — BOOKED as a bolus now (insulin on board errs high, dosing errs low) **",
-                                      copy.units, podTotal, age, unexplained))
-        startNote = (at, String(format: NSLocalizedString("%.2f U the watch had no record of — counted as insulin on board", comment: "Glance: unexplained insulin booked at takeover (1: units)"), unexplained))
+    }
+
+    /// Books, in this watch's store only, what the pod delivered over a window that the records and
+    /// the schedule cannot explain: the phone has the real records of that insulin, so nothing goes
+    /// home, and the booking ends with this loan's insulin book. Returns the amount booked.
+    func bookInsulinNotInRecords(from last: (units: Double, at: Date), to reading: (units: Double, at: Date),
+                                 records: [LoanDoseRecord], pulseUnits: Double, insulinType: InsulinType?,
+                                 context: String) async -> Double? {
+        let unexplained = LoanReconciler.insulinNotInRecords(totalThen: last.units, then: last.at, totalNow: reading.units, now: reading.at,
+                                                             records: records, schedule: loopManager.settings.basalRateSchedule,
+                                                             pulseUnits: pulseUnits)
+        let minutes = reading.at.timeIntervalSince(last.at) / 60
+        guard unexplained > Self.unexplainedInsulinBand else {
+            SportLog.event("loan", String(format: "%@ check CLEAN — pod total %.2f → %.2f U over %.1f min, residual %+.3f",
+                                          context, last.units, reading.units, minutes, unexplained))
+            return nil
+        }
+        let at = now()
+        let entry = DoseEntry(type: .bolus, startDate: at, endDate: at, value: unexplained, unit: .units,
+                              decisionId: nil, deliveredUnits: unexplained,
+                              syncIdentifier: "LOAN-WATCH-GAP-\(Int(at.timeIntervalSince1970))", insulinType: insulinType)
+        do {
+            try await loopManager.seedInsulinHistory([entry])
+        } catch {
+            SportLog.event("loan", String(format: "** %@ check: %.2f U UNEXPLAINED and the booking FAILED — %@ **", context, unexplained, String(describing: error)))
+            return nil
+        }
+        SportLog.event("loan", String(format: "** %@ check: pod total %.2f → %.2f U over %.1f min; %.2f U the records cannot explain — BOOKED as a bolus now (insulin on board errs high, dosing errs low) **",
+                                      context, last.units, reading.units, minutes, unexplained))
+        return unexplained
     }
 
     /// For log tags, from activation until the loan closes.

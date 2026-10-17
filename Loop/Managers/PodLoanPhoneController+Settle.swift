@@ -199,10 +199,14 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// At the verified round-trip: read the pod's total, rule on the loan, then cancel the
-    /// watch's temp. The audit consumes its anchors either way.
+    /// At the verified round-trip: read the pod's total, rule on the loan, then cancel the watch's
+    /// temp. The reading ends the watch's window and starts this phone's, verdict or not.
     func finishPendingHandbackAudit(elapsed: TimeInterval) {
-        defer { clearAuditAnchors() }
+        let reading = (deps.pumpManager() as? PumpDeliveryOdometer)?.deliveredUnits
+        defer {
+            if let reading { noteReading(units: reading.units, at: reading.at) }
+            loanStartedAt = nil
+        }
         guard let pending = pendingHandbackAudit else {
             // No audit (a hand-back that came without a pod reading): the watch's temp still ends here.
             cancelWatchTemp(epoch: epoch)
@@ -211,25 +215,17 @@ extension PodLoanPhoneController {
         // The dosing hold lifts last, after the verdict is dispatched.
         defer { pendingHandbackAudit = nil }
 
-        if let latest = (deps.pumpManager() as? PumpDeliveryOdometer)?.deliveredUnits?.units {
+        if let reading {
+            let latest = reading.units
             let delivered = latest - pending.deliveredAtStart
             // Milli-units, so the band comparison is not decided by float error.
             let residual = ((delivered - pending.expected) * 1000).rounded() / 1000
 
-            // Whole-loan figure, for the log only; the verdict uses the window above.
-            let loanDelivered = pending.takeoverUnits.map { latest - $0 }
-            let loanResidual: Double? = {
-                guard let d = loanDelivered, let e = pending.wholeLoanExpected else { return nil }
-                return d - e
-            }()
-
             let drift = pending.watchLatest.map { latest - $0 }
             handbackDiag(pending.epoch, String(format:
-                "reconcile[%@]: delivered=%.3f expected=%.3f residual=%+.3f (band ±0.20) · loan total %@ resid %@ · loanMin=%.0f cycles=%d · odometer read by PHONE +%.0fs after reclaim · vs watch endpoint %@ (watch fresh=%@)",
+                "reconcile[%@]: delivered=%.3f expected=%.3f residual=%+.3f (band ±0.20) · loanMin=%.0f cycles=%d · odometer read by PHONE +%.0fs after reclaim · vs watch endpoint %@ (watch fresh=%@)",
                 pending.flavor == .forceReclaim ? "FORCE-RECLAIM" : "AUTHORITATIVE",
                 delivered, pending.expected, residual,
-                loanDelivered.map { String(format: "%.3f", $0) } ?? "n/a",
-                loanResidual.map { String(format: "%+.3f", $0) } ?? "n/a",
                 pending.loanMinutes, pending.cycles, elapsed,
                 drift.map { String(format: "%+.3f", $0) } ?? "n/a",
                 pending.watchFreshened ? "Y" : "N"))
@@ -238,7 +234,8 @@ extension PodLoanPhoneController {
             case .handback:
                 applyReconciliationVerdict(residual: residual, epoch: pending.epoch)
             case .forceReclaim:
-                applyForceReclaimVerdict(residual: residual, epoch: pending.epoch)
+                applyForceReclaimVerdict(residual: residual, epoch: pending.epoch,
+                                         window: DateInterval(start: pending.windowStart, end: max(reading.at, pending.windowStart)))
             }
         } else if pending.flavor == .forceReclaim {
             // A pump that gives no delivered total: nothing to check against.

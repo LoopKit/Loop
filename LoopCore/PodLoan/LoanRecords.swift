@@ -219,12 +219,16 @@ public struct LoanOdometerSnapshot: Codable, Equatable {
     /// A total is only true as of a moment.
     public let asOf: Date?
 
+    /// When `deliveredAtStart` was read: the start of the watch's window. Absent from an older watch.
+    public let deliveredAtStartAt: Date?
+
     public init(deliveredAtStart: Double, deliveredLatest: Double, freshenSucceeded: Bool,
-                asOf: Date? = nil) {
+                asOf: Date? = nil, deliveredAtStartAt: Date? = nil) {
         self.deliveredAtStart = deliveredAtStart
         self.deliveredLatest = deliveredLatest
         self.freshenSucceeded = freshenSucceeded
         self.asOf = asOf
+        self.deliveredAtStartAt = deliveredAtStartAt
     }
 }
 

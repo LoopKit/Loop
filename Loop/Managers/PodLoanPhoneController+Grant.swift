@@ -169,9 +169,8 @@ extension PodLoanPhoneController {
             $0.phase = .grantOffered
             $0.committedCursor = 0
             $0.committedIDs = []
-            $0.audit = .init(loanStartedAt: handedOverAt, deliveredAtGrant: deliveredAtGrant,
-                             base: deliveredAtGrant.map { AuditBase(units: $0, asOf: handedOverAt) })
-            $0.audit.baseEpoch = $0.epoch
+            $0.loanStartedAt = handedOverAt
+            if let deliveredAtGrant { $0.ledger.last = .init(units: deliveredAtGrant, at: handedOverAt) }
             $0.holdRenewedAt = handedOverAt
             $0.holdLapseNoticedAt = nil
             $0.watchSilenceWarningsIssued = 0
