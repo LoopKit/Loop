@@ -271,6 +271,10 @@ final class DeviceDataManager {
         self.glucoseAlertManager = GlucoseAlertManager(alertIssuer: alertManager)
         alertManager.addAlertSoundVendor(managerIdentifier: GlucoseAlertManager.managerIdentifier,
                                          soundVendor: self.glucoseAlertManager)
+        alertManager.playsThroughSilent = { [weak glucoseAlertManager = self.glucoseAlertManager] alert in
+            alert.identifier.managerIdentifier == GlucoseAlertManager.managerIdentifier &&
+                glucoseAlertManager?.playsThroughSilent(for: alert.identifier.alertIdentifier) == true
+        }
         self.settingsManager = settingsManager
         self.healthStore = healthStore
         self.carbStore = carbStore
