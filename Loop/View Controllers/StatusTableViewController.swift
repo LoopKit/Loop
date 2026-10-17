@@ -1581,6 +1581,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func presentSettings() {
+        deviceManager.analyticsServicesManager.didDisplaySettingsScreen()
         let deletePumpDataFunc: () -> PumpManagerViewModel.DeleteTestingDataFunc? = { [weak self] in
             (self?.deviceManager.pumpManager is TestingPumpManager) ? {
                 [weak self] in self?.deviceManager.deleteTestingPumpData()

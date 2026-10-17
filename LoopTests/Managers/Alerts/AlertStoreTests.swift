@@ -91,6 +91,33 @@ class AlertStoreTests: XCTestCase {
         XCTAssertEqual(999, newAnchor?.modificationCounter)
     }
     
+    func testLookupScheduledAlertsDue() {
+        let issued = Self.historicDate
+        let due = issued.addingTimeInterval(Self.delayedAlertDelay)
+        let expect = self.expectation(description: #function)
+        alertStore.recordIssued(alert: alert1, at: issued, completion: self.expectSuccess {
+            self.alertStore.recordIssued(alert: self.delayedAlert, at: issued, completion: self.expectSuccess {
+                self.alertStore.recordIssued(alert: self.repeatingAlert, at: issued, completion: self.expectSuccess {
+                    self.alertStore.recordRetraction(of: Self.repeatingAlertIdentifier, at: due.addingTimeInterval(-1), completion: self.expectSuccess {
+                        self.alertStore.lookupScheduledAlertsDue(after: issued, through: due.addingTimeInterval(1), completion: self.expectSuccess { dueAlerts in
+                            XCTAssertEqual([Self.delayedAlertIdentifier], dueAlerts.map { $0.identifier })
+                            self.alertStore.lookupScheduledAlertsDue(after: issued, through: due.addingTimeInterval(-1), completion: self.expectSuccess { dueAlerts in
+                                XCTAssertTrue(dueAlerts.isEmpty)
+                                self.alertStore.recordIssued(alert: self.delayedAlert, at: issued.addingTimeInterval(10), completion: self.expectSuccess {
+                                    self.alertStore.lookupScheduledAlertsDue(after: issued, through: due.addingTimeInterval(1), completion: self.expectSuccess { dueAlerts in
+                                        XCTAssertTrue(dueAlerts.isEmpty)
+                                        expect.fulfill()
+                                    })
+                                })
+                            })
+                        })
+                    })
+                })
+            })
+        })
+        wait(for: [expect], timeout: Self.defaultTimeout)
+    }
+
     func testRecordIssued() {
         let expect = self.expectation(description: #function)
         alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: self.expectSuccess {
