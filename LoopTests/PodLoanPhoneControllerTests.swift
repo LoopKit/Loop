@@ -1090,6 +1090,26 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertEqual(cancelCalls, 1, "one cancel per loan, not one per chase tick")
     }
 
+    /// A hand-back that comes without a pod reading (the watch let the pod go before the phone's
+    /// ack) has nothing to audit, but the watch's temp still ends on the verified round-trip.
+    func testInheritedTempIsCancelledWhenTheHandbackCarriesNoReading() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        MockPumpManager.testOdometer = 12.0
+
+        let ackSent = expectSend()
+        let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil,
+                                  odometer: nil, events: [], tombstones: [], recovered: true, released: true)
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
+        wait(for: [ackSent], timeout: 5)
+        waitForState(controller, .owner)
+
+        waitUntil(timeout: 8, "reclaim temp cancel") { self.lock.lock(); defer { self.lock.unlock() }; return self.cancelCalls > 0 }
+        waitUntil(timeout: 5, "cancel outcome logged") { self.diagMatching("temp cancelled — pod reverts to the user's schedule until") != nil }
+        XCTAssertNil(diagMatching("reconcile[AUTHORITATIVE]"), "no reading from the watch means no audit")
+        XCTAssertEqual(cancelCalls, 1)
+    }
+
     /// A failed cancel is a logged diagnostic, not a stall: the pod keeps running the watch's last
     /// automatic rate (computed from real CGM data minutes ago) until the phone's next cycle.
     func testFailedInheritedTempCancelIsLoggedAndDoesNotBlockTheReclaim() throws {

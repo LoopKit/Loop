@@ -203,7 +203,11 @@ extension PodLoanPhoneController {
     /// watch's temp. The audit consumes its anchors either way.
     func finishPendingHandbackAudit(elapsed: TimeInterval) {
         defer { clearAuditAnchors() }
-        guard let pending = pendingHandbackAudit else { return }
+        guard let pending = pendingHandbackAudit else {
+            // No audit (a hand-back that came without a pod reading): the watch's temp still ends here.
+            cancelWatchTemp(epoch: epoch)
+            return
+        }
         // The dosing hold lifts last, after the verdict is dispatched.
         defer { pendingHandbackAudit = nil }
 
@@ -245,14 +249,19 @@ extension PodLoanPhoneController {
             handbackDiag(pending.epoch, "reconcile[AUTHORITATIVE]: pod reachable but reported no odometer — keeping the provisional line")
         }
 
-        // The watch's temp ends here, after the reading. On failure it runs until the next cycle.
+        // The watch's temp ends here, after the reading.
+        cancelWatchTemp(epoch: pending.epoch)
+    }
+
+    /// On failure the watch's temp runs until the phone's next cycle.
+    private func cancelWatchTemp(epoch: Int) {
         deps.cancelTempBasalAfterPodReturn { [weak self] error in
             guard let self = self else { return }
             self.queue.async {
                 if let error = error {
-                    self.handbackDiag(pending.epoch, "temp cancel FAILED — pod keeps the watch's temp until the next cycle · \(String(describing: error))")
+                    self.handbackDiag(epoch, "temp cancel FAILED — pod keeps the watch's temp until the next cycle · \(String(describing: error))")
                 } else {
-                    self.handbackDiag(pending.epoch, "temp cancelled — pod reverts to the user's schedule until the phone's next reading")
+                    self.handbackDiag(epoch, "temp cancelled — pod reverts to the user's schedule until the phone's next reading")
                 }
             }
         }
