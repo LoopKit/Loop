@@ -36,8 +36,9 @@ struct PodLoanWatchState: RawRepresentable {
     }
     var grantedSettings: GrantedSettings?
 
-    /// The odometer at takeover; every audit is measured from it.
+    /// The odometer at takeover, and when it was read; every audit is measured from it.
     var deliveredAtTakeover: Double?
+    var deliveredAtTakeoverAt: Date?
     /// The reunion token for a seized loan, echoed by every offer until the loan closes.
     var seizeToken: UUID?
     /// The dosing decision store's query anchor as of the last decisions sent home.
@@ -56,6 +57,7 @@ struct PodLoanWatchState: RawRepresentable {
         lastRevokedEpoch = rawValue["lastRevokedEpoch"] as? Int
         grantedSettings = (rawValue["grantedSettings"] as? [String: Any]).flatMap(Self.grantedSettings(from:))
         deliveredAtTakeover = rawValue["deliveredAtTakeover"] as? Double
+        deliveredAtTakeoverAt = rawValue["deliveredAtTakeoverAt"] as? Date
         seizeToken = (rawValue["seizeToken"] as? String).flatMap(UUID.init(uuidString:))
         dosingDecisionsSent = rawValue["dosingDecisionsSent"] as? [String: Any]
         alertsSent = rawValue["alertsSent"] as? [String: Any]
@@ -77,6 +79,7 @@ struct PodLoanWatchState: RawRepresentable {
             return d
         }
         raw["deliveredAtTakeover"] = deliveredAtTakeover
+        raw["deliveredAtTakeoverAt"] = deliveredAtTakeoverAt
         raw["seizeToken"] = seizeToken?.uuidString
         raw["dosingDecisionsSent"] = dosingDecisionsSent
         raw["alertsSent"] = alertsSent
@@ -158,7 +161,7 @@ extension PodLoanWatchController {
 
     var deliveredAtTakeover: Double? {
         get { persisted.deliveredAtTakeover }
-        set { updateState { $0.deliveredAtTakeover = newValue } }
+        set { updateState { $0.deliveredAtTakeover = newValue; if newValue == nil { $0.deliveredAtTakeoverAt = nil } } }
     }
 
     /// Mirrored synchronously, so main-thread readers never lag the queue.

@@ -182,7 +182,8 @@ extension WatchDataManager {
                                        absorptionTime: e.absorptionTime,
                                        foodType: e.foodType,
                                        userCreatedDate: e.userCreatedDate,
-                                       userUpdatedDate: e.userUpdatedDate)
+                                       userUpdatedDate: e.userUpdatedDate,
+                                       createdByCurrentApp: e.createdByCurrentApp)
                     })
                 }
             },

@@ -136,7 +136,7 @@ extension PodLoanWatchController {
     func debugReadStatus(completion: @escaping (Bool?) -> Void) {
         queue.async {
             guard let odometer = self.pumpOdometer else { completion(nil); return }
-            odometer.refreshDeliveredUnits { ok in completion(ok) }
+            Task { completion(await odometer.refreshDeliveredUnits()) }
         }
     }
 

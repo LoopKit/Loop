@@ -142,8 +142,8 @@ final class PodLoanTimerCharacterizationTests: XCTestCase {
 
     // MARK: - The real request path
 
-    /// A bare request arms exactly one timer, and it is the 60 s no-grant timeout (the phone is
-    /// reachable in this fixture; the grant now includes the phone's cancel-before-release round-trip).
+    /// A bare request arms exactly one timer, and it is the 10 s no-grant timeout (the phone is
+    /// reachable in this fixture).
     func testRequestArmsOnlyTheRequestTimeout() async {
         let controller = await makeController()
         let rec = TimerRecorder()
@@ -153,7 +153,7 @@ final class PodLoanTimerCharacterizationTests: XCTestCase {
         controller.requestLoan(watchBuild: "characterization")
         waitForArmed(rec, atLeast: 1)
 
-        XCTAssertEqual(rec.armed, [.init(label: "request-timeout", delay: 60)])
+        XCTAssertEqual(rec.armed, [.init(label: "request-timeout", delay: PodLoanWatchController.requestTimeout)])
     }
 
     /// A double-tap must not arm a second timeout — the pending request absorbs it. This is

@@ -122,16 +122,22 @@ public struct LoanRequest: Codable, Equatable {
     /// A request that sat in a queue is not granted.
     public let sentAt: Date?
 
+    /// The highest loan number the watch knows, so the phone grants above it: a loan the watch
+    /// started alone can be numbered past the phone's own count.
+    public let knownEpoch: Int?
+
     public init(watchBuild: String,
                 supportedVersions: [Int] = [LoanProtocol.version],
                 requestID: String = UUID().uuidString,
                 supportsSeize: Bool? = nil,
-                sentAt: Date? = nil) {
+                sentAt: Date? = nil,
+                knownEpoch: Int? = nil) {
         self.watchBuild = watchBuild
         self.supportedVersions = supportedVersions
         self.requestID = requestID
         self.supportsSeize = supportsSeize
         self.sentAt = sentAt
+        self.knownEpoch = knownEpoch
     }
 }
 

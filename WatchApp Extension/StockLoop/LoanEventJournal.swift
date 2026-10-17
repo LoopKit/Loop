@@ -111,6 +111,12 @@ final class LoanEventJournal {
         return state?.events.first { $0.record.syncIdentifier == syncIdentifier }?.record
     }
 
+    /// This loan's dose records, acknowledged or not.
+    func doseRecords() -> [LoanDoseRecord] {
+        lock.lock(); defer { lock.unlock() }
+        return (state?.events ?? []).map(\.record).filter { $0.kind != .carb }
+    }
+
     /// Above the cursor, in seq order.
     func unackedEvents() -> [LoanEvent] {
         lock.lock(); defer { lock.unlock() }
