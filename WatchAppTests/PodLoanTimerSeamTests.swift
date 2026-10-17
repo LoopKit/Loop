@@ -63,8 +63,8 @@ final class PodLoanTimerSeamTests: XCTestCase {
                                       stateDirectory: journalDir)
     }
 
-    /// The 60 s request timeout crosses the seam.
-    func testRequestTimeoutCrossesTheSeamAt60Seconds() async {
+    /// The request timeout crosses the seam.
+    func testRequestTimeoutCrossesTheSeam() async {
         let controller = await makeController()
 
         var sent = 0
@@ -80,7 +80,7 @@ final class PodLoanTimerSeamTests: XCTestCase {
         wait(for: [timerArmed], timeout: 5)
 
         XCTAssertEqual(sent, 1)
-        XCTAssertEqual(captured.map(\.0), [60], "the request timeout is the only timer a bare request arms")
+        XCTAssertEqual(captured.map(\.0), [PodLoanWatchController.requestTimeout], "the request timeout is the only timer a bare request arms")
         XCTAssertEqual(captured.map(\.1), ["request-timeout"], "and it is the one we think it is")
     }
 

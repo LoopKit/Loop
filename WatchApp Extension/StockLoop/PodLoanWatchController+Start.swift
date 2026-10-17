@@ -69,11 +69,11 @@ extension PodLoanWatchController {
     /// Verified by reading identities back, not by comparing COB.
     func ingestGrantCarbs(_ grant: LoanGrant) {
         let carbs = grant.carbHistory ?? []
-        // Seeded entries are the phone's, so deleting one skips stock's authorship check.
+        // Each entry keeps the phone's authorship: Loop's own can be deleted here, another app's cannot.
         let objects: [SyncCarbObject] = carbs.map { c in
             SyncCarbObject(
                 absorptionTime: c.absorptionTime,
-                createdByCurrentApp: false,
+                createdByCurrentApp: c.createdByCurrentApp ?? false,
                 foodType: c.foodType,
                 grams: c.grams,
                 startDate: c.startDate,
@@ -179,8 +179,9 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Timeout is 60 s with the phone reachable, 8 s without; the grant includes a pod round-trip.
-    /// Reachability only shortens the timeout, it never gates the request.
+    /// The offline start is a backup, offered when the phone does not answer: at once if it looks
+    /// unreachable, when it goes out of reach during the wait (`noteReachabilityChanged`), or after
+    /// 10 s. The request still goes out; a phone that answers before the confirm wins (`confirmSeize`).
     func requestLoan(watchBuild: String) {
         #if targetEnvironment(simulator)
 
@@ -201,41 +202,59 @@ extension PodLoanWatchController {
             self.lastIdleNote = nil
             self.withdrawSeizeOffer(reason: "a new Start request went out")
 
-            let reachable = self.isPhoneReachable()
+            // "Unreachable" is believed only once the link to the phone is set up: just after launch it reads false.
+            let unreachable = !self.isPhoneReachable() && self.isPhoneLinkActivated()
 
-            let timeout: TimeInterval = reachable ? 60 : 8
-            SportLog.event("loan", "REQUEST sent (build \(watchBuild)) — awaiting grant\(reachable ? "" : " (phone unreachable — short \(Int(timeout))s timeout)")")
-            self.sendMessage(.request(LoanRequest(watchBuild: watchBuild, supportsSeize: true, sentAt: self.now())))
+            let timeout: TimeInterval = unreachable ? Self.unreachableRecheck : Self.requestTimeout
+            SportLog.event("loan", "REQUEST sent (build \(watchBuild)) — awaiting grant\(unreachable ? " (phone unreachable — offline start offered now)" : "")")
+            let known = max(self.epoch ?? 0, self.journal.activeEpoch ?? 0, self.persisted.highWaterEpoch, self.lastRevokedEpoch ?? 0)
+            self.sendMessage(.request(LoanRequest(watchBuild: watchBuild, supportsSeize: true, sentAt: self.now(), knownEpoch: known)))
 
-            self.requestTimeoutWork?.cancel()
-            let work = DispatchWorkItem { [weak self] in
-                guard let self = self, self.phase == .requested else { return }
-
-                defer { self.notifyUI() }
-                self.returnToRestingPhase()
-
-                // A queued request delivered later would grant a fresh epoch over whatever happens next.
-                self.cancelStaleQueuedRequests(context: "request timed out")
-
-                // A stored credential turns the timeout into a phoneless-start offer; its age is shown, not enforced.
-                if let dormant = self.storedDormantGrant() {
-                    self.seizeOffer = (issuedAt: dormant.issuedAt, token: dormant.seizeToken)
-                    self.lastIdleNote = nil
-                    SportLog.event("seize", String(format: "REQUEST TIMED OUT (reachable=%@) — offering offline start (credential issued %@) [seize]",
-                                                   self.isPhoneReachable() ? "Y" : "N",
-                                                   DateFormatter.localizedString(from: dormant.issuedAt, dateStyle: .short, timeStyle: .short)))
-                    return
-                }
-
-                if self.isPhoneReachable() {
-                    SportLog.event("loan", "REQUEST TIMED OUT with phone REACHABLE — one-way wedge signature")
-                }
-                self.lastIdleNote = NSLocalizedString("No response from iPhone — check the phone (loan refused, or busy) and try again.", comment: "Glance: loan request timed out")
-                SportLog.event("loan", "REQUEST TIMED OUT — no grant in \(Int(timeout))s (phone refused / busy / unreachable)")
-            }
-            self.requestTimeoutWork = work
-            self.schedule(after: timeout, label: "request-timeout", execute: work)
+            self.armRequestTimeout(timeout)
         }
+    }
+
+    /// An unreachable phone at the tap is read again this much later: just after the app comes on
+    /// screen, reachability reads false for a moment with the phone there.
+    static let unreachableRecheck: TimeInterval = 1
+
+    /// On `queue`. The timeout ends the request; a stored credential turns it into the offline offer.
+    private func armRequestTimeout(_ timeout: TimeInterval) {
+        requestTimeoutWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self = self, self.phase == .requested else { return }
+
+            // The quick re-check found the phone after all: wait the normal time for its answer.
+            if timeout == Self.unreachableRecheck, self.isPhoneReachable() {
+                SportLog.event("seize", "phone reachable after all — waiting the normal \(Int(Self.requestTimeout)) s for its grant [seize]")
+                self.armRequestTimeout(Self.requestTimeout)
+                return
+            }
+
+            defer { self.notifyUI() }
+            self.returnToRestingPhase()
+
+            // A queued request delivered later would grant a fresh epoch over whatever happens next.
+            self.cancelStaleQueuedRequests(context: "request timed out")
+
+            // A stored credential turns the timeout into a phoneless-start offer; its age is shown, not enforced.
+            if let dormant = self.storedDormantGrant() {
+                self.seizeOffer = (issuedAt: dormant.issuedAt, token: dormant.seizeToken)
+                self.lastIdleNote = nil
+                SportLog.event("seize", String(format: "REQUEST TIMED OUT (reachable=%@) — offering offline start (credential issued %@) [seize]",
+                                               self.isPhoneReachable() ? "Y" : "N",
+                                               DateFormatter.localizedString(from: dormant.issuedAt, dateStyle: .short, timeStyle: .short)))
+                return
+            }
+
+            if self.isPhoneReachable() {
+                SportLog.event("loan", "REQUEST TIMED OUT with phone REACHABLE — one-way wedge signature")
+            }
+            self.lastIdleNote = NSLocalizedString("No response from iPhone — check the phone (loan refused, or busy) and try again.", comment: "Glance: loan request timed out")
+            SportLog.event("loan", "REQUEST TIMED OUT — no grant in \(Int(timeout))s (phone refused / busy / unreachable)")
+        }
+        requestTimeoutWork = work
+        schedule(after: timeout, label: "request-timeout", execute: work)
     }
 
     /// The offer answers one unanswered request; a later grant or Start makes it stale. On `queue`.
@@ -332,8 +351,9 @@ extension PodLoanWatchController {
             rejectGrant("grant expired", notifyPhone: true)
             return
         }
+        // Told to the phone: left waiting, it would hold the pod released until its dead-man ran out.
         if let known = epoch, grant.epoch <= known, !seizeActivationInFlight {
-            rejectGrant("stale epoch \(grant.epoch) (known \(known))", notifyPhone: false)
+            rejectGrant("stale epoch \(grant.epoch) (known \(known))", notifyPhone: true)
             return
         }
 
@@ -577,11 +597,13 @@ extension PodLoanWatchController {
 
     /// The takeover's one save: odometer, `.active` and a seized loan's reunion token together.
     /// The token is persisted only here: an aborted activation never touched the pod.
-    func recordTakeoverActive(delivered: Double) {
+    func recordTakeoverActive(delivered: Double, at: Date?) {
         let token = pendingSeizeToken
         pendingSeizeToken = nil
+        reunionKeepChosen = false
         updateState {
             $0.deliveredAtTakeover = delivered
+            $0.deliveredAtTakeoverAt = at
             $0.phase = .active
             if let token { $0.seizeToken = token }
         }
@@ -596,7 +618,10 @@ extension PodLoanWatchController {
         let maxAttempts = 14
         let control = manager as? ExclusiveDeviceControl
         let odometer = manager as? PumpDeliveryOdometer
-        let refresh: (@escaping (Bool) -> Void) -> Void = odometer?.refreshDeliveredUnits ?? { completion in completion(false) }
+        let refresh: (@escaping (Bool) -> Void) -> Void = { completion in
+            guard let odometer else { return completion(false) }
+            Task { completion(await odometer.refreshDeliveredUnits()) }
+        }
         refresh { [weak self] success in
             guard let self = self else { return }
             self.queue.async {
@@ -621,11 +646,12 @@ extension PodLoanWatchController {
                     self.sendMessage(.takeoverFailed(TakeoverFailed(epoch: grant.epoch, reason: "grant expired mid-takeover")))
                     return
                 }
-                if success, let odometer, let delivered = odometer.deliveredUnits?.units {
+                if success, let odometer, let reading = odometer.deliveredUnits {
+                    let delivered = reading.units
                     // The base for every later audit of this loan.
                     self.revokeCapturedDelivered = nil
                     self.revokeCapturedDeliveredAt = nil
-                    self.recordTakeoverActive(delivered: delivered)
+                    self.recordTakeoverActive(delivered: delivered, at: reading.at)
                     self.onLoanActiveChanged?(true)
                     let takeoverSecs = self.attemptStartedAt.map { self.now().timeIntervalSince($0) } ?? -1
                     SportLog.event("loan", String(format: "ACTIVE — epoch %d, pod taken after %d read(s) in %.1fs [takeover-timing], odometer %.2f U, final read driver=%@ · %@",
