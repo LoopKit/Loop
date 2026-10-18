@@ -175,73 +175,63 @@ extension PodLoanWatchController {
         return try? LoanProtocol.decoder.decode(DormantGrant.self, from: data)
     }
 
-    /// Delivery since the copy that it cannot explain. Boluses still delivering are pro-rated;
-    /// milli-unit quantized; zero unless the excess clears the band.
-    static func insulinTheCopyCannotExplain(copyTotal: Double, copyAt: Date, podTotal: Double, now: Date,
-                                            records: [LoanDoseRecord], schedule: BasalRateSchedule?,
-                                            pulseUnits: Double) -> Double {
-        guard now > copyAt, podTotal >= copyTotal else { return 0 }
-        let unexplained = LoanReconciler.insulinNotInRecords(totalThen: copyTotal, then: copyAt, totalNow: podTotal, now: now,
-                                                             records: records, schedule: schedule, pulseUnits: pulseUnits)
-        return unexplained > unexplainedInsulinBand ? unexplained : 0
+    // MARK: - The ledger's open window
+
+    /// A reading starts the next window: the copy's at a grant, then every pump report's.
+    func noteReading(units: Double, at: Date) {
+        updateState { $0.ledgerLast = (units: units, at: at) }
     }
 
-    /// Books, before the first cycle, what the pod delivered since the copy that the copy's records
-    /// cannot explain. Blocking: the first cycle must see the booking.
-    func bookInsulinTheCopyCannotExplain(podTotal: Double, pulseUnits: Double, epoch: Int) {
-        defer { takeoverCopyTotal = nil; takeoverCopyRecords = [] }
-        guard let copy = takeoverCopyTotal else {
-            SportLog.event("loan", "takeover book check SKIPPED — the copy carried no pod total to compare against")
-            return
-        }
-        let at = self.now()
-        guard at > copy.asOf, podTotal >= copy.units else {
-            SportLog.event("loan", "takeover book check SKIPPED — the copy's reading is not older than the pod's")
-            return
-        }
-        let records = takeoverCopyRecords
-        let insulinType = pumpManager?.status.insulinType
-        let gate = DispatchSemaphore(value: 0)
-        var booked: Double?
-        Task {
-            booked = await self.bookInsulinNotInRecords(from: (copy.units, copy.asOf), to: (podTotal, at), records: records,
-                                                        pulseUnits: pulseUnits, insulinType: insulinType, context: "takeover book")
-            gate.signal()
-        }
-        gate.wait()
-        if let booked {
-            startNote = (at, String(format: NSLocalizedString("%.2f U the watch had no record of — counted as insulin on board", comment: "Glance: unexplained insulin booked at takeover (1: units)"), booked))
-        }
+    /// This watch's records over a window, from its own store: the seeded history, the pod's own
+    /// reports and this watch's doses. An estimate stands for insulin given before it was booked,
+    /// so none is in any window.
+    func ownRecords(from start: Date) async -> [LoanDoseRecord] {
+        let doses = (try? await loopManager.doseStore.getNormalizedDoseEntries(start: start.addingTimeInterval(-.hours(1)))) ?? []
+        return doses.filter { !($0.syncIdentifier?.hasPrefix(Self.estimateSyncPrefix) ?? false) }
+            .compactMap(LoanDoseRecord.init(storeDose:))
     }
 
-    /// Books, in this watch's store only, what the pod delivered over a window that the records and
-    /// the schedule cannot explain: the phone has the real records of that insulin, so nothing goes
-    /// home, and the booking ends with this loan's insulin book. Returns the amount booked.
-    func bookInsulinNotInRecords(from last: (units: Double, at: Date), to reading: (units: Double, at: Date),
-                                 records: [LoanDoseRecord], pulseUnits: Double, insulinType: InsulinType?,
-                                 context: String) async -> Double? {
+    /// Called from the pump's report, before the report completes, so the cycle the reading feeds
+    /// sees the verdict. Each reading closes the open window against this watch's own records; what
+    /// they cannot explain, in practice a phone's doses since the copy or while this watch was off,
+    /// is booked in this watch's store only: the phone has the real records, so nothing goes home,
+    /// and the booking ends with this loan's insulin book.
+    func checkOwnPumpTotal(reading: (units: Double, at: Date), pulseUnits: Double, insulinType: InsulinType?) async {
+        guard let last = persisted.ledgerLast else {
+            noteReading(units: reading.units, at: reading.at)
+            return
+        }
+        guard reading.at > last.at else { return }
+        noteReading(units: reading.units, at: reading.at)
+        // A lower total is a different pod: start again from it.
+        guard reading.units >= last.units else { return }
+        let records = await ownRecords(from: last.at)
         let unexplained = LoanReconciler.insulinNotInRecords(totalThen: last.units, then: last.at, totalNow: reading.units, now: reading.at,
                                                              records: records, schedule: loopManager.settings.basalRateSchedule,
                                                              pulseUnits: pulseUnits)
         let minutes = reading.at.timeIntervalSince(last.at) / 60
         guard unexplained > Self.unexplainedInsulinBand else {
-            SportLog.event("loan", String(format: "%@ check CLEAN — pod total %.2f → %.2f U over %.1f min, residual %+.3f",
-                                          context, last.units, reading.units, minutes, unexplained))
-            return nil
+            SportLog.event("loan", String(format: "[odometer] (own) %.1f min: pump total %.2f → %.2f, residual %+.3f",
+                                          minutes, last.units, reading.units, unexplained))
+            return
         }
         let at = now()
         let entry = DoseEntry(type: .bolus, startDate: at, endDate: at, value: unexplained, unit: .units,
                               decisionId: nil, deliveredUnits: unexplained,
-                              syncIdentifier: "LOAN-WATCH-GAP-\(Int(at.timeIntervalSince1970))", insulinType: insulinType)
+                              syncIdentifier: "\(Self.estimateSyncPrefix)-\(Int(at.timeIntervalSince1970))", insulinType: insulinType)
         do {
             try await loopManager.seedInsulinHistory([entry])
         } catch {
-            SportLog.event("loan", String(format: "** %@ check: %.2f U UNEXPLAINED and the booking FAILED — %@ **", context, unexplained, String(describing: error)))
-            return nil
+            SportLog.event("loan", String(format: "** over the last %.1f min: %.2f U UNEXPLAINED and the booking FAILED — %@ **",
+                                          minutes, unexplained, String(describing: error)))
+            return
         }
-        SportLog.event("loan", String(format: "** %@ check: pod total %.2f → %.2f U over %.1f min; %.2f U the records cannot explain — BOOKED as a bolus now (insulin on board errs high, dosing errs low) **",
-                                      context, last.units, reading.units, minutes, unexplained))
-        return unexplained
+        SportLog.event("loan", String(format: "** pod total %.2f → %.2f U over %.1f min; %.2f U the records cannot explain — BOOKED as a bolus now (insulin on board errs high, dosing errs low) **",
+                                      last.units, reading.units, minutes, unexplained))
+        queue.async {
+            self.startNote = (at, String(format: NSLocalizedString("%.2f U the watch had no record of — counted as insulin on board", comment: "Glance: unexplained insulin booked (1: units)"), unexplained))
+            self.notifyUI()
+        }
     }
 
     /// For log tags, from activation until the loan closes.
@@ -254,4 +244,7 @@ extension PodLoanWatchController {
 
     /// The phone's reconciliation band.
     static let unexplainedInsulinBand = 0.20
+
+    /// Every estimate's sync identifier starts with this; no window's records include one.
+    static let estimateSyncPrefix = "LOAN-WATCH-GAP"
 }

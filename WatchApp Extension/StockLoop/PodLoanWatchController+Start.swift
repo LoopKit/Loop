@@ -528,9 +528,9 @@ extension PodLoanWatchController {
         pumpStateStore.wrappedValue = manager.watchRawValue
         savePumpLocalState(of: manager)
 
-        // The export's header is the copy's view; on a phoneless start it can be half an hour old.
-        takeoverCopyTotal = configuration.deliveredUnits.map { (units: $0, asOf: configuration.asOf) }
-        takeoverCopyRecords = grant.doseHistory
+        // The export's header opens the ledger's window at the copy's reading (on a phoneless start it
+        // can be half an hour old); the takeover read, like every pump report, closes it.
+        updateState { $0.ledgerLast = configuration.deliveredUnits.map { (units: $0, at: configuration.asOf) } }
         guard ingestGrantHistory(grant) else {
             teardownPump()
             returnToRestingPhase()
@@ -658,10 +658,9 @@ extension PodLoanWatchController {
                                                   grant.epoch, attempt + 1, takeoverSecs, delivered, driver, RuntimeStateLog.snapshot()))
                     self.sendMessage(.takeoverComplete(TakeoverComplete(epoch: grant.epoch, firstPodStatus: self.currentPodStatus())))
 
-                    // Book the unexplained insulin, then give the loop the pump and run a full `loop()`
-                    // so the first program is journaled. Not before: a cycle triggered in between would
-                    // dose without the booking.
-                    self.bookInsulinTheCopyCannotExplain(podTotal: delivered, pulseUnits: odometer.deliveryPulseUnits, epoch: grant.epoch)
+                    // The read's own report closed the ledger's window from the copy's reading and booked
+                    // what it could not explain, so the loop can have the pump now; a full `loop()` so
+                    // the first program is journaled.
                     self.loopManager.pumpManager = manager
                     self.loopManager.loop()
                 } else if attempt + 1 < maxAttempts {

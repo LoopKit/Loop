@@ -306,44 +306,91 @@ final class WakeResumeTests: XCTestCase {
         XCTAssertFalse(next.loopManager.closedLoopEnabledNonBlocking, "loop mode is per loan: the next launch starts open")
     }
 
-    // MARK: insulin the copy cannot explain
+    // MARK: insulin the records cannot explain
 
-    private let t0 = Date(timeIntervalSince1970: 1_790_000_000)
+    private let t0 = Date().addingTimeInterval(-.minutes(30))
     private var flatSchedule: BasalRateSchedule { BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.2)])! }
-    private func unexplained(podTotal: Double, after minutes: Double, records: [LoanDoseRecord] = []) -> Double {
-        PodLoanWatchController.insulinTheCopyCannotExplain(copyTotal: 10.0, copyAt: t0, podTotal: podTotal,
-                                                           now: t0.addingTimeInterval(.minutes(minutes)),
-                                                           records: records, schedule: flatSchedule, pulseUnits: 0.05)
+
+    /// What a reading of `podTotal`, `minutes` after the copy's reading of 10.0 U, books with `records`
+    /// in the watch's own store: the ledger's window closes at the reading, as at every pump report.
+    private func unexplained(podTotal: Double, after minutes: Double, records: [DoseEntry] = []) async -> Double {
+        let c = await makeController()
+        var settings = LoopSettings()
+        settings.basalRateSchedule = flatSchedule
+        c.loopManager.settings = settings
+        c.updateState { $0.ledgerLast = (units: 10.0, at: t0) }
+        try? await c.loopManager.seedInsulinHistory(records)
+        await c.checkOwnPumpTotal(reading: (units: podTotal, at: t0.addingTimeInterval(.minutes(minutes))), pulseUnits: 0.05, insulinType: nil)
+        return await booked(in: c, since: t0)
     }
 
-    func testAnOrdinaryStartHasNothingToBook() {
+    /// The estimates in the watch's store since `start`, in units.
+    private func booked(in c: PodLoanWatchController, since start: Date) async -> Double {
+        let doses = (try? await c.loopManager.doseStore.getNormalizedDoseEntries(start: start.addingTimeInterval(-.hours(1)))) ?? []
+        return doses.filter { $0.syncIdentifier?.hasPrefix("LOAN-WATCH-GAP") ?? false }.reduce(0) { $0 + ($1.deliveredUnits ?? 0) }
+    }
+
+    func testAnOrdinaryStartHasNothingToBook() async {
         // Ten minutes at 1.2 U/h is 0.2 U of scheduled basal, and that is all the pod delivered.
-        XCTAssertEqual(unexplained(podTotal: 10.2, after: 10), 0)
-        XCTAssertEqual(unexplained(podTotal: 10.35, after: 10), 0, "0.15 U over is inside the 0.20 U band — the phone's band at reclaim")
+        let clean = await unexplained(podTotal: 10.2, after: 10)
+        XCTAssertEqual(clean, 0)
+        let inBand = await unexplained(podTotal: 10.35, after: 10)
+        XCTAssertEqual(inBand, 0, "0.15 U over is inside the 0.20 U band — the phone's band at reclaim")
     }
 
-    func testAPhoneBolusGivenAfterTheCopyIsBooked() {
+    func testAPhoneBolusGivenAfterTheCopyIsBooked() async {
         // A copy older than a phone bolus: the watch books the unexplained insulin.
-        XCTAssertEqual(unexplained(podTotal: 16.2, after: 10), 6.0, accuracy: 0.001)
+        let booked = await unexplained(podTotal: 16.2, after: 10)
+        XCTAssertEqual(booked, 6.0, accuracy: 0.001)
     }
 
-    func testABolusTheCopyAlreadyKnowsIsNotBookedTwice() {
+    func testABolusTheCopyAlreadyKnowsIsNotBookedTwice() async {
         // Still delivering when the copy's pod reading was taken: half of it is in that reading,
         // the other half arrives after it — and the copy's own record explains that half.
-        let bolus = LoanDoseRecord(kind: .bolus, startDate: t0.addingTimeInterval(-.minutes(2)),
-                                   endDate: t0.addingTimeInterval(.minutes(2)), amount: 6.0)
-        XCTAssertEqual(unexplained(podTotal: 10.0 + 3.0 + 0.2, after: 10, records: [bolus]), 0)
+        let bolus = DoseEntry(type: .bolus, startDate: t0.addingTimeInterval(-.minutes(2)), endDate: t0.addingTimeInterval(.minutes(2)),
+                              value: 6.0, unit: .units, decisionId: nil, deliveredUnits: 6.0, syncIdentifier: "copy-bolus")
+        let straddling = await unexplained(podTotal: 10.0 + 3.0 + 0.2, after: 10, records: [bolus])
+        XCTAssertEqual(straddling, 0)
         // …and a bolus wholly after the reading is explained in full.
-        let later = LoanDoseRecord(kind: .bolus, startDate: t0.addingTimeInterval(.minutes(1)),
-                                   endDate: t0.addingTimeInterval(.minutes(3)), amount: 2.0)
-        XCTAssertEqual(unexplained(podTotal: 10.0 + 2.0 + 0.2, after: 10, records: [later]), 0)
+        let later = DoseEntry(type: .bolus, startDate: t0.addingTimeInterval(.minutes(1)), endDate: t0.addingTimeInterval(.minutes(3)),
+                              value: 2.0, unit: .units, decisionId: nil, deliveredUnits: 2.0, syncIdentifier: "later-bolus")
+        let after = await unexplained(podTotal: 10.0 + 2.0 + 0.2, after: 10, records: [later])
+        XCTAssertEqual(after, 0)
     }
 
-    func testATempInTheCopyExplainsItsOwnDelivery() {
-        let temp = LoanDoseRecord(kind: .tempBasal, startDate: t0.addingTimeInterval(-.minutes(5)),
-                                  endDate: t0.addingTimeInterval(.minutes(25)), unitsPerHour: 3.0)
-        XCTAssertEqual(unexplained(podTotal: 10.5, after: 10, records: [temp]), 0, "ten minutes at 3.0 U/h is 0.5 U")
-        XCTAssertEqual(unexplained(podTotal: 12.5, after: 10, records: [temp]), 2.0, accuracy: 0.001, "anything beyond it is not")
+    func testATempInTheCopyExplainsItsOwnDelivery() async {
+        let temp = DoseEntry(type: .tempBasal, startDate: t0.addingTimeInterval(-.minutes(5)), endDate: t0.addingTimeInterval(.minutes(25)),
+                             value: 3.0, unit: .unitsPerHour, decisionId: nil, syncIdentifier: "copy-temp")
+        let explained = await unexplained(podTotal: 10.5, after: 10, records: [temp])
+        XCTAssertEqual(explained, 0, "ten minutes at 3.0 U/h is 0.5 U")
+        let beyond = await unexplained(podTotal: 12.5, after: 10, records: [temp])
+        XCTAssertEqual(beyond, 2.0, accuracy: 0.001, "anything beyond it is not")
+    }
+
+    func testAfterARelaunchNothingDosesBeforeThePodReports() async {
+        // The loop has the pod at once; stock's recency check refuses to dose until the pod's first
+        // report, and that report closes the ledger's window before it completes. A failed read is no
+        // report, so no dose (grid 14.16).
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        XCTAssertNotNil(c.loopManager.pumpManager, "the loop has the pod at once")
+        XCTAssertEqual(c.loopManager.doseStore.lastAddedPumpData, .distantPast, "no report yet, so no cycle passes the recency check")
+    }
+
+    func testAReadingAfterARelaunchClosesTheWindowFromTheLastReadingBefore() async {
+        // The last reading before the watch went off starts the window; the first reading after the
+        // relaunch books what the pod delivered meanwhile that the watch's records cannot explain.
+        persistGrantedSettings()   // basal 1.0 U/h
+        let before = Date().addingTimeInterval(-.minutes(20))
+        saveState { $0.phase = .active; $0.epoch = 7; $0.ledgerLast = (units: 10.0, at: before) }
+        savePumpState(readablePumpState)
+        let c = await makeController()
+        c.resumeIfNeeded()
+        c.queue.sync { }
+        XCTAssertEqual(c.persisted.ledgerLast?.units, 10.0, "the window survives the relaunch")
+        await c.checkOwnPumpTotal(reading: (units: 13.0, at: Date()), pulseUnits: 0.05, insulinType: nil)   // 20 min of basal is about 0.33 U; the rest nobody recorded
+        let estimate = await booked(in: c, since: before)
+        XCTAssertEqual(estimate, 2.67, accuracy: 0.06)
+        XCTAssertEqual(c.persisted.ledgerLast?.units, 13.0, "and the reading starts the next window")
     }
 
     func testBookedInsulinIsInTheBookTheLoopDosesFrom() async {
@@ -370,17 +417,14 @@ final class WakeResumeTests: XCTestCase {
                              wasUserEntered: false, syncIdentifier: "booked-\(i)")
         })
         let copyAt = Date().addingTimeInterval(-.minutes(10))
-        c.queue.sync {
-            c.takeoverCopyTotal = (10.0, copyAt)
-            c.takeoverCopyRecords = []
-            c.bookInsulinTheCopyCannotExplain(podTotal: 16.2, pulseUnits: 0.05, epoch: 7)   // 0.2 U of basal, 6.0 U nobody recorded
-        }
+        c.updateState { $0.ledgerLast = (units: 10.0, at: copyAt) }
+        await c.checkOwnPumpTotal(reading: (units: 16.2, at: Date()), pulseUnits: 0.05, insulinType: nil)   // 0.2 U of basal, 6.0 U nobody recorded
         let iob: Double? = await withCheckedContinuation { done in
             c.loopManager.updateDisplayState { done.resume(returning: $0.activeInsulin?.value) }
         }
         XCTAssertEqual(iob ?? 0, 6.0, accuracy: 0.5, "six units, a minute old, are all still on board")
         XCTAssertNotNil(c.debugSnapshot().startNoteText, "and the wrist says so")
-        XCTAssertNil(c.takeoverCopyTotal, "consumed: one check per Start")
+        XCTAssertEqual(c.persisted.ledgerLast?.units, 16.2, "the reading starts the next window")
     }
 
     // MARK: the rebuild after a relaunch

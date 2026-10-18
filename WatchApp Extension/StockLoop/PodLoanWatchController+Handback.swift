@@ -274,6 +274,7 @@ extension PodLoanWatchController {
                     $0.epoch = nil
                     $0.deliveredAtTakeover = nil
                     $0.deliveredAtTakeoverAt = nil
+                    $0.ledgerLast = nil
                     $0.seizeToken = nil
                 }
                 self.handbackDeadline = nil
@@ -339,6 +340,7 @@ extension PodLoanWatchController {
             $0.epoch = nil
             $0.deliveredAtTakeover = nil
             $0.deliveredAtTakeoverAt = nil
+            $0.ledgerLast = nil
             $0.seizeToken = nil
         }
         handbackDeadline = nil

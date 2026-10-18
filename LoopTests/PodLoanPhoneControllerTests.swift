@@ -3300,6 +3300,25 @@ extension PodLoanPhoneControllerTests {
         XCTAssertTrue(titles.isEmpty)
     }
 
+    /// The pump's report completes only once the reading's verdict is in the store, so the cycle the
+    /// report feeds sees the estimate (grid 9.8).
+    func testTheReportCompletesOnlyOnceTheEstimateIsInTheStore() throws {
+        _ = seizeCredentialOutstanding()
+        let controller = makeController()
+        let back = Date()
+        readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(30)))
+        MockPumpManager.testOdometer = 12.0
+        MockPumpManager.testOdometerAt = back
+        let completed = expectation(description: "report completed")
+        var bookedWhenCompleted = 0
+        controller.checkOwnPumpTotal {
+            self.lock.lock(); bookedWhenCompleted = self.bookedGapDoses.count; self.lock.unlock()
+            completed.fulfill()
+        }
+        wait(for: [completed], timeout: 5)
+        XCTAssertEqual(bookedWhenCompleted, 1, "the estimate was in the store before the report completed")
+    }
+
     func testTheWatchStartedLoansRecordsRetireTheGapBooking() throws {
         let token = seizeCredentialOutstanding()
         let controller = makeController()

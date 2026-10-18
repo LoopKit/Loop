@@ -285,7 +285,7 @@ extension PodLoanPhoneController {
                             therapySettingsRaw: settingsData,
                             // The schedules' authoring time zone.
                             settingsTimeZoneID: settings.basalRateSchedule?.timeZone.identifier ?? TimeZone.current.identifier,
-                            doseHistory: history.compactMap(Self.loanRecord(from:)),
+                            doseHistory: history.compactMap(LoanDoseRecord.init(storeDose:)),
                             // Capability flags for version skew.
                             supportsInterimHandback: true,
                             supportsOverrideRecords: true,

@@ -1154,6 +1154,7 @@ extension DeviceDataManager: PumpManagerDelegate {
                 completion(error)
                 return
             }
+            await podLoanPumpDidReport()
             completion(nil)
             NotificationCenter.default.post(name: .PumpEventsAdded, object: self, userInfo: nil)
         }

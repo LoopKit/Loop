@@ -169,9 +169,6 @@ final class PodLoanWatchController {
 
     var startNote: (at: Date, text: String)?
 
-    /// The copy's pod total and records, consumed once at takeover.
-    var takeoverCopyTotal: (units: Double, asOf: Date)?
-    var takeoverCopyRecords: [LoanDoseRecord] = []
     /// The persisted state (+State): phase, epoch, high-water, the live loan's settings,
     /// odometer and reunion token. Written whole by `updateState`.
     var stateStore: PersistedProperty<[String: Any]>

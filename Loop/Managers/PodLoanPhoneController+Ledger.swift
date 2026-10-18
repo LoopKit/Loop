@@ -151,7 +151,7 @@ extension PodLoanPhoneController {
     /// still run into it; an estimate stands for insulin given before it was booked, so none is in any window.
     func ownRecords(from start: Date, completion: @escaping ([LoanDoseRecord]) -> Void) {
         deps.doseHistory(start.addingTimeInterval(-.hours(1))) { doses in
-            completion(doses.filter { !Self.isEstimate($0) }.compactMap(Self.loanRecord(from:)))
+            completion(doses.filter { !Self.isEstimate($0) }.compactMap(LoanDoseRecord.init(storeDose:)))
         }
     }
 
@@ -177,24 +177,25 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// Called every phone cycle. While this phone holds the pump, each reading closes the open window
-    /// against its own records, and on a phone a watch could start without, the verdict acts at once:
-    /// a loan started away from the phone can be minutes long. Not while a reclaim's verdict is owed:
-    /// that closes the watch's window.
-    func checkOwnPumpTotal() {
+    /// Called from the pump's report, before the report completes, so the cycle the reading feeds
+    /// sees the verdict. While this phone holds the pump, each reading closes the open window
+    /// against its own records, and on a phone a watch could start without, the verdict acts at
+    /// once: a loan started away from the phone can be minutes long. Not while a reclaim's verdict
+    /// is owed: that closes the watch's window. `completion` fires once any booking is in the store.
+    func checkOwnPumpTotal(completion: @escaping () -> Void = {}) {
         queue.async {
             guard self.state == .owner, self.pendingHandbackAudit == nil,
                   let pump = self.deps.pumpManager() as? PumpDeliveryOdometer,
                   (pump as? ExclusiveDeviceControl)?.isControlReleased != true,
-                  let reading = pump.deliveredUnits else { return }
+                  let reading = pump.deliveredUnits else { return completion() }
             guard let last = self.ledgerLast else {
                 self.noteReading(units: reading.units, at: reading.at)
-                return
+                return completion()
             }
-            guard reading.at > last.at else { return }
+            guard reading.at > last.at else { return completion() }
             self.noteReading(units: reading.units, at: reading.at)
             // A lower total is a different pod: start again from it.
-            guard reading.units >= last.units else { return }
+            guard reading.units >= last.units else { return completion() }
             let gap = reading.at.timeIntervalSince(last.at)
             let acts = self.persisted.seizeToken != nil
             let schedule = self.deps.settings().basalRateSchedule
@@ -205,8 +206,9 @@ extension PodLoanPhoneController {
                                                                   records: records, schedule: schedule, pulseUnits: pulseUnits)
                 PhoneLog.event("loan", String(format: "[odometer] (own) %.1f min: pump total %.2f → %.2f, residual %+.3f",
                                               gap / 60, last.units, reading.units, residual))
-                if acts {
-                    self.queue.async { self.applyGapVerdict(residual: residual, window: DateInterval(start: last.at, end: reading.at)) }
+                guard acts else { return completion() }
+                self.queue.async {
+                    self.applyGapVerdict(residual: residual, window: DateInterval(start: last.at, end: reading.at), completion: completion)
                 }
             }
         }
@@ -299,18 +301,22 @@ extension PodLoanPhoneController {
 
     /// A window this phone held, judged against its own records: insulin they cannot explain is a loan
     /// this phone never heard of (the watch started without it). Silent when clean. Looping continues.
-    func applyGapVerdict(residual: Double, window: DateInterval) {
+    func applyGapVerdict(residual: Double, window: DateInterval, completion: @escaping () -> Void = {}) {
         let gapMinutes = window.duration / 60
         if residual > Self.unexplainedInsulinBand {
             handbackDiag(epoch, String(format:
                 "** WARN — over the last %.0f min: %+.3f U the phone's records cannot explain (Sport Mode started away from the phone?). Still looping. **",
                 gapMinutes, residual))
             bookEstimate(units: residual, window: window, epoch: epoch,
-                         notice: String(format: "Sport Mode probably started away from the phone: %@", Self.bookedSentences(residual)))
+                         notice: String(format: "Sport Mode probably started away from the phone: %@", Self.bookedSentences(residual)),
+                         completion: completion)
         } else if residual < -Self.warnNegativeResidual {
             handbackDiag(epoch, String(format:
                 "** WARN — over the last %.0f min: records claim %.3f U more than the pod delivered. Still looping. **", gapMinutes, -residual))
             deps.issueUrgentNotice(Self.overstatedTitle, Self.overstatedBody(-residual))
+            completion()
+        } else {
+            completion()
         }
     }
 
@@ -334,7 +340,8 @@ extension PodLoanPhoneController {
     }
 
     /// Books an estimate as a manual dose now, so it keeps its identifier and does not decay early.
-    func bookEstimate(units: Double, window: DateInterval, epoch: Int, notice: String) {
+    /// `completion` fires once the store has answered, either way.
+    func bookEstimate(units: Double, window: DateInterval, epoch: Int, notice: String, completion: @escaping () -> Void = {}) {
         let now = deps.now()
         let sync = "\(Self.estimateSyncPrefix)-e\(epoch)-\(Int(now.timeIntervalSince1970))"
         let entry = DoseEntry(type: .bolus, startDate: now, endDate: now,
@@ -342,8 +349,9 @@ extension PodLoanPhoneController {
                               syncIdentifier: sync, manuallyEntered: true)
         deps.issueUrgentNotice(Self.estimatedTitle, notice)
         deps.bookGapDose(entry) { [weak self] ok in
-            guard let self = self else { return }
+            guard let self = self else { return completion() }
             self.queue.async {
+                defer { completion() }
                 guard ok else {
                     self.handbackDiag(epoch, String(format: "** estimate booking FAILED to save — %.2f U is NOT in the books. **", units))
                     return
