@@ -407,7 +407,7 @@ final class BolusEntryViewModel: ObservableObject {
             }
             if let storedCarbEntry = await saveCarbEntry(carbEntry, replacingEntry: originalCarbEntry) {
                 self.dosingDecision.carbEntry = storedCarbEntry
-                self.analyticsServicesManager?.didAddCarbs(source: "Phone", amount: storedCarbEntry.quantity.doubleValue(for: .gram()))
+                self.analyticsServicesManager?.didAddCarbs(source: "Phone")
             } else {
                 self.presentAlert(.carbEntryPersistenceFailure)
                 return false
@@ -422,7 +422,7 @@ final class BolusEntryViewModel: ObservableObject {
         if amountToDeliver > 0 {
             savedPreMealOverride = nil
             delegate.enactBolus(units: amountToDeliver, activationType: activationType, completion: { _ in
-                self.analyticsServicesManager?.didBolus(source: "Phone", units: amountToDeliver)
+                self.analyticsServicesManager?.didBolus(source: "Phone")
             })
         }
         return true

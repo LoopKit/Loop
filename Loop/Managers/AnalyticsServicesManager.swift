@@ -17,6 +17,10 @@ final class AnalyticsServicesManager {
 
     private var analyticsServices = [AnalyticsService]()
 
+    var stateProvider: (() -> AnalyticsState)?
+
+    private var lastState: AnalyticsState?
+
     init() {}
 
     func addService(_ analyticsService: AnalyticsService) {
@@ -68,6 +72,14 @@ final class AnalyticsServicesManager {
 
     func identifyCGMType(_ cgmType: String) {
         identify("CGM Type", value: cgmType)
+    }
+
+    func identifyPumpModel(_ model: String?) {
+        identify("Pump Model", value: model ?? "Unknown")
+    }
+
+    func identifyCGMModel(_ model: String?) {
+        identify("CGM Model", value: model ?? "Unknown")
     }
 
     // MARK: - Screens
@@ -139,10 +151,6 @@ final class AnalyticsServicesManager {
             logEvent("Minimum BG Guard change")
         }
 
-        if newValue.dosingEnabled != oldValue.dosingEnabled {
-            logEvent("Closed loop enabled change")
-        }
-
         if newValue.basalRateSchedule?.timeZone != oldValue.basalRateSchedule?.timeZone {
             logEvent("Therapy schedule time zone change")
         }
@@ -160,6 +168,8 @@ final class AnalyticsServicesManager {
 
     func pumpWasRemoved() {
         logEvent("Pump Removed")
+        identifyPumpType("None")
+        identifyPumpModel("None")
     }
 
     func pumpWasAdded(identifier: String) {
@@ -168,72 +178,116 @@ final class AnalyticsServicesManager {
 
     func cgmWasRemoved() {
         logEvent("CGM Removed")
+        identifyCGMType("None")
+        identifyCGMModel("None")
     }
 
     func cgmWasAdded(identifier: String) {
         logEvent("CGM Added", withProperties: ["identifier" : identifier])
     }
 
-    func didAddCarbs(source: String, amount: Double, inSession: Bool = false) {
-        logEvent("Carb entry created", withProperties: ["source" : source, "amount": "\(amount)"], outOfSession: inSession)
+    func didAddCarbs(source: String) {
+        logEvent("Carb entry created", withProperties: ["source" : source], outOfSession: source != "Phone")
     }
 
     func didRetryBolus() {
         logEvent("Bolus Retry")
     }
 
-    func didBolus(source: String, units: Double, inSession: Bool = false) {
-        logEvent("Bolus set", withProperties: ["source" : source, "units": "\(units)"], outOfSession: true)
+    func didBolus(source: String) {
+        logEvent("Bolus set", withProperties: ["source" : source], outOfSession: source != "Phone")
     }
 
-    func didFetchNewCGMData() {
-        logEvent("CGM Fetch", outOfSession: true)
+    // MARK: - Daily Summary
+
+    func didStoreGlucose(_ samples: [StoredGlucoseSample]) {
+        let count = samples.filter { !$0.wasUserEntered }.count
+        updateDailySummary { $0.glucoseCount += count }
     }
 
     func loopDidSucceed(_ duration: TimeInterval) {
-        logEvent("Loop success", withProperties: ["duration": duration], outOfSession: true)
+        updateDailySummary { summary in
+            summary.loopSuccessCount += 1
+            summary.totalLoopDuration += duration
+            summary.maxLoopDuration = max(summary.maxLoopDuration, duration)
+        }
     }
 
     func loopDidError(error: LoopError) {
-        var props = [AnyHashable: Any]()
-
-        props["issueId"] = error.issueId
-
-        for (detailKey, detail) in error.issueDetails {
-            props[detailKey] = detail
-        }
-
-        logEvent("Loop error", withProperties: props, outOfSession: true)
+        updateDailySummary { $0.loopErrorCounts[error.issueId, default: 0] += 1 }
     }
 
-    func didIssueAlert(identifier: String, interruptionLevel: Alert.InterruptionLevel) {
-        logEvent("Alert Issued", withProperties: ["identifier": identifier, "interruptionLevel": interruptionLevel.rawValue])
+    func identifyState() {
+        guard let state = stateProvider?() else {
+            return
+        }
+        identify("Closed Loop", value: state.closedLoop ? "On" : "Off")
+        identify("Dosing Strategy", value: state.dosingStrategy)
+        identify("Integral Retrospective Correction", value: state.integralRetrospectiveCorrection ? "On" : "Off")
+        identify("Glucose Based Partial Application", value: state.glucoseBasedPartialApplication ? "On" : "Off")
+        lastState = state
     }
 
-    func didEnactOverride(name: String, symbol: String, duration: TemporaryScheduleOverride.Duration, insulinSensitivityMultiplier: Double = 1.0, targetRange: ClosedRange<HKQuantity>? = nil)
-    {
-        let combinedName = "\(symbol) - \(name)"
+    // Callers are on the loop and CGM queues; the summary and state are only touched on main
+    private func updateDailySummary(_ update: @escaping (inout AnalyticsDailySummary) -> Void) {
+        let now = Date()
+        DispatchQueue.main.async {
+            let day = Calendar.current.startOfDay(for: now)
+            var summary = UserDefaults.standard.analyticsDailySummary ?? AnalyticsDailySummary(day: day)
 
-        var properties: [String: Any] = [
-            "name": name,
-            "symbol": symbol,
-            "sensitivityMultiplier": insulinSensitivityMultiplier,
-            "nameWithEmoji": combinedName
-        ]
+            if summary.day != day {
+                self.logEvent("Daily summary", withProperties: summary.properties, outOfSession: true)
+                summary = AnalyticsDailySummary(day: day)
+            }
 
-        if let targetUpperBound = targetRange?.upperBound.doubleValue(for: HKUnit.milligramsPerDeciliter) {
-            properties["targetUpperBound"] = targetUpperBound
+            update(&summary)
+
+            if let state = self.stateProvider?() {
+                summary.state = state
+                if let lastState = self.lastState, state != lastState {
+                    self.logStateChanges(from: lastState, to: state)
+                    self.identifyState()
+                }
+            }
+
+            UserDefaults.standard.analyticsDailySummary = summary
         }
-        if let targetLowerBound = targetRange?.lowerBound.doubleValue(for: HKUnit.milligramsPerDeciliter) {
-            properties["targetLowerBound"] = targetLowerBound
-        }
+    }
 
+    private func logStateChanges(from oldState: AnalyticsState, to newState: AnalyticsState) {
+        if newState.closedLoop != oldState.closedLoop {
+            logEvent("Closed loop enabled change", withProperties: ["enabled": newState.closedLoop])
+        }
+        if newState.dosingStrategy != oldState.dosingStrategy {
+            logEvent("Dosing strategy change", withProperties: ["value": newState.dosingStrategy])
+        }
+        if newState.integralRetrospectiveCorrection != oldState.integralRetrospectiveCorrection {
+            logEvent("Algorithm experiment change", withProperties: ["experiment": "Integral Retrospective Correction", "enabled": newState.integralRetrospectiveCorrection])
+        }
+        if newState.glucoseBasedPartialApplication != oldState.glucoseBasedPartialApplication {
+            logEvent("Algorithm experiment change", withProperties: ["experiment": "Glucose Based Partial Application", "enabled": newState.glucoseBasedPartialApplication])
+        }
+    }
+
+    func didDisplayAlert(identifier: String, interruptionLevel: Alert.InterruptionLevel, scheduled: Bool) {
+        logEvent("Alert Displayed", withProperties: ["identifier": identifier, "interruptionLevel": interruptionLevel.rawValue, "scheduled": scheduled], outOfSession: scheduled)
+    }
+
+    func didEnactOverride(kind: String, duration: TemporaryScheduleOverride.Duration) {
+        var properties: [String: Any] = ["kind": kind]
+
+        switch duration {
+        case .finite(let interval):
+            properties["durationMinutes"] = Int(interval.minutes)
+        case .indefinite:
+            properties["durationMinutes"] = "indefinite"
+        }
 
         logEvent("Override Enacted", withProperties: properties)
     }
 
-    func didCancelOverride(name: String) {
-        logEvent("Override Canceled", withProperties: ["name": name])
+    func didEndOverride(kind: String) {
+        logEvent("Override Ended", withProperties: ["kind": kind])
     }
 }
 
@@ -241,24 +295,78 @@ final class AnalyticsServicesManager {
 // MARK: - PresetActivationObserver
 extension AnalyticsServicesManager: PresetActivationObserver {
     func presetActivated(context: TemporaryScheduleOverride.Context, duration: TemporaryScheduleOverride.Duration) {
-        switch context {
-        case .legacyWorkout:
-            didEnactOverride(name: "workout", symbol: "", duration: duration)
-        case .preMeal:
-            didEnactOverride(name: "preMeal", symbol: "", duration: duration)
-        case .custom:
-            didEnactOverride(name: "custom", symbol: "", duration: duration)
-        case .preset(let preset):
-            didEnactOverride(name: preset.name, symbol: preset.symbol, duration: duration, insulinSensitivityMultiplier: preset.settings.effectiveInsulinNeedsScaleFactor, targetRange: preset.settings.targetRange)
-        }
+        didEnactOverride(kind: context.analyticsKind, duration: duration)
     }
 
     func presetDeactivated(context: TemporaryScheduleOverride.Context) {
-        switch context {
-        case .legacyWorkout:
-            break
-        default:
-            break
+        didEndOverride(kind: context.analyticsKind)
+    }
+}
+
+extension TemporaryScheduleOverride.Context {
+    var analyticsKind: String {
+        switch self {
+        case .legacyWorkout: return "workout"
+        case .preMeal: return "preMeal"
+        case .custom: return "custom"
+        case .preset: return "preset"
+        }
+    }
+}
+
+struct AnalyticsState: Codable, Equatable {
+    var closedLoop: Bool
+    var dosingStrategy: String
+    var integralRetrospectiveCorrection: Bool
+    var glucoseBasedPartialApplication: Bool
+}
+
+struct AnalyticsDailySummary: Codable, Equatable {
+    var day: Date
+    var utcOffset = TimeZone.current.secondsFromGMT()
+    var loopSuccessCount = 0
+    var totalLoopDuration: TimeInterval = 0
+    var maxLoopDuration: TimeInterval = 0
+    var loopErrorCounts: [String: Int] = [:]
+    var glucoseCount = 0
+    var state: AnalyticsState?
+
+    var properties: [AnyHashable: Any] {
+        var properties: [AnyHashable: Any] = [
+            "day": ISO8601DateFormatter.string(from: day, timeZone: TimeZone(secondsFromGMT: utcOffset) ?? .current, formatOptions: .withFullDate),
+            "utcOffset": utcOffset,
+            "loopSuccessCount": loopSuccessCount,
+            "meanLoopDuration": loopSuccessCount > 0 ? totalLoopDuration / Double(loopSuccessCount) : 0,
+            "maxLoopDuration": maxLoopDuration,
+            "loopErrorCount": loopErrorCounts.values.reduce(0, +),
+            "loopErrorCounts": loopErrorCounts,
+            "glucoseCount": glucoseCount
+        ]
+        if let state {
+            properties["closedLoop"] = state.closedLoop
+            properties["dosingStrategy"] = state.dosingStrategy
+            properties["integralRetrospectiveCorrection"] = state.integralRetrospectiveCorrection
+            properties["glucoseBasedPartialApplication"] = state.glucoseBasedPartialApplication
+        }
+        return properties
+    }
+}
+
+extension UserDefaults {
+    private static let analyticsDailySummaryKey = "com.loopkit.Loop.AnalyticsDailySummary"
+    private static let scheduledAlertsReportedThroughKey = "com.loopkit.Loop.AnalyticsScheduledAlertsReportedThrough"
+
+    var scheduledAlertsReportedThrough: Date? {
+        get { object(forKey: Self.scheduledAlertsReportedThroughKey) as? Date }
+        set { set(newValue, forKey: Self.scheduledAlertsReportedThroughKey) }
+    }
+
+    var analyticsDailySummary: AnalyticsDailySummary? {
+        get {
+            data(forKey: Self.analyticsDailySummaryKey).flatMap { try? JSONDecoder().decode(AnalyticsDailySummary.self, from: $0) }
+        }
+        set {
+            set(newValue.flatMap { try? JSONEncoder().encode($0) }, forKey: Self.analyticsDailySummaryKey)
         }
     }
 }

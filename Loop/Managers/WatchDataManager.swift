@@ -386,7 +386,7 @@ final class WatchDataManager: NSObject {
 
             deviceManager.enactBolus(units: bolus.value, activationType: bolus.activationType) { (error) in
                 if error == nil {
-                    self.deviceManager.analyticsServicesManager.didBolus(source: "Watch", units: bolus.value)
+                    self.deviceManager.analyticsServicesManager.didBolus(source: "Watch")
                 }
 
                 // When we've successfully started the bolus, send a new context with our new prediction
@@ -401,7 +401,7 @@ final class WatchDataManager: NSObject {
                 switch result {
                 case .success(let storedCarbEntry):
                     dosingDecision.carbEntry = storedCarbEntry
-                    self.deviceManager.analyticsServicesManager.didAddCarbs(source: "Watch", amount: storedCarbEntry.quantity.doubleValue(for: .gram()))
+                    self.deviceManager.analyticsServicesManager.didAddCarbs(source: "Watch")
                     enactBolus()
                 case .failure(let error):
                     self.log.error("%{public}@", String(describing: error))

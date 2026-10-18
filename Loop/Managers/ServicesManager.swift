@@ -322,7 +322,7 @@ extension ServicesManager: ServiceDelegate {
             try await servicesManagerDelegate?.deliverCarbs(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
             await NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: amountInGrams)
             await remoteDataServicesManager.triggerUpload(for: .carb)
-            analyticsServicesManager.didAddCarbs(source: "Remote", amount: amountInGrams)
+            analyticsServicesManager.didAddCarbs(source: "Remote")
         } catch {
             await NotificationManager.sendRemoteCarbEntryFailureNotification(for: error, amountInGrams: amountInGrams)
             throw error
@@ -347,7 +347,7 @@ extension ServicesManager: ServiceDelegate {
             try await servicesManagerDosingDelegate?.deliverBolus(amountInUnits: amountInUnits)
             await NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
             await remoteDataServicesManager.triggerUpload(for: .dose)
-            analyticsServicesManager.didBolus(source: "Remote", units: amountInUnits)
+            analyticsServicesManager.didBolus(source: "Remote")
         } catch {
             await NotificationManager.sendRemoteBolusFailureNotification(for: error, amountInUnits: amountInUnits)
             throw error
