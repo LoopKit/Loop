@@ -101,6 +101,20 @@ then
     popd . > /dev/null
 fi
 
+# --- Customizations ---
+# Each customization adds an empty <identifier>.loopcustomization file at the workspace root or a submodule root.
+customizations_key="com-loopkit-Loop-customizations"
+/usr/libexec/PlistBuddy -c "Delete :${customizations_key}" "${info_plist_path}" 2>/dev/null || true
+/usr/libexec/PlistBuddy -c "Add :${customizations_key} array" "${info_plist_path}"
+if [ -e ../.git ]; then
+    customizations_root=..
+else
+    customizations_root=.
+fi
+find "${customizations_root}" -maxdepth 2 -name '*.loopcustomization' -exec basename {} .loopcustomization \; | sort -u | while read -r identifier; do
+    /usr/libexec/PlistBuddy -c "Add :${customizations_key}: string ${identifier}" "${info_plist_path}"
+done
+
 # --- Root repo details ---
 # Retrieve current branch (or tag) and commit SHA.
 git_branch=$(git symbolic-ref --short -q HEAD || echo "")

@@ -53,7 +53,10 @@ public protocol SettingsViewModelDelegate: AnyObject {
     func dosingEnabledChanged(_: Bool)
     func dosingStrategyChanged(_: AutomaticDosingStrategy)
     func didTapIssueReport()
+    func generateDiagnosticReport() async -> String
     var closedLoopDescriptiveText: String? { get }
+    var pumpModel: String? { get }
+    var cgmModel: String? { get }
 }
 
 public class SettingsViewModel: ObservableObject {
@@ -68,6 +71,31 @@ public class SettingsViewModel: ObservableObject {
 
     func didTapIssueReport() {
         delegate?.didTapIssueReport()
+    }
+
+    var generateDiagnosticReport: (() async -> String)? {
+        guard let delegate else {
+            return nil
+        }
+        return { [weak delegate] in await delegate?.generateDiagnosticReport() ?? "" }
+    }
+
+    @MainActor
+    var issueReportContext: [String: IssueReportContextValue] {
+        let buildDetails = BuildDetails.default
+        var context: [String: IssueReportContextValue] = [
+            "appVersion": .string(Bundle.main.shortVersionString),
+            "buildNumber": .string(Bundle.main.version),
+            "customizations": .strings(buildDetails.customizations),
+            "deviceModel": .string(UIDevice.current.modelIdentifier),
+            "osVersion": .string(UIDevice.current.systemVersion),
+        ]
+        context["branch"] = (buildDetails.workspaceGitBranch ?? buildDetails.gitBranch).map { .string($0) }
+        context["workspaceRevision"] = buildDetails.workspaceGitRevision.map { .string($0) }
+        context["loopRevision"] = buildDetails.gitRevision.map { .string($0) }
+        context["pumpModel"] = delegate?.pumpModel.map { .string($0) }
+        context["cgmModel"] = delegate?.cgmModel.map { .string($0) }
+        return context
     }
     
     var availableSupports: [SupportUI]
