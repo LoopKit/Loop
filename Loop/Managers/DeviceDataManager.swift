@@ -1741,6 +1741,7 @@ extension DeviceDataManager: DeviceSupportDelegate {
                         "* xcodeVersion: \(BuildDetails.default.xcodeVersion ?? "N/A")",
                         "* Workspace branch: \(BuildDetails.default.workspaceGitBranch ?? "N/A")",
                         "* Workspace SHA: \(BuildDetails.default.workspaceGitRevision ?? "N/A")",
+                        "* Customizations: \(BuildDetails.default.customizations.isEmpty ? "None" : BuildDetails.default.customizations.joined(separator: ", "))",
                         "* Submodule name: branch, SHA",
                         "\(submodulesInfo)",
                         "",

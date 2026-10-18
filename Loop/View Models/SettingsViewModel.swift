@@ -86,6 +86,7 @@ public class SettingsViewModel: ObservableObject {
         var context: [String: IssueReportContextValue] = [
             "appVersion": .string(Bundle.main.shortVersionString),
             "buildNumber": .string(Bundle.main.version),
+            "customizations": .strings(buildDetails.customizations),
             "deviceModel": .string(UIDevice.current.modelIdentifier),
             "osVersion": .string(UIDevice.current.systemVersion),
         ]
