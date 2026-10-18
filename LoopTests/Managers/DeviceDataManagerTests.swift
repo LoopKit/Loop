@@ -178,6 +178,39 @@ final class DeviceDataManagerTests: XCTestCase {
         XCTAssertEqual(loopControlMock.lastCancelActiveTempBasalReason, .unreliableCGMData)
     }
 
+    private func addPumpEvents(_ events: [NewPumpEvent]) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            deviceDataManager.pumpManager(pumpManager, hasNewPumpEvents: events, lastReconciliation: Date(), replacePendingEvents: false) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+
+    func testPumpReplacementDeletesReservoirValues() async throws {
+        let doseStore = deviceDataManager.doseStore
+        _ = try await doseStore.addReservoirValue(25.5, at: Date())
+        XCTAssertEqual(doseStore.lastReservoirValue?.unitVolume, 25.5)
+
+        let podChange = NewPumpEvent(date: Date(), dose: nil, raw: Data("Pod Change".utf8), title: "Pod Change", type: .replaceComponent(componentType: .pump))
+        try await addPumpEvents([podChange])
+
+        XCTAssertNil(doseStore.lastReservoirValue)
+    }
+
+    func testOtherPumpEventsKeepReservoirValues() async throws {
+        let doseStore = deviceDataManager.doseStore
+        _ = try await doseStore.addReservoirValue(25.5, at: Date())
+
+        let setChange = NewPumpEvent(date: Date(), dose: nil, raw: Data("Set Change".utf8), title: "Set Change", type: .replaceComponent(componentType: .infusionSet))
+        try await addPumpEvents([setChange])
+
+        XCTAssertEqual(doseStore.lastReservoirValue?.unitVolume, 25.5)
+    }
+
     func testUploadEventListener() {
         let alertStore = AlertStore()
         deviceDataManager.alertStoreHasUpdatedAlertData(alertStore)

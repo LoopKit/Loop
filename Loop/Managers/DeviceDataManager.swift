@@ -1167,6 +1167,14 @@ extension DeviceDataManager: PumpManagerDelegate {
                 completion(error)
                 return
             }
+            if events.contains(where: { $0.type == .replaceComponent(componentType: .pump) }) {
+                // Reservoir readings belong to the pump that reported them.
+                do {
+                    try await doseStore.deleteAllReservoirValues()
+                } catch {
+                    self.log.error("Failed to delete reservoir values after pump replacement: %{public}@", String(describing: error))
+                }
+            }
             completion(nil)
             NotificationCenter.default.post(name: .PumpEventsAdded, object: self, userInfo: nil)
         }
