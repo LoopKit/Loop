@@ -3230,8 +3230,11 @@ extension PodLoanPhoneControllerTests {
         readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(12)))
         readPod(controller, units: 10.2, at: back)   // the schedule explains the 0.2 U
 
-        waitUntil(timeout: 5, "verdict") { self.diagMatching("back with the pod after 12 min: CLEAN") != nil }
-        lock.lock(); let titles = urgentNotices; lock.unlock()
+        controller.queue.sync {}
+        usleep(300_000)
+        controller.queue.sync {}
+        lock.lock(); let titles = urgentNotices; let booked = bookedGapDoses; lock.unlock()
+        XCTAssertTrue(booked.isEmpty, "clean")
         XCTAssertFalse(titles.contains("Insulin On Board May Be Overstated"))
     }
 
@@ -3250,7 +3253,9 @@ extension PodLoanPhoneControllerTests {
 
         // The next own reading, a long gap later: only what the pod delivered since the return.
         readPod(controller, units: 12.6, at: Date().addingTimeInterval(.minutes(15)))
-        waitUntil(timeout: 5, "verdict") { self.diagMatching("back with the pod after") != nil }
+        controller.queue.sync {}
+        usleep(300_000)
+        controller.queue.sync {}
         lock.lock(); let booked = bookedGapDoses; lock.unlock()
         XCTAssertEqual(booked.count, 1, "the take-back's estimate, and nothing for the same insulin again (epoch \(grant.epoch))")
     }
@@ -3266,16 +3271,33 @@ extension PodLoanPhoneControllerTests {
         XCTAssertTrue(booked.isEmpty)
     }
 
-    func testAShortGapIsOnlyLogged() throws {
+    /// A short loan started away from the phone is caught at the next reading, however close: a gap is
+    /// not required (10-16 21:36, 5.8 min, +0.29 U looped on unseen).
+    func testAShortWindowIsCheckedToo() throws {
         _ = seizeCredentialOutstanding()
         let controller = makeController()
         let back = Date()
         readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(5)))
-        readPod(controller, units: 11.0, at: back)
+        readPod(controller, units: 11.0, at: back)   // the schedule explains about 0.08 U of the 1.0
+        waitUntil(timeout: 5, "booked") { self.lock.lock(); defer { self.lock.unlock() }; return !self.bookedGapDoses.isEmpty }
+        lock.lock(); let booked = bookedGapDoses; lock.unlock()
+        XCTAssertEqual(booked.first?.deliveredUnits ?? 0, 0.92, accuracy: 0.05)
+    }
+
+    /// The phone's ordinary readings, a few minutes apart and explained by the schedule, book nothing.
+    func testOrdinaryReadingsBookNothing() throws {
+        _ = seizeCredentialOutstanding()
+        let controller = makeController()
+        let back = Date()
+        readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(10)))
+        readPod(controller, units: 10.1, at: back.addingTimeInterval(-.minutes(5)))
+        readPod(controller, units: 10.15, at: back)
         controller.queue.sync {}
         usleep(300_000)
-        lock.lock(); let booked = bookedGapDoses; lock.unlock()
+        controller.queue.sync {}
+        lock.lock(); let booked = bookedGapDoses; let titles = urgentNotices; lock.unlock()
         XCTAssertTrue(booked.isEmpty)
+        XCTAssertTrue(titles.isEmpty)
     }
 
     func testTheWatchStartedLoansRecordsRetireTheGapBooking() throws {

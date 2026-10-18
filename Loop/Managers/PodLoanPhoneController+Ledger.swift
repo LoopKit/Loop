@@ -177,13 +177,10 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// A gap this long without reading the pump, on a phone a watch could start without, means the
-    /// watch may have had the pod: the check then acts (see `applyGapVerdict`).
-    static let ownPumpGapForCheck: TimeInterval = .minutes(10)
-
     /// Called every phone cycle. While this phone holds the pump, each reading closes the open window
-    /// against its own records. Logged each cycle; acted on after a gap, on a phone set up for Sport
-    /// Mode started away from it. Not while a reclaim's verdict is owed: that closes the watch's window.
+    /// against its own records, and on a phone a watch could start without, the verdict acts at once:
+    /// a loan started away from the phone can be minutes long. Not while a reclaim's verdict is owed:
+    /// that closes the watch's window.
     func checkOwnPumpTotal() {
         queue.async {
             guard self.state == .owner, self.pendingHandbackAudit == nil,
@@ -199,7 +196,7 @@ extension PodLoanPhoneController {
             // A lower total is a different pod: start again from it.
             guard reading.units >= last.units else { return }
             let gap = reading.at.timeIntervalSince(last.at)
-            let acts = gap >= Self.ownPumpGapForCheck && self.persisted.seizeToken != nil
+            let acts = self.persisted.seizeToken != nil
             let schedule = self.deps.settings().basalRateSchedule
             let pulseUnits = pump.deliveryPulseUnits
             self.ownRecords(from: last.at) { records in
@@ -300,22 +297,20 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// Back with the pod after a gap, as owner: the forced take-back's verdict for a loan this phone
-    /// never heard of (the watch started without it). Looping continues either way.
+    /// A window this phone held, judged against its own records: insulin they cannot explain is a loan
+    /// this phone never heard of (the watch started without it). Silent when clean. Looping continues.
     func applyGapVerdict(residual: Double, window: DateInterval) {
         let gapMinutes = window.duration / 60
         if residual > Self.unexplainedInsulinBand {
             handbackDiag(epoch, String(format:
-                "** WARN — back with the pod after %.0f min: %+.3f U the phone's records cannot explain (Sport Mode started away from the phone?). Still looping. **",
+                "** WARN — over the last %.0f min: %+.3f U the phone's records cannot explain (Sport Mode started away from the phone?). Still looping. **",
                 gapMinutes, residual))
             bookEstimate(units: residual, window: window, epoch: epoch,
                          notice: String(format: "Sport Mode probably started away from the phone: %@", Self.bookedSentences(residual)))
         } else if residual < -Self.warnNegativeResidual {
             handbackDiag(epoch, String(format:
-                "** WARN — back with the pod after %.0f min: records claim %.3f U more than the pod delivered. Still looping. **", gapMinutes, -residual))
+                "** WARN — over the last %.0f min: records claim %.3f U more than the pod delivered. Still looping. **", gapMinutes, -residual))
             deps.issueUrgentNotice(Self.overstatedTitle, Self.overstatedBody(-residual))
-        } else {
-            handbackDiag(epoch, String(format: "back with the pod after %.0f min: CLEAN — residual %+.3f U within ±%.2f", gapMinutes, residual, Self.unexplainedInsulinBand))
         }
     }
 
