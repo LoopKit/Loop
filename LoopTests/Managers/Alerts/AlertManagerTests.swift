@@ -490,21 +490,23 @@ class AlertManagerTests: XCTestCase {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
         
         let lastLoopDate = Date()
+        // Rescheduling reads the last loop date from the shared extension context
+        var context = ExtensionDataManager.context ?? StatusExtensionContext()
+        context.lastLoopCompleted = lastLoopDate
+        ExtensionDataManager.context = context
+
         alertManager.loopDidComplete(lastLoopDate)
         alertManager.alertMuter.configuration.startTime = Date()
         alertManager.alertMuter.configuration.duration = .hours(4)
         waitOnMain()
-        
-        let testExpectation = expectation(description: #function)
-        var loopNotRunningRequests: [UNNotificationRequest] = []
-        UNUserNotificationCenter.current().getPendingNotificationRequests() { notificationRequests in
-            loopNotRunningRequests = notificationRequests.filter({
-                $0.content.categoryIdentifier == LoopNotificationCategory.loopNotRunning.rawValue
-            })
-            testExpectation.fulfill()
+
+        var loopNotRunningRequests = pendingLoopNotRunningRequests()
+        let deadline = Date().addingTimeInterval(5)
+        while loopNotRunningRequests.contains(where: { $0.content.interruptionLevel == .timeSensitive && $0.content.sound != nil }), Date() < deadline {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+            loopNotRunningRequests = pendingLoopNotRunningRequests()
         }
 
-        wait(for: [testExpectation], timeout: 1)
         if #available(iOS 15.0, *) {
             XCTAssertNil(loopNotRunningRequests.first(where: { $0.content.interruptionLevel == .timeSensitive })?.content.sound)
             if let request = loopNotRunningRequests.first(where: { $0.content.interruptionLevel == .critical }) {
@@ -520,6 +522,19 @@ class AlertManagerTests: XCTestCase {
                 XCTAssertNil(request.content.sound)
             }
         }
+    }
+
+    private func pendingLoopNotRunningRequests() -> [UNNotificationRequest] {
+        let pendingExpectation = expectation(description: #function)
+        var requests: [UNNotificationRequest] = []
+        UNUserNotificationCenter.current().getPendingNotificationRequests() { notificationRequests in
+            requests = notificationRequests.filter({
+                $0.content.categoryIdentifier == LoopNotificationCategory.loopNotRunning.rawValue
+            })
+            pendingExpectation.fulfill()
+        }
+        wait(for: [pendingExpectation], timeout: 1)
+        return requests
     }
 }
 
