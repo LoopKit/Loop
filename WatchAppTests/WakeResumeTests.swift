@@ -217,11 +217,12 @@ final class WakeResumeTests: XCTestCase {
     }
 
     func testLiveHandbackWithPhoneUnreachableFailsFastAndKeepsTheLoan() async {
-        // A live hand-back is never queued. Out of reach, End fails at once
-        // and the loan continues — no offer is sent, nothing can land later and take the pod.
+        // A live hand-back is never queued. Out of reach at the tap, and still a second later, End
+        // fails at once and the loan continues — no offer is sent, nothing can land later and take the pod.
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         XCTAssertNotNil(c.pumpManager)
         c.isPhoneReachable = { false }
+        c.scheduler = { _, _, work in work.perform() }   // the one-second re-check, now
         var sent: [[String: Any]] = []
         c.send = { sent.append($0) }
         c.beginHandback()
@@ -230,6 +231,32 @@ final class WakeResumeTests: XCTestCase {
         XCTAssertNotNil(c.pumpManager, "the watch still holds the pod")
         XCTAssertTrue(sent.isEmpty, "no offer left the watch — nothing queued to land later")
         XCTAssertNotNil(c.debugSnapshot().handbackFailureText, "and the glance has the reason to show, on screen rather than as a notification")
+    }
+
+    func testAResendsUnreachableSampleDoesNotEndTheHandback() async {
+        // Reachability routes a message, it never rules (grid 14.17): once the exchange is under way
+        // the hand-back holds for its budget, and a resend that finds the phone unreachable waits for
+        // the next instead of giving up.
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        var timers: [(label: String, work: DispatchWorkItem)] = []
+        c.scheduler = { _, label, work in timers.append((label, work)) }
+        c.isPhoneReachable = { true }
+        var sent: [[String: Any]] = []
+        c.send = { sent.append($0) }
+        c.beginHandback()
+        c.queue.sync { }
+        XCTAssertEqual(sent.count, 1, "the live offer went out")
+
+        c.isPhoneReachable = { false }
+        c.queue.sync { timers.last { $0.label == "handback-resend" }?.work.perform() }
+        XCTAssertEqual(c.phase, .active)
+        XCTAssertTrue(c.debugSnapshot().handbackPending, "one unreachable reading is not a verdict: the hand-back holds")
+        XCTAssertNil(c.debugSnapshot().handbackFailureText)
+        XCTAssertEqual(sent.count, 1, "nothing goes to an unreachable phone")
+
+        c.isPhoneReachable = { true }
+        c.queue.sync { timers.last { $0.label == "handback-resend" }?.work.perform() }
+        XCTAssertEqual(sent.count, 2, "the next resend sends again")
     }
 
     func testPhoneRefusalEndsTheHandbackAtOnceAndKeepsTheLoan() async throws {

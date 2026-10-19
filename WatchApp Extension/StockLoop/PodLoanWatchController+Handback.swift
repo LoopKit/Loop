@@ -44,6 +44,19 @@ extension PodLoanWatchController {
                 return
             }
             SportLog.event("loan", "HAND-BACK requested — draining \(self.journal.unackedEvents().count) events; still in control (WS1)")
+            // An unreachable read at the tap is read again a second later before it refuses, as at
+            // Start: just after the app wakes it lies for a moment with the phone right there.
+            guard self.isPhoneReachable() else {
+                self.schedule(after: Self.unreachableRecheck, label: "handback-recheck") {
+                    guard self.phase == .active, self.handbackRequested else { return }
+                    if self.isPhoneReachable() {
+                        self.sendHandbackOffer(freshened: false, recovered: false)
+                    } else {
+                        self.handbackTimedOut(unreachable: true)
+                    }
+                }
+                return
+            }
             self.sendHandbackOffer(freshened: false, recovered: false)
         }
     }
@@ -233,17 +246,19 @@ extension PodLoanWatchController {
         let live = !recovered && phase != .revoked && phase != .recoveredDrain
         let reachableNow = isPhoneReachable()
         if !reachableNow { handbackSawUnreachable = true }
-        if live, !reachableNow {
-            handbackTimedOut(unreachable: true)
-            return
-        }
         if lastHandbackReachable != reachableNow {
             SportLog.event("loan", reachableNow
                 ? "hand-back: iPhone reachable — offer should ack shortly"
-                : "drain: iPhone UNREACHABLE — offer queued, will land when it returns")
+                : (live ? "hand-back: iPhone unreachable — the live offer waits for the next resend"
+                        : "drain: iPhone UNREACHABLE — offer queued, will land when it returns"))
             lastHandbackReachable = reachableNow
         }
-        sendMessage(.handbackOffer(offer), urgentOnly: live)
+        // A live offer goes only to a reachable phone; one unreachable reading is not a verdict (the
+        // link flaps while either app changes state), so the hand-back holds for its budget and the
+        // next resend tries again.
+        if !live || reachableNow {
+            sendMessage(.handbackOffer(offer), urgentOnly: live)
+        }
 
         resendWorkItem?.cancel()
         let work = DispatchWorkItem { [weak self] in
