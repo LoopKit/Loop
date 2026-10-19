@@ -16,8 +16,7 @@ import os.log
 
 extension PodLoanWatchController {
 
-    /// Everything unacked. A `renewal` goes even when empty (the phone's liveness signal), and an
-    /// empty one is urgent-only.
+    /// Everything unacked. A `renewal` goes even when empty: it is the phone's sign the watch is there.
     func streamRecords(renewal: Bool = false) {
         guard phase == .active, let epoch = epoch else { return }
         let events = journal.unackedEvents()
@@ -38,8 +37,7 @@ extension PodLoanWatchController {
         }
 
         sendMessage(.doseRecordBatch(DoseRecordBatch(epoch: epoch, events: events, tombstones: tombstones,
-                                                     odometer: odometer, sentAt: self.now())),
-                    urgentOnly: empty)
+                                                     odometer: odometer, sentAt: self.now())))
     }
 
     /// Once per completed cycle, including cycles that recorded nothing.

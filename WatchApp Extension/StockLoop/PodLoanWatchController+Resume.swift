@@ -95,14 +95,40 @@ extension PodLoanWatchController {
         phase = .active
         onLoanActiveChanged?(true)
 
-        // The loop gets the pod now. Nothing doses before the pod reports: after a relaunch stock's
-        // recency check refuses until the first report, and that report closes the ledger's open
-        // window, booking what the pod delivered while this watch was off, before it completes.
+        SportLog.event("loan", "RESUMED — epoch \(epoch ?? -1) rebuilt from saved pod state after a relaunch (stock relaunch) · \(RuntimeStateLog.snapshot())")
+
+        // Rows 12, 13 and 19: `LoanControl` decides what a watch back from off does.
+        switch LoanControl.decide(LoanControl.Situation(device: .watch, trigger: .backFromOff)) {
+        case .query(let wait, let onSilence):
+            // The wait for an answer starts when the question can actually go out (10-17 21:37: asked
+            // before the link had started, the question was lost and silence was read as no phone).
+            whenLinkActivated { [weak self] in
+                guard let self = self, self.phase == .active, self.pumpManager === manager else { return }
+                self.sendHoldsPodStatusReport(reason: "back from off — asking the phone before looping")
+                self.schedule(after: wait.seconds, label: "resume-ask") { [weak self] in
+                    guard let self = self else { return }
+                    // A phone that holds the pod answers with the stop, which stands this watch aside.
+                    guard self.phase == .active, self.pumpManager === manager else {
+                        SportLog.event("loan", "resume: stood aside — the phone holds the pod")
+                        return
+                    }
+                    SportLog.event("loan", "resume: no word that the phone holds the pod")
+                    if case .carryOn = LoanControl.afterQuery(.silence, onSilence: onSilence) { self.handPodToLoop(manager) }
+                }
+            }
+        default:
+            handPodToLoop(manager)
+        }
+    }
+
+    /// Nothing doses before the pod reports: after a relaunch the loop's recency check refuses until the
+    /// first report, and that report closes the ledger's open window, booking what the pod delivered
+    /// while this watch was off, before it completes.
+    func handPodToLoop(_ manager: PumpManager) {
         loopManager.pumpManager = manager
         loopManager.updateDisplayState()
-        // As stock at launch: a cycle now, not at the next reading.
+        // As at any launch: a cycle now, not at the next reading.
         loopManager.checkPumpDataAndLoop()
-        SportLog.event("loan", "RESUMED — epoch \(epoch ?? -1) rebuilt from saved pod state after a relaunch (stock relaunch) · \(RuntimeStateLog.snapshot())")
     }
 
     /// For a session that cannot resume: records may not have reached the phone yet.

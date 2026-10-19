@@ -21,18 +21,12 @@ extension PodLoanPhoneController {
         guard batch.epoch == epoch, state == .loaned || state == .reclaimPending else {
             handbackDiag(batch.epoch, "batch DROPPED — \(batch.events.count) event(s) ev=\(batch.epoch) vs phone ev=\(epoch), state=\(state.rawValue) (recovered via the offer path if the watch still resends)")
 
-            if batch.epoch > epoch, newestForeignLoanEvidence.map({ batch.epoch >= $0.epoch }) ?? true {
+            // Records are the watch saying it holds the pod: `LoanControl` decides (rows 6, 17, 19).
+            let claim = LoanControl.Claim(loan: batch.epoch > epoch ? .newer : .closed,
+                                          refusedBefore: refusedRevivedEpochs.contains(batch.epoch))
+            let decision = decideAndAct(.watchClaims(claim), why: "records from the watch on e\(batch.epoch)", claimEpoch: batch.epoch)
+            if batch.epoch > epoch, decision != .sendStop, newestForeignLoanEvidence.map({ batch.epoch >= $0.epoch }) ?? true {
                 newestForeignLoanEvidence = (batch.epoch, deps.now())
-            }
-
-            // A future epoch means the watch is running a loan this phone never granted.
-            if state == .owner, batch.epoch > epoch,
-               persisted.seizeToken != nil {
-                engageInferredLoanYield(evidence: "future-epoch batch e\(batch.epoch) at .owner (live seized loan streaming)")
-            }
-
-            if state == .owner, batch.epoch <= epoch {
-                resendRevokeForClosedSession(epoch: batch.epoch, evidence: "records")
             }
             return
         }
@@ -84,8 +78,6 @@ extension PodLoanPhoneController {
                 $0.epoch = offer.epoch
                 $0.phase = .loaned
                 $0.holdRenewedAt = offer.handedBackAt
-                $0.holdLapseNoticedAt = nil
-                $0.watchSilenceWarningsIssued = 0
                 $0.loanStartedAt = anchor
             }
             // The watch's window starts at its takeover reading when the offer carries it. With an older

@@ -42,7 +42,6 @@ extension PodLoanWatchController {
 
         let seizeOfferIssuedAt: Date?
 
-        let reunionPromptVisible: Bool
 
         /// The wrist-up hint under the takeover bar, or nil; and whether it reports the pod reached.
         let takeoverHint: String?
@@ -124,7 +123,6 @@ extension PodLoanWatchController {
                 startNoteAt: startNote?.at,
                 startNoteText: startNote?.text,
                 seizeOfferIssuedAt: seizeOffer?.issuedAt,
-                reunionPromptVisible: reunionPromptActive,
                 takeoverHint: phase == .takingOver
                     ? Self.takeoverHint(firstContact: takeoverFirstContact, podReached: takeoverPodReached, nudged: takeoverNudges > 0)
                     : nil,

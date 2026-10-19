@@ -287,12 +287,4 @@ final class LoanAlertLevelTests: XCTestCase {
         XCTAssertNotEqual(stillDosing.identifier, final.identifier)
         XCTAssertEqual(scheduler.pending.filter { $0.content.title == "End Not Confirmed" }.count, 2)
     }
-
-    /// The phone's return during a seized loan is a routine prompt; the watch keeps dosing.
-    func testIPhoneIsBackIsNormal() async throws {
-        let c = await makeController()
-        c.issueReunionPromptAlert()
-        let request = try await alert(titled: "iPhone Is Back")
-        XCTAssertEqual(request.content.interruptionLevel, .active)
-    }
 }

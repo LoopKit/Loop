@@ -49,7 +49,18 @@ extension ExtensionDelegate {
                     // Sport Mode is unavailable; the rest of the watch app is not affected.
                     SportLog.event("session", "SPORT MODE UNAVAILABLE — stack did not assemble")
                 } else {
-                    session?.sessionDidActivate()
+                    // What arrived while the stores were opening (after a reboot, before first unlock,
+                    // that can be minutes): a stop among it must not be lost.
+                    self.earlyLoanMessagesLock.lock()
+                    let early = self.earlyLoanMessages
+                    self.earlyLoanMessages = []
+                    self.earlyLoanMessagesLock.unlock()
+                    if !early.isEmpty { SportLog.event("loan", "replaying \(early.count) loan message(s) that arrived before the stack was ready") }
+                    for (message, channel) in early { _ = session?.handleIncomingIfLoanMessage(message, channel: channel) }
+                    if WCSession.default.activationState == .activated {
+                        // Activated before the session existed; otherwise the activation callback runs it.
+                        session?.sessionDidActivate()
+                    }
                 }
             }
         }
@@ -140,8 +151,8 @@ extension ExtensionDelegate {
         if let stockLoopSession {
             if stockLoopSession.handleIncomingIfLoanMessage(message, channel: .urgent) { return }
         } else if FeatureFlags.sportModeEnabled, message[LoanProtocol.userInfoKey] != nil {
-            // Logged and the stack started, not discarded.
-            log.error("Loan payload arrived on the urgent channel before the Sport Mode stack finished starting")
+            // Held for the stack, and the stack started.
+            holdEarlyLoanMessage(message, channel: .urgent)
             startStockLoopSession()
             return
         }
@@ -155,9 +166,18 @@ extension ExtensionDelegate {
             return session.handleIncomingIfLoanMessage(userInfo, channel: .queued)
         }
         guard userInfo[LoanProtocol.userInfoKey] != nil else { return false }
-        SportLog.event("loan", "queued \(LoanMessage.peekKind(transport: userInfo) ?? "?") arrived before the Sport Mode stack was ready — DISCARDED")
+        holdEarlyLoanMessage(userInfo, channel: .queued)
         podLoanNoteEarlyPayload()
         return true
+    }
+
+    /// A loan message that arrives before the stack is ready is held and replayed when it is.
+    func holdEarlyLoanMessage(_ message: [String: Any], channel: LoanTransportChannel) {
+        guard FeatureFlags.sportModeEnabled else { return }
+        earlyLoanMessagesLock.lock()
+        earlyLoanMessages.append((message, channel))
+        earlyLoanMessagesLock.unlock()
+        SportLog.event("loan", "\(channel.rawValue) \(LoanMessage.peekKind(transport: message) ?? "?") arrived before the Sport Mode stack was ready — held")
     }
 
     /// The queued channel's half of the same recovery, called from `didReceiveUserInfo`.

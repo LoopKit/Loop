@@ -333,6 +333,17 @@ final class PodLoanPhoneController {
     var trailingDormantRefreshPending = false
 
     var lastClosedSessionRevokeAt: Date?
+    /// A question to the watch awaiting its answer (`askWatch`), and when the last status report came.
+    var watchAskedAt: Date?
+    var lastWatchAnswerAt: Date?
+    /// The last report said the watch holds the pod but cannot reach it.
+    var lastWatchAnswerCannotReachPod = false
+    /// The last report said the watch holds nothing.
+    var lastWatchAnswerHoldsNothing = false
+    /// Loans a revived watch claimed that this phone refused; its records for them get the stop again.
+    var refusedRevivedEpochs: Set<Int> = []
+    /// The silence a "Watch Not Reporting" notice went out for, so it is said once.
+    var silenceWarnedFor: Date?
     var lastDormantSettingsFingerprint: String?
     /// The phone's glucose alert settings as last seen; part of the standing copy's fingerprint.
     var glucoseAlertSettingsSeen: GlucoseAlertSettings?

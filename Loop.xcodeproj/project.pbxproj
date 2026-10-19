@@ -125,6 +125,7 @@
 		335CB5BBEBED4922B20C0CEC /* StockLoopStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23412C23E024F9A9399C435 /* StockLoopStack.swift */; };
 		C0D6128D55F7237079C42112 /* WatchDeviceManagers.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD49ED34A3CE3A86BEFB048E /* WatchDeviceManagers.swift */; };
 		33644743F20B3706E3107FAC /* Loop/Resources/Sounds/mood_synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = BEC0BA802BE613F144AC3A70 /* Loop/Resources/Sounds/mood_synth.caf */; };
+		73BD135109B5757AA0F756D7 /* LoanControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2FD5B2F0532AE1378EF7AD /* LoanControlTests.swift */; };
 		37F9E89015084C8ABF4404FB /* LoanProtocolV2Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1368A70B6E347BCB432DF4D /* LoanProtocolV2Tests.swift */; };
 		3BD58D425AE24815B134F3E1 /* LoanBooksHarnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF6006BAC6EA4034BFD67C0E /* LoanBooksHarnessTests.swift */; };
 		3ED3198A2EB659E600820BCF /* GlucoseLiveActivityConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319882EB659E600820BCF /* GlucoseLiveActivityConfiguration.swift */; };
@@ -287,10 +288,12 @@
 		7B29B5CF4AAA4DA0B6E2F1A9 /* LoanTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0861EE8E371426287E4542F /* LoanTransport.swift */; };
 		10B149E9B807E4BF43BAC1ED /* LoanMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */; };
 		D188AB9E674D4E223C7E62AC /* PersistedProperty+Directory.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA25D2864BD992EA7BA12649 /* PersistedProperty+Directory.swift */; };
+		10A9A914BD17EC84686043E4 /* LoanControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9F934244F9400F3C1960EB /* LoanControl.swift */; };
 		A72952445BE2F9825FE17298 /* LoanRecords.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBC4D5290F0F35E6B66B7227 /* LoanRecords.swift */; };
 		7CC4501AABA3438A9291A003 /* LoanTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0861EE8E371426287E4542F /* LoanTransport.swift */; };
 		1B377B11C88EA02BAD431175 /* LoanMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */; };
 		A870F1D2BB7B0DD59A729C45 /* PersistedProperty+Directory.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA25D2864BD992EA7BA12649 /* PersistedProperty+Directory.swift */; };
+		79A30E1F01447B98C7792AEF /* LoanControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9F934244F9400F3C1960EB /* LoanControl.swift */; };
 		EE29D32ADAB50ABC07CDCEF6 /* LoanRecords.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBC4D5290F0F35E6B66B7227 /* LoanRecords.swift */; };
 		5021CA8C264146C9DFF33E9D /* PluginPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE102E23D8C1C1291EF66387 /* PluginPickerView.swift */; };
 		7D23667D21250C7E0028B67D /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D23667C21250C7E0028B67D /* LocalizedString.swift */; };
@@ -1652,7 +1655,9 @@
 		D0861EE8E371426287E4542F /* LoanTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanTransport.swift; path = LoopCore/PodLoan/LoanTransport.swift; sourceTree = SOURCE_ROOT; };
 		8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LoanMessages.swift"; path = "LoopCore/PodLoan/LoanMessages.swift"; sourceTree = SOURCE_ROOT; };
 		CA25D2864BD992EA7BA12649 /* PersistedProperty+Directory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PersistedProperty+Directory.swift"; path = "LoopCore/PodLoan/PersistedProperty+Directory.swift"; sourceTree = SOURCE_ROOT; };
+		4B9F934244F9400F3C1960EB /* LoanControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanControl.swift; path = LoopCore/PodLoan/LoanControl.swift; sourceTree = SOURCE_ROOT; };
 		FBC4D5290F0F35E6B66B7227 /* LoanRecords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LoanRecords.swift"; path = "LoopCore/PodLoan/LoanRecords.swift"; sourceTree = SOURCE_ROOT; };
+		AF2FD5B2F0532AE1378EF7AD /* LoanControlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanControlTests.swift; path = LoopTests/LoanControlTests.swift; sourceTree = SOURCE_ROOT; };
 		D1368A70B6E347BCB432DF4D /* LoanProtocolV2Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanProtocolV2Tests.swift; path = LoopTests/LoanProtocolV2Tests.swift; sourceTree = SOURCE_ROOT; };
 		CE102E23D8C1C1291EF66387 /* PluginPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PluginPickerView.swift; sourceTree = "<group>"; };
 		DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegralRetrospectiveCorrectionSelectionView.swift; sourceTree = "<group>"; };
@@ -2688,9 +2693,11 @@
 				D0861EE8E371426287E4542F /* LoanTransport.swift */,
 				8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */,
 				CA25D2864BD992EA7BA12649 /* PersistedProperty+Directory.swift */,
+				4B9F934244F9400F3C1960EB /* LoanControl.swift */,
 				FBC4D5290F0F35E6B66B7227 /* LoanRecords.swift */,
 				FF6006BAC6EA4034BFD67C0E /* LoanBooksHarnessTests.swift */,
 				97C8F1C82896495CA6E8AF8F /* PodLoanPhoneControllerTests.swift */,
+				AF2FD5B2F0532AE1378EF7AD /* LoanControlTests.swift */,
 				D1368A70B6E347BCB432DF4D /* LoanProtocolV2Tests.swift */,
 			);
 			name = "Recovered References";
@@ -4305,6 +4312,7 @@
 				7B29B5CF4AAA4DA0B6E2F1A9 /* LoanTransport.swift in Sources */,
 				10B149E9B807E4BF43BAC1ED /* LoanMessages.swift in Sources */,
 				D188AB9E674D4E223C7E62AC /* PersistedProperty+Directory.swift in Sources */,
+				10A9A914BD17EC84686043E4 /* LoanControl.swift in Sources */,
 				A72952445BE2F9825FE17298 /* LoanRecords.swift in Sources */,
 				C1ED6C822E7D8E3D002F91C2 /* AcknowledgeAlertUserInfo.swift in Sources */,
 				E9C00EF324C6222400628F35 /* LoopSettings.swift in Sources */,
@@ -4345,6 +4353,7 @@
 				7CC4501AABA3438A9291A003 /* LoanTransport.swift in Sources */,
 				1B377B11C88EA02BAD431175 /* LoanMessages.swift in Sources */,
 				A870F1D2BB7B0DD59A729C45 /* PersistedProperty+Directory.swift in Sources */,
+				79A30E1F01447B98C7792AEF /* LoanControl.swift in Sources */,
 				EE29D32ADAB50ABC07CDCEF6 /* LoanRecords.swift in Sources */,
 				C1ED6C832E7D8E3D002F91C2 /* AcknowledgeAlertUserInfo.swift in Sources */,
 				C1ED6C652E7C6E2F002F91C2 /* CarbBackfillRequestUserInfo.swift in Sources */,
@@ -4384,6 +4393,7 @@
 			files = (
 				3BD58D425AE24815B134F3E1 /* LoanBooksHarnessTests.swift in Sources */,
 				2595BA7C7FB24296BCB3601A /* PodLoanPhoneControllerTests.swift in Sources */,
+				73BD135109B5757AA0F756D7 /* LoanControlTests.swift in Sources */,
 				37F9E89015084C8ABF4404FB /* LoanProtocolV2Tests.swift in Sources */,
 				A9DF02CB24F72B9E00B7C988 /* CriticalEventLogTests.swift in Sources */,
 				1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */,

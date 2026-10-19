@@ -26,6 +26,10 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     var stockLoopSession: StockLoopSession?
     /// Guards a second build while the first is in flight — ExtensionDelegate+PodLoan.swift.
     var stockLoopSessionStarting = false
+    /// Loan messages that arrived before the stack was ready, replayed once it is —
+    /// ExtensionDelegate+PodLoan.swift.
+    var earlyLoanMessages: [([String: Any], LoanTransportChannel)] = []
+    let earlyLoanMessagesLock = NSLock()
 
     private var observers: [NSKeyValueObservation] = []
     private var notifications: [NSObjectProtocol] = []

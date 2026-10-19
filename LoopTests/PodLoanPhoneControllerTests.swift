@@ -581,20 +581,13 @@ final class PodLoanPhoneControllerTests: XCTestCase {
 
     // MARK: - Watch-entered carbs follow the pod home
 
-    /// During a loan the watch raises the glucose alerts, until the phone notices it silent beside
-    /// the body; then the phone's own alerts come back on.
-    func testTheWatchOwnsAlertsDuringALoanUntilThePhoneNoticesItSilent() {
+    /// During a loan the watch raises the glucose alerts; they come back to the phone with the pod.
+    func testTheWatchOwnsAlertsDuringALoan() {
         let controller = makeController()
         XCTAssertFalse(controller.watchOwnsAlerts, "no loan: the phone's alerts")
 
         _ = establishLoan(controller)
-        XCTAssertTrue(controller.watchOwnsAlerts, "a loan with the watch heard from: the wrist's")
-
-        controller.holdLapseNoticedAt = Date()
-        XCTAssertFalse(controller.watchOwnsAlerts, "the watch silent beside the body: the phone's again")
-
-        controller.holdLapseNoticedAt = nil
-        XCTAssertTrue(controller.watchOwnsAlerts, "the watch reporting again: back to the wrist")
+        XCTAssertTrue(controller.watchOwnsAlerts, "a loan: the watch's")
     }
 
     /// A wrist carb lands in the phone's CarbStore intact at hand-back.
@@ -2863,7 +2856,7 @@ extension PodLoanPhoneControllerTests {
 
 }
 
-// MARK: - A silent watch is warned about, never taken from
+// MARK: - A silent watch is asked, then taken from (grid 9.9, 9.10)
 
 extension PodLoanPhoneControllerTests {
 
@@ -2872,70 +2865,186 @@ extension PodLoanPhoneControllerTests {
         controller.queue.sync { }
     }
 
-    private func silenceWarnings() -> Int {
+    private func sentCount(_ kind: (LoanMessage) -> Bool) -> Int {
         lock.lock(); defer { lock.unlock() }
-        return urgentNotices.filter { $0 == "Watch Not Reporting" }.count
+        return sent.filter(kind).count
     }
 
-    /// A silent watch is warned about at ~20, 40 and 60 min and never taken from.
-    func testASilentWatchIsWarnedAboutAndNeverTakenFrom() throws {
-        let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
-        _ = establishLoan(controller)
+    private func statusQueries() -> Int { sentCount { if case .statusQuery = $0 { return true }; return false } }
+    private func revokes() -> Int { sentCount { if case .revoke = $0 { return true }; return false } }
 
-        clock = clock.addingTimeInterval(.minutes(14))
-        tick(controller)
-        XCTAssertNil(controller.holdLapseNoticedAt, "inside three cycles: nothing")
-
-        clock = clock.addingTimeInterval(.minutes(2))     // 16 min of silence
-        tick(controller)
-        XCTAssertNotNil(controller.holdLapseNoticedAt, "noticed")
-        XCTAssertEqual(silenceWarnings(), 0, "but not yet said: the watch gets one cycle to report")
-
-        clock = clock.addingTimeInterval(.minutes(5))     // 21 min
-        tick(controller)
-        XCTAssertEqual(silenceWarnings(), 1, "about twenty minutes")
-
-        clock = clock.addingTimeInterval(.minutes(5))
-        tick(controller)
-        XCTAssertEqual(silenceWarnings(), 1, "no repeat inside the cadence")
-
-        clock = clock.addingTimeInterval(.minutes(15))    // 41 min
-        tick(controller)
-        XCTAssertEqual(silenceWarnings(), 2, "about forty")
-
-        clock = clock.addingTimeInterval(.minutes(20))    // 61 min
-        tick(controller)
-        XCTAssertEqual(silenceWarnings(), 3, "about sixty")
-
-        clock = clock.addingTimeInterval(.minutes(60))
-        tick(controller)
-        XCTAssertEqual(silenceWarnings(), 3, "then it stops")
-
-        XCTAssertEqual(controller.state, .loaned, "the pod stays assigned to the watch — taking it back is the user's tap")
-        XCTAssertTrue(MockPumpManager.testConnectionReleased, "and the phone's pod link stays released")
-        lock.lock(); let revoked = sent.contains { if case .revoke = $0 { return true }; return false }; lock.unlock()
-        XCTAssertFalse(revoked, "nothing was sent to the watch either")
+    private func withShortAnswerWait(_ body: () throws -> Void) rethrows {
+        PodLoanPhoneController.answerWait = 0.2
+        defer { PodLoanPhoneController.answerWait = LoanControl.Wait.inBackground.seconds }
+        try body()
     }
 
-    /// Coming back into range, the phone notices an hour of silence at once — while the watch,
-    /// alive and dosing all along, is one cycle from reporting. No warning on the way back in.
-    func testAWatchThatReportsOnTheWayBackInIsNotWarnedAbout() throws {
-        let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
-        let grant = establishLoan(controller)
+    /// The watch's report overdue with this phone beside the body: the phone asks, and when nothing
+    /// answers it takes the pod back and says so.
+    func testAnOverdueWatchIsAskedAndTakenFromWhenItDoesNotAnswer() throws {
+        try withShortAnswerWait {
+            let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
+            _ = establishLoan(controller)
 
-        clock = clock.addingTimeInterval(.minutes(90))
-        tick(controller)
-        XCTAssertNotNil(controller.holdLapseNoticedAt, "silence noticed")
+            clock = clock.addingTimeInterval(.minutes(5))
+            tick(controller)
+            XCTAssertEqual(statusQueries(), 0, "inside a cycle: nothing")
 
-        clock = clock.addingTimeInterval(.minutes(3))
-        controller.handleIncoming(userInfo: try LoanMessage.doseRecordBatch(
-            DoseRecordBatch(epoch: grant.epoch, events: [], tombstones: [], sentAt: clock)).transportDictionary())
+            clock = clock.addingTimeInterval(.minutes(2))
+            tick(controller)
+            XCTAssertEqual(statusQueries(), 1, "overdue: the watch is asked")
+
+            waitUntil(timeout: 5, "taken back") { self.revokes() > 0 }
+            lock.lock(); let titles = urgentNotices; lock.unlock()
+            XCTAssertTrue(titles.contains("Watch Not Responding"))
+        }
+    }
+
+    /// An answer inside the wait keeps the loan where it is.
+    func testAnOverdueWatchThatAnswersKeepsThePod() throws {
+        try withShortAnswerWait {
+            let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
+            let grant = establishLoan(controller)
+
+            clock = clock.addingTimeInterval(.minutes(7))
+            tick(controller)
+            XCTAssertEqual(statusQueries(), 1)
+            controller.handleIncoming(userInfo: try LoanMessage.statusReport(StatusReport(
+                epoch: grant.epoch, mode: .closedDirect, lastDirectGlucoseAge: 60, lastEventSeq: 1,
+                podFault: nil, holdsPod: true, knowsGrant: true)).transportDictionary())
+            controller.queue.sync { }
+            usleep(500_000)
+            controller.queue.sync { }
+            XCTAssertEqual(controller.state, .loaned, "the watch answered: the pod stays with it")
+            XCTAssertEqual(revokes(), 0)
+        }
+    }
+
+    /// A loan the watch ANNOUNCED (a seized pod) is anchored at this phone's own last pod read, and a
+    /// silent one is asked and taken back like any other.
+    func testALoanTheWatchAnnouncedIsAnchoredHereAndTakenBackWhenSilent() throws {
+        try withShortAnswerWait {
+            _ = seizeCredentialOutstanding()
+            let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
+            MockPumpManager.testOdometer = 20.0
+            controller.handleIncoming(userInfo: try LoanMessage.statusReport(StatusReport(
+                epoch: 5, mode: .closedDirect, lastDirectGlucoseAge: 60, lastEventSeq: 2,
+                podFault: nil, holdsPod: true)).transportDictionary())
+            waitUntil(timeout: 5, "standing aside on the watch's word") { controller.yieldingToInferredLoan }
+            controller.queue.sync { }
+            XCTAssertEqual(controller.ledgerLast?.units, 20.0, "anchored at this phone's own last pod read")
+
+            clock = clock.addingTimeInterval(.minutes(7))
+            tick(controller)
+            XCTAssertEqual(statusQueries(), 1, "silent: asked")
+            waitUntil(timeout: 5, "taken back") { self.revokes() > 0 }
+            waitUntil(timeout: 5, "no longer standing aside") { !controller.yieldingToInferredLoan }
+        }
+    }
+
+    /// The core use: the phone is left at home. It hears nothing from the watch for the same reason it
+    /// cannot reach the pod, so it asks nothing; home again, it asks.
+    func testAPhoneAwayFromTheBodyAsksNothing() throws {
+        try withShortAnswerWait {
+            var lastReading = Date()
+            let controller = makeController(latestGlucose: { lastReading },
+                                            now: { [weak self] in self?.clock ?? Date() })
+            _ = establishLoan(controller)
+            lastReading = clock                                   // the last reading before leaving
+
+            clock = clock.addingTimeInterval(.minutes(40))        // out for a run; the app happens to wake
+            tick(controller)
+            XCTAssertEqual(statusQueries(), 0, "no sensor, no pod, nobody here to ask about")
+
+            lastReading = clock                                   // home again: the phone reads the sensor
+            tick(controller)
+            XCTAssertEqual(statusQueries(), 1, "now the watch is asked")
+        }
+    }
+
+    /// A reading that shows another device's insulin asks the watch whether it holds the pod.
+    func testAReadingShowingAnotherDevicesInsulinAsksTheWatch() throws {
+        _ = seizeCredentialOutstanding()
+        let controller = makeController()
+        let back = Date()
+        readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(5)))
+        readPod(controller, units: 11.0, at: back)
+        waitUntil(timeout: 5, "asked") { self.statusQueries() == 1 }
+    }
+
+    private func report(epoch: Int, holdsPod: Bool = true, podReachable: Bool? = nil, loanStartedAt: Date? = nil) throws -> [String: Any] {
+        try LoanMessage.statusReport(StatusReport(epoch: epoch, mode: .closedDirect, lastDirectGlucoseAge: 60, lastEventSeq: 1,
+                                                  podFault: nil, holdsPod: holdsPod, knowsGrant: true,
+                                                  podReachable: podReachable, loanStartedAt: loanStartedAt)).transportDictionary()
+    }
+
+    /// A watch that answers it holds the loan but cannot reach the pod is answered like silence:
+    /// the phone takes the pod back (control document, row 14).
+    func testAWatchThatCannotReachThePodIsTakenFrom() throws {
+        try withShortAnswerWait {
+            let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
+            let grant = establishLoan(controller)
+            clock = clock.addingTimeInterval(.minutes(7))
+            tick(controller)
+            XCTAssertEqual(statusQueries(), 1)
+            controller.handleIncoming(userInfo: try report(epoch: grant.epoch, podReachable: false))
+            controller.queue.sync { }
+            waitUntil(timeout: 5, "taken back") { self.revokes() > 0 }
+            XCTAssertNotNil(controller.persisted.tookOverOnSilenceAt, "a takeover on silence, remembered")
+        }
+    }
+
+    /// A watch that let the pod go (a hand-back whose final offer went unacknowledged) answers that it
+    /// holds nothing: the phone takes the pod (control document, transfer H).
+    func testAWatchThatHoldsNothingIsTakenFrom() throws {
+        try withShortAnswerWait {
+            let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
+            let grant = establishLoan(controller)
+            clock = clock.addingTimeInterval(.minutes(7))
+            tick(controller)
+            XCTAssertEqual(statusQueries(), 1)
+            controller.handleIncoming(userInfo: try report(epoch: grant.epoch, holdsPod: false))
+            controller.queue.sync { }
+            waitUntil(timeout: 5, "taken back") { self.revokes() > 0 }
+        }
+    }
+
+    /// A watch back from off claiming a loan that started before this phone took over on silence is
+    /// refused; one started after is a fresh Start and the phone stands aside (control document, row 19).
+    func testARevivedClaimOlderThanTheTakeoverIsRefusedAndANewerOneHonoured() throws {
+        _ = seizeCredentialOutstanding()
+        let tookOver = Date().addingTimeInterval(-.minutes(10))
+        saveState { $0.tookOverOnSilenceAt = tookOver }
+        let controller = makeController()
+
+        controller.handleIncoming(userInfo: try report(epoch: 40, loanStartedAt: tookOver.addingTimeInterval(-.minutes(20))))
         controller.queue.sync { }
-        XCTAssertNil(controller.holdLapseNoticedAt, "the watch reported: the warning stands down")
+        XCTAssertEqual(revokes(), 1, "the revived claim gets the stop")
+        XCTAssertFalse(controller.yieldingToInferredLoan, "and the phone keeps the pod")
 
-        clock = clock.addingTimeInterval(.minutes(10))
-        tick(controller)
-        XCTAssertEqual(silenceWarnings(), 0)
+        controller.handleIncoming(userInfo: try LoanMessage.doseRecordBatch(
+            DoseRecordBatch(epoch: 40, events: [], tombstones: [], sentAt: Date())).transportDictionary())
+        controller.queue.sync { }
+        XCTAssertFalse(controller.yieldingToInferredLoan, "its records do not make the phone stand aside either")
+
+        controller.handleIncoming(userInfo: try report(epoch: 41, loanStartedAt: tookOver.addingTimeInterval(.minutes(5))))
+        waitUntil(timeout: 5, "a fresh Start honoured") { controller.yieldingToInferredLoan }
+    }
+
+    /// A grant the watch never confirms: asked at the probe, silence takes the pod back after the
+    /// answer wait, with one notice (control document, transfer G).
+    func testAnUnconfirmedGrantIsTakenBackOnSilence() throws {
+        PodLoanPhoneController.grantLostProbeDelay = 0.1
+        defer { PodLoanPhoneController.grantLostProbeDelay = 20 }
+        try withShortAnswerWait {
+            let controller = makeController()
+            controller.handleIncoming(userInfo: try LoanMessage.request(LoanRequest(watchBuild: "t")).transportDictionary())
+            waitForState(controller, .grantOffered)
+            waitUntil(timeout: 5, "asked") { self.statusQueries() == 1 }
+            waitForState(controller, .owner)
+            lock.lock(); let notices = self.notices; lock.unlock()
+            XCTAssertTrue(notices.contains("The Watch Didn't Take the Pod"))
+        }
     }
 
     /// An audit consumes its anchors.
@@ -3066,63 +3175,6 @@ extension PodLoanPhoneControllerTests {
         XCTAssertEqual(copies(), 2, "a book change inside its floor waits for the trailing refresh")
     }
 
-    /// A loan the watch ANNOUNCED (a seized pod) is anchored at this phone's own last pod read —
-    /// never at an earlier loan's — and a silent one is warned about like any other.
-    func testALoanTheWatchAnnouncedIsAnchoredHereAndWarnedAboutWhenSilent() throws {
-        _ = seizeCredentialOutstanding()
-        let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
-        MockPumpManager.testOdometer = 20.0
-        controller.handleIncoming(userInfo: try LoanMessage.statusReport(StatusReport(
-            epoch: 5, mode: .closedDirect, lastDirectGlucoseAge: 60, lastEventSeq: 2,
-            podFault: nil, holdsPod: true)).transportDictionary())
-        waitUntil(timeout: 5, "standing aside on the watch's word") { controller.yieldingToInferredLoan }
-        controller.queue.sync { }
-        XCTAssertEqual(controller.ledgerLast?.units, 20.0, "anchored at this phone's own last pod read")
-
-        clock = clock.addingTimeInterval(.minutes(16))
-        tick(controller)
-        clock = clock.addingTimeInterval(.minutes(6))
-        tick(controller)
-        XCTAssertEqual(silenceWarnings(), 1)
-        XCTAssertTrue(controller.yieldingToInferredLoan, "still standing aside: the way back is the pod tile")
-    }
-
-    /// The core use: the phone is left at home. It hears nothing from the watch for the same
-    /// reason it cannot reach the pod — it is somewhere else — and has nothing to warn about.
-    func testAPhoneAwayFromTheBodySaysNothing() throws {
-        var lastReading = Date()
-        let controller = makeController(latestGlucose: { lastReading },
-                                        now: { [weak self] in self?.clock ?? Date() })
-        _ = establishLoan(controller)
-        lastReading = clock                                   // the last reading before leaving
-
-        clock = clock.addingTimeInterval(.minutes(40))        // out for a run; the app happens to wake
-        tick(controller)
-        clock = clock.addingTimeInterval(.minutes(10))
-        tick(controller)
-        XCTAssertNil(controller.holdLapseNoticedAt)
-        XCTAssertEqual(silenceWarnings(), 0, "fifty minutes of silence, and nothing: no sensor, no pod, nobody here to tell")
-
-        lastReading = clock                                   // home again: the phone reads the sensor
-        tick(controller)
-        XCTAssertNotNil(controller.holdLapseNoticedAt, "now the silence counts")
-        XCTAssertEqual(silenceWarnings(), 0, "and the watch still gets its cycle to report first")
-    }
-
-    /// A queued message can land an hour late and must not be believed. A report counts by
-    /// when the watch SENT it, never by when it arrived.
-    func testABatchThatSatInAQueueReportsNothingNew() throws {
-        let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
-        let grant = establishLoan(controller)
-        let sentEarly = clock.addingTimeInterval(.minutes(1))
-
-        clock = clock.addingTimeInterval(.minutes(20))
-        controller.handleIncoming(userInfo: try LoanMessage.doseRecordBatch(
-            DoseRecordBatch(epoch: grant.epoch, events: [], tombstones: [], sentAt: sentEarly)).transportDictionary())
-        controller.queue.sync { }
-        tick(controller)
-        XCTAssertNotNil(controller.holdLapseNoticedAt, "19 minutes old on arrival: the watch is still silent")
-    }
 }
 
 /// Records each preset callback and whether it ran on main; fulfils on the first deactivation.

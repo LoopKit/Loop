@@ -299,10 +299,14 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// A window this phone held, judged against its own records: insulin they cannot explain is a loan
-    /// this phone never heard of (the watch started without it). Silent when clean. Looping continues.
+    /// A window this phone held, judged against its own records: a difference beyond the band either way
+    /// is another device having controlled the pod, a loan this phone never heard of (the watch started
+    /// without it). Extra insulin is booked before the cycle decides; then `LoanControl` decides what
+    /// follows (rows 4, 5 and 18). Silent when clean.
     func applyGapVerdict(residual: Double, window: DateInterval, completion: @escaping () -> Void = {}) {
         let gapMinutes = window.duration / 60
+        decideAndAct(.podReading(differenceBeyondBand: abs(residual) > Self.unexplainedInsulinBand),
+                     why: String(format: "the pod shows %+.2f U this phone's records cannot explain — Sport Mode inferred", residual))
         if residual > Self.unexplainedInsulinBand {
             handbackDiag(epoch, String(format:
                 "** WARN — over the last %.0f min: %+.3f U the phone's records cannot explain (Sport Mode started away from the phone?). Still looping. **",

@@ -354,33 +354,6 @@ struct GlanceView: View {
                     }
                 }
 
-                // The phone returning raises a prompt, never an automatic hand-back.
-                if model.state.reunionPrompt {
-                    VStack(spacing: 3) {
-                        Text(NSLocalizedString("iPhone is back — hand the pod back?", comment: "Glance prompt when the phone returns during a seized loan"))
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(.glanceInk)
-                            .multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true)
-                        HStack(spacing: 6) {
-                            Button {
-                                ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController.confirmReunionHandback()
-                            } label: {
-                                Text(NSLocalizedString("Hand Back", comment: "Glance reunion prompt: end the seized loan"))
-                                    .font(.system(size: 12, weight: .semibold))
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .tint(.glanceAccent)
-                            Button {
-                                ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController.dismissReunionPrompt()
-                            } label: {
-                                Text(NSLocalizedString("Keep", comment: "Glance reunion prompt: continue the seized loan"))
-                                    .font(.system(size: 12))
-                            }
-                            .buttonStyle(.bordered)
-                        }
-                    }
-                }
             }
             .padding(.bottom, 2)
         case .idle, .starting:

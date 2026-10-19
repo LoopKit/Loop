@@ -33,7 +33,7 @@ extension DeviceDataManager {
     /// Revoke the watch's loan and bring the pod home. Dosing stays paused until the records
     /// the watch is holding have been reconciled.
     func reclaimPodLoanFromWatch() {
-        podLoanController?.reclaimNow()
+        podLoanController?.takeBackTapped()
     }
 
     /// The loop's loan gate; with the flag off, only the pump's own release.

@@ -98,6 +98,10 @@ final class WakeResumeTests: XCTestCase {
         }
         if let savedState { savePumpState(savedState) }
         let c = await makeController()
+        // The ask before looping answers at once here (no phone); every other timer runs for real.
+        c.scheduler = { [weak c] delay, label, work in
+            if label == "resume-ask" { work.perform() } else { c?.queue.asyncAfter(deadline: .now() + delay, execute: work) }
+        }
         c.resumeIfNeeded()   // what the session does once the hooks are wired
         c.queue.sync { }     // the resume is built on the queue; wait for it
         return c
@@ -216,27 +220,46 @@ final class WakeResumeTests: XCTestCase {
                        "the last-loop time comes back from disk (else: gray ring for one cycle)")
     }
 
-    func testLiveHandbackWithPhoneUnreachableFailsFastAndKeepsTheLoan() async {
-        // A live hand-back is never queued. Out of reach at the tap, and still a second later, End
-        // fails at once and the loan continues — no offer is sent, nothing can land later and take the pod.
+    func testEndWithThePhoneAwayIsRefusedAfterTheWaitAndSaysHowToStopDosing() async {
+        // The offer is the query (control document, row 8): it goes out by every path; with no
+        // acknowledgement within the wait the End is refused, the loan continues, and the watch says
+        // why and how to stop dosing instead.
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         XCTAssertNotNil(c.pumpManager)
         c.isPhoneReachable = { false }
-        c.scheduler = { _, _, work in work.perform() }   // the one-second re-check, now
+        var answerWait: DispatchWorkItem?
+        c.scheduler = { _, label, work in if label == "handback-answer" { answerWait = work } }
         var sent: [[String: Any]] = []
         c.send = { sent.append($0) }
         c.beginHandback()
         c.queue.sync { }
-        XCTAssertEqual(c.phase, .active, "the loan continues")
+        XCTAssertEqual(sent.count, 1, "the offer went out, whatever the reachability flag says")
+        XCTAssertTrue(c.debugSnapshot().handbackPending, "and the End waits for an answer")
+
+        c.queue.sync { answerWait?.perform() }
+        XCTAssertEqual(c.phase, .active, "silence: the loan continues")
         XCTAssertNotNil(c.pumpManager, "the watch still holds the pod")
-        XCTAssertTrue(sent.isEmpty, "no offer left the watch — nothing queued to land later")
-        XCTAssertNotNil(c.debugSnapshot().handbackFailureText, "and the glance has the reason to show, on screen rather than as a notification")
+        XCTAssertFalse(c.debugSnapshot().handbackPending)
+        XCTAssertTrue(c.debugSnapshot().handbackFailureText?.contains("open the loop") == true,
+                      "on screen: why, and how to stop dosing instead")
     }
 
-    func testAResendsUnreachableSampleDoesNotEndTheHandback() async {
-        // Reachability routes a message, it never rules (grid 14.17): once the exchange is under way
-        // the hand-back holds for its budget, and a resend that finds the phone unreachable waits for
-        // the next instead of giving up.
+    func testEndAnsweredWithinTheWaitIsNotRefused() async throws {
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        var answerWait: DispatchWorkItem?
+        c.scheduler = { _, label, work in if label == "handback-answer" { answerWait = work } }
+        c.send = { _ in }
+        c.beginHandback()
+        c.queue.sync { }
+        c.handleIncoming(userInfo: try LoanMessage.handbackAck(HandbackAck(epoch: 7, committedCursor: 0)).transportDictionary(), channel: .queued)
+        c.queue.sync { }
+        c.queue.sync { answerWait?.perform() }
+        XCTAssertNil(c.debugSnapshot().handbackFailureText, "the phone answered: not refused")
+    }
+
+    func testEveryHandbackOfferGoesWhateverReachabilitySays() async {
+        // Reachability chooses the fast path only: resends go whether or not the flag says the
+        // phone's app can take a live message.
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         var timers: [(label: String, work: DispatchWorkItem)] = []
         c.scheduler = { _, label, work in timers.append((label, work)) }
@@ -245,18 +268,30 @@ final class WakeResumeTests: XCTestCase {
         c.send = { sent.append($0) }
         c.beginHandback()
         c.queue.sync { }
-        XCTAssertEqual(sent.count, 1, "the live offer went out")
+        XCTAssertEqual(sent.count, 1)
 
         c.isPhoneReachable = { false }
         c.queue.sync { timers.last { $0.label == "handback-resend" }?.work.perform() }
-        XCTAssertEqual(c.phase, .active)
-        XCTAssertTrue(c.debugSnapshot().handbackPending, "one unreachable reading is not a verdict: the hand-back holds")
-        XCTAssertNil(c.debugSnapshot().handbackFailureText)
-        XCTAssertEqual(sent.count, 1, "nothing goes to an unreachable phone")
+        XCTAssertEqual(sent.count, 2, "the resend went, queued")
+        XCTAssertTrue(c.debugSnapshot().handbackPending)
+    }
 
-        c.isPhoneReachable = { true }
-        c.queue.sync { timers.last { $0.label == "handback-resend" }?.work.perform() }
-        XCTAssertEqual(sent.count, 2, "the next resend sends again")
+    /// The answer to a query says whether the watch can reach the pod and when its loan started
+    /// (control document, rows 14 and 19).
+    func testTheAnswerCarriesPodReachAndLoanStart() async throws {
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        let started = Date().addingTimeInterval(-.minutes(30))
+        c.updateState { $0.deliveredAtTakeoverAt = started }
+        var reports: [StatusReport] = []
+        c.send = { dict in
+            if let m = try? LoanMessage.decode(fromTransport: dict), case .statusReport(let r) = m { reports.append(r) }
+        }
+        c.handleIncoming(userInfo: try LoanMessage.statusQuery(StatusQuery(epoch: 7)).transportDictionary(), channel: .queued)
+        c.queue.sync { }
+        let report = try XCTUnwrap(reports.last)
+        XCTAssertTrue(report.holdsPod)
+        XCTAssertEqual(report.loanStartedAt?.timeIntervalSince1970 ?? 0, started.timeIntervalSince1970, accuracy: 1)
+        XCTAssertNotEqual(report.podReachable, true, "no recent reading of the pod: not reported as reachable")
     }
 
     func testPhoneRefusalEndsTheHandbackAtOnceAndKeepsTheLoan() async throws {
@@ -394,6 +429,75 @@ final class WakeResumeTests: XCTestCase {
         XCTAssertEqual(beyond, 2.0, accuracy: 0.001, "anything beyond it is not")
     }
 
+    /// Back from being off, the watch asks the phone before the loop has the pod: a "this watch holds the
+    /// pod" report goes out, and a revoke inside the wait stands it aside without a dose (grid 14.19).
+    func testBackFromOffTheWatchAsksThePhoneBeforeLooping() async throws {
+        persistGrantedSettings()
+        saveState { $0.phase = .active; $0.epoch = 7 }
+        savePumpState(readablePumpState)
+        let c = await makeController()
+        var reports: [Int] = []
+        c.send = { dict in
+            if let m = try? LoanMessage.decode(fromTransport: dict), case .statusReport(let r) = m, r.holdsPod { reports.append(r.epoch) }
+        }
+        var ask: DispatchWorkItem?
+        c.scheduler = { _, label, work in if label == "resume-ask" { ask = work } }
+        c.resumeIfNeeded()
+        c.queue.sync { }
+        XCTAssertEqual(reports, [7], "the phone is asked at once")
+        XCTAssertNil(c.loopManager.pumpManager, "and the loop does not have the pod while the question is out")
+
+        c.handleIncoming(userInfo: try LoanMessage.revoke(Revoke(epoch: 7)).transportDictionary(), channel: .queued)
+        c.queue.sync { }
+        c.queue.sync { ask?.perform() }
+        XCTAssertNil(c.loopManager.pumpManager, "the phone holds the pod: this watch stood aside, no cycle ran")
+        XCTAssertNotEqual(c.phase, .active)
+    }
+
+    /// The question waits for the link to the phone to start up, and so does the wait for its answer:
+    /// asked before, it was lost and the silence read as no phone (10-17 21:37).
+    func testBackFromOffTheQuestionWaitsForTheLink() async {
+        persistGrantedSettings()
+        saveState { $0.phase = .active; $0.epoch = 7 }
+        savePumpState(readablePumpState)
+        let c = await makeController()
+        var reports = 0
+        c.send = { dict in
+            if let m = try? LoanMessage.decode(fromTransport: dict), case .statusReport(let r) = m, r.holdsPod { reports += 1 }
+        }
+        var linkUp = false
+        c.isLinkActivated = { linkUp }
+        var asks = 0
+        c.scheduler = { _, label, _ in if label == "resume-ask" { asks += 1 } }
+        c.resumeIfNeeded()
+        c.queue.sync { }
+        XCTAssertEqual(reports, 0, "nothing sent before the link has started")
+        XCTAssertEqual(asks, 0, "and no wait for an answer started")
+
+        linkUp = true
+        c.linkDidActivate()
+        c.queue.sync { }
+        XCTAssertEqual(reports, 1, "asked once the link is up")
+        XCTAssertEqual(asks, 1, "and the wait starts then")
+        XCTAssertNil(c.loopManager.pumpManager)
+    }
+
+    /// No answer within the wait: the watch carries on alone.
+    func testBackFromOffWithNoAnswerTheWatchCarriesOn() async {
+        persistGrantedSettings()
+        saveState { $0.phase = .active; $0.epoch = 7 }
+        savePumpState(readablePumpState)
+        let c = await makeController()
+        var ask: DispatchWorkItem?
+        c.scheduler = { _, label, work in if label == "resume-ask" { ask = work } }
+        c.resumeIfNeeded()
+        c.queue.sync { }
+        XCTAssertNil(c.loopManager.pumpManager)
+        c.queue.sync { ask?.perform() }
+        XCTAssertNotNil(c.loopManager.pumpManager, "silence: the loop has the pod")
+        XCTAssertEqual(c.phase, .active)
+    }
+
     func testAfterARelaunchNothingDosesBeforeThePodReports() async {
         // The loop has the pod at once; stock's recency check refuses to dose until the pod's first
         // report, and that report closes the ledger's window before it completes. A failed read is no
@@ -493,7 +597,8 @@ final class WakeResumeTests: XCTestCase {
 
     func testEveryLandedCycleRenewsTheHoldEvenWithNothingToReport() async throws {
         // The watch's hold on the pod is this message being recent — so it goes out on every
-        // landed cycle, stamped, and an empty one is never queued (late, it would renew nothing).
+        // landed cycle, stamped, by the ordinary paths: the queued one delivers in seconds, and a late
+        // one renews nothing because the phone judges it by its stamp.
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         var sent: [[String: Any]] = []
         c.send = { sent.append($0) }
@@ -502,7 +607,7 @@ final class WakeResumeTests: XCTestCase {
         c.queue.sync { }
         XCTAssertEqual(sent.count, 1, "one renewal")
         let dictionary = try XCTUnwrap(sent.first)
-        XCTAssertEqual(dictionary["urgentOnly"] as? Bool, true, "an empty renewal is never queued")
+        XCTAssertNil(dictionary["urgentOnly"], "an empty renewal goes like any other, queued if need be")
         guard case .doseRecordBatch(let batch)? = try LoanMessage.decode(fromTransport: dictionary) else {
             return XCTFail("the renewal is the ordinary record batch")
         }

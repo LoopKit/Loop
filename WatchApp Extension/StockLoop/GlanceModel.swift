@@ -50,7 +50,6 @@ struct GlanceUIState {
     /// Shown in the phoneless-start confirmation, never enforced.
     var seizeOfferAgeText: String? = nil
 
-    var reunionPrompt: Bool = false
     var viaPhone: Bool = false
 
     /// Which device the glucose on screen came from. It is stamped on arrival rather than read
@@ -448,7 +447,6 @@ final class GlanceViewModel: ObservableObject {
                       Date().timeIntervalSince(at) < 90 {
                 s.transientText = text
             }
-            s.reunionPrompt = snap.reunionPromptVisible
 
             // Narrate the wait for a manual bolus after a short delay, so the user does not End mid-dose.
             if let startedAt = session.stack.loopManager.manualBolusStartedAt {

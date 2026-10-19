@@ -27,7 +27,7 @@ final class StockLoopSession {
         RuntimeStateLog.startMainStallDetector()
 
         loanController.isPhoneReachable = { WCSession.default.isReachable }
-        loanController.isPhoneLinkActivated = { WCSession.default.activationState == .activated }
+        loanController.isLinkActivated = { WCSession.default.activationState == .activated }
 
         // The per-cycle renewal is the phone's liveness signal.
         stack.loopManager.onCycleLanded = { [weak loanController] in loanController?.renewHold() }
@@ -44,9 +44,15 @@ final class StockLoopSession {
         }
 
         // sendMessage when reachable, transferUserInfo otherwise; every send logs its channel.
-        loanController.send = { [weak loanController] dictionary in
+        loanController.send = { [weak self, weak loanController] dictionary in
 
             let session = WCSession.default
+            // Sent before the link has started up, a message is lost: hold it until it has.
+            guard session.activationState == .activated else {
+                SportLog.event("wc", "send \(dictionary.keys.joined(separator: ",")) HELD — the link to the phone has not started yet")
+                self?.holdUntilActivated(dictionary)
+                return
+            }
 
             let wedged = loanController?.urgentSendWedged ?? false
             let urgent = LoanMessage.isInteractiveHandshake(transport: dictionary)
@@ -68,22 +74,12 @@ final class StockLoopSession {
                 SportLog.event("wc", "superseded \(cancelled.count) queued offer(s) with the fresh one")
             }
 
-            // A live hand-back offer is never queued: accepted late, it would split the pod.
-            let urgentOnly = dictionary["urgentOnly"] as? Bool == true
             guard urgent else {
-                if urgentOnly {
-                    SportLog.event("wc", "live hand-back offer NOT queued — urgent path unavailable (reachable \(session.isReachable), wedged \(wedged)); the resend loop retries")
-                    return
-                }
                 enqueueSuperseding(dictionary)
                 return
             }
             session.sendMessage(dictionary, replyHandler: nil, errorHandler: { error in
                 loanController?.noteUrgentSendFailed()
-                if urgentOnly {
-                    SportLog.event("wc", "urgent send FAILED (\(error.localizedDescription)) — live hand-back offer NOT queued; the resend loop retries")
-                    return
-                }
                 SportLog.event("wc", "urgent send FAILED (\(error.localizedDescription)) — falling back to the queued path")
                 enqueueSuperseding(dictionary)
             })
@@ -217,6 +213,16 @@ final class StockLoopSession {
 
     private var linkCensusTimer: DispatchSourceTimer?
 
+    /// Messages sent before the link to the phone started up; sent at `sessionDidActivate`.
+    private var heldUntilActivated: [[String: Any]] = []
+    private let heldLock = NSLock()
+
+    private func holdUntilActivated(_ dictionary: [String: Any]) {
+        heldLock.lock()
+        heldUntilActivated.append(dictionary)
+        heldLock.unlock()
+    }
+
     /// One line a minute on the link, regardless of loan state.
     private func startLinkCensus() {
         let t = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .utility))
@@ -229,8 +235,16 @@ final class StockLoopSession {
         linkCensusTimer = t
     }
 
-    /// The first moment anything can be sent: fail an interrupted takeover, re-offer a parked drain.
+    /// The first moment anything can be sent: what was held goes, then an interrupted takeover is
+    /// failed, a parked drain re-offered, and work waiting on the link runs.
     func sessionDidActivate() {
+        heldLock.lock()
+        let held = heldUntilActivated
+        heldUntilActivated = []
+        heldLock.unlock()
+        if !held.isEmpty { SportLog.event("wc", "link started — sending \(held.count) held message(s)") }
+        held.forEach { loanController.send?($0) }
         loanController.drainRecoveredIfNeeded()
+        loanController.linkDidActivate()
     }
 }
