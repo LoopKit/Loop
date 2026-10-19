@@ -29,13 +29,20 @@ extension PodLoanWatchController: PumpManagerDelegate {
         sendHoldsPodStatusReport(reason: "pump fault")
     }
 
-    /// Book, complete, then journal. On a failed write nothing is acked or journaled; the pod
-    /// re-reports. An empty report still advances the recency gate.
+    /// Book, close the ledger's window, complete, then journal. On a failed write nothing is acked or
+    /// journaled; the pod re-reports. An empty report still advances the recency gate. The window
+    /// closes before the completion, so the cycle this report feeds sees anything it books.
     func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, replacePendingEvents: Bool, completion: @escaping (Error?) -> Void) {
         let loopManager = self.loopManager
+        let odometer = pumpManager as? PumpDeliveryOdometer
+        let reading = odometer?.deliveredUnits
+        let insulinType = pumpManager.status.insulinType
         Task {
             do {
                 try await loopManager.recordPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: replacePendingEvents)
+                if let odometer, let reading {
+                    await self.checkOwnPumpTotal(reading: reading, pulseUnits: odometer.deliveryPulseUnits, insulinType: insulinType)
+                }
                 completion(nil)
                 self.queue.async { self.journalPumpEvents(events) }
             } catch {

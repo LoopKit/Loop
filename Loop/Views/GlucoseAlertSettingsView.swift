@@ -404,6 +404,7 @@ struct GlucoseAlertDetailView: View {
     var delay: DelayBinding? = nil
     var showsTestButton: Bool = false
     var soundBinding: Binding<String>? = nil
+    var playsThroughSilent: Binding<Bool>? = nil
 
     struct SnoozeBinding {
         let enabled: Binding<Bool>
@@ -467,8 +468,15 @@ struct GlucoseAlertDetailView: View {
                                     .foregroundStyle(.secondary)
                             }
                         }
+                        if let playsThroughSilent {
+                            Toggle("Play Through Silent Mode", isOn: playsThroughSilent)
+                        }
                     } footer: {
-                        Text("The sound played when this alarm fires.")
+                        if playsThroughSilent != nil {
+                            Text("The sound played when this alarm fires. Playing through silent mode makes Loop play it even when the phone is silenced or in a Focus, at the current volume.")
+                        } else {
+                            Text("The sound played when this alarm fires.")
+                        }
                     }
                 }
             }
@@ -504,7 +512,8 @@ extension GlucoseAlertDetailView {
             enabled: detail.cfgBind(\.lowEnabled),
             snooze: .init(enabled: detail.cfgBind(\.lowSnoozeEnabled), interval: detail.cfgBind(\.lowRepeatInterval)),
             horizon: nil, infoNotice: nil,
-            soundBinding: Binding(get: { manager.lowSound }, set: { manager.lowSound = $0 })
+            soundBinding: Binding(get: { manager.lowSound }, set: { manager.lowSound = $0 }),
+            playsThroughSilent: Binding(get: { manager.lowPlaysThroughSilent }, set: { manager.lowPlaysThroughSilent = $0 })
         )
     }
 
@@ -530,7 +539,8 @@ extension GlucoseAlertDetailView {
             snooze: .init(enabled: detail.cfgBind(\.highSnoozeEnabled), interval: detail.cfgBind(\.highRepeatInterval)),
             horizon: nil, infoNotice: nil,
             delay: .init(enabled: detail.cfgBind(\.highDelayEnabled), interval: detail.cfgBind(\.highDelay)),
-            soundBinding: Binding(get: { manager.highSound }, set: { manager.highSound = $0 })
+            soundBinding: Binding(get: { manager.highSound }, set: { manager.highSound = $0 }),
+            playsThroughSilent: Binding(get: { manager.highPlaysThroughSilent }, set: { manager.highPlaysThroughSilent = $0 })
         )
     }
 
@@ -541,7 +551,8 @@ extension GlucoseAlertDetailView {
             levelLabel: "Level", level: detail.cfgBind(\.predictedLowThresholdMgDL), levelRange: 55...80,
             enabled: detail.cfgBind(\.predictedLowEnabled),
             snooze: nil, horizon: .init(value: detail.cfgBind(\.predictedLowHorizon)), infoNotice: nil,
-            soundBinding: Binding(get: { manager.predictedLowSound }, set: { manager.predictedLowSound = $0 })
+            soundBinding: Binding(get: { manager.predictedLowSound }, set: { manager.predictedLowSound = $0 }),
+            playsThroughSilent: Binding(get: { manager.predictedLowPlaysThroughSilent }, set: { manager.predictedLowPlaysThroughSilent = $0 })
         )
     }
 }

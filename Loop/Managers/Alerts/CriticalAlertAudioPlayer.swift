@@ -68,7 +68,9 @@ final class CriticalAlertAudioPlayer {
     /// always present. We resolve it directly from the bundle rather than
     /// AlertManager's AlertSoundVendor-keyed `Library/Sounds/` lookup.
     /// Falls back to `critical.caf` if the named file is missing.
-    func play(soundNamed soundName: String = "critical.caf") {
+    /// With `boostVolume` false the sound plays once at the current volume, for
+    /// non-critical alerts that only need to get past the silent switch.
+    func play(soundNamed soundName: String = "critical.caf", boostVolume: Bool = true) {
         stop()
 
         // Vibration is volume-independent, so it's our primary "you missed
@@ -112,10 +114,12 @@ final class CriticalAlertAudioPlayer {
             // Without the Critical Alerts entitlement the system won't raise
             // an inaudible ringer for us, so force it up for the life of the
             // alarm (restored on stop). Best-effort — see SystemVolumeBooster.
-            volumeBooster.boost(to: boostedVolume)
+            if boostVolume {
+                volumeBooster.boost(to: boostedVolume)
+            }
 
             let p = try AVAudioPlayer(contentsOf: url)
-            p.numberOfLoops = -1
+            p.numberOfLoops = boostVolume ? -1 : 0
             p.volume = 1.0
             p.prepareToPlay()
             guard p.play() else {
@@ -124,6 +128,12 @@ final class CriticalAlertAudioPlayer {
                 return
             }
             player = p
+            if !boostVolume {
+                stopTimer?.invalidate()
+                stopTimer = Timer.scheduledTimer(withTimeInterval: p.duration, repeats: false) { [weak self] _ in
+                    Task { @MainActor in self?.stop() }
+                }
+            }
             os_log("Started critical-alert audio playback (duration=%{public}.2fs playing=%{public}@)",
                    log: log, type: .info, p.duration, p.isPlaying ? "yes" : "no")
         } catch {

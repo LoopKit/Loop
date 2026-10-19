@@ -91,6 +91,25 @@ class AlertStoreTests: XCTestCase {
         XCTAssertEqual(999, newAnchor?.modificationCounter)
     }
 
+    func testLookupScheduledAlertsDue() async throws {
+        let issued = Self.historicDate
+        let due = issued.addingTimeInterval(Self.delayedAlertDelay)
+        await alertStore.recordIssued(alert: alert1, at: issued)
+        await alertStore.recordIssued(alert: delayedAlert, at: issued)
+        await alertStore.recordIssued(alert: repeatingAlert, at: issued)
+        try await alertStore.recordRetraction(of: Self.repeatingAlertIdentifier, at: due.addingTimeInterval(-1))
+
+        var dueAlerts = try await alertStore.lookupScheduledAlertsDue(after: issued, through: due.addingTimeInterval(1))
+        XCTAssertEqual([Self.delayedAlertIdentifier], dueAlerts.map { $0.identifier })
+
+        dueAlerts = try await alertStore.lookupScheduledAlertsDue(after: issued, through: due.addingTimeInterval(-1))
+        XCTAssertTrue(dueAlerts.isEmpty)
+
+        await alertStore.recordIssued(alert: delayedAlert, at: issued.addingTimeInterval(10))
+        dueAlerts = try await alertStore.lookupScheduledAlertsDue(after: issued, through: due.addingTimeInterval(1))
+        XCTAssertTrue(dueAlerts.isEmpty)
+    }
+
     func testRecordIssued() async throws {
         await alertStore.recordIssued(alert: alert1, at: Self.historicDate)
         let storedAlerts = try await self.alertStore.fetch(identifier: Self.identifier1)
@@ -106,6 +125,35 @@ class AlertStoreTests: XCTestCase {
         await alertStore.recordIssued(alert: self.alert1, at: Self.historicDate)
         let storedAlerts = try await alertStore.fetch(identifier: Self.identifier1)
         self.assertEqual([self.alert1, self.alert1], storedAlerts)
+    }
+
+    func testLookupRecentReturnsMostRecentFirst() async throws {
+        let now = Self.historicDate
+        await alertStore.recordIssued(alert: alert1, at: now.addingTimeInterval(-120))
+        await alertStore.recordIssued(alert: alert2, at: now.addingTimeInterval(-60))
+        await alertStore.recordIssued(alert: delayedAlert, at: now)
+
+        let entries = try await alertStore.lookupRecent(limit: 10)
+        XCTAssertEqual(3, entries.count)
+        XCTAssertEqual([Self.delayedAlertIdentifier, Self.identifier2, Self.identifier1], entries.map { $0.identifier })
+        XCTAssertEqual("title", entries[1].title)
+        XCTAssertEqual(.critical, entries[1].interruptionLevel)
+        XCTAssertEqual(.active, entries[0].status)
+    }
+
+    func testLookupRecentRespectsLimitAndPaging() async throws {
+        let now = Self.historicDate
+        await alertStore.recordIssued(alert: alert1, at: now.addingTimeInterval(-120))
+        await alertStore.recordIssued(alert: alert2, at: now.addingTimeInterval(-60))
+        await alertStore.recordIssued(alert: delayedAlert, at: now)
+
+        let firstPage = try await alertStore.lookupRecent(limit: 2)
+        XCTAssertEqual(2, firstPage.count)
+        XCTAssertEqual([Self.delayedAlertIdentifier, Self.identifier2], firstPage.map { $0.identifier })
+
+        let secondPage = try await alertStore.lookupRecent(before: firstPage.last!.issuedDate, limit: 2)
+        XCTAssertEqual(1, secondPage.count)
+        XCTAssertEqual(Self.identifier1, secondPage.first?.identifier)
     }
 
     func testRecordAcknowledged() async throws {

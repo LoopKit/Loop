@@ -47,6 +47,18 @@ extension NewCarbEntry {
     }
 }
 
+extension CarbEntryUpdate {
+    var asStoredCarbEntry: StoredCarbEntry {
+        StoredCarbEntry(
+            startDate: startDate,
+            quantity: quantity,
+            foodType: foodType,
+            absorptionTime: absorptionTime,
+            userCreatedDate: date
+        )
+    }
+}
+
 extension StoredDataAlgorithmInput {
 
     func addingDose(dose: InsulinDoseType?) -> StoredDataAlgorithmInput {

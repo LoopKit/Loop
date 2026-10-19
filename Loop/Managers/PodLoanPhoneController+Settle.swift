@@ -55,6 +55,7 @@ extension PodLoanPhoneController {
                 format: "settle CEILING at %.0fs — NO verified round-trip; clearing anyway · ble: %@",
                 Self.reclaimSettleTimeout, ble ?? "no diagnostics from the pump manager"))
             self.reclaimStartedAt = nil
+            self.endReclaimEscalation()
             self.syncUIMirror()
             self.reclaimDisplayAnchor = nil
             self.deps.endReclaimBackgroundTask()
@@ -78,12 +79,22 @@ extension PodLoanPhoneController {
         reclaimSettleWork?.cancel()
         reclaimSettleWork = nil
         reclaimStartedAt = nil
+        endReclaimEscalation()
         reclaimDisplayAnchor = nil
         reclaimVerifyInFlight = false
         deps.endReclaimBackgroundTask()
 
         noteForceReclaimAuditStillOwed(why: reason)
         syncUIMirror()
+    }
+
+    /// An escalation ends with the settle it served, verified, closed early or at the ceiling: the
+    /// transfer rule. Left armed, every connect the pod driver made would wait on its scan.
+    func endReclaimEscalation() {
+        guard reclaimEscalated else { return }
+        reclaimEscalated = false
+        (deps.pumpManager() as? ExclusiveDeviceControl)?.endTakeEscalation()
+        handbackDiag(epoch, "settle over — escalation ended; the pod is reached by this phone's own handle again")
     }
 
     /// The window closed without the pod answering, its link lost after the take-back. The check
@@ -169,6 +180,7 @@ extension PodLoanPhoneController {
                         self.reclaimVerifiedAt = self.deps.now()
                         self.reclaimSettleWork?.cancel()
                         self.reclaimStartedAt = nil
+                        self.endReclaimEscalation()
                         self.syncUIMirror()
                         self.reclaimDisplayAnchor = nil
                         self.deps.endReclaimBackgroundTask()

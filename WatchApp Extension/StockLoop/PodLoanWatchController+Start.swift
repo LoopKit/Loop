@@ -179,9 +179,8 @@ extension PodLoanWatchController {
         }
     }
 
-    /// The offline start is a backup, offered when the phone does not answer: at once if it looks
-    /// unreachable, when it goes out of reach during the wait (`noteReachabilityChanged`), or after
-    /// 10 s. The request still goes out; a phone that answers before the confirm wins (`confirmSeize`).
+    /// The offline start is a backup, offered when the phone does not answer within 10 s. The request
+    /// is the question; whether the phone looks reachable decides nothing (control row 2).
     func requestLoan(watchBuild: String) {
         #if targetEnvironment(simulator)
 
@@ -202,19 +201,18 @@ extension PodLoanWatchController {
             self.lastIdleNote = nil
             self.withdrawSeizeOffer(reason: "a new Start request went out")
 
-            // "Unreachable" is believed only once the link to the phone is set up: just after launch it reads false.
-            let unreachable = !self.isPhoneReachable() && self.isPhoneLinkActivated()
-
-            let timeout: TimeInterval = unreachable ? Self.unreachableRecheck : Self.requestTimeout
-            SportLog.event("loan", "REQUEST sent (build \(watchBuild)) — awaiting grant\(unreachable ? " (phone unreachable — offline start offered now)" : "")")
+            SportLog.event("loan", "REQUEST sent (build \(watchBuild)) — awaiting grant")
             let known = max(self.epoch ?? 0, self.journal.activeEpoch ?? 0, self.persisted.highWaterEpoch, self.lastRevokedEpoch ?? 0)
             self.sendMessage(.request(LoanRequest(watchBuild: watchBuild, supportsSeize: true, sentAt: self.now(), knownEpoch: known)))
 
-            self.armRequestTimeout(timeout)
+            // Rows 1 and 2: the request is the query; `LoanControl` decides the wait and what silence means.
+            let situation = LoanControl.Situation(device: .watch, trigger: .startTapped)
+            guard case .query(let wait, _) = LoanControl.decide(situation) else { return }
+            self.armRequestTimeout(wait.seconds)
         }
     }
 
-    /// An unreachable phone at the tap is read again this much later: just after the app comes on
+    /// An unreachable phone at an End is read again this much later: just after the app comes on
     /// screen, reachability reads false for a moment with the phone there.
     static let unreachableRecheck: TimeInterval = 1
 
@@ -224,32 +222,25 @@ extension PodLoanWatchController {
         let work = DispatchWorkItem { [weak self] in
             guard let self = self, self.phase == .requested else { return }
 
-            // The quick re-check found the phone after all: wait the normal time for its answer.
-            if timeout == Self.unreachableRecheck, self.isPhoneReachable() {
-                SportLog.event("seize", "phone reachable after all — waiting the normal \(Int(Self.requestTimeout)) s for its grant [seize]")
-                self.armRequestTimeout(Self.requestTimeout)
-                return
-            }
-
             defer { self.notifyUI() }
             self.returnToRestingPhase()
 
             // A queued request delivered later would grant a fresh epoch over whatever happens next.
             self.cancelStaleQueuedRequests(context: "request timed out")
 
-            // A stored credential turns the timeout into a phoneless-start offer; its age is shown, not enforced.
-            if let dormant = self.storedDormantGrant() {
+            // Decided when the silence is known, with the copy as it is now: offer the offline start if this
+            // watch holds a copy (its age is shown, not enforced), else say the phone did not answer.
+            let dormant = self.storedDormantGrant()
+            let situation = LoanControl.Situation(device: .watch, trigger: .startTapped, watchHasStoredCopy: dormant != nil)
+            guard case .query(_, let onSilence) = LoanControl.decide(situation) else { return }
+            if case .prompt(.startWithoutPhone) = LoanControl.afterQuery(.silence, onSilence: onSilence), let dormant {
                 self.seizeOffer = (issuedAt: dormant.issuedAt, token: dormant.seizeToken)
                 self.lastIdleNote = nil
-                SportLog.event("seize", String(format: "REQUEST TIMED OUT (reachable=%@) — offering offline start (credential issued %@) [seize]",
-                                               self.isPhoneReachable() ? "Y" : "N",
+                SportLog.event("seize", String(format: "REQUEST TIMED OUT — no answer from the phone; offering offline start (credential issued %@) [seize]",
                                                DateFormatter.localizedString(from: dormant.issuedAt, dateStyle: .short, timeStyle: .short)))
                 return
             }
 
-            if self.isPhoneReachable() {
-                SportLog.event("loan", "REQUEST TIMED OUT with phone REACHABLE — one-way wedge signature")
-            }
             self.lastIdleNote = NSLocalizedString("No response from iPhone — check the phone (loan refused, or busy) and try again.", comment: "Glance: loan request timed out")
             SportLog.event("loan", "REQUEST TIMED OUT — no grant in \(Int(timeout))s (phone refused / busy / unreachable)")
         }
@@ -534,9 +525,9 @@ extension PodLoanWatchController {
         pumpStateStore.wrappedValue = manager.watchRawValue
         savePumpLocalState(of: manager)
 
-        // The export's header is the copy's view; on a phoneless start it can be half an hour old.
-        takeoverCopyTotal = configuration.deliveredUnits.map { (units: $0, asOf: configuration.asOf) }
-        takeoverCopyRecords = grant.doseHistory
+        // The export's header opens the ledger's window at the copy's reading (on a phoneless start it
+        // can be half an hour old); the takeover read, like every pump report, closes it.
+        updateState { $0.ledgerLast = configuration.deliveredUnits.map { (units: $0, at: configuration.asOf) } }
         guard ingestGrantHistory(grant) else {
             teardownPump()
             returnToRestingPhase()
@@ -606,7 +597,6 @@ extension PodLoanWatchController {
     func recordTakeoverActive(delivered: Double, at: Date?) {
         let token = pendingSeizeToken
         pendingSeizeToken = nil
-        reunionKeepChosen = false
         updateState {
             $0.deliveredAtTakeover = delivered
             $0.deliveredAtTakeoverAt = at
@@ -664,10 +654,9 @@ extension PodLoanWatchController {
                                                   grant.epoch, attempt + 1, takeoverSecs, delivered, driver, RuntimeStateLog.snapshot()))
                     self.sendMessage(.takeoverComplete(TakeoverComplete(epoch: grant.epoch, firstPodStatus: self.currentPodStatus())))
 
-                    // Book the unexplained insulin, then give the loop the pump and run a full `loop()`
-                    // so the first program is journaled. Not before: a cycle triggered in between would
-                    // dose without the booking.
-                    self.bookInsulinTheCopyCannotExplain(podTotal: delivered, pulseUnits: odometer.deliveryPulseUnits, epoch: grant.epoch)
+                    // The read's own report closed the ledger's window from the copy's reading and booked
+                    // what it could not explain, so the loop can have the pump now; a full `loop()` so
+                    // the first program is journaled.
                     self.loopManager.pumpManager = manager
                     self.loopManager.loop()
                 } else if attempt + 1 < maxAttempts {

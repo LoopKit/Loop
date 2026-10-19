@@ -61,6 +61,7 @@ extension CarbStore {
 fileprivate extension NewCarbEntry {
     static func simulated(startDate: Date, grams: Double, absorptionTime: TimeInterval) -> NewCarbEntry {
         return NewCarbEntry(date: startDate,
+                            syncIdentifier: UUID().uuidString,
                             quantity: LoopQuantity(unit: .gram, doubleValue: grams),
                             startDate: startDate,
                             foodType: "Simulated",

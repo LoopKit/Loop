@@ -17,6 +17,7 @@ class SetBolusUserInfoTests: XCTestCase {
     private var startDate = dateFormatter.date(from: "2020-05-14T22:45:00Z")!
     private var contextDate = dateFormatter.date(from: "2020-05-14T22:38:14Z")!
     private var carbEntry = NewCarbEntry(date: dateFormatter.date(from: "2020-05-14T22:39:34Z")!,
+                                         syncIdentifier: "2A67A303-1234-4CB8-1234-3D5A2B5A9F9A",
                                          quantity: LoopQuantity(unit: .gram, doubleValue: 17),
                                          startDate: dateFormatter.date(from: "2020-05-14T22:00:00Z")!,
                                          foodType: "Pizza",
@@ -50,6 +51,22 @@ class SetBolusUserInfoTests: XCTestCase {
         XCTAssertEqual(info?.startDate, startDate)
         XCTAssertEqual(info?.contextDate, contextDate)
         XCTAssertEqual(info?.carbEntry, carbEntry)
+    }
+
+    func testRawValueInitializerWithoutCarbEntry() {
+        var rawValue = self.rawValue
+        rawValue["ce"] = nil
+        let info = SetBolusUserInfo(rawValue: rawValue)
+        XCTAssertEqual(info?.value, value)
+        XCTAssertNil(info?.carbEntry)
+    }
+
+    func testRawValueInitializerCarbEntryMissingSyncIdentifier() {
+        var rawValue = self.rawValue
+        var rawCarbEntry = carbEntry.rawValue
+        rawCarbEntry["syncIdentifier"] = nil
+        rawValue["ce"] = rawCarbEntry
+        XCTAssertNil(SetBolusUserInfo(rawValue: rawValue))
     }
 
     func testRawValueInitializerMissingVersion() {
