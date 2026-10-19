@@ -307,8 +307,7 @@ final class WatchDataManager: NSObject {
 
         if let recommendedBolus = try? await loopDataManager.recommendManualBolus(
             manualGlucoseSample: nil,
-            potentialCarbEntry: potentialCarbEntry,
-            originalCarbEntry: nil
+            carbEntryChange: potentialCarbEntry.map { .add($0) }
         ) {
             context.recommendedBolusDose = recommendedBolus.amount
             dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(
@@ -436,7 +435,7 @@ final class WatchDataManager: NSObject {
         if let carbEntry = bolus.carbEntry {
             let storedCarbEntry = try await loopDataManager.addCarbEntry(carbEntry)
             dosingDecision.carbEntry = storedCarbEntry
-            self.analyticsServicesManager?.didAddCarbs(source: "Watch", amount: storedCarbEntry.quantity.doubleValue(for: .gram))
+            self.analyticsServicesManager?.didAddCarbs(source: "Watch")
         } else {
             dosingDecision.carbEntry = nil
         }
@@ -449,7 +448,7 @@ final class WatchDataManager: NSObject {
         }
 
         try await deviceManager.enactBolus(units: bolus.value, decisionId: dosingDecision.id, activationType: bolus.activationType)
-        self.analyticsServicesManager?.didBolus(source: "Watch", units: bolus.value)
+        self.analyticsServicesManager?.didBolus(source: "Watch")
     }
 
     func handleWatchMessage(_ message: [String: Any]) async throws -> [String: Any] {

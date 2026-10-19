@@ -53,6 +53,9 @@ public final class AlertManager {
     private let criticalAlertAlarmScheduler = CriticalAlertAlarmScheduler()
     var alertMuter: AlertMuter
 
+    /// Non-critical alerts that should play their sound in-app, through the silent switch and Focus.
+    var playsThroughSilent: (Alert) -> Bool = { _ in false }
+
     let alertStore: AlertStore
 
     private let bluetoothPoweredOffIdentifier = Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "bluetoothPoweredOff")
@@ -184,6 +187,19 @@ public final class AlertManager {
     func loopDidComplete(_ lastLoopDate: Date? = nil) async {
         // use now if there is no lastLoopDate
         await rescheduleLoopNotRunningNotifications(lastLoopDate ?? Date())
+        await reportDisplayedScheduledAlerts()
+    }
+
+    private func reportDisplayedScheduledAlerts() async {
+        let now = getCurrentDate()
+        let start = UserDefaults.standard.scheduledAlertsReportedThrough ?? now
+        UserDefaults.standard.scheduledAlertsReportedThrough = now
+        guard start < now, let alerts = try? await alertStore.lookupScheduledAlertsDue(after: start, through: now) else {
+            return
+        }
+        for alert in alerts {
+            analyticsServicesManager.didDisplayAlert(identifier: alert.identifier.value, interruptionLevel: alert.interruptionLevel, scheduled: true)
+        }
     }
 
     private func rescheduleLoopNotRunningNotifications() {
@@ -271,6 +287,7 @@ public final class AlertManager {
                 let interruptionLevel: Alert.InterruptionLevel = notification.isCritical ? .critical : .timeSensitive
                 let alert = Alert(identifier: alertIdentifier, foregroundContent: nil, backgroundContent: content, trigger: .immediate, interruptionLevel: interruptionLevel)
                 await recordIssued(alert: alert, at: notification.alertAt)
+                analyticsServicesManager.didDisplayAlert(identifier: alertIdentifier.value, interruptionLevel: interruptionLevel, scheduled: true)
             } else {
                 stillPendingNotifications.append(notification)
             }
@@ -384,7 +401,9 @@ extension AlertManager: AlertIssuer {
             deferredAlerts.append(alert)
             return
         }
-        analyticsServicesManager.didIssueAlert(identifier: alert.identifier.value, interruptionLevel: alert.interruptionLevel)
+        if alert.trigger == .immediate {
+            analyticsServicesManager.didDisplayAlert(identifier: alert.identifier.value, interruptionLevel: alert.interruptionLevel, scheduled: false)
+        }
         scheduleAlertWithSchedulers(alert)
         await alertStore.recordIssued(alert: alert)
     }
@@ -416,8 +435,24 @@ extension AlertManager: AlertIssuer {
     private func scheduleAlertWithSchedulers(_ alert: Alert, issuedDate: Date = Date()) {
         modalAlertScheduler.scheduleAlert(alert)
         let muted = alertMuter.shouldMuteAlert(alert, issuedDate: issuedDate)
-        userNotificationAlertScheduler.scheduleAlert(alert, muted: muted)
+        let inAppSound = muted ? nil : inAppSoundThroughSilent(for: alert)
+        // The notification stays silent when the app plays the sound, so it isn't heard twice
+        userNotificationAlertScheduler.scheduleAlert(alert, muted: muted || inAppSound != nil)
+        if let inAppSound {
+            log.default("Playing %{public}@ through silent mode for %{public}@", inAppSound, String(describing: alert.identifier))
+            criticalAlertAudioPlayer.play(soundNamed: inAppSound, boostVolume: false)
+        }
         playCriticalAlertAudioFallbackIfNeeded(for: alert, muted: muted, issuedDate: issuedDate)
+    }
+
+    private func inAppSoundThroughSilent(for alert: Alert) -> String? {
+        guard alert.interruptionLevel != .critical, case .immediate = alert.trigger, playsThroughSilent(alert) else {
+            return nil
+        }
+        guard case .sound(let name) = alert.sound else {
+            return nil
+        }
+        return name
     }
 
     private func unscheduleAlertWithSchedulers(identifier: Alert.Identifier) async {

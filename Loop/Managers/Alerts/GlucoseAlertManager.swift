@@ -227,6 +227,9 @@ final class GlucoseAlertManager: ObservableObject {
     private static let lowSoundKey = "GlucoseAlertLowSound"
     private static let highSoundKey = "GlucoseAlertHighSound"
     private static let predictedLowSoundKey = "GlucoseAlertPredictedLowSound"
+    private static let lowPlaysThroughSilentKey = "GlucoseAlertLowPlaysThroughSilent"
+    private static let highPlaysThroughSilentKey = "GlucoseAlertHighPlaysThroughSilent"
+    private static let predictedLowPlaysThroughSilentKey = "GlucoseAlertPredictedLowPlaysThroughSilent"
     private static let episodeStateKey = "GlucoseAlertEpisodeState"
 
     // Per-alarm sound defaults. Urgent low keeps the loud critical tone;
@@ -235,6 +238,9 @@ final class GlucoseAlertManager: ObservableObject {
     static let defaultLowSound = "simple.caf"
     static let defaultHighSound = "chime.caf"
     static let defaultPredictedLowSound = "mood_synth.caf"
+    static let defaultLowPlaysThroughSilent = true
+    static let defaultHighPlaysThroughSilent = false
+    static let defaultPredictedLowPlaysThroughSilent = true
     private static let overrideKey = "GlucoseAlertLoopOverride"
     private static let legacyConfigKey = "GlucoseAlertConfiguration"
     private static let legacyPrimaryKey = "GlucoseAlertPrimaryConfig"
@@ -281,6 +287,27 @@ final class GlucoseAlertManager: ObservableObject {
     }
     @Published var predictedLowSound: String {
         didSet { userDefaults.set(predictedLowSound, forKey: Self.predictedLowSoundKey) }
+    }
+
+    /// Whether a non-urgent alarm plays its sound in-app, through the silent switch and Focus.
+    /// Urgent low always does, as a critical alert.
+    @Published var lowPlaysThroughSilent: Bool {
+        didSet { userDefaults.set(lowPlaysThroughSilent, forKey: Self.lowPlaysThroughSilentKey) }
+    }
+    @Published var highPlaysThroughSilent: Bool {
+        didSet { userDefaults.set(highPlaysThroughSilent, forKey: Self.highPlaysThroughSilentKey) }
+    }
+    @Published var predictedLowPlaysThroughSilent: Bool {
+        didSet { userDefaults.set(predictedLowPlaysThroughSilent, forKey: Self.predictedLowPlaysThroughSilentKey) }
+    }
+
+    func playsThroughSilent(for identifier: Alert.AlertIdentifier) -> Bool {
+        switch identifier {
+        case Self.lowAlertIdentifier:          return lowPlaysThroughSilent
+        case Self.highAlertIdentifier:         return highPlaysThroughSilent
+        case Self.predictedLowAlertIdentifier: return predictedLowPlaysThroughSilent
+        default:                               return false
+        }
     }
 
     /// The configured sound filename for a given glucose alarm identifier.
@@ -347,6 +374,9 @@ final class GlucoseAlertManager: ObservableObject {
         lowSound = Self.defaultLowSound
         highSound = Self.defaultHighSound
         predictedLowSound = Self.defaultPredictedLowSound
+        lowPlaysThroughSilent = Self.defaultLowPlaysThroughSilent
+        highPlaysThroughSilent = Self.defaultHighPlaysThroughSilent
+        predictedLowPlaysThroughSilent = Self.defaultPredictedLowPlaysThroughSilent
         loopAlertsOverrideForOwnAlertingCGM = false
     }
 
@@ -523,6 +553,9 @@ final class GlucoseAlertManager: ObservableObject {
         self.lowSound = userDefaults.string(forKey: Self.lowSoundKey) ?? Self.defaultLowSound
         self.highSound = userDefaults.string(forKey: Self.highSoundKey) ?? Self.defaultHighSound
         self.predictedLowSound = userDefaults.string(forKey: Self.predictedLowSoundKey) ?? Self.defaultPredictedLowSound
+        self.lowPlaysThroughSilent = userDefaults.object(forKey: Self.lowPlaysThroughSilentKey) as? Bool ?? Self.defaultLowPlaysThroughSilent
+        self.highPlaysThroughSilent = userDefaults.object(forKey: Self.highPlaysThroughSilentKey) as? Bool ?? Self.defaultHighPlaysThroughSilent
+        self.predictedLowPlaysThroughSilent = userDefaults.object(forKey: Self.predictedLowPlaysThroughSilentKey) as? Bool ?? Self.defaultPredictedLowPlaysThroughSilent
 
         if didMigrate {
             // Write new format and erase all legacy + WIP keys atomically so

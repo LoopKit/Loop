@@ -31,9 +31,10 @@ extension GetBolusRecommendationUserInfo: RawRepresentable {
             return nil
         }
 
-        if let value = rawValue["ce"] as? NewCarbEntry.RawValue,
-           let carbEntry = NewCarbEntry(rawValue: value)
-        {
+        if let rawCarbEntry = rawValue["ce"] {
+            guard let carbEntry = (rawCarbEntry as? NewCarbEntry.RawValue).flatMap(NewCarbEntry.init(rawValue:)) else {
+                return nil
+            }
             self.carbEntry = carbEntry
         } else {
             self.carbEntry = nil

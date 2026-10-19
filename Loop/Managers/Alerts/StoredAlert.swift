@@ -68,6 +68,48 @@ extension StoredAlert {
     public var identifier: Alert.Identifier {
         return Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: alertIdentifier)
     }
+
+    /// A thread-safe value snapshot for the alert history UI. Must be accessed within the store's context perform block.
+    var historyEntry: AlertHistoryEntry {
+        let content = try? Alert.Content(contentString: foregroundContent ?? backgroundContent)
+        let id = syncIdentifier?.uuidString ?? "\(managerIdentifier).\(alertIdentifier).\(issuedDate.timeIntervalSinceReferenceDate)"
+        return AlertHistoryEntry(
+            id: id,
+            identifier: identifier,
+            title: content?.title ?? alertIdentifier,
+            body: content?.body ?? "",
+            interruptionLevel: interruptionLevel,
+            trigger: (try? Alert.Trigger(storedType: triggerType, storedInterval: triggerInterval)) ?? .immediate,
+            issuedDate: issuedDate,
+            acknowledgedDate: acknowledgedDate,
+            retractedDate: retractedDate
+        )
+    }
+}
+
+/// A thread-safe, value-type snapshot of a recorded alert, for display in the alert history UI.
+struct AlertHistoryEntry: Identifiable {
+    enum Status {
+        case active, acknowledged, retracted
+    }
+
+    let id: String
+    let identifier: Alert.Identifier
+    let title: String
+    let body: String
+    let interruptionLevel: Alert.InterruptionLevel
+    let trigger: Alert.Trigger
+    let issuedDate: Date
+    let acknowledgedDate: Date?
+    let retractedDate: Date?
+
+    var managerIdentifier: String { identifier.managerIdentifier }
+
+    var status: Status {
+        if retractedDate != nil { return .retracted }
+        if acknowledgedDate != nil { return .acknowledged }
+        return .active
+    }
 }
 
 extension Alert {

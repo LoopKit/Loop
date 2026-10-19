@@ -14,6 +14,7 @@
 //  callers fall back to CriticalAlertAudioPlayer.
 //
 
+import CryptoKit
 import Foundation
 import LoopKit
 import os.log
@@ -29,9 +30,15 @@ import struct SwiftUI.Color   // Color only; `import SwiftUI` would make `Alert`
 final class CriticalAlertAlarmScheduler {
     private let log = OSLog(subsystem: "com.loopkit.Loop", category: "CriticalAlertAlarmScheduler")
 
-    /// Maps an issued alert to the AlarmKit alarm scheduled for it, so the
-    /// alarm can be cancelled when the alert is acknowledged or retracted.
-    private var alarmsByAlert: [Alert.Identifier: UUID] = [:]
+    /// The AlarmKit alarm ID for an alert, derived from the alert identifier so
+    /// a relaunched app can still stop an alarm scheduled by an earlier process.
+    static func alarmID(for identifier: Alert.Identifier) -> UUID {
+        var bytes = Array(SHA256.hash(data: Data("\(identifier.managerIdentifier).\(identifier.alertIdentifier)".utf8)).prefix(16))
+        bytes[6] = (bytes[6] & 0x0F) | 0x50
+        bytes[8] = (bytes[8] & 0x3F) | 0x80
+        return UUID(uuid: (bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
+                           bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]))
+    }
 
     /// Whether the user has allowed alarms. nil where AlarmKit doesn't exist (below iOS 26).
     static var alarmsAuthorized: Bool? {
@@ -118,17 +125,15 @@ final class CriticalAlertAlarmScheduler {
             sound: sound
         )
 
-        let id = UUID()
-        alarmsByAlert[alert.identifier] = id
+        let id = Self.alarmID(for: alert.identifier)
         let log = self.log
         let identifier = alert.identifier
-        Task { [weak self] in
+        Task {
             do {
                 _ = try await AlarmManager.shared.schedule(id: id, configuration: configuration)
                 os_log("Scheduled AlarmKit alarm %{public}@ for %{public}@", log: log, type: .info, id.uuidString, String(describing: identifier))
             } catch {
                 os_log("Failed to schedule AlarmKit alarm for %{public}@: %{public}@ — falling back to audio", log: log, type: .error, String(describing: identifier), String(describing: error))
-                self?.alarmsByAlert.removeValue(forKey: identifier)
                 onScheduleFailure()
             }
         }
@@ -142,12 +147,19 @@ final class CriticalAlertAlarmScheduler {
     func cancelAlarm(for identifier: Alert.Identifier) {
         guard #available(iOS 26, *) else { return }
         #if canImport(AlarmKit)
-        guard let id = alarmsByAlert.removeValue(forKey: identifier) else { return }
-        // stop() ends a ringing alarm; cancel() removes a scheduled one. The
-        // alarm may be in either state, so try both and ignore errors.
-        try? AlarmManager.shared.stop(id: id)
-        try? AlarmManager.shared.cancel(id: id)
-        os_log("Cancelled AlarmKit alarm %{public}@ for %{public}@", log: log, type: .info, id.uuidString, String(describing: identifier))
+        let id = Self.alarmID(for: identifier)
+        do {
+            guard let alarm = try AlarmManager.shared.alarms.first(where: { $0.id == id }) else { return }
+            // stop() ends a ringing alarm; cancel() removes a scheduled one
+            if alarm.state == .alerting {
+                try AlarmManager.shared.stop(id: id)
+            } else {
+                try AlarmManager.shared.cancel(id: id)
+            }
+            os_log("Cancelled AlarmKit alarm %{public}@ for %{public}@", log: log, type: .info, id.uuidString, String(describing: identifier))
+        } catch {
+            os_log("Failed to cancel AlarmKit alarm %{public}@ for %{public}@: %{public}@", log: log, type: .error, id.uuidString, String(describing: identifier), String(describing: error))
+        }
         #endif
     }
 }

@@ -197,6 +197,38 @@ public class AlertStore {
         }
     }
     
+    /// Delayed and repeating alerts that came due in (start, end] without being retracted first.
+    /// Only the latest issue of each identifier counts, since re-issuing replaces the scheduled alert.
+    public func lookupScheduledAlertsDue(after start: Date, through end: Date) async throws -> [(identifier: Alert.Identifier, interruptionLevel: Alert.InterruptionLevel)] {
+        try await managedObjectContext.perform {
+            let fetchRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
+            fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+                NSPredicate(format: "triggerType != %d", Alert.Trigger.immediate.storedType),
+                NSPredicate(format: "issuedDate > %@ AND issuedDate <= %@", end.addingTimeInterval(-.days(30)) as NSDate, end as NSDate)
+            ])
+            fetchRequest.sortDescriptors = [ NSSortDescriptor(key: "issuedDate", ascending: true) ]
+
+            var latest: [Alert.Identifier: StoredAlert] = [:]
+            for alert in try self.managedObjectContext.fetch(fetchRequest) {
+                latest[alert.identifier] = alert
+            }
+
+            return latest.values.compactMap { alert in
+                guard let interval = alert.triggerInterval?.doubleValue else {
+                    return nil
+                }
+                let due = alert.issuedDate.addingTimeInterval(interval)
+                guard due > start, due <= end else {
+                    return nil
+                }
+                if let retractedDate = alert.retractedDate, retractedDate <= due {
+                    return nil
+                }
+                return (alert.identifier, alert.interruptionLevel)
+            }
+        }
+    }
+
     public func lookupAllAcknowledgedUnretractedRepeatingAlerts() async throws -> [StoredAlert] {
         try await managedObjectContext.perform {
             let fetchRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
@@ -208,6 +240,20 @@ public class AlertStore {
             ])
             fetchRequest.sortDescriptors = [ NSSortDescriptor(key: "modificationCounter", ascending: true) ]
             return try self.managedObjectContext.fetch(fetchRequest)
+        }
+    }
+
+    /// Fetches recorded alerts for the alert history UI, most recently issued first.
+    /// - Parameters:
+    ///   - before: return only alerts issued strictly before this date; pass the oldest loaded alert's `issuedDate` to page backwards.
+    ///   - limit: the maximum number of alerts to return.
+    func lookupRecent(before: Date = .distantFuture, limit: Int) async throws -> [AlertHistoryEntry] {
+        try await managedObjectContext.perform {
+            let fetchRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "issuedDate < %@", before as NSDate)
+            fetchRequest.sortDescriptors = [ NSSortDescriptor(key: "issuedDate", ascending: false) ]
+            fetchRequest.fetchLimit = limit
+            return try self.managedObjectContext.fetch(fetchRequest).map { $0.historyEntry }
         }
     }
 

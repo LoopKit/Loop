@@ -185,7 +185,8 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 )
             }
             
-            let yAxisPoints = glucoseSamples.map{ item in item.quantity.doubleValue(for: unit) } + predicatedGlucose
+            let chartSamples = Self.thinned(glucoseSamples)
+            let yAxisPoints = chartSamples.map{ item in item.quantity.doubleValue(for: unit) } + predicatedGlucose
             let chartYAxis = ChartAxisGenerator.getYAxis(
                 points: yAxisPoints,
                 isMmol: unit == LoopUnit.millimolesPerLiter
@@ -204,9 +205,8 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 isCloseLoop: statusContext?.isClosedLoop ?? false,
                 lastCompleted: statusContext?.lastLoopCompleted,
                 bottomRow: bottomRow,
-                // In order to prevent maxSize errors, only allow the last 100 samples to be sent
-                // Will most likely not be an issue, might be an issue for debugging/CGM simulator with 5sec interval
-                glucoseSamples: glucoseSamples.suffix(100).map { item in
+                // ActivityKit silently drops updates over 4 KB
+                glucoseSamples: chartSamples.suffix(100).map { item in
                     return GlucoseSampleAttributes(x: item.startDate, y: item.quantity.doubleValue(for: unit))
                 },
                 predicatedGlucose: predicatedGlucose,
@@ -345,6 +345,18 @@ class LiveActivityManager : LiveActivityManagerProxy {
     
     // If the chart start falls past the half-hour mark (HH:31–HH:59), pull it back to HH:30
     // so that the nearest hour label is never truncated at the left edge.
+    /// At most one sample per ~5 minutes, keeping the latest, so one-minute CGMs fit the update size limit.
+    static func thinned(_ samples: [StoredGlucoseSample], minimumSpacing: TimeInterval = .minutes(4.5)) -> [StoredGlucoseSample] {
+        var kept: [StoredGlucoseSample] = []
+        for sample in samples.reversed() {
+            if let last = kept.last, last.startDate.timeIntervalSince(sample.startDate) < minimumSpacing {
+                continue
+            }
+            kept.append(sample)
+        }
+        return kept.reversed()
+    }
+
     private func adjustedChartStart(_ date: Date) -> Date {
         let calendar = Calendar.current
         let minute = calendar.component(.minute, from: date)

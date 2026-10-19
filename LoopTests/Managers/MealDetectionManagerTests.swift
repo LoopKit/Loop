@@ -111,33 +111,33 @@ extension MissedMealTestType {
         switch self {
         case .missedMealWithCOB:
             return [
-                NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 30),
+                NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: 30),
                              startDate: Self.dateFormatter.date(from: "2022-10-19T15:41:36")!,
                              foodType: nil,
                              absorptionTime: nil),
-                NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 10),
+                NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: 10),
                              startDate: Self.dateFormatter.date(from: "2022-10-19T17:36:58")!,
                              foodType: nil,
                              absorptionTime: nil)
             ]
         case .noMealWithCOB:
             return [
-                NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 30),
+                NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: 30),
                              startDate: Self.dateFormatter.date(from: "2022-10-17T22:40:00")!,
                              foodType: nil,
                              absorptionTime: nil)
             ]
         case .manyMeals:
             return [
-                NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 30),
+                NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: 30),
                              startDate: Self.dateFormatter.date(from: "2022-10-19T15:41:36")!,
                              foodType: nil,
                              absorptionTime: nil),
-                NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 10),
+                NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: 10),
                              startDate: Self.dateFormatter.date(from: "2022-10-19T17:36:58")!,
                              foodType: nil,
                              absorptionTime: nil),
-                NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 40),
+                NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: 40),
                              startDate: Self.dateFormatter.date(from: "2022-10-19T19:11:43")!,
                              foodType: nil,
                              absorptionTime: nil)
