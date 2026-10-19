@@ -24,9 +24,9 @@ struct PodLoanPhoneState: RawRepresentable {
 
     /// When the watch last reported a cycle, so a relaunch is not read as silence.
     var holdRenewedAt: Date?
-    /// When the silence was noticed.
-    var holdLapseNoticedAt: Date?
-    var watchSilenceWarningsIssued = 0
+    /// When this phone last took control on silence (a query unanswered); a revived watch's claim to a
+    /// loan started before it is refused.
+    var tookOverOnSilenceAt: Date?
 
     /// The watch said it can start alone; nothing dormant goes to a watch that cannot.
     var watchSupportsSeize = false
@@ -79,8 +79,7 @@ struct PodLoanPhoneState: RawRepresentable {
         committedIDs = Set((rawValue["committedIDs"] as? [String] ?? []).compactMap(UUID.init(uuidString:)))
         yieldingToInferredLoan = rawValue["yieldingToInferredLoan"] as? Bool ?? false
         holdRenewedAt = rawValue["holdRenewedAt"] as? Date
-        holdLapseNoticedAt = rawValue["holdLapseNoticedAt"] as? Date
-        watchSilenceWarningsIssued = rawValue["watchSilenceWarningsIssued"] as? Int ?? 0
+        tookOverOnSilenceAt = rawValue["tookOverOnSilenceAt"] as? Date
         watchSupportsSeize = rawValue["watchSupportsSeize"] as? Bool ?? false
         seizeToken = (rawValue["seizeToken"] as? String).flatMap(UUID.init(uuidString:))
         loanStartedAt = rawValue["loanStartedAt"] as? Date
@@ -97,11 +96,10 @@ struct PodLoanPhoneState: RawRepresentable {
         var raw: [String: Any] = ["phase": phase.rawValue, "epoch": epoch, "committedCursor": committedCursor,
                                   "committedIDs": committedIDs.map(\.uuidString),
                                   "yieldingToInferredLoan": yieldingToInferredLoan,
-                                  "watchSilenceWarningsIssued": watchSilenceWarningsIssued,
                                   "watchSupportsSeize": watchSupportsSeize]
         raw["seizeToken"] = seizeToken?.uuidString
         raw["holdRenewedAt"] = holdRenewedAt
-        raw["holdLapseNoticedAt"] = holdLapseNoticedAt
+        raw["tookOverOnSilenceAt"] = tookOverOnSilenceAt
         raw["loanStartedAt"] = loanStartedAt
         raw["pendingForceAudit"] = pendingForceAudit.map {
             ["epoch": $0.epoch, "atStart": $0.deliveredAtStart, "from": $0.from, "expected": $0.expected, "loanMinutes": $0.loanMinutes]

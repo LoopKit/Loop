@@ -12,7 +12,7 @@ protocol CarbStoreProtocol: AnyObject {
 
     func getCarbEntries(start: Date?, end: Date?, dateAscending: Bool, fetchLimit: Int?, with favoriteFoodID: String?) async throws -> [StoredCarbEntry]
 
-    func replaceCarbEntry(_ oldEntry: StoredCarbEntry, withEntry newEntry: NewCarbEntry) async throws -> StoredCarbEntry
+    func replaceCarbEntry(_ oldEntry: StoredCarbEntry, withEntry newEntry: CarbEntryUpdate) async throws -> StoredCarbEntry
 
     func addCarbEntry(_ entry: NewCarbEntry) async throws -> StoredCarbEntry
 

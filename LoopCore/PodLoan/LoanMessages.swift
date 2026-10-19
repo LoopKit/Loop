@@ -386,8 +386,16 @@ public struct StatusReport: Codable, Equatable {
 
     public let knowsGrant: Bool?
 
+    /// With `holdsPod`: whether the watch reached the pod on its last cycle. A holder that cannot reach
+    /// the pod is answered like silence. Absent from older watches.
+    public let podReachable: Bool?
+    /// With `holdsPod`: when the watch's loan started, so a phone that took over on silence can tell a
+    /// revived claim from a fresh Start. Absent from older watches.
+    public let loanStartedAt: Date?
+
     public init(epoch: Int, mode: LoanDosingMode, lastDirectGlucoseAge: TimeInterval?,
-                lastEventSeq: Int, podFault: String?, holdsPod: Bool, knowsGrant: Bool? = nil) {
+                lastEventSeq: Int, podFault: String?, holdsPod: Bool, knowsGrant: Bool? = nil,
+                podReachable: Bool? = nil, loanStartedAt: Date? = nil) {
         self.epoch = epoch
         self.mode = mode
         self.lastDirectGlucoseAge = lastDirectGlucoseAge
@@ -395,6 +403,8 @@ public struct StatusReport: Codable, Equatable {
         self.podFault = podFault
         self.holdsPod = holdsPod
         self.knowsGrant = knowsGrant
+        self.podReachable = podReachable
+        self.loanStartedAt = loanStartedAt
     }
 }
 

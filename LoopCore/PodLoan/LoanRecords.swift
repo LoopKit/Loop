@@ -96,6 +96,28 @@ public struct LoanDoseRecord: Codable, Equatable {
         self.deliveredUnits = deliveredUnits
         self.overrideRaw = overrideRaw
     }
+
+    /// A dose as a device's own store holds it; scheduled basal and resume are omitted. The grant's
+    /// history and each device's ledger window read their records through this.
+    public init?(storeDose dose: DoseEntry) {
+        switch dose.type {
+        case .bolus:
+            self.init(kind: .bolus, startDate: dose.startDate, endDate: dose.endDate, amount: dose.deliveredUnits ?? dose.programmedUnits,
+                      syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType, automatic: dose.automatic,
+                      decisionId: dose.decisionId)
+        // Rate records carry delivered units: the pod floors to whole pulses.
+        case .tempBasal:
+            self.init(kind: .tempBasal, startDate: dose.startDate, endDate: dose.endDate, unitsPerHour: dose.unitsPerHour,
+                      syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType,
+                      deliveredUnits: dose.deliveredUnits, decisionId: dose.decisionId)
+        case .suspend:
+            self.init(kind: .suspend, startDate: dose.startDate, endDate: dose.endDate, unitsPerHour: 0,
+                      syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType,
+                      deliveredUnits: dose.deliveredUnits, decisionId: dose.decisionId)
+        case .basal, .resume:
+            return nil
+        }
+    }
 }
 
 // MARK: - Overrides

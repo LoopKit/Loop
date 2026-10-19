@@ -23,6 +23,13 @@ extension DeviceDataManager {
         podLoanController?.watchOwnsAlerts ?? false
     }
 
+    /// Every pump report closes the loan ledger's open window before the report completes, so the
+    /// cycle the reading feeds sees anything it books.
+    func podLoanPumpDidReport() async {
+        guard let controller = podLoanController else { return }
+        await withCheckedContinuation { done in controller.checkOwnPumpTotal { done.resume() } }
+    }
+
     /// While the pod is away the watch uploads glucose to the remote services, and the phone none.
     var podLoanHoldsGlucoseUploads: Bool {
         isPodLoanedToWatch
@@ -67,7 +74,7 @@ extension DeviceDataManager {
     /// Revoke the watch's loan and bring the pod home. Dosing stays paused until the records
     /// the watch is holding have been reconciled.
     func reclaimPodLoanFromWatch() {
-        podLoanController?.reclaimNow()
+        podLoanController?.takeBackTapped()
     }
 
     /// The loop's loan gate; with the flag off, only the pump's own release.

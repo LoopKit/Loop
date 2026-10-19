@@ -33,9 +33,9 @@ struct GlanceView: View {
         VStack(spacing: 0) {
             statusLine
             Spacer(minLength: 0)
-            centerBlock
+            if model.isResuming { resumeCheckCenter } else { centerBlock }
             Spacer(minLength: 0)
-            bottomBlock
+            if !model.isResuming { bottomBlock }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black)
@@ -89,7 +89,7 @@ struct GlanceView: View {
     /// End, or Cancel while a hand-back drains; nothing otherwise.
     @ViewBuilder
     private var statusRight: some View {
-        if model.state.phase == .active {
+        if model.state.phase == .active && !model.isResuming {
             if model.state.handbackPending {
                 Button { model.cancelHandback() } label: {
                     Text(NSLocalizedString("Cancel", comment: "Glance top-right: abort a pending hand-back"))
@@ -108,10 +108,10 @@ struct GlanceView: View {
         }
     }
 
-    /// Only while this watch is looping; it describes the watch's loop.
+    /// The watch's loop while it holds the pod; with no loan, the phone's loop as last heard.
     @ViewBuilder
     private var loopIndicator: some View {
-        if model.state.phase == .active {
+        if model.state.phase == .active || (model.state.phase == .idle && model.state.loopFreshness != .unknown) {
             Image(loopAssetName, bundle: Self.watchAppBundle)
                 .renderingMode(.template)
                 .resizable()
@@ -162,14 +162,23 @@ struct GlanceView: View {
     private var centerBlock: some View {
         switch model.state.phase {
         case .idle:
-            if model.hasControllerState { idleCenter }
-            else if model.isResuming {
-                Text(NSLocalizedString("Resuming session…", comment: "Glance: a saved Sport Mode session is being rebuilt after a relaunch"))
-                    .font(.footnote).foregroundColor(.secondary)
-            } else { Color.clear.frame(height: 1) }
+            if model.hasControllerState { idleCenter } else { Color.clear.frame(height: 1) }
         case .starting: startingCenter
         default:        standardCenter
         }
+    }
+
+    /// A watch back from off with a saved loan asks the phone before looping; nothing to act on meanwhile.
+    private var resumeCheckCenter: some View {
+        VStack(spacing: 6) {
+            Text(NSLocalizedString("Checking with your iPhone…", comment: "Glance: a watch back from off asks the phone before resuming Sport Mode"))
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.glanceInk)
+            Text(NSLocalizedString("Sport Mode resumes if it doesn't answer.", comment: "Glance: what happens if the phone does not answer the watch back from off"))
+                .font(.system(size: 12))
+                .foregroundColor(.glanceDim)
+        }
+        .multilineTextAlignment(.center)
     }
 
     /// Start, or the phoneless-start confirmation with the credential's age (shown, not enforced).
@@ -277,6 +286,9 @@ struct GlanceView: View {
                 (Text("eventually ").foregroundColor(.glanceDim)
                  + Text(eventual).bold().foregroundColor(model.state.predictionStale ? .glanceDim : .primary))
                     .font(.system(size: 13))
+            } else if model.state.phase == .idle, model.state.notHearingFromPhone {
+                Text(NSLocalizedString("Not hearing from iPhone", comment: "Glance: no loan, and no word from the phone for the warning's interval"))
+                    .font(.system(size: 12)).foregroundColor(.glanceWarn)
             } else if model.state.viaPhone, model.state.phase == .idle || model.state.phase == .starting {
                 Text("via iPhone").font(.system(size: 12)).foregroundColor(.glanceDim)
             }
@@ -354,33 +366,6 @@ struct GlanceView: View {
                     }
                 }
 
-                // The phone returning raises a prompt, never an automatic hand-back.
-                if model.state.reunionPrompt {
-                    VStack(spacing: 3) {
-                        Text(NSLocalizedString("iPhone is back — hand the pod back?", comment: "Glance prompt when the phone returns during a seized loan"))
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(.glanceInk)
-                            .multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true)
-                        HStack(spacing: 6) {
-                            Button {
-                                ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController.confirmReunionHandback()
-                            } label: {
-                                Text(NSLocalizedString("Hand Back", comment: "Glance reunion prompt: end the seized loan"))
-                                    .font(.system(size: 12, weight: .semibold))
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .tint(.glanceAccent)
-                            Button {
-                                ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController.dismissReunionPrompt()
-                            } label: {
-                                Text(NSLocalizedString("Keep", comment: "Glance reunion prompt: continue the seized loan"))
-                                    .font(.system(size: 12))
-                            }
-                            .buttonStyle(.bordered)
-                        }
-                    }
-                }
             }
             .padding(.bottom, 2)
         case .idle, .starting:
