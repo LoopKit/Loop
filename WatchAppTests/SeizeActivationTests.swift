@@ -180,59 +180,27 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertNil(snap.lastIdleNote, "the offer replaces the failure note")
     }
 
-    // MARK: - The shortened timeout
+    // MARK: - The request is the question
 
-    /// Unreachable offers the offline start at once, but the request is still sent.
-    func testUnreachablePhoneOffersTheOfflineStartAtOnce() async {
-        let controller = await makeController()
-        controller.isPhoneReachable = { false }
+    /// The Start waits the normal time for the phone's answer whatever the reachability flag says: it
+    /// reports whether the phone's app can take a live message, not whether the phone is there (control row 2).
+    func testTheStartWaitsForAnAnswerWhateverReachabilitySays() async {
+        for reachable in [false, true] {
+            let controller = await makeController()
+            controller.isPhoneReachable = { reachable }
+            var sent = 0
+            controller.send = { _ in sent += 1 }
+            var captured: [(TimeInterval, String)] = []
+            let timerArmed = expectation(description: "timeout armed")
+            controller.scheduler = { delay, label, _ in captured.append((delay, label)); timerArmed.fulfill() }
 
-        var sent = 0
-        controller.send = { _ in sent += 1 }
-        var captured: [(TimeInterval, String)] = []
-        let timerArmed = expectation(description: "timeout armed")
-        controller.scheduler = { delay, label, _ in captured.append((delay, label)); timerArmed.fulfill() }
+            controller.requestLoan(watchBuild: "seize-test")
+            wait(for: [timerArmed], timeout: 5)
 
-        controller.requestLoan(watchBuild: "seize-test")
-        wait(for: [timerArmed], timeout: 5)
-
-        XCTAssertEqual(sent, 1, "unreachable is advisory — the request still goes out")
-        XCTAssertEqual(captured.map(\.0), [PodLoanWatchController.unreachableRecheck], "unreachable phone → read again in a second, then offered")
-        XCTAssertEqual(captured.map(\.1), ["request-timeout"])
-    }
-
-    /// Just after launch the link is not set up and reads unreachable: that is not believed.
-    func testUnreachableBeforeTheLinkIsSetUpWaitsTheNormalTimeout() async {
-        let controller = await makeController()
-        controller.isPhoneReachable = { false }
-        controller.isPhoneLinkActivated = { false }
-        controller.send = { _ in }
-        var captured: [TimeInterval] = []
-        let timerArmed = expectation(description: "timeout armed")
-        controller.scheduler = { delay, _, _ in captured.append(delay); timerArmed.fulfill() }
-
-        controller.requestLoan(watchBuild: "seize-test")
-        wait(for: [timerArmed], timeout: 5)
-
-        XCTAssertEqual(captured, [PodLoanWatchController.requestTimeout])
-    }
-
-    /// The phone looked reachable at the tap, then went away: the offer comes when it does.
-    func testThePhoneGoingOutOfReachDuringTheRequestOffersAtOnce() async {
-        let controller = await makeController()
-        controller.isPhoneReachable = { true }
-        controller.send = { _ in }
-        let timerArmed = expectation(description: "timeout armed")
-        controller.scheduler = { _, _, _ in timerArmed.fulfill() }   // the 10 s deadline never comes
-        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-600)))
-
-        controller.requestLoan(watchBuild: "seize-test")
-        wait(for: [timerArmed], timeout: 5)
-        XCTAssertNil(controller.debugSnapshot().seizeOfferIssuedAt, "no offer while the phone looks reachable")
-
-        controller.isPhoneReachable = { false }
-        controller.noteReachabilityChanged(false)
-        XCTAssertNotNil(controller.debugSnapshot().seizeOfferIssuedAt, "offered when the phone went out of reach")
+            XCTAssertEqual(sent, 1, "the request goes out")
+            XCTAssertEqual(captured.map(\.0), [PodLoanWatchController.requestTimeout], "reachable \(reachable): the normal wait")
+            XCTAssertEqual(captured.map(\.1), ["request-timeout"])
+        }
     }
 
     // MARK: - Reunion-token hygiene
@@ -323,89 +291,34 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertEqual(snap.phase, .recoveredDrain, "the failed activation rests back on the drain, still startable")
     }
 
-    // MARK: - Reunion: the phone's return ends a seized loan
+    // MARK: - The phone's return changes nothing
 
-    /// The phone returning during a seized loan raises the prompt at once; only the user's choice ends it.
-    func testPhoneReturnPromptsAndOnlyTheUsersChoiceEndsASeizedLoan() async {
+    /// The phone returning during a seized loan: no prompt, the loan continues, and the phone is told this
+    /// watch holds the pod so it stands aside. The looper ends the loan the ordinary way (control row 17).
+    func testThePhoneReturningDuringASeizedLoanOnlyTellsThePhone() async throws {
         let controller = await makeController()
         controller.simFakeLoanFlow = true
-        controller.send = { _ in }
-        controller.isPhoneReachable = { true }
-        controller.scheduler = { _, label, work in
-            switch label {
-            case "sim-grant", "sim-active", "sim-handback": work.perform()   // virtual time through the sim flow
-            default: break                                                   // watchdogs etc. stay armed-only
+        var holdsPodEpochs: [Int] = []
+        controller.send = { dict in
+            if let message = try? LoanMessage.decode(fromTransport: dict),
+               case .statusReport(let r) = message, r.holdsPod {
+                holdsPodEpochs.append(r.epoch)
             }
         }
-
-        controller.requestLoan(watchBuild: "reunion-test")
-        XCTAssertEqual(controller.debugSnapshot().phase, .active, "precondition: sim flow reached the live loan")
-        controller.updateState { $0.seizeToken = UUID() }   // mark it SEIZED
-
-        controller.noteReachabilityChanged(true)
-        var snap = controller.debugSnapshot()
-        XCTAssertTrue(snap.reunionPromptVisible, "the phone heard raises the PROMPT at once")
-        XCTAssertEqual(snap.phase, .active, "…and the loan continues — never auto-ended")
-
-        controller.confirmReunionHandback()
-        // The confirm chain hops the queue twice (beginHandback re-enqueues, then the
-        // sim drive re-enqueues) — fence each hop before reading the verdict.
-        _ = controller.debugSnapshot()
-        _ = controller.debugSnapshot()
-        snap = controller.debugSnapshot()
-        XCTAssertEqual(snap.phase, .idle, "Hand Back runs the normal hand-back to completion")
-        XCTAssertFalse(snap.reunionPromptVisible, "and the prompt is gone")
-    }
-
-    /// Keep is the answer for the rest of the loan: neither reachability nor a message asks again.
-    func testKeepIsNotAskedAgainThisLoan() async throws {
-        let controller = await makeController()
-        controller.simFakeLoanFlow = true
-        controller.send = { _ in }
         controller.isPhoneReachable = { true }
-        controller.scheduler = { _, label, work in
-            if label == "sim-grant" || label == "sim-active" { work.perform() }
-        }
-        controller.requestLoan(watchBuild: "reunion-test")
-        controller.updateState { $0.seizeToken = UUID() }
-
-        controller.noteReachabilityChanged(true)
-        XCTAssertTrue(controller.debugSnapshot().reunionPromptVisible)
-        controller.dismissReunionPrompt()
-        XCTAssertFalse(controller.debugSnapshot().reunionPromptVisible, "Keep clears the prompt")
-
-        controller.noteReachabilityChanged(false)
-        controller.noteReachabilityChanged(true)
-        controller.handleIncoming(userInfo: try LoanMessage.diag(LoanDiag(epoch: 1, text: "phone")).transportDictionary(), channel: .queued)
-        let snap = controller.debugSnapshot()
-        XCTAssertFalse(snap.reunionPromptVisible, "not asked again this loan")
-        XCTAssertEqual(snap.phase, .active)
-    }
-
-    /// The gates: a normal loan never prompts; a reachability loss is not a return; a message from the
-    /// phone is (the watch's own reachability drops whenever its app leaves the screen).
-    func testReunionPromptRespectsItsGates() async throws {
-        let controller = await makeController()
-        controller.simFakeLoanFlow = true
-        controller.send = { _ in }
-        controller.isPhoneReachable = { false }
         controller.scheduler = { _, label, work in
             if label == "sim-grant" || label == "sim-active" { work.perform() }
         }
         controller.requestLoan(watchBuild: "reunion-test")
         XCTAssertEqual(controller.debugSnapshot().phase, .active)
-
-        controller.noteReachabilityChanged(true)                    // NORMAL loan: no token stored
-        XCTAssertFalse(controller.debugSnapshot().reunionPromptVisible, "a normal loan must never prompt")
-
         controller.updateState { $0.seizeToken = UUID() }
-        controller.noteReachabilityChanged(false)
-        XCTAssertFalse(controller.debugSnapshot().reunionPromptVisible, "a reachability LOSS is not a reunion")
 
+        controller.noteReachabilityChanged(true)
         controller.handleIncoming(userInfo: try LoanMessage.diag(LoanDiag(epoch: 1, text: "phone")).transportDictionary(), channel: .queued)
         let snap = controller.debugSnapshot()
-        XCTAssertTrue(snap.reunionPromptVisible, "a message from the phone raises it")
-        XCTAssertEqual(snap.phase, .active, "and does not touch the loan")
+        XCTAssertEqual(snap.phase, .active, "the loan continues")
+        XCTAssertFalse(snap.handbackPending, "nothing starts a hand-back but the looper")
+        XCTAssertEqual(holdsPodEpochs, [snap.epoch].compactMap { $0 }, "the phone is told, once, for the live loan")
     }
 
     /// A grant numbered at or below a loan this watch already knows is answered as failed, so the
@@ -425,49 +338,6 @@ final class SeizeActivationTests: XCTestCase {
         _ = controller.debugSnapshot()
         XCTAssertEqual(failedEpochs, [110])
         XCTAssertEqual(controller.debugSnapshot().phase, .idle)
-    }
-
-    /// Just after the app comes on screen, reachability reads false for a moment with the phone
-    /// there: an unreachable read at the tap is checked again before the offline start is offered.
-    func testAnUnreachableReadAtTheTapIsCheckedAgainBeforeTheOffer() async {
-        let controller = await makeController()
-        controller.send = { _ in }
-        controller.isPhoneReachable = { false }
-        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-600), completeSettings: true))
-        var armed: [(delay: TimeInterval, work: DispatchWorkItem)] = []
-        controller.scheduler = { delay, label, work in
-            if label == "request-timeout" { armed.append((delay, work)) }
-        }
-
-        controller.requestLoan(watchBuild: "recheck-test")
-        _ = controller.debugSnapshot()
-        XCTAssertEqual(armed.map(\.delay), [PodLoanWatchController.unreachableRecheck], "a quick re-check, not the offer")
-
-        // The phone was there after all: the request waits the normal time, no offer yet.
-        controller.isPhoneReachable = { true }
-        armed[0].work.perform()
-        XCTAssertNil(controller.debugSnapshot().seizeOfferIssuedAt, "no offer on a stale unreachable read")
-        XCTAssertEqual(armed.map(\.delay), [PodLoanWatchController.unreachableRecheck, PodLoanWatchController.requestTimeout])
-
-        // No grant in the normal time: the offer, as before.
-        armed[1].work.perform()
-        XCTAssertNotNil(controller.debugSnapshot().seizeOfferIssuedAt)
-    }
-
-    /// Still unreachable at the re-check: the offer comes then.
-    func testAnUnreachablePhoneGetsTheOfferAtTheRecheck() async {
-        let controller = await makeController()
-        controller.send = { _ in }
-        controller.isPhoneReachable = { false }
-        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-600), completeSettings: true))
-        var armed: [DispatchWorkItem] = []
-        controller.scheduler = { _, label, work in if label == "request-timeout" { armed.append(work) } }
-
-        controller.requestLoan(watchBuild: "recheck-test")
-        _ = controller.debugSnapshot()
-        armed[0].perform()
-        XCTAssertNotNil(controller.debugSnapshot().seizeOfferIssuedAt)
-        XCTAssertEqual(armed.count, 1)
     }
 
     /// A seize epoch clears the high-water mark and the recorded revoke.
@@ -496,39 +366,6 @@ final class SeizeActivationTests: XCTestCase {
 
         XCTAssertEqual(sentEpochs.last, 8,
                        "max(credential 3, high-water 5, revoked 7) + 1 — every guard cleared, nothing reused")
-    }
-
-    /// The phone is told the watch holds the pod as soon as it is reachable, and again at Keep: it
-    /// never waits on the dose stream or on the prompt.
-    func testReunionPromptAndKeepSendHoldsPodReports() async {
-        let controller = await makeController()
-        controller.simFakeLoanFlow = true
-        var holdsPodEpochs: [Int] = []
-        controller.send = { dict in
-            if let message = try? LoanMessage.decode(fromTransport: dict),
-               case .statusReport(let r) = message, r.holdsPod {
-                holdsPodEpochs.append(r.epoch)
-            }
-        }
-        controller.isPhoneReachable = { true }
-        controller.scheduler = { _, label, work in
-            if label == "sim-grant" || label == "sim-active" { work.perform() }
-        }
-        controller.requestLoan(watchBuild: "reunion-test")
-        XCTAssertEqual(controller.debugSnapshot().phase, .active)
-        controller.updateState { $0.seizeToken = UUID() }
-
-        controller.noteReachabilityChanged(true)
-        _ = controller.debugSnapshot()
-        XCTAssertEqual(holdsPodEpochs.count, 1, "told at once")
-        controller.noteReachabilityChanged(true)
-        _ = controller.debugSnapshot()
-        XCTAssertEqual(holdsPodEpochs.count, 1, "not repeated while the prompt is up")
-
-        controller.dismissReunionPrompt()
-        _ = controller.debugSnapshot()
-        XCTAssertEqual(holdsPodEpochs.count, 2, "Keep re-asserts it")
-        XCTAssertEqual(holdsPodEpochs.last, controller.debugSnapshot().epoch, "for the live loan's epoch")
     }
 
     /// A late grant while resting on a parked drain is answered, not ignored.
@@ -619,35 +456,6 @@ final class SeizeActivationTests: XCTestCase {
     }
 
     // MARK: - The offer answers one unanswered request
-
-    /// With the phone reachable at confirm, an ordinary request goes out.
-    func testConfirmWithThePhoneBackSendsAnOrdinaryRequest() async {
-        let controller = await makeController()
-        controller.isPhoneReachable = { false }
-        var requests = 0
-        controller.send = { dict in
-            if let message = try? LoanMessage.decode(fromTransport: dict), case .request(_) = message { requests += 1 }
-        }
-        var timeoutsFired = 0
-        controller.scheduler = { _, label, work in
-            // Only the first timeout runs: it is the one that puts the offer up.
-            if label == "request-timeout" && timeoutsFired == 0 { timeoutsFired += 1; work.perform() }
-        }
-
-        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-600), completeSettings: true))
-        controller.requestLoan(watchBuild: "reachable-confirm")
-        XCTAssertNotNil(controller.debugSnapshot().seizeOfferIssuedAt, "precondition: the offline offer is up")
-
-        controller.isPhoneReachable = { true }
-        controller.confirmSeize()
-        _ = controller.debugSnapshot()          // drains the confirm, which queues the request behind itself
-        let snap = controller.debugSnapshot()   // drains the request
-
-        XCTAssertEqual(requests, 2, "the confirm went to the phone as a second ordinary request")
-        XCTAssertEqual(snap.phase, .requested, "waiting on the phone's grant, not activating the stored credential")
-        XCTAssertNil(snap.seizeOfferIssuedAt, "the offer was consumed")
-        XCTAssertNil(controller.persisted.seizeToken)
-    }
 
     /// An accepted grant withdraws the offline offer.
     func testALateGrantWithdrawsTheOfflineOffer() async throws {

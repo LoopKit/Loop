@@ -598,70 +598,15 @@ final class LoanBooksHarnessTests: XCTestCase {
             provenanceIdentifier: "LoanBooksHarnessTests")
     }
 
-    /// The store is the idempotency point: one identity, one row; a late replay loses to a local edit.
-    func testR36DeliveredCarbIdentityInsertIfAbsent() {
-        let store = makeCarbStore()
-        let now = Date()
-        let entry = NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 10),
-                                 startDate: now.addingTimeInterval(-1800),
-                                 foodType: nil,
-                                 absorptionTime: .hours(3))
-        let wireID = UUID().uuidString   // the watch journal event UUID, as it travels
-
-        var first: StoredCarbEntry?
-        let e1 = expectation(description: "first delivery")
-        store.addCarbEntry(entry, syncIdentifier: wireID) { result in
-            if case .success(let stored) = result { first = stored }
-            e1.fulfill()
-        }
-        wait(for: [e1], timeout: 10)
-        XCTAssertEqual(first?.syncIdentifier, wireID, "the wire identity IS the stored identity — no re-mint at the last inch")
-
-        let e2 = expectation(description: "redelivery")
-        var second: StoredCarbEntry?
-        store.addCarbEntry(entry, syncIdentifier: wireID) { result in
-            if case .success(let stored) = result { second = stored }
-            e2.fulfill()
-        }
-        wait(for: [e2], timeout: 10)
-        XCTAssertEqual(second?.syncIdentifier, wireID)
-
-        var count = -1
-        let e3 = expectation(description: "read back")
-        store.getCarbEntries(start: now.addingTimeInterval(-.hours(4))) { result in
-            if case .success(let list) = result { count = list.count }
-            e3.fulfill()
-        }
-        wait(for: [e3], timeout: 10)
-        XCTAssertEqual(count, 1, "two deliveries, ONE row — the store dedups, not the caller")
-
-        // INSERT-IF-ABSENT, never upsert: a local edit (same identity, bumped version) must
-        // beat a late replay of the original. Upsert semantics would clobber the user's edit.
-        let edited = NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 25),
-                                  startDate: entry.startDate, foodType: nil,
-                                  absorptionTime: entry.absorptionTime)
-        let e4 = expectation(description: "local edit")
-        store.replaceCarbEntry(second!, withEntry: edited) { _ in e4.fulfill() }
-        wait(for: [e4], timeout: 10)
-
-        var afterReplay: StoredCarbEntry?
-        let e5 = expectation(description: "late replay of the ORIGINAL")
-        store.addCarbEntry(entry, syncIdentifier: wireID) { result in
-            if case .success(let stored) = result { afterReplay = stored }
-            e5.fulfill()
-        }
-        wait(for: [e5], timeout: 10)
-        XCTAssertEqual(afterReplay?.quantity.doubleValue(for: .gram) ?? 0, 25, accuracy: 0.01,
-                       "the replay returns the EDITED entry untouched — replays never win against later human intent")
-    }
-
-    /// The fold's carb shape: quantity, start, absorption, no identity. Parity rides on those three.
+    /// The fold's carb shape: quantity, start, absorption, and a fresh identity. Parity rides on the first three.
     private func addCarb(_ store: CarbStore, grams: Double, at start: Date, absorptionTime: TimeInterval) {
         let exp = expectation(description: "addCarbEntry")
-        let entry = NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: grams),
+        let entry = NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: grams),
                                  startDate: start, foodType: nil, absorptionTime: absorptionTime)
-        store.addCarbEntry(entry) { result in
-            if case .failure(let error) = result {
+        Task {
+            do {
+                _ = try await store.addCarbEntry(entry)
+            } catch {
                 XCTFail("addCarbEntry failed: \(error)")
             }
             exp.fulfill()
@@ -1443,7 +1388,7 @@ private final class PhoneOverrideHarness {
             pumpControlChanged: { _ in },
             send: { _ in },
             addPumpEvents: { _, _, completion in completion(nil) },
-            addCarb: { _, _, completion in completion(nil) },
+            addCarb: { _, completion in completion(nil) },
             // Read by the controller's "already applied?" check.
             scheduleOverride: { [weak self] in self?.phoneOverride },
             applyScheduleOverride: { [weak self] override, changedAt in

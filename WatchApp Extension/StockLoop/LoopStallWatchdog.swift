@@ -59,6 +59,21 @@ enum SensorSearchAlert {
     }
 }
 
+/// With no loan running, fires if the watch hears nothing from the phone (control row 3).
+enum NotHearingFromPhoneAlert {
+    private static let identifier = "sportmode.notHearingFromPhone"
+
+    static func arm(after interval: TimeInterval) {
+        WristAlerts.arm(identifier, after: interval,
+                        title: NSLocalizedString("Not Hearing From iPhone", comment: "Watch alert title: no word from the phone and no loan running"),
+                        body: NSLocalizedString("Your watch hasn't heard from your iPhone for 25 minutes, so it can't tell whether anything is looping. If the iPhone is off or not with you, open Loop on the watch to start Sport Mode.", comment: "Watch alert body: no word from the phone and no loan running"))
+    }
+
+    static func disarm() {
+        WristAlerts.disarm([identifier])
+    }
+}
+
 /// Fires if a hand-back never completes.
 enum HandbackStuckAlert {
     /// Covers two offers and a pod read; shorter would abandon a hand-back mid-commit.

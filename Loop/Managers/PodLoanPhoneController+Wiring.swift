@@ -55,20 +55,20 @@ extension WatchDataManager {
                     return
                 }
 
-                // A grant rides both channels; the watch drops the later duplicate by epoch.
-                let grantRidesBothChannels = (kind == "grant")
+                // A grant, a query and an answer ride both channels; the watch drops the later duplicate.
+                let ridesBothChannels = LoanMessage.ridesBothChannels(transport: dictionary)
                 self?.log.default("Loan send kind=%{public}@ path=urgent bytes=%{public}d", kind ?? "?", size)
-                PhoneLog.event("wc", "send \(kind ?? "?") path=urgent\(grantRidesBothChannels ? "+queued" : "") bytes=\(size)")
+                PhoneLog.event("wc", "send \(kind ?? "?") path=urgent\(ridesBothChannels ? "+queued" : "") bytes=\(size)")
                 session.sendMessage(dictionary, replyHandler: nil, errorHandler: { [weak self] error in
-                    guard !grantRidesBothChannels else {
-                        PhoneLog.event("wc", "urgent send FAILED grant — \(error.localizedDescription) — the queued copy carries it")
+                    guard !ridesBothChannels else {
+                        PhoneLog.event("wc", "urgent send FAILED \(kind ?? "?") — \(error.localizedDescription) — the queued copy carries it")
                         return
                     }
                     self?.log.error("Loan urgent send FAILED kind=%{public}@ — %{public}@ — falling back to queued", kind ?? "?", String(describing: error))
                     PhoneLog.event("wc", "urgent send FAILED \(kind ?? "?") bytes=\(size) — \(error.localizedDescription) — falling back to queued")
                     session.transferUserInfo(dictionary)
                 })
-                if grantRidesBothChannels { session.transferUserInfo(dictionary) }
+                if ridesBothChannels { session.transferUserInfo(dictionary) }
             },
             addPumpEvents: { [weak self] events, lastReconciliation, completion in
                 guard let self = self else { completion(nil); return }
@@ -83,15 +83,13 @@ extension WatchDataManager {
                     }
                 }
             },
-            addCarb: { [weak self] entry, syncIdentifier, completion in
+            addCarb: { [weak self] entry, completion in
                 guard let self = self else { completion(nil); return }
 
-                // Identity-accepting add, so a resent record is not a second meal.
+                // Under the entry's own identity, so a resent record is not a second meal.
                 Task {
                     do {
-                        _ = try await withCheckedThrowingContinuation { (c: CheckedContinuation<StoredCarbEntry, Error>) in
-                            self.deviceManager.carbStore.addCarbEntry(entry, syncIdentifier: syncIdentifier) { c.resume(with: $0) }
-                        }
+                        _ = try await self.deviceManager.carbStore.addCarbEntry(entry)
                         completion(nil)
                     } catch {
                         completion(error)

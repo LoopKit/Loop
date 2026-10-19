@@ -28,7 +28,7 @@ final class WristCarbDeleteTests: XCTestCase {
 
     func testADeleteAfterAnInterimCommitMatchesThePhonesCopy() async throws {
         let controller = try await liveLoan()
-        let meal = NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 30),
+        let meal = NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: 30),
                                 startDate: Date().addingTimeInterval(-600), foodType: nil, absorptionTime: .hours(3))
 
         controller.loanDidRecordCarbs(meal)
@@ -45,7 +45,7 @@ final class WristCarbDeleteTests: XCTestCase {
                                                        isFinalHandback: false)).carbs
         XCTAssertEqual(committed.count, 1)
         let onPhone = StoredCarbEntry(startDate: meal.startDate, quantity: meal.quantity,
-                                      syncIdentifier: committed.first?.eventID.uuidString)
+                                      syncIdentifier: committed.first?.syncIdentifier)
         controller.journal.applyAck(committedCursor: carbEvent.seq)
 
         // Deleted on the wrist, as the Active Carbs list passes it.
@@ -63,7 +63,7 @@ final class WristCarbDeleteTests: XCTestCase {
     /// decision records the entry as stored, under the journal's identity.
     func testTheCarbSaveAnswersWithTheStoredEntryUnderTheJournalsIdentity() async throws {
         let controller = try await liveLoan()
-        let meal = NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 45),
+        let meal = NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: 45),
                                 startDate: Date().addingTimeInterval(-60), foodType: nil, absorptionTime: .hours(3))
 
         let saved = expectation(description: "saved")

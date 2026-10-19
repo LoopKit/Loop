@@ -35,6 +35,8 @@ struct PodLoanWatchState: RawRepresentable {
     /// The odometer at takeover, and when it was read; every audit is measured from it.
     var deliveredAtTakeover: Double?
     var deliveredAtTakeoverAt: Date?
+    /// The ledger's open window starts here: the copy's reading at a grant, then every pump report.
+    var ledgerLast: (units: Double, at: Date)?
     /// The reunion token for a seized loan, echoed by every offer until the loan closes.
     var seizeToken: UUID?
     /// The dosing decision store's query anchor as of the last decisions sent home.
@@ -54,6 +56,9 @@ struct PodLoanWatchState: RawRepresentable {
         grantedSettings = (rawValue["grantedSettings"] as? [String: Any]).flatMap(Self.grantedSettings(from:))
         deliveredAtTakeover = rawValue["deliveredAtTakeover"] as? Double
         deliveredAtTakeoverAt = rawValue["deliveredAtTakeoverAt"] as? Date
+        if let units = rawValue["ledgerLastUnits"] as? Double, let at = rawValue["ledgerLastAt"] as? Date {
+            ledgerLast = (units: units, at: at)
+        }
         seizeToken = (rawValue["seizeToken"] as? String).flatMap(UUID.init(uuidString:))
         dosingDecisionsSent = rawValue["dosingDecisionsSent"] as? [String: Any]
         alertsSent = rawValue["alertsSent"] as? [String: Any]
@@ -74,6 +79,8 @@ struct PodLoanWatchState: RawRepresentable {
         }
         raw["deliveredAtTakeover"] = deliveredAtTakeover
         raw["deliveredAtTakeoverAt"] = deliveredAtTakeoverAt
+        raw["ledgerLastUnits"] = ledgerLast?.units
+        raw["ledgerLastAt"] = ledgerLast?.at
         raw["seizeToken"] = seizeToken?.uuidString
         raw["dosingDecisionsSent"] = dosingDecisionsSent
         raw["alertsSent"] = alertsSent
@@ -151,15 +158,20 @@ extension PodLoanWatchController {
         set { updateState { $0.lastRevokedEpoch = newValue } }
     }
 
+    /// Cleared with the ledger's window: the next grant opens a new one from its own copy.
     var deliveredAtTakeover: Double? {
         get { persisted.deliveredAtTakeover }
-        set { updateState { $0.deliveredAtTakeover = newValue; if newValue == nil { $0.deliveredAtTakeoverAt = nil } } }
+        set { updateState { $0.deliveredAtTakeover = newValue; if newValue == nil { $0.deliveredAtTakeoverAt = nil; $0.ledgerLast = nil } } }
     }
 
     /// Mirrored synchronously, so main-thread readers never lag the queue.
     func phaseDidChange(from oldValue: Phase, to phase: Phase) {
+        // A loan runs: the watch's own ladder covers it, not the silent-phone warning.
+        if phase == .takingOver || phase == .active { NotHearingFromPhoneAlert.disarm() }
         loanActiveMirrorLock.lock()
         _loanActiveMirror = (phase == .active)
+        // A loan that ends while a watch back from off is still checking (the phone's stop) ends the check.
+        if phase != .active { _resumingMirror = false }
         _wristAlarmsMirror = [.takingOver, .active, .handingBack, .recoveredDrain].contains(phase)
         loanActiveMirrorLock.unlock()
         // Edge-triggered, so re-asserting a phase cannot fire twice.

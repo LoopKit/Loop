@@ -42,11 +42,6 @@ enum LoanReconciler {
         }
     }
 
-    /// The event ID is the carb's sync identifier; the store would otherwise mint a new one.
-    struct IdentifiedCarb: Equatable {
-        let eventID: UUID
-        let entry: NewCarbEntry
-    }
 
     struct Outcome: Equatable {
         /// The caller drops any record whose end precedes its start.
@@ -56,7 +51,8 @@ enum LoanReconciler {
         /// finished at the end.
         var openEventID: UUID? = nil
 
-        var carbs: [IdentifiedCarb] = []
+        /// Each under its journal event's ID as its sync identifier, the identity the watch stored it under.
+        var carbs: [NewCarbEntry] = []
 
         /// Never a carb this same drain added; that pair cancels.
         var deletedCarbs: [DeletedCarb] = []
@@ -119,14 +115,13 @@ enum LoanReconciler {
                 }
             case .carb:
                 if let grams = event.record.amount {
-                    outcome.carbs.append(IdentifiedCarb(
-                        eventID: event.id,
-                        entry: NewCarbEntry(
-                            date: event.record.userCreatedDate ?? Date(),
-                            quantity: LoopQuantity(unit: .gram, doubleValue: grams),
-                            startDate: event.record.startDate,
-                            foodType: event.record.note,
-                            absorptionTime: event.record.absorptionTime)))
+                    outcome.carbs.append(NewCarbEntry(
+                        date: event.record.userCreatedDate ?? Date(),
+                        syncIdentifier: event.id.uuidString,
+                        quantity: LoopQuantity(unit: .gram, doubleValue: grams),
+                        startDate: event.record.startDate,
+                        foodType: event.record.note,
+                        absorptionTime: event.record.absorptionTime))
                 }
             // Added and deleted in the same drain: cancels (seq order makes that safe).
             case .carbDeleted:
@@ -134,7 +129,7 @@ enum LoanReconciler {
                 if let grams = event.record.amount {
                     let start = event.record.startDate
                     let before = outcome.carbs.count
-                    outcome.carbs.removeAll { $0.entry.startDate == start && $0.entry.quantity.doubleValue(for: .gram) == grams }
+                    outcome.carbs.removeAll { $0.startDate == start && $0.quantity.doubleValue(for: .gram) == grams }
                     guard outcome.carbs.count == before else { break }
                     outcome.deletedCarbs.append(DeletedCarb(
                         syncIdentifier: event.record.syncIdentifier,

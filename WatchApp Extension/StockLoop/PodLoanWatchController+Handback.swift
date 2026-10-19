@@ -26,7 +26,6 @@ extension PodLoanWatchController {
         queue.async {
             guard self.phase == .active, self.pumpManager != nil else { return }
             guard !self.handbackRequested else { return }
-            self.reunionPromptActive = false
             self.handbackRequested = true
             self.handbackFailure = nil
             self.handbackResendCount = 0
@@ -44,7 +43,18 @@ extension PodLoanWatchController {
                 return
             }
             SportLog.event("loan", "HAND-BACK requested — draining \(self.journal.unackedEvents().count) events; still in control (WS1)")
+            // Rows 7, 8 and 21: the offer is the query; `LoanControl` decides what silence means.
+            let tappedAt = self.now()
+            self.handbackAckedAt = nil
             self.sendHandbackOffer(freshened: false, recovered: false)
+            guard case .query(let wait, let onSilence) = LoanControl.decide(LoanControl.Situation(device: .watch, trigger: .endTapped)) else { return }
+            self.schedule(after: wait.seconds, label: "handback-answer") { [weak self] in
+                guard let self = self, self.phase == .active, self.handbackRequested,
+                      self.handbackAckedAt.map({ $0 >= tappedAt }) != true else { return }
+                if case .refuse = LoanControl.afterQuery(.silence, onSilence: onSilence) {
+                    self.handbackTimedOut(unreachable: true)
+                }
+            }
         }
     }
 
@@ -66,10 +76,10 @@ extension PodLoanWatchController {
     func handbackTimedOut(unreachable: Bool = false, refusal: String? = nil) {
         let why: String
         if let refusal { why = "REFUSED by the phone — \(refusal)" }
-        else if unreachable { why = "not possible — iPhone not reachable, no offer sent" }
+        else if unreachable { why = "not possible — iPhone did not answer the offer" }
         else { why = "timed out (\(Int(HandbackStuckAlert.interval))s) — iPhone never acked" }
         handbackFailure = (now(), refusal ?? (unreachable
-            ? NSLocalizedString("iPhone not reachable — still running", comment: "Glance transient: End failed, phone unreachable")
+            ? NSLocalizedString("iPhone isn't nearby, so the pod can't be handed back. Sport Mode keeps looping. To stop automatic dosing, open the loop on the watch.", comment: "Glance message: End refused, the phone did not answer")
             : NSLocalizedString("iPhone didn't respond — still running", comment: "Glance transient: End failed, no ack")))
         resendWorkItem?.cancel()
         handbackDeadline = nil
@@ -191,8 +201,8 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Sends one offer and arms the next. A live offer is never queued: accepted late it would
-    /// split the pod. Drains from a loan that is already over may queue.
+    /// Sends one offer, by every path, and arms the next: a late interim offer only stores records,
+    /// and nothing returns the watch to dosing after the final one.
     func sendHandbackOffer(freshened: Bool, recovered: Bool) {
         guard let epoch = epoch ?? journal.activeEpoch else { return }
         // After a revoke's teardown, use the total captured before it.
@@ -229,21 +239,15 @@ extension PodLoanWatchController {
             SportLog.event("loan", "hand-back offer attempt \(handbackResendCount) — waiting for iPhone ack")
         }
 
-        // Live: this watch still holds the pod (interim or final offer).
-        let live = !recovered && phase != .revoked && phase != .recoveredDrain
         let reachableNow = isPhoneReachable()
         if !reachableNow { handbackSawUnreachable = true }
-        if live, !reachableNow {
-            handbackTimedOut(unreachable: true)
-            return
-        }
         if lastHandbackReachable != reachableNow {
             SportLog.event("loan", reachableNow
                 ? "hand-back: iPhone reachable — offer should ack shortly"
-                : "drain: iPhone UNREACHABLE — offer queued, will land when it returns")
+                : "hand-back: iPhone not reachable for a live message — offer queued")
             lastHandbackReachable = reachableNow
         }
-        sendMessage(.handbackOffer(offer), urgentOnly: live)
+        sendMessage(.handbackOffer(offer))
 
         resendWorkItem?.cancel()
         let work = DispatchWorkItem { [weak self] in
@@ -274,6 +278,7 @@ extension PodLoanWatchController {
                     $0.epoch = nil
                     $0.deliveredAtTakeover = nil
                     $0.deliveredAtTakeoverAt = nil
+                    $0.ledgerLast = nil
                     $0.seizeToken = nil
                 }
                 self.handbackDeadline = nil
@@ -307,6 +312,8 @@ extension PodLoanWatchController {
             SportLog.event("loan", "ack IGNORED ev=\(ack.epoch) — ours ev=\(epoch.map(String.init) ?? "nil") journal ev=\(journal.activeEpoch.map(String.init) ?? "nil"); stale redelivery or epoch mismatch")
             return
         }
+        // The phone answered the offer: the End is not refused.
+        handbackAckedAt = now()
         // An empty backlog is the finalize gate.
         journal.applyAck(committedCursor: ack.committedCursor)
         guard journal.unackedEvents().isEmpty else { return }
@@ -339,13 +346,13 @@ extension PodLoanWatchController {
             $0.epoch = nil
             $0.deliveredAtTakeover = nil
             $0.deliveredAtTakeoverAt = nil
+            $0.ledgerLast = nil
             $0.seizeToken = nil
         }
         handbackDeadline = nil
         handbackStartedAt = nil
         HandbackStuckAlert.disarm()
         onLoanActiveChanged?(false)
-        reunionPromptActive = false
         SportLog.event("loan", "CLOSED — records drained, pod released, cursor \(ack.committedCursor)")
     }
 
@@ -377,6 +384,7 @@ extension PodLoanWatchController {
         teardownPump()
         phase = .revoked
         onLoanActiveChanged?(false)
+        lastIdleNote = NSLocalizedString("Sport Mode ended. Your iPhone has the pod.", comment: "Glance note after the phone took the pod back")
         SportLog.event("loan", "REVOKED — phone reclaimed the pod, draining records")
         sendHandbackOffer(freshened: false, recovered: true)
     }
@@ -509,8 +517,17 @@ extension PodLoanWatchController {
             lastEventSeq: journal.lastEventSeq,
             podFault: pumpFaultDescription,
             holdsPod: phase == .active,
-            knowsGrant: true)
+            knowsGrant: true,
+            podReachable: phase == .active ? podReachedLately : nil,
+            loanStartedAt: persisted.deliveredAtTakeoverAt)
         sendMessage(.statusReport(report))
+    }
+
+    /// Whether this watch read the pod within the last cycle: a holder that cannot reach the pod says
+    /// so, and the phone answers it like silence. Nil before any reading.
+    var podReachedLately: Bool? {
+        guard let reading = pumpOdometer?.deliveredUnits else { return nil }
+        return now().timeIntervalSince(reading.at) <= LoanControl.watchReportOverdue
     }
 
     /// `.closedDirect`, the only mode.

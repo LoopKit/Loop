@@ -32,8 +32,6 @@ extension PodLoanPhoneController {
         updateState {
             $0.yieldingToInferredLoan = true
             $0.holdRenewedAt = now
-            $0.holdLapseNoticedAt = nil
-            $0.watchSilenceWarningsIssued = 0
             if let units {
                 $0.ledger.last = .init(units: units, at: asOf)
                 $0.loanStartedAt = asOf
@@ -52,7 +50,7 @@ extension PodLoanPhoneController {
         deps.issueNotice(
             NSLocalizedString("Pod Looks Controlled by the Watch", comment: "Phone notice title when the phone yields to an inferred watch loan"),
             NSLocalizedString("This phone has paused automatic dosing because the pod appears to be in use by the watch. Tap the pod tile to take it back.", comment: "Phone notice body when the phone yields to an inferred watch loan"))
-        PhoneLog.event("mirror", "YIELDING to an inferred loan — \(evidence); pill=Pod on Watch, dosing paused, pod BLE released, exits: pill tap / watch revival / reunion prompt; on conflict the phone yields [mirror]")
+        PhoneLog.event("mirror", "YIELDING to an inferred loan — \(evidence); pill=Pod on Watch, dosing paused, pod BLE released, exits: pill tap / watch revival / the watch's records; on conflict the phone yields [mirror]")
     }
 
     /// The stop message can be lost on the way to a watch that was off. Anything the watch sends
@@ -89,9 +87,11 @@ extension PodLoanPhoneController {
     }
 
     /// Comfortably past a normal takeover, which lands in well under half this.
-    private static let grantLostProbeDelay: TimeInterval = 20
+    /// Settable for tests.
+    static var grantLostProbeDelay: TimeInterval = 20
 
-    /// Asks only: a watch mid-takeover is as silent as one that heard nothing.
+    /// The grant unconfirmed: ask the watch. "Taking over" waits for the lease; "no such grant" takes the
+    /// pod back at once (`handleStatusReport`); silence takes it back after the answer wait.
     private func armGrantLostProbe(for grantEpoch: Int) {
         queue.asyncAfter(deadline: .now() + Self.grantLostProbeDelay) { [weak self] in
             guard let self = self, self.state == .grantOffered, self.epoch == grantEpoch else { return }
@@ -100,20 +100,27 @@ extension PodLoanPhoneController {
             if !self.deps.watchAppInstalled() {
                 self.handbackDiag(grantEpoch, "grant unconfirmed AND isWatchAppInstalled=false — one-way wedge signature")
             }
+            let askedAt = self.deps.now()
             self.sendMessage(.statusQuery(StatusQuery(epoch: grantEpoch)))
+            self.queue.asyncAfter(deadline: .now() + Self.answerWait) { [weak self] in
+                guard let self = self, self.state == .grantOffered, self.epoch == grantEpoch,
+                      self.lastWatchAnswerAt.map({ $0 >= askedAt }) != true else { return }
+                self.t1WorkItem?.cancel()
+                self.reclaimToOwner(alert: Self.grantNotTakenNotice, reason: "grant unconfirmed and the watch did not answer")
+            }
         }
     }
 
-    /// Five-minute dead-man on an unconfirmed takeover: ask once more, then take the pod back.
-    /// Per grant; every path that abandons a loan clears it.
+    static let grantNotTakenNotice = (
+        title: NSLocalizedString("The Watch Didn't Take the Pod", comment: "Phone notice title: a grant the watch never confirmed"),
+        body: NSLocalizedString("Sport Mode didn't start on the watch. This phone kept the pod and is looping.", comment: "Phone notice body: a grant the watch never confirmed"))
+
+    /// The grant's lease (five minutes) for a takeover the watch said is under way: ask once more at its
+    /// end, then take the pod back. Per grant; every path that abandons a loan clears it.
     func armT1(for grantEpoch: Int) {
         if grantOfferedAt == nil { grantOfferedAt = deps.now() }
         armGrantLostProbe(for: grantEpoch)
 
-        scheduleNotification(id: NotificationID.t1,
-                             title: NSLocalizedString("Watch Loan Not Confirmed", comment: "Phone notification title: the watch never confirmed a takeover"),
-                             body: NSLocalizedString("The watch hasn't confirmed taking the pod. The phone will take it back.", comment: "Phone notification body: the watch never confirmed a takeover"),
-                             delay: .minutes(5), repeats: false)
         t1WorkItem?.cancel()
         let work = DispatchWorkItem { [weak self] in
             guard let self = self, self.state == .grantOffered, self.epoch == grantEpoch else { return }
@@ -122,7 +129,7 @@ extension PodLoanPhoneController {
             let confirm = DispatchWorkItem { [weak self] in
                 guard let self = self, self.state == .grantOffered, self.epoch == grantEpoch else { return }
 
-                self.reclaimToOwner(alert: nil, reason: "dead-man T1 expired — the watch never confirmed the takeover")
+                self.reclaimToOwner(alert: Self.grantNotTakenNotice, reason: "the grant's lease ended — the watch never confirmed the takeover")
             }
             self.t1WorkItem = confirm
             self.queue.asyncAfter(deadline: .now() + 15, execute: confirm)
@@ -158,31 +165,35 @@ extension PodLoanPhoneController {
     /// The one place an ungranted loan can be recognised. `knowsGrant` nil means no information;
     /// only an explicit false may act. A pod fault is announced once.
     func handleStatusReport(_ report: StatusReport) {
-        // A newer epoch the watch holds backs both a yield and a re-aimed revoke.
-        if report.holdsPod, report.epoch > epoch {
-            if newestForeignLoanEvidence.map({ report.epoch >= $0.epoch }) ?? true {
-                newestForeignLoanEvidence = (report.epoch, deps.now())
+        // Any report answers a question this phone asked (`askWatch`).
+        lastWatchAnswerAt = deps.now()
+        lastWatchAnswerCannotReachPod = report.holdsPod && report.podReachable == false
+        lastWatchAnswerHoldsNothing = !report.holdsPod
+        if report.holdsPod {
+            let loan: LoanControl.ClaimedLoan = report.epoch > epoch ? .newer
+                : (report.epoch == epoch && state != .owner ? .current : .closed)
+            let claim = LoanControl.Claim(loan: loan, startedAt: report.loanStartedAt, podReachable: report.podReachable,
+                                          refusedBefore: refusedRevivedEpochs.contains(report.epoch))
+            let decision = decideAndAct(.watchClaims(claim), why: "the watch says it holds the pod on e\(report.epoch) (status report)",
+                                        claimEpoch: report.epoch)
+            if loan == .newer {
+                if decision == .sendStop {
+                    // Row 19: a revived claim, refused; its records will get the stop too.
+                    refusedRevivedEpochs.insert(report.epoch)
+                    return
+                }
+                if newestForeignLoanEvidence.map({ report.epoch >= $0.epoch }) ?? true {
+                    newestForeignLoanEvidence = (report.epoch, deps.now())
+                }
+                // Transfer G: the awaited grant is a ghost; stand aside for the loan actually running.
+                if state == .grantOffered, persisted.seizeToken != nil {
+                    t1WorkItem?.cancel()
+                    cancelNotification(id: NotificationID.t1)
+                    handbackDiag(epoch, "ghost grant e\(epoch) ABANDONED — the watch answered holdsPod e\(report.epoch); yielding instead of waiting on a takeover that cannot come [mirror]")
+                    state = .owner
+                    engageInferredLoanYield(evidence: "statusReport — watch holds e\(report.epoch), ghost grant abandoned")
+                }
             }
-            // Only a watch holding this phone's seize credential could have started a session.
-            let hasCredential = persisted.seizeToken != nil
-            switch state {
-            case .owner where hasCredential:
-                engageInferredLoanYield(evidence: "statusReport — watch holds the pod on e\(report.epoch)")
-            // The awaited grant is a ghost; yield to the loan actually running.
-            case .grantOffered where hasCredential:
-
-                t1WorkItem?.cancel()
-                cancelNotification(id: NotificationID.t1)
-                handbackDiag(epoch, "ghost grant e\(epoch) ABANDONED — the watch answered holdsPod e\(report.epoch); yielding instead of waiting on a takeover that cannot come [mirror]")
-                state = .owner
-                engageInferredLoanYield(evidence: "statusReport — watch holds e\(report.epoch), ghost grant abandoned")
-            default:
-                break
-            }
-        }
-        // The watch says it holds the pod on a loan this phone has ended: tell it again to stop.
-        if report.holdsPod, report.epoch <= epoch, state == .owner, !yieldingToInferredLoan {
-            resendRevokeForClosedSession(epoch: report.epoch, evidence: "a status report")
         }
         guard report.epoch == epoch else { return }
 

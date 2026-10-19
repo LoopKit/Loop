@@ -132,7 +132,7 @@ final class OverrideHistoryTests: XCTestCase {
         await seedGlucose(manager, hours: 3)
         let carbStart = now.addingTimeInterval(-.hours(6))
         _ = try await manager.carbStore.addCarbEntry(NewCarbEntry(
-            quantity: LoopQuantity(unit: .gram, doubleValue: 30), startDate: carbStart, foodType: nil, absorptionTime: .hours(3)))
+            syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: 30), startDate: carbStart, foodType: nil, absorptionTime: .hours(3)))
         manager.overrideHistory.recordOverride(halfNeeds(start: now.addingTimeInterval(-.hours(7)), duration: .hours(2)))
 
         // After the entry is made: an entry created after the base time is filtered, as in stock.

@@ -58,7 +58,7 @@ final class PodLoanPhoneController {
 
         var addPumpEvents: ([NewPumpEvent], _ lastReconciliation: Date?, @escaping (Error?) -> Void) -> Void
 
-        var addCarb: (NewCarbEntry, String, @escaping (Error?) -> Void) -> Void
+        var addCarb: (NewCarbEntry, @escaping (Error?) -> Void) -> Void
 
         var deleteCarb: (LoanReconciler.DeletedCarb, @escaping (Error?) -> Void) -> Void = { _, done in done(nil) }
 
@@ -228,28 +228,6 @@ final class PodLoanPhoneController {
         deps.send(dictionary)
     }
 
-    /// A phone dose as a wire record; scheduled basal and resume are omitted.
-    static func loanRecord(from dose: DoseEntry) -> LoanDoseRecord? {
-        switch dose.type {
-        case .bolus:
-            return LoanDoseRecord(kind: .bolus, startDate: dose.startDate, endDate: dose.endDate, amount: dose.deliveredUnits ?? dose.programmedUnits,
-                                  syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType, automatic: dose.automatic,
-                                  decisionId: dose.decisionId)
-        // Rate records carry delivered units: the pod floors to whole pulses.
-        case .tempBasal:
-
-            return LoanDoseRecord(kind: .tempBasal, startDate: dose.startDate, endDate: dose.endDate, unitsPerHour: dose.unitsPerHour,
-                                  syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType,
-                                  deliveredUnits: dose.deliveredUnits, decisionId: dose.decisionId)
-        case .suspend:
-            return LoanDoseRecord(kind: .suspend, startDate: dose.startDate, endDate: dose.endDate, unitsPerHour: 0,
-                                  syncIdentifier: dose.syncIdentifier, insulinType: dose.insulinType,
-                                  deliveredUnits: dose.deliveredUnits, decisionId: dose.decisionId)
-        case .basal, .resume:
-            return nil
-        }
-    }
-
     /// Restores the loan and re-arms what was owed; a loaned state pauses dosing at once.
     init(dependencies: Dependencies) {
         self.deps = dependencies
@@ -355,6 +333,17 @@ final class PodLoanPhoneController {
     var trailingDormantRefreshPending = false
 
     var lastClosedSessionRevokeAt: Date?
+    /// A question to the watch awaiting its answer (`askWatch`), and when the last status report came.
+    var watchAskedAt: Date?
+    var lastWatchAnswerAt: Date?
+    /// The last report said the watch holds the pod but cannot reach it.
+    var lastWatchAnswerCannotReachPod = false
+    /// The last report said the watch holds nothing.
+    var lastWatchAnswerHoldsNothing = false
+    /// Loans a revived watch claimed that this phone refused; its records for them get the stop again.
+    var refusedRevivedEpochs: Set<Int> = []
+    /// The silence a "Watch Not Reporting" notice went out for, so it is said once.
+    var silenceWarnedFor: Date?
     var lastDormantSettingsFingerprint: String?
     /// The phone's glucose alert settings as last seen; part of the standing copy's fingerprint.
     var glucoseAlertSettingsSeen: GlucoseAlertSettings?

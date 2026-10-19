@@ -235,6 +235,8 @@ class SettingsManager {
             analyticsServicesManager?.didChangeInsulinModel()
         }
 
+        analyticsServicesManager?.didChangeLoopSettings(from: oldValue, to: newValue)
+
         if newValue.dosingEnabled != oldValue.dosingEnabled {
             self.dosingEnabled = newValue.dosingEnabled
         }

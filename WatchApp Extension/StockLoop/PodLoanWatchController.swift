@@ -118,11 +118,37 @@ final class PodLoanWatchController {
     /// Sets the request timeout and refuses to queue a live offer; never gates a start.
     var isPhoneReachable: () -> Bool = { true }
 
-    /// Whether the link to the phone is set up; until it is, "unreachable" means nothing.
-    var isPhoneLinkActivated: () -> Bool = { true }
+    /// Whether the link to the phone has finished starting up. Before it has, a message is lost, so
+    /// anything that waits on an answer starts only once it is (`whenLinkActivated`).
+    var isLinkActivated: () -> Bool = { true }
+
+    /// When the phone was last heard from; the Sport Mode page says when it has gone quiet.
+    var lastHeardFromPhoneAt: Date?
+
+    /// Work waiting for the link to start up; run by `linkDidActivate`. On `queue`.
+    var workAwaitingLink: [() -> Void] = []
+
+    /// On `queue`: runs `work` now if the link is up, else when it comes up.
+    func whenLinkActivated(_ work: @escaping () -> Void) {
+        guard isLinkActivated() else {
+            workAwaitingLink.append(work)
+            SportLog.event("wc", "link to the phone not started yet — held until it is")
+            return
+        }
+        work()
+    }
+
+    /// The link to the phone has started up.
+    func linkDidActivate() {
+        queue.async {
+            let waiting = self.workAwaitingLink
+            self.workAwaitingLink = []
+            waiting.forEach { $0() }
+        }
+    }
 
     /// How long a Start waits for the phone's grant before offering the offline start.
-    static let requestTimeout: TimeInterval = 10
+    static let requestTimeout: TimeInterval = LoanControl.Wait.onScreen.seconds
 
     /// Logs reachability transitions, not every resend.
     var lastHandbackReachable: Bool?
@@ -166,12 +192,12 @@ final class PodLoanWatchController {
 
     /// Transient glance notes, stamped so they age out.
     var handbackFailure: (at: Date, text: String)?
+    /// When the phone last acknowledged a hand-back offer; an End with no acknowledgement in the
+    /// answer wait is refused.
+    var handbackAckedAt: Date?
 
     var startNote: (at: Date, text: String)?
 
-    /// The copy's pod total and records, consumed once at takeover.
-    var takeoverCopyTotal: (units: Double, asOf: Date)?
-    var takeoverCopyRecords: [LoanDoseRecord] = []
     /// The persisted state (+State): phase, epoch, high-water, the live loan's settings,
     /// odometer and reunion token. Written whole by `updateState`.
     var stateStore: PersistedProperty<[String: Any]>
@@ -311,6 +337,19 @@ final class PodLoanWatchController {
     /// Serialized with timers and the pump's callbacks.
     func handleIncoming(userInfo: [String: Any], channel: LoanTransportChannel) {
         queue.async { self.handleIncomingOnQueue(userInfo: userInfo, channel: channel) }
+        notePhoneHeard()
+    }
+
+    /// Any word from the phone (its loan messages, or its status for the stock pages). With no loan
+    /// running, `LoanControl` row 3: the warning for a silent phone is pushed out.
+    func notePhoneHeard() {
+        queue.async {
+            self.lastHeardFromPhoneAt = self.now()
+            guard self.phase == .idle || self.phase == .recoveredDrain else { return }
+            if case .tellIfSilent(.notHearingFromPhone, let after) = LoanControl.decide(LoanControl.Situation(device: .watch, trigger: .phoneHeardWithNoLoan)) {
+                NotHearingFromPhoneAlert.arm(after: after)
+            }
+        }
     }
 
     /// Logs every inbound message, with its channel, before any guard.
@@ -327,10 +366,6 @@ final class PodLoanWatchController {
         guard let message = message else { return }
 
         SportLog.event("loan", "RX \(message.kindLabel) ch=\(channel.rawValue) — ours ev=\(epoch.map(String.init) ?? "nil") phase=\(phase.rawValue)")
-        // Any message is the phone heard; reachability alone flickers with this app's screen. Not a
-        // revoke: the phone has taken the pod back, so there is nothing to ask.
-        if case .revoke = message {} else { raiseReunionPrompt(because: "phone heard (\(message.kindLabel))") }
-
         switch message {
         case .grant(let grant):
             handleGrant(grant)
@@ -366,10 +401,8 @@ final class PodLoanWatchController {
         }
     }
 
-    /// `urgentOnly`: never fall back to the queue.
-    func sendMessage(_ message: LoanMessage, urgentOnly: Bool = false) {
-        guard var dictionary = try? message.transportDictionary() else { return }
-        if urgentOnly { dictionary["urgentOnly"] = true }
+    func sendMessage(_ message: LoanMessage) {
+        guard let dictionary = try? message.transportDictionary() else { return }
         send?(dictionary)
     }
 
@@ -422,9 +455,6 @@ final class PodLoanWatchController {
     /// Persisted only once the loan is active (a fold persists at once).
     var pendingSeizeToken: UUID?
 
-    var reunionPromptActive = false
-    /// Keep was the answer: no second prompt this loan. Cleared when a loan becomes active.
-    var reunionKeepChosen = false
 
     /// Simulator only: Start and End drive the fake flow in +SimulatorDriver. Set by tests, or
     /// by the `-simFakeLoanFlow` launch argument.

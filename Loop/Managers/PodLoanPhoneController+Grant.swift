@@ -128,7 +128,7 @@ extension PodLoanPhoneController {
 
         // Cancel the phone's temp and wait for the pod to acknowledge it before releasing. From here the
         // phone's own loop doses nothing: a temp set between the cancel and the release went
-        // unacknowledged (2026-10-16 23:24), and the driver's recovery then dialed the lent pod.
+        // unacknowledged, and the driver's recovery then dialed the lent pod.
         grantInFlight = true
         deps.cancelTempBasalForGrant { [weak self] error in
             guard let self = self else { return }
@@ -176,8 +176,6 @@ extension PodLoanPhoneController {
             $0.loanStartedAt = handedOverAt
             if let deliveredAtGrant { $0.ledger.last = .init(units: deliveredAtGrant, at: handedOverAt) }
             $0.holdRenewedAt = handedOverAt
-            $0.holdLapseNoticedAt = nil
-            $0.watchSilenceWarningsIssued = 0
         }
         stateDidChange(from: previous)
 
@@ -285,7 +283,7 @@ extension PodLoanPhoneController {
                             therapySettingsRaw: settingsData,
                             // The schedules' authoring time zone.
                             settingsTimeZoneID: settings.basalRateSchedule?.timeZone.identifier ?? TimeZone.current.identifier,
-                            doseHistory: history.compactMap(Self.loanRecord(from:)),
+                            doseHistory: history.compactMap(LoanDoseRecord.init(storeDose:)),
                             // Capability flags for version skew.
                             supportsInterimHandback: true,
                             supportsOverrideRecords: true,

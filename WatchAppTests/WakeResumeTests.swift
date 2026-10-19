@@ -98,6 +98,10 @@ final class WakeResumeTests: XCTestCase {
         }
         if let savedState { savePumpState(savedState) }
         let c = await makeController()
+        // The ask before looping answers at once here (no phone); every other timer runs for real.
+        c.scheduler = { [weak c] delay, label, work in
+            if label == "resume-ask" { work.perform() } else { c?.queue.asyncAfter(deadline: .now() + delay, execute: work) }
+        }
         c.resumeIfNeeded()   // what the session does once the hooks are wired
         c.queue.sync { }     // the resume is built on the queue; wait for it
         return c
@@ -216,20 +220,78 @@ final class WakeResumeTests: XCTestCase {
                        "the last-loop time comes back from disk (else: gray ring for one cycle)")
     }
 
-    func testLiveHandbackWithPhoneUnreachableFailsFastAndKeepsTheLoan() async {
-        // A live hand-back is never queued. Out of reach, End fails at once
-        // and the loan continues — no offer is sent, nothing can land later and take the pod.
+    func testEndWithThePhoneAwayIsRefusedAfterTheWaitAndSaysHowToStopDosing() async {
+        // The offer is the query (control document, row 8): it goes out by every path; with no
+        // acknowledgement within the wait the End is refused, the loan continues, and the watch says
+        // why and how to stop dosing instead.
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         XCTAssertNotNil(c.pumpManager)
         c.isPhoneReachable = { false }
+        var answerWait: DispatchWorkItem?
+        c.scheduler = { _, label, work in if label == "handback-answer" { answerWait = work } }
         var sent: [[String: Any]] = []
         c.send = { sent.append($0) }
         c.beginHandback()
         c.queue.sync { }
-        XCTAssertEqual(c.phase, .active, "the loan continues")
+        XCTAssertEqual(sent.count, 1, "the offer went out, whatever the reachability flag says")
+        XCTAssertTrue(c.debugSnapshot().handbackPending, "and the End waits for an answer")
+
+        c.queue.sync { answerWait?.perform() }
+        XCTAssertEqual(c.phase, .active, "silence: the loan continues")
         XCTAssertNotNil(c.pumpManager, "the watch still holds the pod")
-        XCTAssertTrue(sent.isEmpty, "no offer left the watch — nothing queued to land later")
-        XCTAssertNotNil(c.debugSnapshot().handbackFailureText, "and the glance has the reason to show, on screen rather than as a notification")
+        XCTAssertFalse(c.debugSnapshot().handbackPending)
+        XCTAssertTrue(c.debugSnapshot().handbackFailureText?.contains("open the loop") == true,
+                      "on screen: why, and how to stop dosing instead")
+    }
+
+    func testEndAnsweredWithinTheWaitIsNotRefused() async throws {
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        var answerWait: DispatchWorkItem?
+        c.scheduler = { _, label, work in if label == "handback-answer" { answerWait = work } }
+        c.send = { _ in }
+        c.beginHandback()
+        c.queue.sync { }
+        c.handleIncoming(userInfo: try LoanMessage.handbackAck(HandbackAck(epoch: 7, committedCursor: 0)).transportDictionary(), channel: .queued)
+        c.queue.sync { }
+        c.queue.sync { answerWait?.perform() }
+        XCTAssertNil(c.debugSnapshot().handbackFailureText, "the phone answered: not refused")
+    }
+
+    func testEveryHandbackOfferGoesWhateverReachabilitySays() async {
+        // Reachability chooses the fast path only: resends go whether or not the flag says the
+        // phone's app can take a live message.
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        var timers: [(label: String, work: DispatchWorkItem)] = []
+        c.scheduler = { _, label, work in timers.append((label, work)) }
+        c.isPhoneReachable = { true }
+        var sent: [[String: Any]] = []
+        c.send = { sent.append($0) }
+        c.beginHandback()
+        c.queue.sync { }
+        XCTAssertEqual(sent.count, 1)
+
+        c.isPhoneReachable = { false }
+        c.queue.sync { timers.last { $0.label == "handback-resend" }?.work.perform() }
+        XCTAssertEqual(sent.count, 2, "the resend went, queued")
+        XCTAssertTrue(c.debugSnapshot().handbackPending)
+    }
+
+    /// The answer to a query says whether the watch can reach the pod and when its loan started
+    /// (control document, rows 14 and 19).
+    func testTheAnswerCarriesPodReachAndLoanStart() async throws {
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        let started = Date().addingTimeInterval(-.minutes(30))
+        c.updateState { $0.deliveredAtTakeoverAt = started }
+        var reports: [StatusReport] = []
+        c.send = { dict in
+            if let m = try? LoanMessage.decode(fromTransport: dict), case .statusReport(let r) = m { reports.append(r) }
+        }
+        c.handleIncoming(userInfo: try LoanMessage.statusQuery(StatusQuery(epoch: 7)).transportDictionary(), channel: .queued)
+        c.queue.sync { }
+        let report = try XCTUnwrap(reports.last)
+        XCTAssertTrue(report.holdsPod)
+        XCTAssertEqual(report.loanStartedAt?.timeIntervalSince1970 ?? 0, started.timeIntervalSince1970, accuracy: 1)
+        XCTAssertNotEqual(report.podReachable, true, "no recent reading of the pod: not reported as reachable")
     }
 
     func testPhoneRefusalEndsTheHandbackAtOnceAndKeepsTheLoan() async throws {
@@ -306,44 +368,165 @@ final class WakeResumeTests: XCTestCase {
         XCTAssertFalse(next.loopManager.closedLoopEnabledNonBlocking, "loop mode is per loan: the next launch starts open")
     }
 
-    // MARK: insulin the copy cannot explain
+    // MARK: insulin the records cannot explain
 
-    private let t0 = Date(timeIntervalSince1970: 1_790_000_000)
+    private let t0 = Date().addingTimeInterval(-.minutes(30))
     private var flatSchedule: BasalRateSchedule { BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.2)])! }
-    private func unexplained(podTotal: Double, after minutes: Double, records: [LoanDoseRecord] = []) -> Double {
-        PodLoanWatchController.insulinTheCopyCannotExplain(copyTotal: 10.0, copyAt: t0, podTotal: podTotal,
-                                                           now: t0.addingTimeInterval(.minutes(minutes)),
-                                                           records: records, schedule: flatSchedule, pulseUnits: 0.05)
+
+    /// What a reading of `podTotal`, `minutes` after the copy's reading of 10.0 U, books with `records`
+    /// in the watch's own store: the ledger's window closes at the reading, as at every pump report.
+    private func unexplained(podTotal: Double, after minutes: Double, records: [DoseEntry] = []) async -> Double {
+        let c = await makeController()
+        var settings = LoopSettings()
+        settings.basalRateSchedule = flatSchedule
+        c.loopManager.settings = settings
+        c.updateState { $0.ledgerLast = (units: 10.0, at: t0) }
+        try? await c.loopManager.seedInsulinHistory(records)
+        await c.checkOwnPumpTotal(reading: (units: podTotal, at: t0.addingTimeInterval(.minutes(minutes))), pulseUnits: 0.05, insulinType: nil)
+        return await booked(in: c, since: t0)
     }
 
-    func testAnOrdinaryStartHasNothingToBook() {
+    /// The estimates in the watch's store since `start`, in units.
+    private func booked(in c: PodLoanWatchController, since start: Date) async -> Double {
+        let doses = (try? await c.loopManager.doseStore.getNormalizedDoseEntries(start: start.addingTimeInterval(-.hours(1)))) ?? []
+        return doses.filter { $0.syncIdentifier?.hasPrefix("LOAN-WATCH-GAP") ?? false }.reduce(0) { $0 + ($1.deliveredUnits ?? 0) }
+    }
+
+    func testAnOrdinaryStartHasNothingToBook() async {
         // Ten minutes at 1.2 U/h is 0.2 U of scheduled basal, and that is all the pod delivered.
-        XCTAssertEqual(unexplained(podTotal: 10.2, after: 10), 0)
-        XCTAssertEqual(unexplained(podTotal: 10.35, after: 10), 0, "0.15 U over is inside the 0.20 U band — the phone's band at reclaim")
+        let clean = await unexplained(podTotal: 10.2, after: 10)
+        XCTAssertEqual(clean, 0)
+        let inBand = await unexplained(podTotal: 10.35, after: 10)
+        XCTAssertEqual(inBand, 0, "0.15 U over is inside the 0.20 U band — the phone's band at reclaim")
     }
 
-    func testAPhoneBolusGivenAfterTheCopyIsBooked() {
+    func testAPhoneBolusGivenAfterTheCopyIsBooked() async {
         // A copy older than a phone bolus: the watch books the unexplained insulin.
-        XCTAssertEqual(unexplained(podTotal: 16.2, after: 10), 6.0, accuracy: 0.001)
+        let booked = await unexplained(podTotal: 16.2, after: 10)
+        XCTAssertEqual(booked, 6.0, accuracy: 0.001)
     }
 
-    func testABolusTheCopyAlreadyKnowsIsNotBookedTwice() {
+    func testABolusTheCopyAlreadyKnowsIsNotBookedTwice() async {
         // Still delivering when the copy's pod reading was taken: half of it is in that reading,
         // the other half arrives after it — and the copy's own record explains that half.
-        let bolus = LoanDoseRecord(kind: .bolus, startDate: t0.addingTimeInterval(-.minutes(2)),
-                                   endDate: t0.addingTimeInterval(.minutes(2)), amount: 6.0)
-        XCTAssertEqual(unexplained(podTotal: 10.0 + 3.0 + 0.2, after: 10, records: [bolus]), 0)
+        let bolus = DoseEntry(type: .bolus, startDate: t0.addingTimeInterval(-.minutes(2)), endDate: t0.addingTimeInterval(.minutes(2)),
+                              value: 6.0, unit: .units, decisionId: nil, deliveredUnits: 6.0, syncIdentifier: "copy-bolus")
+        let straddling = await unexplained(podTotal: 10.0 + 3.0 + 0.2, after: 10, records: [bolus])
+        XCTAssertEqual(straddling, 0)
         // …and a bolus wholly after the reading is explained in full.
-        let later = LoanDoseRecord(kind: .bolus, startDate: t0.addingTimeInterval(.minutes(1)),
-                                   endDate: t0.addingTimeInterval(.minutes(3)), amount: 2.0)
-        XCTAssertEqual(unexplained(podTotal: 10.0 + 2.0 + 0.2, after: 10, records: [later]), 0)
+        let later = DoseEntry(type: .bolus, startDate: t0.addingTimeInterval(.minutes(1)), endDate: t0.addingTimeInterval(.minutes(3)),
+                              value: 2.0, unit: .units, decisionId: nil, deliveredUnits: 2.0, syncIdentifier: "later-bolus")
+        let after = await unexplained(podTotal: 10.0 + 2.0 + 0.2, after: 10, records: [later])
+        XCTAssertEqual(after, 0)
     }
 
-    func testATempInTheCopyExplainsItsOwnDelivery() {
-        let temp = LoanDoseRecord(kind: .tempBasal, startDate: t0.addingTimeInterval(-.minutes(5)),
-                                  endDate: t0.addingTimeInterval(.minutes(25)), unitsPerHour: 3.0)
-        XCTAssertEqual(unexplained(podTotal: 10.5, after: 10, records: [temp]), 0, "ten minutes at 3.0 U/h is 0.5 U")
-        XCTAssertEqual(unexplained(podTotal: 12.5, after: 10, records: [temp]), 2.0, accuracy: 0.001, "anything beyond it is not")
+    func testATempInTheCopyExplainsItsOwnDelivery() async {
+        let temp = DoseEntry(type: .tempBasal, startDate: t0.addingTimeInterval(-.minutes(5)), endDate: t0.addingTimeInterval(.minutes(25)),
+                             value: 3.0, unit: .unitsPerHour, decisionId: nil, syncIdentifier: "copy-temp")
+        let explained = await unexplained(podTotal: 10.5, after: 10, records: [temp])
+        XCTAssertEqual(explained, 0, "ten minutes at 3.0 U/h is 0.5 U")
+        let beyond = await unexplained(podTotal: 12.5, after: 10, records: [temp])
+        XCTAssertEqual(beyond, 2.0, accuracy: 0.001, "anything beyond it is not")
+    }
+
+    /// Back from being off, the watch asks the phone before the loop has the pod: a "this watch holds the
+    /// pod" report goes out, and a revoke inside the wait stands it aside without a dose (control row 12).
+    func testBackFromOffTheWatchAsksThePhoneBeforeLooping() async throws {
+        persistGrantedSettings()
+        saveState { $0.phase = .active; $0.epoch = 7 }
+        savePumpState(readablePumpState)
+        let c = await makeController()
+        var reports: [Int] = []
+        c.send = { dict in
+            if let m = try? LoanMessage.decode(fromTransport: dict), case .statusReport(let r) = m, r.holdsPod { reports.append(r.epoch) }
+        }
+        var ask: DispatchWorkItem?
+        c.scheduler = { _, label, work in if label == "resume-ask" { ask = work } }
+        c.resumeIfNeeded()
+        c.queue.sync { }
+        XCTAssertEqual(reports, [7], "the phone is asked at once")
+        XCTAssertNil(c.loopManager.pumpManager, "and the loop does not have the pod while the question is out")
+        XCTAssertNil(c.pumpManager, "nor is there a pump manager to reach the pod")
+        XCTAssertTrue(c.isResumingNonBlocking, "the glance says it is checking with the phone")
+
+        c.handleIncoming(userInfo: try LoanMessage.revoke(Revoke(epoch: 7)).transportDictionary(), channel: .queued)
+        c.queue.sync { }
+        XCTAssertFalse(c.isResumingNonBlocking, "the phone's stop ends the check")
+        c.queue.sync { ask?.perform() }
+        XCTAssertNil(c.loopManager.pumpManager, "the phone holds the pod: this watch stood aside, no cycle ran")
+        XCTAssertNotEqual(c.phase, .active)
+    }
+
+    /// The question waits for the link to the phone to start up, and so does the wait for its answer:
+    /// asked before, it would be lost and the silence read as no phone.
+    func testBackFromOffTheQuestionWaitsForTheLink() async {
+        persistGrantedSettings()
+        saveState { $0.phase = .active; $0.epoch = 7 }
+        savePumpState(readablePumpState)
+        let c = await makeController()
+        var reports = 0
+        c.send = { dict in
+            if let m = try? LoanMessage.decode(fromTransport: dict), case .statusReport(let r) = m, r.holdsPod { reports += 1 }
+        }
+        var linkUp = false
+        c.isLinkActivated = { linkUp }
+        var asks = 0
+        c.scheduler = { _, label, _ in if label == "resume-ask" { asks += 1 } }
+        c.resumeIfNeeded()
+        c.queue.sync { }
+        XCTAssertEqual(reports, 0, "nothing sent before the link has started")
+        XCTAssertEqual(asks, 0, "and no wait for an answer started")
+
+        linkUp = true
+        c.linkDidActivate()
+        c.queue.sync { }
+        XCTAssertEqual(reports, 1, "asked once the link is up")
+        XCTAssertEqual(asks, 1, "and the wait starts then")
+        XCTAssertNil(c.loopManager.pumpManager)
+    }
+
+    /// No answer within the wait: the watch carries on alone.
+    func testBackFromOffWithNoAnswerTheWatchCarriesOn() async {
+        persistGrantedSettings()
+        saveState { $0.phase = .active; $0.epoch = 7 }
+        savePumpState(readablePumpState)
+        let c = await makeController()
+        var ask: DispatchWorkItem?
+        c.scheduler = { _, label, work in if label == "resume-ask" { ask = work } }
+        c.resumeIfNeeded()
+        c.queue.sync { }
+        XCTAssertNil(c.loopManager.pumpManager)
+        XCTAssertTrue(c.isResumingNonBlocking, "checking with the phone")
+        c.queue.sync { ask?.perform() }
+        XCTAssertNotNil(c.loopManager.pumpManager, "silence: the loop has the pod")
+        XCTAssertEqual(c.phase, .active)
+        XCTAssertFalse(c.isResumingNonBlocking, "and the check is over")
+    }
+
+    func testAfterARelaunchNothingDosesBeforeThePodReports() async {
+        // Once the check passes the loop has the pod; stock's recency check refuses to dose until the
+        // pod's first report, and that report closes the ledger's window before it completes. A failed
+        // read is no report, so no dose.
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        XCTAssertNotNil(c.loopManager.pumpManager, "the loop has the pod at once")
+        XCTAssertEqual(c.loopManager.doseStore.lastAddedPumpData, .distantPast, "no report yet, so no cycle passes the recency check")
+    }
+
+    func testAReadingAfterARelaunchClosesTheWindowFromTheLastReadingBefore() async {
+        // The last reading before the watch went off starts the window; the first reading after the
+        // relaunch books what the pod delivered meanwhile that the watch's records cannot explain.
+        persistGrantedSettings()   // basal 1.0 U/h
+        let before = Date().addingTimeInterval(-.minutes(20))
+        saveState { $0.phase = .active; $0.epoch = 7; $0.ledgerLast = (units: 10.0, at: before) }
+        savePumpState(readablePumpState)
+        let c = await makeController()
+        c.resumeIfNeeded()
+        c.queue.sync { }
+        XCTAssertEqual(c.persisted.ledgerLast?.units, 10.0, "the window survives the relaunch")
+        await c.checkOwnPumpTotal(reading: (units: 13.0, at: Date()), pulseUnits: 0.05, insulinType: nil)   // 20 min of basal is about 0.33 U; the rest nobody recorded
+        let estimate = await booked(in: c, since: before)
+        XCTAssertEqual(estimate, 2.67, accuracy: 0.06)
+        XCTAssertEqual(c.persisted.ledgerLast?.units, 13.0, "and the reading starts the next window")
     }
 
     func testBookedInsulinIsInTheBookTheLoopDosesFrom() async {
@@ -370,17 +553,14 @@ final class WakeResumeTests: XCTestCase {
                              wasUserEntered: false, syncIdentifier: "booked-\(i)")
         })
         let copyAt = Date().addingTimeInterval(-.minutes(10))
-        c.queue.sync {
-            c.takeoverCopyTotal = (10.0, copyAt)
-            c.takeoverCopyRecords = []
-            c.bookInsulinTheCopyCannotExplain(podTotal: 16.2, pulseUnits: 0.05, epoch: 7)   // 0.2 U of basal, 6.0 U nobody recorded
-        }
+        c.updateState { $0.ledgerLast = (units: 10.0, at: copyAt) }
+        await c.checkOwnPumpTotal(reading: (units: 16.2, at: Date()), pulseUnits: 0.05, insulinType: nil)   // 0.2 U of basal, 6.0 U nobody recorded
         let iob: Double? = await withCheckedContinuation { done in
             c.loopManager.updateDisplayState { done.resume(returning: $0.activeInsulin?.value) }
         }
         XCTAssertEqual(iob ?? 0, 6.0, accuracy: 0.5, "six units, a minute old, are all still on board")
         XCTAssertNotNil(c.debugSnapshot().startNoteText, "and the wrist says so")
-        XCTAssertNil(c.takeoverCopyTotal, "consumed: one check per Start")
+        XCTAssertEqual(c.persisted.ledgerLast?.units, 16.2, "the reading starts the next window")
     }
 
     // MARK: the rebuild after a relaunch
@@ -399,9 +579,9 @@ final class WakeResumeTests: XCTestCase {
 
         c.resumeIfNeeded()
         c.queue.sync { }
-        XCTAssertFalse(c.isResumingNonBlocking, "rebuilt")
+        XCTAssertTrue(c.isResumingNonBlocking, "restored, and still checking with the phone before looping")
         XCTAssertTrue(c.isLoanActiveNonBlocking)
-        XCTAssertNotNil(c.pumpManager)
+        XCTAssertNil(c.pumpManager, "the pump manager, which reaches the pod by itself, waits for the check")
     }
 
     func testAFailedRebuildIsNeitherLiveNorResuming() async {
@@ -422,7 +602,8 @@ final class WakeResumeTests: XCTestCase {
 
     func testEveryLandedCycleRenewsTheHoldEvenWithNothingToReport() async throws {
         // The watch's hold on the pod is this message being recent — so it goes out on every
-        // landed cycle, stamped, and an empty one is never queued (late, it would renew nothing).
+        // landed cycle, stamped, by the ordinary paths: the queued one delivers in seconds, and a late
+        // one renews nothing because the phone judges it by its stamp.
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         var sent: [[String: Any]] = []
         c.send = { sent.append($0) }
@@ -431,7 +612,7 @@ final class WakeResumeTests: XCTestCase {
         c.queue.sync { }
         XCTAssertEqual(sent.count, 1, "one renewal")
         let dictionary = try XCTUnwrap(sent.first)
-        XCTAssertEqual(dictionary["urgentOnly"] as? Bool, true, "an empty renewal is never queued")
+        XCTAssertNil(dictionary["urgentOnly"], "an empty renewal goes like any other, queued if need be")
         guard case .doseRecordBatch(let batch)? = try LoanMessage.decode(fromTransport: dictionary) else {
             return XCTFail("the renewal is the ordinary record batch")
         }

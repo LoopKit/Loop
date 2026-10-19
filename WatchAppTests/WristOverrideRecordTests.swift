@@ -89,7 +89,7 @@ final class WristOverrideRecordTests: XCTestCase {
     }
 
     private func meal() -> NewCarbEntry {
-        NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 30), startDate: Date(), foodType: nil,
+        NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: 30), startDate: Date(), foodType: nil,
                      absorptionTime: .hours(3))
     }
 
@@ -164,8 +164,8 @@ final class WristOverrideRecordTests: XCTestCase {
     }
 }
 
-/// A cancelled temp reaches the phone as a zero-length rate record (2026-10-09: six cancels in an overnight
-/// loan were never journaled, leaving the cancelled temps standing in the phone's books).
+/// A cancelled temp reaches the phone as a zero-length rate record; unjournaled, cancelled temps would
+/// stand in the phone's books.
 final class LoanCancelRecordTests: XCTestCase {
     private let start = Date()
     private func temp(_ rate: Double, from start: Date, minutes: Double, id: String) -> LoanDoseRecord {

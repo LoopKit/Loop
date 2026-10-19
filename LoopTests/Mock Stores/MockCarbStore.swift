@@ -19,7 +19,7 @@ class MockCarbStore: CarbStoreProtocol {
         return carbHistory.filterDateRange(start, end)
     }
 
-    func replaceCarbEntry(_ oldEntry: StoredCarbEntry, withEntry newEntry: NewCarbEntry) async throws -> StoredCarbEntry {
+    func replaceCarbEntry(_ oldEntry: StoredCarbEntry, withEntry newEntry: CarbEntryUpdate) async throws -> StoredCarbEntry {
         let stored = newEntry.asStoredCarbEntry
         carbHistory = carbHistory.map({ entry in
             if entry.syncIdentifier == oldEntry.syncIdentifier {

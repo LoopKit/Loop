@@ -30,7 +30,9 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Every exit from the rebuild ends here, so the UI never sits on a finished resume.
+    /// Ends the check a watch back from off makes before looping: at the hand to Loop, at any exit
+    /// that does not resume, and when the loan ends (the phone's stop). The glance shows "Checking
+    /// with your iPhone…" until then.
     func endResuming() {
         loanActiveMirrorLock.lock()
         _resumingMirror = false
@@ -38,10 +40,9 @@ extension PodLoanWatchController {
         notifyUI()
     }
 
-    /// Settings first, then the pump manager; either unreadable degrades to a recovered drain.
+    /// Settings first; the pump manager after the phone has been asked. Either unreadable degrades to a
+    /// recovered drain.
     func resumeSavedLoanOnQueue(_ savedState: PumpManager.RawStateValue) {
-        defer { endResuming() }
-
         // Before anything can fail: the phone still leaves the alarms here until the records land.
         let alertSettings = persisted.grantedSettings?.glucoseAlertSettings
         Task { @MainActor [loopManager] in loopManager.configureGlucoseAlerts(from: alertSettings) }
@@ -54,33 +55,20 @@ extension PodLoanWatchController {
             phase = .recoveredDrain
             issueSessionEndedAlert()
             SportLog.event("loan", "RESUME failed — therapy settings unreadable; falling back to a recovered drain")
+            endResuming()
             return
         }
-
-        SportLog.event("loan", "RESUME: building the pump manager from saved state")
-        guard let manager = watchPumpManager(rawValue: savedState) else {
-            pumpStateStore.wrappedValue = nil
-            updateState { $0.grantedSettings = nil }
-            phase = .recoveredDrain
-            issueSessionEndedAlert()
-            SportLog.event("loan", "RESUME failed — saved pump state unreadable (or saved before it carried its manager's identifier); falling back to a recovered drain")
-            return
-        }
-        SportLog.event("loan", "RESUME: pump manager built")
-        // The pod's total as this watch last read it, before anything reads the pod again.
-        let lastReading = (manager as? PumpDeliveryOdometer)?.deliveredUnits
 
         // Off for longer than insulin's action time: the loan is stale and whatever another device gave
         // in that time cannot be timed, so the records go home and the watch does not resume.
-        if let lastReading, now().timeIntervalSince(lastReading.at) > InsulinMath.defaultInsulinActivityDuration {
-            // Built only to read the total: it connects at construction, so it lets the pod go.
-            (manager as? ExclusiveDeviceControl)?.releaseControl()
+        if let last = persisted.ledgerLast, now().timeIntervalSince(last.at) > InsulinMath.defaultInsulinActivityDuration {
             pumpStateStore.wrappedValue = nil
             updateState { $0.grantedSettings = nil }
             phase = .recoveredDrain
             issueSessionEndedAlert()
             SportLog.event("loan", String(format: "RESUME declined — the watch last read the pod %.1f h ago, past insulin's action time; records go home as a recovered hand-back",
-                                          now().timeIntervalSince(lastReading.at) / 3600))
+                                          now().timeIntervalSince(last.at) / 3600))
+            endResuming()
             return
         }
 
@@ -89,54 +77,68 @@ extension PodLoanWatchController {
         loopManager.restoreOverrideHistory()
         phoneSupportsInterimHandback = payload.supportsInterimHandback
         phoneSupportsOverrideRecords = payload.supportsOverrideRecords
-        manager.pumpManagerDelegate = self
-        manager.delegateQueue = queue
-        pumpManager = manager
 
-        // Through the property, so didSet updates the main-safe mirrors. The loop gets the pod only after
-        // the check below: until then a cycle started by a reading finds no pod and does nothing.
+        // Through the property, so didSet updates the main-safe mirrors.
         phase = .active
         onLoanActiveChanged?(true)
 
-        // Seed the reconciliation stamp, or the first cycle refuses with "pump data too old".
-        let lastSync = manager.lastSync
-        Task { [loopManager] in
-            if let lastSync { try? await loopManager.recordPumpEvents([], lastReconciliation: lastSync, replacePendingEvents: false) }
-            // Before the first cycle: book what the pod delivered while this watch was off that its records cannot explain.
-            await self.bookInsulinGivenWhileOff(manager: manager, lastReading: lastReading)
-            self.queue.async {
-                // The loan may have ended while the check ran.
-                guard self.phase == .active, self.pumpManager === manager else { return }
-                loopManager.pumpManager = manager
-                loopManager.updateDisplayState()
-                // As stock at launch: a cycle now, not at the next reading.
-                loopManager.checkPumpDataAndLoop()
+        SportLog.event("loan", "RESUMED — epoch \(epoch ?? -1) restored after a relaunch; the pump manager is built once the phone has been asked · \(RuntimeStateLog.snapshot())")
+
+        // Rows 12, 13 and 19: `LoanControl` decides what a watch back from off does.
+        let resumedEpoch = epoch
+        switch LoanControl.decide(LoanControl.Situation(device: .watch, trigger: .backFromOff)) {
+        case .query(let wait, let onSilence):
+            // The wait for an answer starts when the question can actually go out: a message sent before
+            // the link has started is lost, and the silence would be read as no phone.
+            whenLinkActivated { [weak self] in
+                guard let self = self, self.phase == .active, self.epoch == resumedEpoch, self.pumpManager == nil else { return }
+                self.sendHoldsPodStatusReport(reason: "back from off — asking the phone before looping")
+                self.schedule(after: wait.seconds, label: "resume-ask") { [weak self] in
+                    guard let self = self else { return }
+                    // A phone that holds the pod answers with the stop, which stands this watch aside.
+                    guard self.phase == .active, self.epoch == resumedEpoch, self.pumpManager == nil else {
+                        SportLog.event("loan", "resume: stood aside — the phone holds the pod")
+                        return
+                    }
+                    SportLog.event("loan", "resume: no word that the phone holds the pod")
+                    if case .carryOn = LoanControl.afterQuery(.silence, onSilence: onSilence) { self.buildAndHandPodToLoop(savedState) }
+                }
             }
+        default:
+            buildAndHandPodToLoop(savedState)
         }
-        SportLog.event("loan", "RESUMED — epoch \(epoch ?? -1) rebuilt from saved pod state after a relaunch (stock relaunch) · \(RuntimeStateLog.snapshot())")
     }
 
-    /// The pod's total now against its total when this watch last read it, with what the watch's own
-    /// records and the schedule explain; the rest, in practice a phone's doses while the watch was off,
-    /// is booked. One read; if the pod does not answer, the check is skipped and logged.
-    func bookInsulinGivenWhileOff(manager: PumpManager, lastReading: (units: Double, at: Date)?) async {
-        guard let odometer = manager as? PumpDeliveryOdometer, let last = lastReading else {
-            SportLog.event("loan", "resume check SKIPPED — no earlier pod total to compare against")
+    /// The pump manager is built only once the check has passed: built, it reaches the pod by itself,
+    /// which it must not do while the phone may be looping the pod. Unreadable, it degrades to a drain.
+    func buildAndHandPodToLoop(_ savedState: PumpManager.RawStateValue) {
+        SportLog.event("loan", "RESUME: building the pump manager from saved state")
+        guard let manager = watchPumpManager(rawValue: savedState) else {
+            pumpStateStore.wrappedValue = nil
+            updateState { $0.grantedSettings = nil }
+            phase = .recoveredDrain
+            onLoanActiveChanged?(false)
+            issueSessionEndedAlert()
+            SportLog.event("loan", "RESUME failed — saved pump state unreadable (or saved before it carried its manager's identifier); falling back to a recovered drain")
+            endResuming()
             return
         }
-        let read = await odometer.refreshDeliveredUnits()
-        guard read, let reading = odometer.deliveredUnits, reading.at > last.at, reading.units >= last.units else {
-            SportLog.event("loan", "resume check SKIPPED — the pod did not answer with a newer total")
-            return
-        }
-        guard let booked = await bookInsulinNotInRecords(from: last, to: reading, records: journal.doseRecords(),
-                                                        pulseUnits: odometer.deliveryPulseUnits,
-                                                        insulinType: manager.status.insulinType, context: "resume") else { return }
-        let at = self.now()
-        queue.async {
-            self.startNote = (at, String(format: NSLocalizedString("%.2f U the watch had no record of — counted as insulin on board", comment: "Glance: unexplained insulin booked at takeover (1: units)"), booked))
-            self.notifyUI()
-        }
+        SportLog.event("loan", "RESUME: pump manager built")
+        manager.pumpManagerDelegate = self
+        manager.delegateQueue = queue
+        pumpManager = manager
+        handPodToLoop(manager)
+    }
+
+    /// Nothing doses before the pod reports: after a relaunch the loop's recency check refuses until the
+    /// first report, and that report closes the ledger's open window, booking what the pod delivered
+    /// while this watch was off, before it completes.
+    func handPodToLoop(_ manager: PumpManager) {
+        endResuming()
+        loopManager.pumpManager = manager
+        loopManager.updateDisplayState()
+        // As at any launch: a cycle now, not at the next reading.
+        loopManager.checkPumpDataAndLoop()
     }
 
     /// For a session that cannot resume: records may not have reached the phone yet.

@@ -26,6 +26,10 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     var stockLoopSession: StockLoopSession?
     /// Guards a second build while the first is in flight — ExtensionDelegate+PodLoan.swift.
     var stockLoopSessionStarting = false
+    /// Loan messages that arrived before the stack was ready, replayed once it is —
+    /// ExtensionDelegate+PodLoan.swift.
+    var earlyLoanMessages: [([String: Any], LoanTransportChannel)] = []
+    let earlyLoanMessagesLock = NSLock()
 
     private var observers: [NSKeyValueObservation] = []
     private var notifications: [NSObjectProtocol] = []
@@ -202,6 +206,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             log.error("Could not decode WatchContext: %{public}@", data)
             return
         }
+        stockLoopSession?.loanController.notePhoneHeard()
 
         if context.displayGlucoseUnit == nil {
             let type = HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!
@@ -324,7 +329,7 @@ extension ExtensionDelegate: UNUserNotificationCenterDelegate {
                 let mealTime = userInfo[LoopNotificationUserInfoKey.missedMealTime.rawValue] as? Date,
                 let carbAmount = userInfo[LoopNotificationUserInfoKey.missedMealCarbAmount.rawValue] as? Double
             {
-                let missedEntry = NewCarbEntry(quantity: LoopQuantity(unit: .gram,
+                let missedEntry = NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram,
                                                                          doubleValue: carbAmount),
                                                     startDate: mealTime,
                                                     foodType: nil,

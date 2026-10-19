@@ -19,6 +19,7 @@ struct AlertManagementView: View {
     @ObservedObject private var checker: AlertPermissionsChecker
     @ObservedObject private var alertMuter: AlertMuter
     private let glucoseAlertManager: GlucoseAlertManager?
+    private let alertStore: AlertStore?
 
     enum Sheet: Hashable, Identifiable {
         case durationSelection
@@ -66,10 +67,12 @@ struct AlertManagementView: View {
 
     public init(checker: AlertPermissionsChecker,
                 alertMuter: AlertMuter = AlertMuter(),
-                glucoseAlertManager: GlucoseAlertManager? = nil) {
+                glucoseAlertManager: GlucoseAlertManager? = nil,
+                alertStore: AlertStore? = nil) {
         self.checker = checker
         self.alertMuter = alertMuter
         self.glucoseAlertManager = glucoseAlertManager
+        self.alertStore = alertStore
     }
 
     var body: some View {
@@ -82,9 +85,25 @@ struct AlertManagementView: View {
             if FeatureFlags.missedMealNotifications {
                 missedMealAlertSection
             }
+            if let alertStore {
+                historySection(alertStore: alertStore)
+            }
             supportSection
         }
         .navigationTitle(NSLocalizedString("Alert Management", comment: "Title of alert management screen"))
+    }
+
+    private func historySection(alertStore: AlertStore) -> some View {
+        Section(header: Text("History").textCase(nil)) {
+            NavigationLink(destination: AlertHistoryView(alertStore: alertStore)) {
+                HStack {
+                    Image(systemName: "clock.arrow.circlepath")
+                        .foregroundStyle(.tint)
+                    Text("Alert History", comment: "Alert history navigation link label")
+                }
+                .accessibilityIdentifier("alertManagementAlertHistory")
+            }
+        }
     }
 
     private func glucoseAlertsSection(manager: GlucoseAlertManager) -> some View {
