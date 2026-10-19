@@ -37,6 +37,7 @@ extension PodLoanWatchController {
 
         let handbackFailedAt: Date?
         let handbackFailureText: String?
+        let lastHeardFromPhoneAt: Date?
         let startNoteAt: Date?
         let startNoteText: String?
 
@@ -120,6 +121,7 @@ extension PodLoanWatchController {
                 phoneReachable: isPhoneReachable(),
                 handbackFailedAt: handbackFailure?.at,
                 handbackFailureText: handbackFailure?.text,
+                lastHeardFromPhoneAt: lastHeardFromPhoneAt,
                 startNoteAt: startNote?.at,
                 startNoteText: startNote?.text,
                 seizeOfferIssuedAt: seizeOffer?.issuedAt,

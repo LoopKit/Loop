@@ -71,8 +71,8 @@ public enum LoanControl {
         case endTapped
         /// The watch app is back from being off (dead, or relaunched) with a loan saved.
         case backFromOff
-        /// The phone's loop has gone stale while no loan runs.
-        case phoneLoopStale
+        /// A message from the phone while no loan runs: the watch hears the phone, which loops (state 1).
+        case phoneHeardWithNoLoan
 
         // The phone's observations and taps
         /// A pod reading: whether it shows a difference from the phone's records beyond the band.
@@ -134,6 +134,7 @@ public enum LoanControl {
         case watchNotResponding
         case phoneAwayCannotHandBack
         case noResponseFromPhone
+        case notHearingFromPhone
     }
 
     public enum Prompt: Equatable {
@@ -163,6 +164,9 @@ public enum LoanControl {
         case refuse(Tell)
         case prompt(Prompt)
         case tell(Tell)
+        /// Watch: tell the looper if nothing more is heard within `after`; each new word pushes it out.
+        /// Pre-scheduled, so it fires even if the watch app is not running.
+        case tellIfSilent(Tell, after: TimeInterval)
     }
 
     /// What came back to a query.
@@ -189,6 +193,12 @@ public enum LoanControl {
     /// The watch's report is overdue after this long without one: one loop cycle and a margin.
     public static let watchReportOverdue: TimeInterval = 6 * 60
 
+    /// With no loan running, the watch warns when it has heard nothing from the phone for this long:
+    /// after the phone's own pre-scheduled Loop Failure (20 min), which reaches the wrist when the phone is
+    /// near or by a cellular watch's relay (seen 10-18), so the watch's is the backup for a dead phone or
+    /// a watch with no route to it.
+    public static let notHearingFromPhoneWarning: TimeInterval = 25 * 60
+
     // MARK: - The decisions, row by row
 
     public static func decide(_ s: Situation) -> Decision {
@@ -203,9 +213,13 @@ public enum LoanControl {
 
         // Row 3 · The phone is dead or away and no loan runs. Deliberate exception: looping is safer,
         // but taking the pod would enter Sport Mode without a tap, and the watch cannot tell a dead phone
-        // from one left at home. Nothing is taken. (A watch notice is not built: open question Q3.)
-        case (.watch, .phoneLoopStale):
-            return .nothing
+        // from one left at home. Nothing is taken; the looper is told. This state is easy to enter and
+        // rarely chosen (a forgotten phone), so the watch warns once when the phone has been silent for
+        // 25 minutes, and Start is one tap away. Each word from the phone pushes the warning out. The phone
+        // talks with its loop cycles, so a phone that stops looping also goes quiet; its own Loop Failure
+        // at 20 minutes comes first, and the watch's is the backup for a dead phone.
+        case (.watch, .phoneHeardWithNoLoan):
+            return .tellIfSilent(.notHearingFromPhone, after: notHearingFromPhoneWarning)
 
         // Row 4 · A clean reading: the resting state carries on.
         // Rows 5 and 18 · A reading shows insulin the phone's records cannot explain, so another device

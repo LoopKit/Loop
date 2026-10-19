@@ -122,6 +122,9 @@ final class PodLoanWatchController {
     /// anything that waits on an answer starts only once it is (`whenLinkActivated`).
     var isLinkActivated: () -> Bool = { true }
 
+    /// When the phone was last heard from; the Sport Mode page says when it has gone quiet.
+    var lastHeardFromPhoneAt: Date?
+
     /// Work waiting for the link to start up; run by `linkDidActivate`. On `queue`.
     var workAwaitingLink: [() -> Void] = []
 
@@ -334,6 +337,19 @@ final class PodLoanWatchController {
     /// Serialized with timers and the pump's callbacks.
     func handleIncoming(userInfo: [String: Any], channel: LoanTransportChannel) {
         queue.async { self.handleIncomingOnQueue(userInfo: userInfo, channel: channel) }
+        notePhoneHeard()
+    }
+
+    /// Any word from the phone (its loan messages, or its status for the stock pages). With no loan
+    /// running, `LoanControl` row 3: the warning for a silent phone is pushed out.
+    func notePhoneHeard() {
+        queue.async {
+            self.lastHeardFromPhoneAt = self.now()
+            guard self.phase == .idle || self.phase == .recoveredDrain else { return }
+            if case .tellIfSilent(.notHearingFromPhone, let after) = LoanControl.decide(LoanControl.Situation(device: .watch, trigger: .phoneHeardWithNoLoan)) {
+                NotHearingFromPhoneAlert.arm(after: after)
+            }
+        }
     }
 
     /// Logs every inbound message, with its channel, before any guard.

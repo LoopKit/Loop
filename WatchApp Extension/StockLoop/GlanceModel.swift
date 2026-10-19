@@ -51,6 +51,8 @@ struct GlanceUIState {
     var seizeOfferAgeText: String? = nil
 
     var viaPhone: Bool = false
+    /// No loan, and nothing heard from the phone for the warning's interval (control row 3).
+    var notHearingFromPhone: Bool = false
 
     /// Which device the glucose on screen came from. It is stamped on arrival rather than read
     /// back from the store, so it answers "is this watch standing on its own right now?".
@@ -360,7 +362,7 @@ final class GlanceViewModel: ObservableObject {
             // The note slot has one occupant. The controller's own note wins over the sensor-code
             // prompt: whatever just happened to a session matters more than a standing setup task.
             var idle = Self.idleState(context: ExtensionDelegate.sharedIfAvailable()?.loopManager.activeContext,
-                                      note: snap.lastIdleNote ?? sensorNote)
+                                      note: snap.lastIdleNote ?? sensorNote, phoneHeardAt: snap.lastHeardFromPhoneAt)
 
             if let issued = snap.seizeOfferIssuedAt {
                 let f = DateComponentsFormatter()
@@ -506,11 +508,20 @@ final class GlanceViewModel: ObservableObject {
     }
 
     /// No loan: the phone's last reading, labelled and dimmed.
-    static func idleState(context: WatchContext?, note: String? = nil) -> GlanceUIState {
+    static func idleState(context: WatchContext?, note: String? = nil, phoneHeardAt: Date? = nil, now: Date = Date()) -> GlanceUIState {
         var s = GlanceUIState()
         s.phase = .idle
         s.viaPhone = true
         s.bgColor = .dim
+        // The phone's loop, coloured as stock's ring colours it, so both pages agree.
+        switch context?.loopLastRunDate.map({ LoopCompletionFreshness(age: now.timeIntervalSince($0)) }) {
+        case .fresh?: s.loopFreshness = .fresh
+        case .aging?: s.loopFreshness = .aging
+        case .stale?: s.loopFreshness = .stale
+        case nil:     s.loopFreshness = .unknown
+        }
+        s.loopClosed = context?.isClosedLoop == true
+        s.notHearingFromPhone = phoneHeardAt.map { now.timeIntervalSince($0) >= LoanControl.notHearingFromPhoneWarning } ?? false
         if let quantity = context?.glucose {
             s.bgText = String(format: "%.0f", quantity.doubleValue(for: .milligramsPerDeciliter))
             s.trendSymbol = context?.glucoseTrend?.symbol

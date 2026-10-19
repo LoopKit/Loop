@@ -101,7 +101,7 @@ extension PodLoanPhoneController {
             resendRevokeForClosedSession(epoch: claimEpoch, evidence: why)
         case .renewHold:
             noteHoldRenewal(sentAt: deps.now())
-        case .refuse, .prompt, .tell:
+        case .refuse, .prompt, .tell, .tellIfSilent:
             // The watch's decisions; never returned for the phone.
             break
         }
@@ -113,7 +113,7 @@ extension PodLoanPhoneController {
             deps.issueUrgentNotice(
                 NSLocalizedString("Watch Not Responding", comment: "Phone notice title: the watch did not answer and the phone is taking the pod back"),
                 NSLocalizedString("The watch stopped reporting and didn't answer. This phone is taking the pod back; insulin the watch gave is counted.", comment: "Phone notice body: the phone takes the pod back from a silent watch"))
-        case .phoneAwayCannotHandBack, .noResponseFromPhone:
+        case .phoneAwayCannotHandBack, .noResponseFromPhone, .notHearingFromPhone:
             break
         }
     }

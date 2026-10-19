@@ -247,6 +247,21 @@ final class LoanAlertLevelTests: XCTestCase {
         return try XCTUnwrap(nil, "no alert titled \(title)")
     }
 
+    /// Control row 3: with no loan, each word from the phone pushes out a time-sensitive warning that
+    /// fires after 15 minutes of silence; a loan starting takes it away.
+    func testWithNoLoanAWordFromThePhoneArmsTheSilentPhoneWarning() async throws {
+        let c = await makeController()
+        c.notePhoneHeard()
+        c.queue.sync { }
+        let request = try await alert(titled: "Not Hearing From iPhone")
+        XCTAssertEqual(request.content.interruptionLevel, .timeSensitive)
+        XCTAssertNotNil(c.debugSnapshot().lastHeardFromPhoneAt)
+
+        c.queue.sync { c.phase = .active }
+        let gone = await MainActor.run { [scheduler] in scheduler!.pending.allSatisfy { $0.content.title != "Not Hearing From iPhone" } }
+        XCTAssertTrue(gone, "a loan running: the watch's own ladder covers it")
+    }
+
     /// One-way wedge while the loan is live: the watch is still dosing.
     func testEndNotConfirmedWhileStillDosingIsNormal() async throws {
         let c = await makeController()

@@ -166,6 +166,8 @@ extension PodLoanWatchController {
 
     /// Mirrored synchronously, so main-thread readers never lag the queue.
     func phaseDidChange(from oldValue: Phase, to phase: Phase) {
+        // A loan runs: the watch's own ladder covers it, not the silent-phone warning.
+        if phase == .takingOver || phase == .active { NotHearingFromPhoneAlert.disarm() }
         loanActiveMirrorLock.lock()
         _loanActiveMirror = (phase == .active)
         _wristAlarmsMirror = [.takingOver, .active, .handingBack, .recoveredDrain].contains(phase)

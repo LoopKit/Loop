@@ -3042,8 +3042,8 @@ extension PodLoanPhoneControllerTests {
             waitForState(controller, .grantOffered)
             waitUntil(timeout: 5, "asked") { self.statusQueries() == 1 }
             waitForState(controller, .owner)
-            lock.lock(); let notices = self.notices; lock.unlock()
-            XCTAssertTrue(notices.contains("The Watch Didn't Take the Pod"))
+            // The state changes first, then the notice goes out.
+            waitUntil(timeout: 5, "the notice") { self.lock.lock(); defer { self.lock.unlock() }; return self.notices.contains("The Watch Didn't Take the Pod") }
         }
     }
 

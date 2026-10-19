@@ -108,10 +108,10 @@ struct GlanceView: View {
         }
     }
 
-    /// Only while this watch is looping; it describes the watch's loop.
+    /// The watch's loop while it holds the pod; with no loan, the phone's loop as last heard.
     @ViewBuilder
     private var loopIndicator: some View {
-        if model.state.phase == .active {
+        if model.state.phase == .active || (model.state.phase == .idle && model.state.loopFreshness != .unknown) {
             Image(loopAssetName, bundle: Self.watchAppBundle)
                 .renderingMode(.template)
                 .resizable()
@@ -277,6 +277,9 @@ struct GlanceView: View {
                 (Text("eventually ").foregroundColor(.glanceDim)
                  + Text(eventual).bold().foregroundColor(model.state.predictionStale ? .glanceDim : .primary))
                     .font(.system(size: 13))
+            } else if model.state.phase == .idle, model.state.notHearingFromPhone {
+                Text(NSLocalizedString("Not hearing from iPhone", comment: "Glance: no loan, and no word from the phone for the warning's interval"))
+                    .font(.system(size: 12)).foregroundColor(.glanceWarn)
             } else if model.state.viaPhone, model.state.phase == .idle || model.state.phase == .starting {
                 Text("via iPhone").font(.system(size: 12)).foregroundColor(.glanceDim)
             }

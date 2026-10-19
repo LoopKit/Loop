@@ -197,6 +197,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             log.error("Could not decode WatchContext: %{public}@", data)
             return
         }
+        stockLoopSession?.loanController.notePhoneHeard()
 
         if context.displayGlucoseUnit == nil {
             let type = HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!

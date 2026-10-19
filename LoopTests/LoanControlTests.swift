@@ -33,9 +33,10 @@ final class LoanControlTests: XCTestCase {
         XCTAssertEqual(watch(.startTapped, storedCopy: false), .query(.onScreen, onSilence: .tell(.noResponseFromPhone)))
     }
 
-    // Row 3 · Phone dead or away, no loan: the watch takes nothing (deliberate exception).
-    func testRow3_TheWatchDoesNotTakeADeadPhonesPod() {
-        XCTAssertEqual(watch(.phoneLoopStale), .nothing)
+    // Row 3 · Phone dead or away, no loan: the watch takes nothing (deliberate exception); each word from
+    // the phone pushes out a warning that fires after 25 minutes of silence, after the phone's own at 20.
+    func testRow3_TheWatchWarnsAfterTwentyFiveMinutesWithoutThePhoneAndTakesNothing() {
+        XCTAssertEqual(watch(.phoneHeardWithNoLoan), .tellIfSilent(.notHearingFromPhone, after: 25 * 60))
     }
 
     // Row 4 · Phone back, clean reading: carry on.
