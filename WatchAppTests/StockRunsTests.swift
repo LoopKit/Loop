@@ -133,7 +133,7 @@ final class StockRunsTests: XCTestCase {
     }
 
     private func carbs(_ grams: Double) -> NewCarbEntry {
-        NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: grams), startDate: Date(), foodType: nil, absorptionTime: TimeInterval(3 * 3600))
+        NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: grams), startDate: Date(), foodType: nil, absorptionTime: TimeInterval(3 * 3600))
     }
 
     /// One automatic cycle, waited out on the manager's queue.
@@ -736,10 +736,8 @@ final class StockRunsTests: XCTestCase {
         manager.recommendManualBolus(potentialCarbEntry: meal) { _ in shown.fulfill() }
         await fulfillment(of: [shown], timeout: 20)
 
-        let mealSyncId = UUID().uuidString
-        let stored = try await withCheckedThrowingContinuation { continuation in
-            manager.carbStore.addCarbEntry(meal, syncIdentifier: mealSyncId) { continuation.resume(with: $0) }
-        }
+        let mealSyncId = meal.syncIdentifier
+        let stored = try await manager.carbStore.addCarbEntry(meal)
 
         let accepted = expectation(description: "bolus")
         manager.enactManualBolus(units: 1.0, activationType: .manualNoRecommendation, carbEntry: meal,
@@ -886,7 +884,7 @@ final class StockRunsTests: XCTestCase {
     func testSavingCarbsOnTheWristRunsNoCycle() async throws {
         let (manager, enactor) = try await makeClosedLoopManager()
 
-        manager.addLoanCarbEntry(carbs(40), syncIdentifier: UUID().uuidString)
+        manager.addLoanCarbEntry(carbs(40))
         var tries = 0
         while await storedCarbs(manager).isEmpty, tries < 50 {
             tries += 1

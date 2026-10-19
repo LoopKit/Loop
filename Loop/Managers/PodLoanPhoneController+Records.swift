@@ -266,7 +266,7 @@ extension PodLoanPhoneController {
 
                         if !isStale {
                             for carb in outcome.carbs {
-                                self.deps.addCarb(carb.entry, carb.eventID.uuidString) { _ in }
+                                self.deps.addCarb(carb) { _ in }
                             }
 
                             for gone in outcome.deletedCarbs {

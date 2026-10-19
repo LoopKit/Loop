@@ -106,13 +106,14 @@ extension PodLoanWatchController {
         }
     }
 
-    /// Also in the local store, so the next cycle's COB sees it. Both under the event ID, the
-    /// identity the phone stores it under, so a later wrist delete matches there. `completion`
-    /// gets the local store's answer.
+    /// Also in the local store, so the next cycle's COB sees it. The entry's identity is the journal
+    /// event's ID, the identity the phone stores it under, so a later delete on the watch matches there.
+    /// `completion` gets the local store's answer.
     func loanDidRecordCarbs(_ entry: NewCarbEntry, completion: ((Swift.Result<StoredCarbEntry, Error>) -> Void)? = nil) {
         let grams = entry.quantity.doubleValue(for: .gram)
-        let eventID = UUID()
-        loopManager.addLoanCarbEntry(entry, syncIdentifier: eventID.uuidString) { result in
+        let eventID = UUID(uuidString: entry.syncIdentifier) ?? UUID()
+        let entry = entry.syncIdentifier == eventID.uuidString ? entry : entry.withSyncIdentifier(eventID.uuidString)
+        loopManager.addLoanCarbEntry(entry) { result in
             // As stock `LoopDataManager.addCarbEntry`: saved carbs end a pre-meal preset.
             if case .success = result { self.endPreMealOverride(reason: "carbs saved on the wrist") }
             completion?(result)

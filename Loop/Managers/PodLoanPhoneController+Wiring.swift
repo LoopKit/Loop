@@ -83,15 +83,13 @@ extension WatchDataManager {
                     }
                 }
             },
-            addCarb: { [weak self] entry, syncIdentifier, completion in
+            addCarb: { [weak self] entry, completion in
                 guard let self = self else { completion(nil); return }
 
-                // Identity-accepting add, so a resent record is not a second meal.
+                // Under the entry's own identity, so a resent record is not a second meal.
                 Task {
                     do {
-                        _ = try await withCheckedThrowingContinuation { (c: CheckedContinuation<StoredCarbEntry, Error>) in
-                            self.deviceManager.carbStore.addCarbEntry(entry, syncIdentifier: syncIdentifier) { c.resume(with: $0) }
-                        }
+                        _ = try await self.deviceManager.carbStore.addCarbEntry(entry)
                         completion(nil)
                     } catch {
                         completion(error)

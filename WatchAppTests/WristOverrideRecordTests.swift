@@ -89,7 +89,7 @@ final class WristOverrideRecordTests: XCTestCase {
     }
 
     private func meal() -> NewCarbEntry {
-        NewCarbEntry(quantity: LoopQuantity(unit: .gram, doubleValue: 30), startDate: Date(), foodType: nil,
+        NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: LoopQuantity(unit: .gram, doubleValue: 30), startDate: Date(), foodType: nil,
                      absorptionTime: .hours(3))
     }
 

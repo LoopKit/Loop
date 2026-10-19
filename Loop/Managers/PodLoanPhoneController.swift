@@ -58,7 +58,7 @@ final class PodLoanPhoneController {
 
         var addPumpEvents: ([NewPumpEvent], _ lastReconciliation: Date?, @escaping (Error?) -> Void) -> Void
 
-        var addCarb: (NewCarbEntry, String, @escaping (Error?) -> Void) -> Void
+        var addCarb: (NewCarbEntry, @escaping (Error?) -> Void) -> Void
 
         var deleteCarb: (LoanReconciler.DeletedCarb, @escaping (Error?) -> Void) -> Void = { _, done in done(nil) }
 

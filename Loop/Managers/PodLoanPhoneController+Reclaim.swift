@@ -168,7 +168,7 @@ extension PodLoanPhoneController {
             if let earliest = outcome.doses.map(\.startDate).min() {
                 deps.insulinHistoryRewritten(earliest)
             }
-            for carb in outcome.carbs { deps.addCarb(carb.entry, carb.eventID.uuidString) { _ in } }
+            for carb in outcome.carbs { deps.addCarb(carb) { _ in } }
             for gone in outcome.deletedCarbs {
                 deps.deleteCarb(gone) { error in
                     self.handbackDiag(self.epoch, error == nil

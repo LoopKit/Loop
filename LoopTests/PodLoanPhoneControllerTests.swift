@@ -244,10 +244,9 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                 self.lock.unlock()
                 if !hold { completion(nil) }
             },
-            addCarb: { [weak self] entry, syncIdentifier, completion in
+            addCarb: { [weak self] entry, completion in
                 // Raw append: the controller's guards must not hide behind a store dedupe.
                 self?.lock.lock(); self?.addedCarbs.append(entry); self?.lock.unlock()
-                _ = syncIdentifier
                 completion(nil)
             },
             scheduleOverride: { [weak self] in
@@ -670,8 +669,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         let controller = makeController()
         let grant = establishLoan(controller)
         var phoneCarbs: [StoredCarbEntry] = []
-        controller.deps.addCarb = { entry, sync, done in
-            self.lock.lock(); phoneCarbs.append(StoredCarbEntry(startDate: entry.startDate, quantity: entry.quantity, syncIdentifier: sync)); self.lock.unlock()
+        controller.deps.addCarb = { entry, done in
+            self.lock.lock(); phoneCarbs.append(StoredCarbEntry(startDate: entry.startDate, quantity: entry.quantity, syncIdentifier: entry.syncIdentifier)); self.lock.unlock()
             done(nil)
         }
         controller.deps.deleteCarb = { gone, done in

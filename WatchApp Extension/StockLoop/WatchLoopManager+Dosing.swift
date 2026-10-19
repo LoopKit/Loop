@@ -155,16 +155,18 @@ extension WatchLoopManager {
         }
     }
 
-    /// The local half, under the identity the caller journals it with. As stock, no cycle
-    /// follows: the next reading runs one, and the carb store's change refreshes the display.
-    func addLoanCarbEntry(_ entry: NewCarbEntry, syncIdentifier: String,
-                          completion: ((Swift.Result<StoredCarbEntry, Error>) -> Void)? = nil) {
-        carbStore.addCarbEntry(entry, syncIdentifier: syncIdentifier) { result in
-            switch result {
-            case .success(let stored):
+    /// The local half, under the entry's own identity, which the caller journals it with. As stock, no
+    /// cycle follows: the next reading runs one, and the carb store's change refreshes the display.
+    func addLoanCarbEntry(_ entry: NewCarbEntry, completion: ((Swift.Result<StoredCarbEntry, Error>) -> Void)? = nil) {
+        Task {
+            let result: Swift.Result<StoredCarbEntry, Error>
+            do {
+                let stored = try await carbStore.addCarbEntry(entry)
                 SportLog.event("loan", String(format: "carbs logged locally: %.0f g", stored.quantity.doubleValue(for: .gram)))
-            case .failure(let error):
+                result = .success(stored)
+            } catch {
                 SportLog.event("loan", "carb store add FAILED — \(String(describing: error))")
+                result = .failure(error)
             }
             completion?(result)
         }
@@ -294,5 +296,13 @@ extension WatchLoopManager {
             SportLog.event("dose", String(format: "automatic bolus %.2f U ACCEPTED by pod", bolus))
         }
         return nil
+    }
+}
+
+extension NewCarbEntry {
+    /// The same entry under another identity.
+    func withSyncIdentifier(_ syncIdentifier: String) -> NewCarbEntry {
+        NewCarbEntry(date: date, syncIdentifier: syncIdentifier, quantity: quantity, startDate: startDate,
+                     foodType: foodType, absorptionTime: absorptionTime, favoriteFoodID: favoriteFoodID)
     }
 }
