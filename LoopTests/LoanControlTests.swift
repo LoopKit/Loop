@@ -2,7 +2,7 @@
 //  LoanControlTests.swift
 //  LoopTests
 //
-//  SPORT_MODE_CONTROL.md, section 5, row by row: each test sets up what the acting device sees in that
+//  Documentation/SportMode/Control.md, section 5, row by row: each test sets up what the acting device sees in that
 //  row's physical configuration and checks the row's result. A different ruling for a row changes its
 //  case in LoanControl.swift and its test here.
 //

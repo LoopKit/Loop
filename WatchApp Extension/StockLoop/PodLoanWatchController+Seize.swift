@@ -3,7 +3,7 @@
 //  WatchApp Extension
 //
 //  Starting a loan without the phone from the stored dormant grant. When the phone returns the loan
-//  simply continues; the looper ends it the ordinary way (grid 9.9).
+//  simply continues; the looper ends it the ordinary way (control row 17).
 //
 
 import Foundation

@@ -156,7 +156,7 @@ extension PodLoanPhoneController {
     }
 
     /// The watch's first reading of the pod: the window until then was this phone's, whose last
-    /// program the pod ran on. Logged, never acted on (grid 9.5). The watch's window starts here,
+    /// program the pod ran on. Logged, never acted on. The watch's window starts here,
     /// unless this phone read the pod after it: the latest reading starts the window, so the phone's
     /// own doses after the watch's takeover stay the phone's.
     func noteTakeoverReading(units: Double, at: Date) {

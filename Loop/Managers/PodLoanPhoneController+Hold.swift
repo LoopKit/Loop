@@ -3,8 +3,8 @@
 //  Loop
 //
 //  The phone's side of `LoanControl`: it describes the situation, asks `LoanControl.decide`, and
-//  carries out the decision. Who controls the pod is decided there, in SPORT_MODE_CONTROL.md's row
-//  order; this file only observes and acts.
+//  carries out the decision. Who controls the pod is decided there, in the row order of
+//  Documentation/SportMode/Control.md; this file only observes and acts.
 //
 
 import Foundation

@@ -2,7 +2,7 @@
 //  LoanControl.swift
 //  LoopCore
 //
-//  Who controls the pod: the decisions of SPORT_MODE_CONTROL.md, section 5, as one function. Both apps
+//  Who controls the pod: the decisions of Documentation/SportMode/Control.md, section 5, as one function. Both apps
 //  describe the situation at each decision point, call `decide`, and carry out what it returns; the
 //  mechanisms (take back, stand aside, query, hand back) decide nothing. One case per row, in the
 //  document's order; each case's comment is the row's reason. A different ruling for a row is a change
@@ -116,9 +116,9 @@ public enum LoanControl {
         /// The looper waits on screen (Start, End): the watch app is in front and its live path usually
         /// works; a late answer costs a second tap.
         case onScreen
-        /// In the background a question and its answer each travel queued; the slowest one-way delivery
-        /// seen was 15 s (10-17) and a round trip took 15.5 s (10-18). A late answer here moves control
-        /// wrongly, so the wait covers twice the slowest delivery.
+        /// In the background a question and its answer may each travel queued; the slowest one-way
+        /// delivery seen was 15 s and a round trip took 15.5 s. A late answer here moves control wrongly,
+        /// so the wait covers twice the slowest delivery.
         case inBackground
 
         public var seconds: TimeInterval {

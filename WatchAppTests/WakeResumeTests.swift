@@ -430,7 +430,7 @@ final class WakeResumeTests: XCTestCase {
     }
 
     /// Back from being off, the watch asks the phone before the loop has the pod: a "this watch holds the
-    /// pod" report goes out, and a revoke inside the wait stands it aside without a dose (grid 14.19).
+    /// pod" report goes out, and a revoke inside the wait stands it aside without a dose (control row 12).
     func testBackFromOffTheWatchAsksThePhoneBeforeLooping() async throws {
         persistGrantedSettings()
         saveState { $0.phase = .active; $0.epoch = 7 }
@@ -458,7 +458,7 @@ final class WakeResumeTests: XCTestCase {
     }
 
     /// The question waits for the link to the phone to start up, and so does the wait for its answer:
-    /// asked before, it was lost and the silence read as no phone (10-17 21:37).
+    /// asked before, it would be lost and the silence read as no phone.
     func testBackFromOffTheQuestionWaitsForTheLink() async {
         persistGrantedSettings()
         saveState { $0.phase = .active; $0.epoch = 7 }
@@ -504,9 +504,9 @@ final class WakeResumeTests: XCTestCase {
     }
 
     func testAfterARelaunchNothingDosesBeforeThePodReports() async {
-        // The loop has the pod at once; stock's recency check refuses to dose until the pod's first
-        // report, and that report closes the ledger's window before it completes. A failed read is no
-        // report, so no dose (grid 14.16).
+        // Once the check passes the loop has the pod; stock's recency check refuses to dose until the
+        // pod's first report, and that report closes the ledger's window before it completes. A failed
+        // read is no report, so no dose.
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         XCTAssertNotNil(c.loopManager.pumpManager, "the loop has the pod at once")
         XCTAssertEqual(c.loopManager.doseStore.lastAddedPumpData, .distantPast, "no report yet, so no cycle passes the recency check")

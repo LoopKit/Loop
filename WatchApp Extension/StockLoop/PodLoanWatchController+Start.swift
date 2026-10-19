@@ -180,7 +180,7 @@ extension PodLoanWatchController {
     }
 
     /// The offline start is a backup, offered when the phone does not answer within 10 s. The request
-    /// is the question; whether the phone looks reachable decides nothing (grid 9.9).
+    /// is the question; whether the phone looks reachable decides nothing (control row 2).
     func requestLoan(watchBuild: String) {
         #if targetEnvironment(simulator)
 

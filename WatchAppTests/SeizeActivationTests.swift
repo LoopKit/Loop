@@ -183,7 +183,7 @@ final class SeizeActivationTests: XCTestCase {
     // MARK: - The request is the question
 
     /// The Start waits the normal time for the phone's answer whatever the reachability flag says: it
-    /// reports whether the phone's app can take a live message, not whether the phone is there (grid 9.9).
+    /// reports whether the phone's app can take a live message, not whether the phone is there (control row 2).
     func testTheStartWaitsForAnAnswerWhateverReachabilitySays() async {
         for reachable in [false, true] {
             let controller = await makeController()
@@ -294,7 +294,7 @@ final class SeizeActivationTests: XCTestCase {
     // MARK: - The phone's return changes nothing
 
     /// The phone returning during a seized loan: no prompt, the loan continues, and the phone is told this
-    /// watch holds the pod so it stands aside. The looper ends the loan the ordinary way (grid 9.9).
+    /// watch holds the pod so it stands aside. The looper ends the loan the ordinary way (control row 17).
     func testThePhoneReturningDuringASeizedLoanOnlyTellsThePhone() async throws {
         let controller = await makeController()
         controller.simFakeLoanFlow = true

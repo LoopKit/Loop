@@ -15,8 +15,8 @@ extension ExtensionDelegate {
 
     /// Tasks already completed, kept (not just their identities) so a freed address cannot be
     /// mistaken for a new task. WatchKit can hand a task over again, also in a LATER wake, and
-    /// completing one twice throws: crash 2026-09-29, and 2026-10-07 13:26 ("NSMapTable count
-    /// underflow") six completions after a new wake had cleared this list. So it is never cleared.
+    /// completing one twice throws ("NSMapTable count underflow"), seen six completions after a new
+    /// wake had cleared this list. So it is never cleared.
     private static var completedBluetoothTasks: [WKBluetoothAlertRefreshBackgroundTask] = []
 
     private func completeOnce(_ task: WKBluetoothAlertRefreshBackgroundTask) {
