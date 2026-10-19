@@ -307,8 +307,7 @@ final class WatchDataManager: NSObject {
 
         if let recommendedBolus = try? await loopDataManager.recommendManualBolus(
             manualGlucoseSample: nil,
-            potentialCarbEntry: potentialCarbEntry,
-            originalCarbEntry: nil
+            carbEntryChange: potentialCarbEntry.map { .add($0) }
         ) {
             context.recommendedBolusDose = recommendedBolus.amount
             dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(

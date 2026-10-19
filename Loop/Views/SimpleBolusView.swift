@@ -371,13 +371,13 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
             return StoredGlucoseSample(startDate: sample.date, quantity: sample.quantity)
         }
         
-        func addCarbEntry(_ carbEntry: LoopKit.NewCarbEntry, replacing replacingEntry: StoredCarbEntry?) async throws -> StoredCarbEntry {
+        func addCarbEntry(_ carbEntry: LoopKit.NewCarbEntry) async throws -> StoredCarbEntry {
             StoredCarbEntry(
                 startDate: carbEntry.startDate,
                 quantity: carbEntry.quantity,
                 uuid: UUID(),
                 provenanceIdentifier: UUID().uuidString,
-                syncIdentifier: UUID().uuidString,
+                syncIdentifier: carbEntry.syncIdentifier,
                 syncVersion: 1,
                 foodType: carbEntry.foodType,
                 absorptionTime: carbEntry.absorptionTime,
