@@ -577,14 +577,13 @@ final class LoopDataManager: ObservableObject {
 
     func recommendManualBolus(
         manualGlucoseSample: NewGlucoseSample? = nil,
-        potentialCarbEntry: NewCarbEntry? = nil,
-        originalCarbEntry: StoredCarbEntry? = nil,
+        carbEntryChange: CarbEntryChange? = nil,
         truncatingActiveOverride: Bool = false
     ) async throws -> ManualBolusRecommendation? {
 
         var endingPremealOverride = false
 
-        if potentialCarbEntry != nil,
+        if carbEntryChange != nil,
             let activeOverride = temporaryPresetsManager.activeOverride,
             activeOverride.context == .preMeal
         {
@@ -593,8 +592,8 @@ final class LoopDataManager: ObservableObject {
 
         var input = try await self.fetchData(for: now, presumePresetEndingNow: truncatingActiveOverride || endingPremealOverride)
             .addingGlucoseSample(sample: manualGlucoseSample?.asStoredGlucoseSample)
-            .removingCarbEntry(carbEntry: originalCarbEntry)
-            .addingCarbEntry(carbEntry: potentialCarbEntry?.asStoredCarbEntry)
+            .removingCarbEntry(carbEntry: carbEntryChange?.originalEntry)
+            .addingCarbEntry(carbEntry: carbEntryChange?.asStoredCarbEntry)
 
         input.includePositiveVelocityAndRC = usePositiveMomentumAndRCForManualBoluses
         input.recommendationType = .manualBolus
@@ -762,16 +761,15 @@ extension LoopDataManager {
     /// Adds and stores carb data, and recommends a bolus if needed
     ///
     /// - Parameters:
-    ///   - carbEntry: The new carb value
-    ///   - completion: A closure called once upon completion
-    ///   - result: The bolus recommendation
-    func addCarbEntry(_ carbEntry: NewCarbEntry, replacing replacingEntry: StoredCarbEntry? = nil) async throws -> StoredCarbEntry {
-        let storedCarbEntry: StoredCarbEntry
-        if let replacingEntry = replacingEntry {
-            storedCarbEntry = try await carbStore.replaceCarbEntry(replacingEntry, withEntry: carbEntry)
-        } else {
-            storedCarbEntry = try await carbStore.addCarbEntry(carbEntry)
-        }
+    ///   - carbEntry: The new carb value, stored once however often it is retried
+    func addCarbEntry(_ carbEntry: NewCarbEntry) async throws -> StoredCarbEntry {
+        let storedCarbEntry = try await carbStore.addCarbEntry(carbEntry)
+        self.temporaryPresetsManager.endPreMealOverride()
+        return storedCarbEntry
+    }
+
+    func replaceCarbEntry(_ oldEntry: StoredCarbEntry, with update: CarbEntryUpdate) async throws -> StoredCarbEntry {
+        let storedCarbEntry = try await carbStore.replaceCarbEntry(oldEntry, withEntry: update)
         self.temporaryPresetsManager.endPreMealOverride()
         return storedCarbEntry
     }
@@ -1065,7 +1063,7 @@ extension LoopDataManager: ServicesManagerDelegate {
         }
         
         let quantity = LoopQuantity(unit: .gram, doubleValue: amountInGrams)
-        let candidateCarbEntry = NewCarbEntry(quantity: quantity, startDate: startDate ?? now, foodType: foodType, absorptionTime: absorptionTime)
+        let candidateCarbEntry = NewCarbEntry(syncIdentifier: UUID().uuidString, quantity: quantity, startDate: startDate ?? now, foodType: foodType, absorptionTime: absorptionTime)
 
         let _ = try await carbStore.addCarbEntry(candidateCarbEntry)
     }
@@ -1152,15 +1150,14 @@ extension LoopDataManager: BolusEntryViewModelDelegate {
     }
 
     func generatePrediction(
-        originalCarbEntry: StoredCarbEntry?,
-        potentialCarbEntry: NewCarbEntry?,
+        carbEntryChange: CarbEntryChange?,
         potentialDose: SimpleInsulinDose?,
         manualGlucose: NewGlucoseSample?
     ) async throws -> (historicGlucose: [StoredGlucoseSample], predictedGlucose: [PredictedGlucoseValue]) {
 
         var endingPremealOverride = false
 
-        if potentialCarbEntry != nil,
+        if carbEntryChange != nil,
             let activeOverride = temporaryPresetsManager.activeOverride,
             activeOverride.context == .preMeal
         {
@@ -1173,8 +1170,8 @@ extension LoopDataManager: BolusEntryViewModelDelegate {
         input = input
             .addingDose(dose: potentialDose)
             .addingGlucoseSample(sample: manualGlucose?.asStoredGlucoseSample)
-            .removingCarbEntry(carbEntry: originalCarbEntry)
-            .addingCarbEntry(carbEntry: potentialCarbEntry?.asStoredCarbEntry)
+            .removingCarbEntry(carbEntry: carbEntryChange?.originalEntry)
+            .addingCarbEntry(carbEntry: carbEntryChange?.asStoredCarbEntry)
 
         let prediction = try input.predictGlucose()
 

@@ -114,6 +114,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     func recommendBolus(forGrams grams: Int, eatenAt carbEntryDate: Date, absorptionTime carbAbsorptionTime: CarbAbsorptionTime, lastEntryDate: Date) async {
         let entry = NewCarbEntry(
             date: lastEntryDate,
+            syncIdentifier: UUID().uuidString,
             quantity: LoopQuantity(unit: .gram, doubleValue: Double(grams)),
             startDate: carbEntryDate,
             foodType: carbAbsorptionTime.emoji,
