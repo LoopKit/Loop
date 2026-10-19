@@ -57,7 +57,8 @@ final class StockLoopSession {
             let wedged = loanController?.urgentSendWedged ?? false
             let urgent = LoanMessage.isInteractiveHandshake(transport: dictionary)
                 && session.isReachable && !wedged
-            SportLog.event("wc", "send \(dictionary.keys.joined(separator: ",")) — session \(session.activationState.rawValue), reachable \(session.isReachable), path \(urgent ? "urgent" : "queued")")
+            let ridesBothChannels = urgent && LoanMessage.ridesBothChannels(transport: dictionary)
+            SportLog.event("wc", "send \(dictionary.keys.joined(separator: ",")) — session \(session.activationState.rawValue), reachable \(session.isReachable), path \(urgent ? (ridesBothChannels ? "urgent+queued" : "urgent") : "queued")")
 
             // At most one queued hand-back offer. Capture the stale list before enqueueing, cancel after.
             let enqueueSuperseding = { (payload: [String: Any]) in
@@ -80,9 +81,14 @@ final class StockLoopSession {
             }
             session.sendMessage(dictionary, replyHandler: nil, errorHandler: { error in
                 loanController?.noteUrgentSendFailed()
+                guard !ridesBothChannels else {
+                    SportLog.event("wc", "urgent send FAILED (\(error.localizedDescription)) — the queued copy carries it")
+                    return
+                }
                 SportLog.event("wc", "urgent send FAILED (\(error.localizedDescription)) — falling back to the queued path")
                 enqueueSuperseding(dictionary)
             })
+            if ridesBothChannels { enqueueSuperseding(dictionary) }
         }
 
         // The loan's history, one queued file at close. Files whose transfer has finished are

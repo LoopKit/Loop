@@ -158,19 +158,33 @@ extension LoanMessage {
         }
     }
 
-    /// Urgent (`sendMessage`) for anything a person is waiting through; bookkeeping stays queued
-    /// (`transferUserInfo`), which survives a relaunch.
+    /// Urgent (`sendMessage`) for anything a person or a query is waiting through; bookkeeping stays
+    /// queued (`transferUserInfo`), which survives a relaunch. A query and its answer are urgent: sent
+    /// only queued, a watch back from off could wait out its query while the phone was reachable.
     public var isInteractiveHandshake: Bool {
         switch self {
         case .request, .grant, .denied, .nack, .revoke, .handbackOffer, .handbackAck,
-             .takeoverComplete:
+             .takeoverComplete, .statusQuery, .statusReport:
             return true
-        case .takeoverFailed, .doseRecordBatch, .statusQuery,
-             .statusReport, .diag,
-
-             .dormantGrant:
+        case .takeoverFailed, .doseRecordBatch, .diag, .dormantGrant:
             return false
         }
+    }
+
+    /// Sent by the immediate path, and queued as well: a grant, and a query and its answer. An immediate
+    /// message is lost if the sending app goes inactive before it is delivered, and a lost query reads as
+    /// silence; the queued copy survives that. Both sides drop the later duplicate.
+    public var ridesBothChannels: Bool {
+        switch self {
+        case .grant, .statusQuery, .statusReport:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public static func ridesBothChannels(transport userInfo: [String: Any]) -> Bool {
+        (try? decode(fromTransport: userInfo))?.ridesBothChannels ?? false
     }
 
     /// The kind without decoding the body.

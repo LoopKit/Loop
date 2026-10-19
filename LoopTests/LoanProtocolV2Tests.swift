@@ -590,8 +590,23 @@ final class LoanProtocolV2Tests: XCTestCase {
     /// on the guaranteed, relaunch-surviving queue that the cursor/ID machinery is built around.
     func testBackgroundBookkeepingStaysOnTheQueuedChannel() {
         XCTAssertFalse(LoanMessage.doseRecordBatch(DoseRecordBatch(epoch: 1, events: [], tombstones: [])).isInteractiveHandshake)
-        XCTAssertFalse(LoanMessage.statusQuery(StatusQuery(epoch: 1)).isInteractiveHandshake)
         XCTAssertFalse(LoanMessage.diag(LoanDiag(epoch: 1, text: "x")).isInteractiveHandshake)
+    }
+
+    /// A query is waited on, so it and its answer ride the immediate channel when the other side is reachable.
+    func testQueryAndAnswerRideTheImmediateChannel() {
+        XCTAssertTrue(LoanMessage.statusQuery(StatusQuery(epoch: 1)).isInteractiveHandshake)
+        XCTAssertTrue(LoanMessage.statusReport(StatusReport(epoch: 1, mode: .closedDirect, lastDirectGlucoseAge: nil,
+                                                            lastEventSeq: 0, podFault: nil, holdsPod: true)).isInteractiveHandshake)
+    }
+
+    /// A query and its answer are also queued: an immediate message is lost if the sending app goes
+    /// inactive first, and a lost query reads as silence. A stop rides one channel.
+    func testQueryAndAnswerAreAlsoQueued() {
+        XCTAssertTrue(LoanMessage.statusQuery(StatusQuery(epoch: 1)).ridesBothChannels)
+        XCTAssertTrue(LoanMessage.statusReport(StatusReport(epoch: 1, mode: .closedDirect, lastDirectGlucoseAge: nil,
+                                                            lastEventSeq: 0, podFault: nil, holdsPod: true)).ridesBothChannels)
+        XCTAssertFalse(LoanMessage.revoke(Revoke(epoch: 1)).ridesBothChannels)
     }
 
     // MARK: - Transport kind peek
