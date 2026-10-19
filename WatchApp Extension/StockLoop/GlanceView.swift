@@ -33,9 +33,9 @@ struct GlanceView: View {
         VStack(spacing: 0) {
             statusLine
             Spacer(minLength: 0)
-            centerBlock
+            if model.isResuming { resumeCheckCenter } else { centerBlock }
             Spacer(minLength: 0)
-            bottomBlock
+            if !model.isResuming { bottomBlock }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black)
@@ -89,7 +89,7 @@ struct GlanceView: View {
     /// End, or Cancel while a hand-back drains; nothing otherwise.
     @ViewBuilder
     private var statusRight: some View {
-        if model.state.phase == .active {
+        if model.state.phase == .active && !model.isResuming {
             if model.state.handbackPending {
                 Button { model.cancelHandback() } label: {
                     Text(NSLocalizedString("Cancel", comment: "Glance top-right: abort a pending hand-back"))
@@ -162,14 +162,23 @@ struct GlanceView: View {
     private var centerBlock: some View {
         switch model.state.phase {
         case .idle:
-            if model.hasControllerState { idleCenter }
-            else if model.isResuming {
-                Text(NSLocalizedString("Resuming session…", comment: "Glance: a saved Sport Mode session is being rebuilt after a relaunch"))
-                    .font(.footnote).foregroundColor(.secondary)
-            } else { Color.clear.frame(height: 1) }
+            if model.hasControllerState { idleCenter } else { Color.clear.frame(height: 1) }
         case .starting: startingCenter
         default:        standardCenter
         }
+    }
+
+    /// A watch back from off with a saved loan asks the phone before looping; nothing to act on meanwhile.
+    private var resumeCheckCenter: some View {
+        VStack(spacing: 6) {
+            Text(NSLocalizedString("Checking with your iPhone…", comment: "Glance: a watch back from off asks the phone before resuming Sport Mode"))
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.glanceInk)
+            Text(NSLocalizedString("Sport Mode resumes if it doesn't answer.", comment: "Glance: what happens if the phone does not answer the watch back from off"))
+                .font(.system(size: 12))
+                .foregroundColor(.glanceDim)
+        }
+        .multilineTextAlignment(.center)
     }
 
     /// Start, or the phoneless-start confirmation with the credential's age (shown, not enforced).

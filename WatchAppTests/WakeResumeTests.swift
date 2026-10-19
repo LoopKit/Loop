@@ -446,9 +446,12 @@ final class WakeResumeTests: XCTestCase {
         c.queue.sync { }
         XCTAssertEqual(reports, [7], "the phone is asked at once")
         XCTAssertNil(c.loopManager.pumpManager, "and the loop does not have the pod while the question is out")
+        XCTAssertNil(c.pumpManager, "nor is there a pump manager to reach the pod")
+        XCTAssertTrue(c.isResumingNonBlocking, "the glance says it is checking with the phone")
 
         c.handleIncoming(userInfo: try LoanMessage.revoke(Revoke(epoch: 7)).transportDictionary(), channel: .queued)
         c.queue.sync { }
+        XCTAssertFalse(c.isResumingNonBlocking, "the phone's stop ends the check")
         c.queue.sync { ask?.perform() }
         XCTAssertNil(c.loopManager.pumpManager, "the phone holds the pod: this watch stood aside, no cycle ran")
         XCTAssertNotEqual(c.phase, .active)
@@ -493,9 +496,11 @@ final class WakeResumeTests: XCTestCase {
         c.resumeIfNeeded()
         c.queue.sync { }
         XCTAssertNil(c.loopManager.pumpManager)
+        XCTAssertTrue(c.isResumingNonBlocking, "checking with the phone")
         c.queue.sync { ask?.perform() }
         XCTAssertNotNil(c.loopManager.pumpManager, "silence: the loop has the pod")
         XCTAssertEqual(c.phase, .active)
+        XCTAssertFalse(c.isResumingNonBlocking, "and the check is over")
     }
 
     func testAfterARelaunchNothingDosesBeforeThePodReports() async {
@@ -574,9 +579,9 @@ final class WakeResumeTests: XCTestCase {
 
         c.resumeIfNeeded()
         c.queue.sync { }
-        XCTAssertFalse(c.isResumingNonBlocking, "rebuilt")
+        XCTAssertTrue(c.isResumingNonBlocking, "restored, and still checking with the phone before looping")
         XCTAssertTrue(c.isLoanActiveNonBlocking)
-        XCTAssertNotNil(c.pumpManager)
+        XCTAssertNil(c.pumpManager, "the pump manager, which reaches the pod by itself, waits for the check")
     }
 
     func testAFailedRebuildIsNeitherLiveNorResuming() async {

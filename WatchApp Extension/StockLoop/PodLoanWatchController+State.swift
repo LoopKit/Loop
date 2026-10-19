@@ -170,6 +170,8 @@ extension PodLoanWatchController {
         if phase == .takingOver || phase == .active { NotHearingFromPhoneAlert.disarm() }
         loanActiveMirrorLock.lock()
         _loanActiveMirror = (phase == .active)
+        // A loan that ends while a watch back from off is still checking (the phone's stop) ends the check.
+        if phase != .active { _resumingMirror = false }
         _wristAlarmsMirror = [.takingOver, .active, .handingBack, .recoveredDrain].contains(phase)
         loanActiveMirrorLock.unlock()
         // Edge-triggered, so re-asserting a phase cannot fire twice.
