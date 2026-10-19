@@ -11,7 +11,6 @@ import SwiftUI
 struct SendIssueReportView: View {
     let context: [String: IssueReportContextValue]
     let generateDiagnosticReport: (() async -> String)?
-    let exportLocally: () -> Void
 
     @Environment(\.dismiss) private var dismiss
 
@@ -95,12 +94,8 @@ struct SendIssueReportView: View {
                     .font(.footnote)
                 }
             }
-
-            Section(footer: Text(NSLocalizedString("Opens Loop's diagnostic report so you can save it or share it yourself. Nothing is sent to the developers.", comment: "Footer for exporting the issue report locally"))) {
-                Button(NSLocalizedString("Export Locally Instead", comment: "Button to open the diagnostic report for local export instead of submitting"), action: exportLocally)
-            }
         }
-        .navigationTitle(NSLocalizedString("Report Issue", comment: "Title of the issue report screen"))
+        .navigationTitle(NSLocalizedString("Send to Developers", comment: "Title of the issue report screen"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {

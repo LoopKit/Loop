@@ -600,20 +600,16 @@ extension SettingsView {
     
     private var supportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "The title of the support section in settings"))) {
-            NavigationLink(destination: SendIssueReportView(
-                context: viewModel.issueReportContext,
+            NavigationLink(destination: ReportProblemView(
+                issueReportContext: viewModel.issueReportContext,
                 generateDiagnosticReport: viewModel.generateDiagnosticReport,
-                exportLocally: viewModel.didTapIssueReport
+                criticalEventLogExportViewModel: viewModel.criticalEventLogExportViewModel
             )) {
-                Text(NSLocalizedString("Report Issue", comment: "The title text for the issue report menu item"))
+                Text(NSLocalizedString("Report a Problem", comment: "The title text for the report a problem menu item"))
             }
 
             ForEach(pluginMenuItems.filter( { $0.section == .support })) {
                 $0.view
-            }
-
-            NavigationLink(destination: CriticalEventLogExportView(viewModel: viewModel.criticalEventLogExportViewModel)) {
-                Text(NSLocalizedString("Export Critical Event Logs", comment: "The title of the export critical event logs in support"))
             }
 
             supportInfoRow(NSLocalizedString("Version", comment: "Label for the app version row in the Support section"), value: Text(localizedAppNameAndVersion))

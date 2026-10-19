@@ -52,7 +52,6 @@ public typealias PumpManagerViewModel = DeviceViewModel<PumpManagerDescriptor>
 public protocol SettingsViewModelDelegate: AnyObject {
     func dosingEnabledChanged(_: Bool)
     func dosingStrategyChanged(_: AutomaticDosingStrategy)
-    func didTapIssueReport()
     func generateDiagnosticReport() async -> String
     var closedLoopDescriptiveText: String? { get }
     var automaticDosingEnabled: Bool { get set }
@@ -71,10 +70,6 @@ class SettingsViewModel {
     weak var delegate: SettingsViewModelDelegate?
     
     weak var deliveryDelegate: DeliveryDelegate?
-
-    func didTapIssueReport() {
-        delegate?.didTapIssueReport()
-    }
 
     var generateDiagnosticReport: (() async -> String)? {
         guard let delegate else {

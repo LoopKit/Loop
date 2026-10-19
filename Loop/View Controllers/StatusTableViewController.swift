@@ -1469,9 +1469,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func presentIssueReport() {
-        let vc = CommandResponseViewController.generateDiagnosticReport(reportGenerator: diagnosticReportGenerator)
-        vc.title = NSLocalizedString("Issue Report", comment: "The view controller title for the issue report screen")
-        show(vc, sender: nil)
+        let hostingController = DismissibleHostingController(
+            rootView: ReportProblemModal(viewModel: statusTableViewModel.settingsViewModel),
+            isModalInPresentation: false)
+        present(hostingController, animated: true)
     }
 
     // MARK: - Actions
@@ -2263,14 +2264,6 @@ extension StatusTableViewController: SettingsViewModelDelegate {
     func dosingStrategyChanged(_ strategy: AutomaticDosingStrategy) {
         settingsManager.mutateLoopSettings { settings in
             settings.automaticDosingStrategy = strategy
-        }
-    }
-
-    func didTapIssueReport() {
-        // TODO: this dismiss here is temporary, until we know exactly where
-        // we want this screen to belong in the navigation flow
-        dismiss(animated: true) {
-            self.presentIssueReport()
         }
     }
 
