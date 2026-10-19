@@ -229,5 +229,8 @@ Failures only a test can produce. They are logged when recognised; no warning is
   (`+Mirror`) and records (`+Records`), the Take Back tap.
 - **Watch**: the Start (`+Start`), the End (`+Handback`), the return from off (`+Resume`) and every word from the phone
   while no loan runs (row 3, `notePhoneHeard`) each call the function and carry out the result.
-- **Transfers** (section 6) still decide inside their own code: the grant and its probe (`+Mirror`, `+Grant`), the
-  hand-back (`+Handback`, `+Records`), the take-back (`+Reclaim`, `+Settle`).
+- **Transfers** (section 6) decide inside their own code: the grant and its probe (`+Mirror`, `+Grant`), the
+  hand-back (`+Handback`, `+Records`), the take-back (`+Reclaim`, `+Settle`). This is deliberate. A transfer is a
+  short conversation with steps, timers and retries, not a single decision, and every failed step follows the one
+  transfer rule; what differs between them is timing. A different outcome for one transfer would move that
+  transfer's choice into `LoanControl`, with its test.
