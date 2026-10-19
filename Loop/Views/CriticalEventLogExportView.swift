@@ -94,7 +94,7 @@ struct CriticalEventLogExportView: View {
     }
 }
 
-struct ActivityViewController: UIViewControllerRepresentable {
+fileprivate struct ActivityViewController: UIViewControllerRepresentable {
     var activityItems: [Any]
     var applicationActivities: [UIActivity]? = nil
 

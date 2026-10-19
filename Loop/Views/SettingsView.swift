@@ -600,14 +600,6 @@ extension SettingsView {
     
     private var supportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "The title of the support section in settings"))) {
-            NavigationLink(destination: ReportProblemView(
-                issueReportContext: viewModel.issueReportContext,
-                generateDiagnosticReport: viewModel.generateDiagnosticReport,
-                criticalEventLogExportViewModel: viewModel.criticalEventLogExportViewModel
-            )) {
-                Text(NSLocalizedString("Report a Problem", comment: "The title text for the report a problem menu item"))
-            }
-
             ForEach(pluginMenuItems.filter( { $0.section == .support })) {
                 $0.view
             }

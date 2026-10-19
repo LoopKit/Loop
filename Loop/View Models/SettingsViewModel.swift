@@ -52,7 +52,6 @@ public typealias PumpManagerViewModel = DeviceViewModel<PumpManagerDescriptor>
 public protocol SettingsViewModelDelegate: AnyObject {
     func dosingEnabledChanged(_: Bool)
     func dosingStrategyChanged(_: AutomaticDosingStrategy)
-    func generateDiagnosticReport() async -> String
     var closedLoopDescriptiveText: String? { get }
     var automaticDosingEnabled: Bool { get set }
     var automationHistory: [AutomationHistoryEntry] { get }
@@ -71,36 +70,10 @@ class SettingsViewModel {
     
     weak var deliveryDelegate: DeliveryDelegate?
 
-    var generateDiagnosticReport: (() async -> String)? {
-        guard let delegate else {
-            return nil
-        }
-        return { [weak delegate] in await delegate?.generateDiagnosticReport() ?? "" }
-    }
-
-    @MainActor
-    var issueReportContext: [String: IssueReportContextValue] {
-        let buildDetails = BuildDetails.default
-        var context: [String: IssueReportContextValue] = [
-            "appVersion": .string(Bundle.main.shortVersionString),
-            "buildNumber": .string(Bundle.main.version),
-            "customizations": .strings(buildDetails.customizations),
-            "deviceModel": .string(UIDevice.current.modelIdentifier),
-            "osVersion": .string(UIDevice.current.systemVersion),
-        ]
-        context["branch"] = (buildDetails.workspaceGitBranch ?? buildDetails.gitBranch).map { .string($0) }
-        context["workspaceRevision"] = buildDetails.workspaceGitRevision.map { .string($0) }
-        context["loopRevision"] = buildDetails.gitRevision.map { .string($0) }
-        context["pumpModel"] = deviceManager?.pumpManager.map { .string($0.status.device.model ?? "Unknown") }
-        context["cgmModel"] = deviceManager?.cgmManager.map { .string($0.cgmManagerStatus.device?.model ?? "Unknown") }
-        return context
-    }
-    
     var availableSupports: [SupportUI]
     let pumpManagerSettingsViewModel: PumpManagerViewModel
     let cgmManagerSettingsViewModel: CGMManagerViewModel
     let servicesViewModel: ServicesViewModel
-    let criticalEventLogExportViewModel: CriticalEventLogExportViewModel
     let therapySettings: () -> TherapySettings
     var isOnboardingComplete: Bool
     let therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?
@@ -170,7 +143,6 @@ class SettingsViewModel {
                 pumpManagerSettingsViewModel: PumpManagerViewModel,
                 cgmManagerSettingsViewModel: CGMManagerViewModel,
                 servicesViewModel: ServicesViewModel,
-                criticalEventLogExportViewModel: CriticalEventLogExportViewModel,
                 therapySettings: @escaping () -> TherapySettings,
                 initialDosingEnabled: Bool,
                 automaticDosingStrategy: AutomaticDosingStrategy,
@@ -190,7 +162,6 @@ class SettingsViewModel {
         self.pumpManagerSettingsViewModel = pumpManagerSettingsViewModel
         self.cgmManagerSettingsViewModel = cgmManagerSettingsViewModel
         self.servicesViewModel = servicesViewModel
-        self.criticalEventLogExportViewModel = criticalEventLogExportViewModel
         self.therapySettings = therapySettings
         self.closedLoopPreference = initialDosingEnabled
         self.automaticDosingStrategy = automaticDosingStrategy
@@ -271,9 +242,7 @@ extension SettingsViewModel {
                                  versionUpdateViewModel: VersionUpdateViewModel(supportManager: nil, guidanceColors: .default),
                                  pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),
                                  cgmManagerSettingsViewModel: DeviceViewModel<CGMManagerDescriptor>(),
-                                 servicesViewModel: ServicesViewModel.preview,
-                                 criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
-                                 therapySettings: { TherapySettings() },
+                                 servicesViewModel: ServicesViewModel.preview,                                 therapySettings: { TherapySettings() },
                                  initialDosingEnabled: true,
                                  automaticDosingStrategy: .automaticBolus,
                                  lastLoopCompletion: FakeLastLoopCompletionPublisher().$mockLastLoopCompletion,
