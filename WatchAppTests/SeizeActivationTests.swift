@@ -126,8 +126,8 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertEqual(rebuilt.epoch, 9, "the provisional epoch is forced fresh")
         XCTAssertEqual(rebuilt.expiresAt, leaseUntil,
                        "the LIVE lease is minted at activation — the handshake starts at the confirm, not at issue")
-        XCTAssertGreaterThan(rebuilt.expiresAt.timeIntervalSinceNow, 240,
-                             "an hour-old credential must still enter the ladder with (almost) the full 5-minute budget")
+        XCTAssertGreaterThan(rebuilt.expiresAt.timeIntervalSinceNow, PodLoanWatchController.seizeActivationLease - 5,
+                             "an hour-old credential must still enter the ladder with (almost) the full lease")
         // Every other field carries verbatim.
         XCTAssertEqual(rebuilt.pumpConfiguration, dormant.grant.pumpConfiguration)
         XCTAssertEqual(rebuilt.podAddress, dormant.grant.podAddress)

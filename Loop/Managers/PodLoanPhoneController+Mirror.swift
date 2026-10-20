@@ -115,8 +115,8 @@ extension PodLoanPhoneController {
         title: NSLocalizedString("The Watch Didn't Take the Pod", comment: "Phone notice title: a grant the watch never confirmed"),
         body: NSLocalizedString("Sport Mode didn't start on the watch. This phone kept the pod and is looping.", comment: "Phone notice body: a grant the watch never confirmed"))
 
-    /// The grant's lease (five minutes) for a takeover the watch said is under way: ask once more at its
-    /// end, then take the pod back. Per grant; every path that abandons a loan clears it.
+    /// The grant's lease for a takeover the watch said is under way: ask once more at its end, then
+    /// take the pod back. Per grant; every path that abandons a loan clears it.
     func armT1(for grantEpoch: Int) {
         if grantOfferedAt == nil { grantOfferedAt = deps.now() }
         armGrantLostProbe(for: grantEpoch)
@@ -135,7 +135,7 @@ extension PodLoanPhoneController {
             self.queue.asyncAfter(deadline: .now() + 15, execute: confirm)
         }
         t1WorkItem = work
-        queue.asyncAfter(deadline: .now() + .minutes(5), execute: work)
+        queue.asyncAfter(deadline: .now() + LoanControl.takeoverLease, execute: work)
     }
 
     /// The watch has the pod; the audit is measured from the total it first read.
@@ -204,7 +204,7 @@ extension PodLoanPhoneController {
 
         if state == .grantOffered, report.knowsGrant == true, !report.holdsPod {
             let elapsed = grantOfferedAt.map { deps.now().timeIntervalSince($0) } ?? 0
-            handbackDiag(report.epoch, String(format: "takeover IN PROGRESS on the watch at +%.0fs — the 5-minute dead-man runs unchanged", elapsed))
+            handbackDiag(report.epoch, String(format: "takeover IN PROGRESS on the watch at +%.0fs — the lease's dead-man runs unchanged", elapsed))
         }
         // The watch does not know this grant: no need to wait out the dead-man.
         if state == .grantOffered, report.knowsGrant == false, !report.holdsPod {

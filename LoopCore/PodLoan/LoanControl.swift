@@ -194,6 +194,11 @@ public enum LoanControl {
     /// The watch's report is overdue after this long without one: one loop cycle and a margin.
     public static let watchReportOverdue: TimeInterval = 6 * 60
 
+    /// How long a takeover has to reach the pod, for a grant and for an offline start alike. Every
+    /// takeover seen reached the pod within 25 s, most within 4; a pod not reached in a minute was
+    /// not reached in five either, and the looper waited that long to be told.
+    public static let takeoverLease: TimeInterval = 60
+
     /// With no loan running, the watch warns when it has heard nothing from the phone for this long:
     /// after the phone's own pre-scheduled Loop Failure (20 min), which reaches the wrist when the phone is
     /// near or by a cellular watch's relay (seen 10-18), so the watch's is the backup for a dead phone or

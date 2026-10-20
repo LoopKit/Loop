@@ -189,7 +189,7 @@ extension PodLoanPhoneController {
 
         // The lease bounds the handshake, not the loan.
         assembleGrant(epoch: grantEpoch, referenceDate: handedOverAt,
-                      expiresAt: handedOverAt.addingTimeInterval(.minutes(5)),
+                      expiresAt: handedOverAt.addingTimeInterval(LoanControl.takeoverLease),
                       pumpConfiguration: control.exportConfiguration(), loanSettingsRaw: loanSettings.rawValue,
                       settings: settings) { [weak self] grant in
             guard let self = self else { return }

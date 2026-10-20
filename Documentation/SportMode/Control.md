@@ -172,7 +172,7 @@ not complete goes back to the state before it began, or to the resting state if 
 | G | the grant is lost or the takeover stalls | phone | no confirmation 20 s after the grant | query the watch | nobody (the phone has released; the watch has not taken) | — | built |
 | G | ″ | phone | answer "I know no such grant" | take back at once | phone | phone: notification "The watch didn't take the pod. This phone kept it." | built |
 | G | ″ | phone | silence 30 s after that query | take back | phone | ″ | built |
-| G | ″ | phone | answer "taking over" | wait until the grant's lease ends (5 min), then query once more and take back on silence | the watch if it lands | ″ if it does not | built |
+| G | ″ | phone | answer "taking over" | wait until the grant's lease ends (60 s), then query once more and take back on silence | the watch if it lands | ″ if it does not | built |
 | G | the takeover fails on the watch | watch, then phone | the watch reports failure | the phone takes back at once | phone | watch: on screen, the reason | built |
 | G | the grant is numbered at or below a loan the watch already knows | watch | a stale grant | answer "takeover failed" | phone | — | built |
 | G | the confirmation is lost | phone | the query is answered "I hold loan n" | treat the takeover as complete | watch | — | built |

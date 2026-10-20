@@ -174,7 +174,7 @@ extension PodLoanWatchController {
     }
 
     /// Bounds the handshake, not the credential.
-    static let seizeActivationLease: TimeInterval = 5 * 60
+    static let seizeActivationLease: TimeInterval = LoanControl.takeoverLease
 
     /// The phone's reconciliation band.
     static let unexplainedInsulinBand = 0.20
