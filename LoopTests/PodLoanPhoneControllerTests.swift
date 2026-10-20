@@ -2923,6 +2923,54 @@ extension PodLoanPhoneControllerTests {
         }
     }
 
+    /// A question's silence belongs to the loan it asked about. The loan ends and another starts
+    /// inside the wait: the verdict is dropped, and nothing is taken from the new loan.
+    func testAQuestionsVerdictIsDroppedWhenTheLoanChanged() throws {
+        PodLoanPhoneController.answerWait = 3
+        defer { PodLoanPhoneController.answerWait = LoanControl.Wait.inBackground.seconds }
+        let controller = makeController()
+        let first = establishLoan(controller)
+
+        // Real time throughout: the hand-back's pod verification compares real clocks.
+        controller.queue.sync { controller.holdRenewedAt = Date().addingTimeInterval(-.minutes(7)) }
+        tick(controller)
+        XCTAssertEqual(statusQueries(), 1, "overdue: the watch is asked")
+
+        // The watch hands back inside the wait, and a new loan starts.
+        let ackSent = expectSend()
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(HandbackOffer(
+            epoch: first.epoch, handedBackAt: Date(), finalStatus: nil, odometer: nil,
+            events: [], tombstones: [], recovered: false, released: true)).transportDictionary())
+        wait(for: [ackSent], timeout: 5)
+        waitForState(controller, .owner)
+        waitUntil(timeout: 8, "settled") { !controller.isReclaimSettling }
+        let second = establishLoan(controller)
+        XCTAssertNotEqual(second.epoch, first.epoch)
+
+        usleep(3_500_000)
+        controller.queue.sync { }
+        XCTAssertEqual(revokes(), 0, "the old question's silence takes nothing from the new loan")
+        XCTAssertEqual(controller.state, .loaned)
+    }
+
+    /// A change of the loan's state ends the open question, so the next loan can be asked at once.
+    func testALoanChangeClearsTheOpenQuestion() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        controller.queue.sync { controller.holdRenewedAt = Date().addingTimeInterval(-.minutes(7)) }
+        tick(controller)
+        XCTAssertEqual(statusQueries(), 1)
+        controller.queue.sync { XCTAssertNotNil(controller.watchAskedAt, "a question is open") }
+
+        let ackSent = expectSend()
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(HandbackOffer(
+            epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil, odometer: nil,
+            events: [], tombstones: [], recovered: false, released: true)).transportDictionary())
+        wait(for: [ackSent], timeout: 5)
+        waitForState(controller, .owner)
+        controller.queue.sync { XCTAssertNil(controller.watchAskedAt, "the hand-back ended it") }
+    }
+
     /// An answer inside the wait keeps the loan where it is.
     func testAnOverdueWatchThatAnswersKeepsThePod() throws {
         try withShortAnswerWait {

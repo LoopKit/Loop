@@ -145,6 +145,8 @@ extension PodLoanPhoneController {
     func askWatch(why: String, then: @escaping (LoanControl.Answer) -> Void) {
         guard watchAskedAt == nil else { return }
         let askedAt = deps.now()
+        let askedEpoch = epoch
+        let askedRole = controlRole
         let heardBefore = watchLastHeard
         let foreignBefore = newestForeignLoanEvidence?.at
         watchAskedAt = askedAt
@@ -153,6 +155,12 @@ extension PodLoanPhoneController {
         queue.asyncAfter(deadline: .now() + Self.answerWait) { [weak self] in
             guard let self = self, self.watchAskedAt == askedAt else { return }
             self.watchAskedAt = nil
+            // The question was about one situation, this loan and this phone's role; a verdict for
+            // another is moot (a hand-back and a new Start fit inside the wait).
+            guard self.epoch == askedEpoch, self.controlRole == askedRole else {
+                self.handbackDiag(askedEpoch, "the question about e\(askedEpoch) is moot — the loan or this phone's role changed while it waited (\(why))")
+                return
+            }
             let reported = self.lastWatchAnswerAt.map { $0 >= askedAt } == true
             let answer: LoanControl.Answer
             if reported && self.lastWatchAnswerCannotReachPod {
