@@ -196,6 +196,7 @@ extension PodLoanWatchController {
             if self.phase == .recoveredDrain {
                 SportLog.event("loan", "Start over a parked drain — \(self.journal.unackedEvents().count) undrained event(s) keep resending; a seize would fold them in [seize]")
             }
+            self.startCancelled = false
             self.phase = .requested
             self.attemptStartedAt = self.now()
             self.lastIdleNote = nil
@@ -336,6 +337,12 @@ extension PodLoanWatchController {
                 sendMessage(.takeoverFailed(TakeoverFailed(epoch: grant.epoch, reason: reason)))
             }
             returnToRestingPhase()
+        }
+        // A Start the looper cancelled at the offline offer: the grant starts nothing, and the phone,
+        // told, takes the pod back at once (transfer G). Sport Mode is entered only by a tap.
+        if phase == .idle, startCancelled, !seizeActivationInFlight {
+            rejectGrant("the Start was cancelled on the watch", notifyPhone: true)
+            return
         }
         // Lease expired, or an epoch at least this new is already known.
         guard self.now() < grant.expiresAt || seizeActivationInFlight else {

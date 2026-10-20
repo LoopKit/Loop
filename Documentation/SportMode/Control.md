@@ -174,6 +174,7 @@ not complete goes back to the state before it began, or to the resting state if 
 | G | ″ | phone | silence 30 s after that query | take back | phone | ″ | built |
 | G | ″ | phone | answer "taking over" | wait until the grant's lease ends (60 s), then query once more and take back on silence | the watch if it lands | ″ if it does not | built |
 | G | the takeover fails on the watch | watch, then phone | the watch reports failure | the phone takes back at once | phone | watch: on screen, the reason | built |
+| G | the looper cancels at the offline offer, and the grant arrives after that | watch | a grant for a Start no longer wanted | answer "takeover failed": Sport Mode is entered only by a tap, and the cancel withdrew it; a new Start asks afresh | phone | phone: takes the pod back at once, as above | built |
 | G | the grant is numbered at or below a loan the watch already knows | watch | a stale grant | answer "takeover failed" | phone | — | built |
 | G | the confirmation is lost | phone | the query is answered "I hold loan n" | treat the takeover as complete | watch | — | built |
 | **S** offline start | the pod does not answer within the lease | watch | no pod reading | back to rest | phone (as before) | watch: "Sport Mode start expired before the pod answered" | built |

@@ -480,6 +480,41 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertNil(snap.seizeOfferIssuedAt, "the accepted grant withdrew the offline offer")
     }
 
+    /// A grant for a Start the looper cancelled at the offline offer starts nothing: the phone is told
+    /// and takes the pod back (control row 2, transfer G). A fresh Start asks afresh.
+    func testAGrantAfterTheOfferIsDismissedIsRefused() async throws {
+        let controller = await makeController()
+        controller.isPhoneReachable = { false }
+        var cancelled = 0
+        controller.send = { dict in
+            if case .takeoverFailed(let f)? = try? LoanMessage.decode(fromTransport: dict), f.reason.contains("cancelled") { cancelled += 1 }
+        }
+        var timeoutsFired = 0
+        controller.scheduler = { _, label, work in
+            if label == "request-timeout" && timeoutsFired == 0 { timeoutsFired += 1; work.perform() }
+        }
+
+        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-120), epoch: 3))
+        controller.requestLoan(watchBuild: "cancelled")
+        XCTAssertNotNil(controller.debugSnapshot().seizeOfferIssuedAt, "precondition: the timeout put the offer up")
+        controller.dismissSeize()
+        controller.queue.sync { }
+
+        let late = fixtureDormant(issuedAt: Date(), epoch: 9, completeSettings: true).grant
+            .withEpoch(9, leaseUntil: Date().addingTimeInterval(300))
+        controller.handleIncoming(userInfo: try LoanMessage.grant(late).transportDictionary(), channel: .queued)
+        controller.queue.sync { }
+        XCTAssertEqual(cancelled, 1, "the phone is told the Start was cancelled")
+        XCTAssertNil(controller.pumpManager, "nothing started")
+        XCTAssertEqual(controller.debugSnapshot().phase, .idle)
+
+        // A fresh Start withdraws the cancel: its grant is taken up, not refused.
+        controller.requestLoan(watchBuild: "again")
+        controller.handleIncoming(userInfo: try LoanMessage.grant(late.withEpoch(10, leaseUntil: Date().addingTimeInterval(300))).transportDictionary(), channel: .queued)
+        controller.queue.sync { }
+        XCTAssertEqual(cancelled, 1, "the fresh Start's grant is not refused as cancelled")
+    }
+
     /// A new Start supersedes an offer left from an earlier unanswered request; its own timeout
     /// re-offers if the phone is still silent.
     func testANewStartWithdrawsTheOfflineOffer() async {
