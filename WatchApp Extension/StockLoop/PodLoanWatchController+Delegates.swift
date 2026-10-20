@@ -15,10 +15,18 @@ import WatchKit
 import os.log
 
 extension PodLoanWatchController: PumpManagerDelegate {
+    /// A driver released by a teardown can still report, when the release let its last command finish:
+    /// the controller stays its delegate (the driver treats none as impossible) and drops what it says.
+    func isCurrentDriver(_ manager: PumpManager) -> Bool {
+        (manager as AnyObject) === (pumpManager as AnyObject?)
+    }
+
     /// Saved on every update; its presence tells the next launch the loan was live.
     func pumpManagerDidUpdateState(_ pumpManager: PumpManager) {
-        pumpStateStore.wrappedValue = pumpManager.watchRawValue
+        // The pod's handle is saved after the loan too: a release can still drop one that never connected.
         savePumpLocalState(of: pumpManager)
+        guard isCurrentDriver(pumpManager) else { return }
+        pumpStateStore.wrappedValue = pumpManager.watchRawValue
         reportPumpFaultOnce()
     }
 
@@ -33,6 +41,11 @@ extension PodLoanWatchController: PumpManagerDelegate {
     /// journaled; the pod re-reports. An empty report still advances the recency gate. The window
     /// closes before the completion, so the cycle this report feeds sees anything it books.
     func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, replacePendingEvents: Bool, completion: @escaping (Error?) -> Void) {
+        guard isCurrentDriver(pumpManager) else {
+            SportLog.event("loan", "\(events.count) pump event(s) from a released pod driver — ignored; the phone's check counts any insulin they carry")
+            completion(nil)
+            return
+        }
         let loopManager = self.loopManager
         let odometer = pumpManager as? PumpDeliveryOdometer
         let reading = odometer?.deliveredUnits
@@ -140,6 +153,7 @@ extension PodLoanWatchController {
 
 extension PodLoanWatchController: PumpManagerStatusObserver {
     func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus, oldStatus: PumpManagerStatus) {
+        guard isCurrentDriver(pumpManager) else { return }
         os_log("Pump status: %{public}@", log: log, type: .default, String(describing: status.basalDeliveryState))
         // As stock `DeviceDataManager.pumpManager(_:didUpdate:oldStatus:)`.
         loopManager.doseStore.device = status.device

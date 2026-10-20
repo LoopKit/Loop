@@ -334,6 +334,10 @@ final class PodLoanWatchController {
     /// Saved pump state handed from `init` to `resumeIfNeeded`, which does the rebuild.
     var pendingResumeState: PumpManager.RawStateValue?
 
+    /// The looper cancelled a Start at the offline offer; a grant for it starts nothing. Cleared by
+    /// the next Start.
+    var startCancelled = false
+
     /// Serialized with timers and the pump's callbacks.
     func handleIncoming(userInfo: [String: Any], channel: LoanTransportChannel) {
         queue.async { self.handleIncomingOnQueue(userInfo: userInfo, channel: channel) }
@@ -430,7 +434,8 @@ final class PodLoanWatchController {
             Task { await loopManager.retractStandingAlerts(managerIdentifier: pumpIdentifier) }
         }
         pumpControl?.releaseControl()
-        pumpManager?.pumpManagerDelegate = nil
+        // Still the driver's delegate: the release lets a command under way finish, and its report
+        // must find one (the driver treats none as impossible). The callbacks ignore a released driver.
         pumpManager = nil
         pumpStateStore.wrappedValue = nil
         // The odometer stays until close: the drain's offers still measure from it.
