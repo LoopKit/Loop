@@ -49,7 +49,8 @@ public enum LoanControl {
     /// The watch saying it holds the pod: a status report, or records.
     public struct Claim: Equatable {
         public var loan: ClaimedLoan
-        /// When the loan started; reports carry it, records do not.
+        /// When the loan started, or the latest it could have: a report says it; records bound it by
+        /// their first record or their send time. A bound before the takeover is as sure as the time.
         public var startedAt: Date?
         /// Whether the watch read the pod within its last cycle; nil when not said.
         public var podReachable: Bool?

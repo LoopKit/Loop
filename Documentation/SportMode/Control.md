@@ -64,6 +64,11 @@ rule 4 says how.
 when to time a notice. The one rule that looks like a clock is the 6-hour limit on a watch resuming, and that is
 rule 1: insulin delivered longer ago than its action time cannot be placed.
 
+**A watch's records are its word too.** Records from a loan the phone does not hold are a claim to it, judged like
+the watch's own report, so arrival order cannot change the outcome. The report says when the loan started; records
+bound it, since nothing is logged or sent before a loan starts: their first record, or their send time, is the
+latest it could have started, and a bound before the takeover is as sure as the time.
+
 ---
 
 ## 3. Vocabulary

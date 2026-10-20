@@ -281,6 +281,12 @@ public struct DoseRecordBatch: Codable, Equatable {
         self.odometer = odometer
         self.sentAt = sentAt
     }
+
+    /// The latest the loan could have started: nothing is logged or sent before a loan starts. What the
+    /// phone judges a claim by (control row 19); nil when the batch is empty and carries no send time.
+    public var startedNoLaterThan: Date? {
+        (events.map(\.loggedAt) + [sentAt].compactMap { $0 }).min()
+    }
 }
 
 /// The watch offering the pod back; resent until acked, and harmless to receive twice.
