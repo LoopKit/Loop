@@ -91,7 +91,7 @@ extension PodLoanPhoneController {
             updateState { $0.tookOverOnSilenceAt = deps.now() }
             handbackDiag(epoch, "the watch did NOT answer, or cannot reach the pod — taking the pod back (\(why))")
             tellLooper(tell)
-            reclaimNow()
+            reclaimNow(onSilence: true)
         case .takeOnTap:
             reclaimNow()
         case .standAside:

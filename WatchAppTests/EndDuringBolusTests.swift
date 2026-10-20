@@ -1,0 +1,85 @@
+//
+//  EndDuringBolusTests.swift
+//  WatchAppTests
+//
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
+//
+//  Nobody takes the pod while it is giving a bolus (control document, row H): the watch's End is
+//  refused on the spot while its own bolus is being given. Hosted with a real DASH manager, which
+//  needs the host app's bluetooth-central background mode.
+//
+
+import XCTest
+import LoopKit
+import LoopCore
+import LoopAlgorithm
+@testable import OmnipodKit
+@testable import WatchApp
+
+final class EndDuringBolusTests: XCTestCase {
+
+    private var defaults: UserDefaults!
+    private var dir: URL!
+
+    override func setUp() {
+        super.setUp()
+        defaults = UserDefaults(suiteName: "EndDuringBolusTests-\(UUID().uuidString)")!
+        dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    }
+
+    private func makeController() async -> PodLoanWatchController {
+        let cacheStore = PersistenceController(directoryURL: dir.appendingPathComponent("cache"))
+        let doseStore = await DoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                        longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
+                                        provenanceIdentifier: "EndDuringBolusTests")
+        let glucoseStore = await GlucoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                              cacheLength: 4 * 60 * 60, provenanceIdentifier: "EndDuringBolusTests")
+        let carbStore = CarbStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                  cacheLength: 24 * 60 * 60, provenanceIdentifier: "EndDuringBolusTests")
+        let manager = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
+                                       defaults: defaults, stateDirectory: dir)
+        return PodLoanWatchController(loopManager: manager, journal: LoanEventJournal(directory: dir),
+                                      stateDirectory: dir)
+    }
+
+    /// A DASH manager whose pod is giving a 2 U bolus started just now.
+    private func makePumpMidBolus() throws -> OmniPumpManager {
+        var podState = PodState(address: 0x1f0b3557, firmwareVersion: "2.7.0", iFirmwareVersion: "2.7.0",
+                                lotNo: 1, lotSeq: 1, insulinType: .novolog, podType: dashType)
+        podState.setupProgress = .completed
+        podState.unfinalizedBolus = UnfinalizedDose(decisionId: nil, bolusAmount: 2.0, startTime: Date(),
+                                                    scheduledCertainty: .certain, insulinType: .novolog)
+        let raw: [String: Any] = ["basalSchedule": ["entries": [["rate": 1.0, "startTime": 0.0]]],
+                                  "controllerId": UInt32(0x1234_5678), "podId": UInt32(0x1234_5679),
+                                  "podState": podState.rawValue]
+        return try XCTUnwrap(OmniPumpManager(rawState: raw))
+    }
+
+    /// End with the watch's bolus still being given: refused at once, no offer goes to the phone,
+    /// the loan continues, and the screen says when to try again.
+    func testEndWhileTheWatchsBolusIsBeingGivenIsRefusedAtOnce() async throws {
+        let c = await makeController()
+        let pump = try makePumpMidBolus()
+        guard case .inProgress = pump.status.bolusState else { return XCTFail("precondition: the pod is giving a bolus") }
+        c.queue.sync {
+            pump.pumpManagerDelegate = c
+            pump.delegateQueue = c.queue
+            c.pumpManager = pump
+            c.loopManager.pumpManager = pump
+            c.phase = .active
+        }
+        var sent: [[String: Any]] = []
+        c.send = { sent.append($0) }
+
+        c.beginHandback()
+        c.queue.sync { }
+
+        XCTAssertTrue(sent.isEmpty, "no offer goes out")
+        XCTAssertFalse(c.debugSnapshot().handbackPending)
+        XCTAssertEqual(c.phase, .active, "the loan continues")
+        XCTAssertNotNil(c.pumpManager, "the watch still holds the pod")
+        XCTAssertTrue(c.debugSnapshot().handbackFailureText?.contains("bolus") == true,
+                      "on screen: why, and when to try again")
+    }
+}

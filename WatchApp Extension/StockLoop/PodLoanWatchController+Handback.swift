@@ -24,8 +24,16 @@ extension PodLoanWatchController {
         if simFakeLoanFlow { simDriveHandback(); return }
         #endif
         queue.async {
-            guard self.phase == .active, self.pumpManager != nil else { return }
+            guard self.phase == .active, let pumpManager = self.pumpManager else { return }
             guard !self.handbackRequested else { return }
+            // Nobody takes the pod while it is giving a bolus (transfer H): End again after it.
+            if case .inProgress(let dose) = pumpManager.status.bolusState {
+                let left = max(1, dose.endDate.timeIntervalSince(self.now())).rounded(.up)
+                self.handbackFailure = (self.now(), String(format: NSLocalizedString("A bolus is still being given. Try again in %.0f seconds.", comment: "Glance transient: End refused while the watch's bolus is still being given"), left))
+                SportLog.event("loan", String(format: "HAND-BACK refused — a bolus is being given, %.0f s left", left))
+                self.notifyUI()
+                return
+            }
             self.handbackRequested = true
             self.handbackFailure = nil
             self.handbackResendCount = 0

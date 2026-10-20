@@ -326,6 +326,8 @@ final class PodLoanPhoneController {
 
     /// A take-back attempt in progress, and the phase to restore if the pod does not answer.
     var takeBackStartedAt: Date?
+    /// The attempt is a take-over on silence: a bolus in progress is waited out, not refused.
+    var takeBackOnSilence = false
     var takeBackFrom: State?
 
     var lastDormantRefreshAt: Date?

@@ -166,6 +166,14 @@ The table above describes *holding*. A transfer is the pod moving between holder
 steps, where what goes wrong is always a step's message not arriving. One rule covers them: **a transfer that does
 not complete goes back to the state before it began, or to the resting state if that cannot be established.**
 
+**Nobody takes the pod while it is giving a bolus.** The pod gives a bolus by itself, at a fixed rate, once it has
+accepted it, so a pod handed over mid-bolus would leave the record wrong on both sides. A Start while the phone's
+own bolus runs, and an End or a Take Back while the watch's runs, are refused with how long the bolus has left; the
+looper tries again after it. A take-over on silence, where nobody can retry, waits for the pod to finish the bolus
+it reports. The pod has one connection, so the device reading it cannot be raced by a new bolus. An offline Start
+cannot ask the phone and takes the pod whatever it is giving: the phone's records are trued up from the pod's
+delivered total when it is back with the pod.
+
 | Transfer | Step that fails | Who notices | What it sees | What it does | Pod held by | Looper sees | Status |
 |---|---|---|---|---|---|---|---|
 | **G** grant (phone → watch) | the request is lost | watch | silence 10 s after the request | prompt "Start without it?" if it has a stored copy, else "No response from iPhone" | phone | watch: on screen | built |
@@ -173,15 +181,18 @@ not complete goes back to the state before it began, or to the resting state if 
 | G | ″ | phone | answer "I know no such grant" | take back at once | phone | phone: notification "The watch didn't take the pod. This phone kept it." | built |
 | G | ″ | phone | silence 30 s after that query | take back | phone | ″ | built |
 | G | ″ | phone | answer "taking over" | wait until the grant's lease ends (60 s), then query once more and take back on silence | the watch if it lands | ″ if it does not | built |
+| G | the phone's own bolus is still being given at the Start | phone | its pump's bolus state | deny the Start: "A bolus is still being given. Try again in N seconds." | phone | watch: on screen, the reason | built |
 | G | the takeover fails on the watch | watch, then phone | the watch reports failure | the phone takes back at once | phone | watch: on screen, the reason | built |
 | G | the looper cancels at the offline offer, and the grant arrives after that | watch | a grant for a Start no longer wanted | answer "takeover failed": Sport Mode is entered only by a tap, and the cancel withdrew it; a new Start asks afresh | phone | phone: takes the pod back at once, as above | built |
 | G | the grant is numbered at or below a loan the watch already knows | watch | a stale grant | answer "takeover failed" | phone | — | built |
 | G | the confirmation is lost | phone | the query is answered "I hold loan n" | treat the takeover as complete | watch | — | built |
 | **S** offline start | the pod does not answer within the lease | watch | no pod reading | back to rest | phone (as before) | watch: "Sport Mode start expired before the pod answered" | built |
-| **H** hand-back (watch → phone) | the phone is away at End | watch | silence 10 s after the offer | refuse (row 8) | watch | row 8 | built |
+| **H** hand-back (watch → phone) | the watch's bolus is still being given at End | watch | its pump's bolus state | refuse the End: "A bolus is still being given. Try again in N seconds."; the loan continues | watch | watch: on screen | built |
+| H | the phone is away at End | watch | silence 10 s after the offer | refuse (row 8) | watch | row 8 | built |
 | H | the phone acknowledged the first offer, later offers go unanswered | watch | no acknowledgement; resends every 15 s | keep resending, by every path, for the 2-min budget | watch, still looping | watch: "ending…" | built |
 | H | the final offer (sent after dosing stopped) is not acknowledged within the budget | watch | no acknowledgement | let the pod go and keep sending records; the phone takes the pod when they land, or when its overdue query is answered "I hold nothing" (counted as silence) | nobody until the phone takes it (seconds, or 6–11 min if every message was lost) | watch: notification "End Not Confirmed: the watch has stopped dosing… open Loop on the iPhone and tap the pod tile" | built. The transfer rule's second half: the watch cannot tell whether its final offer arrived, and resuming would dose beside a phone that may already be taking the pod, so the resting state it is |
 | **T** take-back (phone ← watch's pod) | the pod does not answer within 5 s | phone | no link | refuse; the loan is unchanged | watch | phone: "Couldn't Reach the Pod" | built |
+| T | the pod is giving the watch's bolus when the phone reaches it | phone | the pod's status, read before the stop | a tapped take-back is refused: "A bolus is still being given. Try again in N seconds."; a take-over on silence waits for the pod to finish, its link limit starting again after | watch, until the bolus ends | phone: notification "Wait for the Bolus" (tap); nothing (silence) | built |
 | T | the stop is lost (watch off) | watch, at return | its query is answered with a stop | stand aside (row 12) | phone | row 12 | built |
 | T | the pod is not reached within 12 s of a take-back | phone | link still down | escalate: search for the pod by its advertisement. The search ends with the take-back, reached or at its 5-min limit, and connects go back to the phone's own handle | phone | — | built |
 | T | the pod cannot be read after the take-back | phone | the insulin check is owed | hold dosing until the pod answers, then check | phone, not dosing | — | built |

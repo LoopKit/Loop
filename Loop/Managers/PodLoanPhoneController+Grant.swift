@@ -100,6 +100,14 @@ extension PodLoanPhoneController {
             reclaimPodConnection()
         }
 
+        // Nobody takes the pod while it is giving a bolus (transfer G): the looper tries again after it.
+        if case .inProgress(let dose) = pump.status.bolusState {
+            let left = max(1, dose.endDate.timeIntervalSince(deps.now())).rounded(.up)
+            handbackDiag(epoch, String(format: "grant REFUSED — this phone's bolus is still being given, %.0f s left", left))
+            deny(String(format: "A bolus is still being given. Try again in %.0f seconds.", left))
+            return
+        }
+
         // Refuse until the last reclaim's pod round-trip has verified.
         if let started = reclaimStartedAt,
            deps.now().timeIntervalSince(started) < Self.reclaimSettleTimeout,

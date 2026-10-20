@@ -57,10 +57,11 @@ extension PodLoanPhoneController {
     /// The user's take-back from the pod tile; nothing takes the pod back on a timer. One path:
     /// reach for the pod first. With the link up the phone holds the pod, so it tells the watch to
     /// stop and takes over; without it nothing has changed and the user is asked to try again.
-    func reclaimNow() {
+    func reclaimNow(onSilence: Bool = false) {
         queue.async {
             // A hand-back already being written ends the loan by itself.
             guard self.podIsOnLoan, self.state != .reconciling, self.state != .reclaimPending else { return }
+            self.takeBackOnSilence = onSilence
             self.beginTakeBack(from: self.state)
         }
     }
@@ -85,18 +86,15 @@ extension PodLoanPhoneController {
         let waited = Double(tick) * Self.takeBackPollInterval
 
         if deps.isConnectionReady() {
-            // Aim at the newest loan the watch reported; a stale-epoch revoke would be refused.
-            let revokeEpoch = supersededByLiveLoan(epoch) ? (newestForeignLoanEvidence?.epoch ?? epoch) : epoch
-            sendMessage(.revoke(Revoke(epoch: revokeEpoch)))
-            handbackDiag(epoch, String(format: "take-back: pod link up +%.1fs — watch told to stop (revoke e%d)", waited, revokeEpoch))
-            clearInferredLoanYield(reason: "take-back — this phone holds the pod")
-            forceReclaimToOwner(reason: "take-back from the pod tile")
+            readPodForTakeBack(started: started, waited: waited)
             return
         }
 
         // Giving up needs the pump to release; without one, keep holding.
         if waited >= Self.takeBackLinkLimit, let control = deps.pumpManager() as? ExclusiveDeviceControl {
-            refuseTakeBack(control: control, waited: waited)
+            refuseTakeBack(control: control, why: String(format: "no pod link after %.1fs", waited),
+                           notice: (NSLocalizedString("Couldn't Reach the Pod", comment: "Phone notice title when a take-back found the pod out of reach"),
+                                    NSLocalizedString("Sport Mode is still running on the watch. Bring the phone close to the pod and try again.", comment: "Phone notice body when a take-back found the pod out of reach")))
             return
         }
         queue.asyncAfter(deadline: .now() + Self.takeBackPollInterval) { [weak self] in
@@ -104,9 +102,52 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// The pod did not answer: undo the reach and leave the loan exactly as it was. No revoke was
-    /// sent and no record imported, so the watch carries on.
-    private func refuseTakeBack(control: ExclusiveDeviceControl, waited: TimeInterval) {
+    /// With the link up, the pod is read before the stop. Nobody takes the pod while it is giving a
+    /// bolus (transfer T): a tapped take-back is refused, and a take-over on silence waits for the pod
+    /// to finish, its link limit starting again after. The pod has one connection, so the watch cannot
+    /// start another bolus meanwhile.
+    private func readPodForTakeBack(started: Date, waited: TimeInterval) {
+        guard let pump = deps.pumpManager() else { return finishTakeBack(waited: waited) }
+        let read: (@escaping () -> Void) -> Void = { done in
+            guard let odometer = pump as? PumpDeliveryOdometer else { return done() }
+            Task { _ = await odometer.refreshDeliveredUnits(); done() }
+        }
+        read { [weak self] in
+            guard let self else { return }
+            self.queue.async {
+                guard self.takeBackStartedAt == started, self.state == .reclaimPending else { return }
+                guard case .inProgress(let dose) = pump.status.bolusState else {
+                    self.finishTakeBack(waited: waited)
+                    return
+                }
+                let left = max(1, dose.endDate.timeIntervalSince(self.deps.now())).rounded(.up)
+                if self.takeBackOnSilence {
+                    self.handbackDiag(self.epoch, String(format: "take-back: the pod is giving the watch's bolus, %.0f s left — waiting for it to finish", left))
+                    self.queue.asyncAfter(deadline: .now() + min(left, 10) + 1) { [weak self] in
+                        self?.awaitPodForTakeBack(started: started, tick: 0)
+                    }
+                } else if let control = pump as? ExclusiveDeviceControl {
+                    self.refuseTakeBack(control: control, why: String(format: "the pod is giving the watch's bolus, %.0f s left", left),
+                                        notice: (NSLocalizedString("Wait for the Bolus", comment: "Phone notice title when a take-back found the watch's bolus still being given"),
+                                                 String(format: NSLocalizedString("A bolus is still being given. Try again in %.0f seconds.", comment: "Phone notice body when a take-back found the watch's bolus still being given"), left)))
+                }
+            }
+        }
+    }
+
+    /// The link is up and the pod is free: tell the watch to stop and take over.
+    private func finishTakeBack(waited: TimeInterval) {
+        // Aim at the newest loan the watch reported; a stale-epoch revoke would be refused.
+        let revokeEpoch = supersededByLiveLoan(epoch) ? (newestForeignLoanEvidence?.epoch ?? epoch) : epoch
+        sendMessage(.revoke(Revoke(epoch: revokeEpoch)))
+        handbackDiag(epoch, String(format: "take-back: pod link up +%.1fs — watch told to stop (revoke e%d)", waited, revokeEpoch))
+        clearInferredLoanYield(reason: "take-back — this phone holds the pod")
+        forceReclaimToOwner(reason: "take-back from the pod tile")
+    }
+
+    /// The pod did not answer, or is busy with a bolus: undo the reach and leave the loan exactly as
+    /// it was. No revoke was sent and no record imported, so the watch carries on.
+    private func refuseTakeBack(control: ExclusiveDeviceControl, why: String, notice: (title: String, body: String)) {
         let previous = takeBackFrom ?? (yieldingToInferredLoan ? .owner : .loaned)
         cancelTakeBackAttempt()
         reclaimDisplayAnchor = nil
@@ -119,10 +160,8 @@ extension PodLoanPhoneController {
         deps.ownershipDidChange()
         deps.endReclaimBackgroundTask()
 
-        handbackDiag(epoch, String(format: "take-back REFUSED — no pod link after %.1fs; loan unchanged (%@), nothing sent to the watch", waited, previous.rawValue))
-        deps.issueNotice(
-            NSLocalizedString("Couldn't Reach the Pod", comment: "Phone notice title when a take-back found the pod out of reach"),
-            NSLocalizedString("Sport Mode is still running on the watch. Bring the phone close to the pod and try again.", comment: "Phone notice body when a take-back found the pod out of reach"))
+        handbackDiag(epoch, "take-back REFUSED — \(why); loan unchanged (\(previous.rawValue)), nothing sent to the watch")
+        deps.issueNotice(notice.title, notice.body)
     }
 
     /// Called wherever a loan ends by another route.
