@@ -2262,6 +2262,83 @@ extension PodLoanPhoneControllerTests {
         XCTAssertEqual(revokeCount(), 1)
     }
 
+    // MARK: - Nobody takes the pod while it is giving a bolus
+
+    /// The pump mid-bolus, `secondsLeft` from its end: at a Start it is this phone's bolus, during a
+    /// loan it is what the take-back's read of the pod shows, the watch's.
+    private func setBolusInProgress(secondsLeft: TimeInterval) {
+        let now = Date()
+        pump.status.bolusState = .inProgress(DoseEntry(type: .bolus, startDate: now.addingTimeInterval(-10),
+                                                       endDate: now.addingTimeInterval(secondsLeft), value: 2, unit: .units, decisionId: nil))
+    }
+
+    /// Start while this phone's bolus is being given: denied with the wait, nothing released, and
+    /// the Start after the bolus goes through.
+    func testStartIsDeniedWhileThisPhonesBolusIsBeingGiven() throws {
+        let controller = makeController()
+        setBolusInProgress(secondsLeft: 30)
+        controller.handleIncoming(userInfo: try LoanMessage.request(LoanRequest(watchBuild: "t")).transportDictionary())
+        waitUntil(timeout: 5, "denied") { if case .denied? = self.lastSent() { return true }; return false }
+
+        guard case .denied(let denied)? = lastSent() else { return XCTFail("expected a denial") }
+        XCTAssertTrue(denied.reason.contains("30 seconds"), "the watch shows how long to wait: \(denied.reason)")
+        XCTAssertEqual(controller.state, .owner)
+        XCTAssertFalse(MockPumpManager.testConnectionReleased, "the pump was never released")
+        XCTAssertTrue(controlCalls.isEmpty)
+        XCTAssertNotNil(diagMatching("bolus is still being given"))
+
+        pump.status.bolusState = .noBolus
+        establishLoan(controller)
+    }
+
+    /// A tapped take-back finds the pod giving the watch's bolus: refused, the loan exactly as it
+    /// was, the looper told to wait. The tap after the bolus takes the pod.
+    func testATappedTakeBackIsRefusedWhileTheWatchsBolusIsBeingGiven() throws {
+        let controller = makeController()
+        establishLoan(controller)
+        setBolusInProgress(secondsLeft: 30)
+        let readsBefore = MockPumpManager.testForcedReadCount
+
+        controller.reclaimNow()
+        waitUntil(timeout: 5, "refused") {
+            self.lock.lock(); defer { self.lock.unlock() }
+            return self.notices.contains("Wait for the Bolus")
+        }
+
+        XCTAssertGreaterThan(MockPumpManager.testForcedReadCount, readsBefore, "the pod was read before deciding")
+        XCTAssertEqual(controller.state, .loaned, "the loan carries on")
+        XCTAssertTrue(MockPumpManager.testConnectionReleased, "the pump is released again")
+        XCTAssertTrue(controller.holdsAutomaticDosing)
+        XCTAssertEqual(revokeCount(), 0, "the watch was never told to stop")
+        XCTAssertNil(controller.reclaimProgress)
+        XCTAssertNotNil(diagMatching("take-back REFUSED — the pod is giving the watch's bolus"))
+
+        pump.status.bolusState = .noBolus
+        controller.reclaimNow()
+        waitForState(controller, .owner)
+        XCTAssertEqual(revokeCount(), 1)
+    }
+
+    /// A take-over on silence finds the pod giving the watch's bolus: it waits for the pod to
+    /// finish rather than refusing, then takes the pod. The pod has one connection, so the watch
+    /// cannot start another bolus meanwhile.
+    func testATakeOverOnSilenceWaitsForTheWatchsBolusThenTakesThePod() throws {
+        let controller = makeController()
+        establishLoan(controller)
+        setBolusInProgress(secondsLeft: 1)
+
+        controller.reclaimNow(onSilence: true)
+        waitUntil(timeout: 5, "waiting") { self.diagMatching("waiting for it to finish") != nil }
+        XCTAssertEqual(controller.state, .reclaimPending, "held, not refused")
+        XCTAssertEqual(revokeCount(), 0)
+        XCTAssertFalse(notices.contains("Wait for the Bolus"), "nothing to ask of the looper")
+
+        pump.status.bolusState = .noBolus   // the pod finished
+        waitForState(controller, .owner)
+        XCTAssertEqual(revokeCount(), 1, "then the watch is told to stop, once")
+        XCTAssertFalse(MockPumpManager.testConnectionReleased, "and the phone holds the pump")
+    }
+
     /// A refused take-back from a loan the phone only inferred leaves the phone stood aside.
     func testRefusedTakeBackFromAnInferredLoanStaysStoodAside() throws {
         PodLoanPhoneController.takeBackLinkLimit = 0.5
@@ -2807,6 +2884,9 @@ extension PodLoanPhoneControllerTests {
                          lastEventSeq: 0, podFault: nil, holdsPod: false, knowsGrant: false)
         ).transportDictionary())
         waitForState(controller, .owner)
+
+        // The phone refuses a grant until the pod has answered its reclaim: wait for that answer.
+        waitUntil(timeout: 8, "reclaim verification") { controller.reclaimVerifiedAt != nil }
 
         // Six minutes: past the 5-minute settle window, which is asynchronous.
         clock = clock.addingTimeInterval(360)
