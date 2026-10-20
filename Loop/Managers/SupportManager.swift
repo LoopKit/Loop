@@ -40,6 +40,7 @@ public final class SupportManager {
     private let pluginManager: PluginManager
     private let staticSupportTypes: [SupportUI.Type]
     private let staticSupportTypesByIdentifier: [String: SupportUI.Type]
+    private let criticalEventLogExporterFactory: CriticalEventLogExporterFactory?
 
     lazy private var cancellables = Set<AnyCancellable>()
 
@@ -47,11 +48,13 @@ public final class SupportManager {
          deviceSupportDelegate: DeviceSupportDelegate,
          servicesManager: ServicesManager? = nil,
          staticSupportTypes: [SupportUI.Type]? = nil,
-         alertIssuer: AlertIssuer) {
-        
+         alertIssuer: AlertIssuer,
+         criticalEventLogExporterFactory: CriticalEventLogExporterFactory? = nil) {
+
         self.alertIssuer = alertIssuer
         self.deviceSupportDelegate = deviceSupportDelegate
         self.pluginManager = pluginManager
+        self.criticalEventLogExporterFactory = criticalEventLogExporterFactory
         self.staticSupportTypes = []
         staticSupportTypesByIdentifier = self.staticSupportTypes.reduce(into: [:]) { (map, type) in
             map[type.pluginIdentifier] = type
@@ -217,7 +220,14 @@ extension SupportManager: SupportUIDelegate {
     public func openURL(url: URL) {
         UIApplication.shared.open(url)
     }
-    
+
+    public func criticalEventLogExportView() -> AnyView {
+        guard let criticalEventLogExporterFactory else {
+            return AnyView(EmptyView())
+        }
+        return AnyView(CriticalEventLogExportView(viewModel: CriticalEventLogExportViewModel(exporterFactory: criticalEventLogExporterFactory)))
+    }
+
     public var pumpStatus: LoopKit.PumpManagerStatus? {
         deviceSupportDelegate.pumpManagerStatus
     }
