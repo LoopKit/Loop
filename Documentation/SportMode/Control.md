@@ -77,8 +77,8 @@ latest it could have started, and a bound before the takeover is as sure as the 
   **10 s** while the looper waits on screen (Start, End), **30 s** in the background (every other query), because
   a background question and its answer may each travel queued, and a late answer there moves control wrongly
   (`LoanControl.Wait`). A question and its answer go by the live path when the other device is reachable, and
-  queued as well, so a live message lost when an app goes inactive cannot leave the other side unasked. Silence is an answer. The looper never sees a
-  query.
+  queued as well, so a live message lost when an app goes inactive cannot leave the other side unasked or
+  unanswered: the stop rides both too. Silence is an answer. The looper never sees a query.
 - **Prompt:** device to looper, answered only by a tap. Silence is not an answer: nothing changes until the tap. The
   only prompt the system raises by itself is the offline-start offer ("Start without it?"); every other tap is one
   the looper started.

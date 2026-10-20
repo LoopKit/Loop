@@ -370,7 +370,8 @@ extension PodLoanWatchController {
             }
             return
         }
-        guard phase != .idle else { return }
+        // The stop rides two channels: the later copy of one already acted on changes nothing.
+        guard phase != .idle, phase != .revoked else { return }
 
         handbackRequested = false
         handbackDeadline = nil

@@ -600,13 +600,15 @@ final class LoanProtocolV2Tests: XCTestCase {
                                                             lastEventSeq: 0, podFault: nil, holdsPod: true)).isInteractiveHandshake)
     }
 
-    /// A query and its answer are also queued: an immediate message is lost if the sending app goes
-    /// inactive first, and a lost query reads as silence. A stop rides one channel.
-    func testQueryAndAnswerAreAlsoQueued() {
+    /// A query and its answers are also queued: an immediate message is lost if the sending app goes
+    /// inactive first; a lost query reads as silence, and a lost stop leaves the watch looping. A
+    /// hand-back acknowledgement rides one channel.
+    func testQueryAndAnswersAreAlsoQueued() {
         XCTAssertTrue(LoanMessage.statusQuery(StatusQuery(epoch: 1)).ridesBothChannels)
         XCTAssertTrue(LoanMessage.statusReport(StatusReport(epoch: 1, mode: .closedDirect, lastDirectGlucoseAge: nil,
                                                             lastEventSeq: 0, podFault: nil, holdsPod: true)).ridesBothChannels)
-        XCTAssertFalse(LoanMessage.revoke(Revoke(epoch: 1)).ridesBothChannels)
+        XCTAssertTrue(LoanMessage.revoke(Revoke(epoch: 1)).ridesBothChannels)
+        XCTAssertFalse(LoanMessage.handbackAck(HandbackAck(epoch: 1, committedCursor: 0)).ridesBothChannels)
     }
 
     // MARK: - Transport kind peek
