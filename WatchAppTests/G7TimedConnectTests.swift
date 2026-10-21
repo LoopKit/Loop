@@ -240,7 +240,7 @@ final class WatchCGMAdoptionTests: XCTestCase {
         wrist.adoptCGMConfiguration(phoneExport(sensorID: "DXCMph", code: "1234"))
         let first = try XCTUnwrap(wrist.cgmManager as? G7CGMManager)
         XCTAssertEqual(first.state.sensorID, "DXCMph")
-        XCTAssertTrue(first.isConfiguredByAnotherController)
+        XCTAssertTrue(first.state.configuredByAnotherController)
         XCTAssertNil(first.state.peripheralIdentifier, "never connected, so it searches until the sensor is found")
 
         wrist.adoptCGMConfiguration(phoneExport(sensorID: "DXCMph", code: "1234"))

@@ -36,7 +36,6 @@ final class LendableMockPumpManager: MockPumpManager, ExclusiveDeviceControl, Pu
     convenience init?(adopting configuration: SharedDeviceConfiguration, localState: [String: Any]?) {
         self.init()
     }
-    var isConfiguredByAnotherController: Bool { false }
     var isControlReleased: Bool { Self.testConnectionReleased }
     func releaseControl() { Self.testConnectionReleased = true }
     func takeControl() { Self.testConnectionReleased = false }

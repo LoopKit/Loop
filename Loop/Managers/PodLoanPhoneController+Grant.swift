@@ -163,15 +163,6 @@ extension PodLoanPhoneController {
         handbackDiag(releaseEpoch, "GRANT — releasing pod BLE (wasReleased=\(control.isControlReleased))")
         control.releaseControl()
         deps.pumpControlChanged(true)
-        // A link still up here predicts a refused takeover (the pod accepts one central).
-        queue.asyncAfter(deadline: .now() + 3) { [weak self, weak pump] in
-            guard let self = self, let control = pump as? ExclusiveDeviceControl else { return }
-
-            self.handbackDiag(releaseEpoch, "GRANT +3s — pod BLE released=\(control.isControlReleased) linkUp=\(control.isControlReady)")
-            if control.isControlReady {
-                self.handbackDiag(releaseEpoch, "GRANT +3s — ** STILL CONNECTED after release — the watch's takeover will be refused (single-central pod) **")
-            }
-        }
 
         // New epoch, empty dedup state, this loan's anchors: one save, before the grant goes out.
         let previous = state
