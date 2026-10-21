@@ -495,7 +495,7 @@ final class LoanProtocolV2Tests: XCTestCase {
             events: events, schedule: flatSchedule,
             loanStart: loanStart, loanEnd: loanEnd))
 
-        XCTAssertNil(outcome.openEventID, "nothing is open on a final hand-back")
+        XCTAssertTrue(outcome.openEventIDs.isEmpty, "nothing is open on a final hand-back")
         XCTAssertEqual(outcome.doses.count, 3)
         for dose in outcome.doses {
             XCTAssertFalse(dose.isMutable, "final-hand-back doses are finalized")
@@ -512,13 +512,35 @@ final class LoanProtocolV2Tests: XCTestCase {
             loanStart: loanStart, loanEnd: loanStart.addingTimeInterval(720),
             isFinalHandback: false))
 
-        XCTAssertEqual(outcome.openEventID, events[2].id, "the latest-starting still-running temp is open")
+        XCTAssertEqual(outcome.openEventIDs, [events[2].id], "the latest-starting still-running temp is open")
         // The open temp is NOT written; the two superseded temps are, immutable & uncapped.
         XCTAssertEqual(outcome.doses.count, 2)
         XCTAssertFalse(outcome.doses.contains { $0.isMutable }, "no mutable loan doses")
         let openSyncID = LoanReconciler.syncIdentifier(for: events[2])
         XCTAssertFalse(outcome.doses.contains { $0.syncIdentifier == openSyncID }, "open temp withheld from write")
         XCTAssertTrue(outcome.doses.contains { $0.syncIdentifier == LoanReconciler.syncIdentifier(for: events[0]) })
+    }
+
+    /// Interim drain: a bolus still being given is open like a running temp: acked, not written, so
+    /// Loop's dose store never holds a finished bolus that ends in the future. Once it has finished,
+    /// the next drain writes it.
+    func testInterimDrainWithholdsABolusStillBeingGiven() {
+        let start = loanStart.addingTimeInterval(600)
+        let bolus = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                              record: LoanDoseRecord(kind: .bolus, startDate: start, endDate: start.addingTimeInterval(80), amount: 2),
+                              loggedAt: start)
+        let during = LoanReconciler.reconcile(LoanReconciler.Input(
+            events: [bolus], schedule: flatSchedule,
+            loanStart: loanStart, loanEnd: start.addingTimeInterval(30), isFinalHandback: false))
+        XCTAssertEqual(during.openEventIDs, [bolus.id])
+        XCTAssertTrue(during.doses.isEmpty, "not written while it is being given")
+
+        let after = LoanReconciler.reconcile(LoanReconciler.Input(
+            events: [bolus], schedule: flatSchedule,
+            loanStart: loanStart, loanEnd: start.addingTimeInterval(90), isFinalHandback: false))
+        XCTAssertTrue(after.openEventIDs.isEmpty)
+        XCTAssertEqual(after.doses.map(\.type), [.bolus], "written once it has finished")
+        XCTAssertEqual(after.doses.first?.endDate, start.addingTimeInterval(80))
     }
 
     /// A single completed temp on a final hand-back keeps its (sub-loanEnd) window intact.

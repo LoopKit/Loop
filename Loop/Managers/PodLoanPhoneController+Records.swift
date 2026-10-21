@@ -219,8 +219,9 @@ extension PodLoanPhoneController {
 
         let doses = outcome.doses
 
-        // The interim's open rate record is acked but not committed; it lands finished at the end.
-        let committable = events.filter { $0.id != outcome.openEventID }
+        // The interim's open records (a rate record still running, a bolus still being given) are
+        // acked but not committed; each lands finished later.
+        let committable = events.filter { !outcome.openEventIDs.contains($0.id) }
 
         // Drop impossible doses individually, by name.
         let sane = doses.filter { $0.endDate >= $0.startDate }

@@ -1587,6 +1587,37 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         waitForState(controller, .owner)
     }
 
+    /// While an End waits, an interim offer can carry a watch bolus still being given. It is acked
+    /// but not written: Loop's dose store takes a bolus only once it has finished (it stops a debug
+    /// build on a finished bolus that ends in the future). The next offer after it has finished writes it.
+    func testInterimDrainAcksABolusStillBeingGivenAndWritesItOnceFinished() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        let now = Date()
+        let bolus = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                              record: LoanDoseRecord(kind: .bolus, startDate: now.addingTimeInterval(-20),
+                                                     endDate: now.addingTimeInterval(60), amount: 2),
+                              loggedAt: now.addingTimeInterval(-20))
+
+        let duringAck = expectSend()
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(HandbackOffer(
+            epoch: grant.epoch, handedBackAt: now, finalStatus: nil, odometer: nil,
+            events: [bolus], tombstones: [], recovered: false, released: false)).transportDictionary())
+        wait(for: [duringAck], timeout: 5)
+        guard case .handbackAck(let ack)? = lastSent() else { return XCTFail("expected an ack") }
+        XCTAssertEqual(ack.committedCursor, bolus.seq, "acked, so the End can reach its release check")
+        XCTAssertFalse(addedDoses.flatMap { $0 }.contains { $0.type == .bolus }, "not written while it is being given")
+
+        let afterAck = expectSend()
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(HandbackOffer(
+            epoch: grant.epoch, handedBackAt: now.addingTimeInterval(90), finalStatus: nil, odometer: nil,
+            events: [], tombstones: [], recovered: false, released: false)).transportDictionary())
+        wait(for: [afterAck], timeout: 5)
+        controller.queue.sync { }
+        XCTAssertEqual(addedDoses.flatMap { $0 }.filter { $0.type == .bolus }.count, 1, "written once, finished")
+        XCTAssertEqual(controller.state, .loaned)
+    }
+
     // MARK: - KNOWN_RESIDUALS §16 (two-phase hand-back test debt)
 
     /// An offer without the `released` key (older watch) finalizes the loan.

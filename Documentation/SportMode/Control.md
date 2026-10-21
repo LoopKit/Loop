@@ -170,7 +170,9 @@ not complete goes back to the state before it began, or to the resting state if 
 accepted it, so a pod handed over mid-bolus would leave the record wrong on both sides. A Start while the phone's
 own bolus runs, and an End or a Take Back while the watch's runs, are refused with how long the bolus has left; the
 looper tries again after it. A bolus counts from the moment it is sent until it has finished or been cancelled, and
-the watch checks again when it would release the pod, so a bolus started while an End waits for the phone refuses it. A take-over on silence, where nobody can retry, waits for the pod to finish the bolus
+the watch checks again when it would release the pod, so a bolus started while an End waits for the phone refuses it. The
+phone saves a watch bolus only once it has finished, as Loop's own drivers report one: a record of a bolus still
+being given is acknowledged but kept back. A take-over on silence, where nobody can retry, waits for the pod to finish the bolus
 it reports. The pod has one connection, so the device reading it cannot be raced by a new bolus. An offline Start
 cannot ask the phone and takes the pod whatever it is giving: the phone's records are trued up from the pod's
 delivered total when it is back with the pod.
