@@ -19028,6 +19028,7 @@
     },
     "Export Critical Event Logs" : {
       "comment" : "The title of the export critical event logs in support",
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -24168,6 +24169,7 @@
     },
     "Issue Report" : {
       "comment" : "The title text for the issue report menu item\nThe view controller title for the issue report screen",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -24804,6 +24806,7 @@
     },
     "Loading..." : {
       "comment" : "The loading message for the diagnostic report screen",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

@@ -228,7 +228,8 @@ class LoopAppManager: NSObject {
         supportManager = SupportManager(pluginManager: pluginManager,
                                         deviceSupportDelegate: deviceDataManager,
                                         servicesManager: deviceDataManager.servicesManager,
-                                        alertIssuer: alertManager)
+                                        alertIssuer: alertManager,
+                                        criticalEventLogExporterFactory: deviceDataManager.criticalEventLogExportManager)
         
         setWhitelistedDevices()
 

@@ -52,11 +52,7 @@ public typealias PumpManagerViewModel = DeviceViewModel<PumpManagerDescriptor>
 public protocol SettingsViewModelDelegate: AnyObject {
     func dosingEnabledChanged(_: Bool)
     func dosingStrategyChanged(_: AutomaticDosingStrategy)
-    func didTapIssueReport()
-    func generateDiagnosticReport() async -> String
     var closedLoopDescriptiveText: String? { get }
-    var pumpModel: String? { get }
-    var cgmModel: String? { get }
 }
 
 public class SettingsViewModel: ObservableObject {
@@ -69,40 +65,10 @@ public class SettingsViewModel: ObservableObject {
     
     private weak var delegate: SettingsViewModelDelegate?
 
-    func didTapIssueReport() {
-        delegate?.didTapIssueReport()
-    }
-
-    var generateDiagnosticReport: (() async -> String)? {
-        guard let delegate else {
-            return nil
-        }
-        return { [weak delegate] in await delegate?.generateDiagnosticReport() ?? "" }
-    }
-
-    @MainActor
-    var issueReportContext: [String: IssueReportContextValue] {
-        let buildDetails = BuildDetails.default
-        var context: [String: IssueReportContextValue] = [
-            "appVersion": .string(Bundle.main.shortVersionString),
-            "buildNumber": .string(Bundle.main.version),
-            "customizations": .strings(buildDetails.customizations),
-            "deviceModel": .string(UIDevice.current.modelIdentifier),
-            "osVersion": .string(UIDevice.current.systemVersion),
-        ]
-        context["branch"] = (buildDetails.workspaceGitBranch ?? buildDetails.gitBranch).map { .string($0) }
-        context["workspaceRevision"] = buildDetails.workspaceGitRevision.map { .string($0) }
-        context["loopRevision"] = buildDetails.gitRevision.map { .string($0) }
-        context["pumpModel"] = delegate?.pumpModel.map { .string($0) }
-        context["cgmModel"] = delegate?.cgmModel.map { .string($0) }
-        return context
-    }
-    
     var availableSupports: [SupportUI]
     let pumpManagerSettingsViewModel: PumpManagerViewModel
     let cgmManagerSettingsViewModel: CGMManagerViewModel
     let servicesViewModel: ServicesViewModel
-    let criticalEventLogExportViewModel: CriticalEventLogExportViewModel
     let therapySettings: () -> TherapySettings
     let sensitivityOverridesEnabled: Bool
     let isOnboardingComplete: Bool
@@ -139,7 +105,6 @@ public class SettingsViewModel: ObservableObject {
                 pumpManagerSettingsViewModel: PumpManagerViewModel,
                 cgmManagerSettingsViewModel: CGMManagerViewModel,
                 servicesViewModel: ServicesViewModel,
-                criticalEventLogExportViewModel: CriticalEventLogExportViewModel,
                 therapySettings: @escaping () -> TherapySettings,
                 sensitivityOverridesEnabled: Bool,
                 initialDosingEnabled: Bool,
@@ -156,7 +121,6 @@ public class SettingsViewModel: ObservableObject {
         self.pumpManagerSettingsViewModel = pumpManagerSettingsViewModel
         self.cgmManagerSettingsViewModel = cgmManagerSettingsViewModel
         self.servicesViewModel = servicesViewModel
-        self.criticalEventLogExportViewModel = criticalEventLogExportViewModel
         self.therapySettings = therapySettings
         self.sensitivityOverridesEnabled = sensitivityOverridesEnabled
         self.closedLoopPreference = initialDosingEnabled
@@ -204,7 +168,6 @@ extension SettingsViewModel {
                                  pumpManagerSettingsViewModel: DeviceViewModel<PumpManagerDescriptor>(),
                                  cgmManagerSettingsViewModel: DeviceViewModel<CGMManagerDescriptor>(),
                                  servicesViewModel: ServicesViewModel.preview,
-                                 criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()),
                                  therapySettings: { TherapySettings() },
                                  sensitivityOverridesEnabled: false,
                                  initialDosingEnabled: true,
