@@ -141,6 +141,22 @@ final class EndDuringBolusTests: XCTestCase {
         XCTAssertTrue(c.debugSnapshot().handbackFailureText?.contains("bolus") == true)
     }
 
+    /// Nobody starts a bolus while the pod is being handed back: with an End waiting, the watch
+    /// refuses a bolus and says how to give one; the End itself is untouched.
+    func testABolusIsRefusedWhileAnEndIsWaiting() async throws {
+        let c = await makeController()
+        _ = try activeLoan(c)
+        XCTAssertNil(c.bolusRefusalWhileEnding(), "no End waiting: a bolus may go")
+
+        c.queue.sync { c.handbackRequested = true }
+        XCTAssertEqual(c.bolusRefusalWhileEnding(), "Sport Mode is ending. Bolus from your iPhone once it has the pod, or cancel End first.")
+        XCTAssertTrue(c.debugSnapshot().handbackPending, "the End carries on")
+
+        let content = CarbAndBolusFlowViewModel.bolusFailureContent(units: 1, carbGrams: nil,
+                                                                    error: BolusRefusedWhileEnding(reason: c.bolusRefusalWhileEnding()!))
+        XCTAssertEqual(content.title, "Bolus Not Sent")
+    }
+
     /// A Start the phone denies (its own bolus still being given, for one) is felt on the watch too.
     func testAStartThePhoneDeniesIsFelt() async throws {
         let c = await makeController()

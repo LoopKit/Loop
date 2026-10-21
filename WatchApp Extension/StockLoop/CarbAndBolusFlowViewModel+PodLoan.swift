@@ -41,6 +41,12 @@ extension CarbAndBolusFlowViewModel {
         let content = UNMutableNotificationContent()
         content.sound = .default
 
+        if let refused = error as? BolusRefusedWhileEnding {
+            content.title = NSLocalizedString("Bolus Not Sent", comment: "Watch notification title: a bolus refused while an End is waiting")
+            content.body = refused.reason
+            return content
+        }
+
         if case .uncertainDelivery? = error as? PumpManagerError {
             let unitsText = NumberFormatter.localizedString(from: NSNumber(value: units), number: .decimal)
             content.title = String(
@@ -125,6 +131,14 @@ extension CarbAndBolusFlowViewModel {
     /// entry in its decision. Off main: the save completes on the carb store's queue.
     nonisolated private static func podLoanDeliver(carbEntry: NewCarbEntry?, bolus: Double,
                                                    activationType: BolusActivationType, session: StockLoopSession) {
+        // An End is waiting: the pod is going back to the phone, so no bolus starts (nor its carbs, which
+        // the looper enters with it on the phone).
+        if bolus > 0, let refusal = session.loanController.bolusRefusalWhileEnding() {
+            SportLog.event("bolus-ui", String(format: "BOLUS REFUSED — %.2f U: an End is waiting · haptic=failure", bolus))
+            notifyBolusFailure(units: bolus, carbGrams: nil, error: BolusRefusedWhileEnding(reason: refusal))
+            DispatchQueue.main.async { WKInterfaceDevice.current().play(.failure) }
+            return
+        }
         guard let carbEntry else {
             if bolus > 0 {
                 deliverLoanBolus(units: bolus, activationType: activationType, carbEntry: nil, storedCarbEntry: nil, session: session)
@@ -176,4 +190,9 @@ extension CarbAndBolusFlowViewModel {
             }
         }
     }
+}
+
+/// A bolus asked for while an End waits for the phone.
+struct BolusRefusedWhileEnding: Error {
+    let reason: String
 }

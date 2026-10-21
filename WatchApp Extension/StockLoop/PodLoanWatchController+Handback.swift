@@ -83,6 +83,15 @@ extension PodLoanWatchController {
         notifyUI()
     }
 
+    /// Nobody starts a bolus while the pod is being handed back: with an End waiting, a bolus asked
+    /// for on the watch is refused, and this says why. Nil when a bolus may go.
+    func bolusRefusalWhileEnding() -> String? {
+        queue.sync {
+            guard handbackRequested || phase == .handingBack else { return nil }
+            return NSLocalizedString("Sport Mode is ending. Bolus from your iPhone once it has the pod, or cancel End first.", comment: "Watch: a bolus refused while an End is waiting for the phone")
+        }
+    }
+
     /// Cancellable until `finalizeHandback`.
     func cancelHandback() {
         queue.async {
