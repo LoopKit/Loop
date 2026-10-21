@@ -199,7 +199,7 @@ delivered total when it is back with the pod.
 | **T** take-back (phone ← watch's pod) | the pod does not answer within 5 s | phone | no link | refuse; the loan is unchanged | watch | phone: "Couldn't Reach the Pod" | built |
 | T | the pod is giving the watch's bolus when the phone reaches it | phone | the pod's status, read before the stop | a tapped take-back is refused: "A bolus is still being given. Try again in N seconds."; a take-over on silence waits for the pod to finish, its link limit starting again after | watch, until the bolus ends | phone: notification "Wait for the Bolus" (tap); nothing (silence) | built |
 | T | the stop is lost (watch off) | watch, at return | its query is answered with a stop | stand aside (row 12) | phone | row 12 | built |
-| T | the pod is not reached within 12 s of a take-back | phone | link still down | escalate: search for the pod by its advertisement. The search ends with the take-back, reached or at its 5-min limit, and connects go back to the phone's own handle | phone | — | built |
+| T | the pod is not reached within 12 s of a take-back | phone | link still down | the pod driver searches for the pod by its advertisement, until the pod answers or control is released; connects then go back to the phone's own handle | phone | — | built |
 | T | the pod cannot be read after the take-back | phone | the insulin check is owed | hold dosing until the pod answers, then check | phone, not dosing | — | built |
 
 ---

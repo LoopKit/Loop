@@ -47,7 +47,7 @@ extension PodLoanPhoneController {
             guard let self, let control = self.deps.pumpManager() as? ExclusiveDeviceControl else {
                 return "no pump manager"
             }
-            return "released=\(control.isControlReleased) \(control.connectionDiagnostics() ?? "no diagnostics")"
+            return "released=\(control.isControlReleased) ready=\(control.isControlReady)"
         }
     }
 

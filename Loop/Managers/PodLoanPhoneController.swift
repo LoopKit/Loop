@@ -296,7 +296,6 @@ final class PodLoanPhoneController {
 
     var reclaimLinkUpAt: Date?
 
-    var reclaimEscalated = false
     var reclaimStaleReads = 0
 
     /// The tile's wait start, kept across a reopened window.

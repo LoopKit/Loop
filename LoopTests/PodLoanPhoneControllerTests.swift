@@ -22,13 +22,6 @@ extension MockPumpManager {
     static var testOdometer: Double?
     /// When the phone read it. nil = now.
     static var testOdometerAt: Date?
-    /// PHONE MIRROR: the books-dirty primitive (SQN-resync stamp) the inferred-loan
-    /// detector reads. nil = no foreign sessions observed.
-    static var testForeignSessionAt: Date?
-    /// Counts escalations.
-    static var testEscalations = 0
-    /// Counts escalations ended.
-    static var testEscalationsEnded = 0
     /// Counts forced reads, so a test can assert the settle forces without flooding the radio.
     static var testForcedReadCount = 0
     /// What the pod's own status says about a bolus being given, whoever started it.
@@ -49,14 +42,6 @@ final class LendableMockPumpManager: MockPumpManager, ExclusiveDeviceControl, Pu
     func takeControl() { Self.testConnectionReleased = false }
     var deliveredUnits: (units: Double, at: Date)? { Self.testOdometer.map { ($0, Self.testOdometerAt ?? Date()) } }
     var deliveryPulseUnits: Double { 0.05 }
-    var lastForeignSessionAt: Date? { Self.testForeignSessionAt }
-    /// Like the real one, lifts the release.
-    func escalateTakeControl() -> String? {
-        Self.testEscalations += 1
-        Self.testConnectionReleased = false
-        return "test escalation"
-    }
-    func endTakeEscalation() { Self.testEscalationsEnded += 1 }
     func refreshDeliveredUnits() async -> Bool {
         Self.testForcedReadCount += 1
         return true
@@ -146,7 +131,6 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         try? FileManager.default.createDirectory(at: stateDir, withIntermediateDirectories: true)
         MockPumpManager.testForcedReadCount = 0
         MockPumpManager.testPodBolusEndsAt = nil
-        MockPumpManager.testForeignSessionAt = nil
         PodLoanPhoneController.takeBackLinkLimit = 5
         backgroundTaskBegins = 0
         backgroundTaskEnds = 0
@@ -185,8 +169,6 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         MockPumpManager.testConnectionReleased = false
         MockPumpManager.testOdometer = nil
         MockPumpManager.testOdometerAt = nil
-        MockPumpManager.testEscalations = 0
-        MockPumpManager.testEscalationsEnded = 0
 
         let timeZone = TimeZone(identifier: "GMT")!
         settings = LoopSettings(
@@ -889,8 +871,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertEqual(addedDeviceLog, [lines], "only the granted loan's")
     }
 
-    /// Yielding to an inferred loan closes the settle window, whose +12 s escalation would
-    /// otherwise restore this phone's authority to dose.
+    /// Yielding to an inferred loan closes the settle window: a phone that has stood down stops
+    /// chasing the pod and keeps it released.
     func testYieldingToAnInferredLoanClosesTheSettleWindow() throws {
         let controller = makeController()
         establishLoan(controller)
@@ -908,34 +890,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         lock.lock(); let ends = backgroundTaskEnds; lock.unlock()
         XCTAssertGreaterThanOrEqual(ends, 1, "closing the window releases the background hold it carried")
 
-        // Past the escalation mark, with room for the 2 s chase ticks either side of it.
-        Thread.sleep(forTimeInterval: PodLoanPhoneController.reclaimEscalateAfter + 2)
-
-        XCTAssertEqual(MockPumpManager.testEscalations, 0,
-                       "a phone that has stood down must not escalate for the pod")
-        XCTAssertTrue(MockPumpManager.testConnectionReleased,
-                      "and the dosing gate must stay released — escalating clears it, which is dual control")
-        XCTAssertNil(diagMatching("escalating"))
-    }
-
-    /// An escalation ends with the settle it served: left armed, every connect would wait on its scan.
-    /// The transfer rule: a step that is over leaves nothing behind.
-    func testTheEscalationEndsWithTheSettle() throws {
-        let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
-        establishLoan(controller)
-        connectionReady = false                       // the pod does not answer at first
-        controller.forceReclaimToOwner(reason: "test: the take-back cannot reach the pod yet")
-        waitForState(controller, .owner)
-        XCTAssertTrue(controller.isReclaimSettling)
-
-        clock = clock.addingTimeInterval(PodLoanPhoneController.reclaimEscalateAfter + 1)
-        waitUntil(timeout: 5, "the settle escalates") { MockPumpManager.testEscalations == 1 }
-        XCTAssertEqual(MockPumpManager.testEscalationsEnded, 0, "still reaching for the pod")
-
-        connectionReady = true                        // the pod answers
-        waitUntil(timeout: 8, "reclaim verification") { !controller.isReclaimSettling }
-        settle()
-        XCTAssertEqual(MockPumpManager.testEscalationsEnded, 1, "the settle is over, and its escalation with it")
+        settle(3)
+        XCTAssertTrue(MockPumpManager.testConnectionReleased, "the dosing gate stays released")
     }
 
     /// A re-Start while the pod is still returning is denied until the pod is back.

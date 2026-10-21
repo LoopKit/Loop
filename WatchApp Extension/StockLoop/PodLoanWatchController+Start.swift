@@ -539,7 +539,7 @@ extension PodLoanWatchController {
         }
 
         // A pump this watch has never met must be found first, which needs the screen on.
-        let discover = control.takeControlNeedsSearch
+        let discover = watchTakeControlNeedsSearch(adopting: configuration, localState: pumpLocalState(for: configuration))
         takeoverFirstContact = discover
         takeoverPodReached = false
         takeoverNudges = 0
@@ -678,7 +678,7 @@ extension PodLoanWatchController {
 
                     SportLog.event("loan", String(format: "takeover read %d/%d driver=%@ (+%.1fs) — pump link %@ · %@ · %@",
                                                   attempt + 1, maxAttempts, driver, readElapsed,
-                                                  control?.connectionDiagnostics() ?? "no diagnostics",
+                                                  control.map { $0.isControlReady ? "ready" : "not ready" } ?? "no control",
                                                   self.g7StateForContention(),
                                                   RuntimeStateLog.snapshot()))
 
@@ -718,7 +718,7 @@ extension PodLoanWatchController {
                                                   wedged ? "YES" : "no",
                                                   stalled ? "ladder STALLED (our polling was deferred; see cb: for whether the link was up)" : "pod unreachable",
                                                   maxAttempts, failSecs, self.takeoverMaxReadGap, batteryTag(),
-                                                  control?.connectionDiagnostics() ?? "no diagnostics",
+                                                  control.map { $0.isControlReady ? "ready" : "not ready" } ?? "no control",
                                                   RuntimeStateLog.snapshot(), grant.epoch,
                                                   self.seizeMarkerActive ? " [seize]" : ""))
 

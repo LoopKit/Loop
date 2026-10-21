@@ -41,15 +41,6 @@ final class PodReturnsWithUnknownDeliveryStateTests: XCTestCase {
         XCTAssertNil(manager.state.podState?.lastDeliveryStatusReceived, "and the manager's own copy agrees")
     }
 
-    /// LoopKit's contract: nil when there is nothing to escalate.
-    func testEscalatingATakeWithNoPodReturnsNil() throws {
-        let raw: [String: Any] = ["basalSchedule": ["entries": [["rate": 1.0, "startTime": 0.0]]],
-                                  "controllerId": UInt32(0x1234_5678), "podId": UInt32(0x1234_5679)]
-        let manager = try XCTUnwrap(OmniPumpManager(rawState: raw))
-        XCTAssertNil(manager.escalateTakeControl())
-        XCTAssertNotNil(try makeManager(bolusInFlight: false).escalateTakeControl(), "a pod to find: the scan-adopt is armed")
-    }
-
     func testTakingControlBackDropsTheCopyOfABolusInFlightAtRelease() throws {
         let manager = try makeManager(bolusInFlight: true)
         manager.releaseControl()

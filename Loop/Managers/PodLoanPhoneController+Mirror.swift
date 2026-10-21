@@ -42,7 +42,7 @@ extension PodLoanPhoneController {
         (deps.pumpManager() as? ExclusiveDeviceControl)?.releaseControl()
         deps.pumpControlChanged(true)
 
-        // A settle window left open would escalate at +12 s and re-take the radio and the dosing gate.
+        // A settle window left open would keep chasing a pod this phone has let go of.
         closeReclaimSettleWindow(reason: "yielding to an inferred loan — this phone is not reaching for the pod")
         syncUIMirror()
         deps.ownershipDidChange()
