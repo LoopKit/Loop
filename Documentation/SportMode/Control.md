@@ -64,10 +64,28 @@ rule 4 says how.
 when to time a notice. The one rule that looks like a clock is the 6-hour limit on a watch resuming, and that is
 rule 1: insulin delivered longer ago than its action time cannot be placed.
 
-**A watch's records are its word too.** Records from a loan the phone does not hold are a claim to it, judged like
-the watch's own report, so arrival order cannot change the outcome. The report says when the loan started; records
-bound it, since nothing is logged or sent before a loan starts: their first record, or their send time, is the
-latest it could have started, and a bound before the takeover is as sure as the time.
+**A watch's records count as its word too.** This rule exists to tell apart two situations that look alike to the
+phone but need opposite answers. In both, a watch turns up holding a loan the phone does not hold.
+
+- *An old loan coming back (row 19).* The watch died mid-loan; the phone, hearing nothing, took the pod back on
+  silence and has been looping since. Later the watch revives, still believing in its old loan. The phone must
+  refuse: keep the pod and tell the watch to stop. Otherwise a watch with a stale picture of the last hours would
+  take over again.
+- *A new loan started without the phone (row 17).* The looper left the phone behind and started Sport Mode on the
+  watch alone. When the phone comes back, it must adopt that loan and stand aside, because the watch is the one
+  looping.
+
+The phone tells them apart by one fact: did the watch's loan start before or after the phone took the pod over?
+Before means an old loan coming back; after means a new one. The watch's status report states the loan's start
+time. But a revived watch often sends its backlog of records (doses, carbs) before any report, and the records do
+not state the start time. If the phone treated those records simply as "a loan is running", it would stand aside
+for a stale loan, and its answer would depend on whether the records or the report happened to arrive first.
+
+So records for a loan the phone does not hold are treated as the watch claiming the pod, and they are judged by the
+same rule as the report. In place of the start time, they give a limit. A watch logs and sends nothing before its
+loan starts, so the loan began no later than its earliest record (or, for a batch with no records, no later than
+the moment it was sent). When that limit falls before the phone's takeover, the loan certainly began before it, and
+the phone refuses as surely as if it knew the exact start time.
 
 ---
 
