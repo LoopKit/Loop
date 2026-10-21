@@ -104,23 +104,22 @@ extension PodLoanPhoneController {
 
     /// With the link up, the pod is read before the stop. Nobody takes the pod while it is giving a
     /// bolus (transfer T): a tapped take-back is refused, and a take-over on silence waits for the pod
-    /// to finish, its link limit starting again after. The pod has one connection, so the watch cannot
-    /// start another bolus meanwhile.
+    /// to finish, its link limit starting again after. The pod's own status says whether it is giving
+    /// one; this phone's bolus state knows only its own. The pod has one connection, so the watch
+    /// cannot start another bolus meanwhile.
     private func readPodForTakeBack(started: Date, waited: TimeInterval) {
-        guard let pump = deps.pumpManager() else { return finishTakeBack(waited: waited) }
-        let read: (@escaping () -> Void) -> Void = { done in
-            guard let odometer = pump as? PumpDeliveryOdometer else { return done() }
-            Task { _ = await odometer.refreshDeliveredUnits(); done() }
-        }
-        read { [weak self] in
+        guard let pump = deps.pumpManager(), let odometer = pump as? PumpDeliveryOdometer else { return finishTakeBack(waited: waited) }
+        Task { [weak self] in
+            let read = await odometer.refreshDeliveredUnits()
             guard let self else { return }
             self.queue.async {
                 guard self.takeBackStartedAt == started, self.state == .reclaimPending else { return }
-                guard case .inProgress(let dose) = pump.status.bolusState else {
+                guard let endsAt = odometer.bolusUnderWayEndsAt else {
+                    self.handbackDiag(self.epoch, read ? "take-back: pod read — no bolus being given" : "take-back: pod read FAILED — going ahead on the link")
                     self.finishTakeBack(waited: waited)
                     return
                 }
-                let left = max(1, dose.endDate.timeIntervalSince(self.deps.now())).rounded(.up)
+                let left = max(1, endsAt.timeIntervalSince(self.deps.now())).rounded(.up)
                 if self.takeBackOnSilence {
                     self.handbackDiag(self.epoch, String(format: "take-back: the pod is giving the watch's bolus, %.0f s left — waiting for it to finish", left))
                     self.queue.asyncAfter(deadline: .now() + min(left, 10) + 1) { [weak self] in

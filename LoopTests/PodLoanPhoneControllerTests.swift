@@ -31,6 +31,8 @@ extension MockPumpManager {
     static var testEscalationsEnded = 0
     /// Counts forced reads, so a test can assert the settle forces without flooding the radio.
     static var testForcedReadCount = 0
+    /// What the pod's own status says about a bolus being given, whoever started it.
+    static var testPodBolusEndsAt: Date?
 }
 
 /// Test-only hand-off conformance so the full grant path runs against the test pump.
@@ -59,6 +61,7 @@ final class LendableMockPumpManager: MockPumpManager, ExclusiveDeviceControl, Pu
         Self.testForcedReadCount += 1
         return true
     }
+    var bolusUnderWayEndsAt: Date? { Self.testPodBolusEndsAt }
 }
 
 final class PodLoanPhoneControllerTests: XCTestCase {
@@ -142,6 +145,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         stateDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try? FileManager.default.createDirectory(at: stateDir, withIntermediateDirectories: true)
         MockPumpManager.testForcedReadCount = 0
+        MockPumpManager.testPodBolusEndsAt = nil
         MockPumpManager.testForeignSessionAt = nil
         PodLoanPhoneController.takeBackLinkLimit = 5
         backgroundTaskBegins = 0
@@ -2264,12 +2268,17 @@ extension PodLoanPhoneControllerTests {
 
     // MARK: - Nobody takes the pod while it is giving a bolus
 
-    /// The pump mid-bolus, `secondsLeft` from its end: at a Start it is this phone's bolus, during a
-    /// loan it is what the take-back's read of the pod shows, the watch's.
+    /// This phone's own bolus, `secondsLeft` from its end, as its pump's bolus state shows it.
     private func setBolusInProgress(secondsLeft: TimeInterval) {
         let now = Date()
         pump.status.bolusState = .inProgress(DoseEntry(type: .bolus, startDate: now.addingTimeInterval(-10),
                                                        endDate: now.addingTimeInterval(secondsLeft), value: 2, unit: .units, decisionId: nil))
+    }
+
+    /// The watch's bolus, as only the pod's status shows it: this phone's bolus state says none.
+    private func setPodGivingTheWatchsBolus(secondsLeft: TimeInterval) {
+        pump.status.bolusState = .noBolus
+        MockPumpManager.testPodBolusEndsAt = Date().addingTimeInterval(secondsLeft)
     }
 
     /// Start while this phone's bolus is being given: denied with the wait, nothing released, and
@@ -2296,7 +2305,7 @@ extension PodLoanPhoneControllerTests {
     func testATappedTakeBackIsRefusedWhileTheWatchsBolusIsBeingGiven() throws {
         let controller = makeController()
         establishLoan(controller)
-        setBolusInProgress(secondsLeft: 30)
+        setPodGivingTheWatchsBolus(secondsLeft: 30)
         let readsBefore = MockPumpManager.testForcedReadCount
 
         controller.reclaimNow()
@@ -2313,7 +2322,7 @@ extension PodLoanPhoneControllerTests {
         XCTAssertNil(controller.reclaimProgress)
         XCTAssertNotNil(diagMatching("take-back REFUSED — the pod is giving the watch's bolus"))
 
-        pump.status.bolusState = .noBolus
+        MockPumpManager.testPodBolusEndsAt = nil
         controller.reclaimNow()
         waitForState(controller, .owner)
         XCTAssertEqual(revokeCount(), 1)
@@ -2325,7 +2334,7 @@ extension PodLoanPhoneControllerTests {
     func testATakeOverOnSilenceWaitsForTheWatchsBolusThenTakesThePod() throws {
         let controller = makeController()
         establishLoan(controller)
-        setBolusInProgress(secondsLeft: 1)
+        setPodGivingTheWatchsBolus(secondsLeft: 1)
 
         controller.reclaimNow(onSilence: true)
         waitUntil(timeout: 5, "waiting") { self.diagMatching("waiting for it to finish") != nil }
@@ -2333,7 +2342,7 @@ extension PodLoanPhoneControllerTests {
         XCTAssertEqual(revokeCount(), 0)
         XCTAssertFalse(notices.contains("Wait for the Bolus"), "nothing to ask of the looper")
 
-        pump.status.bolusState = .noBolus   // the pod finished
+        MockPumpManager.testPodBolusEndsAt = nil   // the pod finished
         waitForState(controller, .owner)
         XCTAssertEqual(revokeCount(), 1, "then the watch is told to stop, once")
         XCTAssertFalse(MockPumpManager.testConnectionReleased, "and the phone holds the pump")
