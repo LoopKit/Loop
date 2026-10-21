@@ -128,7 +128,7 @@ extension PodLoanPhoneController {
                 } else if let control = pump as? ExclusiveDeviceControl {
                     self.refuseTakeBack(control: control, why: String(format: "the pod is giving the watch's bolus, %.0f s left", left),
                                         notice: (NSLocalizedString("Wait for the Bolus", comment: "Phone notice title when a take-back found the watch's bolus still being given"),
-                                                 String(format: NSLocalizedString("A bolus is still being given. Try again in %.0f seconds.", comment: "Phone notice body when a take-back found the watch's bolus still being given"), left)))
+                                                 LoanControl.bolusRefusal(LoanControl.BolusUnderWay(endsAt: endsAt), now: self.deps.now())))
                 }
             }
         }

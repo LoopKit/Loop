@@ -300,4 +300,23 @@ public enum LoanControl {
         guard let started, let tookOver else { return false }
         return started < tookOver
     }
+
+    // MARK: - Nobody takes the pod while it is giving a bolus
+
+    /// A bolus under way: from the moment it is sent until it has finished or been cancelled. A
+    /// Start, an End and a Take Back are refused meanwhile (transfers G, H and T).
+    public struct BolusUnderWay: Equatable {
+        /// When it ends, once the pump has accepted it; nil while it is being sent or cancelled.
+        public let endsAt: Date?
+        public init(endsAt: Date?) { self.endsAt = endsAt }
+    }
+
+    /// What the looper is told when a Start, an End or a Take Back meets a bolus under way.
+    public static func bolusRefusal(_ bolus: BolusUnderWay, now: Date) -> String {
+        guard let endsAt = bolus.endsAt else {
+            return NSLocalizedString("A bolus is still being given. Try again when it has finished.", comment: "Start, End or Take Back refused while a bolus is being sent to the pod")
+        }
+        let left = max(1, endsAt.timeIntervalSince(now)).rounded(.up)
+        return String(format: NSLocalizedString("A bolus is still being given. Try again in %.0f seconds.", comment: "Start, End or Take Back refused while a bolus is being given (1: seconds left)"), left)
+    }
 }

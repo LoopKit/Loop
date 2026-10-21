@@ -101,10 +101,9 @@ extension PodLoanPhoneController {
         }
 
         // Nobody takes the pod while it is giving a bolus (transfer G): the looper tries again after it.
-        if case .inProgress(let dose) = pump.status.bolusState {
-            let left = max(1, dose.endDate.timeIntervalSince(deps.now())).rounded(.up)
-            handbackDiag(epoch, String(format: "grant REFUSED — this phone's bolus is still being given, %.0f s left", left))
-            deny(String(format: "A bolus is still being given. Try again in %.0f seconds.", left))
+        if let bolus = pump.status.bolusState.underWay {
+            handbackDiag(epoch, "grant REFUSED — this phone's bolus is still being given (ends \(bolus.endsAt.map { "in \(Int($0.timeIntervalSince(deps.now()).rounded(.up))) s" } ?? "when the pod has it"))")
+            deny(LoanControl.bolusRefusal(bolus, now: deps.now()))
             return
         }
 

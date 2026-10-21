@@ -2300,6 +2300,18 @@ extension PodLoanPhoneControllerTests {
         establishLoan(controller)
     }
 
+    /// Start while this phone's bolus is still being sent to the pod: the bolus counts already.
+    func testStartIsDeniedWhileThisPhonesBolusIsBeingSent() throws {
+        let controller = makeController()
+        pump.status.bolusState = .initiating
+        controller.handleIncoming(userInfo: try LoanMessage.request(LoanRequest(watchBuild: "t")).transportDictionary())
+        waitUntil(timeout: 5, "denied") { if case .denied? = self.lastSent() { return true }; return false }
+
+        guard case .denied(let denied)? = lastSent() else { return XCTFail("expected a denial") }
+        XCTAssertEqual(denied.reason, "A bolus is still being given. Try again when it has finished.")
+        XCTAssertFalse(MockPumpManager.testConnectionReleased)
+    }
+
     /// A tapped take-back finds the pod giving the watch's bolus: refused, the loan exactly as it
     /// was, the looper told to wait. The tap after the bolus takes the pod.
     func testATappedTakeBackIsRefusedWhileTheWatchsBolusIsBeingGiven() throws {
