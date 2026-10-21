@@ -428,7 +428,8 @@ final class GlanceViewModel: ObservableObject {
             RuntimeStateLog.mark("glance.refresh.activeStateBuild")
             var s = Self.activeState(data: data, cob: latestCOB, now: Date(),
                                      phoneGlucoseDate: ExtensionDelegate.sharedIfAvailable()?.loopManager.activeContext?.glucoseDate)
-            // One transient slot: hand-back in progress, then recent failure, then start note.
+            // One transient slot: hand-back in progress, then start note; a recent End failure is
+            // laid over the bolus narration below.
             if snap.handbackPending {
                 s.handbackPending = true
                 s.handbackStartedAt = snap.handbackStartedAt
@@ -442,9 +443,6 @@ final class GlanceViewModel: ObservableObject {
                 if !snap.phoneReachable {
                     s.idleNote = NSLocalizedString("Can't reach iPhone — still looping. Move it closer or check its Bluetooth.", comment: "Glance note when an interim hand-back is blocked by an unreachable phone")
                 }
-            } else if let at = snap.handbackFailedAt, let text = snap.handbackFailureText,
-                      Date().timeIntervalSince(at) < 20 {
-                s.transientText = text
             } else if let at = snap.startNoteAt, let text = snap.startNoteText,
                       Date().timeIntervalSince(at) < 90 {
                 s.transientText = text
@@ -470,6 +468,13 @@ final class GlanceViewModel: ObservableObject {
             if let delivery = session.stack.loopManager.manualBolusDelivery {
                 s.bolusDelivery = delivery
                 s.transientText = nil
+            }
+
+            // A refused End says why for its 20 s, even over the bolus it is waiting for.
+            if let at = snap.handbackFailedAt, let text = snap.handbackFailureText,
+               Date().timeIntervalSince(at) < 20 {
+                s.bolusDelivery = nil
+                s.transientText = text
             }
             RuntimeStateLog.mark("glance.refresh.statePublish")
             state = s

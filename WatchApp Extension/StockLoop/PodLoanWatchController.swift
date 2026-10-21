@@ -282,6 +282,8 @@ final class PodLoanWatchController {
     /// Seams: is the app on screen right now, and the tap itself.
     var isWatchAppActive: () -> Bool = { RuntimeStateLog.appStateName() == "active" }
     var playTakeoverNudge: () -> Void = { WKInterfaceDevice.current().play(.notification) }
+    /// A Start or End the watch refused on the spot: the looper feels it as well as reads it.
+    var playRefusal: () -> Void = { DispatchQueue.main.async { WKInterfaceDevice.current().play(.failure) } }
 
     /// From persisted state alone: resume (rebuilt later in `resumeIfNeeded`), drain, or idle.
     init(loopManager: WatchLoopManager, journal: LoanEventJournal = LoanEventJournal(),
@@ -393,6 +395,7 @@ final class PodLoanWatchController {
             if phase == .requested || phase == .idle || phase == .recoveredDrain {
                 returnToRestingPhase()
                 lastIdleNote = denied.reason
+                playRefusal()
                 notifyUI()
             }
             SportLog.event("loan", "DENIED by phone — \(denied.reason)")

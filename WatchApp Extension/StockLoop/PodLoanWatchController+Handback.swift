@@ -31,6 +31,7 @@ extension PodLoanWatchController {
                 let left = max(1, dose.endDate.timeIntervalSince(self.now())).rounded(.up)
                 self.handbackFailure = (self.now(), String(format: NSLocalizedString("A bolus is still being given. Try again in %.0f seconds.", comment: "Glance transient: End refused while the watch's bolus is still being given"), left))
                 SportLog.event("loan", String(format: "HAND-BACK refused — a bolus is being given, %.0f s left", left))
+                self.playRefusal()
                 self.notifyUI()
                 return
             }

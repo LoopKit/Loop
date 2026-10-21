@@ -4,8 +4,8 @@
 //
 //  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
-//  Nobody takes the pod while it is giving a bolus (control document, row H): the watch's End is
-//  refused on the spot while its own bolus is being given. Hosted with a real DASH manager, which
+//  Nobody takes the pod while it is giving a bolus (control document, rows G and H): the watch's
+//  End is refused on the spot while its own bolus is being given, and a refusal is felt. Hosted with a real DASH manager, which
 //  needs the host app's bluetooth-central background mode.
 //
 
@@ -71,15 +71,31 @@ final class EndDuringBolusTests: XCTestCase {
         }
         var sent: [[String: Any]] = []
         c.send = { sent.append($0) }
+        var refusalsFelt = 0
+        c.playRefusal = { refusalsFelt += 1 }
 
         c.beginHandback()
         c.queue.sync { }
 
+        XCTAssertEqual(refusalsFelt, 1, "felt as well as read")
         XCTAssertTrue(sent.isEmpty, "no offer goes out")
         XCTAssertFalse(c.debugSnapshot().handbackPending)
         XCTAssertEqual(c.phase, .active, "the loan continues")
         XCTAssertNotNil(c.pumpManager, "the watch still holds the pod")
         XCTAssertTrue(c.debugSnapshot().handbackFailureText?.contains("bolus") == true,
                       "on screen: why, and when to try again")
+    }
+
+    /// A Start the phone denies (its own bolus still being given, for one) is felt on the watch too.
+    func testAStartThePhoneDeniesIsFelt() async throws {
+        let c = await makeController()
+        var refusalsFelt = 0
+        c.playRefusal = { refusalsFelt += 1 }
+        let reason = "A bolus is still being given. Try again in 30 seconds."
+        c.handleIncoming(userInfo: try LoanMessage.denied(LoanDenied(reason: reason)).transportDictionary(), channel: .urgent)
+        c.queue.sync { }
+
+        XCTAssertEqual(refusalsFelt, 1)
+        XCTAssertEqual(c.phase, .idle)
     }
 }
