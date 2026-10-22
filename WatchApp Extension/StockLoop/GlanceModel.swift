@@ -636,13 +636,6 @@ final class GlanceViewModel: ObservableObject {
             let missedAWindow = (age ?? .infinity) > 8 * 60
             s.g7EtaText = g7EtaText(lastReading: data.glucoseDate ?? phoneGlucoseDate, now: now, firstConnect: missedAWindow)
 
-            // The wedge hint outranks the countdown.
-            if let hint = G7SilenceHint.text(directAge: data.directG7At.map { now.timeIntervalSince($0) },
-                                             relayAge: data.phoneRelayAt.map { now.timeIntervalSince($0) },
-                                             sensorAge: data.sensorActivatedAt.map { now.timeIntervalSince($0) }) {
-                s.g7EtaText = hint
-            }
-
         // An eventual is only offered against a FRESH reading. A prediction from a stale input is
         // not a weaker prediction, it is a different question.
         } else if let eventual = data.eventual {
