@@ -2680,11 +2680,6 @@ extension PodLoanPhoneControllerTests {
 
         XCTAssertTrue(controller.isPodLoanedOutForUI, "the tile's tap predicate includes the yield → Reclaim Now")
         XCTAssertTrue(MockPumpManager.testConnectionReleased, "radio released, interlock armed — as a grant")
-        waitUntil(timeout: 5, "notice posted") {
-            self.lock.lock(); defer { self.lock.unlock() }
-            return self.notices.contains("Pod Looks Controlled by the Watch")
-        }
-
         controller.reclaimNow()                        // the tile tap
         waitUntil(timeout: 5, "force landed") {
             controller.state == .owner && !controller.yieldingToInferredLoan && !MockPumpManager.testConnectionReleased

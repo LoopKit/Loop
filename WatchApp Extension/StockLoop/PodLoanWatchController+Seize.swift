@@ -60,7 +60,6 @@ extension PodLoanWatchController {
             // The Start is withdrawn: a grant that still arrives for it starts nothing (transfer G).
             self.startCancelled = true
             self.cancelStaleQueuedRequests(context: "offer declined")
-            self.lastIdleNote = NSLocalizedString("Offline start cancelled.", comment: "Glance note after dismissing a seize offer")
             SportLog.event("seize", "seize offer DISMISSED [seize]")
             self.notifyUI()
         }

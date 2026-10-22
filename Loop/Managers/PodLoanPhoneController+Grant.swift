@@ -48,9 +48,10 @@ extension PodLoanPhoneController {
             sendMessage(.nack(ProtocolNack(seenVersion: request.supportedVersions.max())))
             return
         }
-        // A grant is mid-flight: the phone has already paused dosing and is waiting on the pod.
+        // A grant is mid-flight: the phone has already paused dosing and is waiting on the pod. A second
+        // Start (the same one by its second route, or a second tap) is answered by that grant.
         guard !grantInFlight else {
-            deny("A grant is already in progress.")
+            os_log("Loan request while a grant is being prepared — the grant answers it", log: log, type: .default)
             return
         }
         guard state == .owner else {

@@ -47,9 +47,7 @@ extension PodLoanPhoneController {
         syncUIMirror()
         deps.ownershipDidChange()
 
-        deps.issueNotice(
-            NSLocalizedString("Pod Looks Controlled by the Watch", comment: "Phone notice title when the phone yields to an inferred watch loan"),
-            NSLocalizedString("This phone has paused automatic dosing because the pod appears to be in use by the watch. Tap the pod tile to take it back.", comment: "Phone notice body when the phone yields to an inferred watch loan"))
+        // No notice: the looper started this loan on the watch; the banner shows it (control row 17).
         PhoneLog.event("mirror", "YIELDING to an inferred loan — \(evidence); pill=Pod on Watch, dosing paused, pod BLE released, exits: pill tap / watch revival / the watch's records; on conflict the phone yields [mirror]")
     }
 
