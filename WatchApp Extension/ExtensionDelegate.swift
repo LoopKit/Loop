@@ -20,7 +20,16 @@ import ClockKit
 
 class ExtensionDelegate: NSObject, WKApplicationDelegate {
 
-    private let log = OSLog(category: "ExtensionDelegate")
+    let log = OSLog(category: "ExtensionDelegate")
+
+    /// The Sport Mode stack — built and used by ExtensionDelegate+PodLoan.swift.
+    var stockLoopSession: StockLoopSession?
+    /// Guards a second build while the first is in flight — ExtensionDelegate+PodLoan.swift.
+    var stockLoopSessionStarting = false
+    /// Loan messages that arrived before the stack was ready, replayed once it is —
+    /// ExtensionDelegate+PodLoan.swift.
+    var earlyLoanMessages: [([String: Any], LoanTransportChannel)] = []
+    let earlyLoanMessagesLock = NSLock()
 
     private var observers: [NSKeyValueObservation] = []
     private var notifications: [NSObjectProtocol] = []
@@ -33,6 +42,8 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
 
     override init() {
         super.init()
+
+        podLoanRegisterSharedInstance()
 
         let session = WCSession.default
         session.delegate = self
@@ -65,6 +76,15 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             }
         })
 
+        // During a loan the glance complication shows the WATCH's loop: the glance mirror is
+        // republished at every landed cycle.
+        notifications.append(NotificationCenter.default.addObserver(forName: WatchLoopManager.glanceMirrorDidUpdate, object: nil, queue: nil) { [weak self] (_) in
+            DispatchQueue.main.async {
+                guard let self, self.stockLoopSession?.loanController.isLoanActiveNonBlocking == true else { return }
+                GlanceComplicationPublisher.publish(from: self)
+            }
+        })
+
         session.activate()
     }
 
@@ -75,6 +95,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     }
 
     func applicationDidFinishLaunching() {
+        podLoanDidFinishLaunching()
         UNUserNotificationCenter.current().delegate = self
         if #available(watchOSApplicationExtension 5.0, *) {
             INRelevantShortcutStore.default.registerShortcuts()
@@ -93,13 +114,23 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
         // glucose we're missing.
         loopManager.requestContextUpdate()
         loopManager.requestGlucoseBackfillIfNecessary()
+
+        podLoanDidBecomeActive()
     }
 
     func applicationWillResignActive() {
+        podLoanWillResignActive()
     }
 
-    // Presumably the main thread?
+    // Not always main: the Bluetooth task arrives on CoreBluetooth's queue (crash 2026-09-14).
     func handle(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
+        guard Thread.isMainThread else {
+            // Silent hop: the task is delivered once per GATT event.
+            DispatchQueue.main.async { self.handle(backgroundTasks) }
+            return
+        }
+        podLoanNoteBackgroundTasks(backgroundTasks)
+
         loopManager.requestGlucoseBackfillIfNecessary()
 
         for task in backgroundTasks {
@@ -111,6 +142,9 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
                 log.default("Processing WKSnapshotRefreshBackgroundTask")
                 task.setTaskCompleted(restoredDefaultState: false, estimatedSnapshotExpiration: Date(timeIntervalSinceNow: TimeInterval(minutes: 5)), userInfo: nil)
                 return  // Don't call the standard setTaskCompleted handler
+            case let task as WKBluetoothAlertRefreshBackgroundTask:
+                holdBluetoothTask(task)
+                continue  // completed on our own schedule
             case is WKURLSessionRefreshBackgroundTask:
                 break
             case let task as WKWatchConnectivityRefreshBackgroundTask:
@@ -137,6 +171,12 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     }
 
     private var pendingConnectivityTasks: [WKWatchConnectivityRefreshBackgroundTask] = []
+
+    // MARK: Bluetooth alert task — one held per wake (ExtensionDelegate+BluetoothWake.swift)
+
+    var heldBluetoothTask: WKBluetoothAlertRefreshBackgroundTask?
+    var heldBluetoothTaskSince: Date?
+    var bluetoothDeliveriesThisWake = 0
 
     private func completePendingConnectivityTasksIfNeeded() {
         if WCSession.default.activationState == .activated && !WCSession.default.hasContentPending {
@@ -166,6 +206,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             log.error("Could not decode WatchContext: %{public}@", data)
             return
         }
+        stockLoopSession?.loanController.notePhoneHeard()
 
         if context.displayGlucoseUnit == nil {
             let type = HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!
@@ -207,6 +248,8 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             log.default("Reloading complication timeline")
             server.reloadTimeline(for: complication)
         }
+        ComplicationPublisher.publish(from: loopManager)
+        GlanceComplicationPublisher.publish(from: self)
     }
 }
 
@@ -220,6 +263,7 @@ extension ExtensionDelegate: WCSessionDelegate {
 
         if activationState == .activated {
             updateContext(session.receivedApplicationContext)
+            podLoanSessionDidActivate()
             Task {
                 await loopManager.requestSettingsUpdate()
             }
@@ -233,6 +277,8 @@ extension ExtensionDelegate: WCSessionDelegate {
 
     // This method is called on a background thread of your app
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
+        if podLoanRoutesUserInfo(userInfo) { return }
+
         let name = userInfo["name"] as? String ?? "WatchContext"
 
         log.default("didReceiveUserInfo: %{public}@", name)
@@ -266,6 +312,7 @@ extension ExtensionDelegate: WCSessionDelegate {
 
 extension ExtensionDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        if await podLoanHandleAlertResponse(response) { return }
 
         log.default("UNNotificationResponse rootInterfaceController = %{public}@", String(describing: WKApplication.shared().rootInterfaceController))
         log.default("UNNotificationResponse visibleInterfaceController = %{public}@", String(describing: WKApplication.shared().visibleInterfaceController))
