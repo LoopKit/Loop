@@ -199,7 +199,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Totaal Koolhydraten"
+            "value" : "Totaal koolhydraten"
           }
         },
         "pl" : {
@@ -456,7 +456,7 @@
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pre-måltid"
+            "value" : "Før måltid"
           }
         },
         "nl" : {
@@ -839,7 +839,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bolus Mislukt"
+            "value" : "Bolus mislukt"
           }
         },
         "pl" : {
@@ -1342,7 +1342,7 @@
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overstyr"
+            "value" : "Overstyring"
           }
         },
         "nl" : {
@@ -1396,7 +1396,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Override"
+            "value" : "覆盖"
           }
         }
       }
@@ -1738,7 +1738,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etiket"
+            "value" : "Label"
           }
         },
         "pl" : {
@@ -2511,7 +2511,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etiket"
+            "value" : "Label"
           }
         },
         "pl" : {
