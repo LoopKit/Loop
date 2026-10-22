@@ -100,6 +100,12 @@
             "state" : "translated",
             "value" : "LoopUI"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LoopUI"
+          }
         }
       }
     },

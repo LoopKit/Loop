@@ -42,17 +42,23 @@ public final class SupportManager {
     private let alertIssuer: AlertIssuer
     private let deviceSupportDelegate: DeviceSupportDelegate
     private let pluginManager: PluginManager
+    private let criticalEventLogExporterFactory: CriticalEventLogExporterFactory?
+    private weak var diagnosticReportGenerator: DiagnosticReportGenerator?
 
     lazy private var cancellables = Set<AnyCancellable>()
 
     init(pluginManager: PluginManager,
          deviceSupportDelegate: DeviceSupportDelegate,
          servicesManager: ServicesManager? = nil,
-         alertIssuer: AlertIssuer) {
-        
+         alertIssuer: AlertIssuer,
+         criticalEventLogExporterFactory: CriticalEventLogExporterFactory? = nil,
+         diagnosticReportGenerator: DiagnosticReportGenerator? = nil) {
+
         self.alertIssuer = alertIssuer
         self.deviceSupportDelegate = deviceSupportDelegate
         self.pluginManager = pluginManager
+        self.criticalEventLogExporterFactory = criticalEventLogExporterFactory
+        self.diagnosticReportGenerator = diagnosticReportGenerator
 
         restoreState()
 
@@ -216,7 +222,14 @@ extension SupportManager: SupportUIDelegate {
     public func openURL(url: URL) {
         UIApplication.shared.open(url)
     }
-    
+
+    public func criticalEventLogExportView() -> AnyView {
+        guard let criticalEventLogExporterFactory else {
+            return AnyView(EmptyView())
+        }
+        return AnyView(CriticalEventLogExportView(viewModel: CriticalEventLogExportViewModel(exporterFactory: criticalEventLogExporterFactory)))
+    }
+
     public var pumpStatus: LoopKit.PumpManagerStatus? {
         deviceSupportDelegate.pumpManagerStatus
     }
@@ -242,7 +255,10 @@ extension SupportManager: SupportUIDelegate {
     }
 
     public func generateIssueReport() async -> String {
-        await deviceSupportDelegate.generateDiagnosticReport()
+        if let diagnosticReportGenerator {
+            return await diagnosticReportGenerator.generateDiagnosticReport()
+        }
+        return await deviceSupportDelegate.generateDiagnosticReport()
     }
     
     public func issueAlert(_ alert: LoopKit.Alert) async {

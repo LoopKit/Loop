@@ -1497,9 +1497,25 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private func presentIssueReport() {
-        let vc = CommandResponseViewController.generateDiagnosticReport(reportGenerator: diagnosticReportGenerator)
-        vc.title = NSLocalizedString("Issue Report", comment: "The view controller title for the issue report screen")
-        show(vc, sender: nil)
+        if let reportProblemView = supportManager.availableSupports.lazy.compactMap({ $0.reportProblemView() }).first {
+            present(DismissibleHostingController(rootView: reportProblemView, isModalInPresentation: false), animated: true)
+            return
+        }
+
+        Task { @MainActor in
+            let date = Date()
+            let report = "Generated: \(date)\n\n" + (await diagnosticReportGenerator.generateDiagnosticReport())
+            let name = "Loop Report \(ISO8601DateFormatter.string(from: date, timeZone: .current, formatOptions: [.withSpaceBetweenDateAndTime, .withInternetDateTime])).md"
+            let url = FileManager.default.temporaryDirectory.appendingPathComponent(name.replacingOccurrences(of: ":", with: "-"))
+            guard (try? report.write(to: url, atomically: true, encoding: .utf8)) != nil else {
+                return
+            }
+            let activityViewController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+            activityViewController.completionWithItemsHandler = { _, _, _, _ in
+                try? FileManager.default.removeItem(at: url)
+            }
+            present(activityViewController, animated: true)
+        }
     }
 
     // MARK: - Actions
@@ -2307,18 +2323,6 @@ extension StatusTableViewController: SettingsViewModelDelegate {
         settingsManager.mutateLoopSettings { settings in
             settings.automaticDosingStrategy = strategy
         }
-    }
-
-    func didTapIssueReport() {
-        // TODO: this dismiss here is temporary, until we know exactly where
-        // we want this screen to belong in the navigation flow
-        dismiss(animated: true) {
-            self.presentIssueReport()
-        }
-    }
-
-    func generateDiagnosticReport() async -> String {
-        await diagnosticReportGenerator.generateDiagnosticReport()
     }
 }
 
