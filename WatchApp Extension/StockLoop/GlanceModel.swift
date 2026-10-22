@@ -392,8 +392,8 @@ final class GlanceViewModel: ObservableObject {
 
             s.phoneUnreachable = !snap.phoneReachable
             s.idleNote = snap.phoneReachable
-                ? NSLocalizedString("Waiting for iPhone — pod still on watch. Bolus unavailable until it connects.", comment: "Glance note while a hand-back waits for the phone")
-                : NSLocalizedString("Can't reach iPhone — pod still on watch. Move it closer or check its Bluetooth.", comment: "Glance note while a hand-back waits for an UNREACHABLE phone")
+                ? NSLocalizedString("Waiting for iPhone to take the pod. Bolus unavailable until then.", comment: "Glance note while a hand-back waits for the phone")
+                : NSLocalizedString("Can't reach iPhone. Waiting for it to take the pod.", comment: "Glance note while a hand-back waits for an UNREACHABLE phone")
             state = s
         // A parked drain is startable: the idle page plus a note.
         case .recoveredDrain:
@@ -441,7 +441,7 @@ final class GlanceViewModel: ObservableObject {
                 // WATCH-to-phone link rather than implying that dosing has stopped.
                 s.phoneUnreachable = !snap.phoneReachable
                 if !snap.phoneReachable {
-                    s.idleNote = NSLocalizedString("Can't reach iPhone — still looping. Move it closer or check its Bluetooth.", comment: "Glance note when an interim hand-back is blocked by an unreachable phone")
+                    s.idleNote = NSLocalizedString("Can't reach iPhone. The watch is still looping.", comment: "Glance note when an interim hand-back is blocked by an unreachable phone")
                 }
             } else if let at = snap.startNoteAt, let text = snap.startNoteText,
                       Date().timeIntervalSince(at) < 90 {
@@ -459,8 +459,8 @@ final class GlanceViewModel: ObservableObject {
                     ? (amount.map { String(format: NSLocalizedString("starting %@ U…", comment: "Glance status while a manual bolus is being sent to the pod (1: units)"), $0) }
                         ?? NSLocalizedString("starting bolus…", comment: "Glance status while a manual bolus is being sent, amount unknown"))
 
-                    : (amount.map { String(format: NSLocalizedString("taking longer than usual — %@ U will deliver", comment: "Glance status when a manual bolus is slow to reach the pod (1: units)"), $0) }
-                        ?? NSLocalizedString("taking longer than usual — the bolus will deliver", comment: "Glance status when a slow manual bolus has no known amount"))
+                    : (amount.map { String(format: NSLocalizedString("taking longer than usual — still sending %@ U", comment: "Glance status when a manual bolus is slow to reach the pod (1: units)"), $0) }
+                        ?? NSLocalizedString("taking longer than usual — still sending the bolus", comment: "Glance status when a slow manual bolus has no known amount"))
             }
 
             // Once the pod has accepted, the delivery bar replaces the narration — the two

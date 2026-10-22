@@ -67,7 +67,7 @@ extension PodLoanPhoneController {
 
                 os_log("Loan request while LOANED — revoking the previous loan first", log: log, type: .default)
                 reclaimNow()
-                deny("Reclaiming the previous loan from the watch — try Start again in a few seconds.")
+                deny("Ending the previous Sport Mode session. Tap Start again in a few seconds.")
             case .owner:
                 break
             }
@@ -91,7 +91,7 @@ extension PodLoanPhoneController {
         }
         // Handing over needs exclusive control and the delivered total both sides audit against.
         guard let control = pump as? ExclusiveDeviceControl, pump is PumpDeliveryOdometer else {
-            deny("This pump can't be loaned to the watch (\(type(of: pump))).")
+            deny("This pump doesn't support Sport Mode.")
             return
         }
 
@@ -114,7 +114,7 @@ extension PodLoanPhoneController {
            reclaimVerifiedAt == nil {
             os_log("Grant deferred: pod still returning from the last reclaim (%.0fs into settle, round-trip not yet verified) — deny-and-retry",
                    log: log, type: .default, deps.now().timeIntervalSince(started))
-            deny("The pod is still returning from the last session. Try Start again in a few seconds.")
+            deny("The iPhone is still reconnecting to the pod. Try again in a few seconds.")
             attemptReclaimVerificationNow(started: started)
             return
         }
@@ -143,7 +143,8 @@ extension PodLoanPhoneController {
             self.queue.async {
                 self.grantInFlight = false
                 if let error = error {
-                    self.deny("The iPhone couldn't reach its pod (\(error.localizedDescription)). The phone kept the pod.")
+                    os_log("Grant: the pre-grant temp cancel failed: %{public}@", log: self.log, type: .error, String(describing: error))
+                    self.deny("The iPhone couldn't reach the pod and kept it. Try again.")
                     return
                 }
                 self.continueGrant(settings: settings, loanSettings: loanSettings, pump: pump, control: control)

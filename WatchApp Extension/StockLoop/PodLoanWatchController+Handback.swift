@@ -88,7 +88,7 @@ extension PodLoanWatchController {
     func bolusRefusalWhileEnding() -> String? {
         queue.sync {
             guard handbackRequested || phase == .handingBack else { return nil }
-            return NSLocalizedString("Sport Mode is ending. Bolus from your iPhone once it has the pod, or cancel End first.", comment: "Watch: a bolus refused while an End is waiting for the phone")
+            return NSLocalizedString("Sport Mode is ending. Bolus on the iPhone once it has the pod.", comment: "Watch: a bolus refused while an End is waiting for the phone")
         }
     }
 
@@ -113,8 +113,8 @@ extension PodLoanWatchController {
         else if unreachable { why = "not possible — iPhone did not answer the offer" }
         else { why = "timed out (\(Int(HandbackStuckAlert.interval))s) — iPhone never acked" }
         handbackFailure = (now(), refusal ?? (unreachable
-            ? NSLocalizedString("iPhone isn't nearby, so the pod can't be handed back. Sport Mode keeps looping. To stop automatic dosing, open the loop on the watch.", comment: "Glance message: End refused, the phone did not answer")
-            : NSLocalizedString("iPhone didn't respond — still running", comment: "Glance transient: End failed, no ack")))
+            ? NSLocalizedString("iPhone didn't answer, so the watch is still looping. To stop automatic dosing, open the loop on the watch.", comment: "Glance message: End refused, the phone did not answer")
+            : NSLocalizedString("iPhone didn't respond. The watch is still looping.", comment: "Glance transient: End failed, no ack")))
         resendWorkItem?.cancel()
         handbackDeadline = nil
         handbackStartedAt = nil
@@ -145,7 +145,7 @@ extension PodLoanWatchController {
             phase = .recoveredDrain
             sendHandbackOffer(recovered: true)
             issueProtocolAlert(title: NSLocalizedString("End Not Confirmed", comment: "Watch alert title: the phone has not confirmed a hand-back"),
-                               body: NSLocalizedString("The watch has stopped dosing and keeps sending its records. If your iPhone hasn't taken over in a minute or two, open Loop on the iPhone and tap the pod tile.", comment: "Watch alert body: released but unconfirmed hand-back"))
+                               body: NSLocalizedString("Neither device is looping. Reclaim the pod on the iPhone.", comment: "Watch alert body: released but unconfirmed hand-back"))
         } else {
             SportLog.event("loan", "HAND-BACK \(why) (interim); Sport Mode continues on the watch\(wedgeSuffix)")
         }
@@ -157,7 +157,7 @@ extension PodLoanWatchController {
             // Only while the loan is still live, so the watch is still dosing: a normal alert.
             if !wasFinal {
                 issueProtocolAlert(title: "End Not Confirmed",
-                                   body: "Your iPhone is reachable but hasn't confirmed. Reopening Loop on both devices usually clears this.",
+                                   body: "The watch is still looping. Reopening Loop on both devices usually clears this.",
                                    identifier: "handbackOneWay", interruptionLevel: .active)
             }
         case .none:

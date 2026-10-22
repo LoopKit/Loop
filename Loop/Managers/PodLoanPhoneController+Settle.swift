@@ -221,7 +221,7 @@ extension PodLoanPhoneController {
         } else if pending.flavor == .forceReclaim {
             // A pump that gives no delivered total: nothing to check against.
             handbackDiag(pending.epoch, "** force-reclaim round-trip landed but no odometer — session UNVERIFIED **")
-            deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)
+            deps.issueUrgentNotice(Self.sessionUnverifiedTitle, Self.sessionUnverifiedBody)
         } else {
             // A clean hand-back keeps its committed records; nothing opens.
             handbackDiag(pending.epoch, "reconcile[AUTHORITATIVE]: pod reachable but reported no odometer — keeping the provisional line")

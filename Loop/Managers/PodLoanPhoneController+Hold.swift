@@ -111,8 +111,8 @@ extension PodLoanPhoneController {
         switch tell {
         case .watchNotResponding:
             deps.issueUrgentNotice(
-                NSLocalizedString("Watch Not Responding", comment: "Phone notice title: the watch did not answer and the phone is taking the pod back"),
-                NSLocalizedString("The watch stopped reporting and didn't answer. This phone is taking the pod back; insulin the watch gave is counted.", comment: "Phone notice body: the phone takes the pod back from a silent watch"))
+                NSLocalizedString("Watch Not Looping", comment: "Phone notice title: the watch did not answer, or cannot reach the pod, and the phone is taking the pod back"),
+                NSLocalizedString("The watch has stopped looping (off or out of range). This iPhone is taking the pod back; insulin the watch gave is counted.", comment: "Phone notice body: the phone takes the pod back from a silent watch"))
         case .phoneAwayCannotHandBack, .noResponseFromPhone, .notHearingFromPhone:
             break
         }

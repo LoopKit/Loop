@@ -38,12 +38,13 @@ extension PodLoanPhoneController {
         hasWarnedProtocolMismatch = true
         deps.issueUrgentNotice(
             NSLocalizedString("Watch Message Unreadable", comment: "Phone notice title when a loan message cannot be decoded"),
-            NSLocalizedString("Loop can't read a message from the watch. The apps may be on different builds — check both are current.", comment: "Phone notice body when a loan message cannot be decoded"))
+            NSLocalizedString("Loop can't read a message from the watch. The iPhone and watch apps may be on different versions.", comment: "Phone notice body when a loan message cannot be decoded"))
     }
 
     /// For a pump that gave no delivered total to check against.
+    static let sessionUnverifiedTitle = "Insulin Not Checked After Sport Mode"
     static let sessionUnverifiedBody = NSLocalizedString(
-        "Loop couldn't check the watch's insulin delivery against the pump. Check your insulin on board. Automatic dosing continues.",
+        "Unexpected: the iPhone couldn't check the watch's insulin against the pod. Insulin the watch gave may be missing from insulin on board. Consider reporting it with a Loop Report.",
         comment: "Phone notice when a watch session's insulin could not be verified after reclaim")
 
     /// Reminders to re-time the unexplained-insulin placeholder, within the insulin duration.
@@ -54,7 +55,7 @@ extension PodLoanPhoneController {
             scheduleNotification(
                 id: NotificationID.placeholder(index),
                 title: NSLocalizedString("Estimated Insulin Still Booked", comment: "Phone reminder title while an unexplained gap bolus stands"),
-                body: String(format: NSLocalizedString("%1$@ U still booked as a bolus at %2$@. When the watch is back, its records update and IOB is exact.", comment: "Phone reminder body while an unexplained gap bolus stands (1: units, 2: time booked)"), amount, time),
+                body: String(format: NSLocalizedString("%1$@ U is still booked as a bolus at %2$@. The watch's records replace it when it's back.", comment: "Phone reminder body while an unexplained gap bolus stands (1: units, 2: time booked)"), amount, time),
                 delay: delay, repeats: false, interruptionLevel: .timeSensitive)
         }
     }

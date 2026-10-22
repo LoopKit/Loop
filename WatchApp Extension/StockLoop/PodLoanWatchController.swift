@@ -315,7 +315,7 @@ final class PodLoanWatchController {
             case .requested, .takingOver:
                 // A start that never finished: tell the phone, stay startable.
                 pendingInterruptedTakeoverEpoch = _persisted.epoch
-                lastIdleNote = NSLocalizedString("Sport Mode start was interrupted. Tap Start to try again.", comment: "Glance: start interrupted by relaunch")
+                lastIdleNote = NSLocalizedString("Sport Mode start was interrupted. Your iPhone still has the pod. Tap Start to try again.", comment: "Glance: start interrupted by relaunch")
                 _persisted.phase = .idle
                 _persisted.epoch = nil
             case .active, .handingBack, .revoked, .recoveredDrain:

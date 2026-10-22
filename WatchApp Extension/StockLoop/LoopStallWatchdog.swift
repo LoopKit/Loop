@@ -29,7 +29,7 @@ enum LoopStallWatchdog {
         formatter.unitsStyle = .full
         for rung in rungs {
             WristAlerts.arm("\(identifier).\(Int(rung))", thread: identifier, after: rung,
-                            title: NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure"),
+                            title: NSLocalizedString("Watch Loop Failure", comment: "The notification title for a loop failure on the watch during Sport Mode"),
                             body: String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"),
                                          formatter.string(from: rung)?.localizedLowercase ?? "\(Int(rung / 60)) minutes"))
         }
@@ -51,7 +51,7 @@ enum SensorSearchAlert {
     static func arm() {
         WristAlerts.arm(identifier, after: interval,
                         title: NSLocalizedString("Sensor Not Found", comment: "Watch sensor-search alert title"),
-                        body: NSLocalizedString("Loop on your watch hasn't found your sensor yet. Open Loop on your watch and keep it open until it connects. If your watch asks to pair with the sensor, accept.", comment: "Watch sensor-search alert body"))
+                        body: NSLocalizedString("Open Loop on the watch and keep it open until it connects.", comment: "Watch sensor-search alert body"))
     }
 
     static func disarm() {
@@ -66,7 +66,7 @@ enum NotHearingFromPhoneAlert {
     static func arm(after interval: TimeInterval) {
         WristAlerts.arm(identifier, after: interval,
                         title: NSLocalizedString("Not Hearing From iPhone", comment: "Watch alert title: no word from the phone and no loan running"),
-                        body: NSLocalizedString("Your watch hasn't heard from your iPhone for 25 minutes, so it can't tell whether anything is looping. If the iPhone is off or not with you, open Loop on the watch to start Sport Mode.", comment: "Watch alert body: no word from the phone and no loan running"))
+                        body: NSLocalizedString("Your iPhone is probably not looping (off or out of range). Sport Mode on the watch is available to take over.", comment: "Watch alert body: no word from the phone and no loan running"))
     }
 
     static func disarm() {
@@ -84,7 +84,7 @@ enum HandbackStuckAlert {
     static func arm() {
         WristAlerts.arm(identifier, after: interval,
                         title: NSLocalizedString("Couldn't End Sport Mode", comment: "Hand-back-stuck alert title"),
-                        body: NSLocalizedString("The iPhone didn't respond, so Sport Mode is still running on your watch. Tap End to try again.", comment: "Hand-back-stuck alert body"))
+                        body: NSLocalizedString("iPhone didn't confirm. Reopen Loop on the watch to see where things stand.", comment: "Hand-back-stuck alert body"))
     }
 
     static func disarm() {

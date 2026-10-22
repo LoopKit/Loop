@@ -54,10 +54,10 @@ extension CarbAndBolusFlowViewModel {
                 unitsText)
             if let carbGrams = carbGrams {
                 content.body = String(
-                    format: NSLocalizedString("%@ g was saved. Loop couldn't confirm delivery. You can wait to see if it resolves.", comment: "Watch notification body when carbs were saved but bolus delivery is unconfirmed (1: grams)"),
+                    format: NSLocalizedString("%@ g saved. Don't bolus again until Loop confirms it.", comment: "Watch notification body when carbs were saved but bolus delivery is unconfirmed (1: grams)"),
                     NumberFormatter.localizedString(from: NSNumber(value: Int(carbGrams.rounded())), number: .none))
             } else {
-                content.body = NSLocalizedString("Loop couldn't confirm delivery. You can wait to see if it resolves.", comment: "Watch notification body when a loan-time bolus delivery is unconfirmed")
+                content.body = NSLocalizedString("Don't bolus again until Loop confirms it.", comment: "Watch notification body when a loan-time bolus delivery is unconfirmed")
             }
             return content
         }

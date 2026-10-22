@@ -80,7 +80,7 @@ extension PodLoanPhoneController {
     /// The grant failed before the watch acted on it: tell the watch and keep the pod.
     func abortGrant(reason: String) {
         os_log("Grant aborted: %{public}@", log: log, type: .error, reason)
-        sendMessage(.denied(LoanDenied(reason: "The loan could not start (\(reason)). The phone kept the pod.")))
+        sendMessage(.denied(LoanDenied(reason: "Sport Mode couldn't start. The iPhone kept the pod. Try again.")))
         reclaimToOwner(alert: nil, reason: "grant ABORTED before it left the phone: \(reason)")
     }
 
@@ -111,7 +111,7 @@ extension PodLoanPhoneController {
 
     static let grantNotTakenNotice = (
         title: NSLocalizedString("The Watch Didn't Take the Pod", comment: "Phone notice title: a grant the watch never confirmed"),
-        body: NSLocalizedString("Sport Mode didn't start on the watch. This phone kept the pod and is looping.", comment: "Phone notice body: a grant the watch never confirmed"))
+        body: NSLocalizedString("Sport Mode didn't start on the watch. This iPhone kept the pod and is looping.", comment: "Phone notice body: a grant the watch never confirmed"))
 
     /// The grant's lease for a takeover the watch said is under way: ask once more at its end, then
     /// take the pod back. Per grant; every path that abandons a loan clears it.
@@ -210,7 +210,7 @@ extension PodLoanPhoneController {
             t1WorkItem?.cancel()
             cancelNotification(id: NotificationID.t1)
 
-            sendMessage(.denied(LoanDenied(reason: "The hand-over never reached the watch. The phone kept the pod. Tap Start again.")))
+            sendMessage(.denied(LoanDenied(reason: "The hand-over never reached the watch. The iPhone kept the pod. Tap Start again.")))
             reclaimToOwner(alert: nil, reason: "grant CONFIRMED LOST by the watch")
         }
         if let fault = report.podFault {
@@ -224,9 +224,10 @@ extension PodLoanPhoneController {
         let key = "\(epoch) \(fault)"
         guard podFaultNoticed != key else { return }
         podFaultNoticed = key
+        // As the pod's own fault alert reads on the phone outside Sport Mode: the fault, then the stock body.
         deps.issueUrgentNotice(
-            NSLocalizedString("Pod Fault", comment: "Phone notice title when the watch reports a pod fault during a loan"),
-            String(format: NSLocalizedString("The watch reports a pod fault: %1$@. Insulin delivery has stopped — replace the pod.", comment: "Phone notice body when the watch reports a pod fault during a loan (1: the pump's own fault text)"), fault))
+            fault,
+            NSLocalizedString("Insulin delivery stopped. Change Pod now.", comment: "Phone notice body when the watch reports a pod fault during a loan (the pod's own alarm text)"))
     }
 
 }

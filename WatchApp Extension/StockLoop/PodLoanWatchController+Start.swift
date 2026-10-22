@@ -237,7 +237,7 @@ extension PodLoanWatchController {
                 return
             }
 
-            self.lastIdleNote = NSLocalizedString("No response from iPhone — check the phone (loan refused, or busy) and try again.", comment: "Glance: loan request timed out")
+            self.lastIdleNote = NSLocalizedString("No answer from iPhone. Open Loop on the iPhone and try again.", comment: "Glance: loan request timed out")
             SportLog.event("loan", "REQUEST TIMED OUT — no grant in \(Int(timeout))s (phone refused / busy / unreachable)")
         }
         requestTimeoutWork = work
@@ -270,7 +270,7 @@ extension PodLoanWatchController {
         if nudged {
             return NSLocalizedString("Raise your wrist to finish connecting.", comment: "Glance: first takeover stuck with the screen off")
         }
-        return NSLocalizedString("First Sport Mode on this pod — keep your wrist up until the pod is found.", comment: "Glance: first takeover of a pod")
+        return NSLocalizedString("Keep your wrist up until the pod is found.", comment: "Glance: first takeover of a pod")
     }
 
     /// Tap the wrist only while the pod is unreached and the screen is off, at most twice.
@@ -504,7 +504,7 @@ extension PodLoanWatchController {
               let control = manager as? ExclusiveDeviceControl, manager is PumpDeliveryOdometer else {
             teardownPump()
             returnToRestingPhase()
-            lastIdleNote = NSLocalizedString("Couldn't read the pod from the phone. Try again.", comment: "Glance: pump snapshot rejected")
+            lastIdleNote = NSLocalizedString("Couldn't build the pod driver from the iPhone's details. Try again.", comment: "Glance: pump snapshot rejected")
             SportLog.event("loan", "grant FAILED — could not build the pump from the phone's configuration")
             sendMessage(.takeoverFailed(TakeoverFailed(epoch: grant.epoch, reason: "pump configuration rejected")))
             return
@@ -523,7 +523,7 @@ extension PodLoanWatchController {
         guard ingestGrantHistory(grant) else {
             teardownPump()
             returnToRestingPhase()
-            lastIdleNote = NSLocalizedString("Couldn't build the insulin book from the phone's history. Try again.", comment: "Glance: insulin book seed failed")
+            lastIdleNote = NSLocalizedString("Couldn't load the insulin history from the iPhone. Try again.", comment: "Glance: insulin book seed failed")
             SportLog.event("loan", "grant FAILED — the insulin book could not be seeded from the phone's history")
             sendMessage(.takeoverFailed(TakeoverFailed(epoch: grant.epoch, reason: "insulin book seed failed")))
             return
@@ -628,7 +628,7 @@ extension PodLoanWatchController {
                     if wedged {
                         self.lastIdleNote = NSLocalizedString("The pod didn't answer. Turn watch Bluetooth off and on, then try again.", comment: "Glance: takeover failed with the BLE-wedge signature")
                     } else {
-                        self.lastIdleNote = NSLocalizedString("Sport Mode start expired before the pod answered. Tap Start to try again.", comment: "Glance: grant lease expired mid-takeover")
+                        self.lastIdleNote = NSLocalizedString("The pod didn't answer in time. Your iPhone still has the pod. Tap Start to try again.", comment: "Glance: grant lease expired mid-takeover")
                     }
                     SportLog.event("loan", "TAKEOVER ABORTED — grant lease expired mid-takeover after \(attempt + 1) read(s), epoch \(grant.epoch), wedgeSignature=\(wedged)\(self.seizeMarkerActive ? " [seize]" : "")")
                     self.sendMessage(.takeoverFailed(TakeoverFailed(epoch: grant.epoch, reason: "grant expired mid-takeover")))

@@ -94,7 +94,7 @@ extension PodLoanPhoneController {
         if waited >= Self.takeBackLinkLimit, let control = deps.pumpManager() as? ExclusiveDeviceControl {
             refuseTakeBack(control: control, why: String(format: "no pod link after %.1fs", waited),
                            notice: (NSLocalizedString("Couldn't Reach the Pod", comment: "Phone notice title when a take-back found the pod out of reach"),
-                                    NSLocalizedString("Sport Mode is still running on the watch. Bring the phone close to the pod and try again.", comment: "Phone notice body when a take-back found the pod out of reach")))
+                                    NSLocalizedString("The watch is still looping. Try again.", comment: "Phone notice body when a take-back found the pod out of reach")))
             return
         }
         queue.asyncAfter(deadline: .now() + Self.takeBackPollInterval) { [weak self] in
@@ -241,7 +241,7 @@ extension PodLoanPhoneController {
         let start = loanStartedAt ?? deps.now().addingTimeInterval(-.hours(2))
         guard let anchor = ledgerLast, let schedule = deps.settings().basalRateSchedule, let pulseUnits = pumpPulseUnits else {
             handbackDiag(epoch, "** force-reclaim audit IMPOSSIBLE — no start odometer/schedule/pump; session UNVERIFIED **")
-            deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)
+            deps.issueUrgentNotice(Self.sessionUnverifiedTitle, Self.sessionUnverifiedBody)
             return false
         }
         let allEvents = staged.values.sorted { $0.seq < $1.seq }

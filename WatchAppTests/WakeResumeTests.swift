@@ -325,7 +325,7 @@ final class WakeResumeTests: XCTestCase {
         c.beginHandback()
         c.queue.sync { }
         XCTAssertEqual(sent, 1, "the interim offer went out")
-        let reason = "iPhone Bluetooth is off — still running"
+        let reason = "The watch is still looping. To end, turn on iPhone Bluetooth and tap End again."
         c.handleIncoming(userInfo: try LoanMessage.denied(LoanDenied(reason: reason)).transportDictionary(), channel: .urgent)
         c.queue.sync { }
         XCTAssertEqual(c.phase, .active, "the loan continues")

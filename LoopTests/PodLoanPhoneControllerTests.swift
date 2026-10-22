@@ -786,7 +786,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertFalse(MockPumpManager.testConnectionReleased, "pod reclaimed on force")
         // With no delivered total to check against, the user is told; the loop is not turned off.
         waitUntil(timeout: 5, "dosing resumed") { !controller.holdsAutomaticDosing }
-        XCTAssertTrue(urgentNotices.contains { $0.contains("Unverified") })
+        XCTAssertTrue(urgentNotices.contains("Insulin Not Checked After Sport Mode"))
     }
 
     // MARK: - Dosing decisions from the watch
@@ -1716,13 +1716,13 @@ final class PodLoanPhoneControllerTests: XCTestCase {
             controller.queue.sync { }
         }
         try report(fault: nil)
-        XCTAssertFalse(urgentNotices.contains("Pod Fault"), "no fault, no notice")
+        XCTAssertTrue(urgentNotices.isEmpty, "no fault, no notice")
 
         try report(fault: "Critical Pod Fault 049")
         try report(fault: "Critical Pod Fault 049")
-        XCTAssertEqual(urgentNotices.filter { $0 == "Pod Fault" }.count, 1, "one notice per fault, not one per report")
-        XCTAssertTrue(urgentNoticeBodies.last?.contains("Critical Pod Fault 049") == true,
-                      "the notice shows the pump's own fault text")
+        XCTAssertEqual(urgentNotices.filter { $0 == "Critical Pod Fault 049" }.count, 1, "one notice per fault, not one per report")
+        XCTAssertEqual(urgentNoticeBodies.last, "Insulin delivery stopped. Change Pod now.",
+                       "the notice reads as the pod's own fault alert: the pump's fault text, then the stock body")
         XCTAssertEqual(controller.state, .loaned, "the loan itself is the watch's to end")
     }
 
@@ -1973,7 +1973,7 @@ extension PodLoanPhoneControllerTests {
         XCTAssertTrue(controller.holdsAutomaticDosing, "still owed, still held")
         XCTAssertNotNil(diagMatching("force-reclaim audit still OWED"))
         lock.lock(); let noticesSoFar = urgentNotices; lock.unlock()
-        XCTAssertFalse(noticesSoFar.contains { $0.contains("Unverified") }, "nothing is declared unverified")
+        XCTAssertFalse(noticesSoFar.contains { $0 == "Insulin Not Checked After Sport Mode" }, "nothing is declared unverified")
 
         lock.lock(); connectionReady = true; lock.unlock()   // the pod comes back, later
         controller.considerOwedForceReclaimAudit()
@@ -2991,7 +2991,7 @@ extension PodLoanPhoneControllerTests {
 
             waitUntil(timeout: 5, "taken back") { self.revokes() > 0 }
             lock.lock(); let titles = urgentNotices; lock.unlock()
-            XCTAssertTrue(titles.contains("Watch Not Responding"))
+            XCTAssertTrue(titles.contains("Watch Not Looping"))
         }
     }
 
@@ -3412,7 +3412,7 @@ extension PodLoanPhoneControllerTests {
         XCTAssertEqual(booked.first?.deliveredUnits ?? 0, 1.5, accuracy: 0.05)
         XCTAssertTrue(booked.first?.syncIdentifier?.hasPrefix("LOAN-AUDIT-GAP-e") ?? false)
         XCTAssertTrue(titles.contains("Insulin Estimated After Sport Mode"))
-        XCTAssertTrue(bodies.contains { $0.hasPrefix("Sport Mode probably started away from the phone") })
+        XCTAssertTrue(bodies.contains { $0.contains("probably from Sport Mode started on the watch") })
         XCTAssertFalse(controller.holdsAutomaticDosing, "looping continues")
     }
 

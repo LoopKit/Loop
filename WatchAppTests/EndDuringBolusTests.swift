@@ -149,7 +149,7 @@ final class EndDuringBolusTests: XCTestCase {
         XCTAssertNil(c.bolusRefusalWhileEnding(), "no End waiting: a bolus may go")
 
         c.queue.sync { c.handbackRequested = true }
-        XCTAssertEqual(c.bolusRefusalWhileEnding(), "Sport Mode is ending. Bolus from your iPhone once it has the pod, or cancel End first.")
+        XCTAssertEqual(c.bolusRefusalWhileEnding(), "Sport Mode is ending. Bolus on the iPhone once it has the pod.")
         XCTAssertTrue(c.debugSnapshot().handbackPending, "the End carries on")
 
         let content = CarbAndBolusFlowViewModel.bolusFailureContent(units: 1, carbGrams: nil,

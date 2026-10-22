@@ -131,7 +131,7 @@ extension PodLoanPhoneController {
         // Refuse a hand-back while this phone's Bluetooth is off; it could not reach the pod.
         if !isStale, canTransition, deps.isBluetoothPoweredOff() {
             handbackDiag(offer.epoch, "hand-back REFUSED — this phone's Bluetooth is off, so it could not reclaim the pod; the watch keeps the loan")
-            sendMessage(.denied(LoanDenied(reason: NSLocalizedString("iPhone Bluetooth is off — still running", comment: "Hand-back refused: shown on the watch glance"))))
+            sendMessage(.denied(LoanDenied(reason: NSLocalizedString("The watch is still looping. To end, turn on iPhone Bluetooth and tap End again.", comment: "Hand-back refused: shown on the watch glance"))))
             return
         }
         // .reconciling: the phone owes an ack; the loan ends when the write lands.
