@@ -17,13 +17,89 @@ import os.log
 
 // MARK: - Sound catalog
 
-/// One selectable alarm sound. `filename` is the bundled `.caf` (also the
-/// `Alert.Sound` name stamped onto issued alerts); `displayName` is what the
-/// picker shows.
+/// The glucose alarms a sound can be chosen for. Themed sets are written per
+/// alarm — the Urgent Low set is not the High set at another pitch — so each
+/// set is only offered on the alarm it was written for.
+enum GlucoseAlarmKind: String, CaseIterable {
+    case urgentLow
+    case low
+    case predictedLow
+    case high
+}
+
+/// How disruptive a themed alarm sounds. Intensity is carried by timbre,
+/// loudness and length together — each level is its own recording, not one
+/// recording at three gain settings.
+enum AlarmUrgencyLevel: String, CaseIterable, Identifiable {
+    case mild
+    case medium
+    case harsh
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .mild: return "Mild"
+        case .medium: return "Medium"
+        case .harsh: return "Harsh"
+        }
+    }
+}
+
+/// Spoken alert voices.
+enum AlarmVoice: String, CaseIterable, Identifiable {
+    case amy
+    case bryce
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .amy: return "Amy"
+        case .bryce: return "Bryce"
+        }
+    }
+}
+
+/// One selectable variant of a sound entry. `filename` is the bundled `.caf`
+/// (also the `Alert.Sound` name stamped onto issued alerts) and is the only
+/// thing persisted, so a stored selection survives any catalog reshuffle.
 struct AlarmSound: Identifiable, Equatable {
-    let filename: String
+    let id: String
     let displayName: String
-    var id: String { filename }
+    let filename: String
+}
+
+/// What the picker reveals once a themed entry is selected.
+enum AlarmSoundSelector {
+    case none
+    case urgency
+    case voice
+}
+
+/// One row in the sound picker. A themed entry carries several variants
+/// behind one name (Acoustic at three urgency levels, Voice in two voices);
+/// a generic tone carries exactly one.
+struct AlarmSoundEntry: Identifiable, Equatable {
+    let id: String
+    let displayName: String
+    /// Empty means generic: offered on every alarm, under "Other Sounds".
+    let kinds: [GlucoseAlarmKind]
+    let selector: AlarmSoundSelector
+    let variants: [AlarmSound]
+
+    var isGeneric: Bool { kinds.isEmpty }
+    var filenames: [String] { variants.map { $0.filename } }
+
+    func variant(forFilename filename: String) -> AlarmSound? {
+        variants.first { $0.filename == filename }
+    }
+
+    /// Middle of the urgency slider, and the set the sound designer
+    /// recommends after hallway testing with PWDs and caregivers.
+    var defaultVariant: AlarmSound {
+        variants.first { $0.id == AlarmUrgencyLevel.medium.rawValue } ?? variants[0]
+    }
 }
 
 /// The sounds available for glucose alarms. Each file is bundled in
@@ -32,29 +108,107 @@ struct AlarmSound: Identifiable, Equatable {
 /// critical fallback) and by the notification path once copied into
 /// `Library/Sounds` via the AlertSoundVendor mechanism.
 enum AlarmSoundCatalog {
-    static let all: [AlarmSound] = [
-        AlarmSound(filename: "urgent_low.caf", displayName: "Urgent Low"),
-        AlarmSound(filename: "critical.caf", displayName: "Sharp Alarm"),
-        AlarmSound(filename: "alarm.caf", displayName: "Alarm"),
-        AlarmSound(filename: "bright_alarm.caf", displayName: "Bright Alarm"),
-        AlarmSound(filename: "honk.caf", displayName: "Honk"),
-        AlarmSound(filename: "chime.caf", displayName: "Chime"),
-        AlarmSound(filename: "clear_chimes.caf", displayName: "Clear Chimes"),
-        AlarmSound(filename: "high_chimes.caf", displayName: "High Chimes"),
-        AlarmSound(filename: "dings.caf", displayName: "Dings"),
-        AlarmSound(filename: "trill.caf", displayName: "Trill"),
-        AlarmSound(filename: "bloom.caf", displayName: "Bloom"),
-        AlarmSound(filename: "bloop.caf", displayName: "Bloop"),
-        AlarmSound(filename: "spring.caf", displayName: "Spring"),
-        AlarmSound(filename: "minimal.caf", displayName: "Minimal"),
-        AlarmSound(filename: "simple.caf", displayName: "Simple"),
-        AlarmSound(filename: "synth.caf", displayName: "Synth"),
-        AlarmSound(filename: "mood_synth.caf", displayName: "Mood Synth"),
-        AlarmSound(filename: "crying.caf", displayName: "Crying"),
+    /// Filename slug per alarm, matching the sound designer's prefixes.
+    private static let slugs: [(kind: GlucoseAlarmKind, slug: String)] = [
+        (.urgentLow, "ulg"),
+        (.low, "lg"),
+        (.predictedLow, "lgs"),
+        (.high, "hg"),
     ]
 
+    private static func themed(_ theme: String, _ displayName: String) -> [AlarmSoundEntry] {
+        slugs.map { kind, slug in
+            AlarmSoundEntry(
+                id: "\(theme).\(slug)",
+                displayName: displayName,
+                kinds: [kind],
+                selector: .urgency,
+                variants: AlarmUrgencyLevel.allCases.map {
+                    AlarmSound(id: $0.rawValue, displayName: $0.displayName, filename: "\(theme)_\(slug)_\($0.rawValue).caf")
+                }
+            )
+        }
+    }
+
+    private static let voiceEntries: [AlarmSoundEntry] = slugs.map { kind, slug in
+        AlarmSoundEntry(
+            id: "voice.\(slug)",
+            displayName: "Voice",
+            kinds: [kind],
+            selector: .voice,
+            variants: AlarmVoice.allCases.map {
+                AlarmSound(id: $0.rawValue, displayName: $0.displayName, filename: "voice_\(slug)_\($0.rawValue).caf")
+            }
+        )
+    }
+
+    private static let genericEntries: [AlarmSoundEntry] = [
+        ("urgent_low.caf", "Urgent Low"),
+        ("critical.caf", "Sharp Alarm"),
+        ("alarm.caf", "Alarm"),
+        ("bright_alarm.caf", "Bright Alarm"),
+        ("honk.caf", "Honk"),
+        ("chime.caf", "Chime"),
+        ("clear_chimes.caf", "Clear Chimes"),
+        ("high_chimes.caf", "High Chimes"),
+        ("dings.caf", "Dings"),
+        ("trill.caf", "Trill"),
+        ("bloom.caf", "Bloom"),
+        ("bloop.caf", "Bloop"),
+        ("spring.caf", "Spring"),
+        ("minimal.caf", "Minimal"),
+        ("simple.caf", "Simple"),
+        ("synth.caf", "Synth"),
+        ("mood_synth.caf", "Mood Synth"),
+        ("crying.caf", "Crying"),
+        ("glass_bell.caf", "Glass Bell"),
+        ("harp.caf", "Harp"),
+        ("meow.caf", "Meow"),
+        ("saw_wave.caf", "Saw Wave"),
+        ("hard_saw_wave.caf", "Hard Saw Wave"),
+        ("sine_wave.caf", "Sine Wave"),
+        ("open_can.caf", "Open Can"),
+        ("open_wrapper.caf", "Open Wrapper"),
+    ].map { filename, name in
+        AlarmSoundEntry(
+            id: filename,
+            displayName: name,
+            kinds: [],
+            selector: .none,
+            variants: [AlarmSound(id: "default", displayName: name, filename: filename)]
+        )
+    }
+
+    static let entries: [AlarmSoundEntry] = themed("acoustic", "Acoustic")
+        + themed("electronic", "Electronic")
+        + voiceEntries
+        + genericEntries
+
+    static let allFilenames: [String] = entries.flatMap { $0.filenames }
+
+    /// Themed sets written for this alarm, in display order.
+    static func themedEntries(for kind: GlucoseAlarmKind) -> [AlarmSoundEntry] {
+        entries.filter { $0.kinds.contains(kind) }
+    }
+
+    /// Generic tones, offered on every alarm.
+    static var genericTones: [AlarmSoundEntry] { genericEntries }
+
+    static func entry(forFilename filename: String) -> AlarmSoundEntry? {
+        entries.first { $0.filenames.contains(filename) }
+    }
+
+    /// The themed default for an alarm: Acoustic, Medium.
+    static func defaultFilename(for kind: GlucoseAlarmKind) -> String {
+        themedEntries(for: kind).first { $0.id.hasPrefix("acoustic.") }?.defaultVariant.filename ?? "alarm.caf"
+    }
+
     static func displayName(for filename: String) -> String {
-        all.first { $0.filename == filename }?.displayName ?? filename
+        guard let entry = entry(forFilename: filename) else { return filename }
+        guard !entry.isGeneric, let variant = entry.variant(forFilename: filename) else {
+            return entry.displayName
+        }
+        return "\(entry.displayName) · \(variant.displayName)"
     }
 }
 
@@ -232,12 +386,12 @@ final class GlucoseAlertManager: ObservableObject {
     private static let predictedLowPlaysThroughSilentKey = "GlucoseAlertPredictedLowPlaysThroughSilent"
     private static let episodeStateKey = "GlucoseAlertEpisodeState"
 
-    // Per-alarm sound defaults. Urgent low keeps the loud critical tone;
-    // the rest get a gentler default the user can change.
-    static let defaultUrgentLowSound = "urgent_low.caf"
-    static let defaultLowSound = "simple.caf"
-    static let defaultHighSound = "chime.caf"
-    static let defaultPredictedLowSound = "mood_synth.caf"
+    // Per-alarm sound defaults: each alarm's own Acoustic set at Medium, the
+    // variant the sound designer recommends after testing with PWDs.
+    static let defaultUrgentLowSound = AlarmSoundCatalog.defaultFilename(for: .urgentLow)
+    static let defaultLowSound = AlarmSoundCatalog.defaultFilename(for: .low)
+    static let defaultHighSound = AlarmSoundCatalog.defaultFilename(for: .high)
+    static let defaultPredictedLowSound = AlarmSoundCatalog.defaultFilename(for: .predictedLow)
     static let defaultLowPlaysThroughSilent = true
     static let defaultHighPlaysThroughSilent = false
     static let defaultPredictedLowPlaysThroughSilent = true
@@ -819,7 +973,7 @@ extension GlucoseAlertManager: AlertSoundVendor {
     }
 
     nonisolated func getSounds() -> [Alert.Sound] {
-        AlarmSoundCatalog.all.map { .sound(name: $0.filename) }
+        AlarmSoundCatalog.allFilenames.map { .sound(name: $0) }
     }
 }
 
