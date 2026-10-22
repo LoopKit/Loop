@@ -392,8 +392,8 @@ final class GlanceViewModel: ObservableObject {
 
             s.phoneUnreachable = !snap.phoneReachable
             s.idleNote = snap.phoneReachable
-                ? NSLocalizedString("Waiting for iPhone — pod still on watch. Bolus unavailable until it connects.", comment: "Glance note while a hand-back waits for the phone")
-                : NSLocalizedString("Can't reach iPhone — pod still on watch. Move it closer or check its Bluetooth.", comment: "Glance note while a hand-back waits for an UNREACHABLE phone")
+                ? NSLocalizedString("Waiting for iPhone to take the pod. Bolus unavailable until then.", comment: "Glance note while a hand-back waits for the phone")
+                : NSLocalizedString("Can't reach iPhone. Waiting for it to take the pod.", comment: "Glance note while a hand-back waits for an UNREACHABLE phone")
             state = s
         // A parked drain is startable: the idle page plus a note.
         case .recoveredDrain:
@@ -428,7 +428,8 @@ final class GlanceViewModel: ObservableObject {
             RuntimeStateLog.mark("glance.refresh.activeStateBuild")
             var s = Self.activeState(data: data, cob: latestCOB, now: Date(),
                                      phoneGlucoseDate: ExtensionDelegate.sharedIfAvailable()?.loopManager.activeContext?.glucoseDate)
-            // One transient slot: hand-back in progress, then recent failure, then start note.
+            // One transient slot: hand-back in progress, then start note; a recent End failure is
+            // laid over the bolus narration below.
             if snap.handbackPending {
                 s.handbackPending = true
                 s.handbackStartedAt = snap.handbackStartedAt
@@ -440,11 +441,8 @@ final class GlanceViewModel: ObservableObject {
                 // WATCH-to-phone link rather than implying that dosing has stopped.
                 s.phoneUnreachable = !snap.phoneReachable
                 if !snap.phoneReachable {
-                    s.idleNote = NSLocalizedString("Can't reach iPhone — still looping. Move it closer or check its Bluetooth.", comment: "Glance note when an interim hand-back is blocked by an unreachable phone")
+                    s.idleNote = NSLocalizedString("Can't reach iPhone. The watch is still looping.", comment: "Glance note when an interim hand-back is blocked by an unreachable phone")
                 }
-            } else if let at = snap.handbackFailedAt, let text = snap.handbackFailureText,
-                      Date().timeIntervalSince(at) < 20 {
-                s.transientText = text
             } else if let at = snap.startNoteAt, let text = snap.startNoteText,
                       Date().timeIntervalSince(at) < 90 {
                 s.transientText = text
@@ -461,8 +459,8 @@ final class GlanceViewModel: ObservableObject {
                     ? (amount.map { String(format: NSLocalizedString("starting %@ U…", comment: "Glance status while a manual bolus is being sent to the pod (1: units)"), $0) }
                         ?? NSLocalizedString("starting bolus…", comment: "Glance status while a manual bolus is being sent, amount unknown"))
 
-                    : (amount.map { String(format: NSLocalizedString("taking longer than usual — %@ U will deliver", comment: "Glance status when a manual bolus is slow to reach the pod (1: units)"), $0) }
-                        ?? NSLocalizedString("taking longer than usual — the bolus will deliver", comment: "Glance status when a slow manual bolus has no known amount"))
+                    : (amount.map { String(format: NSLocalizedString("taking longer than usual — still sending %@ U", comment: "Glance status when a manual bolus is slow to reach the pod (1: units)"), $0) }
+                        ?? NSLocalizedString("taking longer than usual — still sending the bolus", comment: "Glance status when a slow manual bolus has no known amount"))
             }
 
             // Once the pod has accepted, the delivery bar replaces the narration — the two
@@ -470,6 +468,13 @@ final class GlanceViewModel: ObservableObject {
             if let delivery = session.stack.loopManager.manualBolusDelivery {
                 s.bolusDelivery = delivery
                 s.transientText = nil
+            }
+
+            // A refused End says why for its 20 s, even over the bolus it is waiting for.
+            if let at = snap.handbackFailedAt, let text = snap.handbackFailureText,
+               Date().timeIntervalSince(at) < 20 {
+                s.bolusDelivery = nil
+                s.transientText = text
             }
             RuntimeStateLog.mark("glance.refresh.statePublish")
             state = s
@@ -630,13 +635,6 @@ final class GlanceViewModel: ObservableObject {
             // Past a missed window the grid predicts nothing.
             let missedAWindow = (age ?? .infinity) > 8 * 60
             s.g7EtaText = g7EtaText(lastReading: data.glucoseDate ?? phoneGlucoseDate, now: now, firstConnect: missedAWindow)
-
-            // The wedge hint outranks the countdown.
-            if let hint = G7SilenceHint.text(directAge: data.directG7At.map { now.timeIntervalSince($0) },
-                                             relayAge: data.phoneRelayAt.map { now.timeIntervalSince($0) },
-                                             sensorAge: data.sensorActivatedAt.map { now.timeIntervalSince($0) }) {
-                s.g7EtaText = hint
-            }
 
         // An eventual is only offered against a FRESH reading. A prediction from a stale input is
         // not a weaker prediction, it is a different question.

@@ -304,13 +304,10 @@ final class WatchLoopManager {
         let glucose: LoopQuantity?
         let glucoseDate: Date?
 
-        /// When each source last delivered. The provenance line and the wedge hint are derived
-        /// from the pair, so a fresh reading with a stale `directG7At` is the interesting case.
+        /// When each source last delivered. The provenance line is derived from the pair, so a fresh
+        /// reading with a stale `directG7At` is the interesting case.
         let directG7At: Date?
         let phoneRelayAt: Date?
-        /// When the current sensor was started, if known. A new sensor is quiet for its warm-up
-        /// by design, and without this the silence hint cannot tell that from a parked radio.
-        let sensorActivatedAt: Date?
         let trend: GlucoseTrend?
         /// The display run's (stock's `displayState`), as is `iob`; the glance shows these.
         let eventual: LoopQuantity?
@@ -466,14 +463,6 @@ final class WatchLoopManager {
         bgSourceLock.unlock()
 
         refreshGlanceData()
-    }
-
-    /// One-line "who is feeding this watch" for the log at the start of a loan.
-    var g7ContentionSummary: String {
-        let stamps = lastGlucoseSourceStamps
-        func age(_ d: Date?) -> String { d.map { String(format: "%.0fs", now().timeIntervalSince($0)) } ?? "never" }
-
-        return "g7direct=\(age(stamps.direct)) phoneRelay=\(age(stamps.phone))"
     }
 
     /// A phone relay says nothing about the watch's radio, so the two are kept apart.

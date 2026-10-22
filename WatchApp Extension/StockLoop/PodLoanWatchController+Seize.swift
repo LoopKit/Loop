@@ -57,7 +57,9 @@ extension PodLoanWatchController {
         queue.async {
             guard self.seizeOffer != nil else { return }
             self.seizeOffer = nil
-            self.lastIdleNote = NSLocalizedString("Offline start cancelled.", comment: "Glance note after dismissing a seize offer")
+            // The Start is withdrawn: a grant that still arrives for it starts nothing (transfer G).
+            self.startCancelled = true
+            self.cancelStaleQueuedRequests(context: "offer declined")
             SportLog.event("seize", "seize offer DISMISSED [seize]")
             self.notifyUI()
         }
@@ -174,7 +176,7 @@ extension PodLoanWatchController {
     }
 
     /// Bounds the handshake, not the credential.
-    static let seizeActivationLease: TimeInterval = 5 * 60
+    static let seizeActivationLease: TimeInterval = LoanControl.takeoverLease
 
     /// The phone's reconciliation band.
     static let unexplainedInsulinBand = 0.20

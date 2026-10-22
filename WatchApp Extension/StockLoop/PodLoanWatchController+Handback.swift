@@ -24,8 +24,13 @@ extension PodLoanWatchController {
         if simFakeLoanFlow { simDriveHandback(); return }
         #endif
         queue.async {
-            guard self.phase == .active, self.pumpManager != nil else { return }
+            guard self.phase == .active, let pumpManager = self.pumpManager else { return }
             guard !self.handbackRequested else { return }
+            // Nobody takes the pod while it is giving a bolus (transfer H): End again after it.
+            if let bolus = self.bolusUnderWay(pumpManager) {
+                self.refuseEnd(bolus, at: "the tap")
+                return
+            }
             self.handbackRequested = true
             // Anything not yet uploaded goes now, so the release below can confirm it.
             LoanRemoteUploads.shared.flush()
@@ -48,7 +53,7 @@ extension PodLoanWatchController {
             // Rows 7, 8 and 21: the offer is the query; `LoanControl` decides what silence means.
             let tappedAt = self.now()
             self.handbackAckedAt = nil
-            self.sendHandbackOffer(freshened: false, recovered: false)
+            self.sendHandbackOffer(recovered: false)
             guard case .query(let wait, let onSilence) = LoanControl.decide(LoanControl.Situation(device: .watch, trigger: .endTapped)) else { return }
             self.schedule(after: wait.seconds, label: "handback-answer") { [weak self] in
                 guard let self = self, self.phase == .active, self.handbackRequested,
@@ -57,6 +62,35 @@ extension PodLoanWatchController {
                     self.handbackTimedOut(unreachable: true)
                 }
             }
+        }
+    }
+
+    /// The watch's bolus as the bolus rule sees it: the pump's own state, or a manual bolus the
+    /// watch has sent that the pump has not taken up yet.
+    func bolusUnderWay(_ pumpManager: PumpManager) -> LoanControl.BolusUnderWay? {
+        pumpManager.status.bolusState.underWay
+            ?? (loopManager.manualBolusStartedAt != nil ? LoanControl.BolusUnderWay(endsAt: nil) : nil)
+    }
+
+    /// The End is refused and the loan continues: said on screen and felt.
+    private func refuseEnd(_ bolus: LoanControl.BolusUnderWay, at moment: String) {
+        handbackRequested = false
+        resendWorkItem?.cancel()
+        handbackDeadline = nil
+        handbackStartedAt = nil
+        HandbackStuckAlert.disarm()
+        handbackFailure = (now(), LoanControl.bolusRefusal(bolus, now: now()))
+        SportLog.event("loan", "HAND-BACK refused at \(moment) — a bolus is being given (ends \(bolus.endsAt.map { "in \(Int($0.timeIntervalSince(now()).rounded(.up))) s" } ?? "when the pod has it"))")
+        playRefusal()
+        notifyUI()
+    }
+
+    /// Nobody starts a bolus while the pod is being handed back: with an End waiting, a bolus asked
+    /// for on the watch is refused, and this says why. Nil when a bolus may go.
+    func bolusRefusalWhileEnding() -> String? {
+        queue.sync {
+            guard handbackRequested || phase == .handingBack else { return nil }
+            return NSLocalizedString("Sport Mode is ending. Bolus on the iPhone once it has the pod.", comment: "Watch: a bolus refused while an End is waiting for the phone")
         }
     }
 
@@ -81,8 +115,8 @@ extension PodLoanWatchController {
         else if unreachable { why = "not possible — iPhone did not answer the offer" }
         else { why = "timed out (\(Int(HandbackStuckAlert.interval))s) — iPhone never acked" }
         handbackFailure = (now(), refusal ?? (unreachable
-            ? NSLocalizedString("iPhone isn't nearby, so the pod can't be handed back. Sport Mode keeps looping. To stop automatic dosing, open the loop on the watch.", comment: "Glance message: End refused, the phone did not answer")
-            : NSLocalizedString("iPhone didn't respond — still running", comment: "Glance transient: End failed, no ack")))
+            ? NSLocalizedString("iPhone didn't answer, so the watch is still looping. To stop automatic dosing, open the loop on the watch.", comment: "Glance message: End refused, the phone did not answer")
+            : NSLocalizedString("iPhone didn't respond. The watch is still looping.", comment: "Glance transient: End failed, no ack")))
         resendWorkItem?.cancel()
         handbackDeadline = nil
         handbackStartedAt = nil
@@ -111,9 +145,9 @@ extension PodLoanWatchController {
             onLoanActiveChanged?(false)
 
             phase = .recoveredDrain
-            sendHandbackOffer(freshened: false, recovered: true)
+            sendHandbackOffer(recovered: true)
             issueProtocolAlert(title: NSLocalizedString("End Not Confirmed", comment: "Watch alert title: the phone has not confirmed a hand-back"),
-                               body: NSLocalizedString("The watch has stopped dosing and keeps sending its records. If your iPhone hasn't taken over in a minute or two, open Loop on the iPhone and tap the pod tile.", comment: "Watch alert body: released but unconfirmed hand-back"))
+                               body: NSLocalizedString("Neither device is looping. Reclaim the pod on the iPhone.", comment: "Watch alert body: released but unconfirmed hand-back"))
         } else {
             SportLog.event("loan", "HAND-BACK \(why) (interim); Sport Mode continues on the watch\(wedgeSuffix)")
         }
@@ -125,7 +159,7 @@ extension PodLoanWatchController {
             // Only while the loan is still live, so the watch is still dosing: a normal alert.
             if !wasFinal {
                 issueProtocolAlert(title: "End Not Confirmed",
-                                   body: "Your iPhone is reachable but hasn't confirmed. Reopening Loop on both devices usually clears this.",
+                                   body: "The watch is still looping. Reopening Loop on both devices usually clears this.",
                                    identifier: "handbackOneWay", interruptionLevel: .active)
             }
         case .none:
@@ -138,6 +172,11 @@ extension PodLoanWatchController {
     /// Dosing stops and the released offer goes out. The interim resend is cancelled first. The
     /// running temp is left for the phone to cancel at its verified reclaim.
     func finalizeHandback() {
+        // A bolus started while the End waited for the phone: the End is refused, not finished.
+        if phase == .active, let manager = pumpManager, let bolus = bolusUnderWay(manager) {
+            refuseEnd(bolus, at: "the release")
+            return
+        }
         resendWorkItem?.cancel()
         finalOfferSent = false
         // No pump manager left: send the released offer straight away.
@@ -145,7 +184,7 @@ extension PodLoanWatchController {
             handbackRequested = false
             phase = .handingBack
             finalOfferSent = true
-            sendHandbackOffer(freshened: false, recovered: false)
+            sendHandbackOffer(recovered: false)
             return
         }
         // Dosing stops on the loop's own queue, behind any cycle already sending: its dose is then
@@ -177,46 +216,27 @@ extension PodLoanWatchController {
                                           runningTemp.map { ISO8601DateFormatter().string(from: $0.endDate) } ?? "—"))
         }
 
-        do {
-            let finalize: (Bool) -> Void = { freshened in
-                // What the watch uploaded in full: the phone uploads only the rest.
-                LoanRemoteUploads.shared.confirmUploads(within: 5) { confirmed in
-                    self.queue.async {
-                        self.uploadsConfirmed = confirmed
-                        SportLog.event("uploads", "hand-back: uploads confirmed \(confirmed.isEmpty ? "none — the phone uploads its own copies" : confirmed.map { "\($0.key): \($0.value.joined(separator: ", "))" }.joined(separator: "; "))")
-                        self.finalOfferSent = true
-                        self.sendHandbackOffer(freshened: freshened, recovered: false)
-                    }
-                }
-            }
-            // Read the odometer only over a link already up; otherwise a read dials the pod.
-            if let odometer = manager as? PumpDeliveryOdometer, (manager as? ExclusiveDeviceControl)?.isControlReady == true {
-                Task {
-                    let first = await odometer.refreshDeliveredUnits()
-                    let delivered = odometer.deliveredUnits?.units
-                    // A total equal to the takeover reading is probably stale: read once more.
-                    if first, delivered != nil, delivered == self.deliveredAtTakeover {
-                        finalize(await odometer.refreshDeliveredUnits())
-                    } else {
-                        finalize(first)
-                    }
-                }
-            } else {
-                SportLog.event("loan", "hand-back: freshen SKIPPED — no live pod link; the phone's reclaim read is authoritative")
-                finalize(false)
+        // No pod read here: the phone judges the loan by its own read after it takes the pod back.
+        // What the watch uploaded in full: the phone uploads only the rest.
+        LoanRemoteUploads.shared.confirmUploads(within: 5) { confirmed in
+            self.queue.async {
+                self.uploadsConfirmed = confirmed
+                SportLog.event("uploads", "hand-back: uploads confirmed \(confirmed.isEmpty ? "none — the phone uploads its own copies" : confirmed.map { "\($0.key): \($0.value.joined(separator: ", "))" }.joined(separator: "; "))")
+                self.finalOfferSent = true
+                self.sendHandbackOffer(recovered: false)
             }
         }
     }
 
     /// Sends one offer, by every path, and arms the next: a late interim offer only stores records,
     /// and nothing returns the watch to dosing after the final one.
-    func sendHandbackOffer(freshened: Bool, recovered: Bool) {
+    func sendHandbackOffer(recovered: Bool) {
         guard let epoch = epoch ?? journal.activeEpoch else { return }
         // After a revoke's teardown, use the total captured before it.
         var odometer: LoanOdometerSnapshot?
         if let start = deliveredAtTakeover,
            let latest = pumpOdometer?.deliveredUnits?.units ?? revokeCapturedDelivered {
-            odometer = LoanOdometerSnapshot(deliveredAtStart: start, deliveredLatest: latest, freshenSucceeded: freshened,
+            odometer = LoanOdometerSnapshot(deliveredAtStart: start, deliveredLatest: latest,
                                             asOf: pumpOdometer?.deliveredUnits?.at ?? revokeCapturedDeliveredAt,
                                             deliveredAtStartAt: persisted.deliveredAtTakeoverAt)
         }
@@ -306,7 +326,7 @@ extension PodLoanWatchController {
             }
             if self.phase == .handingBack || drain
                 || (self.phase == .active && self.handbackRequested) {
-                self.sendHandbackOffer(freshened: freshened, recovered: recovered)
+                self.sendHandbackOffer(recovered: recovered)
             }
         }
         resendWorkItem = work
@@ -378,7 +398,8 @@ extension PodLoanWatchController {
             }
             return
         }
-        guard phase != .idle else { return }
+        // The stop rides two channels: the later copy of one already acted on changes nothing.
+        guard phase != .idle, phase != .revoked else { return }
 
         handbackRequested = false
         handbackDeadline = nil
@@ -394,7 +415,7 @@ extension PodLoanWatchController {
         onLoanActiveChanged?(false)
         lastIdleNote = NSLocalizedString("Sport Mode ended. Your iPhone has the pod.", comment: "Glance note after the phone took the pod back")
         SportLog.event("loan", "REVOKED — phone reclaimed the pod, draining records")
-        sendHandbackOffer(freshened: false, recovered: true)
+        sendHandbackOffer(recovered: true)
     }
 
     /// What the watch recorded in stock's stores during the loan (dosing decisions, alerts, device
@@ -494,7 +515,7 @@ extension PodLoanWatchController {
                 self.sendMessage(.takeoverFailed(TakeoverFailed(epoch: epoch, reason: "watch relaunched during takeover")))
             }
             guard self.phase == .recoveredDrain else { return }
-            self.sendHandbackOffer(freshened: false, recovered: true)
+            self.sendHandbackOffer(recovered: true)
         }
     }
 

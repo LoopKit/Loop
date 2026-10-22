@@ -256,7 +256,7 @@ final class PodLoanPhoneController {
             pendingHandbackAudit = PendingHandbackAudit(
                 epoch: e, deliveredAtStart: saved.deliveredAtStart, windowStart: saved.from, expected: saved.expected,
                 loanMinutes: saved.loanMinutes, cycles: 0,
-                watchLatest: nil, watchFreshened: false, flavor: .forceReclaim)
+                watchLatest: nil, flavor: .forceReclaim)
             queue.async { [weak self] in
                 guard let self = self else { return }
                 self.handbackDiag(e, "force-reclaim audit RE-ARMED after relaunch — verdict still owed")
@@ -308,7 +308,6 @@ final class PodLoanPhoneController {
 
     var reclaimLinkUpAt: Date?
 
-    var reclaimEscalated = false
     var reclaimStaleReads = 0
 
     /// The tile's wait start, kept across a reopened window.
@@ -338,6 +337,8 @@ final class PodLoanPhoneController {
 
     /// A take-back attempt in progress, and the phase to restore if the pod does not answer.
     var takeBackStartedAt: Date?
+    /// The attempt is a take-over on silence: a bolus in progress is waited out, not refused.
+    var takeBackOnSilence = false
     var takeBackFrom: State?
 
     var lastDormantRefreshAt: Date?

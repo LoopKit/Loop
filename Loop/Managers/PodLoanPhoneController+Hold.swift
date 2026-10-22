@@ -91,7 +91,7 @@ extension PodLoanPhoneController {
             updateState { $0.tookOverOnSilenceAt = deps.now() }
             handbackDiag(epoch, "the watch did NOT answer, or cannot reach the pod — taking the pod back (\(why))")
             tellLooper(tell)
-            reclaimNow()
+            reclaimNow(onSilence: true)
         case .takeOnTap:
             reclaimNow()
         case .standAside:
@@ -111,8 +111,8 @@ extension PodLoanPhoneController {
         switch tell {
         case .watchNotResponding:
             deps.issueUrgentNotice(
-                NSLocalizedString("Watch Not Responding", comment: "Phone notice title: the watch did not answer and the phone is taking the pod back"),
-                NSLocalizedString("The watch stopped reporting and didn't answer. This phone is taking the pod back; insulin the watch gave is counted.", comment: "Phone notice body: the phone takes the pod back from a silent watch"))
+                NSLocalizedString("Watch Not Looping", comment: "Phone notice title: the watch did not answer, or cannot reach the pod, and the phone is taking the pod back"),
+                NSLocalizedString("The watch has stopped looping (off or out of range). This iPhone is taking the pod back; insulin the watch gave is counted.", comment: "Phone notice body: the phone takes the pod back from a silent watch"))
         case .phoneAwayCannotHandBack, .noResponseFromPhone, .notHearingFromPhone:
             break
         }
@@ -145,6 +145,8 @@ extension PodLoanPhoneController {
     func askWatch(why: String, then: @escaping (LoanControl.Answer) -> Void) {
         guard watchAskedAt == nil else { return }
         let askedAt = deps.now()
+        let askedEpoch = epoch
+        let askedRole = controlRole
         let heardBefore = watchLastHeard
         let foreignBefore = newestForeignLoanEvidence?.at
         watchAskedAt = askedAt
@@ -153,6 +155,12 @@ extension PodLoanPhoneController {
         queue.asyncAfter(deadline: .now() + Self.answerWait) { [weak self] in
             guard let self = self, self.watchAskedAt == askedAt else { return }
             self.watchAskedAt = nil
+            // The question was about one situation, this loan and this phone's role; a verdict for
+            // another is moot (a hand-back and a new Start fit inside the wait).
+            guard self.epoch == askedEpoch, self.controlRole == askedRole else {
+                self.handbackDiag(askedEpoch, "the question about e\(askedEpoch) is moot — the loan or this phone's role changed while it waited (\(why))")
+                return
+            }
             let reported = self.lastWatchAnswerAt.map { $0 >= askedAt } == true
             let answer: LoanControl.Answer
             if reported && self.lastWatchAnswerCannotReachPod {
