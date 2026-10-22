@@ -23,7 +23,7 @@ final class GlanceComplicationTests: XCTestCase {
                             tempRate: Double? = 0.75, closed: Bool = true, overrideLabel: String? = nil) -> WatchLoopManager.GlanceData {
         WatchLoopManager.GlanceData(
             glucose: mgdl(106), glucoseDate: now.addingTimeInterval(-glucoseAge),
-            directG7At: now.addingTimeInterval(-glucoseAge), phoneRelayAt: nil, sensorActivatedAt: nil,
+            directG7At: now.addingTimeInterval(-glucoseAge), phoneRelayAt: nil,
             trend: .up, eventual: mgdl(112.4), iob: iob,
             dosingEventual: nil, dosingIOB: nil, dosingCOB: nil,
             tempRate: tempRate, lastLoopCompleted: now.addingTimeInterval(-loopAge),

@@ -144,7 +144,7 @@ extension PodLoanWatchController {
     /// For a session that cannot resume: records may not have reached the phone yet.
     func issueSessionEndedAlert() {
         let title = NSLocalizedString("Sport Mode Ended", comment: "Watch alert title on relaunch after the app died mid-loan")
-        let body = NSLocalizedString("The watch app restarted. Insulin and carb records may not be on the phone yet.", comment: "Watch alert body on relaunch after the app died mid-loan")
+        let body = NSLocalizedString("The watch app restarted and couldn't resume looping. Nothing is looping until your iPhone gets the watch's records and takes over.", comment: "Watch alert body on relaunch after the app died mid-loan")
         Task { @MainActor in
             loopManager.issueAlert(Alert(
                 identifier: Alert.Identifier(managerIdentifier: "PodLoan", alertIdentifier: "sessionEnded"),

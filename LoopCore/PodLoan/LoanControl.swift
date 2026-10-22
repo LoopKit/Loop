@@ -49,7 +49,8 @@ public enum LoanControl {
     /// The watch saying it holds the pod: a status report, or records.
     public struct Claim: Equatable {
         public var loan: ClaimedLoan
-        /// When the loan started; reports carry it, records do not.
+        /// When the loan started, or the latest it could have: a report says it; records bound it by
+        /// their first record or their send time. A bound before the takeover is as sure as the time.
         public var startedAt: Date?
         /// Whether the watch read the pod within its last cycle; nil when not said.
         public var podReachable: Bool?
@@ -193,6 +194,11 @@ public enum LoanControl {
     /// The watch's report is overdue after this long without one: one loop cycle and a margin.
     public static let watchReportOverdue: TimeInterval = 6 * 60
 
+    /// How long a takeover has to reach the pod, for a grant and for an offline start alike. Every
+    /// takeover seen reached the pod within 25 s, most within 4; a pod not reached in a minute was
+    /// not reached in five either, and the looper waited that long to be told.
+    public static let takeoverLease: TimeInterval = 60
+
     /// With no loan running, the watch warns when it has heard nothing from the phone for this long:
     /// after the phone's own pre-scheduled Loop Failure (20 min), which reaches the wrist when the phone is
     /// near or by a cellular watch's relay (seen 10-18), so the watch's is the backup for a dead phone or
@@ -293,5 +299,24 @@ public enum LoanControl {
     static func startedBefore(_ started: Date?, _ tookOver: Date?) -> Bool {
         guard let started, let tookOver else { return false }
         return started < tookOver
+    }
+
+    // MARK: - Nobody takes the pod while it is giving a bolus
+
+    /// A bolus under way: from the moment it is sent until it has finished or been cancelled. A
+    /// Start, an End and a Take Back are refused meanwhile (transfers G, H and T).
+    public struct BolusUnderWay: Equatable {
+        /// When it ends, once the pump has accepted it; nil while it is being sent or cancelled.
+        public let endsAt: Date?
+        public init(endsAt: Date?) { self.endsAt = endsAt }
+    }
+
+    /// What the looper is told when a Start, an End or a Take Back meets a bolus under way.
+    public static func bolusRefusal(_ bolus: BolusUnderWay, now: Date) -> String {
+        guard let endsAt = bolus.endsAt else {
+            return NSLocalizedString("A bolus is still being given. Try again when it has finished.", comment: "Start, End or Take Back refused while a bolus is being sent to the pod")
+        }
+        let left = max(1, endsAt.timeIntervalSince(now)).rounded(.up)
+        return String(format: NSLocalizedString("A bolus is still being given. Try again in %.0f seconds.", comment: "Start, End or Take Back refused while a bolus is being given (1: seconds left)"), left)
     }
 }

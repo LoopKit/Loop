@@ -48,9 +48,10 @@ extension PodLoanPhoneController {
             sendMessage(.nack(ProtocolNack(seenVersion: request.supportedVersions.max())))
             return
         }
-        // A grant is mid-flight: the phone has already paused dosing and is waiting on the pod.
+        // A grant is mid-flight: the phone has already paused dosing and is waiting on the pod. A second
+        // Start (the same one by its second route, or a second tap) is answered by that grant.
         guard !grantInFlight else {
-            deny("A grant is already in progress.")
+            os_log("Loan request while a grant is being prepared — the grant answers it", log: log, type: .default)
             return
         }
         guard state == .owner else {
@@ -66,7 +67,7 @@ extension PodLoanPhoneController {
 
                 os_log("Loan request while LOANED — revoking the previous loan first", log: log, type: .default)
                 reclaimNow()
-                deny("Reclaiming the previous loan from the watch — try Start again in a few seconds.")
+                deny("Ending the previous Sport Mode session. Tap Start again in a few seconds.")
             case .owner:
                 break
             }
@@ -90,7 +91,7 @@ extension PodLoanPhoneController {
         }
         // Handing over needs exclusive control and the delivered total both sides audit against.
         guard let control = pump as? ExclusiveDeviceControl, pump is PumpDeliveryOdometer else {
-            deny("This pump can't be loaned to the watch (\(type(of: pump))).")
+            deny("This pump doesn't support Sport Mode.")
             return
         }
 
@@ -100,13 +101,20 @@ extension PodLoanPhoneController {
             reclaimPodConnection()
         }
 
+        // Nobody takes the pod while it is giving a bolus (transfer G): the looper tries again after it.
+        if let bolus = pump.status.bolusState.underWay {
+            handbackDiag(epoch, "grant REFUSED — this phone's bolus is still being given (ends \(bolus.endsAt.map { "in \(Int($0.timeIntervalSince(deps.now()).rounded(.up))) s" } ?? "when the pod has it"))")
+            deny(LoanControl.bolusRefusal(bolus, now: deps.now()))
+            return
+        }
+
         // Refuse until the last reclaim's pod round-trip has verified.
         if let started = reclaimStartedAt,
            deps.now().timeIntervalSince(started) < Self.reclaimSettleTimeout,
            reclaimVerifiedAt == nil {
             os_log("Grant deferred: pod still returning from the last reclaim (%.0fs into settle, round-trip not yet verified) — deny-and-retry",
                    log: log, type: .default, deps.now().timeIntervalSince(started))
-            deny("The pod is still returning from the last session. Try Start again in a few seconds.")
+            deny("The iPhone is still reconnecting to the pod. Try again in a few seconds.")
             attemptReclaimVerificationNow(started: started)
             return
         }
@@ -135,7 +143,8 @@ extension PodLoanPhoneController {
             self.queue.async {
                 self.grantInFlight = false
                 if let error = error {
-                    self.deny("The iPhone couldn't reach its pod (\(error.localizedDescription)). The phone kept the pod.")
+                    os_log("Grant: the pre-grant temp cancel failed: %{public}@", log: self.log, type: .error, String(describing: error))
+                    self.deny("The iPhone couldn't reach the pod and kept it. Try again.")
                     return
                 }
                 self.continueGrant(settings: settings, loanSettings: loanSettings, pump: pump, control: control)
@@ -156,15 +165,6 @@ extension PodLoanPhoneController {
         handbackDiag(releaseEpoch, "GRANT — releasing pod BLE (wasReleased=\(control.isControlReleased))")
         control.releaseControl()
         deps.pumpControlChanged(true)
-        // A link still up here predicts a refused takeover (the pod accepts one central).
-        queue.asyncAfter(deadline: .now() + 3) { [weak self, weak pump] in
-            guard let self = self, let control = pump as? ExclusiveDeviceControl else { return }
-
-            self.handbackDiag(releaseEpoch, "GRANT +3s — pod BLE released=\(control.isControlReleased) linkUp=\(control.isControlReady)")
-            if control.isControlReady {
-                self.handbackDiag(releaseEpoch, "GRANT +3s — ** STILL CONNECTED after release — the watch's takeover will be refused (single-central pod) **")
-            }
-        }
 
         // New epoch, empty dedup state, this loan's anchors: one save, before the grant goes out.
         let previous = state
@@ -189,7 +189,7 @@ extension PodLoanPhoneController {
 
         // The lease bounds the handshake, not the loan.
         assembleGrant(epoch: grantEpoch, referenceDate: handedOverAt,
-                      expiresAt: handedOverAt.addingTimeInterval(.minutes(5)),
+                      expiresAt: handedOverAt.addingTimeInterval(LoanControl.takeoverLease),
                       pumpConfiguration: control.exportConfiguration(), loanSettingsRaw: loanSettings.rawValue,
                       settings: settings) { [weak self] grant in
             guard let self = self else { return }

@@ -59,7 +59,6 @@ extension WatchLoopManager {
                 glucoseDate: latest?.startDate,
                 directG7At: sources.direct,
                 phoneRelayAt: sources.phone,
-                sensorActivatedAt: (cgmManager as? G7CGMManager)?.sensorActivatedAt,
                 trend: (latest as? StoredGlucoseSample)?.trend,
 
                 eventual: displayState.output?.predictedGlucose.last?.quantity,

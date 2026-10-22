@@ -599,7 +599,7 @@ private final class PreviewBolusProgress: DoseProgressReporter {
         s.phase = .active; s.bgText = "111"; s.trendSymbol = "→"; s.bgColor = .inRange
         s.eventualText = "88"; s.iobText = "1.2"; s.cobText = "8"; s.tempText = "0.00"
         s.loopStatusText = "CLOSED · 1m"
-        s.transientText = "taking longer than usual — 0.90 U will deliver"
+        s.transientText = "taking longer than usual — still sending 0.90 U"
     }))
 }
 

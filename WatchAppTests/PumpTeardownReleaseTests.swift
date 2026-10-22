@@ -90,6 +90,37 @@ final class PumpTeardownReleaseTests: XCTestCase {
         return isGone()
     }
 
+    /// A driver released by a teardown can still report once, when the release let its last command
+    /// finish. The controller stays its delegate (the driver treats none as impossible), drops the
+    /// report, and saves nothing for it.
+    func testAReleasedDriversLateReportIsDroppedNotCrashed() async throws {
+        let controller = await makeController()
+        let pump = try makePump()
+        controller.queue.sync {
+            pump.pumpManagerDelegate = controller
+            pump.delegateQueue = controller.queue
+            controller.pumpManager = pump
+            controller.loopManager.pumpManager = pump
+        }
+        controller.queue.sync { controller.teardownPump() }
+        controller.queue.sync {}
+        XCTAssertTrue((pump.pumpManagerDelegate as AnyObject?) === controller, "still the delegate: a late report must find one")
+        XCTAssertNil(controller.pumpStateStore.wrappedValue, "precondition: the teardown cleared the saved state")
+
+        let reported = expectation(description: "the late report completes")
+        let event = NewPumpEvent(date: Date(), dose: nil, raw: Data([1]), title: "late")
+        controller.queue.sync {
+            controller.pumpManagerDidUpdateState(pump)
+            controller.pumpManager(pump, hasNewPumpEvents: [event], lastReconciliation: Date(), replacePendingEvents: false) { error in
+                XCTAssertNil(error)
+                reported.fulfill()
+            }
+        }
+        await fulfillment(of: [reported], timeout: 5)
+        XCTAssertNil(controller.pumpStateStore.wrappedValue, "a released driver's state is not saved: the next launch must not resume it")
+        XCTAssertNil(controller.pumpManager)
+    }
+
     func testTeardownReleasesThePodManagerAndItsBluetoothManager() async throws {
         let left = try await loanThenTeardown(takeControl: false)
         XCTAssertTrue(released(left.pumpGone), "the pod manager outlives its loan")

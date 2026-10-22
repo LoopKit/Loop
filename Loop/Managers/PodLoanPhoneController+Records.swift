@@ -21,8 +21,11 @@ extension PodLoanPhoneController {
         guard batch.epoch == epoch, state == .loaned || state == .reclaimPending else {
             handbackDiag(batch.epoch, "batch DROPPED — \(batch.events.count) event(s) ev=\(batch.epoch) vs phone ev=\(epoch), state=\(state.rawValue) (recovered via the offer path if the watch still resends)")
 
-            // Records are the watch saying it holds the pod: `LoanControl` decides (rows 6, 17, 19).
+            // Records are the watch's word that it holds the pod: `LoanControl` decides (rows 6, 17, 19).
+            // They bound when the loan started, so records that reach the phone before the watch's own
+            // report are judged the same way.
             let claim = LoanControl.Claim(loan: batch.epoch > epoch ? .newer : .closed,
+                                          startedAt: batch.startedNoLaterThan,
                                           refusedBefore: refusedRevivedEpochs.contains(batch.epoch))
             let decision = decideAndAct(.watchClaims(claim), why: "records from the watch on e\(batch.epoch)", claimEpoch: batch.epoch)
             if batch.epoch > epoch, decision != .sendStop, newestForeignLoanEvidence.map({ batch.epoch >= $0.epoch }) ?? true {
@@ -44,7 +47,7 @@ extension PodLoanPhoneController {
             guard let self, let control = self.deps.pumpManager() as? ExclusiveDeviceControl else {
                 return "no pump manager"
             }
-            return "released=\(control.isControlReleased) \(control.connectionDiagnostics() ?? "no diagnostics")"
+            return "released=\(control.isControlReleased) ready=\(control.isControlReady)"
         }
     }
 
@@ -128,7 +131,7 @@ extension PodLoanPhoneController {
         // Refuse a hand-back while this phone's Bluetooth is off; it could not reach the pod.
         if !isStale, canTransition, deps.isBluetoothPoweredOff() {
             handbackDiag(offer.epoch, "hand-back REFUSED — this phone's Bluetooth is off, so it could not reclaim the pod; the watch keeps the loan")
-            sendMessage(.denied(LoanDenied(reason: NSLocalizedString("iPhone Bluetooth is off — still running", comment: "Hand-back refused: shown on the watch glance"))))
+            sendMessage(.denied(LoanDenied(reason: NSLocalizedString("The watch is still looping. To end, turn on iPhone Bluetooth and tap End again.", comment: "Hand-back refused: shown on the watch glance"))))
             return
         }
         // .reconciling: the phone owes an ack; the loan ends when the write lands.
@@ -192,11 +195,11 @@ extension PodLoanPhoneController {
             let drainFloor = outcome.doses.reduce(0.0) { $0 + ($1.programmedUnits / pulseUnits).rounded(.down) * pulseUnits }
             let loanMin = offer.handedBackAt.timeIntervalSince(loanStart) / 60
             handbackDiag(offer.epoch, String(format:
-                "reconcile[provisional]: delivered=%@ expected=%.3f residual=%@ (band ±0.20) · thisDrain cont=%.3f floor=%.3f · loanMin=%.0f cycles=%d fresh=%@",
+                "reconcile[provisional]: delivered=%@ expected=%.3f residual=%@ (band ±0.20) · thisDrain cont=%.3f floor=%.3f · loanMin=%.0f cycles=%d",
                 delivered.map { String(format: "%.3f", $0) } ?? "n/a", expected,
                 delivered.map { String(format: "%+.3f", $0 - expected) } ?? "n/a",
                 drainCont, drainFloor,
-                loanMin, allStagedEvents.count, offer.odometer?.freshenSucceeded == true ? "Y" : "N"))
+                loanMin, allStagedEvents.count))
 
             // The verdict waits for the phone's own pod read, over the window from the ledger's last reading.
             if isFinal, let start = offer.odometer?.deliveredAtStart {
@@ -209,15 +212,15 @@ extension PodLoanPhoneController {
                     epoch: offer.epoch, deliveredAtStart: base?.units ?? start, windowStart: base?.at ?? loanStart,
                     expected: windowExpected,
                     loanMinutes: loanMin, cycles: allStagedEvents.count,
-                    watchLatest: offer.odometer?.deliveredLatest,
-                    watchFreshened: offer.odometer?.freshenSucceeded == true)
+                    watchLatest: offer.odometer?.deliveredLatest)
             }
         }
 
         let doses = outcome.doses
 
-        // The interim's open rate record is acked but not committed; it lands finished at the end.
-        let committable = events.filter { $0.id != outcome.openEventID }
+        // The interim's open records (a rate record still running, a bolus still being given) are
+        // acked but not committed; each lands finished later.
+        let committable = events.filter { !outcome.openEventIDs.contains($0.id) }
 
         // Drop impossible doses individually, by name.
         let sane = doses.filter { $0.endDate >= $0.startDate }

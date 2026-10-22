@@ -42,20 +42,6 @@ enum RuntimeStateLog {
     private static let backgroundProofInterval: TimeInterval = 120
 
 
-    /// Reports how late a short timer fired; silent when on time, except "start" labels.
-    static func probeTimerDeferral(_ label: String, requested: TimeInterval = 3.0,
-                                   tolerance: TimeInterval = 1.0) {
-        let asked = Date()
-        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + requested) {
-            let actual = Date().timeIntervalSince(asked)
-            let late = actual - requested
-            guard late > tolerance || label.contains("start") else { return }
-            SportLog.event("runtime", String(format:
-                "timer-probe [%@] asked %.1fs got %.1fs (late %+.1fs) · %@",
-                label, requested, actual, late, snapshot()))
-        }
-    }
-
     // All detector state goes through this lock.
     private static let stallLock = NSLock()
     private static var pingSentAt: Date?
