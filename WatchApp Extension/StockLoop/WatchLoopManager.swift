@@ -465,14 +465,6 @@ final class WatchLoopManager {
         refreshGlanceData()
     }
 
-    /// One-line "who is feeding this watch" for the log at the start of a loan.
-    var g7ContentionSummary: String {
-        let stamps = lastGlucoseSourceStamps
-        func age(_ d: Date?) -> String { d.map { String(format: "%.0fs", now().timeIntervalSince($0)) } ?? "never" }
-
-        return "g7direct=\(age(stamps.direct)) phoneRelay=\(age(stamps.phone))"
-    }
-
     /// A phone relay says nothing about the watch's radio, so the two are kept apart.
     var lastGlucoseSourceStamps: (direct: Date?, phone: Date?) {
         bgSourceLock.lock()

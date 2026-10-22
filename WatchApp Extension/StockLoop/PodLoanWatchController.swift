@@ -226,15 +226,10 @@ final class PodLoanWatchController {
     /// Takeover timings and the glance's bar are measured from it.
     var attemptStartedAt: Date?
 
-    /// When the last ladder read came back, so the gap to the next one can be measured.
-    var lastTakeoverReadAt: Date?
-
     /// Separate objects for the event-driven retry and the backstop: a cancelled work item
     /// performs nothing.
     var takeoverRetryAction: (() -> Void)?
     var takeoverBackstop: DispatchWorkItem?
-    /// A large gap means the app was suspended, not that the pod was unreachable.
-    var takeoverMaxReadGap: TimeInterval = 0
 
     /// Feeds the wedge check and the drain's ceiling.
     var handbackResendCount = 0
