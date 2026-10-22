@@ -219,8 +219,6 @@ class LoopAppManager: NSObject {
 
         alertPermissionsChecker = AlertPermissionsChecker()
         alertPermissionsChecker.delegate = alertManager
-        
-        trustedTimeChecker = LoopTrustedTimeChecker(alertManager: alertManager)
 
         settingsManager = SettingsManager(
             cacheStore: cacheStore,
@@ -344,6 +342,8 @@ class LoopAppManager: NSObject {
         }
         deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"), maxEntryAge: localCacheDuration)
 
+        trustedTimeChecker = LoopTrustedTimeChecker(alertManager: alertManager, deviceLog: deviceLog)
+
 
         remoteDataServicesManager = RemoteDataServicesManager(
             alertStore: alertManager.alertStore,
@@ -460,7 +460,9 @@ class LoopAppManager: NSObject {
         supportManager = SupportManager(pluginManager: pluginManager,
                                         deviceSupportDelegate: deviceDataManager,
                                         servicesManager: servicesManager,
-                                        alertIssuer: alertManager)
+                                        alertIssuer: alertManager,
+                                        criticalEventLogExporterFactory: criticalEventLogExportManager,
+                                        diagnosticReportGenerator: self)
         servicesManager.supportManager = supportManager
 
         supportManager.onRequiredUpdate = { [weak self] in
@@ -600,7 +602,6 @@ class LoopAppManager: NSObject {
                                           pumpManagerSettingsViewModel: pumpViewModel,
                                           cgmManagerSettingsViewModel: cgmViewModel,
                                           servicesViewModel: servicesViewModel,
-                                          criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: criticalEventLogExportManager),
                                           therapySettings: { [weak self] in self?.settingsManager.therapySettings ?? TherapySettings() },
                                           initialDosingEnabled: self.settingsManager.settings.dosingEnabled,
                                           automaticDosingStrategy: self.settingsManager.settings.automaticDosingStrategy,

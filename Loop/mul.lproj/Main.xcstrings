@@ -398,7 +398,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "预计"
+            "value" : "预测"
           }
         }
       }
@@ -530,7 +530,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "详细"
+            "value" : "详情"
           }
         }
       }
@@ -608,7 +608,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etiket"
+            "value" : "Label"
           }
         },
         "pl" : {
@@ -866,7 +866,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "g Totaal"
+            "value" : "g totaal"
           }
         },
         "pl" : {
@@ -1130,7 +1130,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etiket"
+            "value" : "Label"
           }
         },
         "pl" : {
@@ -2042,7 +2042,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aanbevolen Basaal"
+            "value" : "Aanbevolen basaalstand"
           }
         },
         "pl" : {
@@ -2300,7 +2300,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etiket"
+            "value" : "Label"
           }
         },
         "pl" : {
@@ -2689,7 +2689,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "g Actieve Kh"
+            "value" : "g actieve kh"
           }
         },
         "pl" : {
@@ -2707,7 +2707,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "g CLB"
+            "value" : "g COB"
           }
         },
         "ru" : {
@@ -2959,7 +2959,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etiket"
+            "value" : "Label"
           }
         },
         "pl" : {
@@ -3211,13 +3211,13 @@
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anbefalt Basal"
+            "value" : "Anbefalt basal"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aanbevolen Basaal"
+            "value" : "Aanbevolen basaalstand"
           }
         },
         "pl" : {

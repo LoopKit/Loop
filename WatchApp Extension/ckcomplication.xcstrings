@@ -82,6 +82,12 @@
             "state" : "translated",
             "value" : "3DK"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3分钟"
+          }
         }
       }
     },
@@ -162,6 +168,12 @@
           }
         },
         "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "120"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "120"
@@ -250,6 +262,12 @@
             "state" : "translated",
             "value" : "120↘︎"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "120↘︎"
+          }
         }
       }
     },
@@ -329,6 +347,12 @@
           }
         },
         "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@%@ %@"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@%@ %@"
