@@ -37,6 +37,7 @@ class LoopTrustedTimeChecker: TrustedTimeChecker {
     // For NTP time checking
     private var ntpClient: TrueTimeClient
     private weak var alertManager: AlertManager?
+    private let deviceLog: PersistentDeviceLog?
     private lazy var log = DiagnosticLog(category: "TrustedTimeChecker")
 
     lazy private var cancellables = Set<AnyCancellable>()
@@ -51,7 +52,7 @@ class LoopTrustedTimeChecker: TrustedTimeChecker {
         }
     }
 
-    init(alertManager: AlertManager? = nil) {
+    init(alertManager: AlertManager? = nil, deviceLog: PersistentDeviceLog? = nil) {
         ntpClient = TrueTimeClient.sharedInstance
         #if DEBUG
         if ntpClient.responds(to: #selector(setter: TrueTimeClient.logCallback)) {
@@ -60,7 +61,8 @@ class LoopTrustedTimeChecker: TrustedTimeChecker {
         #endif
         ntpClient.start()
         self.alertManager = alertManager
-        
+        self.deviceLog = deviceLog
+
         NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
             .sink { [weak self] _ in
                 Task {
@@ -91,9 +93,13 @@ class LoopTrustedTimeChecker: TrustedTimeChecker {
 
                 if abs(timeDelta) > self.acceptableTimeDelta {
                     self.log.default("applicationSignificantTimeChange: ntpNow = %@, deviceNow = %@", ntpNow.debugDescription, deviceNow.debugDescription)
+                    self.logTimeCheck("Time alert issued", referenceTime: referenceTime, ntpNow: ntpNow, deviceNow: deviceNow)
                     self.detectedSystemTimeOffset = timeDelta
                     self.issueTimeChangedAlert()
                 } else {
+                    if self.detectedSystemTimeOffset != 0 {
+                        self.logTimeCheck("Time alert retracted", referenceTime: referenceTime, ntpNow: ntpNow, deviceNow: deviceNow)
+                    }
                     self.detectedSystemTimeOffset = 0
                     self.retractTimeChangedAlert()
                 }
@@ -101,6 +107,14 @@ class LoopTrustedTimeChecker: TrustedTimeChecker {
                 self.log.error("applicationSignificantTimeChange: Error getting NTP time: %@", error.localizedDescription)
             }
         })
+    }
+
+    private func logTimeCheck(_ event: String, referenceTime: ReferenceTime, ntpNow: Date, deviceNow: Date) {
+        let roundTrip = referenceTime.roundTripDelay.map { String(format: "%.3f s", $0) } ?? "unknown"
+        let message = String(format: "%@: offset %.1f s, ntpNow %@, deviceNow %@, host %@, round trip %@, fetched %.0f s ago",
+                             event, ntpNow.timeIntervalSince(deviceNow), ntpNow.debugDescription, deviceNow.debugDescription,
+                             referenceTime.host ?? "unknown", roundTrip, referenceTime.uptimeInterval)
+        deviceLog?.log(managerIdentifier: "TrustedTimeChecker", deviceIdentifier: nil, type: .receive, message: message)
     }
 
     private var alertIdentifier: Alert.Identifier {
