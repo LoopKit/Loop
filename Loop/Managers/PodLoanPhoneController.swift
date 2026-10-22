@@ -244,7 +244,7 @@ final class PodLoanPhoneController {
             pendingHandbackAudit = PendingHandbackAudit(
                 epoch: e, deliveredAtStart: saved.deliveredAtStart, windowStart: saved.from, expected: saved.expected,
                 loanMinutes: saved.loanMinutes, cycles: 0,
-                watchLatest: nil, watchFreshened: false, flavor: .forceReclaim)
+                watchLatest: nil, flavor: .forceReclaim)
             queue.async { [weak self] in
                 guard let self = self else { return }
                 self.handbackDiag(e, "force-reclaim audit RE-ARMED after relaunch — verdict still owed")

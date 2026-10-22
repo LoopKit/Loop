@@ -205,12 +205,11 @@ extension PodLoanPhoneController {
 
             let drift = pending.watchLatest.map { latest - $0 }
             handbackDiag(pending.epoch, String(format:
-                "reconcile[%@]: delivered=%.3f expected=%.3f residual=%+.3f (band ±0.20) · loanMin=%.0f cycles=%d · odometer read by PHONE +%.0fs after reclaim · vs watch endpoint %@ (watch fresh=%@)",
+                "reconcile[%@]: delivered=%.3f expected=%.3f residual=%+.3f (band ±0.20) · loanMin=%.0f cycles=%d · odometer read by PHONE +%.0fs after reclaim · vs watch endpoint %@",
                 pending.flavor == .forceReclaim ? "FORCE-RECLAIM" : "AUTHORITATIVE",
                 delivered, pending.expected, residual,
                 pending.loanMinutes, pending.cycles, elapsed,
-                drift.map { String(format: "%+.3f", $0) } ?? "n/a",
-                pending.watchFreshened ? "Y" : "N"))
+                drift.map { String(format: "%+.3f", $0) } ?? "n/a"))
 
             switch pending.flavor {
             case .handback:

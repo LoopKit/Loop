@@ -250,7 +250,7 @@ extension PodLoanPhoneController {
         pendingHandbackAudit = PendingHandbackAudit(
             epoch: epoch, deliveredAtStart: anchor.units, windowStart: anchor.at, expected: expected,
             loanMinutes: deps.now().timeIntervalSince(start) / 60, cycles: 0,
-            watchLatest: nil, watchFreshened: false, flavor: .forceReclaim)
+            watchLatest: nil, flavor: .forceReclaim)
 
         handbackDiag(epoch, String(format:
             "force-reclaim audit armed — expected %.3f U from %d record(s) + schedule fill over %.0f min since takeover; verdict on the reclaim round-trip",

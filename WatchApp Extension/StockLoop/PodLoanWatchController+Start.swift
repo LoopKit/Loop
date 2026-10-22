@@ -173,7 +173,7 @@ extension PodLoanWatchController {
     func returnToRestingPhase() {
         if journal.hasUndrainedEvents {
             phase = .recoveredDrain
-            sendHandbackOffer(freshened: false, recovered: true)
+            sendHandbackOffer(recovered: true)
         } else {
             phase = .idle
         }

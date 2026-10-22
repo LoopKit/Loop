@@ -195,11 +195,11 @@ extension PodLoanPhoneController {
             let drainFloor = outcome.doses.reduce(0.0) { $0 + ($1.programmedUnits / pulseUnits).rounded(.down) * pulseUnits }
             let loanMin = offer.handedBackAt.timeIntervalSince(loanStart) / 60
             handbackDiag(offer.epoch, String(format:
-                "reconcile[provisional]: delivered=%@ expected=%.3f residual=%@ (band ±0.20) · thisDrain cont=%.3f floor=%.3f · loanMin=%.0f cycles=%d fresh=%@",
+                "reconcile[provisional]: delivered=%@ expected=%.3f residual=%@ (band ±0.20) · thisDrain cont=%.3f floor=%.3f · loanMin=%.0f cycles=%d",
                 delivered.map { String(format: "%.3f", $0) } ?? "n/a", expected,
                 delivered.map { String(format: "%+.3f", $0 - expected) } ?? "n/a",
                 drainCont, drainFloor,
-                loanMin, allStagedEvents.count, offer.odometer?.freshenSucceeded == true ? "Y" : "N"))
+                loanMin, allStagedEvents.count))
 
             // The verdict waits for the phone's own pod read, over the window from the ledger's last reading.
             if isFinal, let start = offer.odometer?.deliveredAtStart {
@@ -212,8 +212,7 @@ extension PodLoanPhoneController {
                     epoch: offer.epoch, deliveredAtStart: base?.units ?? start, windowStart: base?.at ?? loanStart,
                     expected: windowExpected,
                     loanMinutes: loanMin, cycles: allStagedEvents.count,
-                    watchLatest: offer.odometer?.deliveredLatest,
-                    watchFreshened: offer.odometer?.freshenSucceeded == true)
+                    watchLatest: offer.odometer?.deliveredLatest)
             }
         }
 

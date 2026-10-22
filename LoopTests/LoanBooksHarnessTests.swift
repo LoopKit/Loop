@@ -1012,8 +1012,7 @@ final class LoanOverrideTests: XCTestCase {
                                  loggedAt: t0.addingTimeInterval(900))
 
         // Metered: the bolus plus 4 schedule pulses; the 3 s bracket temp floors to zero.
-        let odometer = LoanOdometerSnapshot(deliveredAtStart: 50.00, deliveredLatest: 51.50,
-                                            freshenSucceeded: true, asOf: t0.addingTimeInterval(2400))
+        let odometer = LoanOdometerSnapshot(deliveredAtStart: 50.00, deliveredLatest: 51.50, asOf: t0.addingTimeInterval(2400))
 
         let expected = LoanReconciler.expectedInsulin(
             events: [bolus, bracket, cancel, nextTemp], schedule: baseBasal, pulseUnits: 0.05,

@@ -1019,10 +1019,9 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         let controller = makeController()
         let grant = establishLoan(controller)
 
-        // The watch's endpoint: stale, and it knows it (freshenSucceeded false).
+        // The watch's endpoint: stale.
         let handedBackAt = Date()
-        let odometer = LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: 10.400,
-                                            freshenSucceeded: false)
+        let odometer = LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: 10.400)
         // What the pod ACTUALLY reads when the phone gets there: half a unit further on.
         MockPumpManager.testOdometer = 10.900
 
@@ -1057,8 +1056,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
 
         let ackSent = expectSend()
         let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil,
-                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10, deliveredLatest: 11,
-                                                                 freshenSucceeded: true),
+                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10, deliveredLatest: 11),
                                   events: [], tombstones: [], recovered: false, released: true)
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
         wait(for: [ackSent], timeout: 5)
@@ -1111,8 +1109,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
 
         let ackSent = expectSend()
         let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil,
-                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10, deliveredLatest: 10.5,
-                                                                 freshenSucceeded: true),
+                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10, deliveredLatest: 10.5),
                                   events: [], tombstones: [], recovered: false, released: true)
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
         wait(for: [ackSent], timeout: 5)
@@ -1133,8 +1130,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
 
         let ackSent = expectSend()
         let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil,
-                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10, deliveredLatest: 10.5,
-                                                                 freshenSucceeded: false),
+                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10, deliveredLatest: 10.5),
                                   events: [], tombstones: [], recovered: false, released: true)
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
         wait(for: [ackSent], timeout: 5)
@@ -1287,8 +1283,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         MockPumpManager.testOdometer = 10.0 + deliveredDuringLoan
         let ackSent = expectSend()
         let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil,
-                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: 10.0,
-                                                                 freshenSucceeded: true),
+                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: 10.0),
                                   events: [], tombstones: [], recovered: false, released: true)
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
         wait(for: [ackSent], timeout: 5)
@@ -1325,8 +1320,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         let ackSent = expectSend()
         let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date().addingTimeInterval(60),
                                   finalStatus: nil,
-                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: 10.0,
-                                                                 freshenSucceeded: true),
+                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: 10.0),
                                   events: [bolus], tombstones: [], recovered: false, released: true)
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
         wait(for: [ackSent], timeout: 5)
@@ -1366,8 +1360,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         let bolus = makeEvent(seq: 1, units: 2.2, at: Date())
         let ackSent = expectSend()
         let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil,
-                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: 12.4,
-                                                                 freshenSucceeded: true),
+                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: 12.4),
                                   events: [bolus], tombstones: [], recovered: false, released: true)
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
         wait(for: [ackSent], timeout: 5)
@@ -1386,8 +1379,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         let bolus = makeEvent(seq: 1, units: 2.4, at: Date())
         let ackSent = expectSend()
         let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil,
-                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: 12.2,
-                                                                 freshenSucceeded: true),
+                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: 12.2),
                                   events: [bolus], tombstones: [], recovered: false, released: true)
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
         wait(for: [ackSent], timeout: 5)
@@ -1402,8 +1394,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
     /// Sends a batch carrying a mid-loan odometer reading and waits for it on the controller's queue.
     private func sendMidLoanReading(_ controller: PodLoanPhoneController, epoch: Int,
                                     events: [LoanEvent] = [], latest: Double, asOf: Date?) throws {
-        let snap = LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: latest,
-                                        freshenSucceeded: false, asOf: asOf)
+        let snap = LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: latest, asOf: asOf)
         controller.handleIncoming(userInfo: try LoanMessage.doseRecordBatch(
             DoseRecordBatch(epoch: epoch, events: events, tombstones: [], odometer: snap)).transportDictionary())
         controller.queue.sync { }
@@ -1414,8 +1405,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         MockPumpManager.testOdometer = finalOdometer
         let ackSent = expectSend()
         let offer = HandbackOffer(epoch: epoch, handedBackAt: Date().addingTimeInterval(5), finalStatus: nil,
-                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: finalOdometer,
-                                                                 freshenSucceeded: true),
+                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10.0, deliveredLatest: finalOdometer),
                                   events: [], tombstones: [], recovered: false, released: true)
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
         wait(for: [ackSent], timeout: 5)
@@ -3629,7 +3619,7 @@ extension PodLoanPhoneControllerTests {
         let lastRead = Date().addingTimeInterval(-.minutes(2))
         readPod(controller, units: 38.5, at: lastRead)   // after the phone's own bolus
 
-        let takeover = LoanOdometerSnapshot(deliveredAtStart: 36.0, deliveredLatest: 38.6, freshenSucceeded: true,
+        let takeover = LoanOdometerSnapshot(deliveredAtStart: 36.0, deliveredLatest: 38.6,
                                             asOf: Date(), deliveredAtStartAt: Date().addingTimeInterval(-.minutes(40)))
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(
             HandbackOffer(epoch: 5, handedBackAt: Date(), finalStatus: nil, odometer: takeover,
@@ -3649,7 +3639,7 @@ extension PodLoanPhoneControllerTests {
         readPod(controller, units: 30.0, at: Date().addingTimeInterval(-.minutes(40)))
 
         let takeoverAt = Date().addingTimeInterval(-.minutes(30))
-        let takeover = LoanOdometerSnapshot(deliveredAtStart: 30.2, deliveredLatest: 31.0, freshenSucceeded: true,
+        let takeover = LoanOdometerSnapshot(deliveredAtStart: 30.2, deliveredLatest: 31.0,
                                             asOf: Date(), deliveredAtStartAt: takeoverAt)
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(
             HandbackOffer(epoch: 5, handedBackAt: Date(), finalStatus: nil, odometer: takeover,

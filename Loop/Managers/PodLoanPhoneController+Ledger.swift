@@ -251,7 +251,6 @@ extension PodLoanPhoneController {
         let loanMinutes: Double
         let cycles: Int
         let watchLatest: Double?
-        let watchFreshened: Bool
         var flavor: Flavor = .handback
     }
 

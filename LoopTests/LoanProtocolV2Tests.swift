@@ -39,7 +39,7 @@ final class LoanProtocolV2Tests: XCTestCase {
             .takeoverFailed(TakeoverFailed(epoch: 5, reason: "test")),
             .doseRecordBatch(DoseRecordBatch(epoch: 5, events: [event], tombstones: [UUID()])),
             .handbackOffer(HandbackOffer(epoch: 5, handedBackAt: now, finalStatus: status,
-                                         odometer: LoanOdometerSnapshot(deliveredAtStart: 10, deliveredLatest: 12, freshenSucceeded: true),
+                                         odometer: LoanOdometerSnapshot(deliveredAtStart: 10, deliveredLatest: 12),
                                          events: [event], tombstones: [], recovered: false)),
             .handbackAck(HandbackAck(epoch: 5, committedCursor: 3)),
             .revoke(Revoke(epoch: 5)),
