@@ -35457,6 +35457,12 @@
             "value" : "Koolhydraatinvoer vereenvoudigen"
           }
         },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simplificați introducerea carbohidraților"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
