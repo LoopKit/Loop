@@ -22,14 +22,10 @@ extension PodLoanPhoneController {
     /// A typical settle; the progress bar is drawn against it.
     static let reclaimSettleExpectation: TimeInterval = 10
 
-    /// Escalate to the pump manager's recovery when the link has not come up by then.
-    static let reclaimEscalateAfter: TimeInterval = 12
-
     /// Called on every route back to `.owner`, before `.owner` is announced.
     func beginReclaimSettleWindow() {
         let started = deps.now()
         reclaimStartedAt = started
-        reclaimEscalated = false
         reclaimVerifiedAt = nil
         syncUIMirror()
         reclaimVerifyInFlight = false
@@ -50,12 +46,9 @@ extension PodLoanPhoneController {
             os_log("Reclaim settle CEILING reached (%.0fs) without a verified round-trip — clearing anyway",
                    log: self.log, type: .error, Self.reclaimSettleTimeout)
 
-            let ble = (self.deps.pumpManager() as? ExclusiveDeviceControl)?.connectionDiagnostics()
             self.handbackDiag(self.epoch, String(
-                format: "settle CEILING at %.0fs — NO verified round-trip; clearing anyway · ble: %@",
-                Self.reclaimSettleTimeout, ble ?? "no diagnostics from the pump manager"))
+                format: "settle CEILING at %.0fs — NO verified round-trip; clearing anyway", Self.reclaimSettleTimeout))
             self.reclaimStartedAt = nil
-            self.endReclaimEscalation()
             self.syncUIMirror()
             self.reclaimDisplayAnchor = nil
             self.deps.endReclaimBackgroundTask()
@@ -70,8 +63,7 @@ extension PodLoanPhoneController {
         chaseReclaimVerification(started: started)
     }
 
-    /// Ends the window early, for a phone that has stopped trying to hold the pod. Left open, the
-    /// chase would escalate at +12 s and lift the release, the phone's dosing gate.
+    /// Ends the window early, for a phone that has stopped trying to hold the pod.
     func closeReclaimSettleWindow(reason: String) {
         guard reclaimStartedAt != nil else { return }
         handbackDiag(epoch, "settle window CLOSED early — \(reason)")
@@ -79,22 +71,12 @@ extension PodLoanPhoneController {
         reclaimSettleWork?.cancel()
         reclaimSettleWork = nil
         reclaimStartedAt = nil
-        endReclaimEscalation()
         reclaimDisplayAnchor = nil
         reclaimVerifyInFlight = false
         deps.endReclaimBackgroundTask()
 
         noteForceReclaimAuditStillOwed(why: reason)
         syncUIMirror()
-    }
-
-    /// An escalation ends with the settle it served, verified, closed early or at the ceiling: the
-    /// transfer rule. Left armed, every connect the pod driver made would wait on its scan.
-    func endReclaimEscalation() {
-        guard reclaimEscalated else { return }
-        reclaimEscalated = false
-        (deps.pumpManager() as? ExclusiveDeviceControl)?.endTakeEscalation()
-        handbackDiag(epoch, "settle over — escalation ended; the pod is reached by this phone's own handle again")
     }
 
     /// The window closed without the pod answering, its link lost after the take-back. The check
@@ -120,7 +102,7 @@ extension PodLoanPhoneController {
     func chaseReclaimVerification(started: Date, attempt: Int = 0) {
         guard reclaimStartedAt == started, reclaimVerifiedAt == nil else { return }
 
-        // Backstop: never chase, or escalate for, a pod this phone is not holding.
+        // Backstop: never chase a pod this phone is not holding.
         guard state == .owner, !yieldingToInferredLoan else {
             handbackDiag(epoch, "settle chase STOOD DOWN at tick \(attempt) — the phone is not holding the pod (state \(state.rawValue)\(yieldingToInferredLoan ? ", yielded to an inferred loan" : ""))")
             return
@@ -132,17 +114,6 @@ extension PodLoanPhoneController {
             let waited = up.timeIntervalSince(started)
 
             handbackDiag(epoch, String(format: "settle: link up +%.1fs (tick %d)", waited, attempt))
-        }
-
-        // Once per settle, and only while the link has never come up.
-        if reclaimLinkUpAt == nil, !reclaimEscalated,
-           deps.now().timeIntervalSince(started) >= Self.reclaimEscalateAfter,
-           let control = deps.pumpManager() as? ExclusiveDeviceControl {
-            reclaimEscalated = true
-            let bleBefore = control.connectionDiagnostics() ?? "none"
-            let outcome = control.escalateTakeControl() ?? "the pump manager had nothing to escalate"
-            handbackDiag(epoch, String(format: "settle: link still down at +%.0fs — escalating: %@ · ble before: %@",
-                                       deps.now().timeIntervalSince(started), outcome, bleBefore))
         }
 
         attemptReclaimVerificationNow(started: started)
@@ -180,7 +151,6 @@ extension PodLoanPhoneController {
                         self.reclaimVerifiedAt = self.deps.now()
                         self.reclaimSettleWork?.cancel()
                         self.reclaimStartedAt = nil
-                        self.endReclaimEscalation()
                         self.syncUIMirror()
                         self.reclaimDisplayAnchor = nil
                         self.deps.endReclaimBackgroundTask()
@@ -235,12 +205,11 @@ extension PodLoanPhoneController {
 
             let drift = pending.watchLatest.map { latest - $0 }
             handbackDiag(pending.epoch, String(format:
-                "reconcile[%@]: delivered=%.3f expected=%.3f residual=%+.3f (band ±0.20) · loanMin=%.0f cycles=%d · odometer read by PHONE +%.0fs after reclaim · vs watch endpoint %@ (watch fresh=%@)",
+                "reconcile[%@]: delivered=%.3f expected=%.3f residual=%+.3f (band ±0.20) · loanMin=%.0f cycles=%d · odometer read by PHONE +%.0fs after reclaim · vs watch endpoint %@",
                 pending.flavor == .forceReclaim ? "FORCE-RECLAIM" : "AUTHORITATIVE",
                 delivered, pending.expected, residual,
                 pending.loanMinutes, pending.cycles, elapsed,
-                drift.map { String(format: "%+.3f", $0) } ?? "n/a",
-                pending.watchFreshened ? "Y" : "N"))
+                drift.map { String(format: "%+.3f", $0) } ?? "n/a"))
 
             switch pending.flavor {
             case .handback:
@@ -252,7 +221,7 @@ extension PodLoanPhoneController {
         } else if pending.flavor == .forceReclaim {
             // A pump that gives no delivered total: nothing to check against.
             handbackDiag(pending.epoch, "** force-reclaim round-trip landed but no odometer — session UNVERIFIED **")
-            deps.issueUrgentNotice("Watch Session Unverified", Self.sessionUnverifiedBody)
+            deps.issueUrgentNotice(Self.sessionUnverifiedTitle, Self.sessionUnverifiedBody)
         } else {
             // A clean hand-back keeps its committed records; nothing opens.
             handbackDiag(pending.epoch, "reconcile[AUTHORITATIVE]: pod reachable but reported no odometer — keeping the provisional line")

@@ -226,15 +226,10 @@ final class PodLoanWatchController {
     /// Takeover timings and the glance's bar are measured from it.
     var attemptStartedAt: Date?
 
-    /// When the last ladder read came back, so the gap to the next one can be measured.
-    var lastTakeoverReadAt: Date?
-
     /// Separate objects for the event-driven retry and the backstop: a cancelled work item
     /// performs nothing.
     var takeoverRetryAction: (() -> Void)?
     var takeoverBackstop: DispatchWorkItem?
-    /// A large gap means the app was suspended, not that the pod was unreachable.
-    var takeoverMaxReadGap: TimeInterval = 0
 
     /// Feeds the wedge check and the drain's ceiling.
     var handbackResendCount = 0
@@ -285,6 +280,8 @@ final class PodLoanWatchController {
     /// Seams: is the app on screen right now, and the tap itself.
     var isWatchAppActive: () -> Bool = { RuntimeStateLog.appStateName() == "active" }
     var playTakeoverNudge: () -> Void = { WKInterfaceDevice.current().play(.notification) }
+    /// A Start or End the watch refused on the spot: the looper feels it as well as reads it.
+    var playRefusal: () -> Void = { DispatchQueue.main.async { WKInterfaceDevice.current().play(.failure) } }
 
     /// From persisted state alone: resume (rebuilt later in `resumeIfNeeded`), drain, or idle.
     init(loopManager: WatchLoopManager, journal: LoanEventJournal = LoanEventJournal(),
@@ -321,7 +318,7 @@ final class PodLoanWatchController {
             case .requested, .takingOver:
                 // A start that never finished: tell the phone, stay startable.
                 pendingInterruptedTakeoverEpoch = _persisted.epoch
-                lastIdleNote = NSLocalizedString("Sport Mode start was interrupted. Tap Start to try again.", comment: "Glance: start interrupted by relaunch")
+                lastIdleNote = NSLocalizedString("Sport Mode start was interrupted. Your iPhone still has the pod. Tap Start to try again.", comment: "Glance: start interrupted by relaunch")
                 _persisted.phase = .idle
                 _persisted.epoch = nil
             case .active, .handingBack, .revoked, .recoveredDrain:
@@ -336,6 +333,10 @@ final class PodLoanWatchController {
 
     /// Saved pump state handed from `init` to `resumeIfNeeded`, which does the rebuild.
     var pendingResumeState: PumpManager.RawStateValue?
+
+    /// The looper cancelled a Start at the offline offer; a grant for it starts nothing. Cleared by
+    /// the next Start.
+    var startCancelled = false
 
     /// Serialized with timers and the pump's callbacks.
     func handleIncoming(userInfo: [String: Any], channel: LoanTransportChannel) {
@@ -392,6 +393,7 @@ final class PodLoanWatchController {
             if phase == .requested || phase == .idle || phase == .recoveredDrain {
                 returnToRestingPhase()
                 lastIdleNote = denied.reason
+                playRefusal()
                 notifyUI()
             }
             SportLog.event("loan", "DENIED by phone — \(denied.reason)")
@@ -435,7 +437,8 @@ final class PodLoanWatchController {
             Task { await loopManager.retractStandingAlerts(managerIdentifier: pumpIdentifier) }
         }
         pumpControl?.releaseControl()
-        pumpManager?.pumpManagerDelegate = nil
+        // Still the driver's delegate: the release lets a command under way finish, and its report
+        // must find one (the driver treats none as impossible). The callbacks ignore a released driver.
         pumpManager = nil
         pumpStateStore.wrappedValue = nil
         // The odometer stays until close: the drain's offers still measure from it.

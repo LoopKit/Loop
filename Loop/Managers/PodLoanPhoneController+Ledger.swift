@@ -251,7 +251,6 @@ extension PodLoanPhoneController {
         let loanMinutes: Double
         let cycles: Int
         let watchLatest: Double?
-        let watchFreshened: Bool
         var flavor: Flavor = .handback
     }
 
@@ -266,14 +265,14 @@ extension PodLoanPhoneController {
                 residual, Self.unexplainedInsulinBand))
 
             deps.issueUrgentNotice("Unexplained Insulin",
-                             String(format: "The pod delivered %.2f U more than the watch session's records account for. It is not counted in insulin on board. Automatic dosing continues.", residual))
+                             String(format: "Unexpected: the pod delivered %.2f U more than the watch recorded. It isn't counted in insulin on board. Consider reporting it with a Loop Report.", residual))
         } else if residual < -Self.warnNegativeResidual {
             handbackDiag(epoch, String(format:
                 "** WARN — residual %+.3f U beyond -%.2f: records claim more delivery than the pod made (phantom IOB). Still looping — this direction under-doses and decays out. **",
                 residual, Self.warnNegativeResidual))
 
             deps.issueUrgentNotice("Insulin On Board May Be Overstated",
-                             String(format: "The watch session's records account for %.2f U more than the pod delivered. Automatic dosing continues; expect it to run cautious until this clears.", -residual))
+                             String(format: "Unexpected: the watch recorded %.2f U more than the pod delivered. Loop may dose cautiously for a few hours. Consider reporting it with a Loop Report.", -residual))
         }
     }
 
@@ -286,7 +285,7 @@ extension PodLoanPhoneController {
                 residual, Self.unexplainedInsulinBand))
 
             bookEstimate(units: residual, window: window, epoch: epoch,
-                         notice: String(format: "The watch's records haven't arrived: %@", Self.bookedSentences(residual)))
+                         notice: String(format: "%.2f U booked as a bolus because the watch's records haven't arrived. Its records replace this when the watch is back.", residual))
         } else if residual < -Self.warnNegativeResidual {
             handbackDiag(epoch, String(format:
                 "** WARN — force-reclaim residual %+.3f U beyond -%.2f: records claim more than the pod delivered (phantom IOB). Looping resumes — this direction under-doses and decays out. **",
@@ -312,7 +311,7 @@ extension PodLoanPhoneController {
                 "** WARN — over the last %.0f min: %+.3f U the phone's records cannot explain (Sport Mode started away from the phone?). Still looping. **",
                 gapMinutes, residual))
             bookEstimate(units: residual, window: window, epoch: epoch,
-                         notice: String(format: "Sport Mode probably started away from the phone: %@", Self.bookedSentences(residual)),
+                         notice: String(format: "%.2f U booked as a bolus: insulin the iPhone didn't record, probably from Sport Mode started on the watch. The watch's records replace it when it's back.", residual),
                          completion: completion)
         } else if residual < -Self.warnNegativeResidual {
             handbackDiag(epoch, String(format:
@@ -327,12 +326,8 @@ extension PodLoanPhoneController {
     static let estimatedTitle = "Insulin Estimated After Sport Mode"
     static let overstatedTitle = "Insulin On Board May Be Overstated"
 
-    static func bookedSentences(_ units: Double) -> String {
-        String(format: "%.2f U booked as a bolus. When the watch is back, its records update and IOB is exact.", units)
-    }
-
     static func overstatedBody(_ units: Double) -> String {
-        String(format: "The watch's records haven't arrived: insulin on board may be %.2f U high. Dosing runs cautious until the watch is back.", units)
+        String(format: "Insulin on board may be %.2f U high until the watch's records arrive. Loop will dose cautiously meanwhile.", units)
     }
 
     // MARK: - Estimates
@@ -399,9 +394,9 @@ extension PodLoanPhoneController {
                             doses.count, bolusUnits, rateCount, carbs, booking.units))
 
                         self.rearmPlaceholderReminders()
-                        self.deps.issueNotice("Watch Records Recovered",
-                                        String(format: "The watch is back. Its records (%d doses, %d carbs) replaced the estimated %.2f U bolus — your IOB and COB now reflect actual timing.",
-                                               doses.count, carbs, booking.units))
+                        self.deps.issueNotice("Watch Records Recovered", carbs > 0
+                            ? String(format: "The watch's records replaced the estimated %.2f U. Loop now doses with the watch's insulin and carbs.", booking.units)
+                            : String(format: "The watch's records replaced the estimated %.2f U. Insulin on board is exact again.", booking.units))
                     } else {
                         self.updateState {
                             for i in $0.ledger.bookings.indices where $0.ledger.bookings[i].sync == booking.sync {

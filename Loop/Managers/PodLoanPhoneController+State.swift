@@ -152,6 +152,9 @@ extension PodLoanPhoneController {
     /// The phase's side effects, for a group write that changed it.
     func stateDidChange(from oldValue: State) {
         guard oldValue != state else { return }
+        // A question is about the situation it was asked in: a new state ends it, so the next loan
+        // can be asked at once.
+        watchAskedAt = nil
         if oldValue != .owner, state == .owner {
             beginReclaimSettleWindow()
         }

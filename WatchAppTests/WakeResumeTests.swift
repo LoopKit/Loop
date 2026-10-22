@@ -157,6 +157,27 @@ final class WakeResumeTests: XCTestCase {
         XCTAssertTrue(failures.first?.contains("last revoke") == true, "refused for the revoke, got: \(failures)")
     }
 
+    /// The stop rides two channels; the later copy of one already acted on changes nothing: no second
+    /// teardown, no second offer.
+    func testASecondCopyOfTheStopChangesNothing() async throws {
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        var offers = 0
+        c.send = { dict in
+            if case .handbackOffer? = try? LoanMessage.decode(fromTransport: dict) { offers += 1 }
+        }
+        c.handleIncoming(userInfo: try LoanMessage.revoke(Revoke(epoch: 7)).transportDictionary(), channel: .urgent)
+        c.queue.sync { }
+        c.queue.sync { }
+        XCTAssertEqual(c.phase, .revoked)
+        XCTAssertEqual(offers, 1, "the stop is answered with the final offer")
+
+        c.handleIncoming(userInfo: try LoanMessage.revoke(Revoke(epoch: 7)).transportDictionary(), channel: .queued)
+        c.queue.sync { }
+        c.queue.sync { }
+        XCTAssertEqual(c.phase, .revoked)
+        XCTAssertEqual(offers, 1, "the queued copy is dropped")
+    }
+
     func testActiveLoanWithSavedPodStateResumes() async {
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         XCTAssertEqual(c.phase, .active, "an active loan with saved pod state resumes — not drained")
@@ -309,7 +330,7 @@ final class WakeResumeTests: XCTestCase {
         c.beginHandback()
         c.queue.sync { }
         XCTAssertEqual(sent, 1, "the interim offer went out")
-        let reason = "iPhone Bluetooth is off — still running"
+        let reason = "The watch is still looping. To end, turn on iPhone Bluetooth and tap End again."
         c.handleIncoming(userInfo: try LoanMessage.denied(LoanDenied(reason: reason)).transportDictionary(), channel: .urgent)
         c.queue.sync { }
         XCTAssertEqual(c.phase, .active, "the loan continues")

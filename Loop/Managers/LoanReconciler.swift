@@ -47,9 +47,10 @@ enum LoanReconciler {
         /// The caller drops any record whose end precedes its start.
         var doses: [DoseEntry] = []
 
-        /// The still-running rate record on an interim drain: acked but not committed, so it lands
-        /// finished at the end.
-        var openEventID: UUID? = nil
+        /// On an interim drain, the records not finished yet: the still-running rate record and any
+        /// bolus still being given. Acked but not committed, so each lands finished later. Loop's
+        /// dose store takes a bolus only once it has finished, as stock's drivers report one.
+        var openEventIDs: Set<UUID> = []
 
         /// Each under its journal event's ID as its sync identifier, the identity the watch stored it under.
         var carbs: [NewCarbEntry] = []
@@ -73,22 +74,29 @@ enum LoanReconciler {
         var outcome = Outcome()
         var events = input.events
 
-        // The open rate record: the latest temp or suspend running past the stamp.
-        let openEventID: UUID? = input.isFinalHandback ? nil : events
-            .filter { e in
-                switch e.record.kind {
-                case .tempBasal, .suspend:
-                    return (e.record.endDate ?? e.record.startDate) > input.loanEnd
-                default:
-                    return false
+        // The open records: the latest temp or suspend running past the stamp, and every bolus
+        // still being given at it.
+        var openEventIDs: Set<UUID> = []
+        if !input.isFinalHandback {
+            let openRate = events
+                .filter { e in
+                    switch e.record.kind {
+                    case .tempBasal, .suspend:
+                        return (e.record.endDate ?? e.record.startDate) > input.loanEnd
+                    default:
+                        return false
+                    }
                 }
-            }
-            .max(by: { $0.record.startDate < $1.record.startDate })?.id
-        outcome.openEventID = openEventID
+                .max(by: { $0.record.startDate < $1.record.startDate })?.id
+            openEventIDs = Set(events.filter { $0.record.kind == .bolus && ($0.record.endDate ?? $0.record.startDate) > input.loanEnd }.map(\.id))
+            if let openRate { openEventIDs.insert(openRate) }
+        }
+        outcome.openEventIDs = openEventIDs
 
         for event in events {
             switch event.record.kind {
             case .bolus:
+                if openEventIDs.contains(event.id) { continue }
                 if let units = event.record.amount {
                     outcome.doses.append(DoseEntry(
                         type: .bolus,
@@ -101,7 +109,7 @@ enum LoanReconciler {
                 }
             case .tempBasal, .suspend:
 
-                if event.id == openEventID { continue }
+                if openEventIDs.contains(event.id) { continue }
                 if let rate = event.record.unitsPerHour, let end = event.record.endDate {
                     // A final drain cuts anything still running at the hand-back.
                     let clampedEnd = input.isFinalHandback ? Swift.min(end, input.loanEnd) : end

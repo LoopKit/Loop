@@ -294,6 +294,12 @@ public struct DoseRecordBatch: Codable, Equatable {
         self.odometer = odometer
         self.sentAt = sentAt
     }
+
+    /// The latest the loan could have started: nothing is logged or sent before a loan starts. What the
+    /// phone judges a claim by (control row 19); nil when the batch is empty and carries no send time.
+    public var startedNoLaterThan: Date? {
+        (events.map(\.loggedAt) + [sentAt].compactMap { $0 }).min()
+    }
 }
 
 /// The watch offering the pod back; resent until acked, and harmless to receive twice.
@@ -442,5 +448,16 @@ extension SharedDeviceConfiguration {
         let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil)
         guard let raw = plist as? RawValue else { return nil }
         self.init(rawValue: raw)
+    }
+}
+
+extension PumpManagerStatus.BolusState {
+    /// This pump's own bolus as the bolus rule sees it: being started, given or cancelled.
+    public var underWay: LoanControl.BolusUnderWay? {
+        switch self {
+        case .noBolus: return nil
+        case .inProgress(let dose): return LoanControl.BolusUnderWay(endsAt: dose.endDate)
+        case .initiating, .canceling: return LoanControl.BolusUnderWay(endsAt: nil)
+        }
     }
 }

@@ -158,7 +158,7 @@ final class HandbackDrainStateTests: XCTestCase {
         // The give-up check lives in the resend timer, not in the send. Firing the work item
         // inline is a jump past its deadline, on the queue it would really run on.
         c.scheduler = { _, _, work in work.perform() }
-        c.sendHandbackOffer(freshened: false, recovered: true)
+        c.sendHandbackOffer(recovered: true)
         c.queue.sync { }
 
         c.queue.sync {

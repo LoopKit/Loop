@@ -147,7 +147,7 @@ final class WristBolusFailureWordingTests: XCTestCase {
     func testAnUncertainDeliveryKeepsTheUnconfirmedWording() {
         let content = CarbAndBolusFlowViewModel.bolusFailureContent(units: 2, carbGrams: 30, error: PumpManagerError.uncertainDelivery)
         XCTAssertTrue(content.title.contains("Unconfirmed"), "got \(content.title)")
-        XCTAssertTrue(content.body.contains("30 g was saved"), "got \(content.body)")
+        XCTAssertTrue(content.body.contains("30 g saved"), "got \(content.body)")
     }
 
     func testAnyOtherPumpErrorIsWordedAsStockWordsIt() {
