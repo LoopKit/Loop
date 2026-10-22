@@ -305,6 +305,12 @@
             "value" : "Appen bruker NFC til å koble seg sammen med diabetesenheter."
           }
         },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De app gebruikt NFC om te koppelen met diabetesapparaten."
+          }
+        },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",

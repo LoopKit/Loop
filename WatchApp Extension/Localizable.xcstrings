@@ -488,7 +488,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Actieve Koolhydraten"
+            "value" : "Actieve koolhydraten"
           }
         },
         "pl" : {
@@ -613,7 +613,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Actieve Insuline"
+            "value" : "Actieve insuline"
           }
         },
         "pl" : {
@@ -732,13 +732,13 @@
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Legg til karbohydrater"
+            "value" : "Legg inn karbohydrater"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kh. Inv. Toevoegen"
+            "value" : "Koolhydraten toevoegen"
           }
         },
         "pl" : {
@@ -913,6 +913,12 @@
             "state" : "translated",
             "value" : "Bolus"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大剂量"
+          }
         }
       }
     },
@@ -982,7 +988,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bolus Mislukt"
+            "value" : "Bolus mislukt"
           }
         },
         "pl" : {
@@ -1089,7 +1095,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aanbevolen Bolus Bijgewerkt"
+            "value" : "Bolusadvies bijgewerkt"
           }
         },
         "pl" : {
@@ -1196,7 +1202,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ga Verder"
+            "value" : "Ga verder"
           }
         },
         "pl" : {
@@ -1367,6 +1373,12 @@
           }
         },
         "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dB"
+          }
+        },
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "dB"
@@ -1817,6 +1829,12 @@
             "state" : "translated",
             "value" : "iPhone'unuzun yakında olduğundan emin olun ve tekrar deneyin."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请确保您的 iPhone 在附近，然后重试。"
+          }
         }
       }
     },
@@ -2136,7 +2154,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Netto Basaalsnelheid"
+            "value" : "Netto basaalstand"
           }
         },
         "pl" : {
@@ -2287,6 +2305,12 @@
             "state" : "translated",
             "value" : "Kapalı"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
+          }
         }
       }
     },
@@ -2361,7 +2385,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ok"
+            "value" : "OK"
           }
         },
         "pl" : {
@@ -2965,6 +2989,12 @@
             "state" : "translated",
             "value" : "ön ayar"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预设"
+          }
         }
       }
     },
@@ -3300,6 +3330,12 @@
             "state" : "translated",
             "value" : "Önerilen: %@ Ü"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "推荐: %@ 单位"
+          }
         }
       }
     },
@@ -3382,6 +3418,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Önerilen: Hesaplanıyor..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "REC：正在计算……"
           }
         }
       }
@@ -3678,7 +3720,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opslaan & Bolussen"
+            "value" : "Opslaan & bolussen"
           }
         },
         "pl" : {
@@ -3785,7 +3827,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versturen Mislukt"
+            "value" : "Versturen mislukt"
           }
         },
         "pl" : {
@@ -4043,6 +4085,12 @@
             "state" : "translated",
             "value" : "U"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "U"
+          }
         }
       }
     },
@@ -4244,6 +4292,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iPhone'a Ulaşılamıyor"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法连接 iPhone"
           }
         }
       }
