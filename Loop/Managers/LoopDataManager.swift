@@ -852,13 +852,35 @@ final class LoopDataManager: ObservableObject {
 
         let now = data.predictionStart
         let midnight = Calendar.current.startOfDay(for: now)
-
-        let annotatedDoses = data.doses.annotated(with: data.basal, fillBasalGaps: true)
-        let trimmed = annotatedDoses.map { $0.trimmed(from: midnight, to: now)}
+        let history = InsulinDeliveryHistory(doses: data.doses, scheduledBasal: data.basal, coverageStart: midnight, end: now)
 
         return InsulinValue(
             startDate: midnight,
-            value: trimmed.reduce(0.0) { $0 + $1.volume }
+            value: history.totals(from: midnight, to: now).total
+        )
+    }
+
+    /// Delivery history from midnight `days` days ago until now.
+    func insulinDeliveryHistory(days: Int) async throws -> InsulinDeliveryHistory {
+        let calendar = Calendar.current
+        let end = now
+        let start = calendar.date(byAdding: .day, value: -days, to: calendar.startOfDay(for: end)) ?? end.addingTimeInterval(.days(-Double(days)))
+
+        let doses = try await doseStore.getNormalizedDoseEntries(start: start, end: nil)
+        let earliestDose = doses.map(\.startDate).min()
+        let basalStart = min(start, earliestDose ?? start)
+
+        var basal = try await settingsProvider.getBasalHistory(startDate: basalStart, endDate: end)
+        let basalHistoryStart = basal.first?.startDate ?? end
+        if basalHistoryStart > basalStart, let schedule = settingsProvider.settings.basalRateSchedule {
+            basal = schedule.truncatingBetween(start: basalStart, end: basalHistoryStart) + basal
+        }
+
+        return InsulinDeliveryHistory(
+            doses: doses.map { $0.simpleDose(with: insulinModel(for: $0.insulinType)) },
+            scheduledBasal: basal,
+            coverageStart: max(start, earliestDose ?? end),
+            end: end
         )
     }
 

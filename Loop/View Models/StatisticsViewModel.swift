@@ -35,22 +35,48 @@ final class StatisticsViewModel: ObservableObject {
     /// Days of glucose actually available (bounded by data accumulated and the cache).
     @Published private(set) var availableDays: Double = 0
 
+    /// Complete days of insulin delivery within the selected range, oldest first.
+    @Published private(set) var insulinDays: [DailyInsulinDelivery] = []
+    @Published private(set) var insulinToday: DailyInsulinDelivery?
+    @Published private(set) var typicalInsulinByNow: TypicalInsulinDelivery?
+
     private var allSamples: [StoredGlucoseSample] = []
+    private var allInsulinDays: [DailyInsulinDelivery] = []
     private let glucoseStore: GlucoseStoreProtocol
+    private let insulinDeliveryHistory: ((Int) async throws -> InsulinDeliveryHistory)?
     private let calendar: Calendar
     private let now: () -> Date
 
     /// Configured local cache duration (how far back glucose is retained on device).
     let cacheDuration: TimeInterval
+    let scheduledBasalTotal: Double?
 
     init(glucoseStore: GlucoseStoreProtocol,
+         insulinDeliveryHistory: ((Int) async throws -> InsulinDeliveryHistory)? = nil,
+         scheduledBasalTotal: Double? = nil,
          cacheDuration: TimeInterval = Bundle.main.localCacheDuration,
          calendar: Calendar = .current,
          now: @escaping () -> Date = { Date() }) {
         self.glucoseStore = glucoseStore
+        self.insulinDeliveryHistory = insulinDeliveryHistory
+        self.scheduledBasalTotal = scheduledBasalTotal
         self.cacheDuration = cacheDuration
         self.calendar = calendar
         self.now = now
+    }
+
+    var showsInsulin: Bool { insulinDeliveryHistory != nil }
+
+    /// Mean of the complete days in the selected range.
+    var averageInsulinDay: InsulinDeliveryTotals? {
+        guard !insulinDays.isEmpty else { return nil }
+        let count = Double(insulinDays.count)
+        let sum = insulinDays.reduce(into: InsulinDeliveryTotals()) { sum, day in
+            sum.basal += day.totals.basal
+            sum.automaticBolus += day.totals.automaticBolus
+            sum.manualBolus += day.totals.manualBolus
+        }
+        return InsulinDeliveryTotals(basal: sum.basal / count, automaticBolus: sum.automaticBolus / count, manualBolus: sum.manualBolus / count)
     }
 
     var cacheDurationDays: Int { Int((cacheDuration / 86400).rounded()) }
@@ -86,6 +112,13 @@ final class StatisticsViewModel: ObservableObject {
             allSamples = []
         }
         availableDays = allSamples.first.map { end.timeIntervalSince($0.startDate) / 86400 } ?? 0
+
+        if let insulinDeliveryHistory, let history = try? await insulinDeliveryHistory(cacheDurationDays) {
+            let days = history.dailyTotals(calendar: calendar)
+            allInsulinDays = days.filter(\.isComplete)
+            insulinToday = days.last(where: { !$0.isComplete })
+            typicalInsulinByNow = history.typicalDelivery(by: history.end, calendar: calendar)
+        }
         recompute()
     }
 
@@ -96,5 +129,7 @@ final class StatisticsViewModel: ObservableObject {
         let start = calendar.date(byAdding: .day, value: -selectedRange.days, to: end)
             ?? end.addingTimeInterval(-Double(selectedRange.days) * 24 * 60 * 60)
         statistics = GlucoseStatistics(samples: allSamples, start: start, end: end, calendar: calendar)
+        let firstDay = calendar.date(byAdding: .day, value: -selectedRange.days, to: calendar.startOfDay(for: end)) ?? start
+        insulinDays = allInsulinDays.filter { $0.start >= firstDay }
     }
 }

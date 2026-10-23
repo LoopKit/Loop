@@ -18,8 +18,8 @@ struct StatisticsView: View {
     @StateObject private var viewModel: StatisticsViewModel
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
 
-    init(glucoseStore: GlucoseStoreProtocol) {
-        _viewModel = StateObject(wrappedValue: StatisticsViewModel(glucoseStore: glucoseStore))
+    init(glucoseStore: GlucoseStoreProtocol, insulinDeliveryHistory: ((Int) async throws -> InsulinDeliveryHistory)? = nil, scheduledBasalTotal: Double? = nil) {
+        _viewModel = StateObject(wrappedValue: StatisticsViewModel(glucoseStore: glucoseStore, insulinDeliveryHistory: insulinDeliveryHistory, scheduledBasalTotal: scheduledBasalTotal))
     }
 
     var body: some View {
@@ -61,6 +61,10 @@ struct StatisticsView: View {
                     Text(NSLocalizedString("No glucose data for this period.", comment: "Statistics empty state"))
                         .foregroundColor(.secondary)
                 }
+            }
+
+            if viewModel.showsInsulin {
+                insulinSection
             }
         }
         .navigationTitle(Text(NSLocalizedString("Statistics", comment: "Statistics screen title")))
@@ -119,6 +123,58 @@ struct StatisticsView: View {
         Section(header: Text(NSLocalizedString("Time in Range", comment: "Time-in-range section header"))) {
             TimeInRangeBar(timeInRange: stats.timeInRange)
                 .padding(.vertical, 8)
+        }
+    }
+
+    private func units(_ value: Double) -> String {
+        String(format: NSLocalizedString("%@ U", comment: "Insulin amount in units (1: number)"), value.formatted(.number.precision(.fractionLength(1))))
+    }
+
+    private func percent(_ part: Double, of total: Double) -> String {
+        total > 0 ? (part / total).formatted(.percent.precision(.fractionLength(0))) : "–"
+    }
+
+    private var todayCaption: String {
+        guard let typical = viewModel.typicalInsulinByNow, let today = viewModel.insulinToday else {
+            return NSLocalizedString("Since midnight", comment: "Caption for insulin delivered today when there is no usual amount to compare")
+        }
+        return String(format: NSLocalizedString("Usually %1$@ by %2$@", comment: "Caption comparing today's insulin with the usual amount by this time (1: units, 2: time of day)"),
+                      units(typical.median), today.end.formatted(date: .omitted, time: .shortened))
+    }
+
+    private var insulinSection: some View {
+        let average = viewModel.averageInsulinDay
+        return Section(header: Text(NSLocalizedString("Daily Insulin", comment: "Daily insulin section header")),
+                       footer: Text(NSLocalizedString("Each bar is one calendar day; the dashed line is the average. Today isn't included until the day is over. Usual amounts are the median of the last 14 days at the same time of day.", comment: "Daily insulin section explanation"))) {
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                metric(NSLocalizedString("Average", comment: "Average daily insulin metric title"),
+                       value: average.map { units($0.total) },
+                       goal: String(format: NSLocalizedString("Per day, over %d days", comment: "Caption for average daily insulin (1: number of days)"), viewModel.insulinDays.count))
+                metric(NSLocalizedString("Today", comment: "Insulin delivered today metric title"),
+                       value: viewModel.insulinToday.map { units($0.totals.total) },
+                       goal: todayCaption)
+                metric(NSLocalizedString("Basal", comment: "Average daily basal metric title"),
+                       value: average.map { units($0.basal) },
+                       goal: average.map { average in
+                           if let scheduled = viewModel.scheduledBasalTotal {
+                               return String(format: NSLocalizedString("%1$@ · scheduled %2$@", comment: "Caption for average daily basal (1: percent of total, 2: scheduled basal units)"), percent(average.basal, of: average.total), units(scheduled))
+                           }
+                           return percent(average.basal, of: average.total)
+                       } ?? "–")
+                metric(NSLocalizedString("Bolus", comment: "Average daily bolus metric title"),
+                       value: average.map { units($0.bolus) },
+                       goal: average.map { average in
+                           String(format: NSLocalizedString("%1$@ · %2$@ automatic", comment: "Caption for average daily bolus (1: percent of total, 2: automatic bolus units)"), percent(average.bolus, of: average.total), units(average.automaticBolus))
+                       } ?? "–")
+            }
+            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+            .listRowBackground(Color.clear)
+
+            if !viewModel.insulinDays.isEmpty {
+                DailyInsulinChartView(days: viewModel.insulinDays, average: average?.total)
+                    .frame(height: 220)
+                    .padding(.vertical, 8)
+            }
         }
     }
 

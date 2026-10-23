@@ -328,7 +328,11 @@ extension SettingsView {
     private var statisticsSection: some View {
         if let glucoseStore = viewModel.deviceManager?.glucoseStore {
             Section {
-                NavigationLink(destination: StatisticsView(glucoseStore: glucoseStore)) {
+                NavigationLink(destination: StatisticsView(
+                    glucoseStore: glucoseStore,
+                    insulinDeliveryHistory: viewModel.insulinDeliveryHistory,
+                    scheduledBasalTotal: viewModel.therapySettings().basalRateSchedule?.total()
+                )) {
                     LargeButton(
                         action: {},
                         includeArrow: false,
@@ -337,7 +341,7 @@ extension SettingsView {
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 30),
                         label: NSLocalizedString("Statistics", comment: "Statistics settings button text"),
-                        descriptiveText: NSLocalizedString("Glucose overview and ambulatory glucose profile", comment: "Statistics settings descriptive text")
+                        descriptiveText: NSLocalizedString("Glucose overview, ambulatory glucose profile and daily insulin", comment: "Statistics settings descriptive text")
                     )
                     .accessibilityIdentifier("settingsViewStatistics")
                 }
