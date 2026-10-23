@@ -25,17 +25,23 @@ struct InsulinDeliveryLog: View {
         self.onEnterManualDose = onEnterManualDose
     }
     
-    private func totalInsulinDeliveredLabel(from total: LoopQuantity) -> some View {
+    private func totalInsulinDeliveredLabel(from total: LoopQuantity, typical: DatedQuantity?) -> some View {
         LabeledContent {
             Text(viewModel.totalDeliveredFormatter.string(from: total) ?? "Unknown")
                 .foregroundStyle(.secondary)
         } label: {
             VStack(alignment: .leading, spacing: 0) {
                 Text("Total Insulin Delivery")
-                
+
                 Text("since \(Calendar.current.startOfDay(for: Date()).formatted(date: .omitted, time: .shortened))")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+
+                if let typical, let amount = viewModel.totalDeliveredFormatter.string(from: typical.quantity) {
+                    Text("usually \(amount) by \(typical.date.formatted(date: .omitted, time: .shortened))", comment: "Usual insulin delivered by this time of day (1: units, 2: time of day)")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
     }
@@ -148,7 +154,7 @@ struct InsulinDeliveryLog: View {
                 }
                 
                 Section {
-                    totalInsulinDeliveredLabel(from: data.totalInsulinDelivered)
+                    totalInsulinDeliveredLabel(from: data.totalInsulinDelivered, typical: data.typicalInsulinDelivered)
                 }
             }
             

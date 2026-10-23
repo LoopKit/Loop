@@ -35,7 +35,7 @@ struct PresetsView: View {
                 PresetConfirmationView(preset: loopManager.selectablePresets.first {$0.id == override.presetId})
             case .presetsList:
                 NavigationStack(path: $path) {
-                    PresetListView(presets: loopManager.selectablePresets, path: $path)
+                    PresetListView(presets: loopManager.listedPresets, path: $path)
                 }
             }
         }

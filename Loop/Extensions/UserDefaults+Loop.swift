@@ -19,6 +19,7 @@ extension UserDefaults {
         case inFlightAutomaticDose = "com.loopkit.Loop.inFlightAutomaticDose"
         case favoriteFoods = "com.loopkit.Loop.favoriteFoods"
         case automationHistory = "com.loopkit.Loop.automationHistory"
+        case showsActivityPresets = "com.loopkit.Loop.showsActivityPresets"
     }
 
     var legacyPumpManagerRawValue: PumpManager.RawValue? {
@@ -128,6 +129,15 @@ extension UserDefaults {
             } catch {
                 assertionFailure("Unable to encode automation history")
             }
+        }
+    }
+
+    var showsActivityPresets: Bool {
+        get {
+            object(forKey: Key.showsActivityPresets.rawValue) as? Bool ?? true
+        }
+        set {
+            set(newValue, forKey: Key.showsActivityPresets.rawValue)
         }
     }
 }
