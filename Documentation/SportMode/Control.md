@@ -129,17 +129,17 @@ screen, and the words. Stated once here:
 
 ## 5. The table
 
-One row per situation. The inputs describe the world and what each device can see; the result says what happens;
+One section per situation, after an index. The inputs describe the world and what each device can see; the result says what happens;
 the *why* gives the reasoning, briefly where nothing is in tension and at length where a judgement was made. A
 device that is dead shows *dead* in its cells. *Status*: **built**, **deliberate exception** (a principle set aside on
 purpose; the *why* says which), **accepted** (nothing can act; Loop without Sport Mode is the same). *Code* names
 where the row is decided: `+Name` is the extension file `PodLoanPhoneController+Name.swift` on the phone or
-`PodLoanWatchController+Name.swift` on the watch. Every row with an
-acting device is one case of `LoanControl.decide` (`LoopCore/PodLoan/LoanControl.swift`), in this table's order, with
-the row's reason as its comment, and one test in `LoopTests/LoanControlTests.swift`; a different ruling for a row is
-a change to that case and that test.
+`PodLoanWatchController+Name.swift` on the watch. Every situation with an
+acting device is one case of `LoanControl.decide` (`LoopCore/PodLoan/LoanControl.swift`), in this order, with
+the row's reason as its comment, and one test in `LoopTests/LoanControlTests.swift`; a different ruling for a situation
+is a change to that case and that test.
 
-Columns:
+Each situation lists:
 - **Control state:** pod held by · how it got the pod · loan (number, start) · took over on silence at · looper's
   latest tap.
 - **Physical configuration:** phone where / alive · watch where / alive.
@@ -148,33 +148,334 @@ Columns:
 - **Result:** query · answer · action · pod held by afterwards · time without looping · looper sees.
 - **Status · Code · Why.**
 
-| # | Pod held by | How it got the pod | Loan | Took over on silence at | Looper's latest tap | Phone | Watch | What changed | Phone believes | Phone: sensor | Phone: pod | Phone heard from the watch | Watch believes | Watch: sensor | Watch: pod | Watch heard from the phone | Query | Answer | Action | Held by afterwards | Time without looping | Looper sees | Status | Code | Why |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 Start, phone near | phone | resting state | none | none | Start on the watch, now | near, alive | on wrist, alive | Start tapped on the watch | it holds the pod | fresh | holding, reads | the Start request | the phone holds the pod | fresh | not touched | nothing yet | the request is the query (watch → phone) | a grant | phone releases the pod and holds its dosing; watch takes over (transfer G) | watch, by grant | seconds | watch: Sport Mode page; phone: banner "Sport Mode Active" | built | phone `+Grant`, watch `+Start` | The looper chose the watch and the phone is there to hand over: the ordinary case. |
-| 2 Start, phone away or dead | phone | resting state | none | none | Start on the watch, now | away, or dead | on wrist, alive | Start tapped on the watch | it holds the pod (as of when it left), or dead | none, or dead | out of reach, or dead | nothing | the phone holds the pod | fresh | not touched | nothing | the request (queued) | silence after 10 s | prompt "Start without it?"; on the tap, the watch starts from its stored copy and checks the pod's total first | watch, started without the phone | 10 s plus the tap | watch: on screen, the offer | built | watch `+Start`, `+Seize` | The looper asked for Sport Mode and the phone cannot grant it. Starting from the stored copy is entering a mode, which needs the looper's tap (rule 6), so the system offers it as the alternative to the refused Start (rule 7). The query's silence decides when to offer, not the reachability flag, which says only whether the phone's app can take a live message this second. |
-| 3 Phone dies, no loan | phone | resting state | none | none | any | dead | on wrist, alive | the phone dies | dead | dead | dead | dead | the phone holds the pod | fresh | not touched | nothing; the phone's loop goes stale | none | none | tell: nobody takes the pod; a pre-scheduled watch warning, pushed out by every word from the phone, fires after 25 min of silence, after the phone's own Loop Failure at 20 | nobody; the pod runs its schedule within 30 min | until the looper starts Sport Mode or charges the phone | watch · notification (time-sensitive) "Not Hearing From iPhone: your watch hasn't heard from your iPhone for 25 minutes, so it can't tell whether anything is looping. If the iPhone is off or not with you, open Loop on the watch to start Sport Mode." · on screen: the phone's loop ring (red after 16 min, as in Loop) and "Not hearing from iPhone" after 25 min | deliberate exception for control; the warning is built | `LoanControl` row 3; watch `NotHearingFromPhoneAlert` | Looping wins under rule 3, but taking the pod here would be entering Sport Mode without a tap, which rule 6 forbids, and the watch cannot tell a dead phone from one left at home. Following rule 3 would start Sport Mode every time the looper walked away from the phone. The cost is Loop's own: away from a working phone, nothing loops. Telling is what remains. The watch knows this state (no loan, no word from the phone), and it is easy to enter without choosing it (a forgotten phone), so it warns once. The phone talks with its loop cycles, so a phone that stops looping goes quiet too; its own pre-scheduled Loop Failure (20 min) reaches the watch when near, or through a cellular watch's relay, so the watch's comes after it, as the backup for a dead phone or a watch with no route to it. |
-| 4 Phone back, no loan | phone | resting state | none | none | any | near again, alive | any | the phone comes back into reach | it holds the pod | fresh | reads it | nothing | the phone holds the pod, or dead | — | — | — | none | — | carry on; the reading's check finds nothing to explain | phone | none beyond the time away | nothing | built | phone `+Ledger` | The resting state, resumed. |
-| 5 Insulin seen, no loan answers | phone | resting state | none, as far as the phone knows | none | any | near, alive | any | a reading shows the pod delivered more or less than the phone's records explain, beyond 0.20 U | it holds the pod | fresh | reading shows the difference | nothing | idle, or dead | — | — | the phone's query | phone → watch | silence, or "I hold nothing" | book (if more was delivered), keep looping, tell; record the time as "took over on silence" | phone | none | phone: notification "Insulin Estimated After Sport Mode: … booked as a bolus" (more delivered) or "Insulin On Board May Be Overstated" (less) | built | phone `+Ledger` `followAnotherControllersInsulin` | The phone already holds the pod, so silence keeps it there. A real loan answers (rows 17, 18); no answer means either a watch that started alone and died (row 18) or, without a loan, an uncertain-delivery bolus or a testing artifact. Booking covers all three conservatively. |
-| 6 Message from a closed loan | phone | any | the phone has ended loan n | any | any | near, alive | near, alive | a message arrives from the watch about loan n | it holds the pod | fresh | holding | a report, records or an offer for loan n | it holds loan n | fresh | trying | nothing | none | — | send the stop for loan n again (at most every 20 s) | phone | none | watch: "Sport Mode ended. Your iPhone has the pod" | built | phone `+Mirror` `resendRevokeForClosedSession` | The watch missed the stop; it gets it again. |
-| 7 End, phone near | watch | grant | n | none | End on the watch, now | near, alive | on wrist, alive | End tapped on the watch | the watch holds loan n | fresh | released | the hand-back offer | it holds loan n | fresh | holding | an acknowledgement | the offer is the query (watch → phone) | acknowledged | hand back (transfer H) | phone | seconds | watch: "returning records…", then the phone's page; phone: banner gone | built | watch `+Handback`, phone `+Records` | The looper's latest decision, and both devices are there to carry it out. |
-| 8 End, phone away | watch | grant | n | none | End on the watch, now | away, or dead | on wrist, alive | End tapped on the watch | the watch holds loan n, or dead | none, or dead | out of reach | nothing | it holds loan n | fresh | holding | nothing | the offer (queued) | silence after 10 s | refuse the End; the loan continues | watch | none | watch: on screen, not a notification: "iPhone isn't nearby, so the pod can't be handed back. Sport Mode keeps looping. To stop automatic dosing, open the loop on the watch." | built | watch `+Handback` | This refuses the looper's express intent, and the reason has to be honest. End names an action, giving the pod to the phone, which cannot be done without the phone. What the looper meant is one of two things the watch cannot tell apart: end Sport Mode (impossible here) or stop dosing (possible, by opening the loop). So the refusal says both. How the watch knows the phone is away: it sends the offer and waits, like every other query. The reachability flag reports only whether the phone's app can take a live message this second, and would refuse with the phone in the next room. An offer that lands late only stores records; nothing changes hands. |
-| 9 Take Back on the phone | watch | grant, or started alone and adopted | n | none | Take Back on the phone, now | near, alive | on wrist, alive or dead | Take Back tapped | the watch holds loan n | fresh | released | anything | it holds loan n, or dead | fresh, or dead | holding, or dead | the stop | none: a tap needs no query | — | take (reach the pod in 5 s, send the stop, check insulin; if the pod does not answer, refuse: transfer T) | phone | seconds | phone: banner gone; watch: "Sport Mode ended. Your iPhone has the pod" | built | phone `+Reclaim` | A tap is the looper's latest decision. |
-| 10 Watch dies, phone near | watch | grant | n | none | Start on the watch, earlier | near, alive | on wrist, dead | the watch dies | the watch holds loan n | fresh | released | nothing for more than a cycle | dead | dead | dead | dead | phone → watch, once the report is overdue | silence after 30 s | take; record the time as "took over on silence" | phone | 6–11 min, then 30 s | phone: notification "Watch Not Looping: this iPhone is taking the pod back; insulin the watch gave is counted" | built | phone `+Hold` | A live watch on the wrist, with the body in reach, answers within seconds. Silence means it is not looping, and looping conservatively is safer than not looping. The watch's first word would end a mistake. When it comes back: row 12. |
-| 11 Watch dies, phone away | watch | grant | n | none | Start on the watch, earlier | away, or dead | on wrist, dead | the watch dies | the watch holds loan n, or dead | none | out of reach | nothing | dead | dead | dead | dead | none: no device can see the body | — | nothing | nobody; the pod runs its schedule within 30 min | until a device is back (rows 12, 13, 18) | nothing | accepted | — | Nobody can act. Loop with a dead phone is the same. |
-| 12 Watch back, phone holds the pod | phone | took back by tap, or took over on silence | n (closed) | none, or when the phone took over | Start on the watch, earlier; or Take Back | near, alive | on wrist, back from dead | the watch comes back | it holds the pod | fresh | holding | "I hold loan n" (the watch's query) | it holds loan n, as of when it died | fresh | not touched | nothing at launch | watch → phone, once its link has started; live when the phone is reachable, and queued | the stop for loan n | stand aside, before any dose | phone | none | watch: "Checking with your iPhone…" while it asks, then "Sport Mode ended. Your iPhone has the pod" | built | watch `+Resume`, phone `+Mirror` | The watch was out of the conversation (rule 5); the phone holds the pod; the watch stays out and the looper starts again if wanted. The question waits for the watch's link to the phone to start: a message sent before that is lost. It goes by the live path when the phone is reachable, and queued as well; queued alone, the answer can take longer than the wait, and the watch would loop beside the phone until it arrived. The watch shows that it is checking, and builds nothing that can reach the pod until the check ends. |
-| 13 Watch back, nobody else holds the pod | watch | grant, or started alone | n | none | Start on the watch, earlier | away or dead; or near and still lending | on wrist, back from dead | the watch comes back | the watch holds loan n, or dead | — | released, or out of reach | "I hold loan n", or nothing | it holds loan n | fresh | not touched | nothing | watch → phone | silence (phone away), or nothing back (phone still lending) | carry on: the loop gets the pod; its first reading closes the window from the last reading before it died, booking what its records cannot explain | watch | 30 s plus the first reading | watch: "Checking with your iPhone…" for up to 30 s, then a note if anything was booked: "0.55 U the watch had no record of, counted as insulin on board" | built | watch `+Resume`, `+Seize` | The only device there carries on with what it was last told (rule 5). More than 6 hours off: no resume, records go home, "Sport Mode Ended" (rule 1). |
-| 14 Watch on a far charger, phone near | watch | grant | n | none | Start on the watch, earlier | near, alive | off wrist out of reach, alive | the watch goes on a charger out of the pod's reach | the watch holds loan n | fresh | released | nothing for more than a cycle (a cycle that cannot reach the pod sends no report) | it holds loan n | none | unreachable | the phone's query | phone → watch | "I hold loan n but cannot reach the pod" | take, as on silence; record the time | phone | 6–11 min, then 30 s | phone: notification "Watch Not Looping: this iPhone is taking the pod back…"; watch: on screen "Sport Mode ended. Your iPhone has the pod" | built | phone `+Hold`, watch `+Handback` (the answer) | Rule 2 protects a device that is looping. This one holds the loan and cannot act on it. It is alive and answers, so silence cannot be the signal; the answer carries the fact, and "cannot reach" is acted on like silence. The watch could give up the pod by itself after a failed cycle, but it cannot tell whether the phone is there to take it, and giving up with nobody there gains nothing. The phone knows it is near and can loop, so the phone decides. Rare: a charger by the bed is within reach. |
-| 15 Watch out of reach, phone away | watch | grant | n | none | Start on the watch, earlier | away, or dead | off wrist out of reach, alive | both away from the body | the watch holds loan n, or dead | none | out of reach | nothing | it holds loan n | none | unreachable | nothing | none | — | nothing; the watch's own "not looping" warnings | nobody | until a device is back | watch: notifications "Loop hasn't completed" at 20 and 40 min, 1 and 2 h, on a watch nobody is wearing | accepted | watch `LoopStallWatchdog` | Nobody can act; the warnings land on the watch, which is not worn. |
-| 16 Phone moves during a loan | watch | grant | n | none | Start on the watch, earlier | leaves, dies, or comes back | on wrist, alive | the phone changes place or state | the watch holds loan n | any | released | reports each cycle | it holds loan n | fresh | holding | anything | none | — | carry on | watch | none | phone: banner "Sport Mode Active" when looked at | built | — | The latest decision stands; nothing about the phone changes it. |
-| 17 Phone returns, watch started alone and alive | watch | started without the phone | n, started at T | none | Start Anyway on the watch, earlier | near again, alive | on wrist, alive | the phone comes back | it holds the pod (it was never told) | fresh | reads it: insulin it cannot explain | "I hold loan n" (on reach), or nothing yet | it holds loan n | fresh | holding | anything | phone → watch, on seeing the insulin; or none, if the watch's word came first | "I hold loan n" | stand aside, adopt the loan; from here rows 7–16 apply | watch | none | phone: banner "Sport Mode Active" (no prompt, no notification) | built | phone `+Mirror`, `+Ledger` | The latest decision was the looper's Start on the watch, made without the phone; the phone's return is not a decision, so it raises no prompt. |
-| 18 Phone returns, watch started alone and dead | watch (dead) | started without the phone | n, started at T | none | Start Anyway on the watch, earlier | near again, alive | on wrist, dead | the phone comes back | it holds the pod | fresh | insulin it cannot explain | nothing | dead | dead | dead | dead | phone → watch | silence | book what it cannot explain, keep looping, tell; record the time as "took over on silence" | phone | none (the phone was already looping when it read) | phone: notification "Insulin Estimated After Sport Mode: Sport Mode probably started away from the phone: … booked as a bolus" | built | phone `+Ledger` | The watch is out of the conversation; the phone holds the pod and keeps it. When the watch comes back: row 19. |
-| 19 Watch back after the phone took over | phone | took over on silence (row 18, or row 10/14) | n, started at T1 | T2, after T1 | Start Anyway on the watch, at T1 | near, alive | on wrist, back from dead | the watch comes back | it holds the pod | fresh | holding | "I hold loan n, started at T1" | it holds loan n, as of when it died | fresh | not touched | nothing at launch | watch → phone | the stop for loan n | stand aside, before any dose | phone | none | watch: "Checking with your iPhone…" while it asks, then "Sport Mode ended. Your iPhone has the pod" | built | phone `+Mirror` (`refusesRevivedLoan`) | Two rules meet. A watch's word normally makes the phone stand aside (rule 2), because a watch that says it holds a loan is usually looping it. But this watch was out of the conversation: the phone queried, got nothing, and has looped since. Its claim is about the time before it died. Standing aside would move control, silently, to a device the looper stopped using, reversing the takeover without a tap (rule 5). The phone tells the cases apart by one fact it holds, when it took over: a loan started before that is a revived claim, refused; one started after is a fresh Start the looper made while the phone was away, honoured (row 17). Accepted cost: if the watch was merely slow to answer, the takeover was a mistake and this keeps it; one tap restores the loan, and the watch says what happened. |
-| 20 Phone returns, watch started alone on a far charger | watch | started without the phone | n | none | Start Anyway on the watch, earlier | near again, alive | off wrist out of reach, alive | the phone comes back | it holds the pod | fresh | insulin it cannot explain | nothing | it holds loan n | none | unreachable | the phone's query | phone → watch | "I hold loan n but cannot reach the pod" | as on silence: book, keep looping, tell; record the time | phone | none | as row 18 | built | phone `+Ledger`, `+Hold` | As row 14: a holder that cannot reach the pod is treated as absent. When the watch is back in reach it queries and gets the stop (row 19). |
-| 21 End, phone away, watch started alone | watch | started without the phone | n | none | End on the watch, now | away, or dead | on wrist, alive | End tapped | the phone holds the pod (never told), or dead | — | out of reach | nothing | it holds loan n | fresh | holding | nothing | the offer (queued) | silence after 10 s | refuse, as row 8 | watch | none | as row 8 | built | watch `+Handback` | As row 8. |
-| 22 Watch started alone dies, phone away | watch (dead) | started without the phone | n | none | Start Anyway on the watch, earlier | away, or dead | on wrist, dead | the watch dies | the phone holds the pod (never told), or dead | none | out of reach | nothing | dead | dead | dead | dead | none | — | nothing | nobody | until rows 13 or 18 | nothing | accepted | — | Nobody can act. |
-| 23 Both dead | whoever held it | any | any | any | any | dead | dead | both die | dead | dead | dead | dead | dead | dead | dead | dead | none | — | nothing; the pod runs its schedule | nobody | until a device is back | nothing | accepted | — | Nothing to decide. |
-| 24 Start, phone near, pod silent (highly abnormal) | phone | resting state | none | none | Start on the watch, now | near, alive | on wrist, alive | Start tapped on the watch | it holds the pod | fresh | holding, no answer | the Start request | the phone holds the pod | fresh | not touched | nothing yet | the request is the query (watch → phone) | a refusal, within the watch's 10 s wait | phone keeps the pod; watch shows "The iPhone couldn't reach the pod and kept it. Try again." | phone | as long as the pod is silent, as in Loop without Sport Mode | watch: the refusal on screen; phone: Loop's own pod-communication warnings | not built: the phone waits on the pod past the 10 s, so the watch reads silence and offers row 2's start without the phone | phone `+Grant` | **Highly abnormal.** A device near the body reaches the pod unless the pod itself fails (a dead or faulted pod; in tests, the emulator unplugged). The phone is there, so its answer must arrive inside the wait: its silence would say it is away, and starting without it cannot help when the pod is the problem. |
-| 25 Start without the phone, pod silent (highly abnormal) | phone | resting state | none | none | Start Anyway on the watch, now | away, or dead | on wrist, alive | Start Anyway tapped | it holds the pod (as of when it left), or dead | none, or dead | out of reach, or dead | nothing | the phone holds the pod | fresh | trying, no answer | nothing | none: the pod read is the check | no pod answer within the 60 s takeover window | watch gives up and returns to rest | phone, in name only: nobody loops | until the pod answers or is replaced | watch: on screen "The pod didn't answer, so Sport Mode didn't start. Neither device is looping." | built | watch `+Start`, `+Seize` | **Highly abnormal.** The phone at home and a dead or faulted pod (watch Bluetooth off has its own warnings; a pocket that blocks radio is not realistic). In tests: the emulator unplugged with the phone's radios off. Nobody can loop, so the looper needs to learn that the pod is the problem. |
+| # | Situation | Held by afterwards | Status |
+|---|---|---|---|
+| 1 | [Start, phone near](#1-start-phone-near) | watch, by grant | built |
+| 2 | [Start, phone away or dead](#2-start-phone-away-or-dead) | watch, started without the phone | built |
+| 3 | [Phone dies, no loan](#3-phone-dies-no-loan) | nobody; the pod runs its schedule within 30 min | deliberate exception for control |
+| 4 | [Phone back, no loan](#4-phone-back-no-loan) | phone | built |
+| 5 | [Insulin seen, no loan answers](#5-insulin-seen-no-loan-answers) | phone | built |
+| 6 | [Message from a closed loan](#6-message-from-a-closed-loan) | phone | built |
+| 7 | [End, phone near](#7-end-phone-near) | phone | built |
+| 8 | [End, phone away](#8-end-phone-away) | watch | built |
+| 9 | [Take Back on the phone](#9-take-back-on-the-phone) | phone | built |
+| 10 | [Watch dies, phone near](#10-watch-dies-phone-near) | phone | built |
+| 11 | [Watch dies, phone away](#11-watch-dies-phone-away) | nobody; the pod runs its schedule within 30 min | accepted |
+| 12 | [Watch back, phone holds the pod](#12-watch-back-phone-holds-the-pod) | phone | built |
+| 13 | [Watch back, nobody else holds the pod](#13-watch-back-nobody-else-holds-the-pod) | watch | built |
+| 14 | [Watch on a far charger, phone near](#14-watch-on-a-far-charger-phone-near) | phone | built |
+| 15 | [Watch out of reach, phone away](#15-watch-out-of-reach-phone-away) | nobody | accepted |
+| 16 | [Phone moves during a loan](#16-phone-moves-during-a-loan) | watch | built |
+| 17 | [Phone returns, watch started alone and alive](#17-phone-returns-watch-started-alone-and-alive) | watch | built |
+| 18 | [Phone returns, watch started alone and dead](#18-phone-returns-watch-started-alone-and-dead) | phone | built |
+| 19 | [Watch back after the phone took over](#19-watch-back-after-the-phone-took-over) | phone | built |
+| 20 | [Phone returns, watch started alone on a far charger](#20-phone-returns-watch-started-alone-on-a-far-charger) | phone | built |
+| 21 | [End, phone away, watch started alone](#21-end-phone-away-watch-started-alone) | watch | built |
+| 22 | [Watch started alone dies, phone away](#22-watch-started-alone-dies-phone-away) | nobody | accepted |
+| 23 | [Both dead](#23-both-dead) | nobody | accepted |
+| 24 | [Start, phone near, pod silent (highly abnormal)](#24-start-phone-near-pod-silent-highly-abnormal) | phone | not built |
+| 25 | [Start without the phone, pod silent (highly abnormal)](#25-start-without-the-phone-pod-silent-highly-abnormal) | phone, in name only: nobody loops | built |
+
+### 1. Start, phone near
+
+- **Control state:** pod held by phone (resting state) · loan: none · took over on silence at: none · looper's latest tap: Start on the watch, now
+- **Where:** phone near, alive · watch on wrist, alive
+- **What changed:** Start tapped on the watch
+- **Phone sees:** believes it holds the pod · sensor: fresh · pod: holding, reads · heard from the watch: the Start request
+- **Watch sees:** believes the phone holds the pod · sensor: fresh · pod: not touched · heard from the phone: nothing yet
+- **Result:** query: the request is the query (watch → phone) → answer: a grant → action: phone releases the pod and holds its dosing; watch takes over (transfer G)
+- **Afterwards:** pod held by watch, by grant · time without looping: seconds · looper sees: watch: Sport Mode page; phone: banner "Sport Mode Active"
+- **Status:** built · **Code:** phone `+Grant`, watch `+Start`
+- **Why:** The looper chose the watch and the phone is there to hand over: the ordinary case.
+
+### 2. Start, phone away or dead
+
+- **Control state:** pod held by phone (resting state) · loan: none · took over on silence at: none · looper's latest tap: Start on the watch, now
+- **Where:** phone away, or dead · watch on wrist, alive
+- **What changed:** Start tapped on the watch
+- **Phone sees:** believes it holds the pod (as of when it left), or dead · sensor: none, or dead · pod: out of reach, or dead · heard from the watch: nothing
+- **Watch sees:** believes the phone holds the pod · sensor: fresh · pod: not touched · heard from the phone: nothing
+- **Result:** query: the request (queued) → answer: silence after 10 s → action: prompt "Start without it?"; on the tap, the watch starts from its stored copy and checks the pod's total first
+- **Afterwards:** pod held by watch, started without the phone · time without looping: 10 s plus the tap · looper sees: watch: on screen, the offer
+- **Status:** built · **Code:** watch `+Start`, `+Seize`
+- **Why:** The looper asked for Sport Mode and the phone cannot grant it. Starting from the stored copy is entering a mode, which needs the looper's tap (rule 6), so the system offers it as the alternative to the refused Start (rule 7). The query's silence decides when to offer, not the reachability flag, which says only whether the phone's app can take a live message this second.
+
+### 3. Phone dies, no loan
+
+- **Control state:** pod held by phone (resting state) · loan: none · took over on silence at: none · looper's latest tap: any
+- **Where:** phone dead · watch on wrist, alive
+- **What changed:** the phone dies
+- **Phone sees:** believes dead · sensor: dead · pod: dead · heard from the watch: dead
+- **Watch sees:** believes the phone holds the pod · sensor: fresh · pod: not touched · heard from the phone: nothing; the phone's loop goes stale
+- **Result:** query: none → answer: none → action: tell: nobody takes the pod; a pre-scheduled watch warning, pushed out by every word from the phone, fires after 25 min of silence, after the phone's own Loop Failure at 20
+- **Afterwards:** pod held by nobody; the pod runs its schedule within 30 min · time without looping: until the looper starts Sport Mode or charges the phone · looper sees: watch · notification (time-sensitive) "Not Hearing From iPhone: your watch hasn't heard from your iPhone for 25 minutes, so it can't tell whether anything is looping. If the iPhone is off or not with you, open Loop on the watch to start Sport Mode." · on screen: the phone's loop ring (red after 16 min, as in Loop) and "Not hearing from iPhone" after 25 min
+- **Status:** deliberate exception for control; the warning is built · **Code:** `LoanControl` row 3; watch `NotHearingFromPhoneAlert`
+- **Why:** Looping wins under rule 3, but taking the pod here would be entering Sport Mode without a tap, which rule 6 forbids, and the watch cannot tell a dead phone from one left at home. Following rule 3 would start Sport Mode every time the looper walked away from the phone. The cost is Loop's own: away from a working phone, nothing loops. Telling is what remains. The watch knows this state (no loan, no word from the phone), and it is easy to enter without choosing it (a forgotten phone), so it warns once. The phone talks with its loop cycles, so a phone that stops looping goes quiet too; its own pre-scheduled Loop Failure (20 min) reaches the watch when near, or through a cellular watch's relay, so the watch's comes after it, as the backup for a dead phone or a watch with no route to it.
+
+### 4. Phone back, no loan
+
+- **Control state:** pod held by phone (resting state) · loan: none · took over on silence at: none · looper's latest tap: any
+- **Where:** phone near again, alive · watch any
+- **What changed:** the phone comes back into reach
+- **Phone sees:** believes it holds the pod · sensor: fresh · pod: reads it · heard from the watch: nothing
+- **Watch sees:** believes the phone holds the pod, or dead · sensor: — · pod: — · heard from the phone: —
+- **Result:** query: none → answer: — → action: carry on; the reading's check finds nothing to explain
+- **Afterwards:** pod held by phone · time without looping: none beyond the time away · looper sees: nothing
+- **Status:** built · **Code:** phone `+Ledger`
+- **Why:** The resting state, resumed.
+
+### 5. Insulin seen, no loan answers
+
+- **Control state:** pod held by phone (resting state) · loan: none, as far as the phone knows · took over on silence at: none · looper's latest tap: any
+- **Where:** phone near, alive · watch any
+- **What changed:** a reading shows the pod delivered more or less than the phone's records explain, beyond 0.20 U
+- **Phone sees:** believes it holds the pod · sensor: fresh · pod: reading shows the difference · heard from the watch: nothing
+- **Watch sees:** believes idle, or dead · sensor: — · pod: — · heard from the phone: the phone's query
+- **Result:** query: phone → watch → answer: silence, or "I hold nothing" → action: book (if more was delivered), keep looping, tell; record the time as "took over on silence"
+- **Afterwards:** pod held by phone · time without looping: none · looper sees: phone: notification "Insulin Estimated After Sport Mode: … booked as a bolus" (more delivered) or "Insulin On Board May Be Overstated" (less)
+- **Status:** built · **Code:** phone `+Ledger` `followAnotherControllersInsulin`
+- **Why:** The phone already holds the pod, so silence keeps it there. A real loan answers (rows 17, 18); no answer means either a watch that started alone and died (row 18) or, without a loan, an uncertain-delivery bolus or a testing artifact. Booking covers all three conservatively.
+
+### 6. Message from a closed loan
+
+- **Control state:** pod held by phone (any) · loan: the phone has ended loan n · took over on silence at: any · looper's latest tap: any
+- **Where:** phone near, alive · watch near, alive
+- **What changed:** a message arrives from the watch about loan n
+- **Phone sees:** believes it holds the pod · sensor: fresh · pod: holding · heard from the watch: a report, records or an offer for loan n
+- **Watch sees:** believes it holds loan n · sensor: fresh · pod: trying · heard from the phone: nothing
+- **Result:** query: none → answer: — → action: send the stop for loan n again (at most every 20 s)
+- **Afterwards:** pod held by phone · time without looping: none · looper sees: watch: "Sport Mode ended. Your iPhone has the pod"
+- **Status:** built · **Code:** phone `+Mirror` `resendRevokeForClosedSession`
+- **Why:** The watch missed the stop; it gets it again.
+
+### 7. End, phone near
+
+- **Control state:** pod held by watch (grant) · loan: n · took over on silence at: none · looper's latest tap: End on the watch, now
+- **Where:** phone near, alive · watch on wrist, alive
+- **What changed:** End tapped on the watch
+- **Phone sees:** believes the watch holds loan n · sensor: fresh · pod: released · heard from the watch: the hand-back offer
+- **Watch sees:** believes it holds loan n · sensor: fresh · pod: holding · heard from the phone: an acknowledgement
+- **Result:** query: the offer is the query (watch → phone) → answer: acknowledged → action: hand back (transfer H)
+- **Afterwards:** pod held by phone · time without looping: seconds · looper sees: watch: "returning records…", then the phone's page; phone: banner gone
+- **Status:** built · **Code:** watch `+Handback`, phone `+Records`
+- **Why:** The looper's latest decision, and both devices are there to carry it out.
+
+### 8. End, phone away
+
+- **Control state:** pod held by watch (grant) · loan: n · took over on silence at: none · looper's latest tap: End on the watch, now
+- **Where:** phone away, or dead · watch on wrist, alive
+- **What changed:** End tapped on the watch
+- **Phone sees:** believes the watch holds loan n, or dead · sensor: none, or dead · pod: out of reach · heard from the watch: nothing
+- **Watch sees:** believes it holds loan n · sensor: fresh · pod: holding · heard from the phone: nothing
+- **Result:** query: the offer (queued) → answer: silence after 10 s → action: refuse the End; the loan continues
+- **Afterwards:** pod held by watch · time without looping: none · looper sees: watch: on screen, not a notification: "iPhone isn't nearby, so the pod can't be handed back. Sport Mode keeps looping. To stop automatic dosing, open the loop on the watch."
+- **Status:** built · **Code:** watch `+Handback`
+- **Why:** This refuses the looper's express intent, and the reason has to be honest. End names an action, giving the pod to the phone, which cannot be done without the phone. What the looper meant is one of two things the watch cannot tell apart: end Sport Mode (impossible here) or stop dosing (possible, by opening the loop). So the refusal says both. How the watch knows the phone is away: it sends the offer and waits, like every other query. The reachability flag reports only whether the phone's app can take a live message this second, and would refuse with the phone in the next room. An offer that lands late only stores records; nothing changes hands.
+
+### 9. Take Back on the phone
+
+- **Control state:** pod held by watch (grant, or started alone and adopted) · loan: n · took over on silence at: none · looper's latest tap: Take Back on the phone, now
+- **Where:** phone near, alive · watch on wrist, alive or dead
+- **What changed:** Take Back tapped
+- **Phone sees:** believes the watch holds loan n · sensor: fresh · pod: released · heard from the watch: anything
+- **Watch sees:** believes it holds loan n, or dead · sensor: fresh, or dead · pod: holding, or dead · heard from the phone: the stop
+- **Result:** query: none: a tap needs no query → answer: — → action: take (reach the pod in 5 s, send the stop, check insulin; if the pod does not answer, refuse: transfer T)
+- **Afterwards:** pod held by phone · time without looping: seconds · looper sees: phone: banner gone; watch: "Sport Mode ended. Your iPhone has the pod"
+- **Status:** built · **Code:** phone `+Reclaim`
+- **Why:** A tap is the looper's latest decision.
+
+### 10. Watch dies, phone near
+
+- **Control state:** pod held by watch (grant) · loan: n · took over on silence at: none · looper's latest tap: Start on the watch, earlier
+- **Where:** phone near, alive · watch on wrist, dead
+- **What changed:** the watch dies
+- **Phone sees:** believes the watch holds loan n · sensor: fresh · pod: released · heard from the watch: nothing for more than a cycle
+- **Watch sees:** believes dead · sensor: dead · pod: dead · heard from the phone: dead
+- **Result:** query: phone → watch, once the report is overdue → answer: silence after 30 s → action: take; record the time as "took over on silence"
+- **Afterwards:** pod held by phone · time without looping: 6–11 min, then 30 s · looper sees: phone: notification "Watch Not Looping: this iPhone is taking the pod back; insulin the watch gave is counted"
+- **Status:** built · **Code:** phone `+Hold`
+- **Why:** A live watch on the wrist, with the body in reach, answers within seconds. Silence means it is not looping, and looping conservatively is safer than not looping. The watch's first word would end a mistake. When it comes back: row 12.
+
+### 11. Watch dies, phone away
+
+- **Control state:** pod held by watch (grant) · loan: n · took over on silence at: none · looper's latest tap: Start on the watch, earlier
+- **Where:** phone away, or dead · watch on wrist, dead
+- **What changed:** the watch dies
+- **Phone sees:** believes the watch holds loan n, or dead · sensor: none · pod: out of reach · heard from the watch: nothing
+- **Watch sees:** believes dead · sensor: dead · pod: dead · heard from the phone: dead
+- **Result:** query: none: no device can see the body → answer: — → action: nothing
+- **Afterwards:** pod held by nobody; the pod runs its schedule within 30 min · time without looping: until a device is back (rows 12, 13, 18) · looper sees: nothing
+- **Status:** accepted · **Code:** —
+- **Why:** Nobody can act. Loop with a dead phone is the same.
+
+### 12. Watch back, phone holds the pod
+
+- **Control state:** pod held by phone (took back by tap, or took over on silence) · loan: n (closed) · took over on silence at: none, or when the phone took over · looper's latest tap: Start on the watch, earlier; or Take Back
+- **Where:** phone near, alive · watch on wrist, back from dead
+- **What changed:** the watch comes back
+- **Phone sees:** believes it holds the pod · sensor: fresh · pod: holding · heard from the watch: "I hold loan n" (the watch's query)
+- **Watch sees:** believes it holds loan n, as of when it died · sensor: fresh · pod: not touched · heard from the phone: nothing at launch
+- **Result:** query: watch → phone, once its link has started; live when the phone is reachable, and queued → answer: the stop for loan n → action: stand aside, before any dose
+- **Afterwards:** pod held by phone · time without looping: none · looper sees: watch: "Checking with your iPhone…" while it asks, then "Sport Mode ended. Your iPhone has the pod"
+- **Status:** built · **Code:** watch `+Resume`, phone `+Mirror`
+- **Why:** The watch was out of the conversation (rule 5); the phone holds the pod; the watch stays out and the looper starts again if wanted. The question waits for the watch's link to the phone to start: a message sent before that is lost. It goes by the live path when the phone is reachable, and queued as well; queued alone, the answer can take longer than the wait, and the watch would loop beside the phone until it arrived. The watch shows that it is checking, and builds nothing that can reach the pod until the check ends.
+
+### 13. Watch back, nobody else holds the pod
+
+- **Control state:** pod held by watch (grant, or started alone) · loan: n · took over on silence at: none · looper's latest tap: Start on the watch, earlier
+- **Where:** phone away or dead; or near and still lending · watch on wrist, back from dead
+- **What changed:** the watch comes back
+- **Phone sees:** believes the watch holds loan n, or dead · sensor: — · pod: released, or out of reach · heard from the watch: "I hold loan n", or nothing
+- **Watch sees:** believes it holds loan n · sensor: fresh · pod: not touched · heard from the phone: nothing
+- **Result:** query: watch → phone → answer: silence (phone away), or nothing back (phone still lending) → action: carry on: the loop gets the pod; its first reading closes the window from the last reading before it died, booking what its records cannot explain
+- **Afterwards:** pod held by watch · time without looping: 30 s plus the first reading · looper sees: watch: "Checking with your iPhone…" for up to 30 s, then a note if anything was booked: "0.55 U the watch had no record of, counted as insulin on board"
+- **Status:** built · **Code:** watch `+Resume`, `+Seize`
+- **Why:** The only device there carries on with what it was last told (rule 5). More than 6 hours off: no resume, records go home, "Sport Mode Ended" (rule 1).
+
+### 14. Watch on a far charger, phone near
+
+- **Control state:** pod held by watch (grant) · loan: n · took over on silence at: none · looper's latest tap: Start on the watch, earlier
+- **Where:** phone near, alive · watch off wrist out of reach, alive
+- **What changed:** the watch goes on a charger out of the pod's reach
+- **Phone sees:** believes the watch holds loan n · sensor: fresh · pod: released · heard from the watch: nothing for more than a cycle (a cycle that cannot reach the pod sends no report)
+- **Watch sees:** believes it holds loan n · sensor: none · pod: unreachable · heard from the phone: the phone's query
+- **Result:** query: phone → watch → answer: "I hold loan n but cannot reach the pod" → action: take, as on silence; record the time
+- **Afterwards:** pod held by phone · time without looping: 6–11 min, then 30 s · looper sees: phone: notification "Watch Not Looping: this iPhone is taking the pod back…"; watch: on screen "Sport Mode ended. Your iPhone has the pod"
+- **Status:** built · **Code:** phone `+Hold`, watch `+Handback` (the answer)
+- **Why:** Rule 2 protects a device that is looping. This one holds the loan and cannot act on it. It is alive and answers, so silence cannot be the signal; the answer carries the fact, and "cannot reach" is acted on like silence. The watch could give up the pod by itself after a failed cycle, but it cannot tell whether the phone is there to take it, and giving up with nobody there gains nothing. The phone knows it is near and can loop, so the phone decides. Rare: a charger by the bed is within reach.
+
+### 15. Watch out of reach, phone away
+
+- **Control state:** pod held by watch (grant) · loan: n · took over on silence at: none · looper's latest tap: Start on the watch, earlier
+- **Where:** phone away, or dead · watch off wrist out of reach, alive
+- **What changed:** both away from the body
+- **Phone sees:** believes the watch holds loan n, or dead · sensor: none · pod: out of reach · heard from the watch: nothing
+- **Watch sees:** believes it holds loan n · sensor: none · pod: unreachable · heard from the phone: nothing
+- **Result:** query: none → answer: — → action: nothing; the watch's own "not looping" warnings
+- **Afterwards:** pod held by nobody · time without looping: until a device is back · looper sees: watch: notifications "Loop hasn't completed" at 20 and 40 min, 1 and 2 h, on a watch nobody is wearing
+- **Status:** accepted · **Code:** watch `LoopStallWatchdog`
+- **Why:** Nobody can act; the warnings land on the watch, which is not worn.
+
+### 16. Phone moves during a loan
+
+- **Control state:** pod held by watch (grant) · loan: n · took over on silence at: none · looper's latest tap: Start on the watch, earlier
+- **Where:** phone leaves, dies, or comes back · watch on wrist, alive
+- **What changed:** the phone changes place or state
+- **Phone sees:** believes the watch holds loan n · sensor: any · pod: released · heard from the watch: reports each cycle
+- **Watch sees:** believes it holds loan n · sensor: fresh · pod: holding · heard from the phone: anything
+- **Result:** query: none → answer: — → action: carry on
+- **Afterwards:** pod held by watch · time without looping: none · looper sees: phone: banner "Sport Mode Active" when looked at
+- **Status:** built · **Code:** —
+- **Why:** The latest decision stands; nothing about the phone changes it.
+
+### 17. Phone returns, watch started alone and alive
+
+- **Control state:** pod held by watch (started without the phone) · loan: n, started at T · took over on silence at: none · looper's latest tap: Start Anyway on the watch, earlier
+- **Where:** phone near again, alive · watch on wrist, alive
+- **What changed:** the phone comes back
+- **Phone sees:** believes it holds the pod (it was never told) · sensor: fresh · pod: reads it: insulin it cannot explain · heard from the watch: "I hold loan n" (on reach), or nothing yet
+- **Watch sees:** believes it holds loan n · sensor: fresh · pod: holding · heard from the phone: anything
+- **Result:** query: phone → watch, on seeing the insulin; or none, if the watch's word came first → answer: "I hold loan n" → action: stand aside, adopt the loan; from here rows 7–16 apply
+- **Afterwards:** pod held by watch · time without looping: none · looper sees: phone: banner "Sport Mode Active" (no prompt, no notification)
+- **Status:** built · **Code:** phone `+Mirror`, `+Ledger`
+- **Why:** The latest decision was the looper's Start on the watch, made without the phone; the phone's return is not a decision, so it raises no prompt.
+
+### 18. Phone returns, watch started alone and dead
+
+- **Control state:** pod held by watch (dead) (started without the phone) · loan: n, started at T · took over on silence at: none · looper's latest tap: Start Anyway on the watch, earlier
+- **Where:** phone near again, alive · watch on wrist, dead
+- **What changed:** the phone comes back
+- **Phone sees:** believes it holds the pod · sensor: fresh · pod: insulin it cannot explain · heard from the watch: nothing
+- **Watch sees:** believes dead · sensor: dead · pod: dead · heard from the phone: dead
+- **Result:** query: phone → watch → answer: silence → action: book what it cannot explain, keep looping, tell; record the time as "took over on silence"
+- **Afterwards:** pod held by phone · time without looping: none (the phone was already looping when it read) · looper sees: phone: notification "Insulin Estimated After Sport Mode: Sport Mode probably started away from the phone: … booked as a bolus"
+- **Status:** built · **Code:** phone `+Ledger`
+- **Why:** The watch is out of the conversation; the phone holds the pod and keeps it. When the watch comes back: row 19.
+
+### 19. Watch back after the phone took over
+
+- **Control state:** pod held by phone (took over on silence (row 18, or row 10/14)) · loan: n, started at T1 · took over on silence at: T2, after T1 · looper's latest tap: Start Anyway on the watch, at T1
+- **Where:** phone near, alive · watch on wrist, back from dead
+- **What changed:** the watch comes back
+- **Phone sees:** believes it holds the pod · sensor: fresh · pod: holding · heard from the watch: "I hold loan n, started at T1"
+- **Watch sees:** believes it holds loan n, as of when it died · sensor: fresh · pod: not touched · heard from the phone: nothing at launch
+- **Result:** query: watch → phone → answer: the stop for loan n → action: stand aside, before any dose
+- **Afterwards:** pod held by phone · time without looping: none · looper sees: watch: "Checking with your iPhone…" while it asks, then "Sport Mode ended. Your iPhone has the pod"
+- **Status:** built · **Code:** phone `+Mirror` (`refusesRevivedLoan`)
+- **Why:** Two rules meet. A watch's word normally makes the phone stand aside (rule 2), because a watch that says it holds a loan is usually looping it. But this watch was out of the conversation: the phone queried, got nothing, and has looped since. Its claim is about the time before it died. Standing aside would move control, silently, to a device the looper stopped using, reversing the takeover without a tap (rule 5). The phone tells the cases apart by one fact it holds, when it took over: a loan started before that is a revived claim, refused; one started after is a fresh Start the looper made while the phone was away, honoured (row 17). Accepted cost: if the watch was merely slow to answer, the takeover was a mistake and this keeps it; one tap restores the loan, and the watch says what happened.
+
+### 20. Phone returns, watch started alone on a far charger
+
+- **Control state:** pod held by watch (started without the phone) · loan: n · took over on silence at: none · looper's latest tap: Start Anyway on the watch, earlier
+- **Where:** phone near again, alive · watch off wrist out of reach, alive
+- **What changed:** the phone comes back
+- **Phone sees:** believes it holds the pod · sensor: fresh · pod: insulin it cannot explain · heard from the watch: nothing
+- **Watch sees:** believes it holds loan n · sensor: none · pod: unreachable · heard from the phone: the phone's query
+- **Result:** query: phone → watch → answer: "I hold loan n but cannot reach the pod" → action: as on silence: book, keep looping, tell; record the time
+- **Afterwards:** pod held by phone · time without looping: none · looper sees: as row 18
+- **Status:** built · **Code:** phone `+Ledger`, `+Hold`
+- **Why:** As row 14: a holder that cannot reach the pod is treated as absent. When the watch is back in reach it queries and gets the stop (row 19).
+
+### 21. End, phone away, watch started alone
+
+- **Control state:** pod held by watch (started without the phone) · loan: n · took over on silence at: none · looper's latest tap: End on the watch, now
+- **Where:** phone away, or dead · watch on wrist, alive
+- **What changed:** End tapped
+- **Phone sees:** believes the phone holds the pod (never told), or dead · sensor: — · pod: out of reach · heard from the watch: nothing
+- **Watch sees:** believes it holds loan n · sensor: fresh · pod: holding · heard from the phone: nothing
+- **Result:** query: the offer (queued) → answer: silence after 10 s → action: refuse, as row 8
+- **Afterwards:** pod held by watch · time without looping: none · looper sees: as row 8
+- **Status:** built · **Code:** watch `+Handback`
+- **Why:** As row 8.
+
+### 22. Watch started alone dies, phone away
+
+- **Control state:** pod held by watch (dead) (started without the phone) · loan: n · took over on silence at: none · looper's latest tap: Start Anyway on the watch, earlier
+- **Where:** phone away, or dead · watch on wrist, dead
+- **What changed:** the watch dies
+- **Phone sees:** believes the phone holds the pod (never told), or dead · sensor: none · pod: out of reach · heard from the watch: nothing
+- **Watch sees:** believes dead · sensor: dead · pod: dead · heard from the phone: dead
+- **Result:** query: none → answer: — → action: nothing
+- **Afterwards:** pod held by nobody · time without looping: until rows 13 or 18 · looper sees: nothing
+- **Status:** accepted · **Code:** —
+- **Why:** Nobody can act.
+
+### 23. Both dead
+
+- **Control state:** pod held by whoever held it (any) · loan: any · took over on silence at: any · looper's latest tap: any
+- **Where:** phone dead · watch dead
+- **What changed:** both die
+- **Phone sees:** believes dead · sensor: dead · pod: dead · heard from the watch: dead
+- **Watch sees:** believes dead · sensor: dead · pod: dead · heard from the phone: dead
+- **Result:** query: none → answer: — → action: nothing; the pod runs its schedule
+- **Afterwards:** pod held by nobody · time without looping: until a device is back · looper sees: nothing
+- **Status:** accepted · **Code:** —
+- **Why:** Nothing to decide.
+
+### 24. Start, phone near, pod silent (highly abnormal)
+
+- **Control state:** pod held by phone (resting state) · loan: none · took over on silence at: none · looper's latest tap: Start on the watch, now
+- **Where:** phone near, alive · watch on wrist, alive
+- **What changed:** Start tapped on the watch
+- **Phone sees:** believes it holds the pod · sensor: fresh · pod: holding, no answer · heard from the watch: the Start request
+- **Watch sees:** believes the phone holds the pod · sensor: fresh · pod: not touched · heard from the phone: nothing yet
+- **Result:** query: the request is the query (watch → phone) → answer: a refusal, within the watch's 10 s wait → action: phone keeps the pod; watch shows "The iPhone couldn't reach the pod and kept it. Try again."
+- **Afterwards:** pod held by phone · time without looping: as long as the pod is silent, as in Loop without Sport Mode · looper sees: watch: the refusal on screen; phone: Loop's own pod-communication warnings
+- **Status:** not built: the phone waits on the pod past the 10 s, so the watch reads silence and offers row 2's start without the phone · **Code:** phone `+Grant`
+- **Why:** **Highly abnormal.** A device near the body reaches the pod unless the pod itself fails (a dead or faulted pod; in tests, the emulator unplugged). The phone is there, so its answer must arrive inside the wait: its silence would say it is away, and starting without it cannot help when the pod is the problem.
+
+### 25. Start without the phone, pod silent (highly abnormal)
+
+- **Control state:** pod held by phone (resting state) · loan: none · took over on silence at: none · looper's latest tap: Start Anyway on the watch, now
+- **Where:** phone away, or dead · watch on wrist, alive
+- **What changed:** Start Anyway tapped
+- **Phone sees:** believes it holds the pod (as of when it left), or dead · sensor: none, or dead · pod: out of reach, or dead · heard from the watch: nothing
+- **Watch sees:** believes the phone holds the pod · sensor: fresh · pod: trying, no answer · heard from the phone: nothing
+- **Result:** query: none: the pod read is the check → answer: no pod answer within the 60 s takeover window → action: watch gives up and returns to rest
+- **Afterwards:** pod held by phone, in name only: nobody loops · time without looping: until the pod answers or is replaced · looper sees: watch: on screen "The pod didn't answer, so Sport Mode didn't start. Neither device is looping."
+- **Status:** built · **Code:** watch `+Start`, `+Seize`
+- **Why:** **Highly abnormal.** The phone at home and a dead or faulted pod (watch Bluetooth off has its own warnings; a pocket that blocks radio is not realistic). In tests: the emulator unplugged with the phone's radios off. Nobody can loop, so the looper needs to learn that the pod is the problem.
+
 
 **Physically impossible (no behaviour, at most a log line):** the sensor away from the body; a device that can see
 the sensor but not the pod, or the pod but not the sensor.
