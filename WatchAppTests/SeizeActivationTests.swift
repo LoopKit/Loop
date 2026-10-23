@@ -203,6 +203,14 @@ final class SeizeActivationTests: XCTestCase {
         }
     }
 
+    /// Control row 25: a start without the phone that gets no pod answer says nobody loops; a granted
+    /// Start's timeout keeps saying the phone has the pod, because the phone takes it back.
+    func testATakeoverThatTimesOutSaysWhoHasThePod() {
+        XCTAssertEqual(PodLoanWatchController.takeoverExpiredNote(offlineStart: true),
+                       "The pod didn't answer, so Sport Mode didn't start. Neither device is looping.")
+        XCTAssertTrue(PodLoanWatchController.takeoverExpiredNote(offlineStart: false).contains("Your iPhone still has the pod"))
+    }
+
     // MARK: - Reunion-token hygiene
 
     /// A failed activation leaves no persisted token for the phone's retro-ack to match.
