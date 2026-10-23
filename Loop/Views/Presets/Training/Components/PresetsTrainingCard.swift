@@ -16,7 +16,7 @@ public struct PresetsTrainingCard: View {
     public init(trainingCompletion: PresetsTrainingCompletion) {
         if trainingCompletion.completedChapters[.customizingPresets] != true {
             self.imageName = "PresetsTrainingCreditEditStartCard"
-        } else if trainingCompletion.completedChapters[.trainingComplete] != true {
+        } else if !trainingCompletion.isComplete {
             self.imageName = "PresetsTrainingCreditEditResumeCard"
         } else {
             self.imageName = nil

@@ -8,6 +8,7 @@
 
 import XCTest
 import LoopKit
+import LoopCore
 
 @testable import Loop
 
@@ -93,5 +94,31 @@ class TemporaryPresetsManagerTests: XCTestCase {
 
         let actualOverrideRange = manager.effectiveCorrectionRangeSchedule()?.value(at: overrideStart.addingTimeInterval(2 /* hours */ * 60 * 60))
         XCTAssertEqual(actualOverrideRange, overrideTargetRange)
+    }
+
+    func testHidingActivityPresetsOnlyRemovesThemFromTheList() {
+        let userDefaults = UserDefaults(suiteName: UUID().uuidString)!
+        let manager = TemporaryPresetsManager(settingsProvider: MockSettingsProvider(settings: settings), presetHistory: TemporaryScheduleOverrideHistory(), userDefaults: userDefaults)
+        let activityIDs = ActivityPreset.ActivityType.allCases.map(\.id)
+        XCTAssertTrue(manager.showsActivityPresets)
+        XCTAssertEqual(manager.listedPresets.filter { activityIDs.contains($0.id) }.count, activityIDs.count)
+
+        manager.showsActivityPresets = false
+
+        XCTAssertTrue(manager.listedPresets.allSatisfy { !activityIDs.contains($0.id) })
+        XCTAssertTrue(manager.listedPresets.contains { $0.id == "preMeal" })
+        XCTAssertEqual(manager.selectablePresets.filter { activityIDs.contains($0.id) }.count, activityIDs.count, "hidden presets still resolve by id")
+
+        let relaunched = TemporaryPresetsManager(settingsProvider: MockSettingsProvider(settings: settings), presetHistory: TemporaryScheduleOverrideHistory(), userDefaults: userDefaults)
+        XCTAssertFalse(relaunched.showsActivityPresets)
+    }
+
+    func testSettingsUserInfoCarriesActivityPresetVisibility() {
+        let hidden = LoopSettingsUserInfo(loopSettings: LoopSettings(), showsActivityPresets: false)
+        XCTAssertEqual(LoopSettingsUserInfo(rawValue: hidden.rawValue)?.showsActivityPresets, false)
+
+        var fromOlderPhone = hidden.rawValue
+        fromOlderPhone["a"] = nil
+        XCTAssertEqual(LoopSettingsUserInfo(rawValue: fromOlderPhone)?.showsActivityPresets, true)
     }
 }
