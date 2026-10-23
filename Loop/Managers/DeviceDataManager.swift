@@ -43,6 +43,9 @@ protocol UploadEventListener {
 @MainActor
 final class DeviceDataManager {
 
+    /// Pod loan: set by LoopAppManager, weak because the app manager owns it — read by `DeviceDataManager+PodLoan.swift`.
+    weak var watchManager: WatchDataManager?
+
     private let log = DiagnosticLog(category: "DeviceDataManager")
 
     let pluginManager: PluginManager
@@ -1167,6 +1170,7 @@ extension DeviceDataManager: PumpManagerDelegate {
                 completion(error)
                 return
             }
+            await podLoanPumpDidReport()
             completion(nil)
             NotificationCenter.default.post(name: .PumpEventsAdded, object: self, userInfo: nil)
         }
@@ -1380,6 +1384,7 @@ struct CancelTempBasalFailedMaximumBasalRateChangedError: LocalizedError {
 
 extension DeviceDataManager : RemoteDataServicesManagerDelegate {
     var shouldSyncGlucoseToRemoteService: Bool {
+        guard !podLoanHoldsGlucoseUploads else { return false }
         guard let cgmManager = cgmManager else {
             return true
         }

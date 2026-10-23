@@ -22,14 +22,20 @@ enum WatchDataManagerError: Error {
 @MainActor
 final class WatchDataManager: NSObject {
 
-    private unowned let deviceManager: DeviceDataManager
-    private unowned let settingsManager: SettingsManager
-    private unowned let loopDataManager: LoopDataManager
+    unowned let deviceManager: DeviceDataManager   // read by the pod-loan wiring extension
+    unowned let settingsManager: SettingsManager   // read by the pod-loan wiring extension
+    unowned let loopDataManager: LoopDataManager   // read by the pod-loan wiring extension
     private unowned let carbStore: CarbStore
     private unowned let glucoseStore: GlucoseStore
     private unowned let analyticsServicesManager: AnalyticsServicesManager?
-    private unowned let temporaryPresetsManager: TemporaryPresetsManager
+    unowned let temporaryPresetsManager: TemporaryPresetsManager   // read by the pod-loan wiring extension
     private unowned let alertManager: AlertManager
+
+    // MARK: - Pod loan (stored state only — the behaviour is in WatchDataManager+PodLoan.swift)
+
+    var reclaimBackgroundTask: UIBackgroundTaskIdentifier = .invalid   // held across a pod-loan take-back and its settle
+    let lockedLastWatchContact = Locked<Date?>(nil)   // when the watch was last heard from — the pod loan's liveness signal
+    private(set) lazy var podLoanController: PodLoanPhoneController = makePodLoanController()   // pod-loan dependency wiring in PodLoanPhoneController+Wiring.swift
 
     init(
         deviceManager: DeviceDataManager,
@@ -59,13 +65,16 @@ final class WatchDataManager: NSObject {
         NotificationCenter.default.addObserver(self, selector: #selector(updateWatch(_:)), name: .LoopDataUpdated, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(sendSupportedBolusVolumesIfNeeded), name: .PumpManagerChanged, object: deviceManager)
 
+        wireLoopFailureSuppressionGate()
         watchSession?.delegate = self
         watchSession?.activate()
+
+        podLoanStartup()
     }
 
-    private let log = DiagnosticLog(category: "WatchDataManager")
+    let log = DiagnosticLog(category: "WatchDataManager")
 
-    private var watchSession: WCSession? = {
+    var watchSession: WCSession? = {
         if WCSession.isSupported() {
             return WCSession.default
         } else {
@@ -137,6 +146,8 @@ final class WatchDataManager: NSObject {
         else {
             return
         }
+
+        podLoanConsiderRefresh(for: updateContext)
 
         // Any update context should trigger a watch update
         sendWatchContextIfNeeded()
@@ -297,11 +308,13 @@ final class WatchDataManager: NSObject {
         dosingDecision.carbsOnBoard = carbsOnBoard
 
         context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
+        podLoanShareCGMConfiguration(context)
 
         let settings = self.settingsManager.loopSettings
 
         context.isClosedLoop = settings.dosingEnabled
         context.isOnboardingCompleted = deviceManager.cgmManager?.isOnboarded == true && deviceManager.pumpManager?.isOnboarded == true
+        podLoanLogOnboardingContext(context)
         context.deviceIssue = deviceManager.cgmManager == nil || deviceManager.cgmManager?.isInoperable == true || deviceManager.cgmManager?.inSignalLoss == true || deviceManager.pumpManager == nil || deviceManager.pumpManager?.isInoperable == true || deviceManager.pumpManager?.inSignalLoss == true || deviceManager.hasBluetoothIssue
 
         context.potentialCarbEntry = potentialCarbEntry
@@ -426,6 +439,8 @@ final class WatchDataManager: NSObject {
             throw WatchDataManagerError.expiredBolusRecommendation
         }
 
+        let deliveryRefusedForLoan = podLoanRefusesWatchBolus(bolus, message: message)
+
         var dosingDecision: BolusDosingDecision
         if let contextDate = bolus.contextDate, let contextDosingDecision = contextDosingDecisions[contextDate] {
             dosingDecision = contextDosingDecision
@@ -443,6 +458,9 @@ final class WatchDataManager: NSObject {
 
         dosingDecision.manualBolusRequested = bolus.value
         await loopDataManager.storeManualBolusDosingDecision(dosingDecision, withDate: bolus.startDate)
+
+        // Loan-time refusal: the decision and any carbs are stored above; delivery is not attempted.
+        guard !deliveryRefusedForLoan else { return }
 
         guard bolus.value > 0 else {
             return
@@ -549,6 +567,7 @@ extension WatchDataManager: WCSessionDelegate {
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         Task { @MainActor in
             self.log.default("Received message: %{public}@", message)
+            if podLoanHandlesMessage(message, replyHandler: replyHandler) { return }
             do {
                 replyHandler(try await handleWatchMessage(message))
             } catch {
@@ -558,7 +577,7 @@ extension WatchDataManager: WCSessionDelegate {
     }
 
     nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
-        assertionFailure("We currently don't expect any userInfo messages transferred from the watch side")
+        podLoanHandleReceivedUserInfo(userInfo)
     }
 
     nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
@@ -620,6 +639,7 @@ extension WatchDataManager: WCSessionDelegate {
 
     nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
         Task { @MainActor in
+            podLoanSessionReachabilityDidChange(session)
             sendSettingsIfNeeded()
             sendSupportedBolusVolumesIfNeeded()
         }
