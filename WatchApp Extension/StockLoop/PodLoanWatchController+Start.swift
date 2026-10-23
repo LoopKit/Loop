@@ -606,6 +606,14 @@ extension PodLoanWatchController {
         }
     }
 
+    /// The glance note when the takeover window closes with no pod answer. After a grant the phone takes the
+    /// pod back; after a start without the phone (control row 25) the phone is away, so nobody loops.
+    static func takeoverExpiredNote(offlineStart: Bool) -> String {
+        offlineStart
+            ? NSLocalizedString("The pod didn't answer, so Sport Mode didn't start. Neither device is looping.", comment: "Glance: a start without the phone got no answer from the pod")
+            : NSLocalizedString("The pod didn't answer in time. Your iPhone still has the pod. Tap Start to try again.", comment: "Glance: grant lease expired mid-takeover")
+    }
+
     /// Reads pod status until it answers: again when the pump reports ready, or after 8 s if no
     /// report comes (a read can fail on a link already up). The lease is the only deadline; it is
     /// re-checked every iteration and expiry outranks a good status.
@@ -626,10 +634,11 @@ extension PodLoanWatchController {
                 }
 
                 guard self.now() < grant.expiresAt else {
+                    let offlineStart = self.pendingSeizeToken != nil
                     self.teardownPump()
                     self.returnToRestingPhase()
 
-                    self.lastIdleNote = NSLocalizedString("The pod didn't answer in time. Your iPhone still has the pod. Tap Start to try again.", comment: "Glance: grant lease expired mid-takeover")
+                    self.lastIdleNote = Self.takeoverExpiredNote(offlineStart: offlineStart)
                     SportLog.event("loan", "TAKEOVER ABORTED — grant lease expired mid-takeover after \(attempt + 1) read(s), epoch \(grant.epoch)\(self.seizeMarkerActive ? " [seize]" : "")")
                     self.sendMessage(.takeoverFailed(TakeoverFailed(epoch: grant.epoch, reason: "grant expired mid-takeover")))
                     return
