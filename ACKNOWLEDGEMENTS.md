@@ -4,9 +4,26 @@ Third-party material bundled with Loop, and the terms it is used under.
 
 ## Alarm and alert sounds
 
-The themed glucose alarm sets (Acoustic, Electronic) and the one-off tones in
-`Loop/Resources/Sounds` were created by a sound designer for the Trio project
-and contributed to Loop for distribution as part of the app.
+The themed glucose alarm sets (`acoustic_*.caf`, `electronic_*.caf`) and the
+one-off tones (`glass_bell.caf`, `harp.caf`, `meow.caf`, `saw_wave.caf`,
+`hard_saw_wave.caf`, `sine_wave.caf`, `open_can.caf`, `open_wrapper.caf`) were
+created for the Trio project by **an anonymous diabetes dad and Trio user**.
+
+- Licence: **Creative Commons Zero 1.0 Universal (CC0 1.0)** —
+  <https://creativecommons.org/publicdomain/zero/1.0/>
+- The author states that they are the author of these files, that they hold
+  the right to license them, and that they contain no third-party material
+  they cannot license. The CC0 dedication is what allows them to be carried
+  here as well as in Trio.
+- CC0 requires no attribution. The credit above is given at the author's
+  request; they have asked to remain anonymous.
+- Changes made: the one-off tones were looped by whole repeats to at least
+  five seconds, so that every alarm sounds for a comparable time; the themed
+  sets were left as delivered, since their length and level carry the urgency
+  along with the timbre. All were then encoded to IMA4 `.caf`.
+
+The spoken alert sounds are generated from third-party voice models and are
+*not* covered by that dedication — see below.
 
 ## Voice alerts
 
