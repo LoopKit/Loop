@@ -296,6 +296,9 @@ final class WatchDataManager: NSObject {
         dosingDecision.carbsOnBoard = carbsOnBoard
 
         context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
+        if let sharing = self.deviceManager.cgmManager as? DeviceConfigurationSharing, sharing.isConfigurationSharingEnabled {
+            context.cgmConfiguration = sharing.exportConfiguration().rawValue
+        }
 
         let settings = self.settingsManager.loopSettings
 
