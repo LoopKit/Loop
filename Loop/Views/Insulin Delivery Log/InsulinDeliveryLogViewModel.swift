@@ -38,7 +38,7 @@ class InsulinDeliveryLogViewModel {
     }
     
     struct DisplayData: Hashable {
-        let insulinDeliveryState: InsulinDeliveryOverview.State, insulinDeliveryStateUpdatedDate: Date, currentBasalRate: DatedQuantity, lastAutoBolus: DatedQuantity?, totalInsulinDelivered: LoopQuantity, events: [InsulinDeliveryLogEvent]
+        let insulinDeliveryState: InsulinDeliveryOverview.State, insulinDeliveryStateUpdatedDate: Date, currentBasalRate: DatedQuantity, lastAutoBolus: DatedQuantity?, totalInsulinDelivered: LoopQuantity, typicalInsulinDelivered: DatedQuantity?, events: [InsulinDeliveryLogEvent]
     }
     
     enum State: Hashable {
@@ -176,7 +176,7 @@ class InsulinDeliveryLogViewModel {
         let startDate = fetchedDate.addingTimeInterval(.days(-1))
         
         let statusState = fetchStatusState()
-        let totalInsulinDelivered = await fetchTotalInsulinDeliveredToday()
+        let (totalInsulinDelivered, typicalInsulinDelivered) = await fetchInsulinDeliveredToday()
         let doses = await fetchDoses(since: startDate)
         let lastAutoBolus = fetchLastAutoBolus(doses: doses)
         let decisions = await fetchDosingDecisions(doses.compactMap(\.decisionId))
@@ -195,6 +195,7 @@ class InsulinDeliveryLogViewModel {
                 currentBasalRate: fetchCurrentBasal() ?? DatedQuantity(date: TestingDate.currentTestingDate(), quantity: LoopQuantity(unit: .internationalUnitsPerHour, doubleValue: 0)),
                 lastAutoBolus: lastAutoBolus,
                 totalInsulinDelivered: totalInsulinDelivered,
+                typicalInsulinDelivered: typicalInsulinDelivered,
                 events: events
             )
         )
@@ -266,8 +267,16 @@ class InsulinDeliveryLogViewModel {
         (try? await loopDataManager.dosingDecisionStore.findDosingDecisionsByIds(ids)) ?? []
     }
     
-    private func fetchTotalInsulinDeliveredToday() async -> LoopQuantity {
-        await LoopQuantity(unit: .internationalUnit, doubleValue: loopDataManager.totalDeliveredToday()?.value ?? 0)
+    /// Today's total, and the usual amount by this time of day when there's enough history.
+    private func fetchInsulinDeliveredToday() async -> (LoopQuantity, DatedQuantity?) {
+        guard let history = try? await loopDataManager.insulinDeliveryHistory(days: 14) else {
+            return (await LoopQuantity(unit: .internationalUnit, doubleValue: loopDataManager.totalDeliveredToday()?.value ?? 0), nil)
+        }
+        let today = history.totals(from: Calendar.current.startOfDay(for: history.end), to: history.end).total
+        let typical = history.typicalDelivery(by: history.end).map {
+            DatedQuantity(date: history.end, quantity: LoopQuantity(unit: .internationalUnit, doubleValue: $0.median))
+        }
+        return (LoopQuantity(unit: .internationalUnit, doubleValue: today), typical)
     }
     
     private func handleBasalEvent(dose: DoseEntry, decision: LightDosingDecision?, events: inout [InsulinDeliveryLogEvent]) {

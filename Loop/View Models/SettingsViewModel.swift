@@ -119,6 +119,8 @@ class SettingsViewModel {
 
     @ObservationIgnored weak var favoriteFoodInsightsDelegate: FavoriteFoodInsightsViewModelDelegate?
 
+    @ObservationIgnored var insulinDeliveryHistory: ((Int) async throws -> InsulinDeliveryHistory)?
+
     @MainActor
     var showDeleteTestData: Bool {
         availableSupports.contains(where: { $0.showsDeleteTestDataUI })
