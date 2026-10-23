@@ -98,7 +98,7 @@ struct PresetsView: View {
     var isDescending: Bool { !presetsSortAscending }
 
     var presetsSorted: [SelectablePreset] {
-        temporaryPresetsManager.selectablePresets
+        temporaryPresetsManager.listedPresets
             .filter { $0.id != temporaryPresetsManager.activeOverride?.presetId }
             .sorted(by: {
             switch (selectedSortOption) {
@@ -151,13 +151,7 @@ struct PresetsView: View {
                                 sortMenu
                             }
                             
-                            Button(action: {
-                                if trainingCompletion.isComplete {
-                                    presentCreateView = true
-                                } else {
-                                    presentTrainingNeededAlert = true
-                                }
-                            }) {
+                            Button(action: createPreset) {
                                 Image(systemName: "plus")
                             }
                             .foregroundStyle(trainingCompletion.isComplete ? Color.accentColor : Color.secondary)
@@ -184,9 +178,13 @@ struct PresetsView: View {
                                     activeSheet = .presetDetent(preset)
                                 }
                             }
+
+                            if presetsSorted.isEmpty {
+                                createPresetButton
+                            }
                         }
                     }
-                    
+
                     // Support Section
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Support")
@@ -236,6 +234,15 @@ struct PresetsView: View {
                                 .stroke(Color(UIColor.secondarySystemBackground), lineWidth: 1)
                                 .frame(maxWidth: .infinity))
                         }
+                    }
+
+                    // Options Section
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Options", comment: "Presets screen section header for display options")
+                            .font(.headline.weight(.semibold))
+                            .padding(.horizontal, 10)
+
+                        activityPresetsToggle
                     }
                 }
                 .padding()
@@ -322,8 +329,63 @@ struct PresetsView: View {
         .alert(isPresented: $presentTrainingNeededAlert) {
             trainingNeededAlert
         }
+        .onChange(of: temporaryPresetsManager.showsActivityPresets, initial: true) { _, showsActivityPresets in
+            trainingCompletion.exerciseRequired = showsActivityPresets
+        }
     }
-    
+
+    private func createPreset() {
+        if trainingCompletion.isComplete {
+            presentCreateView = true
+        } else {
+            presentTrainingNeededAlert = true
+        }
+    }
+
+    private var createPresetButton: some View {
+        Button(action: createPreset) {
+            VStack(spacing: 12) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 44))
+                Text("Create New Preset", comment: "Button shown in place of the preset list when there are no presets")
+                    .font(.headline)
+            }
+            .foregroundStyle(trainingCompletion.isComplete ? Color.accentColor : Color.secondary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 32)
+            .background(RoundedRectangle(cornerRadius: 12)
+                .fill(Color(UIColor.tertiarySystemBackground)))
+        }
+        .accessibilityIdentifier("button_CreateNewPreset")
+    }
+
+    private var activityPresetsToggle: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Toggle(isOn: Binding(
+                get: { temporaryPresetsManager.showsActivityPresets },
+                set: { newValue in withAnimation { temporaryPresetsManager.showsActivityPresets = newValue } }
+            )) {
+                Text("Show Activity Presets", comment: "Title of the toggle that shows or hides the built-in activity presets")
+            }
+            .padding(10)
+            .background(RoundedRectangle(cornerRadius: 8)
+                .fill(Color(UIColor.tertiarySystemBackground))
+                .stroke(Color(UIColor.secondarySystemBackground), lineWidth: 1)
+                .frame(maxWidth: .infinity))
+            .accessibilityIdentifier("toggle_ShowActivityPresets")
+
+            Text(activityPresetsFooter)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 10)
+        }
+    }
+
+    private var activityPresetsFooter: String {
+        let names = ListFormatter.localizedString(byJoining: ActivityPreset.ActivityType.allCases.map(\.name))
+        return String(format: NSLocalizedString("%1$@. While hidden, the Presets for Exercise training chapter is optional.", comment: "Footer under the Show Activity Presets toggle. (1: list of activity preset names)"), names)
+    }
+
     private var trainingNeededAlert: SwiftUI.Alert {
         Alert(title: Text("Training Required for New Presets", comment: "Preset training needed alert title"),
               message: Text("To create a new preset, you must complete the required training.", comment: "Preset training needed alert message"),

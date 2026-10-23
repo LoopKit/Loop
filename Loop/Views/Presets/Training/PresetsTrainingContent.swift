@@ -51,7 +51,9 @@ extension PresetsTraining.Step: PresetsTrainingContent {
                         Text("How to configure each setting")
                         Text("How to use Presets when you are sick")
                         Text("How to use Presets for everyday activities")
-                        Text("How to use Presets for exercise")
+                        ExerciseOptionalReader { isOptional in
+                            isOptional ? Text("How to use Presets for exercise (optional)") : Text("How to use Presets for exercise")
+                        }
                     }
                     .padding(.leading, 8)
                 }
@@ -132,10 +134,12 @@ extension PresetsTraining.Step: PresetsTrainingContent {
                     )
                     .disabled(true)
                     
-                    CommonUseStep(
-                        title: Text("Presets for Exercise"),
-                        readTime: .minutes(5)
-                    )
+                    ExerciseOptionalReader { isOptional in
+                        CommonUseStep(
+                            title: isOptional ? Text("Presets for Exercise (Optional)") : Text("Presets for Exercise"),
+                            readTime: .minutes(5)
+                        )
+                    }
                     .disabled(true)
                 }
                 
@@ -265,10 +269,12 @@ extension PresetsTraining.Step: PresetsTrainingContent {
                         onTapGesture: next
                     )
                     
-                    CommonUseStep(
-                        title: Text("Presets for Exercise"),
-                        readTime: .minutes(5)
-                    )
+                    ExerciseOptionalReader { isOptional in
+                        CommonUseStep(
+                            title: isOptional ? Text("Presets for Exercise (Optional)") : Text("Presets for Exercise"),
+                            readTime: .minutes(5)
+                        )
+                    }
                     .disabled(true)
                 }
                 
@@ -371,11 +377,13 @@ extension PresetsTraining.Step: PresetsTrainingContent {
                         readTime: .minutes(2)
                     )
                     
-                    CommonUseStep(
-                        title: Text("Presets for Exercise"),
-                        readTime: .minutes(5),
-                        onTapGesture: next
-                    )
+                    ExerciseOptionalReader { isOptional in
+                        CommonUseStep(
+                            title: isOptional ? Text("Presets for Exercise (Optional)") : Text("Presets for Exercise"),
+                            readTime: .minutes(5),
+                            onTapGesture: next
+                        )
+                    }
                 }
             case .presetsForExercise:
                 Text("Exercise is a common reason to use a preset. Different kinds of exercise and their intensity levels can affect your glucose levels in different ways.")
@@ -443,15 +451,8 @@ extension PresetsTraining.Step: PresetsTrainingContent {
                             
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Walking")
-                                
-                                HStack(alignment: .center, spacing: 2) {
-                                    Text("\(Image(systemName: "lightbulb.max"))")
-                                    
-                                    Text(" **Tip** Use your \(Image(systemName: "figure.walk")) **Walking** preset")
-                                }
-                                .padding(.vertical, 4)
-                                .padding(.horizontal, 6)
-                                .background(Color(UIColor.secondarySystemBackground).cornerRadius(5))
+
+                                ActivityPresetTip(Text(" **Tip** Use your \(Image(systemName: "figure.walk")) **Walking** preset"))
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -468,15 +469,8 @@ extension PresetsTraining.Step: PresetsTrainingContent {
                             
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Jogging")
-                                
-                                HStack(alignment: .center, spacing: 2) {
-                                    Text("\(Image(systemName: "lightbulb.max"))")
-                                         
-                                    Text(" **Tip** Use your \(Image(systemName: "figure.run")) **Jogging** preset")
-                                }
-                                .padding(.vertical, 4)
-                                .padding(.horizontal, 6)
-                                .background(Color(UIColor.secondarySystemBackground).cornerRadius(5))
+
+                                ActivityPresetTip(Text(" **Tip** Use your \(Image(systemName: "figure.run")) **Jogging** preset"))
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -962,6 +956,12 @@ extension PresetsTraining.Step: PresetsTrainingContent {
             }
             
             Text("You may review the training materials again at any time via the Learning Hub, located at the bottom of the Preset screen.")
+
+            ExerciseOptionalReader { isOptional, isExerciseComplete in
+                if isOptional && !isExerciseComplete {
+                    Text("Presets for Exercise is optional. The Learning Hub opens it whenever you want to read it.")
+                }
+            }
         }
     }
     
@@ -1117,31 +1117,47 @@ extension PresetsTraining.Chapter: PresetsTrainingContent {
     }
 }
 
-extension ActivityPreset.ActivityType {
-    func bulletItem(full: Bool) -> Text {
-        if full {
-            return Text(Image(systemName: systemImageName))
-                .fontDesign(.monospaced)
-            + Text(" \(name) · ")
-                .fontWeight(.semibold)
-            + Text("\(defaultInsulinNeedsScaleFactor.formatted(.percent)) of insulin")
-        } else {
-            return Text(Image(systemName: systemImageName))
-                .fontDesign(.monospaced)
-            + Text(" \(name)")
-                .fontWeight(.semibold)
-        }
+private struct ExerciseOptionalReader<Content: View>: View {
+    @Environment(PresetsTraining.self) private var training
+
+    private let content: (_ isOptional: Bool, _ isExerciseComplete: Bool) -> Content
+
+    init(@ViewBuilder content: @escaping (_ isOptional: Bool, _ isExerciseComplete: Bool) -> Content) {
+        self.content = content
+    }
+
+    init(@ViewBuilder content: @escaping (_ isOptional: Bool) -> Content) {
+        self.content = { isOptional, _ in content(isOptional) }
+    }
+
+    var body: some View {
+        content(
+            !training.trainingCompletion.isRequired(.exercise),
+            training.trainingCompletion.completedChapters[.exercise] == true
+        )
     }
 }
 
-extension ActivityPreset {
-    @ViewBuilder
-    static func bulletList(full: Bool) -> some View {
-        BulletedListView {
-            ActivityPreset.ActivityType.jogging.bulletItem(full: full)
-            ActivityPreset.ActivityType.walking.bulletItem(full: full)
-            ActivityPreset.ActivityType.biking.bulletItem(full: full)
-            ActivityPreset.ActivityType.strengthTraining.bulletItem(full: full)
+/// Points at a built-in activity preset, so it is left out while those are hidden.
+private struct ActivityPresetTip: View {
+    @Environment(PresetsTraining.self) private var training
+
+    private let text: Text
+
+    init(_ text: Text) {
+        self.text = text
+    }
+
+    var body: some View {
+        if training.trainingCompletion.exerciseRequired {
+            HStack(alignment: .center, spacing: 2) {
+                Text("\(Image(systemName: "lightbulb.max"))")
+
+                text
+            }
+            .padding(.vertical, 4)
+            .padding(.horizontal, 6)
+            .background(Color(UIColor.secondarySystemBackground).cornerRadius(5))
         }
     }
 }

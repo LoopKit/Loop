@@ -10,10 +10,12 @@ import LoopKit
 public struct LoopSettingsUserInfo: Equatable {
     public var loopSettings: LoopSettings
     public var scheduleOverride: TemporaryScheduleOverride?
+    public var showsActivityPresets: Bool
 
-    public init(loopSettings: LoopSettings, scheduleOverride: TemporaryScheduleOverride? = nil) {
+    public init(loopSettings: LoopSettings, scheduleOverride: TemporaryScheduleOverride? = nil, showsActivityPresets: Bool = true) {
         self.loopSettings = loopSettings
         self.scheduleOverride = scheduleOverride
+        self.showsActivityPresets = showsActivityPresets
     }
 }
 
@@ -39,13 +41,16 @@ extension LoopSettingsUserInfo: RawRepresentable {
         } else {
             self.scheduleOverride = nil
         }
+
+        self.showsActivityPresets = rawValue["a"] as? Bool ?? true
     }
 
     public var rawValue: RawValue {
         var raw: RawValue = [
             "v": LoopSettingsUserInfo.version,
             "name": LoopSettingsUserInfo.name,
-            "s": loopSettings.rawValue
+            "s": loopSettings.rawValue,
+            "a": showsActivityPresets
         ]
         raw["o"] = scheduleOverride?.rawValue
 
