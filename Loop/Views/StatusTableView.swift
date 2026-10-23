@@ -309,16 +309,16 @@ enum ActionTabBarMetrics {
             .safeAreaInsets.bottom ?? 0
     }
 
-    static var interfaceOrientation: UIInterfaceOrientation {
+    static var isCompactHeight: Bool {
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         let scene = scenes.first { $0.windows.contains { $0.isKeyWindow } }
             ?? scenes.first { $0.activationState == .foregroundActive }
             ?? scenes.first
-        return scene?.interfaceOrientation ?? .portrait
+        return scene?.traitCollection.verticalSizeClass == .compact
     }
 
     static var tableContentInset: CGFloat {
-        guard !interfaceOrientation.isLandscape else { return 0 }
+        guard !isCompactHeight else { return 0 }
         if #available(iOS 26.0, *), bottomSafeAreaInset == 0 {
             return barHeight + 40
         }
@@ -357,35 +357,25 @@ struct LegacyTabBarBackground: ViewModifier {
 
 struct ActionTabView<Content: View>: View {
 
-    @State private var orientation: UIInterfaceOrientation
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     private let content: Content
     private let tabs: [ActionTab]
-    
+
     init(
         @ViewBuilder content: @escaping () -> Content,
         @ActionTabBuilder tabs: @escaping () -> [ActionTab],
     ) {
         self.content = content()
         self.tabs = tabs()
-        self.orientation = ActionTabBarMetrics.interfaceOrientation
     }
 
     var body: some View {
+        let isVisible = verticalSizeClass != .compact
         content
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                ActionTabBar(items: tabs, isHidden: !orientation.isPortrait)
-                    .modifier(LegacyTabBarBackground(isVisible: orientation.isPortrait))
-            }
-            .onAppear {
-                UIDevice.current.beginGeneratingDeviceOrientationNotifications()
-                orientation = ActionTabBarMetrics.interfaceOrientation
-            }
-            .onDisappear {
-                UIDevice.current.endGeneratingDeviceOrientationNotifications()
-            }
-            .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
-                orientation = ActionTabBarMetrics.interfaceOrientation
+                ActionTabBar(items: tabs, isHidden: !isVisible)
+                    .modifier(LegacyTabBarBackground(isVisible: isVisible))
             }
     }
 }
