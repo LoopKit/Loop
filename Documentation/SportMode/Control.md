@@ -22,6 +22,9 @@ sensor together. A device that can see the sensor can see the pod, and vice vers
 watch on the wrist is woken by the sensor every five minutes, so it always comes back within a cycle even if watchOS
 stops its app; a watch silent for longer than a cycle is off the wrist, dead, or in a test.
 
+**Highly abnormal:** a pod on the body that answers neither device (a dead or faulted pod). Rows 24 and 25 cover it;
+in tests it is the pod emulator unplugged.
+
 **One asymmetry that matters for coexistence.** The phone's pod driver holds the pod's connection open whenever the
 phone controls the pod and Loop is on screen; the watch connects for each cycle and lets go. So two devices that both
 believe they control the pod do not share it: the phone's open connection blocks the watch, and the pod's single
@@ -170,6 +173,8 @@ Columns:
 | 21 End, phone away, watch started alone | watch | started without the phone | n | none | End on the watch, now | away, or dead | on wrist, alive | End tapped | the phone holds the pod (never told), or dead | — | out of reach | nothing | it holds loan n | fresh | holding | nothing | the offer (queued) | silence after 10 s | refuse, as row 8 | watch | none | as row 8 | built | watch `+Handback` | As row 8. |
 | 22 Watch started alone dies, phone away | watch (dead) | started without the phone | n | none | Start Anyway on the watch, earlier | away, or dead | on wrist, dead | the watch dies | the phone holds the pod (never told), or dead | none | out of reach | nothing | dead | dead | dead | dead | none | — | nothing | nobody | until rows 13 or 18 | nothing | accepted | — | Nobody can act. |
 | 23 Both dead | whoever held it | any | any | any | any | dead | dead | both die | dead | dead | dead | dead | dead | dead | dead | dead | none | — | nothing; the pod runs its schedule | nobody | until a device is back | nothing | accepted | — | Nothing to decide. |
+| 24 Start, phone near, pod silent (highly abnormal) | phone | resting state | none | none | Start on the watch, now | near, alive | on wrist, alive | Start tapped on the watch | it holds the pod | fresh | holding, no answer | the Start request | the phone holds the pod | fresh | not touched | nothing yet | the request is the query (watch → phone) | a refusal, within the watch's 10 s wait | phone keeps the pod; watch shows "The iPhone couldn't reach the pod and kept it. Try again." | phone | as long as the pod is silent, as in Loop without Sport Mode | watch: the refusal on screen; phone: Loop's own pod-communication warnings | not built: the phone waits on the pod past the 10 s, so the watch reads silence and offers row 2's start without the phone | phone `+Grant` | **Highly abnormal.** A device near the body reaches the pod unless the pod itself fails (a dead or faulted pod; in tests, the emulator unplugged). The phone is there, so its answer must arrive inside the wait: its silence would say it is away, and starting without it cannot help when the pod is the problem. |
+| 25 Start without the phone, pod silent (highly abnormal) | phone | resting state | none | none | Start Anyway on the watch, now | away, or dead | on wrist, alive | Start Anyway tapped | it holds the pod (as of when it left), or dead | none, or dead | out of reach, or dead | nothing | the phone holds the pod | fresh | trying, no answer | nothing | none: the pod read is the check | no pod answer within the 60 s takeover window | watch gives up and returns to rest | phone, in name only: nobody loops | until the pod answers or is replaced | watch: on screen "The pod didn't answer, so Sport Mode didn't start. Neither device is looping." | built | watch `+Start`, `+Seize` | **Highly abnormal.** The phone at home and a dead or faulted pod (watch Bluetooth off has its own warnings; a pocket that blocks radio is not realistic). In tests: the emulator unplugged with the phone's radios off. Nobody can loop, so the looper needs to learn that the pod is the problem. |
 
 **Physically impossible (no behaviour, at most a log line):** the sensor away from the body; a device that can see
 the sensor but not the pod, or the pod but not the sensor.
@@ -228,7 +233,7 @@ Failures only a test can produce. They are logged when recognised; no warning is
 
 - **Pod emulator on a counter, devices carried away.** The watch gets no sensor or pod wakes, watchOS stops its app,
   it goes silent, and a phone back near the counter takes the pod (row 10 by mistake).
-- **Pod emulator not delivering or not reachable.** The pod's total does not move while the records expect basal, so
+- **Pod emulator not delivering or not reachable** (as a real pod that answers no one: rows 24 and 25). The pod's total does not move while the records expect basal, so
   the hand-back check reports insulin overstated, and the phone's reconnect may need its escalation.
 - **Pod emulator needs a reboot** after some failed takeovers.
 - **Water pod** off the body: as the emulator on a counter.
