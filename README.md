@@ -1,6 +1,6 @@
 # Loop for iOS
 
-![App Icon](/AppIcon.icon/Assets/loop_circle.svg?raw=true)
+<img src="/Documentation/AppIcon.png?raw=true" alt="Loop app icon" width="128">
 
 [![Join the chat at https://loop.zulipchat.com](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://loop.zulipchat.com)
 
