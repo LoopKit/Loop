@@ -563,8 +563,8 @@ final class LoopDataManager: ObservableObject {
             volatilityBaseline: volatilityBaseline)
     }
 
-    private var enabledAlgorithmExperiments: Set<LoopAlgorithmExperiment> {
-        var experiments: Set<LoopAlgorithmExperiment> = []
+    private var enabledAlgorithmExperiments: Set<ExperimentOption> {
+        var experiments: Set<ExperimentOption> = []
         if UserDefaults.standard.integralRetrospectiveCorrectionEnabled {
             experiments.insert(.integralRetrospectiveCorrection)
         }
@@ -1055,7 +1055,7 @@ extension LoopDataManager {
     }
 
     /// Glucose based partial application only affects automatic boluses, so it is in effect only with that strategy
-    private func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy) -> [LoopKit.AlgorithmExperiment] {
+    private func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy) -> [AlgorithmExperiment] {
         enabledAlgorithmExperiments
             .filter { $0 != .glucoseBasedApplicationFactor || dosingStrategy == .automaticBolus }
             .sorted { $0.rawValue < $1.rawValue }
@@ -1063,7 +1063,7 @@ extension LoopDataManager {
                 let parameters: JSONValue? = experiment == .guardAndRunway
                     ? volatilityBaseline?.value.map { .object(["volatilityBaseline": .number($0)]) }
                     : nil
-                return LoopKit.AlgorithmExperiment(identifier: experiment.rawValue, parameters: parameters)
+                return AlgorithmExperiment(identifier: experiment.rawValue, parameters: parameters)
             }
     }
 

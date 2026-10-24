@@ -486,7 +486,6 @@
 		C16B984026B4898800256B05 /* DoseEnactorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16B983F26B4898800256B05 /* DoseEnactorTests.swift */; };
 		C16DA84222E8E112008624C2 /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* PluginManager.swift */; };
 		C16F51192B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16F51182B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift */; };
-		A1B2C3D42E8F000100000004 /* LoopAlgorithmExperiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D42E8F000100000003 /* LoopAlgorithmExperiment.swift */; };
 		52ECDA0F09B4C8F23A4B450E /* InsulinDeliveryHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4C16D18C8806FF48331134C /* InsulinDeliveryHistory.swift */; };
 		C16F511B2B89363A00EFD7A1 /* SimpleInsulinDose.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16F511A2B89363A00EFD7A1 /* SimpleInsulinDose.swift */; };
 		C16FC0B02A99392F0025E239 /* live_capture_input.json in Resources */ = {isa = PBXBuildFile; fileRef = C16FC0AF2A99392F0025E239 /* live_capture_input.json */; };
@@ -1321,7 +1320,6 @@
 		C16B983F26B4898800256B05 /* DoseEnactorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseEnactorTests.swift; sourceTree = "<group>"; };
 		C16DA84122E8E112008624C2 /* PluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginManager.swift; sourceTree = "<group>"; };
 		C16F51182B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredDataAlgorithmInput.swift; sourceTree = "<group>"; };
-		A1B2C3D42E8F000100000003 /* LoopAlgorithmExperiment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAlgorithmExperiment.swift; sourceTree = "<group>"; };
 		C4C16D18C8806FF48331134C /* InsulinDeliveryHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryHistory.swift; sourceTree = "<group>"; };
 		C16F511A2B89363A00EFD7A1 /* SimpleInsulinDose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleInsulinDose.swift; sourceTree = "<group>"; };
 		C16FC0AF2A99392F0025E239 /* live_capture_input.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = live_capture_input.json; sourceTree = "<group>"; };
@@ -1724,7 +1722,6 @@
 				4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */,
 				A987CD4824A58A0100439ADC /* ZipArchive.swift */,
 				C16F51182B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift */,
-				A1B2C3D42E8F000100000003 /* LoopAlgorithmExperiment.swift */,
 				C4C16D18C8806FF48331134C /* InsulinDeliveryHistory.swift */,
 				C16F511A2B89363A00EFD7A1 /* SimpleInsulinDose.swift */,
 				C152B9F42C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift */,
@@ -3468,7 +3465,6 @@
 				A9D5C5B625DC6C6A00534873 /* LoopAppManager.swift in Sources */,
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
 				C16F51192B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift in Sources */,
-				A1B2C3D42E8F000100000004 /* LoopAlgorithmExperiment.swift in Sources */,
 				1452F4AB2A851EDF00F8B9E4 /* FavoriteFoodAddEditView.swift in Sources */,
 				C1742332259BEADC00399C9D /* ManualEntryDoseView.swift in Sources */,
 				43F64DD91D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift in Sources */,
