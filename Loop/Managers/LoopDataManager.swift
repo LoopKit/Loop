@@ -1235,7 +1235,8 @@ extension LoopDataManager {
         potentialCarbEntry: NewCarbEntry? = nil,
         replacingCarbEntry replacedCarbEntry: StoredCarbEntry? = nil,
         includingPendingInsulin: Bool = false,
-        includingPositiveVelocityAndRC: Bool = true
+        includingPositiveVelocityAndRC: Bool = true,
+        requireRecentPumpData: Bool = true
     ) throws -> [PredictedGlucoseValue] {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
@@ -1254,8 +1255,10 @@ extension LoopDataManager {
             throw LoopError.invalidFutureGlucose(date: lastGlucoseDate)
         }
 
-        guard now().timeIntervalSince(pumpStatusDate) <= LoopCoreConstants.inputDataRecencyInterval else {
-            throw LoopError.pumpDataTooOld(date: pumpStatusDate)
+        if requireRecentPumpData {
+            guard now().timeIntervalSince(pumpStatusDate) <= LoopCoreConstants.inputDataRecencyInterval else {
+                throw LoopError.pumpDataTooOld(date: pumpStatusDate)
+            }
         }
 
         var momentum: [GlucoseEffect] = []
@@ -1487,8 +1490,16 @@ extension LoopDataManager {
 
         let pendingInsulin = try getPendingInsulin()
         let shouldIncludePendingInsulin = pendingInsulin > 0
-        let prediction = try predictGlucose(using: .all, potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC)
-        return try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry)
+
+        var effectsToUse = PredictionInputEffect.all
+        var requireRecentPumpData = true // default to true to gate existing behavior on other pump types
+        if self.shouldModelAsNoDelivery {
+            // No active pod connected means no basal delivery — model it as suspension
+            effectsToUse.insert(.suspend)
+            requireRecentPumpData = false
+        }
+        let prediction = try predictGlucose(using: effectsToUse, potentialBolus: nil, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: shouldIncludePendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC, requireRecentPumpData: requireRecentPumpData)
+        return try recommendBolusValidatingDataRecency(forPrediction: prediction, consideringPotentialCarbEntry: potentialCarbEntry, requireRecentPumpData: requireRecentPumpData)
     }
 
     /// - Throws:
@@ -1498,7 +1509,8 @@ extension LoopDataManager {
     ///     - LoopError.pumpDataTooOld
     ///     - LoopError.configurationError
     fileprivate func recommendBolusValidatingDataRecency<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample],
-                                                                               consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?) throws -> ManualBolusRecommendation? {
+                                                                               consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?,
+                                                                               requireRecentPumpData: Bool = true) throws -> ManualBolusRecommendation? {
         guard let glucose = glucoseStore.latestGlucose else {
             throw LoopError.missingDataError(.glucose)
         }
@@ -1513,9 +1525,10 @@ extension LoopDataManager {
         guard lastGlucoseDate.timeIntervalSince(now()) <= LoopCoreConstants.inputDataRecencyInterval else {
             throw LoopError.invalidFutureGlucose(date: lastGlucoseDate)
         }
-
-        guard now().timeIntervalSince(pumpStatusDate) <= LoopCoreConstants.inputDataRecencyInterval else {
-            throw LoopError.pumpDataTooOld(date: pumpStatusDate)
+        if requireRecentPumpData {
+            guard now().timeIntervalSince(pumpStatusDate) <= LoopCoreConstants.inputDataRecencyInterval else {
+                throw LoopError.pumpDataTooOld(date: pumpStatusDate)
+            }
         }
 
         guard glucoseMomentumEffect != nil else {
@@ -1531,6 +1544,12 @@ extension LoopDataManager {
         }
 
         return try recommendManualBolus(forPrediction: predictedGlucose, consideringPotentialCarbEntry: potentialCarbEntry)
+    }
+    
+    private var shouldModelAsNoDelivery: Bool {
+        // Model as no delivery if the delegate or status is not present.
+        // If both are present, use the pumpManagerStatus field directly
+        return delegate?.pumpManagerStatus?.shouldModelAsNoDelivery ?? true
     }
     
     /// - Throws: LoopError.configurationError
@@ -1719,7 +1738,8 @@ extension LoopDataManager {
 
         let pumpStatusDate = doseStore.lastAddedPumpData
 
-        if startDate.timeIntervalSince(pumpStatusDate) > LoopCoreConstants.inputDataRecencyInterval {
+        let pumpDataTooOld = startDate.timeIntervalSince(pumpStatusDate) > LoopCoreConstants.inputDataRecencyInterval
+        if pumpDataTooOld {
             errors.append(.pumpDataTooOld(date: pumpStatusDate))
         }
 
@@ -1773,17 +1793,33 @@ extension LoopDataManager {
         }
 
         dosingDecision.appendErrors(errors)
-        if let error = errors.first {
+        let errorsExcludingPumpDataTooOld = errors.filter {
+            if case .pumpDataTooOld = $0 { return false }
+            return true
+        }
+        if let error = errorsExcludingPumpDataTooOld.first {
             logger.error("%{public}@", String(describing: error))
             return (dosingDecision, error)
         }
 
         var loopError: LoopError?
         do {
-            let predictedGlucose = try predictGlucose(using: settings.enabledEffects)
+            var effectsToUse = settings.enabledEffects
+            if self.shouldModelAsNoDelivery {
+                effectsToUse.insert(.suspend)  // no pump = no basal delivery, model it as suspension
+            }
+            let predictedGlucose = try predictGlucose(using: effectsToUse, requireRecentPumpData: false)
             self.predictedGlucose = predictedGlucose
-            let predictedGlucoseIncludingPendingInsulin = try predictGlucose(using: settings.enabledEffects, includingPendingInsulin: true)
+            // Prediction is shown regardless of pump state, while automated dosing still requires fresh pump data (below via pumpDataTooOld)
+            let predictedGlucoseIncludingPendingInsulin = try predictGlucose(using: effectsToUse, includingPendingInsulin: true, requireRecentPumpData: false)
             self.predictedGlucoseIncludingPendingInsulin = predictedGlucoseIncludingPendingInsulin
+
+            if pumpDataTooOld {
+                self.logger.debug("Skipping automatic dose recommendation due to stale pump data.")
+                recommendedAutomaticDose = nil
+                dosingDecision.automaticDoseRecommendation = nil
+                return (dosingDecision, .pumpDataTooOld(date: pumpStatusDate))
+            }
 
             dosingDecision.predictedGlucose = predictedGlucose
 
@@ -1944,6 +1980,17 @@ extension LoopDataManager {
             }
         }
     }
+    
+    
+}
+
+extension PumpManagerStatus {
+    var shouldModelAsNoDelivery: Bool {
+        // Treat a non-active (faulted or setup incomplete) pod just like no pod
+        // OmniBLE reports no active pod as .active(.distantPast)
+        // See both OmniBLEPumpManager.basalDeliveryState(for:) and OmnipodPumpManager.basalDeliveryState(for:)
+        return basalDeliveryState == .active(.distantPast)
+    }
 }
 
 /// Describes a view into the loop state
@@ -1985,9 +2032,10 @@ protocol LoopState {
     /// - Parameter replacedCarbEntry: An existing carb entry replaced by `potentialCarbEntry`
     /// - Parameter includingPendingInsulin: If `true`, the returned prediction will include the effects of scheduled but not yet delivered insulin
     /// - Parameter considerPositiveVelocityAndRC: Positive velocity and positive retrospective correction will not be used if this is false.
+    /// - Parameter requireRecentPumpData: Age of pump data will not be evaluated (and not throw LoopError.pumpDataTooOld) if this is `false`. Set to `false` for predicting insulin without a pump connected.
     /// - Returns: An timeline of predicted glucose values
     /// - Throws: LoopError.missingDataError if prediction cannot be computed
-    func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, includingPendingInsulin: Bool, considerPositiveVelocityAndRC: Bool) throws -> [PredictedGlucoseValue]
+    func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, includingPendingInsulin: Bool, considerPositiveVelocityAndRC: Bool, requireRecentPumpData: Bool) throws -> [PredictedGlucoseValue]
 
     /// Calculates a new prediction from a manual glucose entry in the context of a meal entry
     ///
@@ -2035,7 +2083,8 @@ extension LoopState {
     /// - Returns: An timeline of predicted glucose values
     /// - Throws: LoopError.missingDataError if prediction cannot be computed
     func predictGlucose(using inputs: PredictionInputEffect, includingPendingInsulin: Bool = false) throws -> [GlucoseValue] {
-        try predictGlucose(using: inputs, potentialBolus: nil, potentialCarbEntry: nil, replacingCarbEntry: nil, includingPendingInsulin: includingPendingInsulin, considerPositiveVelocityAndRC: true)
+        // `requireRecentPumpData` set to false as this method is for visualization purposes
+        try predictGlucose(using: inputs, potentialBolus: nil, potentialCarbEntry: nil, replacingCarbEntry: nil, includingPendingInsulin: includingPendingInsulin, considerPositiveVelocityAndRC: true, requireRecentPumpData: false)
     }
 }
 
@@ -2099,9 +2148,9 @@ extension LoopDataManager {
             return loopDataManager.retrospectiveCorrection.totalGlucoseCorrectionEffect
         }
 
-        func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, includingPendingInsulin: Bool, considerPositiveVelocityAndRC: Bool) throws -> [PredictedGlucoseValue] {
+        func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?, includingPendingInsulin: Bool, considerPositiveVelocityAndRC: Bool, requireRecentPumpData: Bool) throws -> [PredictedGlucoseValue] {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
-            return try loopDataManager.predictGlucose(using: inputs, potentialBolus: potentialBolus, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: includingPendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC)
+            return try loopDataManager.predictGlucose(using: inputs, potentialBolus: potentialBolus, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry, includingPendingInsulin: includingPendingInsulin, includingPositiveVelocityAndRC: considerPositiveVelocityAndRC, requireRecentPumpData: requireRecentPumpData)
         }
 
         func predictGlucoseFromManualGlucose(
