@@ -223,6 +223,9 @@ struct ChartPageView: View {
         .onChange(of: loopManager.activeContext?.predictedGlucose) { oldValue, newValue in
             updateGlucoseChart()
         }
+        .onChange(of: loopManager.directGlucoseRevision) { oldValue, newValue in
+            updateGlucoseChart()
+        }
         .sheet(isPresented: $isShowingCarbList) {
             CarbList()
         }

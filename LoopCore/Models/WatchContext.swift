@@ -61,6 +61,9 @@ public final class WatchContext: RawRepresentable {
 
     public var cgmManagerState: CGMManager.RawStateValue?
 
+    /// The CGM's `SharedDeviceConfiguration`, for a watch that reads the sensor itself.
+    public var cgmConfiguration: SharedDeviceConfiguration.RawValue?
+
     public var isClosedLoop: Bool?
     public var deviceIssue: Bool?
     public var isOnboardingCompleted: Bool?
@@ -178,6 +181,7 @@ public final class WatchContext: RawRepresentable {
         cob = rawValue["cob"] as? Double
 
         cgmManagerState = rawValue["cgmManagerState"] as? CGMManager.RawStateValue
+        cgmConfiguration = rawValue["cgmConfiguration"] as? SharedDeviceConfiguration.RawValue
 
         if let rawValue = rawValue["pg"] as? WatchPredictedGlucose.RawValue {
             predictedGlucose = WatchPredictedGlucose(rawValue: rawValue)
@@ -198,6 +202,7 @@ public final class WatchContext: RawRepresentable {
         raw["oc"] = isOnboardingCompleted
 
         raw["cgmManagerState"] = cgmManagerState
+        raw["cgmConfiguration"] = cgmConfiguration
 
         raw["cob"] = cob
 
