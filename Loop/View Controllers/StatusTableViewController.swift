@@ -140,7 +140,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         tableView.estimatedRowHeight = 74
 
         // Estimate an initial value
-        landscapeMode = UIScreen.main.bounds.size.width > UIScreen.main.bounds.size.height
+        landscapeMode = Self.isCompactHeight
 
         addScenarioStepGestureRecognizers()
 
@@ -208,6 +208,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
         if presentedViewController == nil {
             navigationController?.setNavigationBarHidden(false, animated: animated)
         }
+    }
+
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        updateTopContentInset()
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -350,8 +355,22 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
     }
 
-    // Toggles the display mode based on the screen aspect ratio. Should not be updated outside of reloadData().
+    // Charts only, for compact height (an iPhone in landscape). Should not be updated outside of reloadData().
     private var landscapeMode = false
+
+    private static var isCompactHeight: Bool {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let scene = scenes.first { $0.windows.contains { $0.isKeyWindow } }
+            ?? scenes.first { $0.activationState == .foregroundActive }
+            ?? scenes.first
+        return scene?.traitCollection.verticalSizeClass == .compact
+    }
+
+    // With a vertical status bar there is no top safe area inset, so keep the first row clear of the display corners.
+    private var cornerClearanceTopInset: CGFloat {
+        guard #available(iOS 26.0, *), let window = view.window else { return 0 }
+        return max(0, window.edgeInsets(for: .safeArea(cornerAdaptation: .vertical)).top - window.safeAreaInsets.top)
+    }
 
     private var lastLoopError: Error?
 
@@ -361,6 +380,16 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private var shouldShowHUD: Bool {
         return !landscapeMode
+    }
+
+    private func updateTopContentInset() {
+        let top = shouldShowBannerWarning ? 0 : cornerClearanceTopInset
+        guard tableView.contentInset.top != top else { return }
+        let wasAtTop = tableView.contentOffset.y <= -tableView.adjustedContentInset.top
+        tableView.contentInset.top = top
+        if wasAtTop {
+            tableView.contentOffset.y = -tableView.adjustedContentInset.top
+        }
     }
 
     private var shouldShowStatus: Bool {
@@ -792,6 +821,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         } else {
             tableView.reloadRows(at: [IndexPath(row: 0, section: Section.alertWarning.rawValue)], with: .none)
         }
+        updateTopContentInset()
     }
 
     private func updateBannerAndHUDandStatusRows(statusRowMode: StatusRowMode, newSize: CGSize?, animated: Bool) {
@@ -802,8 +832,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         self.statusRowMode = statusRowMode
 
-        if let newSize = newSize {
-            landscapeMode = newSize.width > newSize.height
+        if newSize != nil {
+            landscapeMode = traitCollection.verticalSizeClass == .compact
         }
 
         let hudIsVisible = self.shouldShowHUD
@@ -923,6 +953,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private class AlertPermissionsDisabledWarningCell: UITableViewCell {
+        var fullBleedTopInset: CGFloat?
+
         override func updateConfiguration(using state: UICellConfigurationState) {
             super.updateConfiguration(using: state)
 
@@ -948,18 +980,22 @@ final class StatusTableViewController: LoopChartsTableViewController {
             backgroundConfiguration = backgroundConfig
             backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 5, trailing: 10)
             backgroundConfiguration?.cornerRadius = 10
+            if fullBleedTopInset != nil {
+                applyFullBleedBackground()
+            }
 
             let disclosureIndicator = UIImage(systemName: "chevron.right")?.withTintColor(.white)
             let imageView = UIImageView(image: disclosureIndicator)
             imageView.tintColor = .white
             accessoryView = imageView
 
-            contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 13, trailing: 0)
+            contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: (fullBleedTopInset ?? 0) + 6, leading: 0, bottom: 13, trailing: 0)
         }
     }
 
     private class MuteAlertsWarningCell: UITableViewCell {
         var formattedAlertMuteEndTime: String = NSLocalizedString("Unknown", comment: "label for when the alert mute end time is unknown")
+        var fullBleedTopInset: CGFloat?
 
         fileprivate class GradientView: UIView {
             override static var layerClass: AnyClass { CAGradientLayer.self }
@@ -992,6 +1028,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
             backgroundConfiguration = backgroundConfig
             backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 5, bottom: 5, trailing: 5)
             backgroundConfiguration?.cornerRadius = 10
+            if fullBleedTopInset != nil {
+                applyFullBleedBackground()
+            }
 
             let unmuteIndicator = UIImage(systemName: "stop.circle")?.withTintColor(.white)
             let imageView = UIImageView(image: unmuteIndicator)
@@ -999,19 +1038,22 @@ final class StatusTableViewController: LoopChartsTableViewController {
             imageView.frame.size = CGSize(width: 30, height: 30)
             accessoryView = imageView
 
-            contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 13, trailing: 0)
+            contentView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: (fullBleedTopInset ?? 0) + 6, leading: 0, bottom: 13, trailing: 0)
         }
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch Section(rawValue: indexPath.section)! {
         case .alertWarning:
+            let fullBleedTopInset: CGFloat? = cornerClearanceTopInset > 0 ? cornerClearanceTopInset : nil
             if alertPermissionsChecker.showWarning {
                 let cell = tableView.dequeueReusableCell(withIdentifier: AlertPermissionsDisabledWarningCell.className, for: indexPath) as! AlertPermissionsDisabledWarningCell
+                cell.fullBleedTopInset = fullBleedTopInset
                 return cell
             } else {
                 let cell = tableView.dequeueReusableCell(withIdentifier: MuteAlertsWarningCell.className, for: indexPath) as! MuteAlertsWarningCell
                 cell.formattedAlertMuteEndTime = alertMuter.formattedEndTime
+                cell.fullBleedTopInset = fullBleedTopInset
                 cell.selectionStyle = .none
                 return cell
             }
@@ -1219,8 +1261,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .charts:
             // Compute the height of the HUD, defaulting to 70
             let hudHeight = ceil(hudView?.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height ?? 74)
-            var availableSize = max(tableView.bounds.width, tableView.bounds.height)
-            availableSize -= (tableView.safeAreaInsets.top + tableView.safeAreaInsets.bottom + hudHeight)
+            var availableSize = landscapeMode ? max(tableView.bounds.width, tableView.bounds.height) : tableView.bounds.height
+            availableSize -= (tableView.safeAreaInsets.top + tableView.safeAreaInsets.bottom + tableView.contentInset.top + hudHeight)
 
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
@@ -2256,5 +2298,13 @@ extension StatusTableViewController: ServicesViewModelDelegate {
         settingsViewController.serviceOnboardingDelegate = deviceManager.servicesManager
         settingsViewController.completionDelegate = self
         show(settingsViewController, sender: self)
+    }
+}
+
+private extension UITableViewCell {
+    // Without a top status bar, the banner runs to the top edge and the display corners round it.
+    func applyFullBleedBackground() {
+        backgroundConfiguration?.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 5, trailing: 0)
+        backgroundConfiguration?.cornerRadius = 0
     }
 }
