@@ -68,6 +68,15 @@ public final class LoopCompletionHUDView: BaseHUDView {
             loopStateView.deviceIssue = deviceIssue
         }
     }
+
+    /// The loop is running on another device (the pod is loaned to the watch); do not age.
+    public var loopRunsElsewhere = false {
+        didSet {
+            if loopRunsElsewhere != oldValue {
+                updateDisplay(nil)
+            }
+        }
+    }
     
     public var mostRecentGlucoseDataDate: Date?
     public var mostRecentPumpDataDate: Date?
@@ -149,7 +158,12 @@ public final class LoopCompletionHUDView: BaseHUDView {
         caption?.isHidden = !loopIconClosed
         let timeAgoToIncludeTimeStamp: TimeInterval = .minutes(20)
         let timeAgoToIncludeDate: TimeInterval = .hours(4)
-        if loopIconClosed, let date = lastLoopCompleted {
+        if loopRunsElsewhere {
+            freshness = .fresh
+            onAgoUpdate?(nil)
+            caption?.text = ""
+            accessibilityLabel = LocalizedString("Loop is running on Apple Watch", comment: "Accessibility label describing completion HUD while the watch runs the loop")
+        } else if loopIconClosed, let date = lastLoopCompleted {
             // restrict time ago from 0 to 7 days
             let ago = min(abs(min(0, date.timeIntervalSinceNow)), TimeInterval.days(7))
 
