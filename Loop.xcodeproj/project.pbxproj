@@ -486,6 +486,7 @@
 		C16B984026B4898800256B05 /* DoseEnactorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16B983F26B4898800256B05 /* DoseEnactorTests.swift */; };
 		C16DA84222E8E112008624C2 /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* PluginManager.swift */; };
 		C16F51192B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16F51182B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift */; };
+		A1B2C3D42E8F000100000004 /* LoopAlgorithmExperiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D42E8F000100000003 /* LoopAlgorithmExperiment.swift */; };
 		52ECDA0F09B4C8F23A4B450E /* InsulinDeliveryHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4C16D18C8806FF48331134C /* InsulinDeliveryHistory.swift */; };
 		C16F511B2B89363A00EFD7A1 /* SimpleInsulinDose.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16F511A2B89363A00EFD7A1 /* SimpleInsulinDose.swift */; };
 		C16FC0B02A99392F0025E239 /* live_capture_input.json in Resources */ = {isa = PBXBuildFile; fileRef = C16FC0AF2A99392F0025E239 /* live_capture_input.json */; };
@@ -597,9 +598,7 @@
 		CB1AF8155B1761A30ACA5591 /* Loop/Resources/Sounds/synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = 83081FFB0497A4596F597830 /* Loop/Resources/Sounds/synth.caf */; };
 		D6E28676C2C7751C77C7F2FB /* Loop/Resources/Sounds/spring.caf in Resources */ = {isa = PBXBuildFile; fileRef = 9471E156FC10D6D0FF219C77 /* Loop/Resources/Sounds/spring.caf */; };
 		DD3DBD292A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */; };
-		DDC389F62A2B61750066E2E8 /* ApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */; };
-		DDC389F82A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */; };
-		DDC389FA2A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */; };
+		A1B2C3D42E8F000100000002 /* GuardAndRunwaySelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D42E8F000100000001 /* GuardAndRunwaySelectionView.swift */; };
 		DDC389FC2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */; };
 		DDC389FE2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */; };
 		DE965737FE2DAE9FE692769E /* Loop/Resources/Sounds/alarm.caf in Resources */ = {isa = PBXBuildFile; fileRef = 0FC34B523FE5A50C920506D5 /* Loop/Resources/Sounds/alarm.caf */; };
@@ -1322,6 +1321,7 @@
 		C16B983F26B4898800256B05 /* DoseEnactorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseEnactorTests.swift; sourceTree = "<group>"; };
 		C16DA84122E8E112008624C2 /* PluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginManager.swift; sourceTree = "<group>"; };
 		C16F51182B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredDataAlgorithmInput.swift; sourceTree = "<group>"; };
+		A1B2C3D42E8F000100000003 /* LoopAlgorithmExperiment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAlgorithmExperiment.swift; sourceTree = "<group>"; };
 		C4C16D18C8806FF48331134C /* InsulinDeliveryHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryHistory.swift; sourceTree = "<group>"; };
 		C16F511A2B89363A00EFD7A1 /* SimpleInsulinDose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleInsulinDose.swift; sourceTree = "<group>"; };
 		C16FC0AF2A99392F0025E239 /* live_capture_input.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = live_capture_input.json; sourceTree = "<group>"; };
@@ -1408,9 +1408,7 @@
 		C9SCENED0000000000000002 /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		CE102E23D8C1C1291EF66387 /* PluginPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PluginPickerView.swift; sourceTree = "<group>"; };
 		DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegralRetrospectiveCorrectionSelectionView.swift; sourceTree = "<group>"; };
-		DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationFactorStrategy.swift; sourceTree = "<group>"; };
-		DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorStrategy.swift; sourceTree = "<group>"; };
-		DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstantApplicationFactorStrategy.swift; sourceTree = "<group>"; };
+		A1B2C3D42E8F000100000001 /* GuardAndRunwaySelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardAndRunwaySelectionView.swift; sourceTree = "<group>"; };
 		DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+algorithmExperimentsSection.swift"; sourceTree = "<group>"; };
 		DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorSelectionView.swift; sourceTree = "<group>"; };
 		E4854073AAE5C2CB97167F63 /* HealthAccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthAccessView.swift; sourceTree = "<group>"; };
@@ -1707,14 +1705,11 @@
 		43757D131C06F26C00910CB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */,
 				FEEDF0000000000000000000 /* GlucoseStatistics.swift */,
 				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
 				8378B7D1F532A5F47CEBB6AE /* CarbEntryChange.swift */,
-				DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */,
 				C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */,
 				1455ACB12C667BEE004F44F2 /* Deeplink.swift */,
-				DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */,
 				B40D07C6251A89D500C1C6D7 /* GlucoseDisplay.swift */,
 				43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */,
 				C1C660D0252E4DD5009B5C32 /* LoopConstants.swift */,
@@ -1729,6 +1724,7 @@
 				4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */,
 				A987CD4824A58A0100439ADC /* ZipArchive.swift */,
 				C16F51182B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift */,
+				A1B2C3D42E8F000100000003 /* LoopAlgorithmExperiment.swift */,
 				C4C16D18C8806FF48331134C /* InsulinDeliveryHistory.swift */,
 				C16F511A2B89363A00EFD7A1 /* SimpleInsulinDose.swift */,
 				C152B9F42C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift */,
@@ -2069,6 +2065,7 @@
 				C1AF062229426300002C1B19 /* ManualGlucoseEntryRow.swift */,
 				DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */,
 				DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */,
+				A1B2C3D42E8F000100000001 /* GuardAndRunwaySelectionView.swift */,
 				84DEB10C2C18FABA00170734 /* IOSFocusModesView.swift */,
 				84D1F1A62D09053A00CB271F /* StatusTableView.swift */,
 				B429CAB22E97C7F300FA988E /* LoopStatusModalView.swift */,
@@ -3471,6 +3468,7 @@
 				A9D5C5B625DC6C6A00534873 /* LoopAppManager.swift in Sources */,
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
 				C16F51192B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift in Sources */,
+				A1B2C3D42E8F000100000004 /* LoopAlgorithmExperiment.swift in Sources */,
 				1452F4AB2A851EDF00F8B9E4 /* FavoriteFoodAddEditView.swift in Sources */,
 				C1742332259BEADC00399C9D /* ManualEntryDoseView.swift in Sources */,
 				43F64DD91D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift in Sources */,
@@ -3495,7 +3493,6 @@
 				1D49795824E7289700948F05 /* ServicesViewModel.swift in Sources */,
 				1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */,
 				C1B80D632AF97D7200AB7705 /* LoopDataManager+CarbAbsorption.swift in Sources */,
-				DDC389FA2A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift in Sources */,
 				C191D2A125B3ACAA00C26C0B /* DosingStrategySelectionView.swift in Sources */,
 				A977A2F424ACFECF0059C207 /* CriticalEventLogExportManager.swift in Sources */,
 				89CA2B32226C18B8004D9350 /* TestingScenariosTableViewController.swift in Sources */,
@@ -3532,6 +3529,7 @@
 				1DDE273D24AEA4B000796622 /* SettingsViewModel.swift in Sources */,
 				FEEDB0000000000000000001 /* StatisticsViewModel.swift in Sources */,
 				DD3DBD292A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift in Sources */,
+				A1B2C3D42E8F000100000002 /* GuardAndRunwaySelectionView.swift in Sources */,
 				842E40A72F22F7E2000CCCE0 /* TintedContent.swift in Sources */,
 				842E40A92F22F7E2000CCCE0 /* EstimatedReadTime.swift in Sources */,
 				842E40AA2F22F7E2000CCCE0 /* PresetsTrainingView.swift in Sources */,
@@ -3547,7 +3545,6 @@
 				1DB619AC270BAD3D006C9D07 /* VersionUpdateViewModel.swift in Sources */,
 				A9C62D882331703100535612 /* Service.swift in Sources */,
 				89CAB36324C8FE96009EE3CE /* PredictedGlucoseChartView.swift in Sources */,
-				DDC389F82A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift in Sources */,
 				847F23432E4543140035C864 /* ActivePresetBanner.swift in Sources */,
 				84BC5BDF2E1C4A7300432000 /* InsulinDeliveryEventDetailsView.swift in Sources */,
 				4F6663941E905FD2009E74FC /* ChartColorPalette+Loop.swift in Sources */,
@@ -3632,7 +3629,6 @@
 				A97F250825E056D500F0EE19 /* OnboardingManager.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
-				DDC389F62A2B61750066E2E8 /* ApplicationFactorStrategy.swift in Sources */,
 				FEEDB0000000000000000000 /* GlucoseStatistics.swift in Sources */,
 				4F70C2101DE8FAC5006380B7 /* ExtensionDataManager.swift in Sources */,
 				1455ACB22C667BEE004F44F2 /* Deeplink.swift in Sources */,
