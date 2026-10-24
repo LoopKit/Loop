@@ -61,6 +61,11 @@ public struct ExperimentsSettingsView: View {
                 .foregroundColor(.secondary)
 
                 Divider()
+                NavigationLink(destination: GuardAndRunwaySelectionView(isGuardAndRunwayEnabled: $isGuardAndRunwayEnabled)) {
+                    ExperimentRow(
+                        name: NSLocalizedString("Guard + Runway", comment: "Title of guard and runway experiment"),
+                        enabled: isGuardAndRunwayEnabled)
+                }
                 NavigationLink(destination: GlucoseBasedApplicationFactorSelectionView(isGlucoseBasedApplicationFactorEnabled: $isGlucoseBasedApplicationFactorEnabled, automaticDosingStrategy: automaticDosingStrategy)) {
                     ExperimentRow(
                         name: NSLocalizedString("Glucose Based Partial Application", comment: "Title of glucose based partial application experiment"),
@@ -70,11 +75,6 @@ public struct ExperimentsSettingsView: View {
                     ExperimentRow(
                         name: NSLocalizedString("Integral Retrospective Correction", comment: "Title of integral retrospective correction experiment"),
                         enabled: isIntegralRetrospectiveCorrectionEnabled)
-                }
-                NavigationLink(destination: GuardAndRunwaySelectionView(isGuardAndRunwayEnabled: $isGuardAndRunwayEnabled)) {
-                    ExperimentRow(
-                        name: NSLocalizedString("Guard + Runway", comment: "Title of guard and runway experiment"),
-                        enabled: isGuardAndRunwayEnabled)
                 }
                 Spacer()
             }
