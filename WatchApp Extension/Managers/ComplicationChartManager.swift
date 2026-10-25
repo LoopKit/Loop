@@ -16,6 +16,7 @@ private let textInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
 
 extension CGSize {
     fileprivate static let glucosePoint = CGSize(width: 2, height: 2)
+    fileprivate static let manualGlucosePoint = CGSize(width: 3, height: 3)
 }
 
 extension NSAttributedString {
@@ -150,12 +151,13 @@ final class ComplicationChartManager {
     }
 
     private func drawHistoricalGlucose(in context: CGContext, using scaler: GlucoseChartScaler) {
-        context.setFillColor(UIColor.glucose.cgColor)
         data?.historicalGlucose?.lazy.filter {
             scaler.dates.contains($0.startDate)
         }.forEach { glucose in
             let origin = scaler.point(for: glucose, unit: unit)
-            let glucoseRect = CGRect(origin: origin, size: .glucosePoint).alignedToScreenScale(WKInterfaceDevice.current().screenScale)
+            let size: CGSize = glucose.isManualGlucose ? .manualGlucosePoint : .glucosePoint
+            let glucoseRect = CGRect(origin: origin, size: size).alignedToScreenScale(WKInterfaceDevice.current().screenScale)
+            context.setFillColor((glucose.isManualGlucose ? UIColor.red : UIColor.glucose).cgColor)
             context.fill(glucoseRect)
         }
     }

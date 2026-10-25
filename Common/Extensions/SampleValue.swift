@@ -8,6 +8,14 @@
 import LoopKit
 import LoopAlgorithm
 
+extension SampleValue {
+    /// A glucose value entered by hand, such as a fingerstick or calibration.
+    var isManualGlucose: Bool {
+        guard let sample = self as? GlucoseSampleValue else { return false }
+        return sample.wasUserEntered && !sample.isDisplayOnly
+    }
+}
+
 extension Collection where Element == SampleValue {
     /// O(n)
     var quantityRange: ClosedRange<LoopQuantity>? {
