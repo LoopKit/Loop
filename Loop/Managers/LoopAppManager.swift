@@ -490,7 +490,8 @@ class LoopAppManager: NSObject {
                 closedLoop: settingsManager.dosingEnabled,
                 dosingStrategy: settingsManager.loopSettings.automaticDosingStrategy.analyticsValue,
                 integralRetrospectiveCorrection: UserDefaults.standard.integralRetrospectiveCorrectionEnabled,
-                glucoseBasedPartialApplication: UserDefaults.standard.glucoseBasedApplicationFactorEnabled
+                glucoseBasedPartialApplication: UserDefaults.standard.glucoseBasedApplicationFactorEnabled,
+                guardAndRunway: UserDefaults.standard.guardAndRunwayEnabled
             )
         }
         analyticsServicesManager.identifyState()
