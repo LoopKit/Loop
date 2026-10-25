@@ -77,6 +77,8 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
     private var totalRetrospectiveCorrection: LoopQuantity?
 
+    private var guardAndRunway: GuardAndRunwayOutput?
+
     private var refreshContext = RefreshContext.all
 
     private var chartStartDate: Date {
@@ -126,11 +128,15 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
         self.retrospectiveGlucoseDiscrepancies = algoOutput?.effects.retrospectiveGlucoseDiscrepancies
         totalRetrospectiveCorrection = algoOutput?.effects.totalRetrospectiveCorrectionEffect
+        self.guardAndRunway = algoOutput?.guardAndRunway
 
         self.glucoseChart.setPredictedGlucoseValues(algoOutput?.predictedGlucose ?? [])
 
         do {
-            let glucose = try algoInput?.predictGlucose(effectsOptions: self.selectedInputs.algorithmEffectOptions) ?? []
+            var glucose = try algoInput?.predictGlucose(effectsOptions: self.selectedInputs.algorithmEffectOptions) ?? []
+            if self.selectedInputs.contains(.guardAndRunway), let guardAndRunway = self.guardAndRunway {
+                glucose = guardAndRunway.guarded(glucose)
+            }
             self.glucoseChart.setAlternatePredictedGlucoseValues(glucose)
         } catch {
             self.refreshContext.update(with: .status)
@@ -199,7 +205,8 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
     // Removed .suspend from this list; LoopAlgorithm needs updates to support this. Also review
     // for better ways to support desired use cases. https://github.com/LoopKit/Loop/pull/2026
-    private var availableInputs: [PredictionInputEffect] = [.carbs, .insulin, .momentum, .retrospection]
+    private lazy var availableInputs: [PredictionInputEffect] = [.carbs, .insulin, .momentum, .retrospection]
+        + (UserDefaults.standard.guardAndRunwayEnabled ? [.guardAndRunway] : [])
 
     private var selectedInputs = PredictionInputEffect.all
 
@@ -301,7 +308,26 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
             } else {
                 subtitleText = String(format: "%@\n%@", subtitleText, retro)
             }
-        
+
+            if guardAndRunway?.postLowRiseCutActive == true {
+                subtitleText += "\n" + NSLocalizedString("Rises reduced to 30% after a recent low (Guard + Runway)", comment: "Shown under retrospective correction while the guard and runway post-low rise cut is active")
+            }
+        }
+
+        if input == .guardAndRunway, let guardAndRunway {
+            let formatter = QuantityFormatter(for: glucoseChart.glucoseUnit)
+            func display(_ milligramsPerDeciliter: Double) -> String {
+                formatter.string(from: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: milligramsPerDeciliter)) ?? "?"
+            }
+            let guardText = guardAndRunway.bandApplied
+                ? String(format: NSLocalizedString("Forecast lowered up to %1$@ (recent volatility %2$@)", comment: "Guard and runway band description. (1: The most the forecast is lowered)(2: Recent glucose volatility)"),
+                         display(guardAndRunway.bandDepth), display(guardAndRunway.volatility))
+                : NSLocalizedString("Forecast not lowered while carbs are active", comment: "Guard and runway band description when active carbs keep it off")
+            let runwayText = guardAndRunway.runwayShift > 0
+                ? String(format: NSLocalizedString("Automatic dosing target lowered %1$@", comment: "Guard and runway runway description. (1: How far the automatic dosing target is lowered)"),
+                         display(guardAndRunway.runwayShift))
+                : NSLocalizedString("Automatic dosing target not lowered", comment: "Guard and runway runway description when the target is not lowered")
+            subtitleText = String(format: "%@\n%@", guardText, runwayText)
         }
 
         cell.subtitleLabel?.text = subtitleText
