@@ -35,6 +35,13 @@ enum LoopConstants {
 
     static let statusChartMinimumHistoryDisplay: TimeInterval = .hours(1)
 
+    /// Chart width the time window options are sized for: a portrait iPhone.
+    static let statusChartReferenceWidth: CGFloat = 360
+
+    static let statusChartMaximumWidthScale: CGFloat = 2
+
+    static let chartMinimumWidthPerTimeLabel: CGFloat = 44
+
     static let glucoseChartDefaultDisplayBound =
         LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)...LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
 
