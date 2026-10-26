@@ -402,7 +402,7 @@ class LoopAppManager: NSObject {
         dosingDecisionStore.delegate = deviceDataManager
         remoteDataServicesManager.delegate = deviceDataManager
 
-        let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore!, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceDataManager.deviceLog, alertManager.alertStore]
+        let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore!, glucoseStore, carbStore, dosingDecisionStore, doseStore, temporaryPresetsManager.presetHistory, deviceDataManager.deviceLog, alertManager.alertStore]
         criticalEventLogExportManager = CriticalEventLogExportManager(logs: criticalEventLogs,
                                                                       directory: FileManager.default.exportsDirectoryURL,
                                                                       historicalDuration: localCacheDuration)
