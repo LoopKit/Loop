@@ -120,6 +120,13 @@ final class AlarmSoundCatalogTests: XCTestCase {
                        CriticalAlertAudioPlayer.minBurstDuration, accuracy: 0.001)
     }
 
+    /// Every alarm names itself on screen — the sound picker is titled with it.
+    func testEveryAlarmHasADistinctName() {
+        let names = GlucoseAlarmKind.allCases.map { $0.displayName }
+        XCTAssertEqual(Set(names).count, names.count)
+        XCTAssertFalse(names.contains { $0.isEmpty })
+    }
+
     func testThemedEntryDefaultsToTheMediumVariant() {
         for kind in GlucoseAlarmKind.allCases {
             for entry in AlarmSoundCatalog.themedEntries(for: kind) where entry.selector == .urgency {

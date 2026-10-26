@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import LoopAlgorithm
 import LoopKit
 @testable import Loop
 
@@ -133,5 +134,129 @@ final class GlucoseAlertManagerTests: XCTestCase {
         let rising = now.addingTimeInterval(10 * 60)
         await restarted.evaluate(samples: [sample(200, at: rising)], now: rising)
         XCTAssertEqual(issuer.issuedIDs, [GlucoseAlertManager.highAlertIdentifier])
+    }
+
+    // MARK: - Armed alert tests
+
+    private func predicted(_ mgdl: Double, at date: Date) -> PredictedGlucoseValue {
+        PredictedGlucoseValue(startDate: date, quantity: .glucose(value: mgdl))
+    }
+
+    /// The point of arming is that the alert arrives later, from whatever state
+    /// Loop is in — so it waits for a reading rather than firing on the spot.
+    func testArmingDoesNotFireImmediately() async {
+        manager.armTest(for: .low)
+        XCTAssertEqual(manager.armedTest, .low)
+        XCTAssertEqual(issuer.issued, [])
+    }
+
+    func testArmedTestFiresOnTheNextReading() async {
+        manager.armTest(for: .low)
+        let now = Date()
+        await manager.evaluate(samples: [sample(120, at: now)], now: now)
+        XCTAssertEqual(issuer.issuedIDs, [GlucoseAlarmKind.low.testAlertIdentifier])
+        XCTAssertNil(manager.armedTest, "The test is one-shot")
+    }
+
+    /// It rides along with the reading; it must not stand in for it. An armed
+    /// test while glucose is genuinely urgent-low has to leave the real alert
+    /// alone.
+    func testArmedTestLeavesTheRealEvaluationAlone() async {
+        manager.armTest(for: .high)
+        let now = Date()
+        await manager.evaluate(samples: [sample(50, at: now)], now: now)
+        XCTAssertEqual(issuer.issuedIDs,
+                       [GlucoseAlertManager.urgentLowAlertIdentifier, GlucoseAlarmKind.high.testAlertIdentifier])
+    }
+
+    /// Arming one alarm must not fire another.
+    func testArmedTestFiresOnlyTheArmedAlarm() async {
+        manager.armTest(for: .urgentLow)
+        let now = Date()
+        await manager.evaluate(samples: [sample(120, at: now)], now: now)
+        XCTAssertEqual(issuer.issuedIDs, [GlucoseAlarmKind.urgentLow.testAlertIdentifier])
+    }
+
+    func testCancellingAnArmedTestStopsIt() async {
+        manager.armTest(for: .low)
+        manager.cancelArmedTest()
+        XCTAssertNil(manager.armedTest)
+        let now = Date()
+        await manager.evaluate(samples: [sample(120, at: now)], now: now)
+        XCTAssertEqual(issuer.issuedIDs, [])
+    }
+
+    /// Predicted Low has no reading of its own to ride along with, so a glucose
+    /// batch must leave its armed test alone and the next loop cycle must fire it.
+    func testPredictedLowTestWaitsForALoopCycle() async {
+        manager.armTest(for: .predictedLow)
+        let now = Date()
+        await manager.evaluate(samples: [sample(120, at: now)], now: now)
+        XCTAssertEqual(issuer.issuedIDs, [])
+        XCTAssertEqual(manager.armedTest, .predictedLow)
+
+        // A forecast that stays well above the threshold: no real alert.
+        await manager.evaluatePredictedGlucose([predicted(140, at: now.addingTimeInterval(15 * 60))], now: now)
+        XCTAssertEqual(issuer.issuedIDs, [GlucoseAlarmKind.predictedLow.testAlertIdentifier])
+        XCTAssertNil(manager.armedTest)
+    }
+
+    /// The test is only worth anything if it asks for delivery on the same
+    /// terms as the real alarm: same sound, same interruption level.
+    func testArmedTestCarriesTheAlarmsSoundAndInterruptionLevel() async {
+        manager.urgentLowSound = "chime.caf"
+        manager.armTest(for: .urgentLow)
+        let now = Date()
+        await manager.evaluate(samples: [sample(120, at: now)], now: now)
+        let alert = issuer.issued.first
+        XCTAssertEqual(alert?.sound?.filename, "chime.caf")
+        XCTAssertEqual(alert?.interruptionLevel, .critical)
+        XCTAssertEqual(alert?.trigger, .immediate)
+    }
+
+    func testNonUrgentArmedTestsAreTimeSensitive() {
+        for kind in [GlucoseAlarmKind.low, .high, .predictedLow] {
+            XCTAssertEqual(kind.interruptionLevel, .timeSensitive, "\(kind)")
+        }
+        XCTAssertEqual(GlucoseAlarmKind.urgentLow.interruptionLevel, .critical)
+    }
+
+    /// A test identifier has to be distinct from the real one — that is what
+    /// keeps a test out of the real alarm's episode state and retraction — but
+    /// still has to resolve to the same alarm's sound and silent-mode setting.
+    func testTestIdentifiersAreDistinctButResolveToTheSameAlarm() {
+        manager.lowSound = "harp.caf"
+        manager.lowPlaysThroughSilent = true
+        for kind in GlucoseAlarmKind.allCases {
+            XCTAssertNotEqual(kind.testAlertIdentifier, kind.alertIdentifier)
+            XCTAssertEqual(GlucoseAlarmKind.kind(forAlertIdentifier: kind.testAlertIdentifier), kind)
+            XCTAssertEqual(GlucoseAlarmKind.kind(forAlertIdentifier: kind.alertIdentifier), kind)
+            XCTAssertEqual(manager.configuredSoundName(for: kind.testAlertIdentifier),
+                           manager.configuredSoundName(for: kind.alertIdentifier))
+            XCTAssertEqual(manager.playsThroughSilent(for: kind.testAlertIdentifier),
+                           manager.playsThroughSilent(for: kind.alertIdentifier))
+        }
+        XCTAssertEqual(manager.configuredSoundName(for: GlucoseAlarmKind.low.testAlertIdentifier), "harp.caf")
+        XCTAssertTrue(manager.playsThroughSilent(for: GlucoseAlarmKind.low.testAlertIdentifier))
+    }
+
+    /// iOS can terminate a backgrounded Loop before the next reading lands; a
+    /// test that quietly evaporates looks exactly like a broken alarm.
+    func testArmedTestSurvivesRelaunch() async {
+        manager.armTest(for: .high)
+        let restarted = relaunch()
+        XCTAssertEqual(restarted.armedTest, .high)
+
+        let now = Date()
+        await restarted.evaluate(samples: [sample(120, at: now)], now: now)
+        XCTAssertEqual(issuer.issuedIDs, [GlucoseAlarmKind.high.testAlertIdentifier])
+
+        // And it is cleared, so it can't fire again on the launch after that.
+        XCTAssertNil(relaunch().armedTest)
+    }
+
+    func testUnknownIdentifierHasNoAlarm() {
+        XCTAssertNil(GlucoseAlarmKind.kind(forAlertIdentifier: "something.else"))
+        XCTAssertFalse(manager.playsThroughSilent(for: "something.else"))
     }
 }

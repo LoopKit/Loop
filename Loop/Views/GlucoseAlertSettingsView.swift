@@ -402,7 +402,6 @@ struct GlucoseAlertDetailView: View {
     let horizon: HorizonBinding?
     let infoNotice: String?
     var delay: DelayBinding? = nil
-    var showsTestButton: Bool = false
     var soundBinding: Binding<String>? = nil
     /// Which alarm this is, so the picker can lead with the sets written for it.
     var soundKind: GlucoseAlarmKind? = nil
@@ -480,28 +479,68 @@ struct GlucoseAlertDetailView: View {
                             Text("The sound played when this alarm fires.")
                         }
                     }
-                }
-            }
 
-            if showsTestButton, FeatureFlags.allowDebugFeatures {
-                Section {
-                    if manager.pendingTestUrgentLow {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-                            Text("Test armed — next CGM reading will fire")
-                            Spacer()
-                            Button("Cancel") { manager.cancelTestUrgentLow() }.foregroundStyle(.red)
-                        }
-                    } else {
-                        Button("Arm test alert") { manager.armTestUrgentLowOnNextReading() }
-                    }
-                } footer: {
-                    Text("Arming substitutes a below-threshold value in place of the next real CGM reading, so the alert fires from whatever app state Loop is in at that moment.")
+                    ArmTestSection(kind: soundKind, manager: manager)
                 }
             }
         }
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// Sends one real alert on demand, so the alarm can be checked end to end
+/// against whatever the phone is actually set to — ringer level, silent
+/// switch, a Focus, Do Not Disturb, the Critical Alerts permission.
+///
+/// Arming rather than firing on the spot is the point: the alert goes out
+/// alongside the next reading, which leaves time to lock the phone, put it in
+/// a pocket or turn a Focus on first. Firing from the settings screen would
+/// only ever prove that a foreground alert works.
+private struct ArmTestSection: View {
+    let kind: GlucoseAlarmKind
+    @ObservedObject var manager: GlucoseAlertManager
+
+    private var isArmed: Bool { manager.armedTest == kind }
+
+    var body: some View {
+        Section {
+            if isArmed {
+                HStack {
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                    Text(armedLabel)
+                    Spacer()
+                    Button("Cancel") { manager.cancelArmedTest() }.foregroundStyle(.red)
+                }
+            } else {
+                Button("Test This Alert") { manager.armTest(for: kind) }
+            }
+        } footer: {
+            Text(explanation)
+        }
+    }
+
+    private var armedLabel: String {
+        kind == .predictedLow
+            ? NSLocalizedString("Armed — fires on the next loop cycle",
+                                comment: "Status of an armed predicted-low alert test")
+            : NSLocalizedString("Armed — fires on the next sensor reading",
+                                comment: "Status of an armed glucose alert test")
+    }
+
+    private var explanation: String {
+        let lead = kind == .predictedLow
+            ? NSLocalizedString("Sends this alert once, on the next completed loop cycle.",
+                                comment: "Footer of the predicted-low alert test control, when it fires")
+            : NSLocalizedString("Sends this alert once, with the next sensor reading.",
+                                comment: "Footer of the glucose alert test control, when it fires")
+        let purpose = NSLocalizedString(
+            "Lock your phone, turn on a Focus or turn your ringer down first, then see whether the alert still reaches you.",
+            comment: "Footer of the glucose alert test control, what it is for"
+        )
+        let reassurance = NSLocalizedString("Your glucose data and your real alerts aren't affected.",
+                                            comment: "Footer of the glucose alert test control, reassurance")
+        return [lead, purpose, reassurance].joined(separator: " ")
     }
 }
 
@@ -527,7 +566,7 @@ extension GlucoseAlertDetailView {
             description: "Alerts you when your sensor reading is at or below this level. Repeats every 5 min while still low.",
             levelLabel: "Level", level: detail.cfgBind(\.urgentLowThresholdMgDL), levelRange: 50...70,
             enabled: detail.cfgBind(\.urgentLowEnabled),
-            snooze: nil, horizon: nil, infoNotice: notice, showsTestButton: true,
+            snooze: nil, horizon: nil, infoNotice: notice,
             soundBinding: Binding(get: { manager.urgentLowSound }, set: { manager.urgentLowSound = $0 }), soundKind: .urgentLow
         )
     }

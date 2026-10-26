@@ -25,6 +25,42 @@ enum GlucoseAlarmKind: String, CaseIterable {
     case low
     case predictedLow
     case high
+
+    var displayName: String {
+        switch self {
+        case .urgentLow: return NSLocalizedString("Urgent Low", comment: "Name of the urgent low glucose alarm")
+        case .low: return NSLocalizedString("Low", comment: "Name of the low glucose alarm")
+        case .predictedLow: return NSLocalizedString("Predicted Low", comment: "Name of the predicted low glucose alarm")
+        case .high: return NSLocalizedString("High", comment: "Name of the high glucose alarm")
+        }
+    }
+
+    /// Identifier of the alert this alarm issues.
+    var alertIdentifier: Alert.AlertIdentifier {
+        switch self {
+        case .urgentLow: return GlucoseAlertManager.urgentLowAlertIdentifier
+        case .low: return GlucoseAlertManager.lowAlertIdentifier
+        case .predictedLow: return GlucoseAlertManager.predictedLowAlertIdentifier
+        case .high: return GlucoseAlertManager.highAlertIdentifier
+        }
+    }
+
+    /// Identifier of this alarm's armed *test* alert. Deliberately distinct
+    /// from the real one: a test then can't touch the real alarm's episode
+    /// state, its retraction, or its AlarmKit alarm.
+    var testAlertIdentifier: Alert.AlertIdentifier { "\(alertIdentifier).test" }
+
+    /// Matches the real alarm's level. Getting past Focus and the silent
+    /// switch is the whole point of the test, so the test has to ask for
+    /// delivery on exactly the same terms.
+    var interruptionLevel: Alert.InterruptionLevel {
+        self == .urgentLow ? .critical : .timeSensitive
+    }
+
+    /// The alarm an alert identifier belongs to, real or test.
+    static func kind(forAlertIdentifier identifier: Alert.AlertIdentifier) -> GlucoseAlarmKind? {
+        allCases.first { $0.alertIdentifier == identifier || $0.testAlertIdentifier == identifier }
+    }
 }
 
 /// How disruptive a themed alarm sounds. Intensity is carried by timbre,
@@ -388,6 +424,7 @@ final class GlucoseAlertManager: ObservableObject {
     private static let highPlaysThroughSilentKey = "GlucoseAlertHighPlaysThroughSilent"
     private static let predictedLowPlaysThroughSilentKey = "GlucoseAlertPredictedLowPlaysThroughSilent"
     private static let episodeStateKey = "GlucoseAlertEpisodeState"
+    private static let armedTestKey = "GlucoseAlertArmedTest"
 
     // Per-alarm sound defaults: each alarm's own Acoustic set at Medium, the
     // variant the sound designer recommends after testing with PWDs.
@@ -459,22 +496,22 @@ final class GlucoseAlertManager: ObservableObject {
     }
 
     func playsThroughSilent(for identifier: Alert.AlertIdentifier) -> Bool {
-        switch identifier {
-        case Self.lowAlertIdentifier:          return lowPlaysThroughSilent
-        case Self.highAlertIdentifier:         return highPlaysThroughSilent
-        case Self.predictedLowAlertIdentifier: return predictedLowPlaysThroughSilent
-        default:                               return false
+        switch GlucoseAlarmKind.kind(forAlertIdentifier: identifier) {
+        case .low:            return lowPlaysThroughSilent
+        case .high:           return highPlaysThroughSilent
+        case .predictedLow:   return predictedLowPlaysThroughSilent
+        case .urgentLow, nil: return false
         }
     }
 
     /// The configured sound filename for a given glucose alarm identifier.
     func configuredSoundName(for identifier: Alert.AlertIdentifier) -> String {
-        switch identifier {
-        case Self.urgentLowAlertIdentifier:   return urgentLowSound
-        case Self.lowAlertIdentifier:         return lowSound
-        case Self.highAlertIdentifier:        return highSound
-        case Self.predictedLowAlertIdentifier: return predictedLowSound
-        default:                              return Self.defaultUrgentLowSound
+        switch GlucoseAlarmKind.kind(forAlertIdentifier: identifier) {
+        case .urgentLow:    return urgentLowSound
+        case .low:          return lowSound
+        case .high:         return highSound
+        case .predictedLow: return predictedLowSound
+        case nil:           return Self.defaultUrgentLowSound
         }
     }
 
@@ -650,7 +687,24 @@ final class GlucoseAlertManager: ObservableObject {
     private var latestReading: (mgdl: Double, date: Date)?
     private var cancellables = Set<AnyCancellable>()
 
-    @Published private(set) var pendingTestUrgentLow: Bool = false
+    /// The alarm whose test is armed, if any. One at a time; arming another
+    /// replaces it. The test waits for the next CGM reading (or the next loop
+    /// cycle, for Predicted Low) so it is delivered from whatever state Loop
+    /// is actually in — backgrounded, screen locked, phone in a Focus — which
+    /// is the thing the user is trying to check.
+    ///
+    /// Persisted, because iOS may terminate a backgrounded Loop before the
+    /// next reading arrives, and a test that quietly evaporates reads exactly
+    /// like an alarm that doesn't work.
+    @Published private(set) var armedTest: GlucoseAlarmKind? {
+        didSet {
+            if let armedTest {
+                userDefaults.set(armedTest.rawValue, forKey: Self.armedTestKey)
+            } else {
+                userDefaults.removeObject(forKey: Self.armedTestKey)
+            }
+        }
+    }
 
     // MARK: - Init
 
@@ -726,6 +780,8 @@ final class GlucoseAlertManager: ObservableObject {
             for key in keysToRemove { userDefaults.removeObject(forKey: key) }
         }
 
+        self.armedTest = userDefaults.string(forKey: Self.armedTestKey).flatMap(GlucoseAlarmKind.init(rawValue:))
+
         if let data = userDefaults.data(forKey: Self.episodeStateKey),
            let saved = try? JSONDecoder().decode(EpisodeState.self, from: data) {
             lowState = saved.low
@@ -744,12 +800,47 @@ final class GlucoseAlertManager: ObservableObject {
 
     // MARK: - Test support
 
-    func armTestUrgentLowOnNextReading() {
-        pendingTestUrgentLow = true
-        os_log("Test: armed", log: log, type: .info)
+    /// Arm a test of one alarm, to be delivered alongside the next reading.
+    func armTest(for kind: GlucoseAlarmKind) {
+        armedTest = kind
+        os_log("Test armed for %{public}@", log: log, type: .info, kind.rawValue)
     }
 
-    func cancelTestUrgentLow() { pendingTestUrgentLow = false }
+    func cancelArmedTest() { armedTest = nil }
+
+    /// Issue the armed test alert for `kind`, if that's the one armed.
+    ///
+    /// The test alert carries the alarm's configured sound and its real
+    /// interruption level — critical for Urgent Low, time-sensitive for the
+    /// rest — so it exercises the same delivery path, including the AlarmKit
+    /// and in-app audio fallbacks. It carries its own identifier and is issued
+    /// in addition to (never in place of) the normal evaluation, so no reading
+    /// is substituted or discarded and no real alarm's state is touched.
+    private func fireArmedTest(for kind: GlucoseAlarmKind) async {
+        guard armedTest == kind else { return }
+        armedTest = nil
+        let content = Alert.Content(
+            title: String(
+                format: NSLocalizedString("%1$@ Alert Test", comment: "Title of a test glucose alert (1: alarm name)"),
+                kind.displayName
+            ),
+            body: NSLocalizedString(
+                "This is a test of this alarm's sound and delivery. Your glucose has not crossed the level.",
+                comment: "Body of a test glucose alert"
+            ),
+            acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Acknowledge button on a test glucose alert")
+        )
+        let alert = Alert(
+            identifier: Alert.Identifier(managerIdentifier: Self.managerIdentifier, alertIdentifier: kind.testAlertIdentifier),
+            foregroundContent: content,
+            backgroundContent: content,
+            trigger: .immediate,
+            interruptionLevel: kind.interruptionLevel,
+            sound: .sound(name: configuredSoundName(for: kind.testAlertIdentifier))
+        )
+        os_log("Firing armed test for %{public}@", log: log, type: .info, kind.rawValue)
+        await alertIssuer.issueAlert(alert)
+    }
 
     // MARK: - Persistence
 
@@ -784,13 +875,7 @@ final class GlucoseAlertManager: ObservableObject {
         }
         latestReading = (latest.quantity.doubleValue(for: .milligramsPerDeciliter), latest.date)
         let config = activeConfiguration(at: now)
-        let mgdl: Double
-        if pendingTestUrgentLow {
-            mgdl = max(20, config.urgentLowThresholdMgDL - 5)
-            pendingTestUrgentLow = false
-        } else {
-            mgdl = latest.quantity.doubleValue(for: .milligramsPerDeciliter)
-        }
+        let mgdl = latest.quantity.doubleValue(for: .milligramsPerDeciliter)
         // Low and urgent-low are mutually exclusive: a reading below the
         // urgent-low threshold is also below the low threshold, so issuing both
         // in the same check is redundant. As a rule, only surface the most
@@ -799,6 +884,13 @@ final class GlucoseAlertManager: ObservableObject {
         await evaluateLow(mgdl: mgdl, config: config, now: now, supersededByUrgentLow: urgentLowSupersedes)
         await evaluateUrgentLow(mgdl: mgdl, config: config, now: now)
         await evaluateHigh(mgdl: mgdl, config: config, now: now)
+
+        // An armed test rides along with a real reading so it arrives from
+        // whatever state Loop is in at that moment, but it is issued on its own
+        // identifier and leaves the evaluation above untouched.
+        if let armed = armedTest, armed != .predictedLow {
+            await fireArmedTest(for: armed)
+        }
     }
 
     private func evaluateLow(mgdl: Double, config: GlucoseAlertConfiguration, now: Date, supersededByUrgentLow: Bool) async {
@@ -881,6 +973,12 @@ final class GlucoseAlertManager: ObservableObject {
         guard effectiveLoopAlertsEnabled else { return }
         let config = activeConfiguration(at: now)
         guard config.predictedLowEnabled else { return }
+
+        // Predicted Low has no reading of its own to ride along with; its test
+        // goes out on the next completed loop cycle instead.
+        if armedTest == .predictedLow {
+            await fireArmedTest(for: .predictedLow)
+        }
 
         func retractIfActive() async {
             guard predictedLowInEpisode else { return }
