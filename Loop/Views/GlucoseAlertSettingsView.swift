@@ -711,28 +711,83 @@ private struct SoundPickerView: View {
     }
 
     var body: some View {
-        List {
-            Section {
-                ForEach(AlarmSoundCatalog.themedEntries(for: kind)) { entry in
-                    SoundPickerRow(entry: entry, selection: $selection, preview: preview)
-                }
-            } footer: {
-                Text("These sets are written for this alarm. Urgency picks a different recording, not the same one louder.")
-            }
-
-            Section {
-                DisclosureGroup(isExpanded: $showsOtherSounds) {
-                    ForEach(AlarmSoundCatalog.genericTones) { entry in
+        ScrollViewReader { proxy in
+            List {
+                Section {
+                    ForEach(AlarmSoundCatalog.themedEntries(for: kind)) { entry in
                         SoundPickerRow(entry: entry, selection: $selection, preview: preview)
+                            .id(entry.id)
                     }
-                } label: {
-                    Text("Other Sounds")
+                } footer: {
+                    Text(footer)
                 }
+
+                Section {
+                    // Not a DisclosureGroup: its chevron points the way a
+                    // NavigationLink's does, so the row reads as a push rather
+                    // than as something that opens in place. Down for "more
+                    // below", flipping up once it is open.
+                    Button {
+                        withAnimation { showsOtherSounds.toggle() }
+                    } label: {
+                        HStack {
+                            Text("Other Sounds").foregroundStyle(.primary)
+                            Spacer()
+                            Text("\(AlarmSoundCatalog.genericTones.count)")
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.down")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                                .rotationEffect(.degrees(showsOtherSounds ? 180 : 0))
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint(showsOtherSounds ? "Collapse" : "Expand")
+
+                    if showsOtherSounds {
+                        ForEach(AlarmSoundCatalog.genericTones) { entry in
+                            SoundPickerRow(entry: entry, selection: $selection, preview: preview)
+                                .id(entry.id)
+                        }
+                    }
+                }
+            }
+            .onAppear {
+                // Opening the group isn't enough on its own — a pick near the
+                // bottom of 26 tones is still off screen. Land on it.
+                guard let entry = AlarmSoundCatalog.entry(forFilename: selection), entry.isGeneric else { return }
+                DispatchQueue.main.async { proxy.scrollTo(entry.id, anchor: .center) }
             }
         }
-        .navigationTitle("Sound")
+        .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { preview.stop() }
+    }
+
+    /// Names the alarm being edited: four screens otherwise titled "Sound".
+    private var title: String {
+        String(
+            format: NSLocalizedString("%1$@ Sound", comment: "Title of the alarm sound picker (1: alarm name)"),
+            kind.displayName
+        )
+    }
+
+    /// Describes whichever control the selected set actually shows.
+    private var footer: String {
+        let lead = NSLocalizedString("These sets are written for this alarm.",
+                                     comment: "Footer of the themed alarm sound list")
+        switch AlarmSoundCatalog.entry(forFilename: selection)?.selector {
+        case .urgency:
+            return lead + " " + NSLocalizedString("Urgency picks a different recording, not the same one louder.",
+                                                  comment: "Footer of the themed alarm sound list, urgency slider shown")
+        case .voice:
+            return lead + " " + NSLocalizedString("Voice picks who reads the alert out.",
+                                                  comment: "Footer of the themed alarm sound list, voice picker shown")
+        default:
+            // A generic tone, or a file no longer in the catalog: no control.
+            return lead
+        }
     }
 }
 
@@ -839,21 +894,19 @@ private struct SoundPickerRow: View {
         .padding(.leading, 32)
     }
 
+    /// No label above it: the row this sits under is already titled "Voice".
     private var voicePicker: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Voice").font(.footnote)
-            Picker("Voice", selection: Binding(
-                get: { variant.id },
-                set: { id in
-                    guard let match = entry.variants.first(where: { $0.id == id }) else { return }
-                    select(match)
-                }
-            )) {
-                ForEach(entry.variants) { Text($0.displayName).tag($0.id) }
+        Picker("Voice", selection: Binding(
+            get: { variant.id },
+            set: { id in
+                guard let match = entry.variants.first(where: { $0.id == id }) else { return }
+                select(match)
             }
-            .labelsHidden()
-            .pickerStyle(.segmented)
+        )) {
+            ForEach(entry.variants) { Text($0.displayName).tag($0.id) }
         }
+        .labelsHidden()
+        .pickerStyle(.segmented)
         .padding(.leading, 32)
     }
 
@@ -911,7 +964,13 @@ private final class AlarmSoundPreviewPlayer: ObservableObject {
 
     private lazy var previewDelegate: PreviewDelegate = {
         let delegate = PreviewDelegate()
-        delegate.onFinish = { [weak self] in self?.stop() }
+        // Which player finished matters: the hop to the main actor leaves a
+        // tick in which a new preview can already have started, and that one
+        // must not be stopped by its predecessor finishing.
+        delegate.onFinish = { [weak self] finished in
+            guard let self, self.player === finished else { return }
+            self.stop()
+        }
         return delegate
     }()
 }
@@ -919,9 +978,9 @@ private final class AlarmSoundPreviewPlayer: ObservableObject {
 /// Clears the play state once a preview runs out, so the row flips back from
 /// stop to play without the user tapping anything.
 private final class PreviewDelegate: NSObject, AVAudioPlayerDelegate {
-    var onFinish: (() -> Void)?
+    var onFinish: ((AVAudioPlayer) -> Void)?
 
-    func audioPlayerDidFinishPlaying(_: AVAudioPlayer, successfully _: Bool) {
-        Task { @MainActor in self.onFinish?() }
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully _: Bool) {
+        Task { @MainActor in self.onFinish?(player) }
     }
 }
