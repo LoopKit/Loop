@@ -321,6 +321,18 @@ extension SettingsView {
                 )
                 .accessibilityIdentifier("settingsViewLiveActivity")
             }
+            NavigationLink(destination: DisplaySettingsView()) {
+                LargeButton(
+                    action: {},
+                    includeArrow: false,
+                    imageView: Image(systemName: "chart.line.uptrend.xyaxis")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 30),
+                    label: NSLocalizedString("Display", comment: "Display settings button text"),
+                    descriptiveText: NSLocalizedString("Chart scale, time window and now line", comment: "Display settings descriptive text")
+                )
+            }
         }
     }
 
@@ -817,6 +829,59 @@ public struct SettingsView_Previews: PreviewProvider {
                 .previewDevice(PreviewDevice(rawValue: "iPhone 11 Pro Max"))
                 .previewDisplayName("11 Pro dark")
                 .environmentObject(displayGlucosePreference)
+        }
+    }
+}
+
+enum DisplayPreference {
+    static let nowLine = "DisplayNowLine"
+    static let fixedGlucoseScale = "DisplayFixedGlucoseScale"
+    static let historyHours = "DisplayHistoryHours"
+}
+
+struct DisplaySettingsView: View {
+    @AppStorage(DisplayPreference.nowLine) private var nowLine = false
+    @AppStorage(DisplayPreference.fixedGlucoseScale) private var fixedGlucoseScale = false
+    @AppStorage(DisplayPreference.historyHours) private var historyHours = 0
+    @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
+
+    private var fixedScaleRange: String {
+        let values = GlucoseChart.fixedScaleAxisValues(for: displayGlucosePreference.unit)
+        let formatter = displayGlucosePreference.formatter.numberFormatter
+        return "\(formatter.string(from: values.first! as NSNumber) ?? "")–\(formatter.string(from: values.last! as NSNumber) ?? "")"
+    }
+
+    var body: some View {
+        List {
+            Section(footer: Text("A vertical line marking the current time on each chart.")) {
+                Toggle("Now Line", isOn: $nowLine)
+            }
+            Section(header: Text("Glucose Scale"), footer: Text("Fixed keeps the glucose chart at \(fixedScaleRange) \(displayGlucosePreference.unit.localizedShortUnitString) so every glance uses the same scale. Auto zooms to fit recent and forecast glucose.")) {
+                Picker("Glucose Scale", selection: $fixedGlucoseScale) {
+                    Text("Auto").tag(false)
+                    Text("Fixed \(fixedScaleRange)").tag(true)
+                }
+                .pickerStyle(.segmented)
+            }
+            Section(header: Text("Time Window"), footer: Text("The full forecast covers your insulin action time.")) {
+                Picker("Time Window", selection: $historyHours) {
+                    timeWindowRow("Full Forecast", detail: "As much history as fits").tag(0)
+                    timeWindowRow("3 Hours", detail: "3 h back, 3 h ahead").tag(3)
+                    timeWindowRow("6 Hours", detail: "6 h back, full forecast").tag(6)
+                    timeWindowRow("12 Hours", detail: "12 h back, full forecast").tag(12)
+                }
+                .pickerStyle(.inline)
+                .labelsHidden()
+            }
+        }
+        .insetGroupedListStyle()
+        .navigationTitle("Display")
+    }
+
+    private func timeWindowRow(_ title: LocalizedStringKey, detail: LocalizedStringKey) -> some View {
+        VStack(alignment: .leading) {
+            Text(title)
+            Text(detail).font(.footnote).foregroundColor(.secondary)
         }
     }
 }

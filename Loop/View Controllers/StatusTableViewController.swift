@@ -96,11 +96,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         tableView.register(InsulinSuspendedTableViewCell.nib(), forCellReuseIdentifier: InsulinSuspendedTableViewCell.className)
         tableView.register(RecentGlucoseTableViewCell.nib(), forCellReuseIdentifier: RecentGlucoseTableViewCell.className)
 
-        if FeatureFlags.predictedGlucoseChartClampEnabled {
-            statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBoundClamped
-        } else {
-            statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBound
-        }
+        applyDisplayPreferences()
 
         registerPumpManager()
         registerCGMManager()
@@ -108,6 +104,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let notificationCenter = NotificationCenter.default
 
         notificationObservers += [
+            notificationCenter.addObserver(forName: UserDefaults.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    guard let self, self.displayPreferencesSnapshot != self.currentDisplayPreferences else { return }
+                    self.applyDisplayPreferences()
+                    self.refreshContext = RefreshContext.all
+                    self.tableView.reloadSections(IndexSet(integer: Section.charts.rawValue), with: .none)
+                    Task { await self.reloadData() }
+                }
+            },
             notificationCenter.addObserver(forName: .LoopDataUpdated, object: nil, queue: nil) { note in
                 let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopUpdateContext.RawValue
                 let context = LoopUpdateContext(rawValue: rawContext)
@@ -439,13 +444,45 @@ final class StatusTableViewController: LoopChartsTableViewController {
         deviceManager.cgmManager == nil || deviceManager.cgmManager?.isInoperable == true || deviceManager.cgmManager?.inSignalLoss == true || deviceManager.pumpManager == nil || deviceManager.pumpManager?.isInoperable == true || deviceManager.pumpManager?.inSignalLoss == true || deviceManager.hasBluetoothIssue
     }
 
+    private var displayPreferencesSnapshot: [AnyHashable] = []
+
+    private var currentDisplayPreferences: [AnyHashable] {
+        let defaults = UserDefaults.standard
+        return [
+            defaults.bool(forKey: DisplayPreference.nowLine),
+            defaults.bool(forKey: DisplayPreference.fixedGlucoseScale),
+            defaults.integer(forKey: DisplayPreference.historyHours)
+        ]
+    }
+
+    private func applyDisplayPreferences() {
+        displayPreferencesSnapshot = currentDisplayPreferences
+        let defaults = UserDefaults.standard
+        ChartDisplayOptions.showsNowLine = defaults.bool(forKey: DisplayPreference.nowLine)
+        statusCharts.glucose.usesFixedScale = defaults.bool(forKey: DisplayPreference.fixedGlucoseScale)
+        if FeatureFlags.predictedGlucoseChartClampEnabled {
+            statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBoundClamped
+        } else {
+            statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBound
+        }
+        StatusChartsManager.ChartIndex.allCases.forEach { statusCharts.invalidateChart(atIndex: $0.rawValue) }
+    }
+
     private func updateChartDateRange() {
         // How far back should we show data? Use the screen size as a guide.
         let availableWidth = (refreshContext.newSize ?? tableView.bounds.size).width - charts.fixedHorizontalMargin
 
-        let totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
+        var totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
         let futureHours = ceil(doseStore.longestEffectDuration.hours)
-        let historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
+        var historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
+        let preferredHistoryHours = UserDefaults.standard.integer(forKey: DisplayPreference.historyHours)
+        if preferredHistoryHours > 0 {
+            let forecastHours = preferredHistoryHours <= 3 ? 3 : futureHours
+            let widthScale = min(LoopConstants.statusChartMaximumWidthScale, max(1, availableWidth / LoopConstants.statusChartReferenceWidth))
+            totalHours = (Double(preferredHistoryHours) + forecastHours) * Double(widthScale)
+            historyHours = totalHours - forecastHours
+        }
+        charts.labelStepHours = max(1, Int(ceil(totalHours * Double(LoopConstants.chartMinimumWidthPerTimeLabel / availableWidth))))
 
         let date = Date(timeIntervalSinceNow: -TimeInterval(hours: historyHours))
         let chartStartDate = Calendar.current.nextDate(after: date, matching: DateComponents(minute: 0), matchingPolicy: .strict, direction: .backward) ?? date
