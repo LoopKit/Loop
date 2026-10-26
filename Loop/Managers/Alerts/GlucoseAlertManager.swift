@@ -39,9 +39,9 @@ enum AlarmUrgencyLevel: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .mild: return "Mild"
-        case .medium: return "Medium"
-        case .harsh: return "Harsh"
+        case .mild: return NSLocalizedString("Mild", comment: "Urgency level of a themed alarm sound")
+        case .medium: return NSLocalizedString("Medium", comment: "Urgency level of a themed alarm sound")
+        case .harsh: return NSLocalizedString("Harsh", comment: "Urgency level of a themed alarm sound")
         }
     }
 }
@@ -55,8 +55,8 @@ enum AlarmVoice: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .amy: return "Amy"
-        case .bryce: return "Bryce"
+        case .amy: return NSLocalizedString("Amy", comment: "Name of a spoken alarm voice")
+        case .bryce: return NSLocalizedString("Bryce", comment: "Name of a spoken alarm voice")
         }
     }
 }
@@ -133,7 +133,7 @@ enum AlarmSoundCatalog {
     private static let voiceEntries: [AlarmSoundEntry] = slugs.map { kind, slug in
         AlarmSoundEntry(
             id: "voice.\(slug)",
-            displayName: "Voice",
+            displayName: NSLocalizedString("Voice", comment: "Name of the spoken alarm sound set"),
             kinds: [kind],
             selector: .voice,
             variants: AlarmVoice.allCases.map {
@@ -143,32 +143,32 @@ enum AlarmSoundCatalog {
     }
 
     private static let genericEntries: [AlarmSoundEntry] = [
-        ("urgent_low.caf", "Urgent Low"),
-        ("critical.caf", "Sharp Alarm"),
-        ("alarm.caf", "Alarm"),
-        ("bright_alarm.caf", "Bright Alarm"),
-        ("honk.caf", "Honk"),
-        ("chime.caf", "Chime"),
-        ("clear_chimes.caf", "Clear Chimes"),
-        ("high_chimes.caf", "High Chimes"),
-        ("dings.caf", "Dings"),
-        ("trill.caf", "Trill"),
-        ("bloom.caf", "Bloom"),
-        ("bloop.caf", "Bloop"),
-        ("spring.caf", "Spring"),
-        ("minimal.caf", "Minimal"),
-        ("simple.caf", "Simple"),
-        ("synth.caf", "Synth"),
-        ("mood_synth.caf", "Mood Synth"),
-        ("crying.caf", "Crying"),
-        ("glass_bell.caf", "Glass Bell"),
-        ("harp.caf", "Harp"),
-        ("meow.caf", "Meow"),
-        ("saw_wave.caf", "Saw Wave"),
-        ("hard_saw_wave.caf", "Hard Saw Wave"),
-        ("sine_wave.caf", "Sine Wave"),
-        ("open_can.caf", "Open Can"),
-        ("open_wrapper.caf", "Open Wrapper"),
+        ("urgent_low.caf", NSLocalizedString("Urgent Low", comment: "Name of a glucose alarm sound")),
+        ("critical.caf", NSLocalizedString("Sharp Alarm", comment: "Name of a glucose alarm sound")),
+        ("alarm.caf", NSLocalizedString("Alarm", comment: "Name of a glucose alarm sound")),
+        ("bright_alarm.caf", NSLocalizedString("Bright Alarm", comment: "Name of a glucose alarm sound")),
+        ("honk.caf", NSLocalizedString("Honk", comment: "Name of a glucose alarm sound")),
+        ("chime.caf", NSLocalizedString("Chime", comment: "Name of a glucose alarm sound")),
+        ("clear_chimes.caf", NSLocalizedString("Clear Chimes", comment: "Name of a glucose alarm sound")),
+        ("high_chimes.caf", NSLocalizedString("High Chimes", comment: "Name of a glucose alarm sound")),
+        ("dings.caf", NSLocalizedString("Dings", comment: "Name of a glucose alarm sound")),
+        ("trill.caf", NSLocalizedString("Trill", comment: "Name of a glucose alarm sound")),
+        ("bloom.caf", NSLocalizedString("Bloom", comment: "Name of a glucose alarm sound")),
+        ("bloop.caf", NSLocalizedString("Bloop", comment: "Name of a glucose alarm sound")),
+        ("spring.caf", NSLocalizedString("Spring", comment: "Name of a glucose alarm sound")),
+        ("minimal.caf", NSLocalizedString("Minimal", comment: "Name of a glucose alarm sound")),
+        ("simple.caf", NSLocalizedString("Simple", comment: "Name of a glucose alarm sound")),
+        ("synth.caf", NSLocalizedString("Synth", comment: "Name of a glucose alarm sound")),
+        ("mood_synth.caf", NSLocalizedString("Mood Synth", comment: "Name of a glucose alarm sound")),
+        ("crying.caf", NSLocalizedString("Crying", comment: "Name of a glucose alarm sound")),
+        ("glass_bell.caf", NSLocalizedString("Glass Bell", comment: "Name of a glucose alarm sound")),
+        ("harp.caf", NSLocalizedString("Harp", comment: "Name of a glucose alarm sound")),
+        ("meow.caf", NSLocalizedString("Meow", comment: "Name of a glucose alarm sound")),
+        ("saw_wave.caf", NSLocalizedString("Saw Wave", comment: "Name of a glucose alarm sound")),
+        ("hard_saw_wave.caf", NSLocalizedString("Hard Saw Wave", comment: "Name of a glucose alarm sound")),
+        ("sine_wave.caf", NSLocalizedString("Sine Wave", comment: "Name of a glucose alarm sound")),
+        ("open_can.caf", NSLocalizedString("Open Can", comment: "Name of a glucose alarm sound")),
+        ("open_wrapper.caf", NSLocalizedString("Open Wrapper", comment: "Name of a glucose alarm sound")),
     ].map { filename, name in
         AlarmSoundEntry(
             id: filename,
@@ -179,8 +179,8 @@ enum AlarmSoundCatalog {
         )
     }
 
-    static let entries: [AlarmSoundEntry] = themed("acoustic", "Acoustic")
-        + themed("electronic", "Electronic")
+    static let entries: [AlarmSoundEntry] = themed("acoustic", NSLocalizedString("Acoustic", comment: "Name of the acoustic themed alarm sound set"))
+        + themed("electronic", NSLocalizedString("Electronic", comment: "Name of the electronic themed alarm sound set"))
         + voiceEntries
         + genericEntries
 
@@ -208,7 +208,10 @@ enum AlarmSoundCatalog {
         guard !entry.isGeneric, let variant = entry.variant(forFilename: filename) else {
             return entry.displayName
         }
-        return "\(entry.displayName) · \(variant.displayName)"
+        return String(
+            format: NSLocalizedString("%1$@ · %2$@", comment: "An alarm sound's set name and the chosen variant (1: set name, 2: variant name)"),
+            entry.displayName, variant.displayName
+        )
     }
 }
 
