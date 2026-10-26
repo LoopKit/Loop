@@ -94,6 +94,32 @@ final class AlarmSoundCatalogTests: XCTestCase {
         XCTAssertEqual(AlarmSoundCatalog.displayName(for: "gone.caf"), "gone.caf")
     }
 
+    /// The in-app critical fallback used to stop at a flat 6s, which cut the
+    /// 10.8s urgent-low alarms off at just over half. The burst now runs whole
+    /// passes of whatever was picked.
+    func testCriticalBurstPlaysWholePassesOfTheSound() {
+        // A long alarm plays through once rather than being cut mid-phrase.
+        XCTAssertEqual(CriticalAlertAudioPlayer.burstDuration(forSoundOfDuration: 10.8), 10.8, accuracy: 0.001)
+        // A short tone still repeats up to the floor, landing on a whole pass.
+        XCTAssertEqual(CriticalAlertAudioPlayer.burstDuration(forSoundOfDuration: 0.84), 6.72, accuracy: 0.001)
+        // Exactly the floor is one pass.
+        XCTAssertEqual(CriticalAlertAudioPlayer.burstDuration(forSoundOfDuration: 6), 6, accuracy: 0.001)
+        // Never shorter than the floor...
+        for duration in stride(from: 0.1, through: 12.0, by: 0.1) {
+            XCTAssertGreaterThanOrEqual(
+                CriticalAlertAudioPlayer.burstDuration(forSoundOfDuration: duration),
+                min(CriticalAlertAudioPlayer.minBurstDuration, duration) - 0.001,
+                "\(duration)s"
+            )
+        }
+        // ...and never a runaway siren.
+        XCTAssertEqual(CriticalAlertAudioPlayer.burstDuration(forSoundOfDuration: 45),
+                       CriticalAlertAudioPlayer.maxBurstDuration, accuracy: 0.001)
+        // A zero-length (unreadable) file falls back to the floor rather than 0.
+        XCTAssertEqual(CriticalAlertAudioPlayer.burstDuration(forSoundOfDuration: 0),
+                       CriticalAlertAudioPlayer.minBurstDuration, accuracy: 0.001)
+    }
+
     func testThemedEntryDefaultsToTheMediumVariant() {
         for kind in GlucoseAlarmKind.allCases {
             for entry in AlarmSoundCatalog.themedEntries(for: kind) where entry.selector == .urgency {
