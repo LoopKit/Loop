@@ -717,6 +717,18 @@
 		FEEDB0000000000000000004 /* Statistics/TimeInRangeBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */; };
 		30E4A68B8C914C5E4B245555 /* InsulinDeliveryHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69CE2EE3714858772FE7A26 /* InsulinDeliveryHistoryTests.swift */; };
 		FEEDB0000000000000000005 /* GlucoseStatisticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */; };
+		89C0C34F420190E8CC7D03B1 /* DayCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F40DE2F3FC02CBA3BE7AF2F /* DayCharts.swift */; };
+		332CC9FC011E78CE5BEA583C /* LoopDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BD3DDF41B598A8C4B5CEB92 /* LoopDesign.swift */; };
+		0C70F4D862F6D3FDB3D91D87 /* LoopHistoryMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21622B2355AED8F6A12FE17C /* LoopHistoryMath.swift */; };
+		2ADBB92A8ABB74360D18EEFA /* LoopHistoryModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471FFD525A4EB897745608BE /* LoopHistoryModels.swift */; };
+		A743DC26D066EE5AC88C2F45 /* LoopHistoryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09448CF97996C40BEDDE6588 /* LoopHistoryProvider.swift */; };
+		6A6C1E1C7A26EC88AFB4FAB1 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A83D311A9ECAE563F74A51 /* DayDetailView.swift */; };
+		23B98F0A53A093412229364D /* LogbookScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AEDC42672A7A8C57546EA0C /* LogbookScreen.swift */; };
+		3ED693ACBF8F9E416055BD56 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844BECBB6357021979B9443F /* MainTabBarController.swift */; };
+		7705483CFFCF0B89F8F1A08E /* NowScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0874B7B679DB9CE661CCE152 /* NowScreen.swift */; };
+		591F13AF435B37B4818E2F2B /* TrendsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFDE56977CC73CBDA1170C5 /* TrendsComponents.swift */; };
+		5CD0888FF33D6F844A81E638 /* TrendsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF0FD64B2B3E9C9AA8764684 /* TrendsScreen.swift */; };
+		97CF13197936D2794766C84A /* LoopHistoryMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42B08644C3031D9E815F9892 /* LoopHistoryMathTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1584,6 +1596,18 @@
 		FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics/TimeInRangeBar.swift; sourceTree = "<group>"; };
 		F69CE2EE3714858772FE7A26 /* InsulinDeliveryHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryHistoryTests.swift; sourceTree = "<group>"; };
 		FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseStatisticsTests.swift; sourceTree = "<group>"; };
+		6F40DE2F3FC02CBA3BE7AF2F /* DayCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayCharts.swift; sourceTree = "<group>"; };
+		0BD3DDF41B598A8C4B5CEB92 /* LoopDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopDesign.swift; sourceTree = "<group>"; };
+		21622B2355AED8F6A12FE17C /* LoopHistoryMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopHistoryMath.swift; sourceTree = "<group>"; };
+		471FFD525A4EB897745608BE /* LoopHistoryModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopHistoryModels.swift; sourceTree = "<group>"; };
+		09448CF97996C40BEDDE6588 /* LoopHistoryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopHistoryProvider.swift; sourceTree = "<group>"; };
+		E3A83D311A9ECAE563F74A51 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
+		7AEDC42672A7A8C57546EA0C /* LogbookScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogbookScreen.swift; sourceTree = "<group>"; };
+		844BECBB6357021979B9443F /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
+		0874B7B679DB9CE661CCE152 /* NowScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowScreen.swift; sourceTree = "<group>"; };
+		4BFDE56977CC73CBDA1170C5 /* TrendsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendsComponents.swift; sourceTree = "<group>"; };
+		AF0FD64B2B3E9C9AA8764684 /* TrendsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendsScreen.swift; sourceTree = "<group>"; };
+		42B08644C3031D9E815F9892 /* LoopHistoryMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopHistoryMathTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1903,6 +1927,7 @@
 		43776F8E1B8022E90074EA36 /* Loop */ = {
 			isa = PBXGroup;
 			children = (
+				8574687EF267DC59043C0242 /* Redesign */,
 				C16DA84022E8E104008624C2 /* Plugins */,
 				B66D1F322E6A5D6600471149 /* Localizable.xcstrings */,
 				B66D1F382E6A5D6600471149 /* InfoPlist.xcstrings */,
@@ -2800,6 +2825,7 @@
 				6C1F8E3BA2D45079B3E2F512 /* OutcomesPackageTests.swift */,
 				BE36167100E59D7413C50F63 /* SetupComparisonTests.swift */,
 				FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */,
+				42B08644C3031D9E815F9892 /* LoopHistoryMathTests.swift */,
 				A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */,
 				A963B279252CEBAE0062AA12 /* SetBolusUserInfoTests.swift */,
 				C19008FF252271BB00721625 /* SimpleBolusCalculatorTests.swift */,
@@ -2973,6 +2999,24 @@
 				E9C58A7724DB529A00487A17 /* momentum_effect_bouncing.json */,
 			);
 			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		8574687EF267DC59043C0242 /* Redesign */ = {
+			isa = PBXGroup;
+			children = (
+				AF0FD64B2B3E9C9AA8764684 /* TrendsScreen.swift */,
+				4BFDE56977CC73CBDA1170C5 /* TrendsComponents.swift */,
+				0874B7B679DB9CE661CCE152 /* NowScreen.swift */,
+				844BECBB6357021979B9443F /* MainTabBarController.swift */,
+				7AEDC42672A7A8C57546EA0C /* LogbookScreen.swift */,
+				E3A83D311A9ECAE563F74A51 /* DayDetailView.swift */,
+				09448CF97996C40BEDDE6588 /* LoopHistoryProvider.swift */,
+				471FFD525A4EB897745608BE /* LoopHistoryModels.swift */,
+				21622B2355AED8F6A12FE17C /* LoopHistoryMath.swift */,
+				0BD3DDF41B598A8C4B5CEB92 /* LoopDesign.swift */,
+				6F40DE2F3FC02CBA3BE7AF2F /* DayCharts.swift */,
+			);
+			path = Redesign;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -3626,6 +3670,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5CD0888FF33D6F844A81E638 /* TrendsScreen.swift in Sources */,
+				591F13AF435B37B4818E2F2B /* TrendsComponents.swift in Sources */,
+				7705483CFFCF0B89F8F1A08E /* NowScreen.swift in Sources */,
+				3ED693ACBF8F9E416055BD56 /* MainTabBarController.swift in Sources */,
+				23B98F0A53A093412229364D /* LogbookScreen.swift in Sources */,
+				6A6C1E1C7A26EC88AFB4FAB1 /* DayDetailView.swift in Sources */,
+				A743DC26D066EE5AC88C2F45 /* LoopHistoryProvider.swift in Sources */,
+				2ADBB92A8ABB74360D18EEFA /* LoopHistoryModels.swift in Sources */,
+				0C70F4D862F6D3FDB3D91D87 /* LoopHistoryMath.swift in Sources */,
+				332CC9FC011E78CE5BEA583C /* LoopDesign.swift in Sources */,
+				89C0C34F420190E8CC7D03B1 /* DayCharts.swift in Sources */,
 				C17824A51E1AD4D100D9D25C /* ManualBolusRecommendation.swift in Sources */,
 				897A5A9624C2175B00C4E71D /* BolusEntryView.swift in Sources */,
 				4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */,
@@ -4074,6 +4129,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				97CF13197936D2794766C84A /* LoopHistoryMathTests.swift in Sources */,
 				A9DF02CB24F72B9E00B7C988 /* CriticalEventLogTests.swift in Sources */,
 				1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */,
 				C1777A6625A125F100595963 /* ManualEntryDoseViewModelTests.swift in Sources */,

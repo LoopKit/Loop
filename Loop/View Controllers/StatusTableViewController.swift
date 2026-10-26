@@ -95,6 +95,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
         tableView.register(InsulinSuspendedTableViewCell.nib(), forCellReuseIdentifier: InsulinSuspendedTableViewCell.className)
         tableView.register(RecentGlucoseTableViewCell.nib(), forCellReuseIdentifier: RecentGlucoseTableViewCell.className)
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.nowHostingCellIdentifier)
 
         applyDisplayPreferences()
 
@@ -229,6 +230,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
         addScenarioStepGestureRecognizers()
 
         setupPresetsStatusBar()
+
+        if usesRedesign {
+            tableView.backgroundColor = .systemGroupedBackground
+            tableView.separatorStyle = .none
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -361,6 +367,32 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private var bolusProgressReporter: DoseProgressReporter?
 
+    // MARK: - Redesign
+
+    /// Read once, so a table never mixes the two layouts; LoopAppManager rebuilds the screen when the preference changes.
+    let usesRedesign = LoopInterfacePreference.useRedesign
+
+    private static let nowHostingCellIdentifier = "NowHostingCell"
+
+    private lazy var nowModel: NowModel = {
+        let model = NowModel(deviceManager: deviceManager, loopDataManager: loopManager, settingsManager: settingsManager, temporaryPresetsManager: temporaryPresetsManager)
+        model.isOnboardingComplete = { [weak self] in self?.onboardingManager.isComplete ?? false }
+        return model
+    }()
+
+    private lazy var nowActions = NowActions(
+        addCarbs: { [weak self] in self?.userTappedAddCarbs() },
+        bolus: { [weak self] in self?.presentBolusScreen() },
+        presets: { [weak self] in self?.presentPresets() },
+        showPrediction: { [weak self] in self?.showPredictionFromNow() },
+        showToday: { [weak self] in self?.showDay(Date()) },
+        showInsulin: { [weak self] in self?.performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: self) },
+        showCarbs: { [weak self] in self?.performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: self) },
+        pumpTapped: { [weak self] in self?.executeHUDTapAction(self?.deviceManager.didTapOnPumpStatus(), from: self?.view) },
+        cgmTapped: { [weak self] in self?.executeHUDTapAction(self?.deviceManager.didTapOnCGMStatus(), from: self?.view) },
+        loopStatusTapped: { [weak self] in self?.showLoopStatusFromNow() }
+    )
+
     private func updateBolusProgress() {
         if let cell = tableView.cellForRow(at: IndexPath(row: StatusRow.status.rawValue, section: Section.status.rawValue)) as? BolusProgressTableViewCell {
             if case let .bolusing(_, total) = cell.configuration {
@@ -403,7 +435,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
     
     private var shouldShowHUD: Bool {
-        return !landscapeMode
+        return !landscapeMode && !usesRedesign
     }
 
     // With a vertical status bar there is no top safe area inset, so keep the first row clear of the display corners.
@@ -413,7 +445,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private var shouldShowStatus: Bool {
-        return !landscapeMode && statusRowMode.hasRow
+        return (!landscapeMode || usesRedesign) && statusRowMode.hasRow
     }
 
     override func glucoseUnitDidChange() {
@@ -700,9 +732,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let statusRowMode = self.determineStatusRowMode()
 
         updateBannerAndHUDandStatusRows(statusRowMode: statusRowMode, newSize: currentContext.newSize, animated: animated)
-        tableView.contentInset = UIEdgeInsets(top: shouldShowBannerWarning ? 0 : cornerClearanceTopInset, left: 0, bottom: ActionTabBarMetrics.tableContentInset, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: shouldShowBannerWarning ? 0 : cornerClearanceTopInset, left: 0, bottom: usesRedesign ? 0 : ActionTabBarMetrics.tableContentInset, right: 0)
         
         redrawCharts()
+
+        if usesRedesign {
+            nowModel.refresh()
+        }
 
         reloading = false
         let reloadNow = !self.refreshContext.isEmpty
@@ -718,8 +754,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case presets
         case alertWarning
         case hud
+        case nowHeader
         case status
         case charts
+        case nowCharts
     }
 
     // MARK: - Chart Section Data
@@ -980,9 +1018,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .hud:
             return shouldShowHUD ? 1 : 0
         case .charts:
-            return ChartRow.allCases.count
+            return usesRedesign ? 0 : ChartRow.allCases.count
         case .status:
             return shouldShowStatus ? StatusRow.allCases.count : 0
+        case .nowHeader, .nowCharts:
+            return usesRedesign ? 1 : 0
         }
     }
     
@@ -1068,6 +1108,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
             cell.hudView.loopCompletionHUD.loopStatusColors = .loopStatus
 
             return cell
+        case .nowHeader:
+            return nowHostingCell(for: indexPath) { NowHeaderView(model: self.nowModel, actions: self.nowActions) }
+        case .nowCharts:
+            return nowHostingCell(for: indexPath) { NowChartsView(model: self.nowModel, actions: self.nowActions) }
         case .charts:
             let cell = tableView.dequeueReusableCell(withIdentifier: ChartTableViewCell.className, for: indexPath) as! ChartTableViewCell
 
@@ -1274,7 +1318,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     cell.setSubtitleLabel(label: nil)
                 }
             }
-        case .presets, .hud, .status, .alertWarning:
+        case .presets, .hud, .status, .alertWarning, .nowHeader, .nowCharts:
             break
         }
     }
@@ -1299,7 +1343,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
         case .alertWarning:
             return UITableView.automaticDimension
-        case .presets, .hud, .status:
+        case .presets, .hud, .status, .nowHeader, .nowCharts:
             return UITableView.automaticDimension
         }
     }
@@ -1316,7 +1360,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 tableView.deselectRow(at: indexPath, animated: true)
                 presentUnmuteAlertConfirmation()
             }
-        case .hud:
+        case .hud, .nowHeader, .nowCharts:
             break
         case .status:
             switch StatusRow(rawValue: indexPath.row)! {
@@ -2381,5 +2425,54 @@ private struct WarningBannerStyle: ViewModifier {
                 .background(Color.critical.cornerRadius(10))
                 .padding([.top, .horizontal], 8)
         }
+    }
+}
+
+// MARK: - Redesigned Now screen
+
+extension StatusTableViewController {
+    private func nowHostingCell<Content: View>(for indexPath: IndexPath, @ViewBuilder content: () -> Content) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: Self.nowHostingCellIdentifier, for: indexPath)
+        cell.selectionStyle = .none
+        cell.backgroundColor = .clear
+        cell.contentConfiguration = UIHostingConfiguration(content: content).margins(.all, 0)
+        return cell
+    }
+
+    func presentSettingsFromTab() {
+        if presentedViewController != nil {
+            return
+        }
+        presentSettings()
+    }
+
+    private func showPredictionFromNow() {
+        guard settingsManager.dosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled else { return }
+        performSegue(withIdentifier: PredictionTableViewController.className, sender: self)
+    }
+
+    func showDay(_ day: Date) {
+        let detail = UIHostingController(rootView: DayDetailView(provider: nowModel.provider, day: day))
+        navigationController?.pushViewController(detail, animated: true)
+    }
+
+    private func showLoopStatusFromNow() {
+        let lastCompleted = loopManager.lastLoopCompleted
+        if let deviceError = deviceManager.lastError, deviceError.date > (lastCompleted ?? .distantPast) {
+            showLastError(self)
+        } else if lastLoopError != nil {
+            showLastError(self)
+        } else if let lastCompleted {
+            let mode = settingsManager.dosingEnabled ? "Closed loop is on." : "Closed loop is off: Loop recommends but doesn't adjust insulin."
+            presentLoopCompletionMessage(title: "Loop ran at \(LoopFormat.time(lastCompleted))", message: mode)
+        } else {
+            presentLoopCompletionMessage(title: "Loop hasn't run yet", message: "Loop runs when it has a new CGM reading and can reach the pump.")
+        }
+    }
+
+    private func presentLoopCompletionMessage(title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Dismiss", comment: "The button label of the action used to dismiss an error alert"), style: .default))
+        present(alertController, animated: true)
     }
 }

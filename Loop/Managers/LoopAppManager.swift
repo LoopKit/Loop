@@ -518,6 +518,19 @@ class LoopAppManager: NSObject {
 
         analyticsServicesManager.application(didFinishLaunchingWithOptions: launchOptions)
 
+        // Loop's automation history only goes back 36 hours, so the Trends screen keeps its own longer record.
+        // The debounce keeps a quick off-and-on from being recorded as open loop.
+        ObservablePublishers.tracking(settingsManager, keyPath: \.dosingEnabled)
+            .debounce(for: .seconds(15), scheduler: RunLoop.main)
+            .removeDuplicates()
+            .sink { LoopModeHistory.shared.record(closedLoop: $0) }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: LoopInterfacePreference.didChange)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.relaunchHomeScreenForInterfaceChange() }
+            .store(in: &cancellables)
+
         state = state.next
 
         await loopDataManager.updateDisplayState()
@@ -623,10 +636,8 @@ class LoopAppManager: NSObject {
         return viewModel
     }()
 
-    private func launchHomeScreen() async {
-        dispatchPrecondition(condition: .onQueue(.main))
-        precondition(state == .launchHomeScreen)
-        
+    /// Builds the status screen and makes it (or the redesign's tabs around it) the window's root.
+    private func installHomeScreen() {
         let viewModel = StatusTableViewModel(
             alertPermissionsChecker: alertPermissionsChecker,
             alertMuter: alertManager.alertMuter,
@@ -652,26 +663,57 @@ class LoopAppManager: NSObject {
 
         self.statusTableViewController = statusTableView.viewController
         
-        var rootNavigationController = rootViewController as? RootNavigationController
-        if rootNavigationController == nil {
-            rootNavigationController = RootNavigationController()
-            rootViewController = rootNavigationController
-        }
+        let showsActionTabs = !LoopInterfacePreference.useRedesign
+        let statusScreen = UIHostingController(
+            rootView: statusTableView
+                .showsActionTabs(showsActionTabs)
+                .environmentObject(deviceDataManager.displayGlucosePreference)
+                .environment(\.appName, Bundle.main.bundleDisplayName)
+                .environment(\.isInvestigationalDevice, FeatureFlags.isInvestigationalDevice)
+                .environment(\.guidanceColors, .default)
+                .environment(\.loopStatusColorPalette, .loopStatus)
+                .environment(\.colorPalette, .default)
+                .environment(\.settingsManager, settingsManager)
+                .environment(\.temporaryPresetsManager, temporaryPresetsManager)
+                .edgesIgnoringSafeArea(.top)
+        )
 
-        rootNavigationController?.setViewControllers([
-            UIHostingController(
-                rootView: statusTableView
-                    .environmentObject(deviceDataManager.displayGlucosePreference)
-                    .environment(\.appName, Bundle.main.bundleDisplayName)
-                    .environment(\.isInvestigationalDevice, FeatureFlags.isInvestigationalDevice)
-                    .environment(\.guidanceColors, .default)
-                    .environment(\.loopStatusColorPalette, .loopStatus)
-                    .environment(\.colorPalette, .default)
-                    .environment(\.settingsManager, settingsManager)
-                    .environment(\.temporaryPresetsManager, temporaryPresetsManager)
-                    .edgesIgnoringSafeArea(.top)
+        if LoopInterfacePreference.useRedesign {
+            let rootNavigationController = RootNavigationController()
+            rootNavigationController.setViewControllers([statusScreen], animated: false)
+            rootViewController = MainTabBarController(
+                rootNavigationController: rootNavigationController,
+                statusTableViewController: statusTableView.viewController,
+                deviceManager: deviceDataManager,
+                loopDataManager: loopDataManager,
+                settingsManager: settingsManager
             )
-        ], animated: true)
+        } else {
+            var rootNavigationController = rootViewController as? RootNavigationController
+            if rootNavigationController == nil {
+                rootNavigationController = RootNavigationController()
+                rootViewController = rootNavigationController
+            }
+
+            rootNavigationController?.setViewControllers([statusScreen], animated: true)
+        }
+    }
+
+    /// Swaps between the classic and redesigned interface once Loop is running.
+    private func relaunchHomeScreenForInterfaceChange() {
+        guard state == .launchComplete else { return }
+        if let presented = rootViewController?.presentedViewController {
+            presented.dismiss(animated: true) { [weak self] in self?.installHomeScreen() }
+        } else {
+            installHomeScreen()
+        }
+    }
+
+    private func launchHomeScreen() async {
+        dispatchPrecondition(condition: .onQueue(.main))
+        precondition(state == .launchHomeScreen)
+
+        installHomeScreen()
 
         await deviceDataManager.refreshDeviceData()
 
@@ -755,6 +797,7 @@ class LoopAppManager: NSObject {
         }
 
         analyticsServicesManager.didOpenFromLink()
+        (rootViewController as? MainTabBarController)?.showNow()
 
         switch deeplink {
         case let .carbEntry(carbEntryLink):
