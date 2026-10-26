@@ -25,27 +25,28 @@ enum Deeplink: String, CaseIterable {
 
 class DeeplinkManager {
     
-    private weak var rootViewController: UIViewController?
+    /// The window's root changes when the interface is switched, so it is looked up on each link.
+    private let rootViewController: () -> UIViewController?
     
-    init(rootViewController: UIViewController?) {
+    init(rootViewController: @escaping () -> UIViewController?) {
         self.rootViewController = rootViewController
     }
     
     func handle(_ url: URL) -> Bool {
-        guard let rootViewController = rootViewController as? RootNavigationController, let deeplink = Deeplink(url: url) else {
+        guard let deeplink = Deeplink(url: url) else {
             return false
         }
         
-        rootViewController.navigate(to: deeplink)
-        return true
+        return handle(deeplink)
     }
     
     func handle(_ deeplink: Deeplink) -> Bool {
-        guard let rootViewController = rootViewController as? RootNavigationController else {
+        guard let root = rootViewController(), let rootNavigationController = root.loopRootNavigationController else {
             return false
         }
         
-        rootViewController.navigate(to: deeplink)
+        (root as? MainTabBarController)?.showNow()
+        rootNavigationController.navigate(to: deeplink)
         return true
     }
 }

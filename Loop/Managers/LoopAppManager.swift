@@ -243,7 +243,7 @@ class LoopAppManager: NSObject {
                                               windowProvider: windowProvider,
                                               userDefaults: UserDefaults.appGroup!)
 
-        deeplinkManager = DeeplinkManager(rootViewController: rootViewController)
+        deeplinkManager = DeeplinkManager(rootViewController: { [weak self] in self?.rootViewController })
 
         for support in supportManager.availableSupports {
             if let analyticsService = support as? AnalyticsService {
@@ -294,6 +294,21 @@ class LoopAppManager: NSObject {
             .assign(to: \.automaticDosingStatus.automaticDosingEnabled, on: self)
             .store(in: &cancellables)
 
+        // Loop's stored runs don't say whether closed loop was on, so the Trends screen keeps its own record.
+        // dropFirst skips the placeholder AutomaticDosingStatus starts with; the debounce swallows the brief
+        // "not allowed yet" while devices come up at launch, so it isn't recorded as open loop.
+        automaticDosingStatus.$automaticDosingEnabled
+            .dropFirst()
+            .debounce(for: .seconds(15), scheduler: RunLoop.main)
+            .removeDuplicates()
+            .sink { LoopModeHistory.shared.record(closedLoop: $0) }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: LoopInterfacePreference.didChange)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.relaunchHomeScreenForInterfaceChange() }
+            .store(in: &cancellables)
+
         state = state.next
     }
 
@@ -309,10 +324,8 @@ class LoopAppManager: NSObject {
         }
     }
 
-    private func launchHomeScreen() {
-        dispatchPrecondition(condition: .onQueue(.main))
-        precondition(state == .launchHomeScreen)
-
+    /// Builds the status screen and makes it (or the redesign's tabs around it) the window's root.
+    private func installHomeScreen() {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle(for: Self.self))
         let statusTableViewController = storyboard.instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
         statusTableViewController.alertPermissionsChecker = alertPermissionsChecker
@@ -324,13 +337,36 @@ class LoopAppManager: NSObject {
         statusTableViewController.testingScenariosManager = testingScenariosManager
         bluetoothStateManager.addBluetoothObserver(statusTableViewController)
 
-        var rootNavigationController = rootViewController as? RootNavigationController
-        if rootNavigationController == nil {
-            rootNavigationController = RootNavigationController()
-            rootViewController = rootNavigationController
-        }
+        if LoopInterfacePreference.useRedesign {
+            let rootNavigationController = RootNavigationController()
+            rootNavigationController.setViewControllers([statusTableViewController], animated: false)
+            rootViewController = MainTabBarController(rootNavigationController: rootNavigationController, deviceManager: deviceDataManager)
+        } else {
+            var rootNavigationController = rootViewController as? RootNavigationController
+            if rootNavigationController == nil {
+                rootNavigationController = RootNavigationController()
+                rootViewController = rootNavigationController
+            }
 
-        rootNavigationController?.setViewControllers([statusTableViewController], animated: true)
+            rootNavigationController?.setViewControllers([statusTableViewController], animated: true)
+        }
+    }
+
+    /// Swaps between the classic and redesigned interface once Loop is running.
+    private func relaunchHomeScreenForInterfaceChange() {
+        guard state == .launchComplete else { return }
+        if let presented = rootViewController?.presentedViewController {
+            presented.dismiss(animated: true) { [weak self] in self?.installHomeScreen() }
+        } else {
+            installHomeScreen()
+        }
+    }
+
+    private func launchHomeScreen() {
+        dispatchPrecondition(condition: .onQueue(.main))
+        precondition(state == .launchHomeScreen)
+
+        installHomeScreen()
 
         deviceDataManager.refreshDeviceData()
 

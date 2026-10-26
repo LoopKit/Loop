@@ -1,0 +1,580 @@
+//
+//  TrendsComponents.swift
+//  Loop
+//
+//  Copyright © 2026 LoopKit Authors. All rights reserved.
+//
+
+import SwiftUI
+import Charts
+
+private typealias P = LoopDesign.Palette
+
+// MARK: - RangeSelector
+
+enum TrendsPeriod: Int, CaseIterable, Identifiable {
+    case day = 1
+    case week = 7
+    case twoWeeks = 14
+    case month = 30
+    case quarter = 90
+
+    var id: Int { rawValue }
+
+    var label: String { self == .day ? "Day" : "\(rawValue) d" }
+
+    var accessibilityName: String { self == .day ? "Day" : "\(rawValue) days" }
+
+    /// The period ending on `endDay` (inclusive), cut off at `now` when it ends today.
+    func interval(endingOn endDay: Date, now: Date = Date(), calendar: Calendar = .current) -> DateInterval {
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDay))!
+        let start = calendar.date(byAdding: .day, value: -rawValue, to: endOfDay)!
+        return DateInterval(start: start, end: min(endOfDay, now))
+    }
+}
+
+struct RangeSelectorView: View {
+    @Binding var period: TrendsPeriod
+    @Binding var endDay: Date
+    var now: Date = Date()
+
+    private var calendar: Calendar { .current }
+
+    private var canStepForward: Bool {
+        !calendar.isDate(endDay, inSameDayAs: now) && endDay < now
+    }
+
+    var body: some View {
+        VStack(spacing: LoopDesign.Space.s3) {
+            HStack(spacing: 2) {
+                ForEach(TrendsPeriod.allCases) { option in
+                    Button {
+                        withAnimation(.snappy(duration: 0.2)) { period = option }
+                    } label: {
+                        Text(option.label)
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(P.ink)
+                            .frame(maxWidth: .infinity, minHeight: 30)
+                            .background {
+                                if option == period {
+                                    Capsule().fill(P.controlThumb).shadow(color: .black.opacity(0.12), radius: 3, y: 1)
+                                }
+                            }
+                            .contentShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(option.accessibilityName)
+                    .accessibilityAddTraits(option == period ? .isSelected : [])
+                }
+            }
+            .padding(2)
+            .background(P.surfaceSunken, in: Capsule())
+
+            HStack {
+                stepButton(systemName: "chevron.left", label: "Previous period", enabled: true) { step(-1) }
+                Spacer()
+                Text(LoopFormat.range(period.interval(endingOn: endDay, now: now).start, endDay))
+                    .font(LoopDesign.Typeface.headline.monospacedDigit())
+                    .foregroundStyle(P.ink)
+                Spacer()
+                stepButton(systemName: "chevron.right", label: "Next period", enabled: canStepForward) { step(1) }
+            }
+        }
+    }
+
+    private func step(_ direction: Int) {
+        guard let next = calendar.date(byAdding: .day, value: direction * period.rawValue, to: endDay) else { return }
+        endDay = min(next, now)
+    }
+
+    private func stepButton(systemName: String, label: String, enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.footnote.weight(.semibold))
+                .frame(width: 30, height: 30)
+                .background(P.surfaceRaised, in: Circle())
+                .overlay(Circle().strokeBorder(P.separator))
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(enabled ? P.ink : P.inkMuted.opacity(0.5))
+        .disabled(!enabled)
+        .accessibilityLabel(label)
+    }
+}
+
+// MARK: - StatGrid
+
+struct StatTile: Identifiable {
+    let label: String
+    let value: String
+    let unit: String?
+    let detail: String?
+    var id: String { label }
+}
+
+struct StatGridView: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let tiles: [StatTile]
+
+    /// Pairs of tiles, so both tiles in a row take the taller one's height; one per row at accessibility sizes.
+    private var rows: [[StatTile]] {
+        let shown = Array(tiles.prefix(6))
+        let perRow = typeSize.isAccessibilitySize ? 1 : 2
+        return stride(from: 0, to: shown.count, by: perRow).map { Array(shown[$0..<min($0 + perRow, shown.count)]) }
+    }
+
+    var body: some View {
+        Grid(horizontalSpacing: LoopDesign.Space.s2, verticalSpacing: LoopDesign.Space.s2) {
+            ForEach(rows, id: \.first?.id) { row in
+                GridRow {
+                    ForEach(row) { tile in
+                        tileView(tile)
+                    }
+                }
+            }
+        }
+    }
+
+    private func tileView(_ tile: StatTile) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(tile.label)
+                .font(LoopDesign.Typeface.footnote)
+                .foregroundStyle(P.inkMuted)
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(tile.value)
+                    .font(LoopDesign.Typeface.statValue)
+                    .foregroundStyle(P.ink)
+                    .minimumScaleFactor(0.7)
+                    .lineLimit(1)
+                if let unit = tile.unit {
+                    Text(unit)
+                        .font(LoopDesign.Typeface.footnote)
+                        .foregroundStyle(P.inkMuted)
+                }
+            }
+            if let detail = tile.detail {
+                Text(detail)
+                    .font(LoopDesign.Typeface.footnote)
+                    .foregroundStyle(P.inkMuted)
+                    .lineLimit(2)
+            }
+        }
+        .padding(LoopDesign.Space.s3)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(P.surfaceSunken, in: RoundedRectangle(cornerRadius: LoopDesign.Radius.md, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - TimeInRange
+
+struct TimeInRangeView: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    /// Fractions per band, 0–1.
+    let fractions: [LoopHistoryMath.RangeBand: Double]
+    let unit: GlucoseUnitStyle
+
+    private var percentages: [LoopHistoryMath.RangeBand: Int] { LoopHistoryMath.roundedPercentages(fractions) }
+
+    static func color(_ band: LoopHistoryMath.RangeBand) -> Color {
+        switch band {
+        case .veryHigh: return P.rangeVeryHigh
+        case .high: return P.rangeHigh
+        case .inRange: return P.rangeIn
+        case .low: return P.rangeLow
+        case .veryLow: return P.rangeVeryLow
+        }
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: LoopDesign.Space.s4) {
+            bar
+                .frame(width: 14)
+            VStack(spacing: LoopDesign.Space.s2) {
+                ForEach(LoopHistoryMath.RangeBand.allCases) { band in
+                    row(band)
+                }
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var bar: some View {
+        GeometryReader { geometry in
+            let minimum: CGFloat = 4
+            let bands = LoopHistoryMath.RangeBand.allCases
+            let raw = bands.map { CGFloat(fractions[$0] ?? 0) }
+            let floors = raw.map { $0 > 0 ? max(minimum, $0 * geometry.size.height) : 0 }
+            let spare = geometry.size.height - floors.reduce(0, +)
+            // Trim the space the minimums borrowed from the largest band.
+            let largest = raw.indices.max { raw[$0] < raw[$1] } ?? 2
+            VStack(spacing: 1) {
+                ForEach(Array(bands.enumerated()), id: \.offset) { index, band in
+                    let height = index == largest ? max(0, floors[index] + spare) : floors[index]
+                    if height > 0 {
+                        Rectangle().fill(Self.color(band)).frame(height: max(0, height - 1))
+                    }
+                }
+            }
+            .clipShape(Capsule())
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func row(_ band: LoopHistoryMath.RangeBand) -> some View {
+        let fraction = fractions[band] ?? 0
+        let hours = fraction * 24
+        let thresholds = Text(band.thresholds(unit))
+            .font(LoopDesign.Typeface.footnote)
+            .foregroundStyle(P.inkMuted)
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s2) {
+                Text("\(percentages[band] ?? 0)%")
+                    .font(LoopDesign.Typeface.statValueSmall)
+                    .foregroundStyle(P.ink)
+                    .frame(minWidth: typeSize.isAccessibilitySize ? nil : 52, alignment: .trailing)
+                Text(band.name)
+                    .font(LoopDesign.Typeface.subhead)
+                    .foregroundStyle(P.ink)
+                if !typeSize.isAccessibilitySize {
+                    thresholds
+                }
+                Spacer(minLength: LoopDesign.Space.s1)
+                Text(String(format: "%.1f h", hours))
+                    .font(LoopDesign.Typeface.footnote.monospacedDigit())
+                    .foregroundStyle(P.inkMuted)
+            }
+            if typeSize.isAccessibilitySize {
+                thresholds
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(band.name), \(band.thresholds(unit)) \(unit.unitName): \(percentages[band] ?? 0) percent, \(String(format: "%.1f", hours)) hours a day")
+    }
+}
+
+// MARK: - AGP
+
+struct AGPChartView: View {
+    let slots: [LoopHistoryMath.AGPSlot]
+    let readings: [GlucosePoint]
+    let days: Int
+    let unit: GlucoseUnitStyle
+    let targetRange: ClosedRange<Double>?
+    var height: CGFloat = 180
+
+    private func v(_ mgdl: Double) -> Double {
+        min(max(unit.value(mgdl), unit.agpDomain.lowerBound), unit.agpDomain.upperBound)
+    }
+
+    private static let hourTicks = [0, 360, 720, 1080, 1440]
+
+    private static func label(minute: Int) -> String {
+        let minute = minute % 1440
+        let date = Calendar.current.date(bySettingHour: minute / 60, minute: minute % 60, second: 0, of: Date())!
+        return DayAxis.hourLabel(date)
+    }
+
+    var enoughDays: Bool { days >= 5 }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
+            if readings.isEmpty {
+                ChartPlaceholder(message: "No CGM data in this period", height: height)
+            } else {
+                chart.frame(height: height)
+                if !enoughDays {
+                    Text("Not enough days for a pattern: \(days) of 5")
+                        .font(LoopDesign.Typeface.footnote)
+                        .foregroundStyle(P.inkMuted)
+                }
+            }
+        }
+    }
+
+    private func minuteOfDay(_ date: Date) -> Int {
+        let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
+        return (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+    }
+
+    private var chart: some View {
+        Chart {
+            if let targetRange {
+                RectangleMark(xStart: .value("Start", 0), xEnd: .value("End", 1440),
+                              yStart: .value("Low", v(targetRange.lowerBound)), yEnd: .value("High", v(targetRange.upperBound)))
+                    .foregroundStyle(P.targetBand)
+            }
+            if enoughDays {
+                ForEach(slots, id: \.minute) { slot in
+                    AreaMark(x: .value("Time", slot.minute), yStart: .value("5%", v(slot.p5)), yEnd: .value("95%", v(slot.p95)), series: .value("Band", "outer"))
+                        .foregroundStyle(P.agpOuter)
+                        .interpolationMethod(.monotone)
+                }
+                ForEach(slots, id: \.minute) { slot in
+                    AreaMark(x: .value("Time", slot.minute), yStart: .value("25%", v(slot.p25)), yEnd: .value("75%", v(slot.p75)), series: .value("Band", "inner"))
+                        .foregroundStyle(P.agpInner)
+                        .interpolationMethod(.monotone)
+                }
+                ForEach(slots, id: \.minute) { slot in
+                    LineMark(x: .value("Time", slot.minute), y: .value("Median", v(slot.p50)), series: .value("Band", "median"))
+                        .foregroundStyle(P.glucose)
+                        .lineStyle(StrokeStyle(lineWidth: 2.5))
+                        .interpolationMethod(.monotone)
+                }
+            } else {
+                ForEach(Array(readings.enumerated()), id: \.offset) { _, point in
+                    PointMark(x: .value("Time", minuteOfDay(point.date)), y: .value("Glucose", v(point.mgdl)))
+                        .symbolSize(8)
+                        .foregroundStyle(P.glucose)
+                }
+            }
+        }
+        .chartXScale(domain: 0...1440)
+        .chartYScale(domain: unit.agpDomain)
+        .chartXAxis {
+            AxisMarks(values: Self.hourTicks) { value in
+                AxisGridLine().foregroundStyle(P.grid)
+                AxisValueLabel {
+                    if let minute = value.as(Int.self) { Text(Self.label(minute: minute)) }
+                }
+                .font(LoopDesign.Typeface.caption)
+                .foregroundStyle(P.inkMuted)
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading, values: unit.agpTicks) { _ in
+                AxisGridLine().foregroundStyle(P.grid)
+                AxisValueLabel().font(LoopDesign.Typeface.caption).foregroundStyle(P.inkMuted)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
+    }
+
+    private var accessibilitySummary: String {
+        guard enoughDays, let high = slots.max(by: { $0.p50 < $1.p50 }), let low = slots.min(by: { $0.p50 < $1.p50 }) else {
+            return "Daily pattern: not enough days"
+        }
+        return "Daily pattern over \(days) days. Median highest \(unit.format(high.p50)) at \(Self.label(minute: high.minute)), lowest \(unit.format(low.p50)) at \(Self.label(minute: low.minute))"
+    }
+}
+
+// MARK: - InsulinDailyTotals
+
+struct InsulinDailyTotalsView: View {
+    let totals: [LoopHistoryMath.DayTotal]
+    /// Weekly averages instead of days, for periods past 30 days.
+    let weekly: Bool
+    /// Calculated from the original daily totals, even when the bars are weekly averages.
+    let average: Double
+    var height: CGFloat = 170
+    var onSelectDay: ((Date) -> Void)? = nil
+
+    private var yMax: Double {
+        let top = max(totals.map(\.total).max() ?? 0, average)
+        return max(10, IOBCOBChartView.niceStep(top / 4) * 5)
+    }
+
+    var body: some View {
+        if totals.allSatisfy({ $0.total == 0 }) {
+            ChartPlaceholder(message: "No insulin recorded in this period", height: height)
+        } else {
+            chart.frame(height: height)
+        }
+    }
+
+    private var unitWidth: Calendar.Component { weekly ? .weekOfYear : .day }
+
+    private var chart: some View {
+        Chart {
+            ForEach(totals) { day in
+                BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Base", 0), yEnd: .value("Basal", day.basal), width: .ratio(0.7))
+                    .foregroundStyle(P.basal)
+                BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Basal", max(0, day.basal - yMax * 0.006)), yEnd: .value("Edge", day.basal), width: .ratio(0.7))
+                    .foregroundStyle(P.basalEdge)
+                BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Basal", day.basal), yEnd: .value("Total", day.total), width: .ratio(0.7))
+                    .foregroundStyle(P.insulin)
+            }
+            RuleMark(y: .value("Average", average))
+                .foregroundStyle(P.ink)
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                .annotation(position: .top, alignment: .trailing, spacing: 2) {
+                    Text(String(format: "%.1f", average))
+                        .font(LoopDesign.Typeface.caption.weight(.semibold))
+                        .foregroundStyle(P.ink)
+                }
+        }
+        .chartYScale(domain: 0...yMax)
+        .chartXAxis {
+            AxisMarks(values: axisDates) { value in
+                AxisValueLabel(centered: true) {
+                    if let date = value.as(Date.self) {
+                        Text(axisLabel(date))
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .font(LoopDesign.Typeface.caption)
+                .foregroundStyle(P.inkMuted)
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading) { _ in
+                AxisGridLine().foregroundStyle(P.grid)
+                AxisValueLabel().font(LoopDesign.Typeface.caption).foregroundStyle(P.inkMuted)
+            }
+        }
+        .chartOverlay { proxy in
+            GeometryReader { geometry in
+                Rectangle().fill(.clear).contentShape(Rectangle())
+                    .onTapGesture { location in
+                        guard let onSelectDay, !weekly, let frame = proxy.plotFrame else { return }
+                        let x = location.x - geometry[frame].origin.x
+                        if let date: Date = proxy.value(atX: x),
+                           let day = totals.min(by: { abs($0.day.addingTimeInterval(43200).timeIntervalSince(date)) < abs($1.day.addingTimeInterval(43200).timeIntervalSince(date)) }) {
+                            onSelectDay(day.day)
+                        }
+                    }
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Insulin per \(weekly ? "day, weekly average" : "day"), average \(LoopFormat.totalUnits(average))")
+    }
+
+    private var axisDates: [Date] {
+        if weekly {
+            let stride = max(1, Int(ceil(Double(totals.count) / 6)))
+            return totals.enumerated().compactMap { index, total in index % stride == 0 ? total.day : nil }
+        }
+        if totals.count > 14 {
+            return totals.map(\.day).filter { Calendar.current.component(.weekday, from: $0) == 2 }
+        }
+        return totals.map(\.day)
+    }
+
+    private func axisLabel(_ date: Date) -> String {
+        if weekly {
+            return date.formatted(.dateTime.day().month(.abbreviated))
+        }
+        let weekday = String(date.formatted(.dateTime.weekday(.narrow)))
+        if totals.count <= 14 {
+            let first = totals.first?.day == date, last = totals.last?.day == date
+            let isMonday = Calendar.current.component(.weekday, from: date) == 2
+            return first || last || isMonday ? "\(weekday)\n\(date.formatted(.dateTime.day()))" : weekday
+        }
+        // 30 days: label every Monday only.
+        return Calendar.current.component(.weekday, from: date) == 2 ? date.formatted(.dateTime.day().month(.abbreviated)) : ""
+    }
+}
+
+// MARK: - LoopModeBar
+
+struct LoopModeBarView: View {
+    let spans: [LoopModeSpan]
+
+    private var total: TimeInterval { spans.reduce(0) { $0 + $1.duration } }
+
+    static func color(_ mode: LoopModeSpan.Mode) -> Color {
+        switch mode {
+        case .closed: return P.statusAutomated
+        case .limited: return P.statusWarning
+        case .open: return P.statusCritical
+        }
+    }
+
+    static func name(_ mode: LoopModeSpan.Mode) -> String {
+        switch mode {
+        case .closed: return "Closed loop"
+        case .limited: return "Limited"
+        case .open: return "Open loop / manual"
+        }
+    }
+
+    private let modes: [LoopModeSpan.Mode] = [.closed, .limited, .open]
+
+    var body: some View {
+        if total <= 0 {
+            ChartPlaceholder(message: "No loop runs recorded in this period", height: 60)
+        } else {
+            VStack(spacing: LoopDesign.Space.s3) {
+                bar.frame(height: 10)
+                ForEach(modes, id: \.self) { mode in
+                    row(mode)
+                }
+            }
+        }
+    }
+
+    private func fraction(_ mode: LoopModeSpan.Mode) -> Double {
+        LoopHistoryMath.duration(of: mode, in: spans) / total
+    }
+
+    private var bar: some View {
+        GeometryReader { geometry in
+            let minimum: CGFloat = 4
+            let widths = modes.map { fraction($0) > 0 ? max(minimum, fraction($0) * geometry.size.width) : 0 }
+            let excess = widths.reduce(0, +) - geometry.size.width
+            HStack(spacing: 1) {
+                ForEach(Array(modes.enumerated()), id: \.offset) { index, mode in
+                    if widths[index] > 0 {
+                        Rectangle()
+                            .fill(Self.color(mode))
+                            .frame(width: max(0, index == 0 ? widths[index] - excess - 2 : widths[index]))
+                    }
+                }
+            }
+            .clipShape(Capsule())
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func row(_ mode: LoopModeSpan.Mode) -> some View {
+        let duration = LoopHistoryMath.duration(of: mode, in: spans)
+        return HStack(spacing: LoopDesign.Space.s2) {
+            Circle().fill(Self.color(mode)).frame(width: 8, height: 8)
+            Text(Self.name(mode))
+                .font(LoopDesign.Typeface.subhead)
+                .foregroundStyle(P.ink)
+            Text("· \(LoopFormat.duration(duration))")
+                .font(LoopDesign.Typeface.footnote)
+                .foregroundStyle(P.inkMuted)
+            Spacer()
+            Text(String(format: "%.1f%%", fraction(mode) * 100))
+                .font(LoopDesign.Typeface.statValueSmall)
+                .foregroundStyle(P.ink)
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+struct LoopGapsList: View {
+    let spans: [LoopModeSpan]
+
+    private var gaps: [LoopModeSpan] {
+        spans.filter { $0.mode != .closed }.sorted { $0.start > $1.start }
+    }
+
+    var body: some View {
+        List {
+            if gaps.isEmpty {
+                Text("No gaps: Loop ran closed loop all through this period.")
+                    .foregroundStyle(P.inkMuted)
+            }
+            ForEach(Array(gaps.enumerated()), id: \.offset) { _, gap in
+                HStack(alignment: .top, spacing: LoopDesign.Space.s3) {
+                    Circle().fill(LoopModeBarView.color(gap.mode)).frame(width: 8, height: 8).padding(.top, 6)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(gap.cause ?? LoopModeBarView.name(gap.mode))
+                            .font(LoopDesign.Typeface.body)
+                        Text("\(LoopFormat.weekdayDay(gap.start)), \(LoopFormat.time(gap.start)) · \(LoopFormat.duration(gap.duration))")
+                            .font(LoopDesign.Typeface.footnote)
+                            .foregroundStyle(P.inkMuted)
+                    }
+                }
+                .accessibilityElement(children: .combine)
+            }
+        }
+        .navigationTitle("Gaps")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
