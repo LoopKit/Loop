@@ -30,25 +30,31 @@ struct SetupComparison: Equatable {
 
     let before: Period?
     let after: Period
+    /// The setup is still in use, rather than replaced by a later change.
+    let isCurrent: Bool
 
-    /// The comparison is still settling until the setup has run for about two weeks.
-    var isSettling: Bool { after.end.timeIntervalSince(after.start) < Self.suggestedDuration }
+    /// The current setup's comparison is still settling until it has run for about two weeks.
+    var isSettling: Bool { isCurrent && after.days * .days(1) < Self.suggestedDuration }
 
+    /// Compares the setup `change` started, until `end` (the next change) or `now`, with the period before it.
     init?(change: SetupChange,
+          end: Date? = nil,
           samples: [StoredGlucoseSample],
           insulinHistory: InsulinDeliveryHistory?,
           now: Date,
           calendar: Calendar = .current) {
-        guard !change.isLowerBound, now.timeIntervalSince(change.date) >= Self.minimumPeriod else {
+        let afterEnd = min(end ?? now, now)
+        guard !change.isLowerBound, afterEnd.timeIntervalSince(change.date) >= Self.minimumPeriod else {
             return nil
         }
+        isCurrent = end == nil
         func period(_ start: Date, _ end: Date) -> Period {
             Period(start: start,
                    end: end,
                    glucose: GlucoseStatistics(samples: samples, start: start, end: end, calendar: calendar),
                    insulinPerDay: Self.insulinPerDay(insulinHistory, from: start, to: end))
         }
-        after = period(change.date, now)
+        after = period(change.date, afterEnd)
 
         let beforeStart = max(change.date - Self.beforeDuration, change.previousDate ?? .distantPast)
         let candidate = period(beforeStart, change.date)

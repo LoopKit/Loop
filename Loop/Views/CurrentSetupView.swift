@@ -18,18 +18,20 @@ struct CurrentSetupView: View {
         _viewModel = StateObject(wrappedValue: viewModel())
     }
 
-    private var setupChange: SetupChange? { viewModel.setupChange }
-
     var body: some View {
         List {
-            if let setupChange {
+            if let selected = viewModel.selected {
                 Section {
-                    Text(summary(setupChange))
+                    Text(summary(selected))
                     if let comparison = viewModel.comparison {
                         if let before = comparison.before {
                             TimeInRangeStripe(title: NSLocalizedString("Before", comment: "Title of the time in range bar for the period before the setup change"), timeInRange: before.glucose.timeInRange)
                         }
-                        TimeInRangeStripe(title: NSLocalizedString("Since Change", comment: "Title of the time in range bar for the period since the setup change"), timeInRange: comparison.after.glucose.timeInRange)
+                        TimeInRangeStripe(
+                            title: comparison.isCurrent
+                                ? NSLocalizedString("Since Change", comment: "Title of the time in range bar for the period since the setup change")
+                                : NSLocalizedString("This Setup", comment: "Title of the time in range bar for a past setup"),
+                            timeInRange: comparison.after.glucose.timeInRange)
                     } else if viewModel.isLoading {
                         HStack { Spacer(); ProgressView(); Spacer() }
                     }
@@ -37,26 +39,14 @@ struct CurrentSetupView: View {
                 if let comparison = viewModel.comparison {
                     resultsSection(comparison)
                 }
-            }
-            Section {
-                if let setupChange {
-                    LabeledContent(NSLocalizedString("Unchanged For", comment: "Title of the row showing how long the current setup has run"), value: setupChange.durationDescription)
-                    LabeledContent(
-                        setupChange.isLowerBound
-                            ? NSLocalizedString("No Change Recorded Since", comment: "Title of the row showing the oldest date the setup is known to be unchanged since")
-                            : NSLocalizedString("Last Change", comment: "Title of the row showing when the setup last changed"),
-                        value: setupChange.date.formatted(date: .abbreviated, time: .shortened))
-                } else {
+            } else if !viewModel.isLoading {
+                Section {
                     Text(NSLocalizedString("No settings have been recorded yet.", comment: "Shown on the current setup screen when there is no settings history"))
                         .foregroundColor(.secondary)
                 }
             }
-            if let setupChange, !setupChange.items.isEmpty {
-                Section(header: SectionHeader(label: NSLocalizedString("What Changed", comment: "Header of the list of settings changed in the last setup change"))) {
-                    ForEach(setupChange.items.indices, id: \.self) { index in
-                        Text(setupChange.items[index].title)
-                    }
-                }
+            if let history = viewModel.history, !history.changes.isEmpty {
+                historySection(history)
             }
             Section(footer: Text(NSLocalizedString("Changes to therapy settings, insulin type or model, dosing strategy and algorithm experiments start a new setup. Running a preset doesn't.\n\nAbout 2 weeks with the same setup is a good amount of time to see a change in outcomes such as time in range and lows. Over just a few days, ordinary day-to-day variation can hide or exaggerate the effect.", comment: "Footer explaining what starts a new setup and how long to keep one"))) {
                 EmptyView()
@@ -72,8 +62,8 @@ struct CurrentSetupView: View {
         let after = comparison.after
         return Section(header: SectionHeader(label: NSLocalizedString("Results", comment: "Header of the setup comparison results")),
                        footer: Text(before == nil
-                                    ? NSLocalizedString("Median glucose by time of day since the change, with its 25–75% band.", comment: "Setup comparison chart explanation without a before period")
-                                    : NSLocalizedString("Median glucose by time of day: dashed before the change, solid since, with the 25–75% band since the change.", comment: "Setup comparison chart explanation"))) {
+                                    ? NSLocalizedString("Median glucose by time of day with this setup, with its 25–75% band.", comment: "Setup comparison chart explanation without a before period")
+                                    : NSLocalizedString("Median glucose by time of day: dashed before the change, solid with this setup, with its 25–75% band.", comment: "Setup comparison chart explanation"))) {
             comparisonRow(NSLocalizedString("Time in Range", comment: "Setup comparison row for time in range"),
                           before?.timeInRange.map(percent), after.timeInRange.map(percent))
             comparisonRow(String(format: NSLocalizedString("Time Below %@", comment: "Setup comparison row for time below the low threshold (1: glucose value, e.g. 70 mg/dL)"), lowThreshold),
@@ -88,6 +78,53 @@ struct CurrentSetupView: View {
                     .padding(.vertical, 8)
             }
         }
+    }
+
+    private func historySection(_ history: SetupHistory) -> some View {
+        Section(header: SectionHeader(label: NSLocalizedString("Setup History", comment: "Header of the list of past setup changes")),
+                footer: Text(NSLocalizedString("Tap a change to compare that setup with the period before it.", comment: "Footer of the setup history list"))) {
+            ForEach(history.changes.reversed(), id: \.date) { change in
+                Button {
+                    viewModel.select(change)
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(dateRange(change, end: history.end(of: change)))
+                                .foregroundColor(.primary)
+                            Text(ListFormatter.localizedString(byJoining: change.items.map(\.title)))
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                            if let timeInRange = viewModel.timeInRange[change.date] {
+                                Text(String(format: NSLocalizedString("%@ in range", comment: "Time in range for a period (1: percent)"), percent(timeInRange)))
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
+                                    .monospacedDigit()
+                            }
+                        }
+                        Spacer()
+                        if change == viewModel.selected {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(.accentColor)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func dateRange(_ change: SetupChange, end: Date?) -> String {
+        guard let end else {
+            return String(format: NSLocalizedString("%@ – Now", comment: "Date range of the current setup (1: start date)"), change.date.formatted(date: .abbreviated, time: .shortened))
+        }
+        return String(format: NSLocalizedString("%1$@ · %2$@", comment: "Start date and length of a past setup (1: start date, 2: duration)"), change.date.formatted(date: .abbreviated, time: .shortened), duration(from: change.date, to: end))
+    }
+
+    private func duration(from start: Date, to end: Date) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.day, .hour, .minute]
+        formatter.maximumUnitCount = 1
+        formatter.unitsStyle = .full
+        return formatter.string(from: max(60, end.timeIntervalSince(start))) ?? ""
     }
 
     private func comparisonRow(_ title: String, _ before: String?, _ after: String?) -> some View {
@@ -122,11 +159,18 @@ struct CurrentSetupView: View {
             return String(format: NSLocalizedString("No setup change has been recorded since %@, so there's no earlier setup to compare with.", comment: "Setup summary when the start of the setup isn't known (1: date)"),
                           change.date.formatted(date: .abbreviated, time: .omitted))
         }
-        var sentences = [change.items.isEmpty
-            ? String(format: NSLocalizedString("It's been %@ since your last setup change.", comment: "Setup summary first sentence (1: duration, e.g. 5 days)"), change.durationDescription)
-            : String(format: NSLocalizedString("It's been %1$@ since your last setup change: %2$@.", comment: "Setup summary first sentence (1: duration, e.g. 5 days, 2: list of what changed)"), change.durationDescription, ListFormatter.localizedString(byJoining: change.items.map(\.title)))]
+        let changed = ListFormatter.localizedString(byJoining: change.items.map(\.title))
+        var sentences: [String]
+        if let end = viewModel.history?.end(of: change) {
+            sentences = [String(format: NSLocalizedString("The setup from %1$@ ran for %2$@, after a change to %3$@.", comment: "Setup summary first sentence for a past setup (1: start date, 2: duration, 3: list of what changed)"),
+                                change.date.formatted(date: .abbreviated, time: .omitted), duration(from: change.date, to: end), changed)]
+        } else {
+            sentences = [String(format: NSLocalizedString("It's been %1$@ since your last setup change: %2$@.", comment: "Setup summary first sentence (1: duration, e.g. 5 days, 2: list of what changed)"), change.durationDescription, changed)]
+        }
         guard let comparison = viewModel.comparison else {
-            if !viewModel.isLoading {
+            if viewModel.history?.end(of: change) != nil {
+                sentences.append(NSLocalizedString("That's too short to compare.", comment: "Setup summary for a past setup that ran less than a day"))
+            } else if !viewModel.isLoading {
                 sentences.append(NSLocalizedString("Results appear after a day with the new setup.", comment: "Setup summary before a day has passed since the change"))
             }
             return sentences.joined(separator: " ")
@@ -143,7 +187,7 @@ struct CurrentSetupView: View {
             sentences.append(NSLocalizedString("There isn't enough CGM data from before the change to compare with.", comment: "Setup summary when the period before the change has too little data"))
         }
         if after.glucose.percentActive < SetupComparison.minimumCGMActive {
-            sentences.append(String(format: NSLocalizedString("CGM data covers only %@ of the time since the change.", comment: "Setup summary note about missing CGM data (1: percent)"), percent(after.glucose.percentActive)))
+            sentences.append(String(format: NSLocalizedString("CGM data covers only %@ of this setup's time.", comment: "Setup summary note about missing CGM data (1: percent)"), percent(after.glucose.percentActive)))
         }
         if comparison.isSettling {
             sentences.append(NSLocalizedString("With less than 2 weeks so far, these numbers can still change a lot.", comment: "Setup summary note while the new setup has run less than two weeks"))

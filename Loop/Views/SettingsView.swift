@@ -359,8 +359,8 @@ extension SettingsView {
                     .accessibilityIdentifier("settingsViewStatistics")
                 }
                 NavigationLink(destination: CurrentSetupView(viewModel: CurrentSetupViewModel(
-                    setupChange: setupChange,
-                    loadSetupChange: { [viewModel] in try await viewModel.setupChange?() },
+                    selected: setupChange,
+                    loadHistory: { [viewModel] in try await viewModel.setupHistory?() ?? SetupHistory(settings: [], experiments: []) },
                     glucoseStore: glucoseStore,
                     insulinDeliveryHistory: viewModel.insulinDeliveryHistory
                 ))) {
@@ -377,7 +377,7 @@ extension SettingsView {
                     .accessibilityIdentifier("settingsViewCurrentSetup")
                 }
                 .task {
-                    setupChange = try? await viewModel.setupChange?()
+                    setupChange = try? await viewModel.setupHistory?().latest
                 }
             }
         }

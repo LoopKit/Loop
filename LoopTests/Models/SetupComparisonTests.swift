@@ -68,6 +68,17 @@ final class SetupComparisonTests: XCTestCase {
         XCTAssertNil(comparison.before)
     }
 
+    func testPastSetupEndsAtTheNextChange() throws {
+        let now = changeDate.addingTimeInterval(.days(30))
+        let glucose = samples(from: changeDate - .days(20), to: now) { _ in 120 }
+        let comparison = try XCTUnwrap(SetupComparison(change: change(), end: changeDate + .days(6), samples: glucose, insulinHistory: nil, now: now))
+
+        XCTAssertEqual(comparison.after.end, changeDate + .days(6))
+        XCTAssertFalse(comparison.isCurrent)
+        XCTAssertFalse(comparison.isSettling)
+        XCTAssertNil(SetupComparison(change: change(), end: changeDate + .hours(10), samples: glucose, insulinHistory: nil, now: now))
+    }
+
     func testNothingUntilADayHasPassed() {
         let now = changeDate.addingTimeInterval(.hours(20))
         let glucose = samples(from: changeDate - .days(14), to: now) { _ in 120 }
