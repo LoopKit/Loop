@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C02026102606000000000002 /* RemoteDataServicesManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02026102606000000000001 /* RemoteDataServicesManagerTests.swift */; };
 		1419606428D9550400BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
@@ -759,6 +760,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C02026102606000000000001 /* RemoteDataServicesManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/RemoteDataServicesManagerTests.swift; sourceTree = "<group>"; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
 		1452F4A82A851C9400F8B9E4 /* AddEditFavoriteFoodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditFavoriteFoodViewModel.swift; sourceTree = "<group>"; };
@@ -2050,6 +2052,7 @@
 		43F78D2C1C8FC58F002152D1 /* LoopTests */ = {
 			isa = PBXGroup;
 			children = (
+				C02026102606000000000001 /* RemoteDataServicesManagerTests.swift */,
 				E9C58A7624DB510500487A17 /* Fixtures */,
 				B4CAD8772549D2330057946B /* LoopCore */,
 				1DA7A83F24476E8C008257F0 /* Managers */,
@@ -3726,6 +3729,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C02026102606000000000002 /* RemoteDataServicesManagerTests.swift in Sources */,
 				A9DF02CB24F72B9E00B7C988 /* CriticalEventLogTests.swift in Sources */,
 				1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */,
 				C1777A6625A125F100595963 /* ManualEntryDoseViewModelTests.swift in Sources */,

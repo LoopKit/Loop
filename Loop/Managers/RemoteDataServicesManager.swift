@@ -61,6 +61,9 @@ final class RemoteDataServicesManager {
         lock.withLock {
             unlockedRemoteDataServices.append(remoteDataService)
         }
+        // A restored service may have durable work and needs fresh drain boundaries even when no
+        // settings or dose changes occur after launch. Retain each stream's existing query anchor.
+        uploadExistingData(to: remoteDataService)
     }
 
     func removeService(_ remoteDataService: RemoteDataService) {
