@@ -270,12 +270,18 @@ extension SettingsView {
         .environment(\.insulinTintColor, self.insulinTintColor)
     }
 
+    @ViewBuilder
     private var interfaceSection: some View {
         Section(footer: Text(NSLocalizedString("The new interface adds Trends and Logbook tabs. Turn it off to go back to the classic status screen; Settings closes to switch.", comment: "Footer for the interface choice in settings"))) {
             Toggle(NSLocalizedString("New Interface", comment: "Title of the toggle for the redesigned interface"), isOn: Binding(
                 get: { LoopInterfacePreference.useRedesign },
                 set: { LoopInterfacePreference.useRedesign = $0 }
             ))
+        }
+        Section {
+            NavigationLink(destination: AppearanceSettingsView()) {
+                Text(NSLocalizedString("Appearance and App Icon", comment: "Title of the row that opens the appearance and app icon settings"))
+            }
         }
     }
 
