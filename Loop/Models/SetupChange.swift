@@ -25,6 +25,8 @@ struct SetupChange: Equatable {
     var items: [Item]
     /// When the setup before this change started, as far as the records show.
     var previousDate: Date? = nil
+    /// The therapy settings were first entered, during onboarding.
+    var isInitialSetup = false
 
     /// Changes this close together are reported as one edit.
     static let groupingInterval = TimeInterval(hours: 1)
@@ -41,7 +43,8 @@ struct SetupChange: Equatable {
         }
         return zip(sorted, sorted.dropFirst()).compactMap { previous, current in
             let items = differences(from: previous, to: current)
-            return items.isEmpty ? nil : SetupChange(date: current.date, isLowerBound: false, items: items)
+            let isInitialSetup = previous.basalRateSchedule == nil && previous.insulinSensitivitySchedule == nil && previous.carbRatioSchedule == nil
+            return items.isEmpty ? nil : SetupChange(date: current.date, isLowerBound: false, items: items, isInitialSetup: isInitialSetup)
         }
     }
 
@@ -70,6 +73,7 @@ struct SetupChange: Equatable {
     func merging(_ other: SetupChange) -> SetupChange {
         var merged = self
         merged.date = max(date, other.date)
+        merged.isInitialSetup = isInitialSetup || other.isInitialSetup
         for item in other.items where !merged.items.contains(item) {
             merged.items.append(item)
         }

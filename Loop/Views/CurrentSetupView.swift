@@ -91,7 +91,7 @@ struct CurrentSetupView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(dateRange(change, end: history.end(of: change)))
                                 .foregroundColor(.primary)
-                            Text(ListFormatter.localizedString(byJoining: change.items.map(\.title)))
+                            Text(change.itemsDescription)
                                 .font(.footnote)
                                 .foregroundColor(.secondary)
                             if let timeInRange = viewModel.timeInRange[change.date] {
@@ -161,7 +161,14 @@ struct CurrentSetupView: View {
         }
         let changed = ListFormatter.localizedString(byJoining: change.items.map(\.title))
         var sentences: [String]
-        if let end = viewModel.history?.end(of: change) {
+        if change.isInitialSetup {
+            if let end = viewModel.history?.end(of: change) {
+                sentences = [String(format: NSLocalizedString("Your initial setup from %1$@ ran for %2$@.", comment: "Setup summary first sentence for the initial setup, now replaced (1: start date, 2: duration)"),
+                                    change.date.formatted(date: .abbreviated, time: .omitted), duration(from: change.date, to: end))]
+            } else {
+                sentences = [String(format: NSLocalizedString("It's been %@ since your initial setup.", comment: "Setup summary first sentence when the initial setup is current (1: duration, e.g. 5 days)"), change.durationDescription)]
+            }
+        } else if let end = viewModel.history?.end(of: change) {
             sentences = [String(format: NSLocalizedString("The setup from %1$@ ran for %2$@, after a change to %3$@.", comment: "Setup summary first sentence for a past setup (1: start date, 2: duration, 3: list of what changed)"),
                                 change.date.formatted(date: .abbreviated, time: .omitted), duration(from: change.date, to: end), changed)]
         } else {
@@ -224,6 +231,12 @@ extension SetupChange {
             return String(format: NSLocalizedString("at least %@", comment: "Time since the setup last changed, when the change date is not known exactly (1: duration, e.g. 3 days)"), duration)
         }
         return duration
+    }
+
+    var itemsDescription: String {
+        isInitialSetup
+            ? NSLocalizedString("Initial setup", comment: "Setup change where the therapy settings were first entered")
+            : ListFormatter.localizedString(byJoining: items.map(\.title))
     }
 }
 
