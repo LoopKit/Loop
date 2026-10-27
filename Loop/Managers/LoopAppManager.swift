@@ -343,6 +343,7 @@ class LoopAppManager: NSObject {
         statusTableViewController.testingScenariosManager = testingScenariosManager
         bluetoothStateManager.addBluetoothObserver(statusTableViewController)
 
+        LoopInterfacePreference.syncToExtensions()
         if LoopInterfacePreference.useRedesign {
             let rootNavigationController = RootNavigationController()
             rootNavigationController.setViewControllers([statusTableViewController], animated: false)
