@@ -41,11 +41,24 @@ struct SetupChange: Equatable {
             insulinType = settings.insulinType
             return settings
         }
-        return zip(sorted, sorted.dropFirst()).compactMap { previous, current in
-            let items = differences(from: previous, to: current)
-            let isInitialSetup = previous.basalRateSchedule == nil && previous.insulinSensitivitySchedule == nil && previous.carbRatioSchedule == nil
-            return items.isEmpty ? nil : SetupChange(date: current.date, isLowerBound: false, items: items, isInitialSetup: isInitialSetup)
+        // Records without therapy settings are saved before onboarding, and occasionally later
+        guard let firstEntered = sorted.firstIndex(where: hasTherapySettings) else {
+            return []
         }
+        let entered = sorted[firstEntered...].filter(hasTherapySettings)
+        var changes = zip(entered, entered.dropFirst()).compactMap { previous, current in
+            let items = differences(from: previous, to: current)
+            return items.isEmpty ? nil : SetupChange(date: current.date, isLowerBound: false, items: items)
+        }
+        if firstEntered > 0 {
+            let initial = entered[0]
+            changes.insert(SetupChange(date: initial.date, isLowerBound: false, items: differences(from: sorted[firstEntered - 1], to: initial), isInitialSetup: true), at: 0)
+        }
+        return changes
+    }
+
+    private static func hasTherapySettings(_ settings: StoredSettings) -> Bool {
+        settings.basalRateSchedule != nil || settings.insulinSensitivitySchedule != nil || settings.carbRatioSchedule != nil
     }
 
     /// Experiments turned on or off between dosing decisions. Decisions from builds that didn't
