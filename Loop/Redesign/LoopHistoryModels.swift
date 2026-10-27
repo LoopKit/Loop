@@ -174,7 +174,7 @@ struct GlucoseUnitStyle: Equatable {
     func mgdl(_ displayValue: Double) -> Double { isMmol ? displayValue * Self.mgdlPerMmol : displayValue }
 
     func format(_ mgdl: Double) -> String {
-        isMmol ? String(format: "%.1f", mgdl / Self.mgdlPerMmol) : String(format: "%.0f", mgdl)
+        isMmol ? LoopFormat.number(mgdl / Self.mgdlPerMmol, decimals: 1) : LoopFormat.number(mgdl, decimals: 0)
     }
 
     /// Fixed chart scales from the design: 2–20 mmol/L on day views, 0–22 on AGP.
@@ -187,13 +187,29 @@ struct GlucoseUnitStyle: Equatable {
 // MARK: - Formatting
 
 enum LoopFormat {
-    static func doseUnits(_ units: Double) -> String { String(format: "%.2f U", units) }
-    static func totalUnits(_ units: Double) -> String { String(format: "%.1f U", units) }
-    static func rate(_ rate: Double) -> String { String(format: "%.2f U/h", rate) }
-    static func grams(_ grams: Double) -> String { String(format: "%.0f g", grams) }
+    /// A number in the user's locale, e.g. "7.3" or "7,3", with no grouping so values read like Loop's own screens.
+    static func number(_ value: Double, decimals: Int) -> String {
+        value.formatted(.number.precision(.fractionLength(decimals)).grouping(.never))
+    }
+
+    static func doseUnits(_ units: Double) -> String {
+        String(format: NSLocalizedString("%1$@ U", comment: "Format string for an amount of insulin in units. (1: amount)"), number(units, decimals: 2))
+    }
+
+    static func totalUnits(_ units: Double) -> String {
+        String(format: NSLocalizedString("%1$@ U", comment: "Format string for an amount of insulin in units. (1: amount)"), number(units, decimals: 1))
+    }
+
+    static func rate(_ rate: Double) -> String {
+        String(format: NSLocalizedString("%1$@ U/h", comment: "Format string for an insulin rate in units per hour. (1: rate)"), number(rate, decimals: 2))
+    }
+
+    static func grams(_ grams: Double) -> String {
+        String(format: NSLocalizedString("%1$@ g", comment: "Format string for an amount of carbohydrate in grams. (1: grams)"), number(grams, decimals: 0))
+    }
 
     static func signed(_ value: Double, decimals: Int = 2) -> String {
-        let s = String(format: "%.\(decimals)f", abs(value))
+        let s = number(abs(value), decimals: decimals)
         if abs(value) < pow(10, -Double(decimals)) / 2 { return "+" + s }
         return (value < 0 ? "−" : "+") + s
     }
@@ -212,38 +228,35 @@ enum LoopFormat {
         date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
     }
 
-    /// "12 – 25 Oct 2026", "28 Sep – 25 Oct 2026", "20 Dec 2025 – 2 Jan 2026"
+    /// "12 – 25 Oct 2026", "28 Sep – 25 Oct 2026", "20 Dec 2025 – 2 Jan 2026", in the user's locale.
     static func range(_ start: Date, _ end: Date, calendar: Calendar = .current) -> String {
-        let sameYear = calendar.component(.year, from: start) == calendar.component(.year, from: end)
-        let sameMonth = sameYear && calendar.component(.month, from: start) == calendar.component(.month, from: end)
         if calendar.isDate(start, inSameDayAs: end) {
             return day(end)
         }
-        let first: String
-        if sameMonth {
-            first = start.formatted(.dateTime.day())
-        } else if sameYear {
-            first = start.formatted(.dateTime.day().month(.abbreviated))
-        } else {
-            first = day(start)
-        }
-        return "\(first) – \(day(end))"
+        let formatter = DateIntervalFormatter()
+        formatter.calendar = calendar
+        formatter.dateTemplate = "dMMMy"
+        return formatter.string(from: start, to: end)
     }
 
-    /// "13 d 11 h", "9 h 45 m", "40 min"
+    /// "13d 11h", "9h 45m", "40m" in English; abbreviated in the user's language.
     static func duration(_ interval: TimeInterval) -> String {
         let minutes = Int((interval / 60).rounded())
-        let days = minutes / 1440, hours = (minutes % 1440) / 60, mins = minutes % 60
-        if days > 0 { return hours > 0 ? "\(days) d \(hours) h" : "\(days) d" }
-        if hours > 0 { return mins > 0 ? "\(hours) h \(mins) m" : "\(hours) h" }
-        return "\(mins) min"
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .abbreviated
+        formatter.allowedUnits = minutes >= 1440 ? [.day, .hour] : minutes >= 60 ? [.hour, .minute] : [.minute]
+        formatter.zeroFormattingBehavior = .dropAll
+        return formatter.string(from: TimeInterval(minutes * 60)) ?? ""
     }
 
-    /// "2 min", "1 h 5 min" — how long ago, for the status pill.
+    /// "2m", "1h 5m": how long ago, for the status pill.
     static func ago(_ date: Date, now: Date = Date()) -> String {
         let minutes = max(0, Int(now.timeIntervalSince(date) / 60))
-        if minutes < 60 { return "\(minutes) min" }
-        return duration(TimeInterval(minutes * 60))
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .abbreviated
+        formatter.allowedUnits = minutes >= 1440 ? [.day, .hour] : minutes >= 60 ? [.hour, .minute] : [.minute]
+        formatter.zeroFormattingBehavior = minutes == 0 ? .pad : .dropAll
+        return formatter.string(from: TimeInterval(minutes * 60)) ?? ""
     }
 }
 

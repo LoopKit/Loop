@@ -56,10 +56,17 @@ enum DayAxis {
         guard let longest = gaps.max(by: { $0.duration < $1.duration }) else { return nil }
         // A gap over the whole period would read "0:00 – 0:00".
         if gaps.count == 1, longest.start == window.start, longest.end == min(end, window.end) {
-            return window.contains(end) ? "No CGM data yet today" : "No CGM data on this day"
+            return window.contains(end)
+                ? NSLocalizedString("No CGM data yet today", comment: "Chart note: there are no glucose readings so far today")
+                : NSLocalizedString("No CGM data on this day", comment: "Chart note: there are no glucose readings for the whole day")
         }
-        let text = "No CGM data \(LoopFormat.time(longest.start)) – \(LoopFormat.time(longest.end))"
-        return gaps.count > 1 ? text + " and \(gaps.count - 1) shorter gap\(gaps.count > 2 ? "s" : "")" : text
+        let start = LoopFormat.time(longest.start)
+        let end = LoopFormat.time(longest.end)
+        if gaps.count > 1 {
+            let others = String.localizedStringWithFormat(NSLocalizedString("%lld shorter gaps", comment: "Chart note: how many other, shorter gaps in glucose readings there were; follows the longest gap. (1: number of gaps)"), gaps.count - 1)
+            return String(format: NSLocalizedString("No CGM data %1$@ – %2$@ and %3$@", comment: "Chart note: the longest gap in glucose readings, plus the shorter ones. (1: start time; 2: end time; 3: number of shorter gaps, e.g. 2 shorter gaps)"), start, end, others)
+        }
+        return String(format: NSLocalizedString("No CGM data %1$@ – %2$@", comment: "Chart note: a gap in glucose readings. (1: start time; 2: end time)"), start, end)
     }
 }
 
@@ -199,7 +206,7 @@ struct InsulinTimelineView: View {
                         .foregroundStyle(P.insulin)
                         .annotation(position: .top, spacing: 2) {
                             if bolusLabels.contains(bolus.id) {
-                                Text(String(format: "%.1f", bolus.units))
+                                Text(LoopFormat.number(bolus.units, decimals: 1))
                                     .font(LoopDesign.Typeface.caption)
                                     .foregroundStyle(P.insulinInk)
                             }
@@ -262,34 +269,39 @@ struct InsulinTimelineView: View {
     private func scrubRows(at date: Date) -> [ScrubCallout.Row] {
         var rows: [ScrubCallout.Row] = [.init(label: nil, value: LoopFormat.time(date), color: P.ink)]
         if let glucose = nearest(history.glucose.map { ($0.date, $0.mgdl) }, to: date, within: 10 * 60) {
-            rows.append(.init(label: "Glucose", value: "\(unit.format(glucose)) \(unit.unitName)", color: P.glucoseInk))
+            rows.append(.init(label: NSLocalizedString("Glucose", comment: "Chart callout label for the glucose reading at the touched time"), value: "\(unit.format(glucose)) \(unit.unitName)", color: P.glucoseInk))
         }
         if let iob = nearest(history.iob.map { ($0.date, $0.value) }, to: date, within: 10 * 60) {
-            rows.append(.init(label: "IOB", value: LoopFormat.doseUnits(iob), color: P.insulinInk))
+            rows.append(.init(label: NSLocalizedString("IOB", comment: "Abbreviation for insulin on board (active insulin)"), value: LoopFormat.doseUnits(iob), color: P.insulinInk))
         }
         if let cob = nearest(history.cob.map { ($0.date, $0.value) }, to: date, within: 10 * 60) {
-            rows.append(.init(label: "COB", value: LoopFormat.grams(cob), color: P.carbsInk))
+            rows.append(.init(label: NSLocalizedString("COB", comment: "Abbreviation for carbs on board (active carbohydrate)"), value: LoopFormat.grams(cob), color: P.carbsInk))
         }
         if let segment = LoopHistoryMath.basalRate(at: date, in: history.basal) {
-            let value = segment.kind == .suspended ? "Suspended" : LoopFormat.rate(segment.rate)
-            rows.append(.init(label: "Basal", value: value, color: P.ink))
+            let value = segment.kind == .suspended
+                ? NSLocalizedString("Suspended", comment: "Chart callout value: insulin delivery was suspended at the touched time")
+                : LoopFormat.rate(segment.rate)
+            rows.append(.init(label: NSLocalizedString("Basal", comment: "Chart callout label for the basal rate at the touched time"), value: value, color: P.ink))
         }
         if let bolus = history.boluses.min(by: { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) }),
            abs(bolus.date.timeIntervalSince(date)) < 5 * 60 {
-            rows.append(.init(label: bolus.automatic ? "Automatic bolus" : "Bolus", value: LoopFormat.doseUnits(bolus.units), color: P.insulinInk))
+            rows.append(.init(label: bolus.automatic
+                              ? NSLocalizedString("Automatic bolus", comment: "Chart callout label for a bolus Loop delivered automatically near the touched time")
+                              : NSLocalizedString("Bolus", comment: "Chart callout label for a bolus near the touched time"),
+                              value: LoopFormat.doseUnits(bolus.units), color: P.insulinInk))
         }
         return rows
     }
 
     private var accessibilitySummary: String {
-        var parts = ["Insulin timeline, \(LoopFormat.weekdayDay(window.start))"]
-        parts.append("bolus \(LoopFormat.totalUnits(history.bolusUnits))")
-        parts.append("basal \(LoopFormat.totalUnits(history.basalUnits))")
-        parts.append("carbs \(LoopFormat.grams(history.carbGrams))")
+        let day = LoopFormat.weekdayDay(window.start)
+        let bolus = LoopFormat.totalUnits(history.bolusUnits)
+        let basal = LoopFormat.totalUnits(history.basalUnits)
+        let carbs = LoopFormat.grams(history.carbGrams)
         if let last = history.glucose.last {
-            parts.append("latest glucose \(unit.format(last.mgdl)) \(unit.unitName)")
+            return String(format: NSLocalizedString("Insulin timeline, %1$@, bolus %2$@, basal %3$@, carbs %4$@, latest glucose %5$@ %6$@", comment: "VoiceOver summary of the day's insulin timeline chart. (1: weekday and date; 2: bolus total, e.g. 12.5 U; 3: basal total; 4: carbs total, e.g. 140 g; 5: latest glucose value; 6: glucose unit, mmol/L or mg/dL)"), day, bolus, basal, carbs, unit.format(last.mgdl), unit.unitName)
         }
-        return parts.joined(separator: ", ")
+        return String(format: NSLocalizedString("Insulin timeline, %1$@, bolus %2$@, basal %3$@, carbs %4$@", comment: "VoiceOver summary of the day's insulin timeline chart with no glucose readings. (1: weekday and date; 2: bolus total, e.g. 12.5 U; 3: basal total; 4: carbs total, e.g. 140 g)"), day, bolus, basal, carbs)
     }
 }
 
@@ -454,7 +466,7 @@ struct PredictionChartView: View {
                 AxisGridLine().foregroundStyle(P.grid)
                 AxisValueLabel {
                     if let date = value.as(Date.self) {
-                        Text(abs(date.timeIntervalSince(now)) < 60 ? "now" : LoopFormat.time(date))
+                        Text(abs(date.timeIntervalSince(now)) < 60 ? NSLocalizedString("now", comment: "Prediction chart x-axis label marking the current time") : LoopFormat.time(date))
                     }
                 }
                 .font(LoopDesign.Typeface.caption)
@@ -483,14 +495,19 @@ struct PredictionChartView: View {
         var rows: [ScrubCallout.Row] = [.init(label: nil, value: LoopFormat.time(date), color: P.ink)]
         let source = date <= now ? readings : prediction
         if let value = nearest(source.map { ($0.date, $0.mgdl) }, to: date, within: 10 * 60) {
-            rows.append(.init(label: date <= now ? "Glucose" : "Predicted", value: "\(unit.format(value)) \(unit.unitName)", color: P.glucoseInk))
+            rows.append(.init(label: date <= now
+                              ? NSLocalizedString("Glucose", comment: "Chart callout label for the glucose reading at the touched time")
+                              : NSLocalizedString("Predicted", comment: "Prediction chart callout label for Loop's predicted glucose at the touched time"),
+                              value: "\(unit.format(value)) \(unit.unitName)", color: P.glucoseInk))
         }
         return rows
     }
 
     private var accessibilitySummary: String {
-        guard let last = futurePrediction.last else { return "Glucose prediction unavailable" }
-        return "Loop predicts \(unit.format(last.mgdl)) \(unit.unitName) by \(LoopFormat.time(last.date))"
+        guard let last = futurePrediction.last else {
+            return NSLocalizedString("Glucose prediction unavailable", comment: "VoiceOver label for the prediction chart when Loop has no prediction")
+        }
+        return String(format: NSLocalizedString("Loop predicts %1$@ %2$@ by %3$@", comment: "VoiceOver summary of the prediction chart. (1: predicted glucose value; 2: glucose unit, mmol/L or mg/dL; 3: time of the prediction)"), unit.format(last.mgdl), unit.unitName, LoopFormat.time(last.date))
     }
 }
 
@@ -605,10 +622,10 @@ struct IOBCOBChartView: View {
     private func scrubRows(at date: Date) -> [ScrubCallout.Row] {
         var rows: [ScrubCallout.Row] = [.init(label: nil, value: LoopFormat.time(date), color: P.ink)]
         if let value = nearest(iob.map { ($0.date, $0.value) }, to: date, within: 10 * 60) {
-            rows.append(.init(label: "IOB", value: LoopFormat.doseUnits(value), color: P.insulinInk))
+            rows.append(.init(label: NSLocalizedString("IOB", comment: "Abbreviation for insulin on board (active insulin)"), value: LoopFormat.doseUnits(value), color: P.insulinInk))
         }
         if let value = nearest(cob.map { ($0.date, $0.value) }, to: date, within: 10 * 60) {
-            rows.append(.init(label: "COB", value: LoopFormat.grams(value), color: P.carbsInk))
+            rows.append(.init(label: NSLocalizedString("COB", comment: "Abbreviation for carbs on board (active carbohydrate)"), value: LoopFormat.grams(value), color: P.carbsInk))
         }
         return rows
     }
@@ -616,6 +633,7 @@ struct IOBCOBChartView: View {
     private var accessibilitySummary: String {
         let iobNow = nearest(iob.map { ($0.date, $0.value) }, to: now, within: 10 * 60)
         let cobNow = nearest(cob.map { ($0.date, $0.value) }, to: now, within: 10 * 60)
-        return "Active insulin \(iobNow.map(LoopFormat.doseUnits) ?? "unknown"), active carbs \(cobNow.map(LoopFormat.grams) ?? "unknown")"
+        let unknown = NSLocalizedString("unknown", comment: "VoiceOver value when active insulin or carbs at the current time isn't known")
+        return String(format: NSLocalizedString("Active insulin %1$@, active carbs %2$@", comment: "VoiceOver summary of the active insulin and carbs chart. (1: insulin on board, e.g. 1.25 U, or unknown; 2: carbs on board, e.g. 20 g, or unknown)"), iobNow.map(LoopFormat.doseUnits) ?? unknown, cobNow.map(LoopFormat.grams) ?? unknown)
     }
 }

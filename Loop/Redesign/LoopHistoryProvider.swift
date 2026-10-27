@@ -155,8 +155,22 @@ final class LoopHistoryProvider {
         return (runs, runs.first?.date)
     }
 
-    /// "glucoseTooOld" → "Glucose too old"
+    /// "glucoseTooOld" → "Glucose too old". Loop's own issue ids are localised; any other id falls back to the
+    /// id split into English words.
     static func describe(issue id: String) -> String {
+        switch id {
+        case "configurationError": return NSLocalizedString("Configuration error", comment: "Reason Loop could not run: its settings are incomplete")
+        case "connectionError": return NSLocalizedString("Connection error", comment: "Reason Loop could not run: no connected devices, or a device connection failed")
+        case "missingDataError": return NSLocalizedString("Missing data error", comment: "Reason Loop could not run: data it needs was missing")
+        case "glucoseTooOld": return NSLocalizedString("Glucose too old", comment: "Reason Loop could not run: the latest glucose reading was too old")
+        case "invalidFutureGlucose": return NSLocalizedString("Invalid future glucose", comment: "Reason Loop could not run: a glucose reading had a timestamp in the future")
+        case "pumpDataTooOld": return NSLocalizedString("Pump data too old", comment: "Reason Loop could not run: the latest pump data was too old")
+        case "recommendationExpired": return NSLocalizedString("Recommendation expired", comment: "Reason Loop could not run: its dosing recommendation expired before it was used")
+        case "pumpSuspended": return NSLocalizedString("Pump suspended", comment: "Reason Loop could not run: insulin delivery on the pump was suspended")
+        case "pumpManagerError": return NSLocalizedString("Pump manager error", comment: "Reason Loop could not run: the pump reported an error")
+        case "unknownError": return NSLocalizedString("Unknown error", comment: "Reason Loop could not run: an unexpected error")
+        default: break
+        }
         var words: [String] = []
         var current = ""
         for character in id {
@@ -189,17 +203,17 @@ final class LoopHistoryProvider {
                     case .replaceComponent(let component)?:
                         let name: String
                         switch component {
-                        case .pump: name = "Pod changed"
-                        case .reservoir: name = "Reservoir changed"
-                        case .infusionSet: name = "Infusion set changed"
+                        case .pump: name = NSLocalizedString("Pod changed", comment: "Pump event in the history: the pump or pod was replaced")
+                        case .reservoir: name = NSLocalizedString("Reservoir changed", comment: "Pump event in the history: the insulin reservoir was replaced")
+                        case .infusionSet: name = NSLocalizedString("Infusion set changed", comment: "Pump event in the history: the infusion set was replaced")
                         }
                         return PumpLogEvent(id: id, date: event.date, kind: .siteChange(name))
                     case .rewind?:
-                        return PumpLogEvent(id: id, date: event.date, kind: .siteChange("Reservoir rewound"))
+                        return PumpLogEvent(id: id, date: event.date, kind: .siteChange(NSLocalizedString("Reservoir rewound", comment: "Pump event in the history: the pump rewound its reservoir")))
                     case .prime?:
-                        return PumpLogEvent(id: id, date: event.date, kind: .siteChange("Primed"))
+                        return PumpLogEvent(id: id, date: event.date, kind: .siteChange(NSLocalizedString("Primed", comment: "Pump event in the history: the pump primed the tubing or cannula")))
                     case .alarm?:
-                        return PumpLogEvent(id: id, date: event.date, kind: .alarm(event.title ?? "Pump alarm"))
+                        return PumpLogEvent(id: id, date: event.date, kind: .alarm(event.title ?? NSLocalizedString("Pump alarm", comment: "Pump event in the history: an alarm whose pump gave no title")))
                     default:
                         return nil
                     }

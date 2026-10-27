@@ -21,9 +21,18 @@ enum TrendsPeriod: Int, CaseIterable, Identifiable {
 
     var id: Int { rawValue }
 
-    var label: String { self == .day ? "Day" : "\(rawValue) d" }
+    var label: String {
+        self == .day
+            ? NSLocalizedString("Day (Trends period)", value: "Day", comment: "Trends period picker: a period of one calendar day (not daytime)")
+            : String(format: NSLocalizedString("%1$@ d", comment: "Trends period picker, short label for a period of several days, e.g. 7 d. (1: number of days)"),
+                     LoopFormat.number(Double(rawValue), decimals: 0))
+    }
 
-    var accessibilityName: String { self == .day ? "Day" : "\(rawValue) days" }
+    var accessibilityName: String {
+        self == .day
+            ? NSLocalizedString("Day (Trends period)", value: "Day", comment: "Trends period picker: a period of one calendar day (not daytime)")
+            : String.localizedStringWithFormat(NSLocalizedString("%lld days", comment: "Trends period picker, VoiceOver name for a period of several days. (1: number of days)"), rawValue)
+    }
 
     /// The period ending on `endDay` (inclusive), cut off at `now` when it ends today.
     func interval(endingOn endDay: Date, now: Date = Date(), calendar: Calendar = .current) -> DateInterval {
@@ -71,13 +80,13 @@ struct RangeSelectorView: View {
             .background(P.surfaceSunken, in: Capsule())
 
             HStack {
-                stepButton(systemName: "chevron.left", label: "Previous period", enabled: true) { step(-1) }
+                stepButton(systemName: "chevron.left", label: NSLocalizedString("Previous period", comment: "VoiceOver label for the Trends button that moves back one period"), enabled: true) { step(-1) }
                 Spacer()
                 Text(LoopFormat.range(period.interval(endingOn: endDay, now: now).start, endDay))
                     .font(LoopDesign.Typeface.headline.monospacedDigit())
                     .foregroundStyle(P.ink)
                 Spacer()
-                stepButton(systemName: "chevron.right", label: "Next period", enabled: canStepForward) { step(1) }
+                stepButton(systemName: "chevron.right", label: NSLocalizedString("Next period", comment: "VoiceOver label for the Trends button that moves forward one period"), enabled: canStepForward) { step(1) }
             }
         }
     }
@@ -168,6 +177,42 @@ struct StatGridView: View {
 
 // MARK: - TimeInRange
 
+extension LoopHistoryMath.RangeBand {
+    /// The band's name in the user's language.
+    var localizedName: String {
+        switch self {
+        case .veryHigh: return NSLocalizedString("Very high", comment: "Time in range band: glucose above 250 mg/dL (13.9 mmol/L)")
+        case .high: return NSLocalizedString("High", comment: "Time in range band: glucose 181–250 mg/dL (10.1–13.9 mmol/L)")
+        case .inRange: return NSLocalizedString("In range", comment: "Time in range band: glucose 70–180 mg/dL (3.9–10.0 mmol/L)")
+        case .low: return NSLocalizedString("Low", comment: "Time in range band: glucose 54–69 mg/dL (3.0–3.8 mmol/L)")
+        case .veryLow: return NSLocalizedString("Very low", comment: "Time in range band: glucose below 54 mg/dL (3.0 mmol/L)")
+        }
+    }
+
+    /// Consensus thresholds with the user's decimal separator, e.g. "3,9–10,0".
+    func localizedThresholds(_ unit: GlucoseUnitStyle) -> String {
+        let decimals = unit.isMmol ? 1 : 0
+        let n: (Double) -> String = { LoopFormat.number($0, decimals: decimals) }
+        switch (self, unit.isMmol) {
+        case (.veryHigh, true): return "> " + n(13.9)
+        case (.high, true): return n(10.1) + "–" + n(13.9)
+        case (.inRange, true): return n(3.9) + "–" + n(10.0)
+        case (.low, true): return n(3.0) + "–" + n(3.8)
+        case (.veryLow, true): return "< " + n(3.0)
+        case (.veryHigh, false): return "> " + n(250)
+        case (.high, false): return n(181) + "–" + n(250)
+        case (.inRange, false): return n(70) + "–" + n(180)
+        case (.low, false): return n(54) + "–" + n(69)
+        case (.veryLow, false): return "< " + n(54)
+        }
+    }
+}
+
+/// "12%" in the user's language.
+private func percentText(_ value: Double, decimals: Int = 0) -> String {
+    String(format: NSLocalizedString("%1$@%%", comment: "A percentage. (1: number)"), LoopFormat.number(value, decimals: decimals))
+}
+
 struct TimeInRangeView: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -225,23 +270,24 @@ struct TimeInRangeView: View {
     private func row(_ band: LoopHistoryMath.RangeBand) -> some View {
         let fraction = fractions[band] ?? 0
         let hours = fraction * 24
-        let thresholds = Text(band.thresholds(unit))
+        let thresholds = Text(band.localizedThresholds(unit))
             .font(LoopDesign.Typeface.footnote)
             .foregroundStyle(P.inkMuted)
         return VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s2) {
-                Text("\(percentages[band] ?? 0)%")
+                Text(percentText(Double(percentages[band] ?? 0)))
                     .font(LoopDesign.Typeface.statValueSmall)
                     .foregroundStyle(P.ink)
                     .frame(minWidth: typeSize.isAccessibilitySize ? nil : 52, alignment: .trailing)
-                Text(band.name)
+                Text(band.localizedName)
                     .font(LoopDesign.Typeface.subhead)
                     .foregroundStyle(P.ink)
                 if !typeSize.isAccessibilitySize {
                     thresholds
                 }
                 Spacer(minLength: LoopDesign.Space.s1)
-                Text(String(format: "%.1f h", hours))
+                Text(String(format: NSLocalizedString("%1$@ h", comment: "Time in range row: average hours a day spent in the band, abbreviated. (1: hours with one decimal)"),
+                            LoopFormat.number(hours, decimals: 1)))
                     .font(LoopDesign.Typeface.footnote.monospacedDigit())
                     .foregroundStyle(P.inkMuted)
             }
@@ -250,7 +296,9 @@ struct TimeInRangeView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(band.name), \(band.thresholds(unit)) \(unit.unitName): \(percentages[band] ?? 0) percent, \(String(format: "%.1f", hours)) hours a day")
+        .accessibilityLabel(String(format: NSLocalizedString("%1$@, %2$@ %3$@: %4$@ percent, %5$@ hours a day", comment: "VoiceOver label for a Time in range row. (1: band name, e.g. In range, 2: glucose thresholds, e.g. 3.9–10.0, 3: glucose unit, 4: percentage number, 5: average hours a day with one decimal)"),
+                                   band.localizedName, band.localizedThresholds(unit), unit.unitName,
+                                   LoopFormat.number(Double(percentages[band] ?? 0), decimals: 0), LoopFormat.number(hours, decimals: 1)))
     }
 }
 
@@ -281,11 +329,12 @@ struct AGPChartView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
             if readings.isEmpty {
-                ChartPlaceholder(message: "No CGM data in this period", height: height)
+                ChartPlaceholder(message: NSLocalizedString("No CGM data in this period", comment: "Trends chart placeholder when the period has no glucose readings"), height: height)
             } else {
                 chart.frame(height: height)
                 if !enoughDays {
-                    Text("Not enough days for a pattern: \(days) of 5")
+                    Text(String(format: NSLocalizedString("Not enough days for a pattern: %1$@ of 5", comment: "Trends Daily pattern footnote when fewer than 5 days have readings; the chart shows raw readings instead. (1: days with readings)"),
+                                LoopFormat.number(Double(days), decimals: 0)))
                         .font(LoopDesign.Typeface.footnote)
                         .foregroundStyle(P.inkMuted)
                 }
@@ -354,9 +403,11 @@ struct AGPChartView: View {
 
     private var accessibilitySummary: String {
         guard enoughDays, let high = slots.max(by: { $0.p50 < $1.p50 }), let low = slots.min(by: { $0.p50 < $1.p50 }) else {
-            return "Daily pattern: not enough days"
+            return NSLocalizedString("Daily pattern: not enough days", comment: "VoiceOver label for the Trends Daily pattern chart when fewer than 5 days have readings")
         }
-        return "Daily pattern over \(days) days. Median highest \(unit.format(high.p50)) at \(Self.label(minute: high.minute)), lowest \(unit.format(low.p50)) at \(Self.label(minute: low.minute))"
+        let span = String.localizedStringWithFormat(NSLocalizedString("%lld days", comment: "A number of days, e.g. a Trends period or how many days are averaged. (1: number of days)"), days)
+        return String(format: NSLocalizedString("Daily pattern over %1$@. Median highest %2$@ at %3$@, lowest %4$@ at %5$@", comment: "VoiceOver label for the Trends Daily pattern chart. (1: days with readings, e.g. 14 days; 2: highest median glucose; 3: time of day; 4: lowest median glucose; 5: time of day)"),
+                      span, unit.format(high.p50), Self.label(minute: high.minute), unit.format(low.p50), Self.label(minute: low.minute))
     }
 }
 
@@ -378,7 +429,7 @@ struct InsulinDailyTotalsView: View {
 
     var body: some View {
         if totals.allSatisfy({ $0.total == 0 }) {
-            ChartPlaceholder(message: "No insulin recorded in this period", height: height)
+            ChartPlaceholder(message: NSLocalizedString("No insulin recorded in this period", comment: "Trends Insulin per day chart placeholder when no insulin was delivered in the period"), height: height)
         } else {
             chart.frame(height: height)
         }
@@ -400,7 +451,7 @@ struct InsulinDailyTotalsView: View {
                 .foregroundStyle(P.ink)
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
                 .annotation(position: .top, alignment: .trailing, spacing: 2) {
-                    Text(String(format: "%.1f", average))
+                    Text(LoopFormat.number(average, decimals: 1))
                         .font(LoopDesign.Typeface.caption.weight(.semibold))
                         .foregroundStyle(P.ink)
                 }
@@ -438,7 +489,10 @@ struct InsulinDailyTotalsView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Insulin per \(weekly ? "day, weekly average" : "day"), average \(LoopFormat.totalUnits(average))")
+        .accessibilityLabel(String(format: weekly
+            ? NSLocalizedString("Insulin per day, weekly average, average %1$@", comment: "VoiceOver label for the Trends Insulin per day chart when bars are weekly averages. (1: average insulin per day, e.g. 32.1 U)")
+            : NSLocalizedString("Insulin per day, average %1$@", comment: "VoiceOver label for the Trends Insulin per day chart. (1: average insulin per day, e.g. 32.1 U)"),
+            LoopFormat.totalUnits(average)))
     }
 
     private var axisDates: [Date] {
@@ -484,9 +538,9 @@ struct LoopModeBarView: View {
 
     static func name(_ mode: LoopModeSpan.Mode) -> String {
         switch mode {
-        case .closed: return "Closed loop"
-        case .limited: return "Limited"
-        case .open: return "Open loop / manual"
+        case .closed: return NSLocalizedString("Closed loop", comment: "Trends Loop status: time Loop was running in closed loop")
+        case .limited: return NSLocalizedString("Limited", comment: "Trends Loop status: time closed loop was on but Loop wasn't completing runs")
+        case .open: return NSLocalizedString("Open loop / manual", comment: "Trends Loop status: time closed loop was switched off")
         }
     }
 
@@ -494,7 +548,7 @@ struct LoopModeBarView: View {
 
     var body: some View {
         if total <= 0 {
-            ChartPlaceholder(message: "No loop runs recorded in this period", height: 60)
+            ChartPlaceholder(message: NSLocalizedString("No loop runs recorded in this period", comment: "Trends Loop status placeholder when there is no Loop run history for the period"), height: 60)
         } else {
             VStack(spacing: LoopDesign.Space.s3) {
                 bar.frame(height: 10)
@@ -539,7 +593,7 @@ struct LoopModeBarView: View {
                 .font(LoopDesign.Typeface.footnote)
                 .foregroundStyle(P.inkMuted)
             Spacer()
-            Text(String(format: "%.1f%%", fraction(mode) * 100))
+            Text(percentText(fraction(mode) * 100, decimals: 1))
                 .font(LoopDesign.Typeface.statValueSmall)
                 .foregroundStyle(P.ink)
         }
@@ -557,7 +611,7 @@ struct LoopGapsList: View {
     var body: some View {
         List {
             if gaps.isEmpty {
-                Text("No gaps: Loop ran closed loop all through this period.")
+                Text(NSLocalizedString("No gaps: Loop ran closed loop all through this period.", comment: "Trends Gaps list when Loop was in closed loop for the whole period"))
                     .foregroundStyle(P.inkMuted)
             }
             ForEach(Array(gaps.enumerated()), id: \.offset) { _, gap in
@@ -566,7 +620,7 @@ struct LoopGapsList: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(gap.cause ?? LoopModeBarView.name(gap.mode))
                             .font(LoopDesign.Typeface.body)
-                        Text("\(LoopFormat.weekdayDay(gap.start)), \(LoopFormat.time(gap.start)) · \(LoopFormat.duration(gap.duration))")
+                        Text("\(gap.start.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute())) · \(LoopFormat.duration(gap.duration))")
                             .font(LoopDesign.Typeface.footnote)
                             .foregroundStyle(P.inkMuted)
                     }
@@ -574,7 +628,7 @@ struct LoopGapsList: View {
                 .accessibilityElement(children: .combine)
             }
         }
-        .navigationTitle("Gaps")
+        .navigationTitle(NSLocalizedString("Gaps", comment: "Trends Loop status button and screen title: list of times Loop wasn't in closed loop"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }
