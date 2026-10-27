@@ -417,7 +417,11 @@ final class LoopModeHistory {
         var changes = self.changes
         guard changes.last?.closedLoop != closedLoop else { return }
         changes.append(.init(date: date, closedLoop: closedLoop))
-        changes.removeAll { date.timeIntervalSince($0.date) > maximumAge }
+        // Keep the last change before the retention window: it establishes the mode at its start.
+        let cutoff = date.addingTimeInterval(-maximumAge)
+        if let anchor = changes.lastIndex(where: { $0.date < cutoff }), anchor > 0 {
+            changes.removeFirst(anchor)
+        }
         if let data = try? JSONEncoder().encode(changes) {
             defaults.set(data, forKey: key)
         }
