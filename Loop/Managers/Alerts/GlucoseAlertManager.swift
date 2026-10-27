@@ -13,6 +13,7 @@ import Combine
 import Foundation
 import LoopAlgorithm
 import LoopKit
+import LoopKitUI
 import os.log
 
 // MARK: - Sound catalog
@@ -447,6 +448,7 @@ final class GlucoseAlertManager: ObservableObject {
     ]
 
     private let alertIssuer: AlertIssuer
+    private let displayGlucosePreference: DisplayGlucosePreference
     private let userDefaults: UserDefaults
 
     /// Ordered list of profiles; `profiles[0]` is always Primary.
@@ -708,8 +710,11 @@ final class GlucoseAlertManager: ObservableObject {
 
     // MARK: - Init
 
-    init(alertIssuer: AlertIssuer, userDefaults: UserDefaults = .standard) {
+    init(alertIssuer: AlertIssuer,
+         displayGlucosePreference: DisplayGlucosePreference,
+         userDefaults: UserDefaults = .standard) {
         self.alertIssuer = alertIssuer
+        self.displayGlucosePreference = displayGlucosePreference
         self.userDefaults = userDefaults
 
         var loadedProfiles: [GlucoseAlertProfile]
@@ -856,6 +861,19 @@ final class GlucoseAlertManager: ObservableObject {
         userDefaults.set(data, forKey: Self.episodeStateKey)
     }
 
+    // MARK: - Alert text
+
+    /// Renders a canonical mg/dL value in the unit the user reads glucose in.
+    /// Thresholds and readings are *stored* in mg/dL throughout; only the text
+    /// the user sees converts, and it goes through the same preference the
+    /// settings screen formats with so the two always agree.
+    private func formatGlucose(_ mgdl: Double, includeUnit: Bool = true) -> String {
+        displayGlucosePreference.format(
+            LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl),
+            includeUnit: includeUnit
+        )
+    }
+
     // MARK: - Evaluation
 
     func evaluate(samples: [NewGlucoseSample], now: Date = Date()) async {
@@ -911,8 +929,12 @@ final class GlucoseAlertManager: ObservableObject {
             }
             let alert = decideAndUpdate(
                 state: &lowState, identifier: Self.lowAlertIdentifier, interruptionLevel: .timeSensitive,
-                title: "Low Glucose",
-                body: "Glucose is below \(Int(threshold)) mg/dL (current: \(Int(mgdl)))",
+                title: NSLocalizedString("Low Glucose", comment: "Title of the low glucose alert"),
+                body: String(
+                    format: NSLocalizedString("Glucose is below %1$@ (current: %2$@)",
+                                              comment: "Body of the low glucose alert (1: threshold with unit, 2: current glucose)"),
+                    formatGlucose(threshold), formatGlucose(mgdl, includeUnit: false)
+                ),
                 delay: nil,
                 repeatInterval: config.lowSnoozeEnabled ? config.lowRepeatInterval : nil, now: now
             )
@@ -930,8 +952,12 @@ final class GlucoseAlertManager: ObservableObject {
         if mgdl < threshold {
             let alert = decideAndUpdate(
                 state: &urgentLowState, identifier: Self.urgentLowAlertIdentifier, interruptionLevel: .critical,
-                title: "Urgent Low Glucose",
-                body: "Glucose is below \(Int(threshold)) mg/dL (current: \(Int(mgdl))). Treat now.",
+                title: NSLocalizedString("Urgent Low Glucose", comment: "Title of the urgent low glucose alert"),
+                body: String(
+                    format: NSLocalizedString("Glucose is below %1$@ (current: %2$@). Treat now.",
+                                              comment: "Body of the urgent low glucose alert (1: threshold with unit, 2: current glucose)"),
+                    formatGlucose(threshold), formatGlucose(mgdl, includeUnit: false)
+                ),
                 delay: nil,
                 repeatInterval: config.urgentLowRepeatInterval, now: now
             )
@@ -949,8 +975,12 @@ final class GlucoseAlertManager: ObservableObject {
         if mgdl > threshold {
             let alert = decideAndUpdate(
                 state: &highState, identifier: Self.highAlertIdentifier, interruptionLevel: .timeSensitive,
-                title: "High Glucose",
-                body: "Glucose is above \(Int(threshold)) mg/dL (current: \(Int(mgdl)))",
+                title: NSLocalizedString("High Glucose", comment: "Title of the high glucose alert"),
+                body: String(
+                    format: NSLocalizedString("Glucose is above %1$@ (current: %2$@)",
+                                              comment: "Body of the high glucose alert (1: threshold with unit, 2: current glucose)"),
+                    formatGlucose(threshold), formatGlucose(mgdl, includeUnit: false)
+                ),
                 delay: config.highDelayEnabled ? config.highDelay : nil,
                 repeatInterval: config.highSnoozeEnabled ? config.highRepeatInterval : nil, now: now
             )
@@ -1011,16 +1041,18 @@ final class GlucoseAlertManager: ObservableObject {
         }
         guard !predictedLowInEpisode else { return }
         predictedLowInEpisode = true
+        let content = Alert.Content(
+            title: NSLocalizedString("Predicted Low Glucose", comment: "Title of the predicted low glucose alert"),
+            body: String(
+                format: NSLocalizedString("Loop predicts glucose below %1$@ within %2$d min.",
+                                          comment: "Body of the predicted low glucose alert (1: threshold with unit, 2: minutes of the prediction horizon)"),
+                formatGlucose(threshold), Int(config.predictedLowHorizon / 60)
+            ),
+            acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Acknowledge button on a glucose alert"))
         let alert = Alert(
             identifier: Alert.Identifier(managerIdentifier: Self.managerIdentifier, alertIdentifier: Self.predictedLowAlertIdentifier),
-            foregroundContent: Alert.Content(
-                title: "Predicted Low Glucose",
-                body: "Loop predicts glucose below \(Int(threshold)) mg/dL within \(Int(config.predictedLowHorizon / 60)) min.",
-                acknowledgeActionButtonLabel: "OK"),
-            backgroundContent: Alert.Content(
-                title: "Predicted Low Glucose",
-                body: "Loop predicts glucose below \(Int(threshold)) mg/dL within \(Int(config.predictedLowHorizon / 60)) min.",
-                acknowledgeActionButtonLabel: "OK"),
+            foregroundContent: content,
+            backgroundContent: content,
             trigger: .immediate, interruptionLevel: .timeSensitive,
             sound: .sound(name: configuredSoundName(for: Self.predictedLowAlertIdentifier))
         )
@@ -1052,10 +1084,13 @@ final class GlucoseAlertManager: ObservableObject {
         }
         guard shouldFire else { return nil }
         state.lastFiredAt = now
+        let content = Alert.Content(
+            title: title, body: body,
+            acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Acknowledge button on a glucose alert"))
         return Alert(
             identifier: Alert.Identifier(managerIdentifier: Self.managerIdentifier, alertIdentifier: identifier),
-            foregroundContent: Alert.Content(title: title, body: body, acknowledgeActionButtonLabel: "OK"),
-            backgroundContent: Alert.Content(title: title, body: body, acknowledgeActionButtonLabel: "OK"),
+            foregroundContent: content,
+            backgroundContent: content,
             trigger: .immediate, interruptionLevel: interruptionLevel,
             sound: .sound(name: configuredSoundName(for: identifier))
         )

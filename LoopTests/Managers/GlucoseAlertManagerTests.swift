@@ -8,6 +8,7 @@
 import XCTest
 import LoopAlgorithm
 import LoopKit
+import LoopKitUI
 @testable import Loop
 
 @MainActor
@@ -27,19 +28,21 @@ final class GlucoseAlertManagerTests: XCTestCase {
     private var issuer: MockAlertIssuer!
     private var defaults: UserDefaults!
     private var manager: GlucoseAlertManager!
+    private var preference: DisplayGlucosePreference!
 
     override func setUp() async throws {
         try await super.setUp()
         issuer = MockAlertIssuer()
         defaults = UserDefaults(suiteName: Self.suiteName)
         defaults.removePersistentDomain(forName: Self.suiteName)
-        manager = GlucoseAlertManager(alertIssuer: issuer, userDefaults: defaults)
+        preference = DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter)
+        manager = GlucoseAlertManager(alertIssuer: issuer, displayGlucosePreference: preference, userDefaults: defaults)
         // Defaults: low = 70, urgentLow = 55, recoveryMargin = 5.
     }
 
     override func tearDown() async throws {
         defaults.removePersistentDomain(forName: Self.suiteName)
-        issuer = nil; defaults = nil; manager = nil
+        issuer = nil; defaults = nil; manager = nil; preference = nil
         try await super.tearDown()
     }
 
@@ -95,7 +98,7 @@ final class GlucoseAlertManagerTests: XCTestCase {
     /// Simulates an app restart by building a second manager over the same
     /// defaults.
     private func relaunch() -> GlucoseAlertManager {
-        GlucoseAlertManager(alertIssuer: issuer, userDefaults: defaults)
+        GlucoseAlertManager(alertIssuer: issuer, displayGlucosePreference: preference, userDefaults: defaults)
     }
 
     func testHighAlertDoesNotRepeatAfterRelaunch() async {
@@ -258,5 +261,75 @@ final class GlucoseAlertManagerTests: XCTestCase {
     func testUnknownIdentifierHasNoAlarm() {
         XCTAssertNil(GlucoseAlarmKind.kind(forAlertIdentifier: "something.else"))
         XCTAssertFalse(manager.playsThroughSilent(for: "something.else"))
+    }
+
+    // MARK: - Display units
+
+    /// Builds a manager reading glucose in `unit`, over its own defaults.
+    private func makeManager(displaying unit: LoopUnit) -> (GlucoseAlertManager, DisplayGlucosePreference) {
+        let preference = DisplayGlucosePreference(displayGlucoseUnit: unit)
+        return (GlucoseAlertManager(alertIssuer: issuer, displayGlucosePreference: preference, userDefaults: defaults),
+                preference)
+    }
+
+    private func formatted(_ mgdl: Double, _ preference: DisplayGlucosePreference, includeUnit: Bool = true) -> String {
+        preference.format(LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl), includeUnit: includeUnit)
+    }
+
+    /// The reported bug: the body read "above 180 mg/dL (current: 193)" on a
+    /// phone set to mmol/L.
+    func testHighAlertBodyUsesTheDisplayUnit() async {
+        let (mmol, preference) = makeManager(displaying: .millimolesPerLiter)
+        let now = Date()
+        await mmol.evaluate(samples: [sample(193, at: now)], now: now)
+
+        let body = issuer.issued.first?.backgroundContent.body
+        XCTAssertNotNil(body)
+        // The formatter writes the unit with word joiners (mg\u{2060}/\u{2060}dL),
+        // so match on "mg" rather than the slashed spelling.
+        XCTAssertFalse(body!.contains("mg"), "Body still names a mg/dL unit: \(body!)")
+        XCTAssertTrue(body!.contains(formatted(180, preference)), "Threshold missing from: \(body!)")
+        XCTAssertTrue(body!.contains(formatted(193, preference, includeUnit: false)), "Reading missing from: \(body!)")
+    }
+
+    func testLowAndUrgentLowBodiesUseTheDisplayUnit() async {
+        let (mmol, preference) = makeManager(displaying: .millimolesPerLiter)
+        let t0 = Date()
+        await mmol.evaluate(samples: [sample(65, at: t0)], now: t0)
+        let low = issuer.issued.first?.backgroundContent.body
+        XCTAssertNotNil(low)
+        XCTAssertFalse(low!.contains("mg"), "Low body still names a mg/dL unit: \(low!)")
+        XCTAssertTrue(low!.contains(formatted(70, preference)))
+
+        issuer.reset()
+        let t1 = t0.addingTimeInterval(5 * 60)
+        await mmol.evaluate(samples: [sample(50, at: t1)], now: t1)
+        let urgent = issuer.issued.first?.backgroundContent.body
+        XCTAssertNotNil(urgent)
+        XCTAssertFalse(urgent!.contains("mg"), "Urgent low body still names a mg/dL unit: \(urgent!)")
+        XCTAssertTrue(urgent!.contains(formatted(55, preference)))
+    }
+
+    func testPredictedLowBodyUsesTheDisplayUnit() async {
+        let (mmol, preference) = makeManager(displaying: .millimolesPerLiter)
+        let now = Date()
+        let predicted = [PredictedGlucoseValue(startDate: now.addingTimeInterval(10 * 60),
+                                               quantity: .glucose(value: 55))]
+        await mmol.evaluatePredictedGlucose(predicted, now: now)
+
+        let body = issuer.issued.first?.backgroundContent.body
+        XCTAssertNotNil(body)
+        XCTAssertFalse(body!.contains("mg"), "Predicted low body still names a mg/dL unit: \(body!)")
+        XCTAssertTrue(body!.contains(formatted(mmol.activeConfiguration().predictedLowThresholdMgDL, preference)))
+    }
+
+    /// A phone set to mg/dL must still read in mg/dL.
+    func testMgdlPhoneStillReadsInMgdl() async {
+        let now = Date()
+        await manager.evaluate(samples: [sample(193, at: now)], now: now)
+        let body = issuer.issued.first?.backgroundContent.body
+        XCTAssertNotNil(body)
+        XCTAssertTrue(body!.contains(formatted(180, preference)), "Threshold missing from: \(body!)")
+        XCTAssertTrue(body!.contains("mg"), "Body lost its unit: \(body!)")
     }
 }
