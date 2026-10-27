@@ -30,6 +30,8 @@ final class NowModel: ObservableObject {
         let name: String
         let message: String?
         let state: DeviceStatusHighlightState?
+        /// Set when the message is the device's own status highlight, which the Now screen spells out in a notice.
+        var symbol: String? = nil
     }
 
     enum LoopState: Equatable {
@@ -43,6 +45,8 @@ final class NowModel: ObservableObject {
     @Published private(set) var lastLoopCompleted: Date?
     @Published private(set) var lastLoopFailed = false
     @Published private(set) var closedLoop = false
+    /// Closed loop is switched on but Loop has paused it, for example while the CGM has no session or data.
+    @Published private(set) var closedLoopPaused = false
     @Published private(set) var iob: Double?
     @Published private(set) var cob: Double?
     @Published private(set) var basalDeliveryState: PumpManagerStatus.BasalDeliveryState?
@@ -162,7 +166,9 @@ final class NowModel: ObservableObject {
         cob = loopDataManager.activeCarbs?.quantity.doubleValue(for: .gram)
         lastLoopFailed = failed
         lastLoopCompleted = loopDataManager.lastLoopCompleted
-        closedLoop = settingsManager.dosingEnabled
+        // Closed loop is on but paused while the CGM session or a manual temp basal rules out automation.
+        closedLoopPaused = settingsManager.dosingEnabled && deviceManager.closedLoopDisallowedLocalizedDescription != nil
+        closedLoop = settingsManager.dosingEnabled && !closedLoopPaused
         targetRange = provider.glucoseTargetRange
         predictionTargets = provider.glucoseTargetBands(in: DateInterval(start: now.addingTimeInterval(-3 * 3600), end: now.addingTimeInterval(3 * 3600)))
         todayTargets = provider.glucoseTargetBands(in: window)
@@ -202,7 +208,9 @@ final class NowModel: ObservableObject {
 
     private func device(name: String, highlight: DeviceStatusHighlight?, progress: DeviceLifecycleProgress?) -> Device {
         if let highlight {
-            return Device(name: name, message: highlight.localizedMessage, state: highlight.state)
+            // Plugins wrap highlights onto two lines for the classic HUD ("Signal\nLoss").
+            let message = highlight.localizedMessage.replacingOccurrences(of: "\n", with: " ")
+            return Device(name: name, message: message, state: highlight.state, symbol: highlight.imageName)
         }
         if let progress, progress.progressState == .warning || progress.progressState == .critical {
             return Device(name: name, message: "ending soon", state: progress.progressState == .critical ? .critical : .warning)
@@ -238,6 +246,9 @@ struct NowHeaderView: View {
                 .foregroundStyle(P.ink)
                 .accessibilityAddTraits(.isHeader)
             statusRow
+            if !noticeItems.isEmpty {
+                notices
+            }
             hero
             actionRow
         }
@@ -249,37 +260,88 @@ struct NowHeaderView: View {
         .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { model.now = $0 }
     }
 
-    // Status pills replace Loop's HUD icons with words.
+    // Status pills replace Loop's HUD icons with words. They wrap rather than scroll, so a device is never off-screen.
     private var statusRow: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: LoopDesign.Space.s2) {
-                Button(action: actions.loopStatusTapped) {
-                    StatusPill(text: loopText, dot: loopColor)
-                }
-                .accessibilityHint("Shows when Loop last ran")
-                Button(action: actions.pumpTapped) {
-                    if let pump = model.pump {
-                        StatusPill(text: pillText(pump), dot: pillColor(pump))
-                    } else {
-                        StatusPill(text: "Add pump", dot: P.statusCritical)
-                    }
-                }
-                .accessibilityHint(model.pump == nil ? "Sets up a pump" : "Opens pump settings")
-                Button(action: actions.cgmTapped) {
-                    if let cgm = model.cgm {
-                        StatusPill(text: pillText(cgm), dot: pillColor(cgm))
-                    } else {
-                        StatusPill(text: "Add CGM", dot: P.statusCritical)
-                    }
-                }
-                .accessibilityHint(model.cgm == nil ? "Sets up a CGM" : "Opens CGM settings")
+        FlowRow(spacing: LoopDesign.Space.s2) {
+            Button(action: actions.loopStatusTapped) {
+                StatusPill(text: loopText, dot: loopColor)
             }
+            .accessibilityHint("Shows when Loop last ran")
+            Button(action: actions.pumpTapped) {
+                if let pump = model.pump {
+                    StatusPill(text: pillText(pump), dot: pillColor(pump))
+                } else {
+                    StatusPill(text: "Add pump", dot: P.statusCritical)
+                }
+            }
+            .accessibilityHint(model.pump == nil ? "Sets up a pump" : "Opens pump settings")
+            Button(action: actions.cgmTapped) {
+                if let cgm = model.cgm {
+                    StatusPill(text: pillText(cgm), dot: pillColor(cgm))
+                } else {
+                    StatusPill(text: "Add CGM", dot: P.statusCritical)
+                }
+            }
+            .accessibilityHint(model.cgm == nil ? "Sets up a CGM" : "Opens CGM settings")
         }
         .buttonStyle(.plain)
     }
 
+    // A device problem or a stalled loop gets a notice in words under the pills, most serious first.
+    private var notices: some View {
+        let items = noticeItems
+        return VStack(spacing: LoopDesign.Space.s2) {
+            ForEach(items) { item in
+                Button(action: item.action) {
+                    DeviceNotice(item: item)
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint(item.hint)
+            }
+        }
+    }
+
+    private var noticeItems: [DeviceNotice.Item] {
+        var items: [DeviceNotice.Item] = []
+        if model.loopState == .failed, let last = model.lastLoopCompleted {
+            items.append(DeviceNotice.Item(
+                id: "loop",
+                severity: .critical,
+                symbol: "exclamationmark.arrow.circlepath",
+                title: "Loop hasn't run for \(LoopFormat.ago(last, now: model.now))",
+                detail: "Insulin isn't being adjusted. Tap for details.",
+                hint: "Shows when Loop last ran",
+                action: actions.loopStatusTapped))
+        }
+        // While suspended, Loop's own status row says so and offers Resume, so only a critical pump problem adds a notice.
+        if let pump = model.pump, let symbol = pump.symbol, let message = pump.message,
+           !model.suspended || pump.state == .critical {
+            let severity = DeviceNotice.Severity(pump.state)
+            items.append(DeviceNotice.Item(
+                id: "pump",
+                severity: severity,
+                symbol: symbol,
+                title: message,
+                detail: severity == .critical ? "Loop may not be giving insulin." : nil,
+                hint: "Opens pump settings",
+                action: actions.pumpTapped))
+        }
+        if let cgm = model.cgm, let symbol = cgm.symbol, let message = cgm.message {
+            let severity = DeviceNotice.Severity(cgm.state)
+            items.append(DeviceNotice.Item(
+                id: "cgm",
+                severity: severity,
+                symbol: symbol,
+                title: message,
+                detail: model.readingIsStale ? "Loop can't adjust insulin without readings." : nil,
+                hint: "Opens CGM settings",
+                action: actions.cgmTapped))
+        }
+        return items.sorted { $0.severity > $1.severity }
+    }
+
     private var loopText: String {
-        let mode = model.closedLoop ? "Closed loop" : "Open loop"
+        let mode = model.closedLoop ? "Closed loop" : model.closedLoopPaused ? "Closed loop paused" : "Open loop"
         guard let last = model.lastLoopCompleted else { return "\(mode) · not run yet" }
         switch model.loopState {
         case .failed: return "Loop failed · \(LoopFormat.ago(last, now: model.now))"
@@ -290,14 +352,15 @@ struct NowHeaderView: View {
     /// Green only while closed loop is running; open loop that ran on time is neutral.
     private var loopColor: Color {
         switch model.loopState {
-        case .fresh: return model.closedLoop ? P.statusAutomated : P.inkMuted
+        case .fresh: return model.closedLoop ? P.statusAutomated : model.closedLoopPaused ? P.statusWarning : P.inkMuted
         case .stale: return P.statusWarning
         case .failed, .never: return P.statusCritical
         }
     }
 
+    /// A highlight is spelled out in its notice, so its pill keeps to the device name.
     private func pillText(_ device: NowModel.Device) -> String {
-        guard let message = device.message else { return device.name }
+        guard let message = device.message, device.symbol == nil else { return device.name }
         return "\(device.name) · \(message)"
     }
 
@@ -305,7 +368,7 @@ struct NowHeaderView: View {
         switch device.state {
         case .critical?: return P.statusCritical
         case .warning?: return P.statusWarning
-        default: return nil
+        default: return device.symbol == nil ? nil : P.inkMuted
         }
     }
 
@@ -590,5 +653,128 @@ struct DayTotalsTiles: View {
             }
         }
         .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+// MARK: - Notices
+
+/// One problem in words: what the device or Loop reports, what it means, and where to go.
+struct DeviceNotice: View {
+    enum Severity: Int, Comparable {
+        case info, warning, critical
+
+        init(_ state: DeviceStatusHighlightState?) {
+            switch state {
+            case .critical?: self = .critical
+            case .warning?: self = .warning
+            default: self = .info
+            }
+        }
+
+        static func < (lhs: Severity, rhs: Severity) -> Bool { lhs.rawValue < rhs.rawValue }
+    }
+
+    struct Item: Identifiable {
+        let id: String
+        let severity: Severity
+        let symbol: String
+        let title: String
+        let detail: String?
+        let hint: String
+        let action: () -> Void
+    }
+
+    let item: Item
+
+    private var tint: Color {
+        switch item.severity {
+        case .critical: return P.statusCritical
+        case .warning: return P.statusWarning
+        case .info: return P.inkMuted
+        }
+    }
+
+    var body: some View {
+        HStack(alignment: .center, spacing: LoopDesign.Space.s3) {
+            Image(systemName: item.symbol)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(item.severity == .critical ? P.criticalInk : tint)
+                .frame(width: 24)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.title)
+                    .font(LoopDesign.Typeface.headline)
+                    .foregroundStyle(item.severity == .critical ? P.criticalInk : P.ink)
+                if let detail = item.detail {
+                    Text(detail)
+                        .font(LoopDesign.Typeface.subhead)
+                        .foregroundStyle(P.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(P.inkMuted)
+                .accessibilityHidden(true)
+        }
+        .padding(LoopDesign.Space.s3)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(tint.opacity(item.severity == .info ? 0.12 : 0.16), in: RoundedRectangle(cornerRadius: LoopDesign.Radius.lg, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: LoopDesign.Radius.lg, style: .continuous)
+                .strokeBorder(tint.opacity(item.severity == .info ? 0 : 0.45), lineWidth: 1)
+        )
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Lays its children out left to right and starts a new line when the next one won't fit.
+struct FlowRow: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let rows = arrange(width: proposal.width ?? .infinity, subviews: subviews)
+        let width = rows.map { $0.width }.max() ?? 0
+        let height = rows.map { $0.height }.reduce(0, +) + spacing * CGFloat(max(rows.count - 1, 0))
+        return CGSize(width: proposal.width ?? width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var y = bounds.minY
+        for row in arrange(width: bounds.width, subviews: subviews) {
+            var x = bounds.minX
+            for index in row.indices {
+                let size = subviews[index].sizeThatFits(ProposedViewSize(width: bounds.width, height: nil))
+                subviews[index].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(width: min(size.width, bounds.width), height: size.height))
+                x += min(size.width, bounds.width) + spacing
+            }
+            y += row.height + spacing
+        }
+    }
+
+    private struct Row {
+        var indices: [Int] = []
+        var width: CGFloat = 0
+        var height: CGFloat = 0
+    }
+
+    private func arrange(width: CGFloat, subviews: Subviews) -> [Row] {
+        var rows: [Row] = []
+        var row = Row()
+        for index in subviews.indices {
+            let size = subviews[index].sizeThatFits(ProposedViewSize(width: width, height: nil))
+            let itemWidth = min(size.width, width)
+            if !row.indices.isEmpty && row.width + spacing + itemWidth > width {
+                rows.append(row)
+                row = Row()
+            }
+            row.width += (row.indices.isEmpty ? 0 : spacing) + itemWidth
+            row.height = max(row.height, size.height)
+            row.indices.append(index)
+        }
+        if !row.indices.isEmpty { rows.append(row) }
+        return rows
     }
 }
