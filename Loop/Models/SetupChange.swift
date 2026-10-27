@@ -30,7 +30,14 @@ struct SetupChange: Equatable {
     /// Finds the latest change in a settings history, in any order. Without one, the setup is
     /// unchanged since at least the oldest record.
     static func latest(in history: [StoredSettings]) -> SetupChange? {
-        let sorted = history.sorted { $0.date < $1.date }
+        // The insulin type comes from the pump, which has none while it's being replaced
+        var insulinType: InsulinType?
+        let sorted = history.sorted { $0.date < $1.date }.map { settings in
+            var settings = settings
+            settings.insulinType = settings.insulinType ?? insulinType
+            insulinType = settings.insulinType
+            return settings
+        }
         guard let first = sorted.first else {
             return nil
         }
@@ -90,7 +97,7 @@ struct SetupChange: Equatable {
         if a.maximumBasalRatePerHour != b.maximumBasalRatePerHour || a.maximumBolus != b.maximumBolus {
             items.append(.therapySetting(.deliveryLimits))
         }
-        if a.insulinType != b.insulinType {
+        if let aType = a.insulinType, let bType = b.insulinType, aType != bType {
             items.append(.insulinType)
         }
         if a.defaultRapidActingModel != b.defaultRapidActingModel {

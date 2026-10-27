@@ -22,6 +22,7 @@ final class SetupChangeTests: XCTestCase {
         strategy: AutomaticDosingStrategy = .automaticBolus,
         dosingEnabled: Bool = true,
         deviceToken: String? = nil,
+        insulinType: InsulinType? = .novolog,
         timeZone: TimeZone = TimeZone(identifier: "America/Chicago")!
     ) -> StoredSettings {
         StoredSettings(
@@ -29,6 +30,7 @@ final class SetupChangeTests: XCTestCase {
             dosingEnabled: dosingEnabled,
             maximumBolus: maximumBolus,
             deviceToken: deviceToken,
+            insulinType: insulinType,
             basalRateSchedule: BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: basal)], timeZone: timeZone),
             insulinSensitivitySchedule: InsulinSensitivitySchedule(unit: isfUnit, dailyItems: [RepeatingScheduleValue(startTime: 0, value: isf)], timeZone: timeZone),
             automaticDosingStrategy: strategy)
@@ -61,8 +63,16 @@ final class SetupChangeTests: XCTestCase {
             settings(at: 1, dosingEnabled: false),
             settings(at: 2, deviceToken: "abc"),
             settings(at: 3, timeZone: other),
+            settings(at: 4, insulinType: nil),
+            settings(at: 5),
         ])
         XCTAssertEqual(change, SetupChange(date: start, isLowerBound: true, items: []))
+    }
+
+    func testInsulinTypeChange() {
+        let change = SetupChange.latest(in: [settings(at: 0), settings(at: 1, insulinType: nil), settings(at: 2, insulinType: .fiasp)])
+        XCTAssertEqual(change?.items, [.insulinType])
+        XCTAssertEqual(change?.date, start.addingTimeInterval(.hours(2)))
     }
 
     func testSameSensitivityInAnotherUnitIsNotAChange() {
