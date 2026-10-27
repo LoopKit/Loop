@@ -20,6 +20,16 @@ struct LogEntry: Identifiable {
         case carbs = "Carbs"
         case loop = "Loop"
         var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .all: return NSLocalizedString("All", comment: "Logbook filter chip: show every entry")
+            case .bolus: return NSLocalizedString("Bolus", comment: "Logbook filter chip: show only boluses")
+            case .basal: return NSLocalizedString("Basal", comment: "Logbook filter chip: show only basal changes")
+            case .carbs: return NSLocalizedString("Carbs", comment: "Logbook filter chip: show only carb entries")
+            case .loop: return NSLocalizedString("Loop", comment: "Logbook filter chip: show only what Loop did automatically (Loop is the app's name)")
+            }
+        }
     }
 
     enum Action {
@@ -124,16 +134,18 @@ final class LogbookModel: ObservableObject {
 
             for bolus in history.boluses where inDay(bolus.date) {
                 let glucose = glucoseContext(at: bolus.date, history.glucose, unit: unit, withTrend: bolus.automatic)
-                var parts = [bolus.automatic ? "Loop" : "Manual"]
+                var parts = [bolus.automatic ? sourceLoop : sourceManual]
                 if !bolus.automatic, let meal = carbsToday.first(where: { abs($0.date.timeIntervalSince(bolus.date)) <= 15 * 60 }) {
                     parts.append(LoopFormat.grams(meal.grams))
                 }
                 if let glucose { parts.append(glucose) }
-                if bolus.manuallyEntered { parts.append("logged") }
+                if bolus.manuallyEntered { parts.append(NSLocalizedString("logged", comment: "Logbook bolus row detail: the dose was logged by hand rather than delivered by the pump")) }
                 entries.append(LogEntry(
                     id: "bolus-\(bolus.id)", date: bolus.date,
-                    title: bolus.automatic ? "Automatic bolus" : "Bolus",
-                    subtitle: parts.joined(separator: " · "),
+                    title: bolus.automatic
+                        ? NSLocalizedString("Automatic bolus", comment: "Logbook row title: a bolus Loop delivered automatically")
+                        : NSLocalizedString("Bolus", comment: "Logbook row title: a bolus"),
+                    subtitle: joined(parts),
                     amount: LoopFormat.doseUnits(bolus.units), amountColor: P.insulinInk,
                     detail: LoopFormat.time(bolus.date),
                     icon: "plus", iconFill: P.insulin,
@@ -142,13 +154,13 @@ final class LogbookModel: ObservableObject {
             }
 
             for carb in carbsToday {
-                var parts = [carb.createdByLoop ? "Manual" : "Health"]
+                var parts = [carb.createdByLoop ? sourceManual : NSLocalizedString("Health", comment: "Logbook carb row detail: the entry came from Apple Health")]
                 if let food = carb.foodType, !food.isEmpty { parts.append(food) }
-                if let hours = carb.absorptionHours { parts.append("absorbs over \(hours.formatted(.number.precision(.fractionLength(0...1)))) h") }
+                if let hours = carb.absorptionHours { parts.append(String(format: NSLocalizedString("absorbs over %1$@ h", comment: "Logbook carb row detail: carb absorption time in hours. (1: hours, e.g. 3 or 2.5)"), hours.formatted(.number.precision(.fractionLength(0...1))))) }
                 let editable = carb.createdByLoop && provider.allowsCarbEditing ? carb.entry : nil
                 entries.append(LogEntry(
                     id: "carbs-\(carb.id)", date: carb.date,
-                    title: "Carbs", subtitle: parts.joined(separator: " · "),
+                    title: NSLocalizedString("Carbs", comment: "Logbook row title: a carb entry"), subtitle: joined(parts),
                     amount: LoopFormat.grams(carb.grams), amountColor: P.carbsInk,
                     detail: LoopFormat.time(carb.date),
                     icon: "fork.knife", iconFill: P.carbs, filters: [.carbs],
@@ -163,29 +175,29 @@ final class LogbookModel: ObservableObject {
                 let count = automaticTemps.count
                 entries.append(LogEntry(
                     id: "basal-\(day.start.timeIntervalSince1970)", date: latest.start,
-                    title: "Basal adjustments",
-                    subtitle: "Loop · \(count) change\(count == 1 ? "" : "s") · tap to list",
-                    amount: LoopFormat.signed(net, decimals: 1) + " U", amountColor: P.insulinInk,
-                    detail: "vs plan",
+                    title: NSLocalizedString("Basal adjustments", comment: "Logbook row title summarising the temp basals Loop set in a day"),
+                    subtitle: String.localizedStringWithFormat(NSLocalizedString("Loop · %lld changes · tap to list", comment: "Logbook basal adjustments row subtitle: how many temp basals Loop set in the day; tapping lists them. (1: number of changes)"), count),
+                    amount: String(format: NSLocalizedString("%1$@ U", comment: "Format string for an amount of insulin in units. (1: amount)"), LoopFormat.signed(net, decimals: 1)), amountColor: P.insulinInk,
+                    detail: NSLocalizedString("vs plan", comment: "Logbook basal adjustments row: the insulin amount is the difference from the scheduled basal"),
                     icon: "waveform.path.ecg", iconFill: P.basalEdge, filters: [.basal, .loop],
                     basalChanges: automaticTemps.reversed()))
             }
             for temp in segments where temp.kind == .temp && !temp.automatic {
                 entries.append(LogEntry(
                     id: "temp-\(temp.start.timeIntervalSince1970)", date: temp.start,
-                    title: "Temp basal",
-                    subtitle: "Manual · \(describe(temp))",
+                    title: NSLocalizedString("Temp basal", comment: "Logbook row title: a temporary basal rate"),
+                    subtitle: String(format: NSLocalizedString("Manual · %1$@", comment: "Logbook temp basal row subtitle: set by hand, then the rate and how long. (1: description, e.g. 0.50 U/h for 30m (scheduled 0.80))"), describe(temp)),
                     amount: LoopFormat.rate(temp.rate), amountColor: P.insulinInk,
                     detail: LoopFormat.time(temp.start),
                     icon: "waveform.path.ecg", iconFill: P.basalEdge, filters: [.basal]))
             }
             for suspend in segments where suspend.kind == .suspended {
-                var parts = [suspend.automatic ? "Loop" : "Manual", LoopFormat.duration(suspend.end.timeIntervalSince(suspend.start))]
+                var parts = [suspend.automatic ? sourceLoop : sourceManual, LoopFormat.duration(suspend.end.timeIntervalSince(suspend.start))]
                 if let glucose = glucoseContext(at: suspend.start, history.glucose, unit: unit, withTrend: false) { parts.append(glucose) }
                 entries.append(LogEntry(
                     id: "suspend-\(suspend.start.timeIntervalSince1970)", date: suspend.start,
-                    title: "Basal suspended", subtitle: parts.joined(separator: " · "),
-                    amount: "0 U/h", amountColor: P.ink,
+                    title: NSLocalizedString("Basal suspended", comment: "Logbook row title: insulin delivery was suspended"), subtitle: joined(parts),
+                    amount: String(format: NSLocalizedString("%1$@ U/h", comment: "Format string for an insulin rate in units per hour. (1: rate)"), LoopFormat.number(0, decimals: 0)), amountColor: P.ink,
                     detail: LoopFormat.time(suspend.start),
                     icon: "pause.fill", iconFill: P.statusWarning,
                     filters: suspend.automatic ? [.basal, .loop] : [.basal]))
@@ -194,13 +206,14 @@ final class LogbookModel: ObservableObject {
             for event in pumpEvents where inDay(event.date) {
                 let title: String
                 switch event.kind {
+                // Site change and alarm names come from the pump plugin as it reports them.
                 case .siteChange(let name): title = name
                 case .alarm(let name): title = name
-                case .resume: title = "Basal resumed"
+                case .resume: title = NSLocalizedString("Basal resumed", comment: "Logbook row title: insulin delivery resumed after a suspend")
                 }
                 entries.append(LogEntry(
                     id: "pump-\(event.id)", date: event.date,
-                    title: title, subtitle: "Pump",
+                    title: title, subtitle: NSLocalizedString("Pump", comment: "Logbook row subtitle: the event was reported by the insulin pump"),
                     amount: "", amountColor: P.ink,
                     detail: LoopFormat.time(event.date),
                     icon: "circle.dashed", iconFill: P.inkMuted.opacity(0.5), filters: []))
@@ -212,12 +225,26 @@ final class LogbookModel: ObservableObject {
         }
     }
 
+    private static var sourceLoop: String {
+        NSLocalizedString("Loop", comment: "Logbook row detail: Loop made this change automatically (Loop is the app's name)")
+    }
+
+    private static var sourceManual: String {
+        NSLocalizedString("Manual", comment: "Logbook row detail: the user made this entry or change by hand")
+    }
+
+    /// Row details are a list of independent facts ("Manual", "45 g", "glucose 7.5"), shown with a middle-dot separator.
+    private static func joined(_ parts: [String]) -> String {
+        parts.joined(separator: " · ")
+    }
+
     static func describe(_ segment: BasalSegment) -> String {
-        var text = "\(LoopFormat.rate(segment.rate)) for \(LoopFormat.duration(segment.end.timeIntervalSince(segment.start)))"
+        let rate = LoopFormat.rate(segment.rate)
+        let duration = LoopFormat.duration(segment.end.timeIntervalSince(segment.start))
         if let scheduled = segment.scheduledRate {
-            text += String(format: " (scheduled %.2f)", scheduled)
+            return String(format: NSLocalizedString("%1$@ for %2$@ (scheduled %3$@)", comment: "A temp basal: its rate, how long it ran and the scheduled rate it replaced. (1: rate, e.g. 0.50 U/h; 2: duration, e.g. 30m; 3: scheduled rate number, e.g. 0.80)"), rate, duration, LoopFormat.number(scheduled, decimals: 2))
         }
-        return text
+        return String(format: NSLocalizedString("%1$@ for %2$@", comment: "A temp basal: its rate and how long it ran. (1: rate, e.g. 0.50 U/h; 2: duration, e.g. 30m)"), rate, duration)
     }
 
     /// "glucose 7.5", or "glucose 11.0 rising" for Loop's own doses.
@@ -225,13 +252,17 @@ final class LogbookModel: ObservableObject {
         guard let reading = readings.last(where: { $0.date <= date.addingTimeInterval(60) }), date.timeIntervalSince(reading.date) <= 10 * 60 else {
             return nil
         }
-        var text = "glucose \(unit.format(reading.mgdl))"
+        let value = unit.format(reading.mgdl)
         if withTrend, let earlier = readings.last(where: { $0.date <= reading.date.addingTimeInterval(-14 * 60) }),
            reading.date.timeIntervalSince(earlier.date) <= 20 * 60 {
             let perFifteen = (reading.mgdl - earlier.mgdl) / reading.date.timeIntervalSince(earlier.date) * 900
-            if perFifteen > 10 { text += " rising" } else if perFifteen < -10 { text += " falling" }
+            if perFifteen > 10 {
+                return String(format: NSLocalizedString("glucose %1$@ rising", comment: "Logbook row detail: glucose when the dose was given, and rising. (1: glucose value, e.g. 11.0)"), value)
+            } else if perFifteen < -10 {
+                return String(format: NSLocalizedString("glucose %1$@ falling", comment: "Logbook row detail: glucose when the dose was given, and falling. (1: glucose value, e.g. 11.0)"), value)
+            }
         }
-        return text
+        return String(format: NSLocalizedString("glucose %1$@", comment: "Logbook row detail: glucose when the dose was given. (1: glucose value, e.g. 7.5)"), value)
     }
 }
 
@@ -275,16 +306,20 @@ struct LogbookView: View {
                         .listRowBackground(Color.clear)
                 }
                 if let error = model.loadError {
-                    Text("Couldn't load Logbook: \(error)").foregroundStyle(P.criticalInk)
-                    Button("Retry") { model.reload() }
+                    Text(String(format: NSLocalizedString("Couldn't load Logbook: %1$@", comment: "Logbook error when its history can't be read. (1: system error description)"), error)).foregroundStyle(P.criticalInk)
+                    Button(NSLocalizedString("Retry", comment: "Button to try loading the Logbook again")) { model.reload() }
                 } else if model.loaded && model.days.allSatisfy({ $0.entries.isEmpty }) {
-                    Text("Nothing logged in the last 7 days.")
+                    Text(NSLocalizedString("Nothing logged in the last 7 days.", comment: "Logbook empty state when there are no entries at all"))
                         .foregroundStyle(P.inkMuted)
                 }
                 ForEach(visibleDays) { day in
                     Section {
                         if day.entries.isEmpty {
-                            Text(model.filter != .all ? "Nothing to show for this filter" : day.insulin > 0 ? "Scheduled basal only" : "Nothing logged")
+                            Text(model.filter != .all
+                                 ? NSLocalizedString("Nothing to show for this filter", comment: "Logbook day with no entries matching the selected filter")
+                                 : day.insulin > 0
+                                 ? NSLocalizedString("Scheduled basal only", comment: "Logbook day where only the scheduled basal ran, with nothing else logged")
+                                 : NSLocalizedString("Nothing logged", comment: "Logbook day with no entries"))
                                 .font(LoopDesign.Typeface.footnote)
                                 .foregroundStyle(P.inkMuted)
                         }
@@ -298,13 +333,13 @@ struct LogbookView: View {
                 Section {
                     EmptyView()
                 } footer: {
-                    Text("Loop keeps the last 7 days on this phone. Older doses and carbs are in Apple Health and on the Trends tab.")
+                    Text(NSLocalizedString("Loop keeps the last 7 days on this phone. Older doses and carbs are in Apple Health and on the Trends tab.", comment: "Logbook footer explaining why only 7 days are listed"))
                 }
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(P.surface)
-            .navigationTitle("Logbook")
+            .navigationTitle(NSLocalizedString("Logbook", comment: "Title of the Logbook tab"))
             .refreshable { model.reload() }
             .overlay {
                 if !model.loaded { ProgressView() }
@@ -317,8 +352,8 @@ struct LogbookView: View {
         .onReceive(NotificationCenter.default.publisher(for: .LoopDataUpdated).debounce(for: .seconds(2), scheduler: RunLoop.main)) { _ in
             model.reload()
         }
-        .alert("Couldn't delete", isPresented: Binding(get: { model.error != nil }, set: { if !$0 { model.error = nil } })) {
-            Button("OK", role: .cancel) {}
+        .alert(NSLocalizedString("Couldn't delete", comment: "Alert title when deleting a Logbook entry fails"), isPresented: Binding(get: { model.error != nil }, set: { if !$0 { model.error = nil } })) {
+            Button(NSLocalizedString("OK", comment: "Button to dismiss the Logbook delete error alert"), role: .cancel) {}
         } message: {
             Text(model.error ?? "")
         }
@@ -331,7 +366,7 @@ struct LogbookView: View {
                     Button {
                         model.filter = filter
                     } label: {
-                        Text(filter.rawValue)
+                        Text(filter.title)
                             .font(LoopDesign.Typeface.footnote.weight(.semibold))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
@@ -348,9 +383,14 @@ struct LogbookView: View {
 
     private func dayHeader(_ day: LogDay) -> some View {
         let calendar = Calendar.current
-        let prefix = calendar.isDateInToday(day.day) ? "Today · " : calendar.isDateInYesterday(day.day) ? "Yesterday · " : ""
+        let date = LoopFormat.weekdayDay(day.day)
+        let title = calendar.isDateInToday(day.day)
+            ? String(format: NSLocalizedString("Today · %1$@", comment: "Logbook day header for today. (1: weekday and date, e.g. Sun 25 Oct)"), date)
+            : calendar.isDateInYesterday(day.day)
+            ? String(format: NSLocalizedString("Yesterday · %1$@", comment: "Logbook day header for yesterday. (1: weekday and date, e.g. Sat 24 Oct)"), date)
+            : date
         return HStack(alignment: .firstTextBaseline) {
-            Text(prefix + LoopFormat.weekdayDay(day.day))
+            Text(title)
                 .font(LoopDesign.Typeface.headline)
                 .foregroundStyle(P.ink)
             Spacer()
@@ -395,13 +435,13 @@ struct LogbookView: View {
             content
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     if let action = entry.delete, canPerform(action) {
-                        Button(role: .destructive) { model.perform(action) } label: { Label("Delete", systemImage: "trash") }
+                        Button(role: .destructive) { model.perform(action) } label: { Label(NSLocalizedString("Delete", comment: "Swipe action to delete a Logbook entry"), systemImage: "trash") }
                     }
                     if let carb = entry.edit, model.carbEditingAllowed {
                         Button {
                             guard model.provider.allowsCarbEditing else { return }
                             path.append(.editCarbs(CarbEditRoute(entry: carb)))
-                        } label: { Label("Edit", systemImage: "pencil") }
+                        } label: { Label(NSLocalizedString("Edit", comment: "Swipe action to edit a Logbook carb entry"), systemImage: "pencil") }
                             .tint(P.accent)
                     }
                 }
@@ -449,7 +489,7 @@ private struct LogbookCarbEditor: View {
         CarbEntryView(viewModel: viewModel)
             .environmentObject(deviceManager.displayGlucosePreference)
             .environment(\.dismissAction, dismiss)
-            .navigationTitle("Edit Carb Entry")
+            .navigationTitle(NSLocalizedString("Edit Carb Entry", comment: "Title of the screen for editing a carb entry from the Logbook"))
             .navigationBarTitleDisplayMode(.inline)
             .onAppear { if !provider.allowsCarbEditing { dismiss() } }
             // Loop posts this from its data queue; SwiftUI faults on publishers that emit off the main thread.
@@ -474,13 +514,13 @@ struct BasalChangesList: View {
                         .foregroundStyle(P.inkMuted)
                 }
                 Spacer()
-                Text(LoopFormat.signed(change.netUnits) + " U")
+                Text(String(format: NSLocalizedString("%1$@ U", comment: "Format string for an amount of insulin in units. (1: amount)"), LoopFormat.signed(change.netUnits)))
                     .font(LoopDesign.Typeface.body.weight(.semibold).monospacedDigit())
                     .foregroundStyle(P.insulinInk)
             }
             .accessibilityElement(children: .combine)
         }
-        .navigationTitle("Basal adjustments")
+        .navigationTitle(NSLocalizedString("Basal adjustments", comment: "Title of the list of every temp basal Loop set in a day"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }

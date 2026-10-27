@@ -273,7 +273,13 @@ struct ValueTile<Value: View>: View {
             Text(label)
                 .font(LoopDesign.Typeface.footnote)
                 .foregroundStyle(LoopDesign.Palette.inkMuted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .allowsTightening(true)
+            // A value with a long unit ("0.04 単位") shrinks to fit rather than breaking mid-word.
             value
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
         }
         .padding(LoopDesign.Space.s3)
         .frame(maxWidth: .infinity, minHeight: 64, maxHeight: .infinity, alignment: .topLeading)

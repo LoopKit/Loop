@@ -201,10 +201,17 @@ class LoopHistoryMathTests: XCTestCase {
         let a = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 10, day: 12, hour: 12)))
         let b = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 10, day: 25, hour: 12)))
         let c = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 9, day: 28, hour: 12)))
-        XCTAssertEqual(LoopFormat.range(a, b), "12 – \(LoopFormat.day(b))")
-        XCTAssertTrue(LoopFormat.range(c, b).hasPrefix(c.formatted(.dateTime.day().month(.abbreviated))))
-        XCTAssertEqual(LoopFormat.duration(13 * 86400 + 11 * 3600), "13 d 11 h")
-        XCTAssertEqual(LoopFormat.duration(9 * 3600 + 45 * 60), "9 h 45 m")
+        // Ranges and durations come from the system's formatters, so they follow the user's locale;
+        // the test host runs in en_US.
+        XCTAssertEqual(LoopFormat.range(b, b), LoopFormat.day(b))
+        let sameMonth = LoopFormat.range(a, b)
+        XCTAssertTrue(sameMonth.contains("12") && sameMonth.contains("25"))
+        XCTAssertEqual(sameMonth.components(separatedBy: "2026").count, 2, "the year appears once")
+        let twoMonths = LoopFormat.range(c, b)
+        XCTAssertTrue(twoMonths.contains("Sep") && twoMonths.contains("Oct"))
+        XCTAssertEqual(LoopFormat.duration(13 * 86400 + 11 * 3600), "13d 11h")
+        XCTAssertEqual(LoopFormat.duration(9 * 3600 + 45 * 60), "9h 45m")
+        XCTAssertEqual(LoopFormat.number(7.25, decimals: 1), 7.25.formatted(.number.precision(.fractionLength(1)).grouping(.never)))
         XCTAssertEqual(LoopFormat.signed(-0.4), "−0.40")
         XCTAssertEqual(LoopFormat.signed(0.0001), "+0.00")
     }

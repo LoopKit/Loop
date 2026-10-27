@@ -39,15 +39,15 @@ final class MainTabBarController: UITabBarController, UITabBarControllerDelegate
         self.provider = LoopHistoryProvider(deviceManager: deviceManager, loopDataManager: loopDataManager, settingsManager: settingsManager, temporaryPresetsManager: statusTableViewController.temporaryPresetsManager)
         super.init(nibName: nil, bundle: nil)
 
-        rootNavigationController.tabBarItem = UITabBarItem(title: "Now", image: UIImage(systemName: "drop.fill"), tag: 0)
+        rootNavigationController.tabBarItem = UITabBarItem(title: NSLocalizedString("Now", comment: "Title of the Now tab in the redesigned interface, showing current glucose and Loop status"), image: UIImage(systemName: "drop.fill"), tag: 0)
 
         let trends = UIHostingController(rootView: TrendsView(provider: provider))
-        trends.tabBarItem = UITabBarItem(title: "Trends", image: UIImage(systemName: "chart.bar.fill"), tag: 1)
+        trends.tabBarItem = UITabBarItem(title: NSLocalizedString("Trends", comment: "Title of the Trends tab in the redesigned interface"), image: UIImage(systemName: "chart.bar.fill"), tag: 1)
 
         let logbook = UIHostingController(rootView: LogbookView(provider: provider, deviceManager: deviceManager))
-        logbook.tabBarItem = UITabBarItem(title: "Logbook", image: UIImage(systemName: "list.bullet"), tag: 2)
+        logbook.tabBarItem = UITabBarItem(title: NSLocalizedString("Logbook", comment: "Title of the Logbook tab in the redesigned interface, listing past events"), image: UIImage(systemName: "list.bullet"), tag: 2)
 
-        settingsPlaceholder.tabBarItem = UITabBarItem(title: "Settings", image: UIImage(systemName: "gearshape.fill"), tag: 3)
+        settingsPlaceholder.tabBarItem = UITabBarItem(title: NSLocalizedString("Settings", comment: "Title of the Settings tab in the redesigned interface"), image: UIImage(systemName: "gearshape.fill"), tag: 3)
 
         viewControllers = [rootNavigationController, trends, logbook, settingsPlaceholder]
         delegate = self

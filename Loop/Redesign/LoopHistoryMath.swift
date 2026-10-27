@@ -48,27 +48,30 @@ enum LoopHistoryMath {
 
         var name: String {
             switch self {
-            case .veryHigh: return "Very high"
-            case .high: return "High"
-            case .inRange: return "In range"
-            case .low: return "Low"
-            case .veryLow: return "Very low"
+            case .veryHigh: return NSLocalizedString("Very high", comment: "Time-in-range band name: glucose above 250 mg/dL (13.9 mmol/L)")
+            case .high: return NSLocalizedString("High", comment: "Time-in-range band name: glucose 181–250 mg/dL (10.1–13.9 mmol/L)")
+            case .inRange: return NSLocalizedString("In range", comment: "Time-in-range band name: glucose 70–180 mg/dL (3.9–10.0 mmol/L)")
+            case .low: return NSLocalizedString("Low", comment: "Time-in-range band name: glucose 54–69 mg/dL (3.0–3.8 mmol/L)")
+            case .veryLow: return NSLocalizedString("Very low", comment: "Time-in-range band name: glucose below 54 mg/dL (3.0 mmol/L)")
             }
         }
 
         /// Consensus thresholds, in the person's unit.
+        /// Numbers go through the user's locale ("3,9–10,0" in German); the symbols are not words, so they stay in code.
         func thresholds(_ unit: GlucoseUnitStyle) -> String {
+            let d = unit.isMmol ? 1 : 0
+            func n(_ value: Double) -> String { LoopFormat.number(value, decimals: d) }
             switch (self, unit.isMmol) {
-            case (.veryHigh, true): return "> 13.9"
-            case (.high, true): return "10.1–13.9"
-            case (.inRange, true): return "3.9–10.0"
-            case (.low, true): return "3.0–3.8"
-            case (.veryLow, true): return "< 3.0"
-            case (.veryHigh, false): return "> 250"
-            case (.high, false): return "181–250"
-            case (.inRange, false): return "70–180"
-            case (.low, false): return "54–69"
-            case (.veryLow, false): return "< 54"
+            case (.veryHigh, true): return "> " + n(13.9)
+            case (.high, true): return n(10.1) + "–" + n(13.9)
+            case (.inRange, true): return n(3.9) + "–" + n(10.0)
+            case (.low, true): return n(3.0) + "–" + n(3.8)
+            case (.veryLow, true): return "< " + n(3.0)
+            case (.veryHigh, false): return "> " + n(250)
+            case (.high, false): return n(181) + "–" + n(250)
+            case (.inRange, false): return n(70) + "–" + n(180)
+            case (.low, false): return n(54) + "–" + n(69)
+            case (.veryLow, false): return "< " + n(54)
             }
         }
 
@@ -318,13 +321,13 @@ enum LoopHistoryMath {
             let cause: String?
             if closedSetting == false {
                 mode = .open
-                cause = "Closed loop off"
+                cause = NSLocalizedString("Closed loop off", comment: "Reason shown for a stretch of time when Loop was in open loop because closed loop was turned off")
             } else if let lastSuccess, slotEnd.timeIntervalSince(lastSuccess) <= recency {
                 mode = .closed
                 cause = nil
             } else {
                 mode = .limited
-                cause = lastError ?? "Loop didn't run"
+                cause = lastError ?? NSLocalizedString("Loop didn't run", comment: "Reason shown for a stretch of time when Loop did not complete a run and recorded no error")
             }
 
             if let last = spans.last, last.mode == mode, last.cause == cause, last.end == t {
