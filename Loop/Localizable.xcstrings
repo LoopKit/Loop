@@ -1988,7 +1988,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ · %2$@ خلال 5 دقائق"
+            "value" : "%1$@ · %2$@ خلال ٥ دقائق"
           }
         },
         "cs" : {

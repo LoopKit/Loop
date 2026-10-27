@@ -50,6 +50,11 @@
 		82F11F858069EDA2DF65D909 /* Loop/Resources/Sounds/voice_lgs_bryce.caf in Resources */ = {isa = PBXBuildFile; fileRef = FB860882201269230F24C96C /* Loop/Resources/Sounds/voice_lgs_bryce.caf */; };
 		0996021E82CDE7DA7A3DD544 /* Loop/Resources/Sounds/voice_ulg_amy.caf in Resources */ = {isa = PBXBuildFile; fileRef = B08A706BF6BC6555453D3E56 /* Loop/Resources/Sounds/voice_ulg_amy.caf */; };
 		8BAF071E821EAC3FB1B183B3 /* Loop/Resources/Sounds/voice_ulg_bryce.caf in Resources */ = {isa = PBXBuildFile; fileRef = 1F9BFD4BD97793AAE2407DCB /* Loop/Resources/Sounds/voice_ulg_bryce.caf */; };
+		E6E73709263FB037F274B2A0 /* WidgetDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE6FCD6C3CA3B693C8A349B /* WidgetDesign.swift */; };
+		8602ACA648AEEBBD4793ED49 /* RedesignStatusWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E169C989E88148A68A4FEFB6 /* RedesignStatusWidgetView.swift */; };
+		FE8902221761558AAEDFFE02 /* RedesignLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB9792C496505ED5C2F302AB /* RedesignLiveActivity.swift */; };
+		4CC1A96D0600081991783423 /* LoopDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BD3DDF41B598A8C4B5CEB92 /* LoopDesign.swift */; };
+		1419606428D9550400BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606928D9554E00BA86E0 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
 		1419606A28D955BC00BA86E0 /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C101947127DD473C004E7EB8 /* MockKitUI.framework */; };
 		142CB7592A60BF2E0075748A /* EditMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142CB7582A60BF2E0075748A /* EditMode.swift */; };
@@ -869,6 +874,9 @@
 
 /* Begin PBXFileReference section */
 		0FC34B523FE5A50C920506D5 /* Loop/Resources/Sounds/alarm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/alarm.caf; sourceTree = SOURCE_ROOT; };
+		FDE6FCD6C3CA3B693C8A349B /* WidgetDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDesign.swift; sourceTree = "<group>"; };
+		E169C989E88148A68A4FEFB6 /* RedesignStatusWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedesignStatusWidgetView.swift; sourceTree = "<group>"; };
+		DB9792C496505ED5C2F302AB /* RedesignLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedesignLiveActivity.swift; sourceTree = "<group>"; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
 		142CB75A2A60BFC30075748A /* FavoriteFoodsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteFoodsView.swift; sourceTree = "<group>"; };
 		1452F4A82A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFoodAddEditViewModel.swift; sourceTree = "<group>"; };
@@ -1702,9 +1710,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		17D23E8E964F381FCC67C938 /* Redesign */ = {
+			isa = PBXGroup;
+			children = (
+				FDE6FCD6C3CA3B693C8A349B /* WidgetDesign.swift */,
+				E169C989E88148A68A4FEFB6 /* RedesignStatusWidgetView.swift */,
+				DB9792C496505ED5C2F302AB /* RedesignLiveActivity.swift */,
+			);
+			path = Redesign;
+			sourceTree = "<group>";
+		};
 		14B1736128AED9EC006CCD7C /* Loop Widget Extension */ = {
 			isa = PBXGroup;
 			children = (
+				17D23E8E964F381FCC67C938 /* Redesign */,
 				147EFE8D2A8BCC5500272438 /* DefaultAssets.xcassets */,
 				147EFE8F2A8BCD8000272438 /* DerivedAssets.xcassets */,
 				147EFE912A8BCD8A00272438 /* DerivedAssetsBase.xcassets */,
@@ -3632,6 +3651,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E6E73709263FB037F274B2A0 /* WidgetDesign.swift in Sources */,
+				8602ACA648AEEBBD4793ED49 /* RedesignStatusWidgetView.swift in Sources */,
+				FE8902221761558AAEDFFE02 /* RedesignLiveActivity.swift in Sources */,
+				4CC1A96D0600081991783423 /* LoopDesign.swift in Sources */,
 				14B1738128AEDC70006CCD7C /* StatusExtensionContext.swift in Sources */,
 				1455ACA92C66665D004F44F2 /* StateColorPalette.swift in Sources */,
 				14B1737628AEDC6C006CCD7C /* HKUnit.swift in Sources */,

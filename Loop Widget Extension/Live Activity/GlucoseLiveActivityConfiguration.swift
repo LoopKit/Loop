@@ -46,6 +46,8 @@ struct GlucoseLiveActivityConfiguration: Widget {
         // banner on the Home Screen of devices that don't support the Dynamic Island.
         if #available(iOS 18.0, *) {
             AdaptiveLockScreenView(context: context)
+        } else if WidgetDesign.useRedesign {
+            RedesignLiveActivity.lockScreen(context)
         } else {
             fullLockScreenView(context: context)
         }
@@ -57,7 +59,13 @@ struct GlucoseLiveActivityConfiguration: Widget {
         @Environment(\.activityFamily) private var activityFamily
 
         var body: some View {
-            if activityFamily == .small {
+            if WidgetDesign.useRedesign {
+                if activityFamily == .small {
+                    RedesignLiveActivity.smallFamily(context)
+                } else {
+                    RedesignLiveActivity.lockScreen(context)
+                }
+            } else if activityFamily == .small {
                 // WatchOS & CarPlay supplemental view - show only bottom row
                 compactLockScreenView(context: context)
             } else {
@@ -262,6 +270,9 @@ struct GlucoseLiveActivityConfiguration: Widget {
     private func dynamicIslandView(
         context: ActivityViewContext<GlucoseActivityAttributes>
     ) -> DynamicIsland {
+        if WidgetDesign.useRedesign {
+            return RedesignLiveActivity.dynamicIsland(context)
+        }
         let glucoseFormatter = NumberFormatter.glucoseFormatter(
             for: context.state.isMmol
                 ? LoopUnit.millimolesPerLiter : LoopUnit.milligramsPerDeciliter

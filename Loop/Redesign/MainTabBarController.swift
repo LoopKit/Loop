@@ -7,6 +7,8 @@
 
 import UIKit
 import SwiftUI
+import WidgetKit
+import LoopCore
 
 /// Whether Loop shows the redesigned interface (tabs: Now, Trends, Logbook, Settings) or the classic status screen.
 enum LoopInterfacePreference {
@@ -19,8 +21,18 @@ enum LoopInterfacePreference {
         set {
             guard newValue != useRedesign else { return }
             UserDefaults.standard.set(newValue, forKey: key)
+            syncToExtensions()
             NotificationCenter.default.post(name: didChange, object: nil)
         }
+    }
+
+    /// Copies the setting to the app group, where the widget and Live Activity read it, and redraws both.
+    static func syncToExtensions() {
+        guard let shared = UserDefaults.appGroup, shared.redesignEnabled != useRedesign else { return }
+        shared.redesignEnabled = useRedesign
+        WidgetCenter.shared.reloadAllTimelines()
+        // The Live Activity otherwise keeps its old look until Loop next runs.
+        NotificationCenter.default.post(name: .LiveActivitySettingsChanged, object: nil)
     }
 }
 
