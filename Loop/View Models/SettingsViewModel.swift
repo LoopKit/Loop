@@ -121,6 +121,8 @@ class SettingsViewModel {
 
     @ObservationIgnored var insulinDeliveryHistory: ((Int) async throws -> InsulinDeliveryHistory)?
 
+    @ObservationIgnored var setupChange: (() async throws -> SetupChange?)?
+
     @MainActor
     var showDeleteTestData: Bool {
         availableSupports.contains(where: { $0.showsDeleteTestDataUI })

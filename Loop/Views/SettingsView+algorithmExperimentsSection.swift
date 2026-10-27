@@ -10,6 +10,7 @@ import Foundation
 import SwiftUI
 import LoopKit
 import LoopKitUI
+import LoopAlgorithm
 
 extension SettingsView {
     internal var algorithmExperimentsSection: some View {
@@ -76,11 +77,18 @@ public struct ExperimentsSettingsView: View {
                         name: NSLocalizedString("Integral Retrospective Correction", comment: "Title of integral retrospective correction experiment"),
                         enabled: isIntegralRetrospectiveCorrectionEnabled)
                 }
+                Text(NSLocalizedString("About 2 weeks with the same setup is a good amount of time to see a change in outcomes such as time in range and lows. Over just a few days, ordinary day-to-day variation can hide or exaggerate the effect.", comment: "Suggested length of time to try an algorithm experiment setup."))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Spacer()
             }
             .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: isGuardAndRunwayEnabled) { UserDefaults.standard.recordAlgorithmExperimentChange(.guardAndRunway, enabled: isGuardAndRunwayEnabled) }
+        .onChange(of: isGlucoseBasedApplicationFactorEnabled) { UserDefaults.standard.recordAlgorithmExperimentChange(.glucoseBasedApplicationFactor, enabled: isGlucoseBasedApplicationFactorEnabled) }
+        .onChange(of: isIntegralRetrospectiveCorrectionEnabled) { UserDefaults.standard.recordAlgorithmExperimentChange(.integralRetrospectiveCorrection, enabled: isIntegralRetrospectiveCorrectionEnabled) }
     }
 }
 
@@ -90,6 +98,39 @@ extension UserDefaults {
         case GlucoseBasedApplicationFactorEnabled = "com.loopkit.algorithmExperiments.glucoseBasedApplicationFactorEnabled"
         case IntegralRetrospectiveCorrectionEnabled = "com.loopkit.algorithmExperiments.integralRetrospectiveCorrectionEnabled"
         case GuardAndRunwayEnabled = "com.loopkit.algorithmExperiments.guardAndRunwayEnabled"
+        case ChangeDate = "com.loopkit.algorithmExperiments.changeDate"
+        case ChangeDateIsLowerBound = "com.loopkit.algorithmExperiments.changeDateIsLowerBound"
+        case ChangedExperiment = "com.loopkit.algorithmExperiments.changedExperiment"
+        case ChangedExperimentEnabled = "com.loopkit.algorithmExperiments.changedExperimentEnabled"
+    }
+
+    var algorithmExperimentsChange: SetupChange? {
+        guard let date = object(forKey: Key.ChangeDate.rawValue) as? Date else {
+            return nil
+        }
+        var items: [SetupChange.Item] = []
+        if let experiment = string(forKey: Key.ChangedExperiment.rawValue).flatMap(ExperimentOption.init(rawValue:)) {
+            items.append(.experiment(experiment, enabled: bool(forKey: Key.ChangedExperimentEnabled.rawValue)))
+        }
+        return SetupChange(date: date, isLowerBound: bool(forKey: Key.ChangeDateIsLowerBound.rawValue), items: items)
+    }
+
+    fileprivate func recordAlgorithmExperimentChange(_ experiment: ExperimentOption, enabled: Bool) {
+        set(Date(), forKey: Key.ChangeDate.rawValue)
+        removeObject(forKey: Key.ChangeDateIsLowerBound.rawValue)
+        set(experiment.rawValue, forKey: Key.ChangedExperiment.rawValue)
+        set(enabled, forKey: Key.ChangedExperimentEnabled.rawValue)
+    }
+
+    // An experiment that was on before changes were recorded counts from the first launch that sees it
+    func updateAlgorithmExperimentsChangeDate() {
+        guard object(forKey: Key.ChangeDate.rawValue) == nil,
+              guardAndRunwayEnabled || glucoseBasedApplicationFactorEnabled || integralRetrospectiveCorrectionEnabled
+        else {
+            return
+        }
+        set(Date(), forKey: Key.ChangeDate.rawValue)
+        set(true, forKey: Key.ChangeDateIsLowerBound.rawValue)
     }
 
     var glucoseBasedApplicationFactorEnabled: Bool {

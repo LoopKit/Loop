@@ -62,6 +62,7 @@ struct SettingsView: View {
     @State private var alert: Destination.Alert?
     @State private var sheet: Destination.Sheet?
     @State private var pluginSelection: (() -> Void)?
+    @State private var setupChange: SetupChange?
     
     var localizedAppNameAndVersion: String
 
@@ -357,8 +358,37 @@ extension SettingsView {
                     )
                     .accessibilityIdentifier("settingsViewStatistics")
                 }
+                NavigationLink(destination: CurrentSetupView(setupChange: setupChange)) {
+                    LargeButton(
+                        action: {},
+                        includeArrow: false,
+                        imageView: Image(systemName: "clock.arrow.circlepath")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 30),
+                        label: NSLocalizedString("Current Setup", comment: "Current setup settings button text"),
+                        descriptiveText: currentSetupDescriptiveText
+                    )
+                    .accessibilityIdentifier("settingsViewCurrentSetup")
+                }
+                .task {
+                    setupChange = try? await viewModel.setupChange?()
+                }
             }
         }
+    }
+
+    private var currentSetupDescriptiveText: String {
+        guard let setupChange else {
+            return NSLocalizedString("How long your settings have been unchanged", comment: "Current setup settings descriptive text before the setup is known")
+        }
+        guard let item = setupChange.items.first else {
+            return setupChange.durationDescription
+        }
+        let changed = setupChange.items.count > 1
+            ? String(format: NSLocalizedString("%@ and more", comment: "Several settings changed together (1: the first one)"), item.title)
+            : item.title
+        return String(format: NSLocalizedString("%1$@ · Last change: %2$@", comment: "Current setup settings descriptive text (1: time since the last change, 2: what changed)"), setupChange.durationDescription, changed)
     }
 
     private func healthKitSharingStatus(for type: HKObjectType) -> HKAuthorizationStatus {

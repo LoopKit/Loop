@@ -495,6 +495,7 @@ class LoopAppManager: NSObject {
             )
         }
         analyticsServicesManager.identifyState()
+        UserDefaults.standard.updateAlgorithmExperimentsChangeDate()
         if let pumpManager = deviceDataManager.pumpManager {
             analyticsServicesManager.identifyPumpType(pumpManager.pluginIdentifier)
             analyticsServicesManager.identifyPumpModel(pumpManager.status.device.model)
@@ -608,6 +609,10 @@ class LoopAppManager: NSObject {
         viewModel.insulinDeliveryHistory = { [weak loopDataManager] days in
             guard let loopDataManager else { throw CancellationError() }
             return try await loopDataManager.insulinDeliveryHistory(days: days)
+        }
+        viewModel.setupChange = { [weak settingsManager] in
+            let history = try await settingsManager?.settingsStore?.getStoredSettings() ?? []
+            return SetupChange.latest(SetupChange.latest(in: history), UserDefaults.standard.algorithmExperimentsChange)
         }
 
         return viewModel
