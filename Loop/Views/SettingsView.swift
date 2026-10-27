@@ -358,7 +358,12 @@ extension SettingsView {
                     )
                     .accessibilityIdentifier("settingsViewStatistics")
                 }
-                NavigationLink(destination: CurrentSetupView(setupChange: setupChange)) {
+                NavigationLink(destination: CurrentSetupView(viewModel: CurrentSetupViewModel(
+                    setupChange: setupChange,
+                    loadSetupChange: { [viewModel] in try await viewModel.setupChange?() },
+                    glucoseStore: glucoseStore,
+                    insulinDeliveryHistory: viewModel.insulinDeliveryHistory
+                ))) {
                     LargeButton(
                         action: {},
                         includeArrow: false,

@@ -23,6 +23,8 @@ struct SetupChange: Equatable {
     /// The setup is known to be unchanged since `date`, but may be older.
     var isLowerBound: Bool
     var items: [Item]
+    /// When the setup before this change started, as far as the history shows.
+    var previousDate: Date? = nil
 
     /// Changes this close to the latest one are reported together, as one edit.
     static let groupingInterval = TimeInterval(hours: 1)
@@ -48,8 +50,10 @@ struct SetupChange: Equatable {
         guard let last = changes.last else {
             return SetupChange(date: first.date, isLowerBound: true, items: [])
         }
-        return changes.reversed().reduce(SetupChange(date: last.date, isLowerBound: false, items: [])) { result, change in
-            change.date >= last.date - groupingInterval ? result.merging(change) : result
+        let groupStart = last.date - groupingInterval
+        let previousDate = changes.last(where: { $0.date < groupStart })?.date ?? first.date
+        return changes.reversed().reduce(SetupChange(date: last.date, isLowerBound: false, items: [], previousDate: previousDate)) { result, change in
+            change.date >= groupStart ? result.merging(change) : result
         }
     }
 
@@ -57,11 +61,18 @@ struct SetupChange: Equatable {
     static func latest(_ a: SetupChange?, _ b: SetupChange?) -> SetupChange? {
         guard let a else { return b }
         guard let b else { return a }
-        let (earlier, later) = a.date <= b.date ? (a, b) : (b, a)
-        guard !later.isLowerBound, !earlier.isLowerBound, earlier.date >= later.date - groupingInterval else {
+        var (earlier, later) = a.date <= b.date ? (a, b) : (b, a)
+        if later.isLowerBound {
             return later
         }
-        return later.merging(earlier)
+        guard !earlier.isLowerBound, earlier.date >= later.date - groupingInterval else {
+            later.previousDate = max(later.previousDate ?? earlier.date, earlier.date)
+            return later
+        }
+        let previousDates = [earlier.previousDate, later.previousDate].compactMap { $0 }
+        later = later.merging(earlier)
+        later.previousDate = previousDates.max()
+        return later
     }
 
     private func merging(_ other: SetupChange) -> SetupChange {

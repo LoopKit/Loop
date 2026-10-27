@@ -11,10 +11,33 @@ import LoopKitUI
 import LoopAlgorithm
 
 struct CurrentSetupView: View {
-    let setupChange: SetupChange?
+    @StateObject private var viewModel: CurrentSetupViewModel
+    @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
+
+    init(viewModel: @autoclosure @escaping () -> CurrentSetupViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel())
+    }
+
+    private var setupChange: SetupChange? { viewModel.setupChange }
 
     var body: some View {
         List {
+            if let setupChange {
+                Section {
+                    Text(summary(setupChange))
+                    if let comparison = viewModel.comparison {
+                        if let before = comparison.before {
+                            TimeInRangeStripe(title: NSLocalizedString("Before", comment: "Title of the time in range bar for the period before the setup change"), timeInRange: before.glucose.timeInRange)
+                        }
+                        TimeInRangeStripe(title: NSLocalizedString("Since Change", comment: "Title of the time in range bar for the period since the setup change"), timeInRange: comparison.after.glucose.timeInRange)
+                    } else if viewModel.isLoading {
+                        HStack { Spacer(); ProgressView(); Spacer() }
+                    }
+                }
+                if let comparison = viewModel.comparison {
+                    resultsSection(comparison)
+                }
+            }
             Section {
                 if let setupChange {
                     LabeledContent(NSLocalizedString("Unchanged For", comment: "Title of the row showing how long the current setup has run"), value: setupChange.durationDescription)
@@ -41,6 +64,108 @@ struct CurrentSetupView: View {
         }
         .insetGroupedListStyle()
         .navigationTitle(NSLocalizedString("Current Setup", comment: "Title of the current setup screen"))
+        .task { await viewModel.load() }
+    }
+
+    private func resultsSection(_ comparison: SetupComparison) -> some View {
+        let before = comparison.before
+        let after = comparison.after
+        return Section(header: SectionHeader(label: NSLocalizedString("Results", comment: "Header of the setup comparison results")),
+                       footer: Text(before == nil
+                                    ? NSLocalizedString("Median glucose by time of day since the change, with its 25–75% band.", comment: "Setup comparison chart explanation without a before period")
+                                    : NSLocalizedString("Median glucose by time of day: dashed before the change, solid since, with the 25–75% band since the change.", comment: "Setup comparison chart explanation"))) {
+            comparisonRow(NSLocalizedString("Time in Range", comment: "Setup comparison row for time in range"),
+                          before?.timeInRange.map(percent), after.timeInRange.map(percent))
+            comparisonRow(String(format: NSLocalizedString("Time Below %@", comment: "Setup comparison row for time below the low threshold (1: glucose value, e.g. 70 mg/dL)"), lowThreshold),
+                          before?.timeBelowRange.map(percent), after.timeBelowRange.map(percent))
+            comparisonRow(NSLocalizedString("Average Glucose", comment: "Setup comparison row for average glucose"),
+                          before?.glucose.averageGlucose.map(glucose), after.glucose.averageGlucose.map(glucose))
+            comparisonRow(NSLocalizedString("Insulin per Day", comment: "Setup comparison row for average daily insulin"),
+                          before?.insulinPerDay.map(units), after.insulinPerDay.map(units))
+            if !after.glucose.agpProfile.isEmpty {
+                MedianComparisonChartView(before: before?.glucose.agpProfile ?? [], after: after.glucose.agpProfile, unit: displayGlucosePreference.unit)
+                    .frame(height: 200)
+                    .padding(.vertical, 8)
+            }
+        }
+    }
+
+    private func comparisonRow(_ title: String, _ before: String?, _ after: String?) -> some View {
+        LabeledContent(title) {
+            if let before {
+                Text(String(format: NSLocalizedString("%1$@ → %2$@", comment: "A value before and since the setup change (1: before, 2: since)"), before, after ?? "–"))
+            } else {
+                Text(after ?? "–")
+            }
+        }
+        .monospacedDigit()
+    }
+
+    private var lowThreshold: String {
+        displayGlucosePreference.format(LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 70))
+    }
+
+    private func percent(_ fraction: Double) -> String {
+        fraction.formatted(.percent.precision(.fractionLength(fraction < 0.1 ? 1 : 0)))
+    }
+
+    private func glucose(_ mgdl: Double) -> String {
+        displayGlucosePreference.format(LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl))
+    }
+
+    private func units(_ value: Double) -> String {
+        String(format: NSLocalizedString("%@ U", comment: "Insulin amount in units (1: number)"), value.formatted(.number.precision(.fractionLength(1))))
+    }
+
+    private func summary(_ change: SetupChange) -> String {
+        guard !change.isLowerBound else {
+            return String(format: NSLocalizedString("No setup change has been recorded since %@, so there's no earlier setup to compare with.", comment: "Setup summary when the start of the setup isn't known (1: date)"),
+                          change.date.formatted(date: .abbreviated, time: .omitted))
+        }
+        var sentences = [change.items.isEmpty
+            ? String(format: NSLocalizedString("It's been %@ since your last setup change.", comment: "Setup summary first sentence (1: duration, e.g. 5 days)"), change.durationDescription)
+            : String(format: NSLocalizedString("It's been %1$@ since your last setup change: %2$@.", comment: "Setup summary first sentence (1: duration, e.g. 5 days, 2: list of what changed)"), change.durationDescription, ListFormatter.localizedString(byJoining: change.items.map(\.title)))]
+        guard let comparison = viewModel.comparison else {
+            if !viewModel.isLoading {
+                sentences.append(NSLocalizedString("Results appear after a day with the new setup.", comment: "Setup summary before a day has passed since the change"))
+            }
+            return sentences.joined(separator: " ")
+        }
+        let after = comparison.after
+        if let before = comparison.before, let tirBefore = before.timeInRange, let tirAfter = after.timeInRange,
+           let lowBefore = before.timeBelowRange, let lowAfter = after.timeBelowRange {
+            sentences.append(String(format: NSLocalizedString("Compared with the %1$@ before it, time in range %2$@, and time below %3$@ %4$@.", comment: "Setup comparison summary (1: length of the before period, 2: time in range change, 3: low threshold, 4: time below range change)"),
+                                    periodDescription(before.days),
+                                    changeDescription(tirBefore, tirAfter, threshold: 0.01),
+                                    lowThreshold,
+                                    changeDescription(lowBefore, lowAfter, threshold: 0.005)))
+        } else {
+            sentences.append(NSLocalizedString("There isn't enough CGM data from before the change to compare with.", comment: "Setup summary when the period before the change has too little data"))
+        }
+        if after.glucose.percentActive < SetupComparison.minimumCGMActive {
+            sentences.append(String(format: NSLocalizedString("CGM data covers only %@ of the time since the change.", comment: "Setup summary note about missing CGM data (1: percent)"), percent(after.glucose.percentActive)))
+        }
+        if comparison.isSettling {
+            sentences.append(NSLocalizedString("With less than 2 weeks so far, these numbers can still change a lot.", comment: "Setup summary note while the new setup has run less than two weeks"))
+        }
+        return sentences.joined(separator: " ")
+    }
+
+    private func changeDescription(_ before: Double, _ after: Double, threshold: Double) -> String {
+        if abs(after - before) < threshold {
+            return String(format: NSLocalizedString("stayed about the same at %@", comment: "A percentage that didn't change much (1: percent)"), percent(after))
+        }
+        let format = after > before
+            ? NSLocalizedString("rose from %1$@ to %2$@", comment: "A percentage that went up (1: before, 2: after)")
+            : NSLocalizedString("fell from %1$@ to %2$@", comment: "A percentage that went down (1: before, 2: after)")
+        return String(format: format, percent(before), percent(after))
+    }
+
+    private func periodDescription(_ days: Double) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = days >= 13.5 && days <= 14.5 ? [.weekOfMonth] : [.day]
+        formatter.unitsStyle = .full
+        return formatter.string(from: days.rounded() * .days(1)) ?? ""
     }
 }
 

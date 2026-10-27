@@ -47,13 +47,14 @@ final class SetupChangeTests: XCTestCase {
 
     func testLatestChangeWins() {
         let change = SetupChange.latest(in: [settings(at: 0), settings(at: 10, basal: 1.2), settings(at: 20, basal: 1.2, maximumBolus: 8)])
-        XCTAssertEqual(change, SetupChange(date: start.addingTimeInterval(.hours(20)), isLowerBound: false, items: [.therapySetting(.deliveryLimits)]))
+        XCTAssertEqual(change, SetupChange(date: start.addingTimeInterval(.hours(20)), isLowerBound: false, items: [.therapySetting(.deliveryLimits)], previousDate: start.addingTimeInterval(.hours(10))))
     }
 
     func testChangesWithinAnHourAreGrouped() {
         let change = SetupChange.latest(in: [settings(at: 0), settings(at: 10, isf: 45), settings(at: 10.5, isf: 45, strategy: .tempBasalOnly)])
         XCTAssertEqual(change?.date, start.addingTimeInterval(.hours(10.5)))
         XCTAssertEqual(change?.items, [.dosingStrategy, .therapySetting(.insulinSensitivity)])
+        XCTAssertEqual(change?.previousDate, start)
     }
 
     func testIgnoredChanges() {
@@ -84,7 +85,8 @@ final class SetupChangeTests: XCTestCase {
     func testExperimentChangeAfterSettingsChange() {
         let settingsChange = SetupChange(date: start, isLowerBound: false, items: [.therapySetting(.carbRatio)])
         let experimentChange = SetupChange(date: start.addingTimeInterval(.hours(30)), isLowerBound: false, items: [.experiment(.guardAndRunway, enabled: true)])
-        XCTAssertEqual(SetupChange.latest(settingsChange, experimentChange), experimentChange)
+        XCTAssertEqual(SetupChange.latest(settingsChange, experimentChange)?.previousDate, start)
+        XCTAssertEqual(SetupChange.latest(settingsChange, experimentChange)?.items, experimentChange.items)
     }
 
     func testCloseChangesAreMerged() {
@@ -102,6 +104,7 @@ final class SetupChangeTests: XCTestCase {
     func testChangeAfterLowerBoundWins() {
         let settingsBound = SetupChange(date: start, isLowerBound: true, items: [])
         let experimentChange = SetupChange(date: start.addingTimeInterval(.minutes(20)), isLowerBound: false, items: [.experiment(.integralRetrospectiveCorrection, enabled: false)])
-        XCTAssertEqual(SetupChange.latest(settingsBound, experimentChange), experimentChange)
+        XCTAssertEqual(SetupChange.latest(settingsBound, experimentChange)?.date, experimentChange.date)
+        XCTAssertEqual(SetupChange.latest(settingsBound, experimentChange)?.previousDate, start)
     }
 }
