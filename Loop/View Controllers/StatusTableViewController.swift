@@ -2463,10 +2463,12 @@ extension StatusTableViewController {
         } else if lastLoopError != nil {
             showLastError(self)
         } else if let lastCompleted {
-            let mode = settingsManager.dosingEnabled ? "Closed loop is on." : "Closed loop is off: Loop recommends but doesn't adjust insulin."
-            presentLoopCompletionMessage(title: "Loop ran at \(LoopFormat.time(lastCompleted))", message: mode)
+            let mode = settingsManager.dosingEnabled
+                ? NSLocalizedString("Closed loop is on.", comment: "Message in the alert shown when tapping the Loop status on the Now screen while closed loop is on")
+                : NSLocalizedString("Closed loop is off: Loop recommends but doesn't adjust insulin.", comment: "Message in the alert shown when tapping the Loop status on the Now screen while closed loop is off")
+            presentLoopCompletionMessage(title: String(format: NSLocalizedString("Loop ran at %1$@", comment: "Title of the alert shown when tapping the Loop status on the Now screen. (1: time Loop last completed, e.g. 14:05)"), LoopFormat.time(lastCompleted)), message: mode)
         } else {
-            presentLoopCompletionMessage(title: "Loop hasn't run yet", message: "Loop runs when it has a new CGM reading and can reach the pump.")
+            presentLoopCompletionMessage(title: NSLocalizedString("Loop hasn't run yet", comment: "Title of the alert shown when tapping the Loop status on the Now screen before Loop has ever completed"), message: NSLocalizedString("Loop runs when it has a new CGM reading and can reach the pump.", comment: "Message in the alert shown when tapping the Loop status on the Now screen before Loop has ever completed"))
         }
     }
 

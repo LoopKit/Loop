@@ -32,6 +32,8 @@ final class NowModel: ObservableObject {
         let state: DeviceStatusHighlightState?
         /// Set when the message is the device's own status highlight, which the Now screen spells out in a notice.
         var symbol: String? = nil
+        /// The device's lifecycle (pod, sensor) is near its end; the pill says so.
+        var endingSoon = false
     }
 
     enum LoopState: Equatable {
@@ -213,7 +215,7 @@ final class NowModel: ObservableObject {
             return Device(name: name, message: message, state: highlight.state, symbol: highlight.imageName)
         }
         if let progress, progress.progressState == .warning || progress.progressState == .critical {
-            return Device(name: name, message: "ending soon", state: progress.progressState == .critical ? .critical : .warning)
+            return Device(name: name, message: nil, state: progress.progressState == .critical ? .critical : .warning, endingSoon: true)
         }
         return Device(name: name, message: nil, state: nil)
     }
@@ -241,7 +243,7 @@ struct NowHeaderView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: LoopDesign.Space.s3) {
-            Text("Now")
+            Text(NSLocalizedString("Now", comment: "Title at the top of the Now screen, showing current glucose and Loop status"))
                 .font(LoopDesign.Typeface.title)
                 .foregroundStyle(P.ink)
                 .accessibilityAddTraits(.isHeader)
@@ -266,23 +268,27 @@ struct NowHeaderView: View {
             Button(action: actions.loopStatusTapped) {
                 StatusPill(text: loopText, dot: loopColor)
             }
-            .accessibilityHint("Shows when Loop last ran")
+            .accessibilityHint(NSLocalizedString("Shows when Loop last ran", comment: "VoiceOver hint for the Loop status pill and the Loop notice on the Now screen"))
             Button(action: actions.pumpTapped) {
                 if let pump = model.pump {
                     StatusPill(text: pillText(pump), dot: pillColor(pump))
                 } else {
-                    StatusPill(text: "Add pump", dot: P.statusCritical)
+                    StatusPill(text: NSLocalizedString("Add pump", comment: "Status pill on the Now screen when no pump is set up; tapping it starts pump setup"), dot: P.statusCritical)
                 }
             }
-            .accessibilityHint(model.pump == nil ? "Sets up a pump" : "Opens pump settings")
+            .accessibilityHint(model.pump == nil
+                ? NSLocalizedString("Sets up a pump", comment: "VoiceOver hint for the Add pump status pill on the Now screen")
+                : NSLocalizedString("Opens pump settings", comment: "VoiceOver hint for the pump status pill and pump notice on the Now screen"))
             Button(action: actions.cgmTapped) {
                 if let cgm = model.cgm {
                     StatusPill(text: pillText(cgm), dot: pillColor(cgm))
                 } else {
-                    StatusPill(text: "Add CGM", dot: P.statusCritical)
+                    StatusPill(text: NSLocalizedString("Add CGM", comment: "Status pill on the Now screen when no CGM is set up; tapping it starts CGM setup"), dot: P.statusCritical)
                 }
             }
-            .accessibilityHint(model.cgm == nil ? "Sets up a CGM" : "Opens CGM settings")
+            .accessibilityHint(model.cgm == nil
+                ? NSLocalizedString("Sets up a CGM", comment: "VoiceOver hint for the Add CGM status pill on the Now screen")
+                : NSLocalizedString("Opens CGM settings", comment: "VoiceOver hint for the CGM status pill and CGM notice on the Now screen"))
         }
         .buttonStyle(.plain)
     }
@@ -308,9 +314,9 @@ struct NowHeaderView: View {
                 id: "loop",
                 severity: .critical,
                 symbol: "exclamationmark.arrow.circlepath",
-                title: "Loop hasn't run for \(LoopFormat.ago(last, now: model.now))",
-                detail: "Insulin isn't being adjusted. Tap for details.",
-                hint: "Shows when Loop last ran",
+                title: String(format: NSLocalizedString("Loop hasn't run for %1$@", comment: "Notice title on the Now screen when Loop hasn't completed recently. (1: duration since Loop last ran, e.g. 16m)"), LoopFormat.ago(last, now: model.now)),
+                detail: NSLocalizedString("Insulin isn't being adjusted. Tap for details.", comment: "Notice detail on the Now screen when Loop hasn't completed recently"),
+                hint: NSLocalizedString("Shows when Loop last ran", comment: "VoiceOver hint for the Loop status pill and the Loop notice on the Now screen"),
                 action: actions.loopStatusTapped))
         }
         // While suspended, Loop's own status row says so and offers Resume, so only a critical pump problem adds a notice.
@@ -322,8 +328,8 @@ struct NowHeaderView: View {
                 severity: severity,
                 symbol: symbol,
                 title: message,
-                detail: severity == .critical ? "Loop may not be giving insulin." : nil,
-                hint: "Opens pump settings",
+                detail: severity == .critical ? NSLocalizedString("Loop may not be giving insulin.", comment: "Notice detail on the Now screen under a critical pump problem reported by the pump") : nil,
+                hint: NSLocalizedString("Opens pump settings", comment: "VoiceOver hint for the pump status pill and pump notice on the Now screen"),
                 action: actions.pumpTapped))
         }
         if let cgm = model.cgm, let symbol = cgm.symbol, let message = cgm.message {
@@ -333,19 +339,32 @@ struct NowHeaderView: View {
                 severity: severity,
                 symbol: symbol,
                 title: message,
-                detail: model.readingIsStale ? "Loop can't adjust insulin without readings." : nil,
-                hint: "Opens CGM settings",
+                detail: model.readingIsStale ? NSLocalizedString("Loop can't adjust insulin without readings.", comment: "Notice detail on the Now screen under a CGM problem when there is no recent glucose reading") : nil,
+                hint: NSLocalizedString("Opens CGM settings", comment: "VoiceOver hint for the CGM status pill and CGM notice on the Now screen"),
                 action: actions.cgmTapped))
         }
         return items.sorted { $0.severity > $1.severity }
     }
 
     private var loopText: String {
-        let mode = model.closedLoop ? "Closed loop" : model.closedLoopPaused ? "Closed loop paused" : "Open loop"
-        guard let last = model.lastLoopCompleted else { return "\(mode) · not run yet" }
-        switch model.loopState {
-        case .failed: return "Loop failed · \(LoopFormat.ago(last, now: model.now))"
-        default: return "\(mode) · \(LoopFormat.ago(last, now: model.now))"
+        guard let last = model.lastLoopCompleted else {
+            if model.closedLoop {
+                return NSLocalizedString("Closed loop · not run yet", comment: "Status pill on the Now screen: closed loop is on but Loop has never completed")
+            } else if model.closedLoopPaused {
+                return NSLocalizedString("Closed loop paused · not run yet", comment: "Status pill on the Now screen: closed loop is switched on but paused (e.g. no CGM data), and Loop has never completed")
+            } else {
+                return NSLocalizedString("Open loop · not run yet", comment: "Status pill on the Now screen: closed loop is off and Loop has never completed")
+            }
+        }
+        let ago = LoopFormat.ago(last, now: model.now)
+        if model.loopState == .failed {
+            return String(format: NSLocalizedString("Loop failed · %1$@", comment: "Status pill on the Now screen: Loop hasn't completed for over 15 minutes. (1: duration since Loop last ran, e.g. 16m)"), ago)
+        } else if model.closedLoop {
+            return String(format: NSLocalizedString("Closed loop · %1$@", comment: "Status pill on the Now screen: closed loop is on and Loop last ran this long ago. (1: duration, e.g. 3m)"), ago)
+        } else if model.closedLoopPaused {
+            return String(format: NSLocalizedString("Closed loop paused · %1$@", comment: "Status pill on the Now screen: closed loop is switched on but paused (e.g. no CGM data), and Loop last ran this long ago. (1: duration, e.g. 3m)"), ago)
+        } else {
+            return String(format: NSLocalizedString("Open loop · %1$@", comment: "Status pill on the Now screen: closed loop is off (Loop recommends only) and Loop last ran this long ago. (1: duration, e.g. 3m)"), ago)
         }
     }
 
@@ -358,10 +377,13 @@ struct NowHeaderView: View {
         }
     }
 
-    /// A highlight is spelled out in its notice, so its pill keeps to the device name.
+    /// A highlight (always a plugin message with a symbol) is spelled out in its notice, so its pill keeps to the device name.
     private func pillText(_ device: NowModel.Device) -> String {
-        guard let message = device.message, device.symbol == nil else { return device.name }
-        return "\(device.name) · \(message)"
+        guard device.symbol == nil else { return device.name }
+        if device.endingSoon {
+            return String(format: NSLocalizedString("%1$@ · ending soon", comment: "Status pill on the Now screen when a pump pod or CGM sensor is near the end of its life. (1: device name from the pump or CGM plugin, e.g. Omnipod 5)"), device.name)
+        }
+        return device.name
     }
 
     private func pillColor(_ device: NowModel.Device) -> Color? {
@@ -390,7 +412,7 @@ struct NowHeaderView: View {
                                     .accessibilityLabel(trend.localizedDescription)
                             }
                         } else {
-                            Text("No reading")
+                            Text(NSLocalizedString("No reading", comment: "Shown on the Now screen in place of the glucose value when there is no recent CGM reading"))
                                 .font(.system(size: 34, weight: .bold, design: .rounded))
                                 .foregroundStyle(P.inkMuted)
                         }
@@ -409,7 +431,7 @@ struct NowHeaderView: View {
                         Text(LoopFormat.time(reading.date))
                     }
                     if let target = model.targetRange {
-                        Text("Target \(model.unit.format(target.lowerBound))–\(model.unit.format(target.upperBound))")
+                        Text(String(format: NSLocalizedString("Target %1$@–%2$@", comment: "Glucose target range on the Now screen hero card. (1: lower bound; 2: upper bound)"), model.unit.format(target.lowerBound), model.unit.format(target.upperBound)))
                     }
                 }
                 .font(LoopDesign.Typeface.footnote)
@@ -421,39 +443,39 @@ struct NowHeaderView: View {
             AdaptiveRow {
                 // As on the classic charts: insulin opens Loop's delivery history, carbs its absorption screen.
                 Button(action: actions.showInsulin) {
-                    ValueTile(label: "IOB") {
+                    ValueTile(label: NSLocalizedString("IOB", comment: "Abbreviation for insulin on board; label of a tile on the Now screen")) {
                         Text(model.iob.map(LoopFormat.doseUnits) ?? "–")
                             .font(LoopDesign.Typeface.statValueSmall)
                             .foregroundStyle(P.insulinInk)
                     }
                 }
                 .buttonStyle(.plain)
-                .accessibilityHint("Opens insulin delivery history")
+                .accessibilityHint(NSLocalizedString("Opens insulin delivery history", comment: "VoiceOver hint for the IOB tile on the Now screen"))
                 Button(action: actions.showCarbs) {
-                    ValueTile(label: "COB") {
+                    ValueTile(label: NSLocalizedString("COB", comment: "Abbreviation for carbs on board; label of a tile on the Now screen")) {
                         Text(model.cob.map(LoopFormat.grams) ?? "–")
                             .font(LoopDesign.Typeface.statValueSmall)
                             .foregroundStyle(P.carbsInk)
                     }
                 }
                 .buttonStyle(.plain)
-                .accessibilityHint("Opens carb absorption")
-                ValueTile(label: "Basal") {
+                .accessibilityHint(NSLocalizedString("Opens carb absorption", comment: "VoiceOver hint for the COB tile on the Now screen"))
+                ValueTile(label: NSLocalizedString("Basal", comment: "Label of a tile showing the current basal rate (Now screen) or the day's basal insulin total (Today so far totals)")) {
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(alignment: .firstTextBaseline, spacing: 2) {
-                            Text(model.basalRate.map { String(format: "%.2f", $0) } ?? "–")
+                            Text(model.basalRate.map { LoopFormat.number($0, decimals: 2) } ?? "–")
                                 .font(LoopDesign.Typeface.statValueSmall)
                                 .foregroundStyle(P.ink)
-                            Text("U/h")
+                            Text(NSLocalizedString("U/h", comment: "Abbreviation for insulin units per hour"))
                                 .font(LoopDesign.Typeface.footnote)
                                 .foregroundStyle(P.inkMuted)
                         }
                         if model.suspended {
-                            Text("Suspended")
+                            Text(NSLocalizedString("Suspended", comment: "Shown in the Basal tile on the Now screen when insulin delivery is suspended"))
                                 .font(LoopDesign.Typeface.footnote.weight(.semibold))
                                 .foregroundStyle(P.criticalInk)
                         } else if let rate = model.basalRate, let scheduled = model.scheduledBasalRate {
-                            Text("\(LoopFormat.signed(rate - scheduled)) vs plan")
+                            Text(String(format: NSLocalizedString("%1$@ vs plan", comment: "Basal tile on the Now screen: how the current basal rate differs from the scheduled rate. (1: signed difference in U/h, e.g. +0.25)"), LoopFormat.signed(rate - scheduled)))
                                 .font(LoopDesign.Typeface.footnote)
                                 .foregroundStyle(P.insulinInk)
                                 .lineLimit(1)
@@ -470,19 +492,19 @@ struct NowHeaderView: View {
     private var readingDetail: String {
         guard let reading = model.reading else { return model.unit.unitName }
         if model.readingIsStale {
-            return "Last reading \(LoopFormat.ago(reading.date, now: model.now)) ago"
+            return String(format: NSLocalizedString("Last reading %1$@ ago", comment: "Shown on the Now screen under No reading when the latest CGM reading is too old. (1: duration, e.g. 25m)"), LoopFormat.ago(reading.date, now: model.now))
         }
         guard let delta = reading.delta else { return model.unit.unitName }
         let change = model.unit.isMmol ? LoopFormat.signed(delta / GlucoseUnitStyle.mgdlPerMmol, decimals: 1) : LoopFormat.signed(delta, decimals: 0)
-        return "\(model.unit.unitName) · \(change) in 5 min"
+        return String(format: NSLocalizedString("%1$@ · %2$@ in 5 min", comment: "Under the glucose value on the Now screen: the glucose unit and how much glucose changed over 5 minutes. (1: glucose unit, e.g. mmol/L; 2: signed change, e.g. +0.3)"), model.unit.unitName, change)
     }
 
     /// Low and high get a pill with words; the number itself is never tinted.
     private var rangePill: (String, Color)? {
         guard let reading = model.reading, !model.readingIsStale else { return nil }
-        if reading.mgdl < 54 { return ("Urgent low", P.statusCritical) }
-        if reading.mgdl < 70 { return ("Low", P.statusCritical) }
-        if reading.mgdl > 250 { return ("High", P.statusWarning) }
+        if reading.mgdl < 54 { return (NSLocalizedString("Urgent low", comment: "Pill under the glucose value on the Now screen when glucose is below 54 mg/dL (3.0 mmol/L)"), P.statusCritical) }
+        if reading.mgdl < 70 { return (NSLocalizedString("Low", comment: "Pill under the glucose value on the Now screen when glucose is below 70 mg/dL (3.9 mmol/L)"), P.statusCritical) }
+        if reading.mgdl > 250 { return (NSLocalizedString("High", comment: "Pill under the glucose value on the Now screen when glucose is above 250 mg/dL (13.9 mmol/L)"), P.statusWarning) }
         return nil
     }
 
@@ -500,10 +522,10 @@ struct NowHeaderView: View {
 
     private var actionRow: some View {
         AdaptiveRow {
-            actionButton("Add carbs", systemImage: "fork.knife", fill: P.carbs, text: P.onFill, action: actions.addCarbs)
+            actionButton(NSLocalizedString("Add carbs", comment: "Button on the Now screen that opens carb entry"), systemImage: "fork.knife", fill: P.carbs, text: P.onFill, action: actions.addCarbs)
                 .disabled(!model.dosingAvailable)
                 .opacity(model.dosingAvailable ? 1 : 0.4)
-            actionButton("Bolus", systemImage: "syringe.fill", fill: P.insulin, text: P.onFill, action: actions.bolus)
+            actionButton(NSLocalizedString("Bolus", comment: "Button on the Now screen that opens the bolus screen"), systemImage: "syringe.fill", fill: P.insulin, text: P.onFill, action: actions.bolus)
                 .disabled(!model.dosingAvailable)
                 .opacity(model.dosingAvailable ? 1 : 0.4)
             // Pre-meal and the other presets share Loop's Presets screen.
@@ -511,19 +533,24 @@ struct NowHeaderView: View {
                 actionLabel(presetsTitle, systemImage: "slider.horizontal.3", fill: presetsFill, text: P.ink)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Presets")
-            .accessibilityValue(presetsTitle == "Presets" ? "" : presetsTitle)
+            .accessibilityLabel(NSLocalizedString("Presets", comment: "Button on the Now screen that opens override presets (and pre-meal); also its VoiceOver label and menu item"))
+            .accessibilityValue(presetsActive ? presetsTitle : "")
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var presetsFill: Color {
         model.preMealOn || model.overrideName != nil ? P.accent.opacity(0.18) : P.surfaceSunken
     }
 
+    private var presetsActive: Bool {
+        model.preMealOn || model.overrideName != nil
+    }
+
     private var presetsTitle: String {
-        if model.preMealOn { return "Pre-meal on" }
+        if model.preMealOn { return NSLocalizedString("Pre-meal on", comment: "Presets button title on the Now screen while the pre-meal target is on") }
         if let name = model.overrideName { return name }
-        return "Presets"
+        return NSLocalizedString("Presets", comment: "Button on the Now screen that opens override presets (and pre-meal); also its VoiceOver label and menu item")
     }
 
     private func actionButton(_ title: String, systemImage: String, fill: Color, text: Color, action: @escaping () -> Void) -> some View {
@@ -534,12 +561,17 @@ struct NowHeaderView: View {
     }
 
     private func actionLabel(_ title: String, systemImage: String, fill: Color, text: Color) -> some View {
+        // Longer languages ("Agregar carbohidratos") wrap onto a second line rather than truncate.
         Text(title)
             .font(LoopDesign.Typeface.subhead.weight(.semibold))
-            .lineLimit(1)
+            .lineLimit(2)
+            .multilineTextAlignment(.center)
             .minimumScaleFactor(0.8)
+            .allowsTightening(true)
             .foregroundStyle(text)
-            .frame(maxWidth: .infinity, minHeight: 44)
+            .padding(.horizontal, LoopDesign.Space.s1)
+            .padding(.vertical, LoopDesign.Space.s1)
+            .frame(maxWidth: .infinity, minHeight: 44, maxHeight: .infinity)
             .background(fill, in: RoundedRectangle(cornerRadius: LoopDesign.Radius.md, style: .continuous))
             .contentShape(RoundedRectangle(cornerRadius: LoopDesign.Radius.md))
     }
@@ -570,47 +602,49 @@ struct NowChartsView: View {
     private var predictionCard: some View {
         Button(action: actions.showPrediction) {
             LoopCard {
-                CardHeader(title: "Next 3 hours") {
+                CardHeader(title: NSLocalizedString("Next 3 hours", comment: "Title of the prediction chart card on the Now screen")) {
                     // Loop's eventual glucose is the end of its prediction, which can run past the three hours drawn.
                     if let last = model.prediction.last {
-                        Text("Eventually \(model.unit.format(last.mgdl)) \(model.unit.unitName)")
+                        Text(String(format: NSLocalizedString("Eventually %1$@ %2$@", comment: "Prediction card on the Now screen: Loop's eventual predicted glucose. (1: glucose value; 2: glucose unit, e.g. mmol/L)"), model.unit.format(last.mgdl), model.unit.unitName))
                     }
                 }
                 if readings.isEmpty && model.prediction.isEmpty {
-                    ChartPlaceholder(message: model.glucoseHistoryError == nil ? "No CGM data in the last 3 hours" : "Couldn't load recent CGM readings")
+                    ChartPlaceholder(message: model.glucoseHistoryError == nil
+                                     ? NSLocalizedString("No CGM data in the last 3 hours", comment: "Empty prediction chart on the Now screen")
+                                     : NSLocalizedString("Couldn't load recent CGM readings", comment: "Prediction chart on the Now screen when recent glucose couldn't be read"))
                 } else {
                     PredictionChartView(readings: readings, prediction: model.prediction, unit: model.unit,
                                         targetBands: model.predictionTargets, now: model.now)
                 }
                 ChartLegend(items: [
-                    LegendItem(swatch: .dot(P.glucose), label: "Readings"),
-                    LegendItem(swatch: .dash(P.glucose), label: "Loop prediction"),
+                    LegendItem(swatch: .dot(P.glucose), label: NSLocalizedString("Readings", comment: "Chart legend on the Now screen: dots are CGM glucose readings")),
+                    LegendItem(swatch: .dash(P.glucose), label: NSLocalizedString("Loop prediction", comment: "Chart legend on the Now screen: dashed line is Loop's predicted glucose")),
                 ])
                 if let error = model.glucoseHistoryError {
-                    Text("Recent readings unavailable: \(error)")
+                    Text(String(format: NSLocalizedString("Recent readings unavailable: %1$@", comment: "Error under the prediction chart on the Now screen. (1: system error description)"), error))
                         .font(LoopDesign.Typeface.footnote)
                         .foregroundStyle(P.criticalInk)
                 }
             }
         }
         .buttonStyle(.plain)
-        .accessibilityHint("Opens Loop's prediction breakdown")
+        .accessibilityHint(NSLocalizedString("Opens Loop's prediction breakdown", comment: "VoiceOver hint for the prediction card on the Now screen"))
     }
 
     private var todayCard: some View {
         Button(action: actions.showToday) {
             LoopCard {
-                CardHeader(title: "Today so far") {
+                CardHeader(title: NSLocalizedString("Today so far", comment: "Title of the card on the Now screen showing today's insulin and carbs")) {
                     if model.historyError == nil {
                         HStack(spacing: 4) {
                             Text(LoopFormat.totalUnits(model.today.totalUnits)).foregroundStyle(P.insulinInk)
-                            Text("·")
+                            Text(verbatim: "·")
                             Text(LoopFormat.grams(model.today.carbGrams)).foregroundStyle(P.carbsInk)
                         }
                     }
                 }
                 if let error = model.historyError {
-                    ChartPlaceholder(message: "Couldn't load today's history: \(error)")
+                    ChartPlaceholder(message: String(format: NSLocalizedString("Couldn't load today's history: %1$@", comment: "Shown on the Now screen's Today so far card when history couldn't be read. (1: system error description)"), error))
                 } else {
                     InsulinTimelineView(history: model.today, unit: model.unit, targetBands: model.todayTargets, now: model.now, height: 230)
                     DayTotalsTiles(history: model.today)
@@ -619,7 +653,7 @@ struct NowChartsView: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityHint("Opens the full day")
+        .accessibilityHint(NSLocalizedString("Opens the full day", comment: "VoiceOver hint for the Today so far card on the Now screen"))
     }
 }
 
@@ -628,25 +662,25 @@ struct DayTotalsTiles: View {
     let history: DayHistory
 
     static let legend: [LegendItem] = [
-        LegendItem(swatch: .solid(P.insulin), label: "Bolus"),
-        LegendItem(swatch: .outline(P.insulin), label: "Automatic"),
-        LegendItem(swatch: .basal, label: "Basal given"),
-        LegendItem(swatch: .dash(P.basalScheduled), label: "Scheduled"),
+        LegendItem(swatch: .solid(P.insulin), label: NSLocalizedString("Bolus", comment: "Chart legend: solid bars are manual boluses")),
+        LegendItem(swatch: .outline(P.insulin), label: NSLocalizedString("Automatic", comment: "Chart legend: outlined bars are automatic boluses given by Loop")),
+        LegendItem(swatch: .basal, label: NSLocalizedString("Basal given", comment: "Chart legend: filled area is basal insulin actually delivered")),
+        LegendItem(swatch: .dash(P.basalScheduled), label: NSLocalizedString("Scheduled", comment: "Chart legend: dashed line is the scheduled basal rate")),
     ]
 
     var body: some View {
         AdaptiveRow {
-            ValueTile(label: "Bolus") {
+            ValueTile(label: NSLocalizedString("Bolus", comment: "Label of a tile showing the day's total bolus insulin")) {
                 Text(LoopFormat.totalUnits(history.bolusUnits))
                     .font(LoopDesign.Typeface.statValueSmall)
                     .foregroundStyle(P.insulinInk)
             }
-            ValueTile(label: "Basal") {
+            ValueTile(label: NSLocalizedString("Basal", comment: "Label of a tile showing the current basal rate (Now screen) or the day's basal insulin total (Today so far totals)")) {
                 Text(LoopFormat.totalUnits(history.basalUnits))
                     .font(LoopDesign.Typeface.statValueSmall)
                     .foregroundStyle(P.insulinInk)
             }
-            ValueTile(label: "Carbs") {
+            ValueTile(label: NSLocalizedString("Carbs", comment: "Label of a tile showing the day's total carbohydrate")) {
                 Text(LoopFormat.grams(history.carbGrams))
                     .font(LoopDesign.Typeface.statValueSmall)
                     .foregroundStyle(P.carbsInk)
