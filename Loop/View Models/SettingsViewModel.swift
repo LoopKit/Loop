@@ -121,7 +121,7 @@ class SettingsViewModel {
 
     @ObservationIgnored var insulinDeliveryHistory: ((Int) async throws -> InsulinDeliveryHistory)?
 
-    @ObservationIgnored var setupChange: (() async throws -> SetupChange?)?
+    @ObservationIgnored var setupHistory: (() async throws -> SetupHistory)?
 
     @MainActor
     var showDeleteTestData: Bool {

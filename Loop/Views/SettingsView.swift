@@ -372,7 +372,7 @@ extension SettingsView {
                     .accessibilityIdentifier("settingsViewCurrentSetup")
                 }
                 .task {
-                    setupChange = try? await viewModel.setupChange?()
+                    setupChange = try? await viewModel.setupHistory?().latest
                 }
             }
         }
