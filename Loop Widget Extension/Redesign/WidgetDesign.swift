@@ -87,7 +87,7 @@ enum WidgetDesign {
             let time = lastCompleted.formatted(date: .omitted, time: .shortened)
             if closedLoop {
                 text = String(format: NSLocalizedString("Closed loop · %1$@", comment: "Status pill on the Now screen: closed loop is on. (1: how long ago Loop last ran, e.g. 2m)"), time)
-                color = P.statusAutomated
+                color = LoopCompletionFreshness(age: age) == .fresh ? P.statusAutomated : P.statusWarning
             } else {
                 text = String(format: NSLocalizedString("Open loop · %1$@", comment: "Status pill on the Now screen: closed loop is off. (1: how long ago Loop last ran, e.g. 2m)"), time)
                 color = P.inkMuted

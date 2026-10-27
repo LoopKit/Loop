@@ -216,6 +216,42 @@ class LoopHistoryMathTests: XCTestCase {
         XCTAssertEqual(LoopFormat.signed(0.0001), "+0.00")
     }
 
+    @MainActor
+    func testCSVExportsEightColumnsWithASCIINumbers() throws {
+        let day = Calendar.current.startOfDay(for: start)
+        for isMmol in [true, false] {
+            var summary = TrendsModel.Summary(interval: DateInterval(start: day, duration: 86400),
+                                              unit: GlucoseUnitStyle(isMmol: isMmol))
+            summary.glucose = [GlucosePoint(date: day, mgdl: 131.53286)]
+            summary.totals = [.init(day: day, basal: 1.25, bolus: 2.5)]
+            summary.carbsByDay = [day: 45]
+            let url = try TrendsModel.exportCSV(summary)
+            defer { try? FileManager.default.removeItem(at: url) }
+            let rows = try String(contentsOf: url, encoding: .utf8).components(separatedBy: "\n")
+            XCTAssertEqual(rows.count, 2)
+            XCTAssertEqual(rows[0].components(separatedBy: ",").count, 8)
+            let columns = rows[1].components(separatedBy: ",")
+            XCTAssertEqual(columns.count, 8)
+            XCTAssertEqual(Array(columns.dropFirst()), [isMmol ? "7.3" : "132", "1", "100", "1.25", "2.50", "3.75", "45"])
+        }
+    }
+
+    func testModeHistoryRetainsTheModeBeforeTheRetentionWindow() throws {
+        let suite = "LoopHistoryMathTests-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let history = LoopModeHistory(defaults: defaults)
+        history.record(closedLoop: false, at: at(0))
+        history.record(closedLoop: true, at: at(60))
+        let switchDate = at(200 * 1440)
+        history.record(closedLoop: false, at: switchDate)
+        XCTAssertEqual(history.changes, [.init(date: at(60), closedLoop: true), .init(date: switchDate, closedLoop: false)])
+        let interval = DateInterval(start: switchDate.addingTimeInterval(-3600), end: switchDate)
+        let spans = LoopHistoryMath.loopModeSpans(interval: interval, runs: [], modeChanges: history.changes,
+                                                  coverageStart: interval.start)
+        XCTAssertEqual(spans.first?.start, interval.start, "Retaining the old mode must preserve recent coverage")
+    }
+
     func testIssueDescriptions() {
         XCTAssertEqual(LoopHistoryProvider.describe(issue: "glucoseTooOld"), "Glucose too old")
         XCTAssertEqual(LoopHistoryProvider.describe(issue: "pumpDataTooOld"), "Pump data too old")

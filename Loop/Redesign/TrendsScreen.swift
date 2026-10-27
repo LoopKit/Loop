@@ -194,14 +194,15 @@ final class TrendsModel: ObservableObject {
 
     // MARK: Export
 
-    func exportCSV(_ s: Summary) throws -> URL {
+    static func exportCSV(_ s: Summary) throws -> URL {
         // The CSV header and values are deliberately not localised: fixed English columns and '.' decimals for data interchange.
         var lines = ["date,mean_glucose_\(s.unit.isMmol ? "mmol_l" : "mg_dl"),readings,time_in_range_pct,basal_u,bolus_u,total_u,carbs_g"]
         let calendar = Calendar.current
         let byDay = Dictionary(grouping: s.glucose) { calendar.startOfDay(for: $0.date) }
         for total in s.totals {
             let readings = byDay[total.day] ?? []
-            let mean = readings.isEmpty ? "" : s.unit.format(readings.reduce(0) { $0 + $1.mgdl } / Double(readings.count))
+            let mean = readings.isEmpty ? "" : String(format: "%.*f", locale: Locale(identifier: "en_US_POSIX"),
+                                                      s.unit.isMmol ? 1 : 0, s.unit.value(readings.reduce(0) { $0 + $1.mgdl } / Double(readings.count)))
             let tir = readings.isEmpty ? "" : String(format: "%.0f", (LoopHistoryMath.timeInRange(readings)[.inRange] ?? 0) * 100)
             let date = Date.ISO8601FormatStyle(timeZone: .current).year().month().day().format(total.day)
             let carbs = String(format: "%.0f", s.carbsByDay[total.day] ?? 0)
@@ -371,7 +372,7 @@ struct TrendsView: View {
             CardHeader(title: NSLocalizedString("Summary", comment: "Trends card title: the summary statistics tiles")) {
                 Menu(NSLocalizedString("Export", comment: "Trends menu title: export the period as a PDF report or CSV file")) {
                     Button(NSLocalizedString("PDF report", comment: "Trends export menu item: share a PDF report of the period")) { export { try model.exportPDF(s) } }
-                    Button(NSLocalizedString("CSV, one row per day", comment: "Trends export menu item: share a CSV spreadsheet file with one row for each day")) { export { try model.exportCSV(s) } }
+                    Button(NSLocalizedString("CSV, one row per day", comment: "Trends export menu item: share a CSV spreadsheet file with one row for each day")) { export { try TrendsModel.exportCSV(s) } }
                 }
                 .foregroundStyle(P.accentInk)
             }
