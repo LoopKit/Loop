@@ -7,6 +7,7 @@
 
 import XCTest
 import LoopKit
+import LoopKitUI
 import LoopAlgorithm
 @testable import Loop
 
@@ -165,5 +166,26 @@ final class GlucoseStatisticsTests: XCTestCase {
         let stats = GlucoseStatistics(samples: samples, start: start, end: end)
         XCTAssertEqual(stats.sampleCount, 1)
         XCTAssertEqual(stats.averageGlucose!, 120, accuracy: 1e-6)
+    }
+
+    // MARK: - Band labels
+
+    /// The consensus band edges are defined in mg/dL, but the labels have to
+    /// read in whatever unit the user has chosen — these are the mmol/L edges
+    /// the AGP report prints.
+    func testBandRangesRenderInTheDisplayUnit() {
+        let mgdl = DisplayGlucosePreference(displayGlucoseUnit: .milligramsPerDeciliter)
+        XCTAssertEqual(GlucoseBand.veryLow.rangeDescription(mgdl), "<54")
+        XCTAssertEqual(GlucoseBand.low.rangeDescription(mgdl), "54\u{2013}69")
+        XCTAssertEqual(GlucoseBand.target.rangeDescription(mgdl), "70\u{2013}180")
+        XCTAssertEqual(GlucoseBand.high.rangeDescription(mgdl), "181\u{2013}250")
+        XCTAssertEqual(GlucoseBand.veryHigh.rangeDescription(mgdl), ">250")
+
+        let mmol = DisplayGlucosePreference(displayGlucoseUnit: .millimolesPerLiter)
+        XCTAssertEqual(GlucoseBand.veryLow.rangeDescription(mmol), "<3.0")
+        XCTAssertEqual(GlucoseBand.low.rangeDescription(mmol), "3.0\u{2013}3.8")
+        XCTAssertEqual(GlucoseBand.target.rangeDescription(mmol), "3.9\u{2013}10.0")
+        XCTAssertEqual(GlucoseBand.high.rangeDescription(mmol), "10.1\u{2013}13.9")
+        XCTAssertEqual(GlucoseBand.veryHigh.rangeDescription(mmol), ">13.9")
     }
 }
