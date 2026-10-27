@@ -2306,6 +2306,19 @@ extension StatusTableViewController: ServicesViewModelDelegate {
 // MARK: - Redesigned Now screen
 
 extension StatusTableViewController {
+    /// In the new interface the status row (bolus progress, suspended, presets, no recent glucose) sits between two
+    /// SwiftUI cards, so it takes the same shape instead of spanning the screen.
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        guard usesRedesign, Section(rawValue: indexPath.section) == .status else { return }
+        cell.backgroundColor = .clear
+        cell.backgroundView = NowCardBackgroundView()
+        let margins = NSDirectionalEdgeInsets(top: 10, leading: 32, bottom: 10, trailing: 32)
+        cell.preservesSuperviewLayoutMargins = false
+        cell.directionalLayoutMargins = margins
+        cell.contentView.preservesSuperviewLayoutMargins = false
+        cell.contentView.directionalLayoutMargins = margins
+    }
+
     private func nowHostingCell<Content: View>(for indexPath: IndexPath, @ViewBuilder content: () -> Content) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: Self.nowHostingCellIdentifier, for: indexPath)
         cell.selectionStyle = .none
@@ -2343,5 +2356,27 @@ extension StatusTableViewController {
         } else {
             presentLoopCompletionMessage(title: "Loop hasn't run yet", message: "Loop runs when it has a new CGM reading and can reach the pump.")
         }
+    }
+}
+
+/// A raised, rounded card inset like the SwiftUI cards on the Now screen.
+private final class NowCardBackgroundView: UIView {
+    private let card = UIView()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        card.backgroundColor = .secondarySystemGroupedBackground
+        card.layer.cornerRadius = 14
+        card.layer.cornerCurve = .continuous
+        addSubview(card)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        card.frame = bounds.inset(by: UIEdgeInsets(top: 4, left: 16, bottom: 4, right: 16))
     }
 }
