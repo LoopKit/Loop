@@ -96,11 +96,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         tableView.register(InsulinSuspendedTableViewCell.nib(), forCellReuseIdentifier: InsulinSuspendedTableViewCell.className)
         tableView.register(RecentGlucoseTableViewCell.nib(), forCellReuseIdentifier: RecentGlucoseTableViewCell.className)
 
-        if FeatureFlags.predictedGlucoseChartClampEnabled {
-            statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBoundClamped
-        } else {
-            statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBound
-        }
+        applyDisplayPreferences()
 
         registerPumpManager()
         registerCGMManager()
@@ -108,6 +104,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let notificationCenter = NotificationCenter.default
 
         notificationObservers += [
+            notificationCenter.addObserver(forName: UserDefaults.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    guard let self, self.displayPreferencesSnapshot != self.currentDisplayPreferences else { return }
+                    self.applyDisplayPreferences()
+                    self.refreshContext = RefreshContext.all
+                    self.tableView.reloadSections(IndexSet(integer: Section.charts.rawValue), with: .none)
+                    Task { await self.reloadData() }
+                }
+            },
             notificationCenter.addObserver(forName: .LoopDataUpdated, object: nil, queue: nil) { note in
                 let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopUpdateContext.RawValue
                 let context = LoopUpdateContext(rawValue: rawContext)
@@ -219,7 +224,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         tableView.estimatedRowHeight = 74
 
         // Estimate an initial value
-        landscapeMode = UIScreen.main.bounds.size.width > UIScreen.main.bounds.size.height
+        landscapeMode = ActionTabBarMetrics.isCompactHeight
 
         addScenarioStepGestureRecognizers()
 
@@ -346,6 +351,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let backgroundContainerView = UIView()
         backgroundContainerView.backgroundColor = .systemBackground
         let statusBarBackgroundView = UIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 0))
+        statusBarBackgroundView.autoresizingMask = .flexibleWidth
         self.statusBarBackgroundView = statusBarBackgroundView
         backgroundContainerView.addSubview(statusBarBackgroundView)
         tableView.backgroundView = backgroundContainerView
@@ -379,7 +385,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
     }
 
-    // Toggles the display mode based on the screen aspect ratio. Should not be updated outside of reloadData().
+    // Charts only, for compact height (an iPhone in landscape). Should not be updated outside of reloadData().
     private var landscapeMode = false {
         didSet {
             setupPresetsStatusBar()
@@ -398,6 +404,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
     
     private var shouldShowHUD: Bool {
         return !landscapeMode
+    }
+
+    // With a vertical status bar there is no top safe area inset, so keep the first row clear of the display corners.
+    private var cornerClearanceTopInset: CGFloat {
+        guard #available(iOS 26.0, *), let window = view.window else { return 0 }
+        return max(0, window.edgeInsets(for: .safeArea(cornerAdaptation: .vertical)).top - window.safeAreaInsets.top)
     }
 
     private var shouldShowStatus: Bool {
@@ -432,13 +444,45 @@ final class StatusTableViewController: LoopChartsTableViewController {
         deviceManager.cgmManager == nil || deviceManager.cgmManager?.isInoperable == true || deviceManager.cgmManager?.inSignalLoss == true || deviceManager.pumpManager == nil || deviceManager.pumpManager?.isInoperable == true || deviceManager.pumpManager?.inSignalLoss == true || deviceManager.hasBluetoothIssue
     }
 
+    private var displayPreferencesSnapshot: [AnyHashable] = []
+
+    private var currentDisplayPreferences: [AnyHashable] {
+        let defaults = UserDefaults.standard
+        return [
+            defaults.bool(forKey: DisplayPreference.nowLine),
+            defaults.bool(forKey: DisplayPreference.fixedGlucoseScale),
+            defaults.integer(forKey: DisplayPreference.historyHours)
+        ]
+    }
+
+    private func applyDisplayPreferences() {
+        displayPreferencesSnapshot = currentDisplayPreferences
+        let defaults = UserDefaults.standard
+        ChartDisplayOptions.showsNowLine = defaults.bool(forKey: DisplayPreference.nowLine)
+        statusCharts.glucose.usesFixedScale = defaults.bool(forKey: DisplayPreference.fixedGlucoseScale)
+        if FeatureFlags.predictedGlucoseChartClampEnabled {
+            statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBoundClamped
+        } else {
+            statusCharts.glucose.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayBound
+        }
+        StatusChartsManager.ChartIndex.allCases.forEach { statusCharts.invalidateChart(atIndex: $0.rawValue) }
+    }
+
     private func updateChartDateRange() {
         // How far back should we show data? Use the screen size as a guide.
         let availableWidth = (refreshContext.newSize ?? tableView.bounds.size).width - charts.fixedHorizontalMargin
 
-        let totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
+        var totalHours = floor(Double(availableWidth / LoopConstants.minimumChartWidthPerHour))
         let futureHours = ceil(doseStore.longestEffectDuration.hours)
-        let historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
+        var historyHours = max(LoopConstants.statusChartMinimumHistoryDisplay.hours, totalHours - futureHours)
+        let preferredHistoryHours = UserDefaults.standard.integer(forKey: DisplayPreference.historyHours)
+        if preferredHistoryHours > 0 {
+            let forecastHours = preferredHistoryHours <= 3 ? 3 : futureHours
+            let widthScale = min(LoopConstants.statusChartMaximumWidthScale, max(1, availableWidth / LoopConstants.statusChartReferenceWidth))
+            totalHours = (Double(preferredHistoryHours) + forecastHours) * Double(widthScale)
+            historyHours = totalHours - forecastHours
+        }
+        charts.labelStepHours = max(1, Int(ceil(totalHours * Double(LoopConstants.chartMinimumWidthPerTimeLabel / availableWidth))))
 
         let date = Date(timeIntervalSinceNow: -TimeInterval(hours: historyHours))
         let chartStartDate = Calendar.current.nextDate(after: date, matching: DateComponents(minute: 0), matchingPolicy: .strict, direction: .backward) ?? date
@@ -656,7 +700,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let statusRowMode = self.determineStatusRowMode()
 
         updateBannerAndHUDandStatusRows(statusRowMode: statusRowMode, newSize: currentContext.newSize, animated: animated)
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: ActionTabBarMetrics.tableContentInset, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: shouldShowBannerWarning ? 0 : cornerClearanceTopInset, left: 0, bottom: ActionTabBarMetrics.tableContentInset, right: 0)
         
         redrawCharts()
 
@@ -822,8 +866,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         self.presetsRowMode = determinePresetsRowMode()
         self.statusRowMode = statusRowMode
 
-        if let newSize = newSize {
-            landscapeMode = newSize.width > newSize.height
+        if newSize != nil {
+            landscapeMode = traitCollection.verticalSizeClass == .compact
         }
 
         let presetsIsVisible = self.shouldShowPresets
@@ -968,7 +1012,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .alertWarning:
             let cell = UITableViewCell()
             let alert = AlertPermissionsChecker.UnsafeNotificationPermissionAlert(permissions: alertPermissionsChecker.notificationCenterSettings)
-    
+            let fullBleedTopInset: CGFloat? = cornerClearanceTopInset > 0 ? cornerClearanceTopInset : nil
+
             cell.contentConfiguration = UIHostingConfiguration  {
                 if alertPermissionsChecker.showWarning {
                     if let alert {
@@ -988,9 +1033,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                 .font(.headline)
                         }
                         .foregroundStyle(Color.white)
-                        .padding(8)
-                        .background(Color.critical.cornerRadius(10))
-                        .padding([.top, .horizontal], 8)
+                        .modifier(WarningBannerStyle(fullBleedTopInset: fullBleedTopInset))
                     }
                 } else {
                     HStack {
@@ -1011,15 +1054,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
                             .font(.title)
                     }
                     .foregroundStyle(Color.white)
-                    .padding(8)
-                    .background(Color.critical.cornerRadius(10))
-                    .padding([.top, .horizontal], 8)
+                    .modifier(WarningBannerStyle(fullBleedTopInset: fullBleedTopInset))
                 }
             }
             .margins(.all, 0)
-            
-            cell.backgroundColor = .secondarySystemBackground
-            
+
+            cell.backgroundColor = fullBleedTopInset == nil ? .secondarySystemBackground : .critical
+
             return cell
         case .hud:
             let cell = tableView.dequeueReusableCell(withIdentifier: HUDViewTableViewCell.className, for: indexPath) as! HUDViewTableViewCell
@@ -1245,7 +1286,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .charts:
             // Compute the height of the HUD, defaulting to 70
             let hudHeight = ceil(hudView?.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height ?? 74)
-            var availableSize = max(tableView.bounds.width, tableView.bounds.height)
+            var availableSize = landscapeMode ? max(tableView.bounds.width, tableView.bounds.height) : tableView.bounds.height
             availableSize -= (tableView.safeAreaInsets.top + tableView.safeAreaInsets.bottom + tableView.contentInset.bottom + hudHeight)
 
             switch ChartRow(rawValue: indexPath.row)! {
@@ -2320,5 +2361,25 @@ extension StatusTableViewController: ServicesViewModelDelegate {
 extension StatusTableViewController {
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         updateStatusBar()
+    }
+}
+
+// Without a top status bar, the banner runs to the top edge and the display corners round it.
+private struct WarningBannerStyle: ViewModifier {
+    let fullBleedTopInset: CGFloat?
+
+    func body(content: Content) -> some View {
+        if let fullBleedTopInset {
+            content
+                .padding(.top, fullBleedTopInset)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 12)
+                .background(Color.critical)
+        } else {
+            content
+                .padding(8)
+                .background(Color.critical.cornerRadius(10))
+                .padding([.top, .horizontal], 8)
+        }
     }
 }

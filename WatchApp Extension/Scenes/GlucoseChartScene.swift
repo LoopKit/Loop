@@ -291,10 +291,10 @@ class GlucoseChartScene: SKScene {
 
         data.historicalGlucose?.filter { scaler.dates.contains($0.startDate) }.forEach {
             let center = scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
-            let size = CGSize(width: 2, height: 2)
+            let size = $0.isManualGlucose ? CGSize(width: 3, height: 3) : CGSize(width: 2, height: 2)
             let origin = CGPoint(x: center.x - size.width / 2, y: center.y - size.height / 2)
             let (sprite, created) = getSprite(forHash: $0.chartHashValue)
-            sprite.color = .glucose
+            sprite.color = $0.isManualGlucose ? .red : .glucose
             sprite.zPosition = NodePlane.values.zPosition
             sprite.move(to: CGRect(origin: origin, size: size).alignedToScreenScale(WKInterfaceDevice.current().screenScale), animated: !created)
             inactiveNodes.removeValue(forKey: $0.chartHashValue)

@@ -166,6 +166,8 @@ final class LoopDataManager: ObservableObject {
 
     private var lastManualBolusRecommendation: ManualBolusRecommendation?
 
+    private var volatilityBaseline: (value: Double?, date: Date)?
+
     private(set) var dosingStrategySelectionEnabled: Bool
 
     var usePositiveMomentumAndRCForManualBoluses: Bool
@@ -536,23 +538,8 @@ final class LoopDataManager: ObservableObject {
         }
 
 
-        // Create dosing strategy based on user setting
-        let applicationFactorStrategy: ApplicationFactorStrategy = UserDefaults.standard.glucoseBasedApplicationFactorEnabled
-            ? GlucoseBasedApplicationFactorStrategy()
-            : ConstantApplicationFactorStrategy()
-
-        let correctionRange = target.closestPrior(to: baseTime)?.value
-
-        let effectiveBolusApplicationFactor: Double?
-
-        if let latestGlucose = glucose.last {
-            effectiveBolusApplicationFactor = applicationFactorStrategy.calculateDosingFactor(
-                for: latestGlucose.quantity,
-                correctionRange: correctionRange!
-            )
-        } else {
-            effectiveBolusApplicationFactor = nil
-        }
+        let experiments = enabledAlgorithmExperiments
+        let volatilityBaseline = experiments.contains(.guardAndRunway) ? await currentVolatilityBaseline(at: baseTime) : nil
 
         return StoredDataAlgorithmInput(
             glucoseHistory: glucose,
@@ -566,12 +553,28 @@ final class LoopDataManager: ObservableObject {
             suspendThreshold: suspendThreshold,
             maxBolus: maxBolus,
             maxBasalRate: maxBasalRate,
-            useIntegralRetrospectiveCorrection: UserDefaults.standard.integralRetrospectiveCorrectionEnabled,
+            useIntegralRetrospectiveCorrection: false,
             includePositiveVelocityAndRC: true,
             carbAbsorptionModel: carbAbsorptionModel,
             recommendationInsulinModel: recommendationInsulinModel,
             recommendationType: .manualBolus,
-            automaticBolusApplicationFactor: effectiveBolusApplicationFactor)
+            automaticBolusApplicationFactor: nil,
+            experiments: experiments,
+            volatilityBaseline: volatilityBaseline)
+    }
+
+    private var enabledAlgorithmExperiments: Set<ExperimentOption> {
+        var experiments: Set<ExperimentOption> = []
+        if UserDefaults.standard.integralRetrospectiveCorrectionEnabled {
+            experiments.insert(.integralRetrospectiveCorrection)
+        }
+        if UserDefaults.standard.glucoseBasedApplicationFactorEnabled {
+            experiments.insert(.glucoseBasedApplicationFactor)
+        }
+        if UserDefaults.standard.guardAndRunwayEnabled {
+            experiments.insert(.guardAndRunway)
+        }
+        return experiments
     }
 
     func loopingReEnabled() async {
@@ -712,6 +715,7 @@ final class LoopDataManager: ObservableObject {
             }
 
             var output = LoopAlgorithm.run(input: input)
+            dosingDecision.algorithmExperiments = algorithmExperiments(for: dosingStrategy, guardAndRunway: output.guardAndRunway)
 
             switch output.recommendationResult {
             case .success(let recommendation):
@@ -911,7 +915,7 @@ final class LoopDataManager: ObservableObject {
 
         if let output = displayState.output {
             var dosingDecision = StoredDosingDecision(date: now, reason: "updateRemoteRecommendation")
-            dosingDecision.algorithmExperiments = algorithmExperiments(for: currentDosingStrategy)
+            dosingDecision.algorithmExperiments = algorithmExperiments(for: currentDosingStrategy, guardAndRunway: output.guardAndRunway)
             dosingDecision.predictedGlucose = output.predictedGlucose
             dosingDecision.insulinOnBoard = displayState.activeInsulin
             dosingDecision.carbsOnBoard = displayState.activeCarbs
@@ -1052,15 +1056,44 @@ extension LoopDataManager {
     }
 
     /// Glucose based partial application only affects automatic boluses, so it is in effect only with that strategy
-    private func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy) -> [AlgorithmExperiment] {
-        var experiments: [AlgorithmExperiment] = []
-        if UserDefaults.standard.integralRetrospectiveCorrectionEnabled {
-            experiments.append(AlgorithmExperiment(identifier: "integralRetrospectiveCorrection"))
+    private func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy, guardAndRunway: GuardAndRunwayOutput? = nil) -> [AlgorithmExperiment] {
+        enabledAlgorithmExperiments
+            .filter { $0 != .glucoseBasedApplicationFactor || dosingStrategy == .automaticBolus }
+            .sorted { $0.rawValue < $1.rawValue }
+            .map { experiment in
+                guard experiment == .guardAndRunway else {
+                    return AlgorithmExperiment(identifier: experiment.rawValue)
+                }
+                var parameters: [String: JSONValue] = [:]
+                if let baseline = volatilityBaseline?.value {
+                    parameters["volatilityBaseline"] = .number(baseline)
+                }
+                if let guardAndRunway {
+                    parameters["volatility"] = .number(guardAndRunway.volatility)
+                    parameters["bandApplied"] = .bool(guardAndRunway.bandApplied)
+                    parameters["bandGain"] = .number(guardAndRunway.bandGain)
+                    parameters["bandDepth"] = .number(guardAndRunway.bandDepth)
+                    parameters["runwayShift"] = .number(guardAndRunway.runwayShift)
+                    parameters["postLowRiseCutActive"] = .bool(guardAndRunway.postLowRiseCutActive)
+                }
+                return AlgorithmExperiment(identifier: experiment.rawValue, parameters: parameters.isEmpty ? nil : .object(parameters))
+            }
+    }
+
+    /// The median σ5 over the last four weeks, for guard + runway's volatility band. Nil until there is a day of glucose.
+    private func currentVolatilityBaseline(at date: Date) async -> Double? {
+        if let volatilityBaseline, abs(date.timeIntervalSince(volatilityBaseline.date)) < (volatilityBaseline.value == nil ? .hours(1) : .days(1)) {
+            return volatilityBaseline.value
         }
-        if UserDefaults.standard.glucoseBasedApplicationFactorEnabled && dosingStrategy == .automaticBolus {
-            experiments.append(AlgorithmExperiment(identifier: "glucoseBasedApplicationFactor"))
+        do {
+            let glucose = try await glucoseStore.getGlucoseSamples(start: date.addingTimeInterval(.days(-28)), end: date)
+            let baseline = GlucoseVolatility.baseline(glucose)
+            volatilityBaseline = (baseline, date)
+            return baseline
+        } catch {
+            logger.error("Error fetching glucose for volatility baseline: %{public}@", error.localizedDescription)
+            return volatilityBaseline?.value
         }
-        return experiments
     }
 
     func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) async {
@@ -1304,7 +1337,8 @@ extension StoredDataAlgorithmInput {
             algorithmEffectsOptions: effectsOptions,
             useIntegralRetrospectiveCorrection: self.useIntegralRetrospectiveCorrection,
             useMidAbsorptionISF: true,
-            carbAbsorptionModel: self.carbAbsorptionModel.model
+            carbAbsorptionModel: self.carbAbsorptionModel.model,
+            experiments: experiments
         )
         return prediction.glucose
     }
@@ -1786,8 +1820,8 @@ extension LoopDataManager: DiagnosticReportGenerator {
             "insulinOnBoard: \(String(describing: algoOutput?.activeInsulin))",
             "error: \(String(describing: loopError))",
             "overrideInUserDefaults: \(String(describing: UserDefaults.appGroup?.intentExtensionOverrideToSet))",
-            "glucoseBasedApplicationFactorEnabled: \(UserDefaults.standard.glucoseBasedApplicationFactorEnabled)",
-            "integralRetrospectiveCorrectionEanbled: \(String(describing: algoInput?.useIntegralRetrospectiveCorrection))",
+            "algorithmExperiments: \(algoInput.map { $0.experiments.map(\.rawValue).sorted() } ?? [])",
+            "volatilityBaseline: \(String(describing: algoInput?.volatilityBaseline))",
             ""
             ]
         return entries.joined(separator: "\n")

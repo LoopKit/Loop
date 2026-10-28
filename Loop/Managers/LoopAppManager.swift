@@ -402,7 +402,7 @@ class LoopAppManager: NSObject {
         dosingDecisionStore.delegate = deviceDataManager
         remoteDataServicesManager.delegate = deviceDataManager
 
-        let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore!, glucoseStore, carbStore, dosingDecisionStore, doseStore, deviceDataManager.deviceLog, alertManager.alertStore]
+        let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore!, glucoseStore, carbStore, dosingDecisionStore, doseStore, temporaryPresetsManager.presetHistory, deviceDataManager.deviceLog, alertManager.alertStore]
         criticalEventLogExportManager = CriticalEventLogExportManager(logs: criticalEventLogs,
                                                                       directory: FileManager.default.exportsDirectoryURL,
                                                                       historicalDuration: localCacheDuration)
@@ -490,7 +490,8 @@ class LoopAppManager: NSObject {
                 closedLoop: settingsManager.dosingEnabled,
                 dosingStrategy: settingsManager.loopSettings.automaticDosingStrategy.analyticsValue,
                 integralRetrospectiveCorrection: UserDefaults.standard.integralRetrospectiveCorrectionEnabled,
-                glucoseBasedPartialApplication: UserDefaults.standard.glucoseBasedApplicationFactorEnabled
+                glucoseBasedPartialApplication: UserDefaults.standard.glucoseBasedApplicationFactorEnabled,
+                guardAndRunway: UserDefaults.standard.guardAndRunwayEnabled
             )
         }
         analyticsServicesManager.identifyState()
@@ -607,6 +608,15 @@ class LoopAppManager: NSObject {
         viewModel.insulinDeliveryHistory = { [weak loopDataManager] days in
             guard let loopDataManager else { throw CancellationError() }
             return try await loopDataManager.insulinDeliveryHistory(days: days)
+        }
+        viewModel.setupHistory = { [weak settingsManager, weak dosingDecisionStore] in
+            let settings = try await settingsManager?.settingsStore?.getStoredSettings() ?? []
+            let now = Date()
+            let start = settings.map(\.date).min() ?? now
+            let experiments = try await ExperimentsHistoryCache().records(since: start, now: now) { readFrom in
+                try await dosingDecisionStore?.getDosingDecisions(start: readFrom, end: now, as: ExperimentsRecord.self) ?? []
+            }
+            return SetupHistory(settings: settings, experiments: experiments)
         }
 
         return viewModel

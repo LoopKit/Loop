@@ -30,11 +30,17 @@
 	<string>$(PRODUCT_MODULE_NAME).ComplicationController</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation. Sleep data from the Health database is used to optimize delivery of Apple Watch complication updates during the time you are awake.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>The watch uses Bluetooth to read your CGM directly when your phone isn't there.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Carbohydrate meal data entered in the app and on the watch is stored in the Health database. Glucose data retrieved from the CGM is stored securely in HealthKit.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>com.loopkit.Loop.AddCarbEntryOnWatch</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

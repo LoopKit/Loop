@@ -41,6 +41,7 @@ public struct ExperimentRow: View {
 public struct ExperimentsSettingsView: View {
     @AppStorage(UserDefaults.Key.GlucoseBasedApplicationFactorEnabled.rawValue) private var isGlucoseBasedApplicationFactorEnabled = false
     @AppStorage(UserDefaults.Key.IntegralRetrospectiveCorrectionEnabled.rawValue) private var isIntegralRetrospectiveCorrectionEnabled = false
+    @AppStorage(UserDefaults.Key.GuardAndRunwayEnabled.rawValue) private var isGuardAndRunwayEnabled = false
     var automaticDosingStrategy: AutomaticDosingStrategy
 
     public var body: some View {
@@ -60,6 +61,11 @@ public struct ExperimentsSettingsView: View {
                 .foregroundColor(.secondary)
 
                 Divider()
+                NavigationLink(destination: GuardAndRunwaySelectionView(isGuardAndRunwayEnabled: $isGuardAndRunwayEnabled)) {
+                    ExperimentRow(
+                        name: NSLocalizedString("Guard + Runway", comment: "Title of guard and runway experiment"),
+                        enabled: isGuardAndRunwayEnabled)
+                }
                 NavigationLink(destination: GlucoseBasedApplicationFactorSelectionView(isGlucoseBasedApplicationFactorEnabled: $isGlucoseBasedApplicationFactorEnabled, automaticDosingStrategy: automaticDosingStrategy)) {
                     ExperimentRow(
                         name: NSLocalizedString("Glucose Based Partial Application", comment: "Title of glucose based partial application experiment"),
@@ -70,6 +76,10 @@ public struct ExperimentsSettingsView: View {
                         name: NSLocalizedString("Integral Retrospective Correction", comment: "Title of integral retrospective correction experiment"),
                         enabled: isIntegralRetrospectiveCorrectionEnabled)
                 }
+                Text(NSLocalizedString("About 2 weeks with the same setup is a good amount of time to see a change in outcomes such as time in range and lows. Over just a few days, ordinary day-to-day variation can hide or exaggerate the effect.", comment: "Suggested length of time to try an algorithm experiment setup."))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Spacer()
             }
             .padding()
@@ -83,6 +93,7 @@ extension UserDefaults {
     fileprivate enum Key: String {
         case GlucoseBasedApplicationFactorEnabled = "com.loopkit.algorithmExperiments.glucoseBasedApplicationFactorEnabled"
         case IntegralRetrospectiveCorrectionEnabled = "com.loopkit.algorithmExperiments.integralRetrospectiveCorrectionEnabled"
+        case GuardAndRunwayEnabled = "com.loopkit.algorithmExperiments.guardAndRunwayEnabled"
     }
 
     var glucoseBasedApplicationFactorEnabled: Bool {
@@ -100,6 +111,15 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.IntegralRetrospectiveCorrectionEnabled.rawValue)
+        }
+    }
+
+    var guardAndRunwayEnabled: Bool {
+        get {
+            bool(forKey: Key.GuardAndRunwayEnabled.rawValue) as Bool
+        }
+        set {
+            set(newValue, forKey: Key.GuardAndRunwayEnabled.rawValue)
         }
     }
 

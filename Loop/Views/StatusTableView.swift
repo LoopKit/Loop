@@ -301,24 +301,42 @@ enum ActionTabBarMetrics {
 
     static let iconHeight: CGFloat = 34
 
-    static var bottomSafeAreaInset: CGFloat {
+    private static var keyWindow: UIWindow? {
         UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap { $0.windows }
-            .first { $0.isKeyWindow }?
-            .safeAreaInsets.bottom ?? 0
+            .first { $0.isKeyWindow }
     }
 
-    static var interfaceOrientation: UIInterfaceOrientation {
+    static var bottomSafeAreaInset: CGFloat {
+        keyWindow?.safeAreaInsets.bottom ?? 0
+    }
+
+    static var hasVerticalStatusBar: Bool {
+        guard let insets = keyWindow?.safeAreaInsets else { return false }
+        return verticalStatusBarEdge(for: EdgeInsets(top: insets.top, leading: insets.left, bottom: insets.bottom, trailing: insets.right)) != nil
+    }
+
+    // A vertical status bar (iPhone Duo) leaves no top inset and insets one side only.
+    static func verticalStatusBarEdge(for insets: EdgeInsets) -> HorizontalEdge? {
+        guard insets.top == 0 else { return nil }
+        switch (insets.leading > 0, insets.trailing > 0) {
+        case (true, false): return .leading
+        case (false, true): return .trailing
+        default: return nil
+        }
+    }
+
+    static var isCompactHeight: Bool {
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         let scene = scenes.first { $0.windows.contains { $0.isKeyWindow } }
             ?? scenes.first { $0.activationState == .foregroundActive }
             ?? scenes.first
-        return scene?.interfaceOrientation ?? .portrait
+        return scene?.traitCollection.verticalSizeClass == .compact
     }
 
     static var tableContentInset: CGFloat {
-        guard !interfaceOrientation.isLandscape else { return 0 }
+        guard !isCompactHeight, !hasVerticalStatusBar else { return 0 }
         if #available(iOS 26.0, *), bottomSafeAreaInset == 0 {
             return barHeight + 40
         }
@@ -357,35 +375,76 @@ struct LegacyTabBarBackground: ViewModifier {
 
 struct ActionTabView<Content: View>: View {
 
-    @State private var orientation: UIInterfaceOrientation
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     private let content: Content
     private let tabs: [ActionTab]
-    
+
     init(
         @ViewBuilder content: @escaping () -> Content,
         @ActionTabBuilder tabs: @escaping () -> [ActionTab],
     ) {
         self.content = content()
         self.tabs = tabs()
-        self.orientation = ActionTabBarMetrics.interfaceOrientation
     }
 
     var body: some View {
-        content
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                ActionTabBar(items: tabs, isHidden: !orientation.isPortrait)
-                    .modifier(LegacyTabBarBackground(isVisible: orientation.isPortrait))
+        GeometryReader { proxy in
+            let insets = proxy.safeAreaInsets
+            let verticalEdge = verticalSizeClass == .compact ? nil : ActionTabBarMetrics.verticalStatusBarEdge(for: insets)
+            let isVisible = verticalSizeClass != .compact && verticalEdge == nil
+            content
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    ActionTabBar(items: tabs, isHidden: !isVisible)
+                        .modifier(LegacyTabBarBackground(isVisible: isVisible))
+                }
+                .overlay(alignment: verticalEdge == .leading ? .bottomLeading : .bottomTrailing) {
+                    // In the status bar's column, below it, as the system places vertical toolbar buttons
+                    if let verticalEdge {
+                        VerticalActionBar(items: tabs)
+                            .frame(width: verticalEdge == .leading ? insets.leading : insets.trailing)
+                            .padding(.bottom, max(insets.bottom, 12))
+                            .ignoresSafeArea(edges: verticalEdge == .leading ? [.leading, .bottom] : [.trailing, .bottom])
+                    }
+                }
+        }
+    }
+}
+
+struct VerticalActionBar: View {
+
+    let items: [ActionTab]
+
+    var body: some View {
+        VStack(spacing: 4) {
+            ForEach(items) { item in
+                Button(action: item.action) {
+                    Image(item.icon)
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: ActionTabBarMetrics.iconHeight)
+                        .foregroundStyle(Color(item.tintColor))
+                        .frame(width: 52, height: 52)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(item.title)
             }
-            .onAppear {
-                UIDevice.current.beginGeneratingDeviceOrientationNotifications()
-                orientation = ActionTabBarMetrics.interfaceOrientation
+        }
+        .padding(.vertical, 6)
+        .modifier(VerticalActionBarBackground())
+    }
+}
+
+private struct VerticalActionBarBackground: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.background {
+                Color.clear.glassEffect(.regular, in: .capsule)
             }
-            .onDisappear {
-                UIDevice.current.endGeneratingDeviceOrientationNotifications()
-            }
-            .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
-                orientation = ActionTabBarMetrics.interfaceOrientation
-            }
+        } else {
+            content.background(Color(UIColor.secondarySystemBackground), in: Capsule())
+        }
     }
 }

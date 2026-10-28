@@ -90,6 +90,12 @@ class LoopDataManager {
 
     private var needsDidUpdateContextNotification: Bool = false
 
+    /// The newest reading from the watch's own connection to the CGM. Main queue only.
+    private(set) var latestDirectGlucose: NewGlucoseSample?
+
+    /// Bumped once the watch's own readings are in the store, for the chart.
+    private(set) var directGlucoseRevision = 0
+
     /// The last attempt to backfill glucose. We use a date because the message timeout is longer
     /// than our desired retry interval, so we allow multiple messages in-flight
     /// Main queue only
@@ -152,6 +158,50 @@ extension LoopDataManager {
             }
             activeContext = context
         }
+        WatchCGMHost.shared.update(from: context)
+    }
+
+    /// Readings from the watch's own connection to the CGM. Stored beside the phone's (the same
+    /// reading from both carries the same sync identifier, so the store keeps one) and shown while
+    /// newer than the phone's.
+    func addDirectGlucose(_ samples: [NewGlucoseSample]) {
+        dispatchPrecondition(condition: .onQueue(.main))
+        guard let latest = samples.max(by: { $0.date < $1.date }) else { return }
+        if latestDirectGlucose.map({ latest.date > $0.date }) ?? true {
+            latestDirectGlucose = latest
+        }
+        Task {
+            do {
+                _ = try await self.glucoseStore?.addGlucoseSamples(samples)
+            } catch {
+                self.log.error("Failure adding direct glucose samples: %{public}@", String(describing: error))
+            }
+            self.directGlucoseRevision += 1
+            self.needsDidUpdateContextNotification = true
+            self.sendDidUpdateContextNotificationIfNecessary()
+        }
+    }
+
+    func directGlucoseDidEnd() {
+        latestDirectGlucose = nil
+    }
+
+    /// The phone's context, with the watch's own reading in place of the phone's when it is newer.
+    var glucoseDisplayContext: WatchContext? {
+        guard let activeContext else { return nil }
+        guard let direct = latestDirectGlucose, direct.date > activeContext.glucoseDate ?? .distantPast,
+              let context = WatchContext(rawValue: activeContext.rawValue) else {
+            return activeContext
+        }
+        context.glucose = direct.quantity
+        context.glucoseDate = direct.date
+        context.glucoseTrend = direct.trend
+        context.glucoseTrendRate = direct.trendRate
+        context.glucoseCondition = direct.condition
+        context.glucoseIsDisplayOnly = direct.isDisplayOnly
+        context.glucoseWasUserEntered = direct.wasUserEntered
+        context.glucoseSyncIdentifier = direct.syncIdentifier
+        return context
     }
 
     func sendDidUpdateContextNotificationIfNecessary() {
@@ -205,7 +255,12 @@ extension LoopDataManager {
         // to power the chart. Backfill from just after our most recent stored sample so the phone
         // returns exactly what we're missing (no overlap); if we have nothing recent, fall back to
         // the earliest cutoff to repopulate the whole chart window.
-        let latestSampleDate = glucoseStore?.latestGlucose?.startDate ?? .distantPast
+        // The watch's own readings don't mean the phone's are here: start no later than the phone's
+        // last reading, and the store drops what it already has.
+        var latestSampleDate = glucoseStore?.latestGlucose?.startDate ?? .distantPast
+        if latestDirectGlucose != nil, let phoneGlucoseDate = activeContext?.glucoseDate {
+            latestSampleDate = min(latestSampleDate, phoneGlucoseDate)
+        }
         let latestDate = max(latestSampleDate, .earliestGlucoseCutoff)
         guard latestDate < .staleGlucoseCutoff else {
             self.log.default("Skipping glucose backfill request because our latest sample date is %{public}@", String(describing: latestDate))
@@ -318,7 +373,7 @@ extension LoopDataManager {
     }
 
     var glucoseValue: String {
-        guard let activeContext = activeContext,
+        guard let activeContext = glucoseDisplayContext,
               let glucose = activeContext.glucose,
               let unit = activeContext.displayGlucoseUnit else
         {

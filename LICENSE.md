@@ -1,5 +1,6 @@
 # Loop is released under the MIT license (MIT)
-With exceptions for frameworks and graphics, noted below.
+With exceptions for frameworks and graphics, noted below, and for the bundled
+alarm sounds and voices, listed in [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md).
 
 Copyright (c) 2015 Nathan Racklyeft
 Copyright (c) 2016 LoopKit Authors

@@ -51,12 +51,29 @@ final class CriticalAlertAudioPlayer {
     /// `SystemVolumeBooster`.
     private let volumeBooster = SystemVolumeBooster()
 
-    /// How long the alarm plays before stopping on its own. A short burst
-    /// (a few loops of the ~0.84s tone) is attention-grabbing without being
-    /// a runaway siren — the user-visible UNNotification persists, and the
-    /// alert re-fires on the next critical-alert trigger if the condition
-    /// holds.
-    private let maxDuration: TimeInterval = 6
+    /// Shortest the alarm plays before stopping on its own. A short burst is
+    /// attention-grabbing without being a runaway siren — the user-visible
+    /// UNNotification persists, and the alert re-fires on the next
+    /// critical-alert trigger if the condition holds.
+    ///
+    /// It is a floor, not a cap: the burst runs whole passes of the sound and
+    /// keeps going until it has reached this, so a 0.84s tone repeats about
+    /// eight times while a 10.8s alarm plays through once. Cutting a long
+    /// alarm off mid-phrase would throw away the part of it that carries the
+    /// urgency, which is why the length can't simply be fixed here.
+    static let minBurstDuration: TimeInterval = 6
+
+    /// Hard ceiling on a burst, so an unexpectedly long sound can't turn into
+    /// a siren that runs for minutes. Also the longest sound AlarmKit and
+    /// `UNNotificationSound` will play, so nothing in the catalog reaches it.
+    static let maxBurstDuration: TimeInterval = 30
+
+    /// Whole passes of `duration`, enough to reach `minBurstDuration`, capped.
+    nonisolated static func burstDuration(forSoundOfDuration duration: TimeInterval) -> TimeInterval {
+        guard duration > 0 else { return minBurstDuration }
+        let passes = max(1, Int((minBurstDuration / duration).rounded(.up)))
+        return min(maxBurstDuration, duration * Double(passes))
+    }
 
     /// True if we're currently looping audio for a critical alert.
     var isPlaying: Bool { player?.isPlaying ?? false }
@@ -78,7 +95,9 @@ final class CriticalAlertAudioPlayer {
         // everything (audio + vibration) to maxDuration, so the alarm still
         // buzzes even if audio setup below fails.
         startVibration()
-        stopTimer = Timer.scheduledTimer(withTimeInterval: maxDuration, repeats: false) { [weak self] _ in
+        // Bounds vibration if the audio setup below fails. Re-armed to the
+        // sound's own burst length once we know how long it is.
+        stopTimer = Timer.scheduledTimer(withTimeInterval: Self.minBurstDuration, repeats: false) { [weak self] _ in
             Task { @MainActor in self?.stop() }
         }
 
@@ -128,14 +147,13 @@ final class CriticalAlertAudioPlayer {
                 return
             }
             player = p
-            if !boostVolume {
-                stopTimer?.invalidate()
-                stopTimer = Timer.scheduledTimer(withTimeInterval: p.duration, repeats: false) { [weak self] _ in
-                    Task { @MainActor in self?.stop() }
-                }
+            let burst = boostVolume ? Self.burstDuration(forSoundOfDuration: p.duration) : p.duration
+            stopTimer?.invalidate()
+            stopTimer = Timer.scheduledTimer(withTimeInterval: burst, repeats: false) { [weak self] _ in
+                Task { @MainActor in self?.stop() }
             }
-            os_log("Started critical-alert audio playback (duration=%{public}.2fs playing=%{public}@)",
-                   log: log, type: .info, p.duration, p.isPlaying ? "yes" : "no")
+            os_log("Started critical-alert audio playback (duration=%{public}.2fs burst=%{public}.2fs playing=%{public}@)",
+                   log: log, type: .info, p.duration, burst, p.isPlaying ? "yes" : "no")
         } catch {
             os_log("Failed to start audio playback: %{public}@", log: log, type: .error, String(describing: error))
         }

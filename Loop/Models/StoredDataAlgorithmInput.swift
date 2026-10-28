@@ -56,4 +56,8 @@ struct StoredDataAlgorithmInput: AlgorithmInput {
     var maxActiveInsulinMultiplier: Double? = nil
 
     var gradualTransitionsThreshold: Double? = nil
+
+    var experiments: Set<ExperimentOption> = []
+
+    var volatilityBaseline: Double? = nil
 }

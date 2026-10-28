@@ -604,9 +604,6 @@
 		CB1AF8155B1761A30ACA5591 /* synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = 83081FFB0497A4596F597830 /* synth.caf */; };
 		D6E28676C2C7751C77C7F2FB /* spring.caf in Resources */ = {isa = PBXBuildFile; fileRef = 9471E156FC10D6D0FF219C77 /* spring.caf */; };
 		DD3DBD292A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */; };
-		DDC389F62A2B61750066E2E8 /* ApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */; };
-		DDC389F82A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */; };
-		DDC389FA2A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */; };
 		DDC389FC2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */; };
 		DDC389FE2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */; };
 		DE965737FE2DAE9FE692769E /* alarm.caf in Resources */ = {isa = PBXBuildFile; fileRef = 0FC34B523FE5A50C920506D5 /* alarm.caf */; };
@@ -665,6 +662,61 @@
 		FEEDB0000000000000000004 /* Statistics/TimeInRangeBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */; };
 		30E4A68B8C914C5E4B245555 /* InsulinDeliveryHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69CE2EE3714858772FE7A26 /* InsulinDeliveryHistoryTests.swift */; };
 		FEEDB0000000000000000005 /* GlucoseStatisticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */; };
+		7877942ED674BA37847514AD /* Loop/Resources/Sounds/acoustic_hg_harsh.caf in Resources */ = {isa = PBXBuildFile; fileRef = A9B1F564432BCBF70C0C6CBB /* Loop/Resources/Sounds/acoustic_hg_harsh.caf */; };
+		A82DB18B916DC17D2E180D59 /* Loop/Resources/Sounds/acoustic_hg_medium.caf in Resources */ = {isa = PBXBuildFile; fileRef = 3481DFC7974E27ABE6AAC4C3 /* Loop/Resources/Sounds/acoustic_hg_medium.caf */; };
+		4A208427654F9A249EC2CFDB /* Loop/Resources/Sounds/acoustic_hg_mild.caf in Resources */ = {isa = PBXBuildFile; fileRef = 1DCC85EA42C8D22C1EC824D8 /* Loop/Resources/Sounds/acoustic_hg_mild.caf */; };
+		F44BED105495ABA988BAB05F /* Loop/Resources/Sounds/acoustic_lg_harsh.caf in Resources */ = {isa = PBXBuildFile; fileRef = A5E01C8397D139F93B60CA0A /* Loop/Resources/Sounds/acoustic_lg_harsh.caf */; };
+		B0007FE66FB0FE886FACD77D /* Loop/Resources/Sounds/acoustic_lg_medium.caf in Resources */ = {isa = PBXBuildFile; fileRef = D64AC8FAA2340810ECB85AE9 /* Loop/Resources/Sounds/acoustic_lg_medium.caf */; };
+		D0EBF80B1D85F96B156725AA /* Loop/Resources/Sounds/acoustic_lg_mild.caf in Resources */ = {isa = PBXBuildFile; fileRef = 65E7CB20BE6AB6A39AF072A2 /* Loop/Resources/Sounds/acoustic_lg_mild.caf */; };
+		3461DE9DBC0B97D5662244FB /* Loop/Resources/Sounds/acoustic_lgs_harsh.caf in Resources */ = {isa = PBXBuildFile; fileRef = 688FE8312F66C4C1909FF93F /* Loop/Resources/Sounds/acoustic_lgs_harsh.caf */; };
+		F98A16085E9F216CEDDB18DB /* Loop/Resources/Sounds/acoustic_lgs_medium.caf in Resources */ = {isa = PBXBuildFile; fileRef = E5D3EF6AEBD5FFAF2ABB187B /* Loop/Resources/Sounds/acoustic_lgs_medium.caf */; };
+		182579BE820905E2B9FCC1B4 /* Loop/Resources/Sounds/acoustic_lgs_mild.caf in Resources */ = {isa = PBXBuildFile; fileRef = 16BE482D6AF35127A36FD9EB /* Loop/Resources/Sounds/acoustic_lgs_mild.caf */; };
+		6AB8817E7C134FE630492390 /* Loop/Resources/Sounds/acoustic_ulg_harsh.caf in Resources */ = {isa = PBXBuildFile; fileRef = A96BF0E0B93A88D6BCEC2338 /* Loop/Resources/Sounds/acoustic_ulg_harsh.caf */; };
+		BAD8333EC083569038F10E88 /* Loop/Resources/Sounds/acoustic_ulg_medium.caf in Resources */ = {isa = PBXBuildFile; fileRef = CC3E2E706E45342C823D641F /* Loop/Resources/Sounds/acoustic_ulg_medium.caf */; };
+		6E0CBD04FE69B38497EFC6F0 /* Loop/Resources/Sounds/acoustic_ulg_mild.caf in Resources */ = {isa = PBXBuildFile; fileRef = E38835D52BBD5607D90B9615 /* Loop/Resources/Sounds/acoustic_ulg_mild.caf */; };
+		DB1B4A63BB3DE5DF05D56791 /* Loop/Resources/Sounds/electronic_hg_harsh.caf in Resources */ = {isa = PBXBuildFile; fileRef = 2D388DFB60E5960C857807D0 /* Loop/Resources/Sounds/electronic_hg_harsh.caf */; };
+		0EA4FC2C9D24030B0D586F80 /* Loop/Resources/Sounds/electronic_hg_medium.caf in Resources */ = {isa = PBXBuildFile; fileRef = 987F0560C0D00A3F1AC4D006 /* Loop/Resources/Sounds/electronic_hg_medium.caf */; };
+		09789816D7760CF9BAA96F28 /* Loop/Resources/Sounds/electronic_hg_mild.caf in Resources */ = {isa = PBXBuildFile; fileRef = C8BD9DF4B53E440810325EA6 /* Loop/Resources/Sounds/electronic_hg_mild.caf */; };
+		D1530992424BA31F0A44EA27 /* Loop/Resources/Sounds/electronic_lg_harsh.caf in Resources */ = {isa = PBXBuildFile; fileRef = FE620B9DFF719ED07CEEA1B4 /* Loop/Resources/Sounds/electronic_lg_harsh.caf */; };
+		3E46B514B1D95CD39E91724B /* Loop/Resources/Sounds/electronic_lg_medium.caf in Resources */ = {isa = PBXBuildFile; fileRef = 0F7A07E85B57B85C219B1244 /* Loop/Resources/Sounds/electronic_lg_medium.caf */; };
+		C9489985ABD6FED5A2E5C857 /* Loop/Resources/Sounds/electronic_lg_mild.caf in Resources */ = {isa = PBXBuildFile; fileRef = C6BD81B55371D7597A3D2BCC /* Loop/Resources/Sounds/electronic_lg_mild.caf */; };
+		B63CAEC6D7662917D8EF89A7 /* Loop/Resources/Sounds/electronic_lgs_harsh.caf in Resources */ = {isa = PBXBuildFile; fileRef = 177CE52DCE2BF26A5B8D4FCF /* Loop/Resources/Sounds/electronic_lgs_harsh.caf */; };
+		746A339E8C3350AB42CC5A16 /* Loop/Resources/Sounds/electronic_lgs_medium.caf in Resources */ = {isa = PBXBuildFile; fileRef = 18566B364CC2520CFBDB2607 /* Loop/Resources/Sounds/electronic_lgs_medium.caf */; };
+		9695396DE1F34E51C8CF0225 /* Loop/Resources/Sounds/electronic_lgs_mild.caf in Resources */ = {isa = PBXBuildFile; fileRef = A746D58F0F0815133AC12A9D /* Loop/Resources/Sounds/electronic_lgs_mild.caf */; };
+		06DEBA22295370ED71FA6FF1 /* Loop/Resources/Sounds/electronic_ulg_harsh.caf in Resources */ = {isa = PBXBuildFile; fileRef = EB5FAFC0C4DA8D94009F0EA7 /* Loop/Resources/Sounds/electronic_ulg_harsh.caf */; };
+		4A1C8ED0D43F5DB88D9E54EF /* Loop/Resources/Sounds/electronic_ulg_medium.caf in Resources */ = {isa = PBXBuildFile; fileRef = 6DEA9E9B5623F8F77822D99C /* Loop/Resources/Sounds/electronic_ulg_medium.caf */; };
+		B47913E810409CB0B7BC6576 /* Loop/Resources/Sounds/electronic_ulg_mild.caf in Resources */ = {isa = PBXBuildFile; fileRef = 780F7D310A3BFB3C3F22694C /* Loop/Resources/Sounds/electronic_ulg_mild.caf */; };
+		82D4B3B73B633E0CDA8CDF73 /* Loop/Resources/Sounds/glass_bell.caf in Resources */ = {isa = PBXBuildFile; fileRef = 92A703ABE59E0E23337CE6B1 /* Loop/Resources/Sounds/glass_bell.caf */; };
+		ACEDEA57D2D24A7AA7010A7B /* Loop/Resources/Sounds/hard_saw_wave.caf in Resources */ = {isa = PBXBuildFile; fileRef = 8032B80CBB012479E89EBDE0 /* Loop/Resources/Sounds/hard_saw_wave.caf */; };
+		908A8AAFECDBC70B57169E3D /* Loop/Resources/Sounds/harp.caf in Resources */ = {isa = PBXBuildFile; fileRef = 8767531B981D2B1C3284D95E /* Loop/Resources/Sounds/harp.caf */; };
+		EB2A217C9AD057A7DF01F116 /* Loop/Resources/Sounds/meow.caf in Resources */ = {isa = PBXBuildFile; fileRef = DE9E9CEE9FBE4CDD17605266 /* Loop/Resources/Sounds/meow.caf */; };
+		706AA94D1D4B49F51B04B9D6 /* Loop/Resources/Sounds/open_can.caf in Resources */ = {isa = PBXBuildFile; fileRef = D212086C7473C12CFAE3EDA7 /* Loop/Resources/Sounds/open_can.caf */; };
+		D87EFB28C39228F73654A56A /* Loop/Resources/Sounds/open_wrapper.caf in Resources */ = {isa = PBXBuildFile; fileRef = 47B3FD13DA5BEB4A2CBBA86C /* Loop/Resources/Sounds/open_wrapper.caf */; };
+		C35102622CBDADC4F8A29531 /* Loop/Resources/Sounds/saw_wave.caf in Resources */ = {isa = PBXBuildFile; fileRef = 8A58B1B290C65AE2DFC96CE6 /* Loop/Resources/Sounds/saw_wave.caf */; };
+		0C63FC60520110C35B54456A /* Loop/Resources/Sounds/sine_wave.caf in Resources */ = {isa = PBXBuildFile; fileRef = 345BE45BC6D5B01FBA7FE0B4 /* Loop/Resources/Sounds/sine_wave.caf */; };
+		ACC87746A312EF0DF019CE18 /* Loop/Resources/Sounds/voice_hg_amy.caf in Resources */ = {isa = PBXBuildFile; fileRef = 9028674AC1F9A25E599AB2CD /* Loop/Resources/Sounds/voice_hg_amy.caf */; };
+		29074112CB80B5D0729833D2 /* Loop/Resources/Sounds/voice_hg_bryce.caf in Resources */ = {isa = PBXBuildFile; fileRef = D1C8C12CAA6CF822846035AA /* Loop/Resources/Sounds/voice_hg_bryce.caf */; };
+		B0C24C973471C4B971DF3034 /* Loop/Resources/Sounds/voice_lg_amy.caf in Resources */ = {isa = PBXBuildFile; fileRef = D5394844C0EA517BF83DAC67 /* Loop/Resources/Sounds/voice_lg_amy.caf */; };
+		E23DB8960A0D78A3D5BBBAC1 /* Loop/Resources/Sounds/voice_lg_bryce.caf in Resources */ = {isa = PBXBuildFile; fileRef = 15A11683B521C116718CCF03 /* Loop/Resources/Sounds/voice_lg_bryce.caf */; };
+		CD753CCE4F90A5DF08CD6FE3 /* Loop/Resources/Sounds/voice_lgs_amy.caf in Resources */ = {isa = PBXBuildFile; fileRef = 34C6B095931D004E1C6D1E2A /* Loop/Resources/Sounds/voice_lgs_amy.caf */; };
+		82F11F858069EDA2DF65D909 /* Loop/Resources/Sounds/voice_lgs_bryce.caf in Resources */ = {isa = PBXBuildFile; fileRef = FB860882201269230F24C96C /* Loop/Resources/Sounds/voice_lgs_bryce.caf */; };
+		0996021E82CDE7DA7A3DD544 /* Loop/Resources/Sounds/voice_ulg_amy.caf in Resources */ = {isa = PBXBuildFile; fileRef = B08A706BF6BC6555453D3E56 /* Loop/Resources/Sounds/voice_ulg_amy.caf */; };
+		8BAF071E821EAC3FB1B183B3 /* Loop/Resources/Sounds/voice_ulg_bryce.caf in Resources */ = {isa = PBXBuildFile; fileRef = 1F9BFD4BD97793AAE2407DCB /* Loop/Resources/Sounds/voice_ulg_bryce.caf */; };
+		D7A3000100000000000A0002 /* WatchCGMHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A3000100000000000A0001 /* WatchCGMHost.swift */; };
+		D7A3000100000000000A0004 /* WatchDeviceManagers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A3000100000000000A0003 /* WatchDeviceManagers.swift */; };
+		101AA7370B0E499FBD88BB9F /* G7SensorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		921B7FAE002E40EFAB3F50C6 /* G7SensorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */; };
+		8B5CF0144D79477AACBE4A82 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4344628320A7A3BE00C4BE6F /* LoopKit.framework */; };
+		A1B2C3D40000000000000012 /* AlarmSoundCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000011 /* AlarmSoundCatalogTests.swift */; };
+		D7A3000100000000000A0006 /* WatchSensorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A3000100000000000A0005 /* WatchSensorView.swift */; };
+		8879F70ABCDF1E10619547A4 /* SetupChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12CD655083D4816F87B13463 /* SetupChange.swift */; };
+		2622474F63F391C3E102B5E5 /* SetupComparisonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE36167100E59D7413C50F63 /* SetupComparisonTests.swift */; };
+		16097A41A1EF24BCF2F670DB /* Statistics/SetupComparisonCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174DD37A96993576E0E573C6 /* Statistics/SetupComparisonCharts.swift */; };
+		414E7082E6A6B9DA8CD11EF3 /* CurrentSetupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C7C2227FAC0A9F7F570A01 /* CurrentSetupViewModel.swift */; };
+		D7DECBB118052B85680A241B /* SetupComparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E7CDB17CCE70885EE93850 /* SetupComparison.swift */; };
+		6D16FF26E7F84F97B5DB6A88 /* CurrentSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFD4A26A23202AF2EA506FCF /* CurrentSetupView.swift */; };
+		D70F014FFB67BA58678452E9 /* SetupChangeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03EC166B8AD05800AFCD474E /* SetupChangeTests.swift */; };
+		A1B2C3D42E8F000100000002 /* GuardAndRunwaySelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D42E8F000100000001 /* GuardAndRunwaySelectionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -777,6 +829,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				101AA7370B0E499FBD88BB9F /* G7SensorKit.framework in Embed Frameworks */,
 				43C05CB221EBD88A006FB252 /* LoopCore.framework in Embed Frameworks */,
 				C1275E1C2E82269A0013B99D /* LoopKit.framework in Embed Frameworks */,
 			);
@@ -1441,9 +1494,6 @@
 		C9SCENED0000000000000002 /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		CE102E23D8C1C1291EF66387 /* PluginPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PluginPickerView.swift; sourceTree = "<group>"; };
 		DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegralRetrospectiveCorrectionSelectionView.swift; sourceTree = "<group>"; };
-		DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationFactorStrategy.swift; sourceTree = "<group>"; };
-		DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorStrategy.swift; sourceTree = "<group>"; };
-		DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstantApplicationFactorStrategy.swift; sourceTree = "<group>"; };
 		DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+algorithmExperimentsSection.swift"; sourceTree = "<group>"; };
 		DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBasedApplicationFactorSelectionView.swift; sourceTree = "<group>"; };
 		E4854073AAE5C2CB97167F63 /* HealthAccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthAccessView.swift; sourceTree = "<group>"; };
@@ -1501,6 +1551,59 @@
 		FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics/TimeInRangeBar.swift; sourceTree = "<group>"; };
 		F69CE2EE3714858772FE7A26 /* InsulinDeliveryHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryHistoryTests.swift; sourceTree = "<group>"; };
 		FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseStatisticsTests.swift; sourceTree = "<group>"; };
+		D7A3000100000000000A0001 /* WatchCGMHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchCGMHost.swift; sourceTree = "<group>"; };
+		D7A3000100000000000A0003 /* WatchDeviceManagers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchDeviceManagers.swift; sourceTree = "<group>"; };
+		F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = G7SensorKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1B2C3D40000000000000011 /* AlarmSoundCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSoundCatalogTests.swift; sourceTree = "<group>"; };
+		D7A3000100000000000A0005 /* WatchSensorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSensorView.swift; sourceTree = "<group>"; };
+		12CD655083D4816F87B13463 /* SetupChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupChange.swift; sourceTree = "<group>"; };
+		BE36167100E59D7413C50F63 /* SetupComparisonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupComparisonTests.swift; sourceTree = "<group>"; };
+		174DD37A96993576E0E573C6 /* Statistics/SetupComparisonCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics/SetupComparisonCharts.swift; sourceTree = "<group>"; };
+		17C7C2227FAC0A9F7F570A01 /* CurrentSetupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSetupViewModel.swift; sourceTree = "<group>"; };
+		D5E7CDB17CCE70885EE93850 /* SetupComparison.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupComparison.swift; sourceTree = "<group>"; };
+		CFD4A26A23202AF2EA506FCF /* CurrentSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSetupView.swift; sourceTree = "<group>"; };
+		03EC166B8AD05800AFCD474E /* SetupChangeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupChangeTests.swift; sourceTree = "<group>"; };
+		A9B1F564432BCBF70C0C6CBB /* Loop/Resources/Sounds/acoustic_hg_harsh.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/acoustic_hg_harsh.caf; sourceTree = SOURCE_ROOT; };
+		3481DFC7974E27ABE6AAC4C3 /* Loop/Resources/Sounds/acoustic_hg_medium.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/acoustic_hg_medium.caf; sourceTree = SOURCE_ROOT; };
+		1DCC85EA42C8D22C1EC824D8 /* Loop/Resources/Sounds/acoustic_hg_mild.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/acoustic_hg_mild.caf; sourceTree = SOURCE_ROOT; };
+		A5E01C8397D139F93B60CA0A /* Loop/Resources/Sounds/acoustic_lg_harsh.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/acoustic_lg_harsh.caf; sourceTree = SOURCE_ROOT; };
+		D64AC8FAA2340810ECB85AE9 /* Loop/Resources/Sounds/acoustic_lg_medium.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/acoustic_lg_medium.caf; sourceTree = SOURCE_ROOT; };
+		65E7CB20BE6AB6A39AF072A2 /* Loop/Resources/Sounds/acoustic_lg_mild.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/acoustic_lg_mild.caf; sourceTree = SOURCE_ROOT; };
+		688FE8312F66C4C1909FF93F /* Loop/Resources/Sounds/acoustic_lgs_harsh.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/acoustic_lgs_harsh.caf; sourceTree = SOURCE_ROOT; };
+		E5D3EF6AEBD5FFAF2ABB187B /* Loop/Resources/Sounds/acoustic_lgs_medium.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/acoustic_lgs_medium.caf; sourceTree = SOURCE_ROOT; };
+		16BE482D6AF35127A36FD9EB /* Loop/Resources/Sounds/acoustic_lgs_mild.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/acoustic_lgs_mild.caf; sourceTree = SOURCE_ROOT; };
+		A96BF0E0B93A88D6BCEC2338 /* Loop/Resources/Sounds/acoustic_ulg_harsh.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/acoustic_ulg_harsh.caf; sourceTree = SOURCE_ROOT; };
+		CC3E2E706E45342C823D641F /* Loop/Resources/Sounds/acoustic_ulg_medium.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/acoustic_ulg_medium.caf; sourceTree = SOURCE_ROOT; };
+		E38835D52BBD5607D90B9615 /* Loop/Resources/Sounds/acoustic_ulg_mild.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/acoustic_ulg_mild.caf; sourceTree = SOURCE_ROOT; };
+		2D388DFB60E5960C857807D0 /* Loop/Resources/Sounds/electronic_hg_harsh.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/electronic_hg_harsh.caf; sourceTree = SOURCE_ROOT; };
+		987F0560C0D00A3F1AC4D006 /* Loop/Resources/Sounds/electronic_hg_medium.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/electronic_hg_medium.caf; sourceTree = SOURCE_ROOT; };
+		C8BD9DF4B53E440810325EA6 /* Loop/Resources/Sounds/electronic_hg_mild.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/electronic_hg_mild.caf; sourceTree = SOURCE_ROOT; };
+		FE620B9DFF719ED07CEEA1B4 /* Loop/Resources/Sounds/electronic_lg_harsh.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/electronic_lg_harsh.caf; sourceTree = SOURCE_ROOT; };
+		0F7A07E85B57B85C219B1244 /* Loop/Resources/Sounds/electronic_lg_medium.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/electronic_lg_medium.caf; sourceTree = SOURCE_ROOT; };
+		C6BD81B55371D7597A3D2BCC /* Loop/Resources/Sounds/electronic_lg_mild.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/electronic_lg_mild.caf; sourceTree = SOURCE_ROOT; };
+		177CE52DCE2BF26A5B8D4FCF /* Loop/Resources/Sounds/electronic_lgs_harsh.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/electronic_lgs_harsh.caf; sourceTree = SOURCE_ROOT; };
+		18566B364CC2520CFBDB2607 /* Loop/Resources/Sounds/electronic_lgs_medium.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/electronic_lgs_medium.caf; sourceTree = SOURCE_ROOT; };
+		A746D58F0F0815133AC12A9D /* Loop/Resources/Sounds/electronic_lgs_mild.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/electronic_lgs_mild.caf; sourceTree = SOURCE_ROOT; };
+		EB5FAFC0C4DA8D94009F0EA7 /* Loop/Resources/Sounds/electronic_ulg_harsh.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/electronic_ulg_harsh.caf; sourceTree = SOURCE_ROOT; };
+		6DEA9E9B5623F8F77822D99C /* Loop/Resources/Sounds/electronic_ulg_medium.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/electronic_ulg_medium.caf; sourceTree = SOURCE_ROOT; };
+		780F7D310A3BFB3C3F22694C /* Loop/Resources/Sounds/electronic_ulg_mild.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/electronic_ulg_mild.caf; sourceTree = SOURCE_ROOT; };
+		92A703ABE59E0E23337CE6B1 /* Loop/Resources/Sounds/glass_bell.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/glass_bell.caf; sourceTree = SOURCE_ROOT; };
+		8032B80CBB012479E89EBDE0 /* Loop/Resources/Sounds/hard_saw_wave.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/hard_saw_wave.caf; sourceTree = SOURCE_ROOT; };
+		8767531B981D2B1C3284D95E /* Loop/Resources/Sounds/harp.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/harp.caf; sourceTree = SOURCE_ROOT; };
+		DE9E9CEE9FBE4CDD17605266 /* Loop/Resources/Sounds/meow.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/meow.caf; sourceTree = SOURCE_ROOT; };
+		D212086C7473C12CFAE3EDA7 /* Loop/Resources/Sounds/open_can.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/open_can.caf; sourceTree = SOURCE_ROOT; };
+		47B3FD13DA5BEB4A2CBBA86C /* Loop/Resources/Sounds/open_wrapper.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/open_wrapper.caf; sourceTree = SOURCE_ROOT; };
+		8A58B1B290C65AE2DFC96CE6 /* Loop/Resources/Sounds/saw_wave.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/saw_wave.caf; sourceTree = SOURCE_ROOT; };
+		345BE45BC6D5B01FBA7FE0B4 /* Loop/Resources/Sounds/sine_wave.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/sine_wave.caf; sourceTree = SOURCE_ROOT; };
+		9028674AC1F9A25E599AB2CD /* Loop/Resources/Sounds/voice_hg_amy.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/voice_hg_amy.caf; sourceTree = SOURCE_ROOT; };
+		D1C8C12CAA6CF822846035AA /* Loop/Resources/Sounds/voice_hg_bryce.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/voice_hg_bryce.caf; sourceTree = SOURCE_ROOT; };
+		D5394844C0EA517BF83DAC67 /* Loop/Resources/Sounds/voice_lg_amy.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/voice_lg_amy.caf; sourceTree = SOURCE_ROOT; };
+		15A11683B521C116718CCF03 /* Loop/Resources/Sounds/voice_lg_bryce.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/voice_lg_bryce.caf; sourceTree = SOURCE_ROOT; };
+		34C6B095931D004E1C6D1E2A /* Loop/Resources/Sounds/voice_lgs_amy.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/voice_lgs_amy.caf; sourceTree = SOURCE_ROOT; };
+		FB860882201269230F24C96C /* Loop/Resources/Sounds/voice_lgs_bryce.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/voice_lgs_bryce.caf; sourceTree = SOURCE_ROOT; };
+		B08A706BF6BC6555453D3E56 /* Loop/Resources/Sounds/voice_ulg_amy.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/voice_ulg_amy.caf; sourceTree = SOURCE_ROOT; };
+		1F9BFD4BD97793AAE2407DCB /* Loop/Resources/Sounds/voice_ulg_bryce.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/voice_ulg_bryce.caf; sourceTree = SOURCE_ROOT; };
+		A1B2C3D42E8F000100000001 /* GuardAndRunwaySelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardAndRunwaySelectionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1520,6 +1623,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				921B7FAE002E40EFAB3F50C6 /* G7SensorKit.framework in Frameworks */,
+				8B5CF0144D79477AACBE4A82 /* LoopKit.framework in Frameworks */,
 				C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */,
 				4344628220A7A37F00C4BE6F /* CoreBluetooth.framework in Frameworks */,
 				43D9002F21EB234400AF44BF /* LoopCore.framework in Frameworks */,
@@ -1670,6 +1775,7 @@
 				C16B983F26B4898800256B05 /* DoseEnactorTests.swift */,
 				E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */,
 				A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */,
+				A1B2C3D40000000000000011 /* AlarmSoundCatalogTests.swift */,
 				E9B3552C293592B40076AB04 /* MealDetectionManagerTests.swift */,
 				C1DA43562B1A70BE00CBD33F /* SettingsManagerTests.swift */,
 				1D70C40026EC0F9D00C62570 /* SupportManagerTests.swift */,
@@ -1750,14 +1856,11 @@
 		43757D131C06F26C00910CB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				DDC389F52A2B61750066E2E8 /* ApplicationFactorStrategy.swift */,
 				FEEDF0000000000000000000 /* GlucoseStatistics.swift */,
 				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
 				8378B7D1F532A5F47CEBB6AE /* CarbEntryChange.swift */,
-				DDC389F92A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift */,
 				C1EF747128D6A44A00C8C083 /* CrashRecoveryManager.swift */,
 				1455ACB12C667BEE004F44F2 /* Deeplink.swift */,
-				DDC389F72A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift */,
 				B40D07C6251A89D500C1C6D7 /* GlucoseDisplay.swift */,
 				43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */,
 				C1C660D0252E4DD5009B5C32 /* LoopConstants.swift */,
@@ -1773,6 +1876,8 @@
 				A987CD4824A58A0100439ADC /* ZipArchive.swift */,
 				C16F51182B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift */,
 				C4C16D18C8806FF48331134C /* InsulinDeliveryHistory.swift */,
+				12CD655083D4816F87B13463 /* SetupChange.swift */,
+				D5E7CDB17CCE70885EE93850 /* SetupComparison.swift */,
 				C16F511A2B89363A00EFD7A1 /* SimpleInsulinDose.swift */,
 				C152B9F42C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift */,
 				84213C882D94941000642E78 /* InsulinDeliveryLogEvent.swift */,
@@ -2103,9 +2208,11 @@
 				B43B5C532EAFBF110096A6AE /* RecentGlucoseTableViewCell.xib */,
 				C151634D2FA2C9C800FEECE8 /* RequiredVersionUpdateView.swift */,
 				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
+				CFD4A26A23202AF2EA506FCF /* CurrentSetupView.swift */,
 				FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */,
 				747DA22B61531CCAAC79E86D /* Statistics/DailyInsulinChartView.swift */,
 				FEEDF0000000000000000003 /* Statistics/AGPChartView.swift */,
+				174DD37A96993576E0E573C6 /* Statistics/SetupComparisonCharts.swift */,
 				FEEDF0000000000000000002 /* Statistics/StatisticsView.swift */,
 				E4854073AAE5C2CB97167F63 /* HealthAccessView.swift */,
 				DDC389FB2A2BC6670066E2E8 /* SettingsView+algorithmExperimentsSection.swift */,
@@ -2115,6 +2222,7 @@
 				C1AF062229426300002C1B19 /* ManualGlucoseEntryRow.swift */,
 				DDC389FD2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift */,
 				DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */,
+				A1B2C3D42E8F000100000001 /* GuardAndRunwaySelectionView.swift */,
 				84DEB10C2C18FABA00170734 /* IOSFocusModesView.swift */,
 				84D1F1A62D09053A00CB271F /* StatusTableView.swift */,
 				B429CAB22E97C7F300FA988E /* LoopStatusModalView.swift */,
@@ -2268,6 +2376,8 @@
 			isa = PBXGroup;
 			children = (
 				4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */,
+				D7A3000100000000000A0001 /* WatchCGMHost.swift */,
+				D7A3000100000000000A0003 /* WatchDeviceManagers.swift */,
 				898ECA62218ABD21001E9D35 /* ComplicationChartManager.swift */,
 				6515A16900D12040FF31E279 /* ComplicationPublisher.swift */,
 			);
@@ -2368,6 +2478,46 @@
 		84957A16300D5CDF0040E2EF /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
+				A9B1F564432BCBF70C0C6CBB /* Loop/Resources/Sounds/acoustic_hg_harsh.caf */,
+				3481DFC7974E27ABE6AAC4C3 /* Loop/Resources/Sounds/acoustic_hg_medium.caf */,
+				1DCC85EA42C8D22C1EC824D8 /* Loop/Resources/Sounds/acoustic_hg_mild.caf */,
+				A5E01C8397D139F93B60CA0A /* Loop/Resources/Sounds/acoustic_lg_harsh.caf */,
+				D64AC8FAA2340810ECB85AE9 /* Loop/Resources/Sounds/acoustic_lg_medium.caf */,
+				65E7CB20BE6AB6A39AF072A2 /* Loop/Resources/Sounds/acoustic_lg_mild.caf */,
+				688FE8312F66C4C1909FF93F /* Loop/Resources/Sounds/acoustic_lgs_harsh.caf */,
+				E5D3EF6AEBD5FFAF2ABB187B /* Loop/Resources/Sounds/acoustic_lgs_medium.caf */,
+				16BE482D6AF35127A36FD9EB /* Loop/Resources/Sounds/acoustic_lgs_mild.caf */,
+				A96BF0E0B93A88D6BCEC2338 /* Loop/Resources/Sounds/acoustic_ulg_harsh.caf */,
+				CC3E2E706E45342C823D641F /* Loop/Resources/Sounds/acoustic_ulg_medium.caf */,
+				E38835D52BBD5607D90B9615 /* Loop/Resources/Sounds/acoustic_ulg_mild.caf */,
+				2D388DFB60E5960C857807D0 /* Loop/Resources/Sounds/electronic_hg_harsh.caf */,
+				987F0560C0D00A3F1AC4D006 /* Loop/Resources/Sounds/electronic_hg_medium.caf */,
+				C8BD9DF4B53E440810325EA6 /* Loop/Resources/Sounds/electronic_hg_mild.caf */,
+				FE620B9DFF719ED07CEEA1B4 /* Loop/Resources/Sounds/electronic_lg_harsh.caf */,
+				0F7A07E85B57B85C219B1244 /* Loop/Resources/Sounds/electronic_lg_medium.caf */,
+				C6BD81B55371D7597A3D2BCC /* Loop/Resources/Sounds/electronic_lg_mild.caf */,
+				177CE52DCE2BF26A5B8D4FCF /* Loop/Resources/Sounds/electronic_lgs_harsh.caf */,
+				18566B364CC2520CFBDB2607 /* Loop/Resources/Sounds/electronic_lgs_medium.caf */,
+				A746D58F0F0815133AC12A9D /* Loop/Resources/Sounds/electronic_lgs_mild.caf */,
+				EB5FAFC0C4DA8D94009F0EA7 /* Loop/Resources/Sounds/electronic_ulg_harsh.caf */,
+				6DEA9E9B5623F8F77822D99C /* Loop/Resources/Sounds/electronic_ulg_medium.caf */,
+				780F7D310A3BFB3C3F22694C /* Loop/Resources/Sounds/electronic_ulg_mild.caf */,
+				92A703ABE59E0E23337CE6B1 /* Loop/Resources/Sounds/glass_bell.caf */,
+				8032B80CBB012479E89EBDE0 /* Loop/Resources/Sounds/hard_saw_wave.caf */,
+				8767531B981D2B1C3284D95E /* Loop/Resources/Sounds/harp.caf */,
+				DE9E9CEE9FBE4CDD17605266 /* Loop/Resources/Sounds/meow.caf */,
+				D212086C7473C12CFAE3EDA7 /* Loop/Resources/Sounds/open_can.caf */,
+				47B3FD13DA5BEB4A2CBBA86C /* Loop/Resources/Sounds/open_wrapper.caf */,
+				8A58B1B290C65AE2DFC96CE6 /* Loop/Resources/Sounds/saw_wave.caf */,
+				345BE45BC6D5B01FBA7FE0B4 /* Loop/Resources/Sounds/sine_wave.caf */,
+				9028674AC1F9A25E599AB2CD /* Loop/Resources/Sounds/voice_hg_amy.caf */,
+				D1C8C12CAA6CF822846035AA /* Loop/Resources/Sounds/voice_hg_bryce.caf */,
+				D5394844C0EA517BF83DAC67 /* Loop/Resources/Sounds/voice_lg_amy.caf */,
+				15A11683B521C116718CCF03 /* Loop/Resources/Sounds/voice_lg_bryce.caf */,
+				34C6B095931D004E1C6D1E2A /* Loop/Resources/Sounds/voice_lgs_amy.caf */,
+				FB860882201269230F24C96C /* Loop/Resources/Sounds/voice_lgs_bryce.caf */,
+				B08A706BF6BC6555453D3E56 /* Loop/Resources/Sounds/voice_ulg_amy.caf */,
+				1F9BFD4BD97793AAE2407DCB /* Loop/Resources/Sounds/voice_ulg_bryce.caf */,
 				C9A47B0475B13A9543390BC8 /* critical.caf */,
 				0FC34B523FE5A50C920506D5 /* alarm.caf */,
 				8FB2394478FF679F436E8EF1 /* bloom.caf */,
@@ -2518,6 +2668,7 @@
 				894F6DD8243C060600CCE676 /* ScalablePositionedText.swift */,
 				89A605EA243288E4009C1096 /* TopDownTriangle.swift */,
 				C12D723F2E4FBC5D00BD628A /* WatchActionsView.swift */,
+				D7A3000100000000000A0005 /* WatchSensorView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2570,6 +2721,7 @@
 				C11BD0542523CFED00236B08 /* SimpleBolusViewModel.swift */,
 				1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */,
 				FEEDF0000000000000000001 /* StatisticsViewModel.swift */,
+				17C7C2227FAC0A9F7F570A01 /* CurrentSetupViewModel.swift */,
 				1D49795724E7289700948F05 /* ServicesViewModel.swift */,
 				C174233B259BEB0F00399C9D /* ManualEntryDoseViewModel.swift */,
 				1DB619AB270BAD3D006C9D07 /* VersionUpdateViewModel.swift */,
@@ -2639,6 +2791,7 @@
 				43D9002C21EB225D00AF44BF /* HealthKit.framework */,
 				43F5C2C81B929C09003EB13D /* HealthKit.framework */,
 				4344628320A7A3BE00C4BE6F /* LoopKit.framework */,
+				F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */,
 				437AFEE6203688CF008C4892 /* LoopKitUI.framework */,
 				892A5D5A222F0D7C008961AB /* LoopTestingKit.framework */,
 				C1E2774722433D7A00354103 /* MKRingProgressView.framework */,
@@ -2672,6 +2825,8 @@
 			children = (
 				C152B9F62C9C7EF100ACBC06 /* AutomationHistoryEntryTests.swift */,
 				F69CE2EE3714858772FE7A26 /* InsulinDeliveryHistoryTests.swift */,
+				03EC166B8AD05800AFCD474E /* SetupChangeTests.swift */,
+				BE36167100E59D7413C50F63 /* SetupComparisonTests.swift */,
 				FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */,
 				A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */,
 				A963B279252CEBAE0062AA12 /* SetBolusUserInfoTests.swift */,
@@ -3230,6 +3385,46 @@
 				C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */,
 				C1EE9E812A38D0FB0064784A /* BuildDetails.plist in Resources */,
 				43FCBBC21E51710B00343C1B /* LaunchScreen.storyboard in Resources */,
+				7877942ED674BA37847514AD /* Loop/Resources/Sounds/acoustic_hg_harsh.caf in Resources */,
+				A82DB18B916DC17D2E180D59 /* Loop/Resources/Sounds/acoustic_hg_medium.caf in Resources */,
+				4A208427654F9A249EC2CFDB /* Loop/Resources/Sounds/acoustic_hg_mild.caf in Resources */,
+				F44BED105495ABA988BAB05F /* Loop/Resources/Sounds/acoustic_lg_harsh.caf in Resources */,
+				B0007FE66FB0FE886FACD77D /* Loop/Resources/Sounds/acoustic_lg_medium.caf in Resources */,
+				D0EBF80B1D85F96B156725AA /* Loop/Resources/Sounds/acoustic_lg_mild.caf in Resources */,
+				3461DE9DBC0B97D5662244FB /* Loop/Resources/Sounds/acoustic_lgs_harsh.caf in Resources */,
+				F98A16085E9F216CEDDB18DB /* Loop/Resources/Sounds/acoustic_lgs_medium.caf in Resources */,
+				182579BE820905E2B9FCC1B4 /* Loop/Resources/Sounds/acoustic_lgs_mild.caf in Resources */,
+				6AB8817E7C134FE630492390 /* Loop/Resources/Sounds/acoustic_ulg_harsh.caf in Resources */,
+				BAD8333EC083569038F10E88 /* Loop/Resources/Sounds/acoustic_ulg_medium.caf in Resources */,
+				6E0CBD04FE69B38497EFC6F0 /* Loop/Resources/Sounds/acoustic_ulg_mild.caf in Resources */,
+				DB1B4A63BB3DE5DF05D56791 /* Loop/Resources/Sounds/electronic_hg_harsh.caf in Resources */,
+				0EA4FC2C9D24030B0D586F80 /* Loop/Resources/Sounds/electronic_hg_medium.caf in Resources */,
+				09789816D7760CF9BAA96F28 /* Loop/Resources/Sounds/electronic_hg_mild.caf in Resources */,
+				D1530992424BA31F0A44EA27 /* Loop/Resources/Sounds/electronic_lg_harsh.caf in Resources */,
+				3E46B514B1D95CD39E91724B /* Loop/Resources/Sounds/electronic_lg_medium.caf in Resources */,
+				C9489985ABD6FED5A2E5C857 /* Loop/Resources/Sounds/electronic_lg_mild.caf in Resources */,
+				B63CAEC6D7662917D8EF89A7 /* Loop/Resources/Sounds/electronic_lgs_harsh.caf in Resources */,
+				746A339E8C3350AB42CC5A16 /* Loop/Resources/Sounds/electronic_lgs_medium.caf in Resources */,
+				9695396DE1F34E51C8CF0225 /* Loop/Resources/Sounds/electronic_lgs_mild.caf in Resources */,
+				06DEBA22295370ED71FA6FF1 /* Loop/Resources/Sounds/electronic_ulg_harsh.caf in Resources */,
+				4A1C8ED0D43F5DB88D9E54EF /* Loop/Resources/Sounds/electronic_ulg_medium.caf in Resources */,
+				B47913E810409CB0B7BC6576 /* Loop/Resources/Sounds/electronic_ulg_mild.caf in Resources */,
+				82D4B3B73B633E0CDA8CDF73 /* Loop/Resources/Sounds/glass_bell.caf in Resources */,
+				ACEDEA57D2D24A7AA7010A7B /* Loop/Resources/Sounds/hard_saw_wave.caf in Resources */,
+				908A8AAFECDBC70B57169E3D /* Loop/Resources/Sounds/harp.caf in Resources */,
+				EB2A217C9AD057A7DF01F116 /* Loop/Resources/Sounds/meow.caf in Resources */,
+				706AA94D1D4B49F51B04B9D6 /* Loop/Resources/Sounds/open_can.caf in Resources */,
+				D87EFB28C39228F73654A56A /* Loop/Resources/Sounds/open_wrapper.caf in Resources */,
+				C35102622CBDADC4F8A29531 /* Loop/Resources/Sounds/saw_wave.caf in Resources */,
+				0C63FC60520110C35B54456A /* Loop/Resources/Sounds/sine_wave.caf in Resources */,
+				ACC87746A312EF0DF019CE18 /* Loop/Resources/Sounds/voice_hg_amy.caf in Resources */,
+				29074112CB80B5D0729833D2 /* Loop/Resources/Sounds/voice_hg_bryce.caf in Resources */,
+				B0C24C973471C4B971DF3034 /* Loop/Resources/Sounds/voice_lg_amy.caf in Resources */,
+				E23DB8960A0D78A3D5BBBAC1 /* Loop/Resources/Sounds/voice_lg_bryce.caf in Resources */,
+				CD753CCE4F90A5DF08CD6FE3 /* Loop/Resources/Sounds/voice_lgs_amy.caf in Resources */,
+				82F11F858069EDA2DF65D909 /* Loop/Resources/Sounds/voice_lgs_bryce.caf in Resources */,
+				0996021E82CDE7DA7A3DD544 /* Loop/Resources/Sounds/voice_ulg_amy.caf in Resources */,
+				8BAF071E821EAC3FB1B183B3 /* Loop/Resources/Sounds/voice_ulg_bryce.caf in Resources */,
 				C9A47B0480AAB1FC572D3F01 /* critical.caf in Resources */,
 				DE965737FE2DAE9FE692769E /* alarm.caf in Resources */,
 				A413B305CB4C4009DA09BE57 /* bloom.caf in Resources */,
@@ -3591,7 +3786,6 @@
 				1D49795824E7289700948F05 /* ServicesViewModel.swift in Sources */,
 				1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */,
 				C1B80D632AF97D7200AB7705 /* LoopDataManager+CarbAbsorption.swift in Sources */,
-				DDC389FA2A2B62470066E2E8 /* ConstantApplicationFactorStrategy.swift in Sources */,
 				C191D2A125B3ACAA00C26C0B /* DosingStrategySelectionView.swift in Sources */,
 				A977A2F424ACFECF0059C207 /* CriticalEventLogExportManager.swift in Sources */,
 				89CA2B32226C18B8004D9350 /* TestingScenariosTableViewController.swift in Sources */,
@@ -3627,7 +3821,9 @@
 				B4F3D25124AF890C0095CE44 /* BluetoothStateManager.swift in Sources */,
 				1DDE273D24AEA4B000796622 /* SettingsViewModel.swift in Sources */,
 				FEEDB0000000000000000001 /* StatisticsViewModel.swift in Sources */,
+				414E7082E6A6B9DA8CD11EF3 /* CurrentSetupViewModel.swift in Sources */,
 				DD3DBD292A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift in Sources */,
+				A1B2C3D42E8F000100000002 /* GuardAndRunwaySelectionView.swift in Sources */,
 				842E40A72F22F7E2000CCCE0 /* TintedContent.swift in Sources */,
 				842E40A92F22F7E2000CCCE0 /* EstimatedReadTime.swift in Sources */,
 				842E40AA2F22F7E2000CCCE0 /* PresetsTrainingView.swift in Sources */,
@@ -3643,7 +3839,6 @@
 				1DB619AC270BAD3D006C9D07 /* VersionUpdateViewModel.swift in Sources */,
 				A9C62D882331703100535612 /* Service.swift in Sources */,
 				89CAB36324C8FE96009EE3CE /* PredictedGlucoseChartView.swift in Sources */,
-				DDC389F82A2B620B0066E2E8 /* GlucoseBasedApplicationFactorStrategy.swift in Sources */,
 				847F23432E4543140035C864 /* ActivePresetBanner.swift in Sources */,
 				84BC5BDF2E1C4A7300432000 /* InsulinDeliveryEventDetailsView.swift in Sources */,
 				4F6663941E905FD2009E74FC /* ChartColorPalette+Loop.swift in Sources */,
@@ -3680,6 +3875,8 @@
 				14C970842C5C2FB400E8A01B /* HowCarbEffectsWorksView.swift in Sources */,
 				1D6B1B6726866D89009AC446 /* AlertPermissionsChecker.swift in Sources */,
 				52ECDA0F09B4C8F23A4B450E /* InsulinDeliveryHistory.swift in Sources */,
+				8879F70ABCDF1E10619547A4 /* SetupChange.swift in Sources */,
+				D7DECBB118052B85680A241B /* SetupComparison.swift in Sources */,
 				C16F511B2B89363A00EFD7A1 /* SimpleInsulinDose.swift in Sources */,
 				4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */,
 				A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */,
@@ -3695,9 +3892,11 @@
 				1D12D3B92548EFDD00B53E8B /* main.swift in Sources */,
 				A9DCF32A25B0FABF00C89088 /* LoopUIColorPalette+Default.swift in Sources */,
 				1DDE273E24AEA4B000796622 /* SettingsView.swift in Sources */,
+				6D16FF26E7F84F97B5DB6A88 /* CurrentSetupView.swift in Sources */,
 				FEEDB0000000000000000004 /* Statistics/TimeInRangeBar.swift in Sources */,
 				A3C9F155FD92DC188BD9A21F /* Statistics/DailyInsulinChartView.swift in Sources */,
 				FEEDB0000000000000000003 /* Statistics/AGPChartView.swift in Sources */,
+				16097A41A1EF24BCF2F670DB /* Statistics/SetupComparisonCharts.swift in Sources */,
 				FEEDB0000000000000000002 /* Statistics/StatisticsView.swift in Sources */,
 				BAF043BF0BC70EC99AE79F71 /* HealthAccessView.swift in Sources */,
 				A9B607B0247F000F00792BE4 /* UserNotifications+Loop.swift in Sources */,
@@ -3728,7 +3927,6 @@
 				A97F250825E056D500F0EE19 /* OnboardingManager.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
-				DDC389F62A2B61750066E2E8 /* ApplicationFactorStrategy.swift in Sources */,
 				FEEDB0000000000000000000 /* GlucoseStatistics.swift in Sources */,
 				4F70C2101DE8FAC5006380B7 /* ExtensionDataManager.swift in Sources */,
 				1455ACB22C667BEE004F44F2 /* Deeplink.swift in Sources */,
@@ -3808,6 +4006,8 @@
 				895788AF242E69A2002CB114 /* BolusInput.swift in Sources */,
 				894F6DDB243C07CF00CCE676 /* GramLabel.swift in Sources */,
 				4FDDD23720DC51DF00D04B16 /* LoopDataManager.swift in Sources */,
+				D7A3000100000000000A0002 /* WatchCGMHost.swift in Sources */,
+				D7A3000100000000000A0004 /* WatchDeviceManagers.swift in Sources */,
 				89E267FD2292456700A3F2AF /* FeatureFlags.swift in Sources */,
 				898ECA60218ABD17001E9D35 /* GlucoseChartScaler.swift in Sources */,
 				894F6DD9243C060600CCE676 /* ScalablePositionedText.swift in Sources */,
@@ -3817,6 +4017,7 @@
 				C10C57FC2E70B8B900A4825C /* EnvironmentValues+GlucoseDisplayUnit.swift in Sources */,
 				4372E492213D956C0068E043 /* GlucoseRangeSchedule.swift in Sources */,
 				C12D72402E4FBC5F00BD628A /* WatchActionsView.swift in Sources */,
+				D7A3000100000000000A0006 /* WatchSensorView.swift in Sources */,
 				A9347F3324E7522900C99C34 /* WatchHistoricalCarbs.swift in Sources */,
 				895788AD242E69A2002CB114 /* AbsorptionTimeSelection.swift in Sources */,
 				89A605EF2432925D009C1096 /* CompletionCheckmark.swift in Sources */,
@@ -3950,6 +4151,8 @@
 				A9A63F8E246B271600588D5B /* NSTimeInterval.swift in Sources */,
 				C152B9F72C9C7EF100ACBC06 /* AutomationHistoryEntryTests.swift in Sources */,
 				30E4A68B8C914C5E4B245555 /* InsulinDeliveryHistoryTests.swift in Sources */,
+				D70F014FFB67BA58678452E9 /* SetupChangeTests.swift in Sources */,
+				2622474F63F391C3E102B5E5 /* SetupComparisonTests.swift in Sources */,
 				FEEDB0000000000000000005 /* GlucoseStatisticsTests.swift in Sources */,
 				A9DFAFB324F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift in Sources */,
 				A963B27A252CEBAE0062AA12 /* SetBolusUserInfoTests.swift in Sources */,
@@ -3975,6 +4178,7 @@
 				C18859A42AF165330010F21F /* MockCGMManager.swift in Sources */,
 				E9C58A7324DB4A2700487A17 /* LoopDataManagerTests.swift in Sources */,
 				A1B2C3D40000000000000002 /* GlucoseAlertManagerTests.swift in Sources */,
+				A1B2C3D40000000000000012 /* AlarmSoundCatalogTests.swift in Sources */,
 				C18859A22AF165130010F21F /* MockPumpManager.swift in Sources */,
 				E98A55F324EDD9530008715D /* MockSettingsStore.swift in Sources */,
 				C165756F2534C468004AE16E /* SimpleBolusViewModelTests.swift in Sources */,

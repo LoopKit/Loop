@@ -402,8 +402,9 @@ struct GlucoseAlertDetailView: View {
     let horizon: HorizonBinding?
     let infoNotice: String?
     var delay: DelayBinding? = nil
-    var showsTestButton: Bool = false
     var soundBinding: Binding<String>? = nil
+    /// Which alarm this is, so the picker can lead with the sets written for it.
+    var soundKind: GlucoseAlarmKind? = nil
     var playsThroughSilent: Binding<Bool>? = nil
 
     struct SnoozeBinding {
@@ -456,10 +457,10 @@ struct GlucoseAlertDetailView: View {
                         Text("Fires once when Loop's forecast first dips below the level inside this horizon. Re-arms when the forecast clears.")
                     }
                 }
-                if let soundBinding {
+                if let soundBinding, let soundKind {
                     Section {
                         NavigationLink {
-                            SoundPickerView(selection: soundBinding)
+                            SoundPickerView(kind: soundKind, selection: soundBinding)
                         } label: {
                             HStack {
                                 Text("Sound")
@@ -478,28 +479,68 @@ struct GlucoseAlertDetailView: View {
                             Text("The sound played when this alarm fires.")
                         }
                     }
-                }
-            }
 
-            if showsTestButton, FeatureFlags.allowDebugFeatures {
-                Section {
-                    if manager.pendingTestUrgentLow {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-                            Text("Test armed — next CGM reading will fire")
-                            Spacer()
-                            Button("Cancel") { manager.cancelTestUrgentLow() }.foregroundStyle(.red)
-                        }
-                    } else {
-                        Button("Arm test alert") { manager.armTestUrgentLowOnNextReading() }
-                    }
-                } footer: {
-                    Text("Arming substitutes a below-threshold value in place of the next real CGM reading, so the alert fires from whatever app state Loop is in at that moment.")
+                    ArmTestSection(kind: soundKind, manager: manager)
                 }
             }
         }
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// Sends one real alert on demand, so the alarm can be checked end to end
+/// against whatever the phone is actually set to — ringer level, silent
+/// switch, a Focus, Do Not Disturb, the Critical Alerts permission.
+///
+/// Arming rather than firing on the spot is the point: the alert goes out
+/// alongside the next reading, which leaves time to lock the phone, put it in
+/// a pocket or turn a Focus on first. Firing from the settings screen would
+/// only ever prove that a foreground alert works.
+private struct ArmTestSection: View {
+    let kind: GlucoseAlarmKind
+    @ObservedObject var manager: GlucoseAlertManager
+
+    private var isArmed: Bool { manager.armedTest == kind }
+
+    var body: some View {
+        Section {
+            if isArmed {
+                HStack {
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                    Text(armedLabel)
+                    Spacer()
+                    Button("Cancel") { manager.cancelArmedTest() }.foregroundStyle(.red)
+                }
+            } else {
+                Button("Test This Alert") { manager.armTest(for: kind) }
+            }
+        } footer: {
+            Text(explanation)
+        }
+    }
+
+    private var armedLabel: String {
+        kind == .predictedLow
+            ? NSLocalizedString("Armed — fires on the next loop cycle",
+                                comment: "Status of an armed predicted-low alert test")
+            : NSLocalizedString("Armed — fires on the next sensor reading",
+                                comment: "Status of an armed glucose alert test")
+    }
+
+    private var explanation: String {
+        let lead = kind == .predictedLow
+            ? NSLocalizedString("Sends this alert once, on the next completed loop cycle.",
+                                comment: "Footer of the predicted-low alert test control, when it fires")
+            : NSLocalizedString("Sends this alert once, with the next sensor reading.",
+                                comment: "Footer of the glucose alert test control, when it fires")
+        let purpose = NSLocalizedString(
+            "Lock your phone, turn on a Focus or turn your ringer down first, then see whether the alert still reaches you.",
+            comment: "Footer of the glucose alert test control, what it is for"
+        )
+        let reassurance = NSLocalizedString("Your glucose data and your real alerts aren't affected.",
+                                            comment: "Footer of the glucose alert test control, reassurance")
+        return [lead, purpose, reassurance].joined(separator: " ")
     }
 }
 
@@ -512,7 +553,7 @@ extension GlucoseAlertDetailView {
             enabled: detail.cfgBind(\.lowEnabled),
             snooze: .init(enabled: detail.cfgBind(\.lowSnoozeEnabled), interval: detail.cfgBind(\.lowRepeatInterval)),
             horizon: nil, infoNotice: nil,
-            soundBinding: Binding(get: { manager.lowSound }, set: { manager.lowSound = $0 }),
+            soundBinding: Binding(get: { manager.lowSound }, set: { manager.lowSound = $0 }), soundKind: .low,
             playsThroughSilent: Binding(get: { manager.lowPlaysThroughSilent }, set: { manager.lowPlaysThroughSilent = $0 })
         )
     }
@@ -525,8 +566,8 @@ extension GlucoseAlertDetailView {
             description: "Alerts you when your sensor reading is at or below this level. Repeats every 5 min while still low.",
             levelLabel: "Level", level: detail.cfgBind(\.urgentLowThresholdMgDL), levelRange: 50...70,
             enabled: detail.cfgBind(\.urgentLowEnabled),
-            snooze: nil, horizon: nil, infoNotice: notice, showsTestButton: true,
-            soundBinding: Binding(get: { manager.urgentLowSound }, set: { manager.urgentLowSound = $0 })
+            snooze: nil, horizon: nil, infoNotice: notice,
+            soundBinding: Binding(get: { manager.urgentLowSound }, set: { manager.urgentLowSound = $0 }), soundKind: .urgentLow
         )
     }
 
@@ -539,7 +580,7 @@ extension GlucoseAlertDetailView {
             snooze: .init(enabled: detail.cfgBind(\.highSnoozeEnabled), interval: detail.cfgBind(\.highRepeatInterval)),
             horizon: nil, infoNotice: nil,
             delay: .init(enabled: detail.cfgBind(\.highDelayEnabled), interval: detail.cfgBind(\.highDelay)),
-            soundBinding: Binding(get: { manager.highSound }, set: { manager.highSound = $0 }),
+            soundBinding: Binding(get: { manager.highSound }, set: { manager.highSound = $0 }), soundKind: .high,
             playsThroughSilent: Binding(get: { manager.highPlaysThroughSilent }, set: { manager.highPlaysThroughSilent = $0 })
         )
     }
@@ -551,7 +592,7 @@ extension GlucoseAlertDetailView {
             levelLabel: "Level", level: detail.cfgBind(\.predictedLowThresholdMgDL), levelRange: 55...80,
             enabled: detail.cfgBind(\.predictedLowEnabled),
             snooze: nil, horizon: .init(value: detail.cfgBind(\.predictedLowHorizon)), infoNotice: nil,
-            soundBinding: Binding(get: { manager.predictedLowSound }, set: { manager.predictedLowSound = $0 }),
+            soundBinding: Binding(get: { manager.predictedLowSound }, set: { manager.predictedLowSound = $0 }), soundKind: .predictedLow,
             playsThroughSilent: Binding(get: { manager.predictedLowPlaysThroughSilent }, set: { manager.predictedLowPlaysThroughSilent = $0 })
         )
     }
@@ -650,30 +691,229 @@ private struct HorizonRow: View {
 
 // MARK: - Sound picker
 
+/// Leads with the themed sets written for this alarm and tucks the older
+/// generic tones under a collapsible, so the recommended choices are the
+/// first thing on screen.
 private struct SoundPickerView: View {
+    let kind: GlucoseAlarmKind
     @Binding var selection: String
     @StateObject private var preview = AlarmSoundPreviewPlayer()
+    /// Start expanded when the current pick lives in there, so the selection
+    /// is never hidden behind a closed group.
+    @State private var showsOtherSounds: Bool
+
+    init(kind: GlucoseAlarmKind, selection: Binding<String>) {
+        self.kind = kind
+        _selection = selection
+        _showsOtherSounds = State(
+            initialValue: AlarmSoundCatalog.entry(forFilename: selection.wrappedValue)?.isGeneric ?? false
+        )
+    }
 
     var body: some View {
-        List {
-            ForEach(AlarmSoundCatalog.all) { sound in
-                Button {
-                    selection = sound.filename
-                    preview.play(soundNamed: sound.filename)
-                } label: {
-                    HStack {
-                        Text(sound.displayName).foregroundStyle(.primary)
-                        Spacer()
-                        if sound.filename == selection {
-                            Image(systemName: "checkmark").foregroundStyle(.tint).fontWeight(.semibold)
+        ScrollViewReader { proxy in
+            List {
+                Section {
+                    ForEach(AlarmSoundCatalog.themedEntries(for: kind)) { entry in
+                        SoundPickerRow(entry: entry, selection: $selection, preview: preview)
+                            .id(entry.id)
+                    }
+                } footer: {
+                    Text(footer)
+                }
+
+                Section {
+                    // Not a DisclosureGroup: its chevron points the way a
+                    // NavigationLink's does, so the row reads as a push rather
+                    // than as something that opens in place. Down for "more
+                    // below", flipping up once it is open.
+                    Button {
+                        withAnimation { showsOtherSounds.toggle() }
+                    } label: {
+                        HStack {
+                            Text("Other Sounds").foregroundStyle(.primary)
+                            Spacer()
+                            Text("\(AlarmSoundCatalog.genericTones.count)")
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.down")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                                .rotationEffect(.degrees(showsOtherSounds ? 180 : 0))
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint(showsOtherSounds ? "Collapse" : "Expand")
+
+                    if showsOtherSounds {
+                        ForEach(AlarmSoundCatalog.genericTones) { entry in
+                            SoundPickerRow(entry: entry, selection: $selection, preview: preview)
+                                .id(entry.id)
                         }
                     }
                 }
             }
+            .onAppear {
+                // Opening the group isn't enough on its own — a pick near the
+                // bottom of 26 tones is still off screen. Land on it.
+                guard let entry = AlarmSoundCatalog.entry(forFilename: selection), entry.isGeneric else { return }
+                DispatchQueue.main.async { proxy.scrollTo(entry.id, anchor: .center) }
+            }
         }
-        .navigationTitle("Sound")
+        .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { preview.stop() }
+    }
+
+    /// Names the alarm being edited: four screens otherwise titled "Sound".
+    private var title: String {
+        String(
+            format: NSLocalizedString("%1$@ Sound", comment: "Title of the alarm sound picker (1: alarm name)"),
+            kind.displayName
+        )
+    }
+
+    /// Describes whichever control the selected set actually shows.
+    private var footer: String {
+        let lead = NSLocalizedString("These sets are written for this alarm.",
+                                     comment: "Footer of the themed alarm sound list")
+        switch AlarmSoundCatalog.entry(forFilename: selection)?.selector {
+        case .urgency:
+            return lead + " " + NSLocalizedString("Urgency picks a different recording, not the same one louder.",
+                                                  comment: "Footer of the themed alarm sound list, urgency slider shown")
+        case .voice:
+            return lead + " " + NSLocalizedString("Voice picks who reads the alert out.",
+                                                  comment: "Footer of the themed alarm sound list, voice picker shown")
+        default:
+            // A generic tone, or a file no longer in the catalog: no control.
+            return lead
+        }
+    }
+}
+
+private struct SoundPickerRow: View {
+    let entry: AlarmSoundEntry
+    @Binding var selection: String
+    @ObservedObject var preview: AlarmSoundPreviewPlayer
+
+    private var isSelected: Bool { entry.filenames.contains(selection) }
+
+    /// The file this row stands for: the picked variant while selected,
+    /// otherwise the entry's default.
+    private var filename: String {
+        isSelected ? selection : entry.defaultVariant.filename
+    }
+
+    private var variant: AlarmSound {
+        entry.variant(forFilename: filename) ?? entry.defaultVariant
+    }
+
+    private var isPlaying: Bool { preview.playing == filename }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            row
+            if isSelected, entry.selector != .none {
+                variantControl
+            }
+        }
+        .animation(.easeInOut(duration: 0.15), value: isSelected)
+    }
+
+    private var row: some View {
+        HStack(spacing: 12) {
+            Button {
+                select(variant)
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .foregroundStyle(isSelected ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
+                        .frame(width: 20)
+                    Text(entry.displayName).foregroundStyle(.primary)
+                    Spacer()
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+
+            Button {
+                preview.toggle(soundNamed: filename)
+            } label: {
+                Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle.fill")
+                    .font(.title3)
+                    .foregroundStyle(.tint)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isPlaying ? "Stop preview" : "Play preview")
+        }
+    }
+
+    @ViewBuilder private var variantControl: some View {
+        switch entry.selector {
+        case .urgency: urgencySlider
+        case .voice: voicePicker
+        case .none: EmptyView()
+        }
+    }
+
+    /// Discrete Mild / Medium / Harsh. Changing it auditions the new level —
+    /// the point is hearing how the character changes.
+    private var urgencySlider: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack {
+                Text("Urgency Level")
+                Spacer()
+                Text(variant.displayName).foregroundStyle(.secondary)
+            }
+            .font(.footnote)
+
+            Slider(
+                value: Binding(
+                    get: { Double(entry.variants.firstIndex(of: variant) ?? 0) },
+                    set: { raw in
+                        let index = min(max(Int(raw.rounded()), 0), entry.variants.count - 1)
+                        select(entry.variants[index])
+                    }
+                ),
+                in: 0...Double(max(entry.variants.count - 1, 1)),
+                step: 1
+            )
+            .padding(.vertical, 4)
+            .accessibilityLabel("Urgency Level")
+            .accessibilityValue(variant.displayName)
+
+            HStack {
+                ForEach(Array(entry.variants.enumerated()), id: \.element.id) { index, item in
+                    if index > 0 { Spacer() }
+                    Text(item.displayName).font(.caption2).foregroundStyle(.secondary)
+                }
+            }
+            .accessibilityHidden(true)
+        }
+        .padding(.leading, 32)
+    }
+
+    /// No label above it: the row this sits under is already titled "Voice".
+    private var voicePicker: some View {
+        Picker("Voice", selection: Binding(
+            get: { variant.id },
+            set: { id in
+                guard let match = entry.variants.first(where: { $0.id == id }) else { return }
+                select(match)
+            }
+        )) {
+            ForEach(entry.variants) { Text($0.displayName).tag($0.id) }
+        }
+        .labelsHidden()
+        .pickerStyle(.segmented)
+        .padding(.leading, 32)
+    }
+
+    /// Selecting always auditions: picking a sound you can't hear isn't a choice.
+    private func select(_ sound: AlarmSound) {
+        selection = sound.filename
+        preview.play(soundNamed: sound.filename)
     }
 }
 
@@ -682,7 +922,17 @@ private struct SoundPickerView: View {
 /// switch on, matching how the alarms themselves behave.
 @MainActor
 private final class AlarmSoundPreviewPlayer: ObservableObject {
+    /// Filename currently sounding, so a row can show stop instead of play.
+    @Published private(set) var playing: String?
     private var player: AVAudioPlayer?
+
+    func toggle(soundNamed soundName: String) {
+        if playing == soundName {
+            stop()
+        } else {
+            play(soundNamed: soundName)
+        }
+    }
 
     func play(soundNamed soundName: String) {
         stop()
@@ -695,9 +945,11 @@ private final class AlarmSoundPreviewPlayer: ObservableObject {
             try session.setActive(true, options: [])
             let p = try AVAudioPlayer(contentsOf: url)
             p.volume = 1.0
+            p.delegate = previewDelegate
             p.prepareToPlay()
-            p.play()
+            guard p.play() else { return }
             player = p
+            playing = soundName
         } catch {
             // Preview is best-effort; silently ignore failures.
         }
@@ -706,6 +958,29 @@ private final class AlarmSoundPreviewPlayer: ObservableObject {
     func stop() {
         player?.stop()
         player = nil
+        playing = nil
         try? AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
+    }
+
+    private lazy var previewDelegate: PreviewDelegate = {
+        let delegate = PreviewDelegate()
+        // Which player finished matters: the hop to the main actor leaves a
+        // tick in which a new preview can already have started, and that one
+        // must not be stopped by its predecessor finishing.
+        delegate.onFinish = { [weak self] finished in
+            guard let self, self.player === finished else { return }
+            self.stop()
+        }
+        return delegate
+    }()
+}
+
+/// Clears the play state once a preview runs out, so the row flips back from
+/// stop to play without the user tapping anything.
+private final class PreviewDelegate: NSObject, AVAudioPlayerDelegate {
+    var onFinish: ((AVAudioPlayer) -> Void)?
+
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully _: Bool) {
+        Task { @MainActor in self.onFinish?(player) }
     }
 }

@@ -235,6 +235,7 @@ final class AnalyticsServicesManager {
         identify("Dosing Strategy", value: state.dosingStrategy)
         identify("Integral Retrospective Correction", value: state.integralRetrospectiveCorrection ? "On" : "Off")
         identify("Glucose Based Partial Application", value: state.glucoseBasedPartialApplication ? "On" : "Off")
+        identify("Guard + Runway", value: state.guardAndRunway ? "On" : "Off")
         lastState = state
     }
 
@@ -273,6 +274,9 @@ final class AnalyticsServicesManager {
         }
         if newState.glucoseBasedPartialApplication != oldState.glucoseBasedPartialApplication {
             logEvent("Algorithm experiment change", withProperties: ["experiment": "Glucose Based Partial Application", "enabled": newState.glucoseBasedPartialApplication])
+        }
+        if newState.guardAndRunway != oldState.guardAndRunway {
+            logEvent("Algorithm experiment change", withProperties: ["experiment": "Guard + Runway", "enabled": newState.guardAndRunway])
         }
     }
 
@@ -333,6 +337,25 @@ struct AnalyticsState: Codable, Equatable {
     var dosingStrategy: String
     var integralRetrospectiveCorrection: Bool
     var glucoseBasedPartialApplication: Bool
+    var guardAndRunway: Bool
+
+    init(closedLoop: Bool, dosingStrategy: String, integralRetrospectiveCorrection: Bool, glucoseBasedPartialApplication: Bool, guardAndRunway: Bool) {
+        self.closedLoop = closedLoop
+        self.dosingStrategy = dosingStrategy
+        self.integralRetrospectiveCorrection = integralRetrospectiveCorrection
+        self.glucoseBasedPartialApplication = glucoseBasedPartialApplication
+        self.guardAndRunway = guardAndRunway
+    }
+
+    // Summaries stored before guardAndRunway was added lack it
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        closedLoop = try container.decode(Bool.self, forKey: .closedLoop)
+        dosingStrategy = try container.decode(String.self, forKey: .dosingStrategy)
+        integralRetrospectiveCorrection = try container.decode(Bool.self, forKey: .integralRetrospectiveCorrection)
+        glucoseBasedPartialApplication = try container.decode(Bool.self, forKey: .glucoseBasedPartialApplication)
+        guardAndRunway = try container.decodeIfPresent(Bool.self, forKey: .guardAndRunway) ?? false
+    }
 }
 
 struct AnalyticsDailySummary: Codable, Equatable {
@@ -365,6 +388,7 @@ struct AnalyticsDailySummary: Codable, Equatable {
             properties["dosingStrategy"] = state.dosingStrategy
             properties["integralRetrospectiveCorrection"] = state.integralRetrospectiveCorrection
             properties["glucoseBasedPartialApplication"] = state.glucoseBasedPartialApplication
+            properties["guardAndRunway"] = state.guardAndRunway
         }
         return properties
     }

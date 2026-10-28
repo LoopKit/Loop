@@ -13,17 +13,130 @@ import Combine
 import Foundation
 import LoopAlgorithm
 import LoopKit
+import LoopKitUI
 import os.log
 
 // MARK: - Sound catalog
 
-/// One selectable alarm sound. `filename` is the bundled `.caf` (also the
-/// `Alert.Sound` name stamped onto issued alerts); `displayName` is what the
-/// picker shows.
+/// The glucose alarms a sound can be chosen for. Themed sets are written per
+/// alarm — the Urgent Low set is not the High set at another pitch — so each
+/// set is only offered on the alarm it was written for.
+enum GlucoseAlarmKind: String, CaseIterable {
+    case urgentLow
+    case low
+    case predictedLow
+    case high
+
+    var displayName: String {
+        switch self {
+        case .urgentLow: return NSLocalizedString("Urgent Low", comment: "Name of the urgent low glucose alarm")
+        case .low: return NSLocalizedString("Low", comment: "Name of the low glucose alarm")
+        case .predictedLow: return NSLocalizedString("Predicted Low", comment: "Name of the predicted low glucose alarm")
+        case .high: return NSLocalizedString("High", comment: "Name of the high glucose alarm")
+        }
+    }
+
+    /// Identifier of the alert this alarm issues.
+    var alertIdentifier: Alert.AlertIdentifier {
+        switch self {
+        case .urgentLow: return GlucoseAlertManager.urgentLowAlertIdentifier
+        case .low: return GlucoseAlertManager.lowAlertIdentifier
+        case .predictedLow: return GlucoseAlertManager.predictedLowAlertIdentifier
+        case .high: return GlucoseAlertManager.highAlertIdentifier
+        }
+    }
+
+    /// Identifier of this alarm's armed *test* alert. Deliberately distinct
+    /// from the real one: a test then can't touch the real alarm's episode
+    /// state, its retraction, or its AlarmKit alarm.
+    var testAlertIdentifier: Alert.AlertIdentifier { "\(alertIdentifier).test" }
+
+    /// Matches the real alarm's level. Getting past Focus and the silent
+    /// switch is the whole point of the test, so the test has to ask for
+    /// delivery on exactly the same terms.
+    var interruptionLevel: Alert.InterruptionLevel {
+        self == .urgentLow ? .critical : .timeSensitive
+    }
+
+    /// The alarm an alert identifier belongs to, real or test.
+    static func kind(forAlertIdentifier identifier: Alert.AlertIdentifier) -> GlucoseAlarmKind? {
+        allCases.first { $0.alertIdentifier == identifier || $0.testAlertIdentifier == identifier }
+    }
+}
+
+/// How disruptive a themed alarm sounds. Intensity is carried by timbre,
+/// loudness and length together — each level is its own recording, not one
+/// recording at three gain settings.
+enum AlarmUrgencyLevel: String, CaseIterable, Identifiable {
+    case mild
+    case medium
+    case harsh
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .mild: return NSLocalizedString("Mild", comment: "Urgency level of a themed alarm sound")
+        case .medium: return NSLocalizedString("Medium", comment: "Urgency level of a themed alarm sound")
+        case .harsh: return NSLocalizedString("Harsh", comment: "Urgency level of a themed alarm sound")
+        }
+    }
+}
+
+/// Spoken alert voices.
+enum AlarmVoice: String, CaseIterable, Identifiable {
+    case amy
+    case bryce
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .amy: return NSLocalizedString("Amy", comment: "Name of a spoken alarm voice")
+        case .bryce: return NSLocalizedString("Bryce", comment: "Name of a spoken alarm voice")
+        }
+    }
+}
+
+/// One selectable variant of a sound entry. `filename` is the bundled `.caf`
+/// (also the `Alert.Sound` name stamped onto issued alerts) and is the only
+/// thing persisted, so a stored selection survives any catalog reshuffle.
 struct AlarmSound: Identifiable, Equatable {
-    let filename: String
+    let id: String
     let displayName: String
-    var id: String { filename }
+    let filename: String
+}
+
+/// What the picker reveals once a themed entry is selected.
+enum AlarmSoundSelector {
+    case none
+    case urgency
+    case voice
+}
+
+/// One row in the sound picker. A themed entry carries several variants
+/// behind one name (Acoustic at three urgency levels, Voice in two voices);
+/// a generic tone carries exactly one.
+struct AlarmSoundEntry: Identifiable, Equatable {
+    let id: String
+    let displayName: String
+    /// Empty means generic: offered on every alarm, under "Other Sounds".
+    let kinds: [GlucoseAlarmKind]
+    let selector: AlarmSoundSelector
+    let variants: [AlarmSound]
+
+    var isGeneric: Bool { kinds.isEmpty }
+    var filenames: [String] { variants.map { $0.filename } }
+
+    func variant(forFilename filename: String) -> AlarmSound? {
+        variants.first { $0.filename == filename }
+    }
+
+    /// Middle of the urgency slider, and the set the sound designer
+    /// recommends after hallway testing with PWDs and caregivers.
+    var defaultVariant: AlarmSound {
+        variants.first { $0.id == AlarmUrgencyLevel.medium.rawValue } ?? variants[0]
+    }
 }
 
 /// The sounds available for glucose alarms. Each file is bundled in
@@ -32,29 +145,110 @@ struct AlarmSound: Identifiable, Equatable {
 /// critical fallback) and by the notification path once copied into
 /// `Library/Sounds` via the AlertSoundVendor mechanism.
 enum AlarmSoundCatalog {
-    static let all: [AlarmSound] = [
-        AlarmSound(filename: "urgent_low.caf", displayName: "Urgent Low"),
-        AlarmSound(filename: "critical.caf", displayName: "Sharp Alarm"),
-        AlarmSound(filename: "alarm.caf", displayName: "Alarm"),
-        AlarmSound(filename: "bright_alarm.caf", displayName: "Bright Alarm"),
-        AlarmSound(filename: "honk.caf", displayName: "Honk"),
-        AlarmSound(filename: "chime.caf", displayName: "Chime"),
-        AlarmSound(filename: "clear_chimes.caf", displayName: "Clear Chimes"),
-        AlarmSound(filename: "high_chimes.caf", displayName: "High Chimes"),
-        AlarmSound(filename: "dings.caf", displayName: "Dings"),
-        AlarmSound(filename: "trill.caf", displayName: "Trill"),
-        AlarmSound(filename: "bloom.caf", displayName: "Bloom"),
-        AlarmSound(filename: "bloop.caf", displayName: "Bloop"),
-        AlarmSound(filename: "spring.caf", displayName: "Spring"),
-        AlarmSound(filename: "minimal.caf", displayName: "Minimal"),
-        AlarmSound(filename: "simple.caf", displayName: "Simple"),
-        AlarmSound(filename: "synth.caf", displayName: "Synth"),
-        AlarmSound(filename: "mood_synth.caf", displayName: "Mood Synth"),
-        AlarmSound(filename: "crying.caf", displayName: "Crying"),
+    /// Filename slug per alarm, matching the sound designer's prefixes.
+    private static let slugs: [(kind: GlucoseAlarmKind, slug: String)] = [
+        (.urgentLow, "ulg"),
+        (.low, "lg"),
+        (.predictedLow, "lgs"),
+        (.high, "hg"),
     ]
 
+    private static func themed(_ theme: String, _ displayName: String) -> [AlarmSoundEntry] {
+        slugs.map { kind, slug in
+            AlarmSoundEntry(
+                id: "\(theme).\(slug)",
+                displayName: displayName,
+                kinds: [kind],
+                selector: .urgency,
+                variants: AlarmUrgencyLevel.allCases.map {
+                    AlarmSound(id: $0.rawValue, displayName: $0.displayName, filename: "\(theme)_\(slug)_\($0.rawValue).caf")
+                }
+            )
+        }
+    }
+
+    private static let voiceEntries: [AlarmSoundEntry] = slugs.map { kind, slug in
+        AlarmSoundEntry(
+            id: "voice.\(slug)",
+            displayName: NSLocalizedString("Voice", comment: "Name of the spoken alarm sound set"),
+            kinds: [kind],
+            selector: .voice,
+            variants: AlarmVoice.allCases.map {
+                AlarmSound(id: $0.rawValue, displayName: $0.displayName, filename: "voice_\(slug)_\($0.rawValue).caf")
+            }
+        )
+    }
+
+    private static let genericEntries: [AlarmSoundEntry] = [
+        ("urgent_low.caf", NSLocalizedString("Urgent Low", comment: "Name of a glucose alarm sound")),
+        ("critical.caf", NSLocalizedString("Sharp Alarm", comment: "Name of a glucose alarm sound")),
+        ("alarm.caf", NSLocalizedString("Alarm", comment: "Name of a glucose alarm sound")),
+        ("bright_alarm.caf", NSLocalizedString("Bright Alarm", comment: "Name of a glucose alarm sound")),
+        ("honk.caf", NSLocalizedString("Honk", comment: "Name of a glucose alarm sound")),
+        ("chime.caf", NSLocalizedString("Chime", comment: "Name of a glucose alarm sound")),
+        ("clear_chimes.caf", NSLocalizedString("Clear Chimes", comment: "Name of a glucose alarm sound")),
+        ("high_chimes.caf", NSLocalizedString("High Chimes", comment: "Name of a glucose alarm sound")),
+        ("dings.caf", NSLocalizedString("Dings", comment: "Name of a glucose alarm sound")),
+        ("trill.caf", NSLocalizedString("Trill", comment: "Name of a glucose alarm sound")),
+        ("bloom.caf", NSLocalizedString("Bloom", comment: "Name of a glucose alarm sound")),
+        ("bloop.caf", NSLocalizedString("Bloop", comment: "Name of a glucose alarm sound")),
+        ("spring.caf", NSLocalizedString("Spring", comment: "Name of a glucose alarm sound")),
+        ("minimal.caf", NSLocalizedString("Minimal", comment: "Name of a glucose alarm sound")),
+        ("simple.caf", NSLocalizedString("Simple", comment: "Name of a glucose alarm sound")),
+        ("synth.caf", NSLocalizedString("Synth", comment: "Name of a glucose alarm sound")),
+        ("mood_synth.caf", NSLocalizedString("Mood Synth", comment: "Name of a glucose alarm sound")),
+        ("crying.caf", NSLocalizedString("Crying", comment: "Name of a glucose alarm sound")),
+        ("glass_bell.caf", NSLocalizedString("Glass Bell", comment: "Name of a glucose alarm sound")),
+        ("harp.caf", NSLocalizedString("Harp", comment: "Name of a glucose alarm sound")),
+        ("meow.caf", NSLocalizedString("Meow", comment: "Name of a glucose alarm sound")),
+        ("saw_wave.caf", NSLocalizedString("Saw Wave", comment: "Name of a glucose alarm sound")),
+        ("hard_saw_wave.caf", NSLocalizedString("Hard Saw Wave", comment: "Name of a glucose alarm sound")),
+        ("sine_wave.caf", NSLocalizedString("Sine Wave", comment: "Name of a glucose alarm sound")),
+        ("open_can.caf", NSLocalizedString("Open Can", comment: "Name of a glucose alarm sound")),
+        ("open_wrapper.caf", NSLocalizedString("Open Wrapper", comment: "Name of a glucose alarm sound")),
+    ].map { filename, name in
+        AlarmSoundEntry(
+            id: filename,
+            displayName: name,
+            kinds: [],
+            selector: .none,
+            variants: [AlarmSound(id: "default", displayName: name, filename: filename)]
+        )
+    }
+
+    static let entries: [AlarmSoundEntry] = themed("acoustic", NSLocalizedString("Acoustic", comment: "Name of the acoustic themed alarm sound set"))
+        + themed("electronic", NSLocalizedString("Electronic", comment: "Name of the electronic themed alarm sound set"))
+        + voiceEntries
+        + genericEntries
+
+    static let allFilenames: [String] = entries.flatMap { $0.filenames }
+
+    /// Themed sets written for this alarm, in display order.
+    static func themedEntries(for kind: GlucoseAlarmKind) -> [AlarmSoundEntry] {
+        entries.filter { $0.kinds.contains(kind) }
+    }
+
+    /// Generic tones, offered on every alarm.
+    static var genericTones: [AlarmSoundEntry] { genericEntries }
+
+    static func entry(forFilename filename: String) -> AlarmSoundEntry? {
+        entries.first { $0.filenames.contains(filename) }
+    }
+
+    /// The themed default for an alarm: Acoustic, Medium.
+    static func defaultFilename(for kind: GlucoseAlarmKind) -> String {
+        themedEntries(for: kind).first { $0.id.hasPrefix("acoustic.") }?.defaultVariant.filename ?? "alarm.caf"
+    }
+
     static func displayName(for filename: String) -> String {
-        all.first { $0.filename == filename }?.displayName ?? filename
+        guard let entry = entry(forFilename: filename) else { return filename }
+        guard !entry.isGeneric, let variant = entry.variant(forFilename: filename) else {
+            return entry.displayName
+        }
+        return String(
+            format: NSLocalizedString("%1$@ · %2$@", comment: "An alarm sound's set name and the chosen variant (1: set name, 2: variant name)"),
+            entry.displayName, variant.displayName
+        )
     }
 }
 
@@ -231,13 +425,14 @@ final class GlucoseAlertManager: ObservableObject {
     private static let highPlaysThroughSilentKey = "GlucoseAlertHighPlaysThroughSilent"
     private static let predictedLowPlaysThroughSilentKey = "GlucoseAlertPredictedLowPlaysThroughSilent"
     private static let episodeStateKey = "GlucoseAlertEpisodeState"
+    private static let armedTestKey = "GlucoseAlertArmedTest"
 
-    // Per-alarm sound defaults. Urgent low keeps the loud critical tone;
-    // the rest get a gentler default the user can change.
-    static let defaultUrgentLowSound = "urgent_low.caf"
-    static let defaultLowSound = "simple.caf"
-    static let defaultHighSound = "chime.caf"
-    static let defaultPredictedLowSound = "mood_synth.caf"
+    // Per-alarm sound defaults: each alarm's own Acoustic set at Medium, the
+    // variant the sound designer recommends after testing with PWDs.
+    static let defaultUrgentLowSound = AlarmSoundCatalog.defaultFilename(for: .urgentLow)
+    static let defaultLowSound = AlarmSoundCatalog.defaultFilename(for: .low)
+    static let defaultHighSound = AlarmSoundCatalog.defaultFilename(for: .high)
+    static let defaultPredictedLowSound = AlarmSoundCatalog.defaultFilename(for: .predictedLow)
     static let defaultLowPlaysThroughSilent = true
     static let defaultHighPlaysThroughSilent = false
     static let defaultPredictedLowPlaysThroughSilent = true
@@ -253,6 +448,7 @@ final class GlucoseAlertManager: ObservableObject {
     ]
 
     private let alertIssuer: AlertIssuer
+    private let displayGlucosePreference: DisplayGlucosePreference
     private let userDefaults: UserDefaults
 
     /// Ordered list of profiles; `profiles[0]` is always Primary.
@@ -302,22 +498,22 @@ final class GlucoseAlertManager: ObservableObject {
     }
 
     func playsThroughSilent(for identifier: Alert.AlertIdentifier) -> Bool {
-        switch identifier {
-        case Self.lowAlertIdentifier:          return lowPlaysThroughSilent
-        case Self.highAlertIdentifier:         return highPlaysThroughSilent
-        case Self.predictedLowAlertIdentifier: return predictedLowPlaysThroughSilent
-        default:                               return false
+        switch GlucoseAlarmKind.kind(forAlertIdentifier: identifier) {
+        case .low:            return lowPlaysThroughSilent
+        case .high:           return highPlaysThroughSilent
+        case .predictedLow:   return predictedLowPlaysThroughSilent
+        case .urgentLow, nil: return false
         }
     }
 
     /// The configured sound filename for a given glucose alarm identifier.
     func configuredSoundName(for identifier: Alert.AlertIdentifier) -> String {
-        switch identifier {
-        case Self.urgentLowAlertIdentifier:   return urgentLowSound
-        case Self.lowAlertIdentifier:         return lowSound
-        case Self.highAlertIdentifier:        return highSound
-        case Self.predictedLowAlertIdentifier: return predictedLowSound
-        default:                              return Self.defaultUrgentLowSound
+        switch GlucoseAlarmKind.kind(forAlertIdentifier: identifier) {
+        case .urgentLow:    return urgentLowSound
+        case .low:          return lowSound
+        case .high:         return highSound
+        case .predictedLow: return predictedLowSound
+        case nil:           return Self.defaultUrgentLowSound
         }
     }
 
@@ -493,12 +689,32 @@ final class GlucoseAlertManager: ObservableObject {
     private var latestReading: (mgdl: Double, date: Date)?
     private var cancellables = Set<AnyCancellable>()
 
-    @Published private(set) var pendingTestUrgentLow: Bool = false
+    /// The alarm whose test is armed, if any. One at a time; arming another
+    /// replaces it. The test waits for the next CGM reading (or the next loop
+    /// cycle, for Predicted Low) so it is delivered from whatever state Loop
+    /// is actually in — backgrounded, screen locked, phone in a Focus — which
+    /// is the thing the user is trying to check.
+    ///
+    /// Persisted, because iOS may terminate a backgrounded Loop before the
+    /// next reading arrives, and a test that quietly evaporates reads exactly
+    /// like an alarm that doesn't work.
+    @Published private(set) var armedTest: GlucoseAlarmKind? {
+        didSet {
+            if let armedTest {
+                userDefaults.set(armedTest.rawValue, forKey: Self.armedTestKey)
+            } else {
+                userDefaults.removeObject(forKey: Self.armedTestKey)
+            }
+        }
+    }
 
     // MARK: - Init
 
-    init(alertIssuer: AlertIssuer, userDefaults: UserDefaults = .standard) {
+    init(alertIssuer: AlertIssuer,
+         displayGlucosePreference: DisplayGlucosePreference,
+         userDefaults: UserDefaults = .standard) {
         self.alertIssuer = alertIssuer
+        self.displayGlucosePreference = displayGlucosePreference
         self.userDefaults = userDefaults
 
         var loadedProfiles: [GlucoseAlertProfile]
@@ -569,6 +785,8 @@ final class GlucoseAlertManager: ObservableObject {
             for key in keysToRemove { userDefaults.removeObject(forKey: key) }
         }
 
+        self.armedTest = userDefaults.string(forKey: Self.armedTestKey).flatMap(GlucoseAlarmKind.init(rawValue:))
+
         if let data = userDefaults.data(forKey: Self.episodeStateKey),
            let saved = try? JSONDecoder().decode(EpisodeState.self, from: data) {
             lowState = saved.low
@@ -587,12 +805,47 @@ final class GlucoseAlertManager: ObservableObject {
 
     // MARK: - Test support
 
-    func armTestUrgentLowOnNextReading() {
-        pendingTestUrgentLow = true
-        os_log("Test: armed", log: log, type: .info)
+    /// Arm a test of one alarm, to be delivered alongside the next reading.
+    func armTest(for kind: GlucoseAlarmKind) {
+        armedTest = kind
+        os_log("Test armed for %{public}@", log: log, type: .info, kind.rawValue)
     }
 
-    func cancelTestUrgentLow() { pendingTestUrgentLow = false }
+    func cancelArmedTest() { armedTest = nil }
+
+    /// Issue the armed test alert for `kind`, if that's the one armed.
+    ///
+    /// The test alert carries the alarm's configured sound and its real
+    /// interruption level — critical for Urgent Low, time-sensitive for the
+    /// rest — so it exercises the same delivery path, including the AlarmKit
+    /// and in-app audio fallbacks. It carries its own identifier and is issued
+    /// in addition to (never in place of) the normal evaluation, so no reading
+    /// is substituted or discarded and no real alarm's state is touched.
+    private func fireArmedTest(for kind: GlucoseAlarmKind) async {
+        guard armedTest == kind else { return }
+        armedTest = nil
+        let content = Alert.Content(
+            title: String(
+                format: NSLocalizedString("%1$@ Alert Test", comment: "Title of a test glucose alert (1: alarm name)"),
+                kind.displayName
+            ),
+            body: NSLocalizedString(
+                "This is a test of this alarm's sound and delivery. Your glucose has not crossed the level.",
+                comment: "Body of a test glucose alert"
+            ),
+            acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Acknowledge button on a test glucose alert")
+        )
+        let alert = Alert(
+            identifier: Alert.Identifier(managerIdentifier: Self.managerIdentifier, alertIdentifier: kind.testAlertIdentifier),
+            foregroundContent: content,
+            backgroundContent: content,
+            trigger: .immediate,
+            interruptionLevel: kind.interruptionLevel,
+            sound: .sound(name: configuredSoundName(for: kind.testAlertIdentifier))
+        )
+        os_log("Firing armed test for %{public}@", log: log, type: .info, kind.rawValue)
+        await alertIssuer.issueAlert(alert)
+    }
 
     // MARK: - Persistence
 
@@ -606,6 +859,19 @@ final class GlucoseAlertManager: ObservableObject {
                                  high: highState, predictedLowInEpisode: predictedLowInEpisode)
         guard let data = try? JSONEncoder().encode(state) else { return }
         userDefaults.set(data, forKey: Self.episodeStateKey)
+    }
+
+    // MARK: - Alert text
+
+    /// Renders a canonical mg/dL value in the unit the user reads glucose in.
+    /// Thresholds and readings are *stored* in mg/dL throughout; only the text
+    /// the user sees converts, and it goes through the same preference the
+    /// settings screen formats with so the two always agree.
+    private func formatGlucose(_ mgdl: Double, includeUnit: Bool = true) -> String {
+        displayGlucosePreference.format(
+            LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl),
+            includeUnit: includeUnit
+        )
     }
 
     // MARK: - Evaluation
@@ -627,13 +893,7 @@ final class GlucoseAlertManager: ObservableObject {
         }
         latestReading = (latest.quantity.doubleValue(for: .milligramsPerDeciliter), latest.date)
         let config = activeConfiguration(at: now)
-        let mgdl: Double
-        if pendingTestUrgentLow {
-            mgdl = max(20, config.urgentLowThresholdMgDL - 5)
-            pendingTestUrgentLow = false
-        } else {
-            mgdl = latest.quantity.doubleValue(for: .milligramsPerDeciliter)
-        }
+        let mgdl = latest.quantity.doubleValue(for: .milligramsPerDeciliter)
         // Low and urgent-low are mutually exclusive: a reading below the
         // urgent-low threshold is also below the low threshold, so issuing both
         // in the same check is redundant. As a rule, only surface the most
@@ -642,6 +902,13 @@ final class GlucoseAlertManager: ObservableObject {
         await evaluateLow(mgdl: mgdl, config: config, now: now, supersededByUrgentLow: urgentLowSupersedes)
         await evaluateUrgentLow(mgdl: mgdl, config: config, now: now)
         await evaluateHigh(mgdl: mgdl, config: config, now: now)
+
+        // An armed test rides along with a real reading so it arrives from
+        // whatever state Loop is in at that moment, but it is issued on its own
+        // identifier and leaves the evaluation above untouched.
+        if let armed = armedTest, armed != .predictedLow {
+            await fireArmedTest(for: armed)
+        }
     }
 
     private func evaluateLow(mgdl: Double, config: GlucoseAlertConfiguration, now: Date, supersededByUrgentLow: Bool) async {
@@ -662,8 +929,12 @@ final class GlucoseAlertManager: ObservableObject {
             }
             let alert = decideAndUpdate(
                 state: &lowState, identifier: Self.lowAlertIdentifier, interruptionLevel: .timeSensitive,
-                title: "Low Glucose",
-                body: "Glucose is below \(Int(threshold)) mg/dL (current: \(Int(mgdl)))",
+                title: NSLocalizedString("Low Glucose", comment: "Title of the low glucose alert"),
+                body: String(
+                    format: NSLocalizedString("Glucose is below %1$@ (current: %2$@)",
+                                              comment: "Body of the low glucose alert (1: threshold with unit, 2: current glucose)"),
+                    formatGlucose(threshold), formatGlucose(mgdl, includeUnit: false)
+                ),
                 delay: nil,
                 repeatInterval: config.lowSnoozeEnabled ? config.lowRepeatInterval : nil, now: now
             )
@@ -681,8 +952,12 @@ final class GlucoseAlertManager: ObservableObject {
         if mgdl < threshold {
             let alert = decideAndUpdate(
                 state: &urgentLowState, identifier: Self.urgentLowAlertIdentifier, interruptionLevel: .critical,
-                title: "Urgent Low Glucose",
-                body: "Glucose is below \(Int(threshold)) mg/dL (current: \(Int(mgdl))). Treat now.",
+                title: NSLocalizedString("Urgent Low Glucose", comment: "Title of the urgent low glucose alert"),
+                body: String(
+                    format: NSLocalizedString("Glucose is below %1$@ (current: %2$@). Treat now.",
+                                              comment: "Body of the urgent low glucose alert (1: threshold with unit, 2: current glucose)"),
+                    formatGlucose(threshold), formatGlucose(mgdl, includeUnit: false)
+                ),
                 delay: nil,
                 repeatInterval: config.urgentLowRepeatInterval, now: now
             )
@@ -700,8 +975,12 @@ final class GlucoseAlertManager: ObservableObject {
         if mgdl > threshold {
             let alert = decideAndUpdate(
                 state: &highState, identifier: Self.highAlertIdentifier, interruptionLevel: .timeSensitive,
-                title: "High Glucose",
-                body: "Glucose is above \(Int(threshold)) mg/dL (current: \(Int(mgdl)))",
+                title: NSLocalizedString("High Glucose", comment: "Title of the high glucose alert"),
+                body: String(
+                    format: NSLocalizedString("Glucose is above %1$@ (current: %2$@)",
+                                              comment: "Body of the high glucose alert (1: threshold with unit, 2: current glucose)"),
+                    formatGlucose(threshold), formatGlucose(mgdl, includeUnit: false)
+                ),
                 delay: config.highDelayEnabled ? config.highDelay : nil,
                 repeatInterval: config.highSnoozeEnabled ? config.highRepeatInterval : nil, now: now
             )
@@ -724,6 +1003,12 @@ final class GlucoseAlertManager: ObservableObject {
         guard effectiveLoopAlertsEnabled else { return }
         let config = activeConfiguration(at: now)
         guard config.predictedLowEnabled else { return }
+
+        // Predicted Low has no reading of its own to ride along with; its test
+        // goes out on the next completed loop cycle instead.
+        if armedTest == .predictedLow {
+            await fireArmedTest(for: .predictedLow)
+        }
 
         func retractIfActive() async {
             guard predictedLowInEpisode else { return }
@@ -756,16 +1041,18 @@ final class GlucoseAlertManager: ObservableObject {
         }
         guard !predictedLowInEpisode else { return }
         predictedLowInEpisode = true
+        let content = Alert.Content(
+            title: NSLocalizedString("Predicted Low Glucose", comment: "Title of the predicted low glucose alert"),
+            body: String(
+                format: NSLocalizedString("Loop predicts glucose below %1$@ within %2$d min.",
+                                          comment: "Body of the predicted low glucose alert (1: threshold with unit, 2: minutes of the prediction horizon)"),
+                formatGlucose(threshold), Int(config.predictedLowHorizon / 60)
+            ),
+            acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Acknowledge button on a glucose alert"))
         let alert = Alert(
             identifier: Alert.Identifier(managerIdentifier: Self.managerIdentifier, alertIdentifier: Self.predictedLowAlertIdentifier),
-            foregroundContent: Alert.Content(
-                title: "Predicted Low Glucose",
-                body: "Loop predicts glucose below \(Int(threshold)) mg/dL within \(Int(config.predictedLowHorizon / 60)) min.",
-                acknowledgeActionButtonLabel: "OK"),
-            backgroundContent: Alert.Content(
-                title: "Predicted Low Glucose",
-                body: "Loop predicts glucose below \(Int(threshold)) mg/dL within \(Int(config.predictedLowHorizon / 60)) min.",
-                acknowledgeActionButtonLabel: "OK"),
+            foregroundContent: content,
+            backgroundContent: content,
             trigger: .immediate, interruptionLevel: .timeSensitive,
             sound: .sound(name: configuredSoundName(for: Self.predictedLowAlertIdentifier))
         )
@@ -797,10 +1084,13 @@ final class GlucoseAlertManager: ObservableObject {
         }
         guard shouldFire else { return nil }
         state.lastFiredAt = now
+        let content = Alert.Content(
+            title: title, body: body,
+            acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Acknowledge button on a glucose alert"))
         return Alert(
             identifier: Alert.Identifier(managerIdentifier: Self.managerIdentifier, alertIdentifier: identifier),
-            foregroundContent: Alert.Content(title: title, body: body, acknowledgeActionButtonLabel: "OK"),
-            backgroundContent: Alert.Content(title: title, body: body, acknowledgeActionButtonLabel: "OK"),
+            foregroundContent: content,
+            backgroundContent: content,
             trigger: .immediate, interruptionLevel: interruptionLevel,
             sound: .sound(name: configuredSoundName(for: identifier))
         )
@@ -819,7 +1109,7 @@ extension GlucoseAlertManager: AlertSoundVendor {
     }
 
     nonisolated func getSounds() -> [Alert.Sound] {
-        AlarmSoundCatalog.all.map { .sound(name: $0.filename) }
+        AlarmSoundCatalog.allFilenames.map { .sound(name: $0) }
     }
 }
 

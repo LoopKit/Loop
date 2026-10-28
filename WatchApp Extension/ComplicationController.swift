@@ -19,7 +19,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     // MARK: - Timeline Configuration
     
     func getTimelineStartDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
-        if let date = LoopDataManager.shared.activeContext?.glucoseDate {
+        if let date = LoopDataManager.shared.glucoseDisplayContext?.glucoseDate {
             handler(date)
         } else {
             handler(nil)
@@ -27,7 +27,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     }
     
     func getTimelineEndDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
-        if let date = LoopDataManager.shared.activeContext?.glucoseDate {
+        if let date = LoopDataManager.shared.glucoseDisplayContext?.glucoseDate {
             handler(date)
         } else {
             handler(nil)
@@ -97,7 +97,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             
             self.log.default("Updating current complication timeline entry")
             
-            if let context = LoopDataManager.shared.activeContext,
+            if let context = LoopDataManager.shared.glucoseDisplayContext,
                 let template = CLKComplicationTemplate.templateForFamily(complication.family,
                                                                          from: context,
                                                                          at: timelineDate,
@@ -123,7 +123,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         updateChartManagerIfNeeded {
             let entries: [CLKComplicationTimelineEntry]?
             
-            guard let context = LoopDataManager.shared.activeContext,
+            guard let context = LoopDataManager.shared.glucoseDisplayContext,
                 let glucoseDate = context.glucoseDate else
             {
                 handler(nil)

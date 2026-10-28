@@ -268,7 +268,8 @@ final class DeviceDataManager {
         self.pluginManager = pluginManager
         self.deviceLog = deviceLog
         self.alertManager = alertManager
-        self.glucoseAlertManager = GlucoseAlertManager(alertIssuer: alertManager)
+        self.glucoseAlertManager = GlucoseAlertManager(alertIssuer: alertManager,
+                                                       displayGlucosePreference: displayGlucosePreference)
         alertManager.addAlertSoundVendor(managerIdentifier: GlucoseAlertManager.managerIdentifier,
                                          soundVendor: self.glucoseAlertManager)
         alertManager.playsThroughSilent = { [weak glucoseAlertManager = self.glucoseAlertManager] alert in

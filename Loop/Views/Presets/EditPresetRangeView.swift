@@ -93,7 +93,7 @@ struct EditPresetRangeView: View {
                         )
 
 
-                        Text("mg/dL")
+                        Text(displayGlucosePreference.unit.localizedShortUnitString)
                             .foregroundColor(.secondary)
                     }
 
