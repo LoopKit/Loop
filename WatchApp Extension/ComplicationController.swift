@@ -19,7 +19,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     // MARK: - Timeline Configuration
     
     func getTimelineStartDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
-        if let date = LoopDataManager.shared.glucoseDisplayContext?.glucoseDate {
+        if let date = LoopDataManager.shared.displayContext?.glucoseDate {
             handler(date)
         } else {
             handler(nil)
@@ -27,7 +27,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     }
     
     func getTimelineEndDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
-        if let date = LoopDataManager.shared.glucoseDisplayContext?.glucoseDate {
+        if let date = LoopDataManager.shared.displayContext?.glucoseDate {
             handler(date)
         } else {
             handler(nil)
@@ -97,7 +97,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             
             self.log.default("Updating current complication timeline entry")
             
-            if let context = LoopDataManager.shared.glucoseDisplayContext,
+            if let context = LoopDataManager.shared.displayContext,
                 let template = CLKComplicationTemplate.templateForFamily(complication.family,
                                                                          from: context,
                                                                          at: timelineDate,
@@ -123,7 +123,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         updateChartManagerIfNeeded {
             let entries: [CLKComplicationTimelineEntry]?
             
-            guard let context = LoopDataManager.shared.glucoseDisplayContext,
+            guard let context = LoopDataManager.shared.displayContext,
                 let glucoseDate = context.glucoseDate else
             {
                 handler(nil)
@@ -237,5 +237,23 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         @unknown default:
             return nil
         }
+    }
+}
+
+// MARK: - Migration to WidgetKit
+
+/// Faces that show a ClockKit complication from this app are moved to its WidgetKit replacement when
+/// the app updates. Both ClockKit descriptors share the identifier "glucosegraph", so they are told
+/// apart by family: the graph is the one offered in the large rectangular slot.
+extension ComplicationController: CLKComplicationWidgetMigrator {
+
+    var widgetMigrator: CLKComplicationWidgetMigrator { self }
+
+    func widgetConfiguration(from complicationDescriptor: CLKComplicationDescriptor) async -> CLKComplicationWidgetMigrationConfiguration? {
+        guard let appBundle = Bundle.main.bundleIdentifier else { return nil }
+        let kind = complicationDescriptor.supportedFamilies.contains(.graphicRectangular)
+            ? LoopComplicationKind.glucoseGraph
+            : LoopComplicationKind.loopStatus
+        return CLKComplicationStaticWidgetMigrationConfiguration(kind: kind, extensionBundleIdentifier: appBundle + ".Complications")
     }
 }

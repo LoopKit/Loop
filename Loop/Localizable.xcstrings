@@ -13,6 +13,12 @@
     " -" : {
 
     },
+    "Apple Watch is controlling the pod. Tap to reclaim." : {
+      "comment" : "The subtitle of the banner indicating the pod is controlled by the watch"
+    },
+    "Last watch update %@" : {
+      "comment" : "Banner line during a loan: when the watch's records last arrived (1: time)"
+    },
     " - " : {
 
     },
@@ -2426,6 +2432,9 @@
         }
       }
     },
+    "%1$@ U is booked as a bolus at %2$@ — the pod's total, not real timing. If you remember the session, correct it in Insulin Delivery." : {
+      "comment" : "Phone reminder body while an unexplained gap bolus stands (1: units, 2: time booked)"
+    },
     "%1$@ U left" : {
       "comment" : "Low reservoir alert format string. (1: Number of units remaining)",
       "extractionState" : "manual",
@@ -2689,6 +2698,9 @@
           }
         }
       }
+    },
+    "%1$@ U was not delivered — the pod is on the watch. Bolus from the watch, or end Sport Mode first." : {
+      "comment" : "Notification body when a bolus is refused because the pod is on loan (1: units)"
     },
     "%1$@ U/hour @ %2$@" : {
       "comment" : "The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time)",
@@ -7932,6 +7944,9 @@
     "Apple Health" : {
       "comment" : "Apple Health settings button text\nTitle of the Apple Health access screen"
     },
+    "Apple Watch is running the loop and controlling the pod. %1$@ on this phone will resume automation when the pod is reclaimed." : {
+      "comment" : "message when the pod is loaned to the watch (1: app name)"
+    },
     "Are you sure you want to delete all history entries?" : {
       "comment" : "Action sheet confirmation message for pump history deletion",
       "localizations" : {
@@ -9020,6 +9035,9 @@
     "Automated insulin adjustments by %@ reduce a noticeable rise in glucose" : {
 
     },
+    "Automatic dosing is paused while Loop checks the pod's insulin total. This usually takes seconds." : {
+      "comment" : "Phone notice body after a force reclaim salvaged staged records"
+    },
     "Automation" : {
 
     },
@@ -9061,131 +9079,6 @@
     },
     "Basal Rate" : {
 
-    },
-    "Basal Rate Schedule" : {
-      "comment" : "Details for configuration error when basal rate schedule is missing",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "جدول الضخ المستمر"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Basalrateskema"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Basalraten-Plan"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Perfil Basal"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Basaaliohjelma"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Programme débit basal"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Basal Rate Schedule"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tabella di velocità basale"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "基礎レートスケジュール"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tidsplan for basaldoser"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Basaalstandenschema"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Harmonogram dawki standardowej"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Programação da Taxa Basal"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Orar rate bazale"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Скорости базала"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Harmonogram bazálnej dávky"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Basaldosschema"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bazal Oran Çizelgesi"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lịch biểu tiêm liều basal"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "基础率表"
-          }
-        }
-      }
     },
     "Basal Rates" : {
       "comment" : "The title of the basal rate profile screen\n   The title text for the basal rate schedule",
@@ -10004,6 +9897,9 @@
           }
         }
       }
+    },
+    "Bolus Not Delivered" : {
+      "comment" : "Notification title when a bolus is refused because the pod is on loan"
     },
     "Bolus Recommendation Updated" : {
       "comment" : "Alert title for an updated bolus recommendation",
@@ -10887,131 +10783,6 @@
         }
       }
     },
-    "Carb effects" : {
-      "comment" : "Details for missing data error when carb effects are missing",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تأثيرات الكارب"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kulhydrateffekter"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kohlenhydrat-Wirkungen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Efectos de carbohidratos"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hiilihydraattivaikutus"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Effets des glucides"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "השפעות פחמימות"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Effetto carboidrati"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "糖質効果"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Karb effekter"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Koolhydraateffecten"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wpływ węglowodanów"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Efeitos Carb"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Efecte carbohidrați"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Влияние углеводов"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Účinky sacharidov"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kolhydrateffekter"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Karbonhidrat etkileri"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "các tác động của Carb"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "碳水效果"
-          }
-        }
-      }
-    },
     "Carb Entry" : {
       "comment" : "Label for carb entry row on bolus screen",
       "localizations" : {
@@ -11162,83 +10933,6 @@
     },
     "Carb Ratio" : {
 
-    },
-    "Carb Ratio Schedule" : {
-      "comment" : "Details for configuration error when carb ratio schedule is missing",
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tidsplan for kulhydratforhold"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zeitplan für das Kohlenhydratverhältnis"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Calendario de ratio de carbohidratos"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Programme des ratios Insuline-Glucides"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tabella del rapporto carboidrati"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tidsplan for karbohydratforhold"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Koolhydraatratioschema"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Harmonogram Współczynnika Węglowodanowego"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Programul raportului de carbohidrați"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Расписание соотношения углеводов"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Karb Oranı Programı"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "碳水系数配置表"
-          }
-        }
-      }
     },
     "Carb Ratios" : {
       "comment" : "The title of the carb ratios schedule screen\n   The title text for the carb ratio schedule",
@@ -12429,125 +12123,6 @@
         }
       }
     },
-    "Check your CGM data source" : {
-      "comment" : "Recovery suggestion when glucose data is missing",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تأكد من مصدر قراءات السكر المستمرة"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kontroller din CGM-datakilde"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Überprüfe Deine CGM-Datenquelle."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verifique su fuente de datos CGM"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tarkista CGM-tietolähde"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vérifier votre source de données CGM"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בדוק את מקור המידע שלך בחיישן"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Controlla la sorgente dati del sensore"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CGM データソースを確認してください"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sjekk CGM"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Controleer je CGM gegevensbron"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sprawdź swój CGM"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verifique seu dispositivo CGM"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verificați sursa de date a senzorului de glicemie"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Проверьте источник мониторинга СК"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kontrollera din CGM:s datakälla"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CGM veri kaynağınızı kontrol edin"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kiểm tra nguồn dữ liệu CGM của bạn"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请检查你的动态血糖数据来源"
-          }
-        }
-      }
-    },
     "Check your device time and/or remove any invalid data from Apple Health." : {
       "comment" : "Caption for bolus screen notice when glucose data is in the future",
       "localizations" : {
@@ -13019,6 +12594,9 @@
           }
         }
       }
+    },
+    "Closed Loop Is Off" : {
+      "comment" : "Phone reminder title after an audit opened the loop"
     },
     "Closed Loop OFF" : {
       "comment" : "Alert title for closed loop off informational modal",
@@ -13867,125 +13445,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "配置"
-          }
-        }
-      }
-    },
-    "Configuration Error: %1$@" : {
-      "comment" : "The error message displayed for configuration errors. (1: configuration error details)",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "خطأ في المعطيات: %1$@"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfigurationsfejl: %1$@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfigurationsfehler: %1$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Error de Configuración: %1$@"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Määritysvirhe: %1$@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erreur de Configuration: %1$@"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Configuration Error: %1$@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Errore di configurazione: %1$@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "設定エラー: %1$@"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfigurasjonsfeil: %1$@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Configuratiefout: %1$@"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Błąd konfiguracji: %1$@"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erro de Configuração: %1$@"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eroare configurare: %1$@"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ошибка конфигурации: %1$@"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfigurationsfel %1$@"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfigürasyon Hatası: %1$@"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lỗi cấu hình: %1$@"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "配置错误：%1$@"
           }
         }
       }
@@ -19154,6 +18613,9 @@
         }
       }
     },
+    "Estimated Insulin Still Booked" : {
+      "comment" : "Phone reminder title while an unexplained gap bolus stands"
+    },
     "Event" : {
 
     },
@@ -20309,6 +19771,9 @@
         }
       }
     },
+    "Finishing Pod Handover" : {
+      "comment" : "Title shown when the phone owns the pod but its connection is not re-established"
+    },
     "Fires once when Loop's forecast first dips below the level inside this horizon. Re-arms when the forecast clears." : {
       "comment" : "A footer for the \"Horizon\" section of a glucose alert detail view, explaining how the horizon works.",
       "isCommentAutoGenerated" : true
@@ -20737,6 +20202,9 @@
     },
     "For these activities, consider setting your insulin needs to **more than 100%**." : {
 
+    },
+    "Forcing…" : {
+      "comment" : "Title text for the pump tile while the phone force-reclaims the pod"
     },
     "Forecasted blood glucose may still be higher than target range." : {
       "localizations" : {
@@ -21376,244 +20844,6 @@
     "Glucose Change Chart" : {
 
     },
-    "Glucose data is %1$@ old" : {
-      "comment" : "The error message when glucose data is too old to be used. (1: glucose data age in minutes)",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "قراءات السكر منذ %1$@ "
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blodsukkerdata er %1$@ gamle"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blutzuckerdaten sind %1$@ alt"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los datos de glucosa son de hace %1$@ "
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glukoositieto on %1$@ vanha"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les dernières données de glucose remontent à %1$@"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glucose data is %1$@ old"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "I dati sulla glicemia sono vecchi di %1$@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "血糖データは %1$@ 前のものです"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blodsukkerdata er %1$@ gammel"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glucosegegevens zijn %1$@ oud"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dane o glukozie są nieaktualne od %1$@"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Medida de glicose está %1$@ atrasada"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Datele despre glicemie au o vechime de %1$@"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Данные о глюкозе устарели на %1$@"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glukosvärde är %1$@ gammalt"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ eski KŞ verisi"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dữ liệu đường huyết %1$@ cũ"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "葡萄糖%1$@分钟未更新"
-          }
-        }
-      }
-    },
-    "Glucose data not available" : {
-      "comment" : "Description of error when glucose data is missing",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "قراءات السكر غير متوفرة"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blodsukkerdata ikke tilgængelige"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blutzuckerdaten nicht verfügbar"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los datos de glucosa no están disponibles"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glukoositietoja ei saatavilla"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les données de glucose ne sont pas disponibles"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glucose data not available"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dati sulla glicemia non disponibili"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "グルコースデータがありません"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blodsukkerdata er utilgjengelig"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glucosegegevens niet beschikbaar"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dane o glukozie są niedostępne"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Medida de glicose não disponível"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nu sunt disponibile date despre glicemie"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Данные гликемии недоступны"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glukosvärde saknas"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "KŞ verisi mevcut değil"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dữ liệu đường huyết không sẵn sàng"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "血糖数据不可用"
-          }
-        }
-      }
-    },
     "Glucose Data Now Available" : {
       "comment" : "Alert title when glucose data returns while on bolus screen",
       "extractionState" : "stale",
@@ -21980,83 +21210,6 @@
     "Glucose Summary" : {
 
     },
-    "Glucose Target Range Schedule" : {
-      "comment" : "Details for configuration error when glucose target range schedule is missing",
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tidsplan for glukosemålområde"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zeitplan für den Blutzucker-Zielbereich"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Horario para el objetivo de glucosa"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Horaire de la plage cible de glycémie"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Programma di intervalli target di glicemia"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tidsplan for blodsukker målområde"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glucosestreefbereikschema"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Harmonogram zakresu docelowego glukozy"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Programul intervalului țintă de glicemie"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "График целевого диапазона глюкозы"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "KŞ Hedef Aralığı Programı"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "血糖目标范围表"
-          }
-        }
-      }
-    },
     "Glucose, Insulin, and Carb Data Access" : {
       "comment" : "Apple Health settings descriptive text"
     },
@@ -22086,6 +21239,12 @@
     },
     "grams" : {
 
+    },
+    "Handing over…" : {
+      "comment" : "Title text for the pump tile while the pod is being handed over to the watch"
+    },
+    "Handing the pod to Apple Watch…" : {
+      "comment" : "The subtitle of the banner while the watch is taking over the pod"
     },
     "HARDWARE SOUNDS" : {
       "extractionState" : "stale",
@@ -23451,125 +22610,6 @@
     "Insulin Delivery Log" : {
 
     },
-    "Insulin effects" : {
-      "comment" : "Details for missing data error when insulin effects are missing\nDetails for missing data error when insulin effects including pending insulin are missing",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تأثيرات الأنسولين"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Insulineffekter"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Insulinwirkungen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Efectos de la insulina"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Insuliinivaikutus"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Effets de l'insuline"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Insulin effects"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Effetto dell’insulina"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インスリン効果"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Insulin effekt"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Insulineëffecten"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "wpływ insuliny"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Efeitos da Insulina"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Efecte insulină"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Влияние инсулина"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Insulineffekter"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "İnsülin etkileri"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tác dụng của insulin"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "胰岛素效果"
-          }
-        }
-      }
-    },
     "Insulin Event" : {
 
     },
@@ -23931,83 +22971,6 @@
     },
     "Insulin Sensitivity Factor (ISF)" : {
 
-    },
-    "Insulin Sensitivity Schedule" : {
-      "comment" : "Details for configuration error when insulin sensitivity schedule is missing",
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Insulinfølsomhed tidsplan"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Insulinempfindlichkeit Plan"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Horario de la sensibilidad a la insulina"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Horaire  de facteur de sensibilité à l'insuline"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Programma di sensibilità insulinica"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Insulin følsomhet tidsplan"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Insulinegevoeligheidschema"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Harmonogram wrażliwości na insulinę"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Orarul Factorului de Sensibilitate la Insulină"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "График чувствительности к инсулину"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "İnsülin Duyarlılık Programı"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "胰岛素敏感系数（ISF）方案"
-          }
-        }
-      }
     },
     "Insulin Suspended" : {
       "comment" : "The title of the cell indicating the pump is suspended",
@@ -24837,83 +23800,6 @@
         }
       }
     },
-    "Invalid glucose reading with a timestamp that is %1$@ in the future" : {
-      "comment" : "The error message when glucose data is in the future. (1: glucose data time in future in minutes)",
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ugyldig glukoseaflæsning med et tidsstempel, der er %1$@ i fremtiden"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ungültiger Blutzuckermesswert mit einem Zeitstempel, der %1$@ in der Zukunft liegt"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lectura de glucosa no válida de %1$@ en el futuro"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lecture de glucose non valide avec un horodatage situé à %1$@ dans le futur"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lettura della glicemia non valida con data e ora %1$@ nel futuro"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ugyldig blodsukkermåling med et tidsstempel som er %1$@ i fremtiden"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ongeldige glucosemeting met een tijdstempel dat %1$@ in de toekomst ligt."
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nieprawidłowy odczyt glukozy ze znacznikiem czasu, który wynosi %1$@ w przyszłości"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Citirea invalidă a glicemiei cu un marcaj temporal care este %1$@ în viitor"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Неверное показание глюкозы с временной меткой, которая находится на %1$@ в будущем"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gelecekte %1$@ olan bir zaman damgasıyla geçersiz KŞ okuması"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "血糖读数无效，其时间戳为 %1$@ ，该时间点在未来"
-          }
-        }
-      }
-    },
     "iOS" : {
 
     },
@@ -25061,6 +23947,9 @@
     },
     "iOS Permissions and Mute All App Sounds" : {
       "comment" : "Alert Permissions descriptive text"
+    },
+    "iPhone Bluetooth is off — still running" : {
+      "comment" : "Hand-back refused: shown on the watch glance"
     },
     "ISF" : {
 
@@ -26225,6 +25114,15 @@
         }
       }
     },
+    "Loop can't read a message from the watch. The apps may be on different builds — check both are current." : {
+      "comment" : "Phone notice body when a loan message cannot be decoded"
+    },
+    "Loop couldn't verify the watch session's insulin, so it stopped dosing. Turn Closed Loop back on when you're ready." : {
+      "comment" : "Phone reminder body after an audit opened the loop"
+    },
+    "Loop couldn't verify the watch's insulin delivery. Automatic dosing is off until you turn it back on." : {
+      "comment" : "Phone notice when a watch session's insulin could not be verified after reclaim"
+    },
     "Loop Crashed" : {
       "comment" : "Title for crash recovery alert",
       "localizations" : {
@@ -26711,9 +25609,6 @@
           }
         }
       }
-    },
-    "Loop is already looping." : {
-      "comment" : "The error message displayed for LoopError.loopInProgress errors."
     },
     "Loop normally gives 40% of your predicted insulin needs each dosing cycle.\n\nWhen the Glucose Based Partial Application experiment is enabled, Loop will vary the percentage of recommended bolus delivered each cycle with glucose level.\n\nNear correction range, it will use 20% (similar to Temp Basal), and gradually increase to a maximum of 80% at high glucose (200 mg/dL, 11.1 mmol/L).\n\nPlease be aware that during fast rising glucose, such as after an unannounced meal, this feature, combined with velocity and retrospective correction effects, may result in a larger dose than your ISF would call for." : {
       "comment" : "Description of Glucose Based Partial Application toggle.",
@@ -27357,205 +26252,6 @@
         }
       }
     },
-    "Manual temporary basal in progress. Automatic dosing is disabled." : {
-      "comment" : "The error message displayed for LoopError.manualTempBasalRunning errors."
-    },
-    "Maximum Basal Rate Per Hour" : {
-      "comment" : "Details for configuration error when maximum basal rate per hour is missing",
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maksimal basalrate pr. time"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maximale Basalte pro Stunde"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tasa basal máxima por hora"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Débit Basal Maximum par heure"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בזאלי מקסימלי לשעה"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Velocità basale massima all'ora"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maksimal basaldose pr. time"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maximale basaalstand per uur"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maksymalna dawka podstawowa na godzinę"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rata bazală maximă pe oră"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Максимальная базальная скорость в час"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saat Başı Maksimum Bazal Oran"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每小时最大基础速率"
-          }
-        }
-      }
-    },
-    "Maximum Bolus" : {
-      "comment" : "Details for configuration error when maximum bolus is missing",
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maksimal bolus"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maximaler Bolus"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bolo Máximo"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suurin sallittu bolus"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bolus Maximum"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בולוס מקסימלי"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bolo massimo"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "最大ボーラス"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maks bolus"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maximale bolus"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maksymalny bolus"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bolus Máximo"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bolus maxim"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Максимальный Болюс"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maximal bolus"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maksimum Bolus"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liều Bolus tối đa"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "最大剂量"
-          }
-        }
-      }
-    },
     "Maximum Bolus Exceeded" : {
       "comment" : "Title for bolus screen warning when max bolus is exceeded",
       "localizations" : {
@@ -27958,125 +26654,6 @@
         }
       }
     },
-    "Missing data: %1$@" : {
-      "comment" : "The error message for missing data. (1: missing data details)",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "بيانات مفقودة: %1$@"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manglende data: %1$@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fehlende Daten: %1$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Faltan Datos: %1$@"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tiedot puuttuvat: %1$@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Données manquantes: %1$@"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "נתונים חסרים: %1$@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dati mancanti: %1$@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "データがありません: %1$@"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manglende data: %1$@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ontbrekende gegevens: %1$@"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brakujące dane: %1$@"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dados ausentes: %1$@"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Date lipsă: %1$@"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Пропущены данные: %1$@"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saknar data: %1$@"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eksik veri: %1$@"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dữ liệu thiếu: %1$@"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "数据缺失: %1$@"
-          }
-        }
-      }
-    },
     "Missing maximum allowed bolus in settings" : {
       "comment" : "Bolus error description: missing maximum bolus in settings.",
       "localizations" : {
@@ -28326,125 +26903,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "模式"
-          }
-        }
-      }
-    },
-    "Momentum effects" : {
-      "comment" : "Details for missing data error when momentum effects are missing",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تأثيرات النشاط"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Momentumeffekter"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Momentum-Effekte"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Efectos de Momento"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liikevaikutukset (momentum)"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Effets de momentum"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "השפעות מומנטום"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Effetti del momento"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "モメンタム効果"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Momentum effekter"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trendlijneffecten"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "wpływ pędu"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Efeitos de aceleração"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Efecte avânt"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Влияние динамики СК"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Momentumeffekter"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Momentum etkileri"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hiệu ứng động lượng"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "葡萄糖动量效应"
           }
         }
       }
@@ -29398,125 +27856,6 @@
     "no change needed" : {
 
     },
-    "No connected devices, or failure during device connection" : {
-      "comment" : "The error message displayed for device connection errors.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لا يوجد أجهزة متصلة, أو يوجد خطأ أثناء الاتصال"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen tilsluttede enheder eller fejl under forbindelse til enhed"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine verbundenen Geräte oder Fehler während der Geräteverbindung"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No hay dispositivos conectados o falla durante conexión de dispositivo"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ei yhdistettyjä laitteita tai häiriö laiteyhteydessä"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas d'appareil connecté, ou échec durant la connexion à l'appareil"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אין מכשירים מחוברים, או שישנה שגיאת התחברות."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nessun dispositivo connesso o mancanza di segnale durante la connessione del dispositivo"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "機器が未接続、または接続に問題"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen tilkoblede enheter, eller feil under enhetstilkobling"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen aangesloten apparaten of storingen tijdens het verbinden met het apparaat"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brak podłączonych urządzeń lub awaria podczas połączenia urządzenia"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nenhum dispositivo conectado ou falha durante a conexão"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nu este conectat niciun dispozitiv sau s-a produs o eroare la conectare"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Устройства не сопряжены или произошла ошибка во время сопряжения"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen ansluten enhet, eller fel vid anslutning till enhet"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bağlı cihaz yok veya cihaz bağlantısı sırasında hata"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Không có thiết bị nào được kết nối, hoặc lỗi trong quá trình kết nối"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "没有连接的设备，或设备连接期间发生故障"
-          }
-        }
-      }
-    },
     "No Delivery" : {
 
     },
@@ -30001,6 +28340,9 @@
           }
         }
       }
+    },
+    "No watch reply…" : {
+      "comment" : "Title text for the pump tile when the watch has not answered within the drain promise"
     },
     "No, edit amount" : {
       "comment" : "The title of the action used when rejecting the the amount of carbohydrates entered.",
@@ -30918,7 +29260,7 @@
       }
     },
     "OK" : {
-      "comment" : "Alert acknowledgment OK button\nCritical Alert permissions disabled alert button\nDefault action for alert when alert acknowledgment fails\nLabel for acknowledging the preset has been active for 24 hours\nNotifications permissions disabled alert button\nText for ok action on notification of upcoming TestFlight expiration\nText for ok action on notification of upcoming profile expiration\nThe title of the notification action to acknowledge a device alert",
+      "comment" : "Alert acknowledgment OK button\nCritical Alert permissions disabled alert button\nDefault action for alert when alert acknowledgment fails\nDismiss the pod-settling notice\nLabel for acknowledging the preset has been active for 24 hours\nNotifications permissions disabled alert button\nText for ok action on notification of upcoming TestFlight expiration\nText for ok action on notification of upcoming profile expiration\nThe title of the notification action to acknowledge a device alert",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -31379,6 +29721,18 @@
     },
     "Please go to the App Store now to update the app." : {
       "comment" : "Required update modal paragraph 3"
+    },
+    "Pod Fault" : {
+      "comment" : "Phone notice title when the watch reports a pod fault during a loan"
+    },
+    "Pod Is on the Watch" : {
+      "comment" : "Title of the reclaim prompt when tapping the pump tile during a loan"
+    },
+    "Pod Looks Controlled by the Watch" : {
+      "comment" : "Phone notice title when the phone yields to an inferred watch loan"
+    },
+    "Pod on Watch" : {
+      "comment" : "Title text for the pump tile while the pod is loaned to the watch"
     },
     "Possible Missed Meal" : {
       "comment" : "The notification title for a meal that was possibly not logged in Loop.",
@@ -32977,125 +31331,6 @@
         }
       }
     },
-    "Pump data is %1$@ old" : {
-      "comment" : "The error message when pump data is too old to be used. (1: pump data age in minutes)",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "بيانات المضخة منذ %1$@ "
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpedata er %1$@ gammel"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpendaten sind %1$@ alt"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los datos de la microinfusora son %1$@ viejos"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpputieto on %1$@ vanha"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les données de la pompe remontent à %1$@"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מידע משאבה: לפני %1$@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "I dati forniti dalla pompa sono di %1$@ fa"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポンプデータが %1$@前のものです"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpedata er %1$@ gammel"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pompgegevens zijn %1$@ oud"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dane z pompy są nieaktualne od %1$@"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dados da bomba são de %1$@ atrás"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Datele din pompă sunt vechi de %1$@"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Данные помпы от %1$@ "
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpvärdena är %1$@ gamla"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pompa verisi %1$@ eski"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dữ liệu bơm %1$@ là cũ"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "胰岛素泵数据%1$@分钟未更新"
-          }
-        }
-      }
-    },
     "Pump Event" : {
       "comment" : "The title of the screen displaying a pump event",
       "localizations" : {
@@ -33269,211 +31504,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "泵已过期"
-          }
-        }
-      }
-    },
-    "Pump Inoperable. Automatic dosing is disabled." : {
-      "comment" : "The error message displayed for LoopError.pumpInoperable errors."
-    },
-    "Pump Manager" : {
-      "comment" : "Details for configuration error when pump manager is missing",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إدارة المضخة"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpemanager"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpenmanager"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Administratión de Microinfusora"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpun hallinta"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gestionnaire de pompe"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מנהל משאבה"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pump Manager"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポンプ設定"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpe manager"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pomp manager"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zarządzanie Pompą"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gerenciamento da Bomba"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manager pompă"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Менеджер помпо"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumphantering"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pompa Yöneticisi"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trình quản lý bơm"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "泵管理"
-          }
-        }
-      }
-    },
-    "Pump Manager Error: %1$@" : {
-      "comment" : "The error message displayed for pump manager errors. (1: pump manager error)",
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fejl i pumpemanager: %1$@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpen-Fehler: %1$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Error del administrador de bomba: %1$@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erreur du gestionnaire de pompe : %1$@"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "שגיאה במנהל שאבה: %1$@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Errore Pump Manager: %1$@"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pump Manager-feil: %1$@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pompmanager fout: %1$@"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Błąd menedżera pompy: %1$@"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eroare de gestionare a pompei: %1$@"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ошибка менеджера помп: %1$@"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pompa Yöneticisi Hatası: %1$@"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "泵管理器错误：%1$@"
           }
         }
       }
@@ -33852,101 +31882,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "泵已暂停输注"
-          }
-        }
-      }
-    },
-    "Pump Suspended. Automatic dosing is disabled." : {
-      "comment" : "The error message displayed for LoopError.pumpSuspended errors.",
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpen er suspenderet. Automatisk dosering er deaktiveret."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpe unterbrochen. Die automatische Dosierung ist deaktiviert."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Microinfusora suspendida. La dosificación automática está desactivada."
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumppu pysäytetty. Automaattinen annostelu ei ole käytössä."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pompe suspendue. Le dosage automatique est désactivé."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "משאבה מושהית. מינון אוטומטי מושבת."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pompa sospesa. Il dosaggio automatico è disattivato."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumpe suspendert. Automatisk dosing er deaktivert."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pomp onderbroken. Automatisch doseren is uitgeschakeld."
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pompa zawieszona. Automatyczne dozowanie jest wyłączone."
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pompă suspendată. Administrarea automată este dezactivată."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Помпа приостановлена. Авто болюсы и ВБС отключены."
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pump pausad. Automatisk dosering är inaktiverad."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pompa Askıya Alındı. Otomatik dozlama devre dışı bırakıldı."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "泵已暂停。自动给药功能已关闭。"
           }
         }
       }
@@ -34335,127 +32270,20 @@
     "Reading & Changing Access" : {
       "comment" : "Health access section header for reading and changing access"
     },
+    "Reclaim Now" : {
+      "comment" : "Button to reclaim the pod from the watch"
+    },
+    "Reclaim the pod to this phone? The watch's Sport Mode session will end and its records will be collected." : {
+      "comment" : "Message of the reclaim prompt"
+    },
+    "Reclaiming the pod…" : {
+      "comment" : "The subtitle of the banner while the phone is reclaiming the pod"
+    },
+    "Reclaiming…" : {
+      "comment" : "Title text for the pump tile while the pod is coming back from the watch"
+    },
     "Recognizing how hard you feel you're working during exercise can help you understand its impact on your glucose levels." : {
 
-    },
-    "Recommendation expired: %1$@ old" : {
-      "comment" : "The error message when a recommendation has expired. (1: age of recommendation in minutes)",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "انتهت صلاحية التوصية منذ: %1$@ "
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forslag udløbet: %1$@ gamle"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Empfehlung abgelaufen: %1$@ alt"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recomendación expiró hace: %1$@"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suositus vanhentunut: %1$@ vanha"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recommandation expirée, remonte à %1$@"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "המלצה פגה: לפני %1$@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La raccomandazione è scaduta: %1$@ fa"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "推奨が %1$@ 経過したため失効"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Anbefaling utløpt: %1$@ gammelt"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aanbeveling verlopen: %1$@ oud"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rekomendacja nieaktualna od %1$@"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recomendação expirou: %1$@ atrás"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recomandare expirată: acum %1$@"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Рекомнендация истекла : от %1$@"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rekommendationen gick ut för %1$@ sedan"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Önerinin süresi doldu: %1$@ eski"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Khuyến cáo hết hạn: %1$@ phút"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@分钟前推荐剂量已过期"
-          }
-        }
-      }
     },
     "Recommended Basal" : {
       "comment" : "The title of the cell displaying a recommended temp basal value",
@@ -37110,6 +34938,12 @@
     "Sound" : {
 
     },
+    "Sport Mode Active" : {
+      "comment" : "The title of the banner indicating the pod is controlled by the watch\ntitle for when the watch is running the loop"
+    },
+    "Sport Mode has ended and this phone is back in control, but it is still reconnecting to the pod. Try again in a moment." : {
+      "comment" : "Message shown while the phone is re-establishing the pod connection after a reclaim"
+    },
     "Stable Glucose" : {
 
     },
@@ -37556,132 +35390,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "支持"
-          }
-        }
-      }
-    },
-    "Suspend Threshold" : {
-      "comment" : "The title text in settings",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "قيمة التعليق"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause grænseværdi"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grenzwert für Hypo-Abschaltung"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suspend Threshold"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nivel de Suspensión"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pysäytysraja"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seuil de suspension"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "סף השהייה"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Soglia di sospensione"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "一時停止値"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terskel for utsettelse"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Onderbrekingsdrempel"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próg zawieszenia pompy"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Limite de Suspenção"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Limită suspendare"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Порог приостановки"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tröskelvärde"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eşiği Askıya Al"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ngưỡng Tạm dừng"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "暂停阈值"
           }
         }
       }
@@ -39685,6 +37393,15 @@
     "The sound played when this alarm fires." : {
 
     },
+    "The watch hasn't confirmed taking the pod. The phone will take it back." : {
+      "comment" : "Phone notification body: the watch never confirmed a takeover"
+    },
+    "The watch hasn't reported a loop for %1$.0f minutes. The pod is still assigned to it. If the watch is off or out of battery, tap the pod tile to bring the pod back to this phone." : {
+      "comment" : "Phone warning body: watch silent mid-session (1: minutes)"
+    },
+    "The watch reports a pod fault: %1$@. Insulin delivery has stopped — replace the pod." : {
+      "comment" : "Phone notice body when the watch reports a pod fault during a loan (1: the pump's own fault text)"
+    },
     "Therapy Settings" : {
       "comment" : "Title text for button to Therapy Settings",
       "localizations" : {
@@ -39897,6 +37614,9 @@
           }
         }
       }
+    },
+    "This phone has paused automatic dosing because the pod appears to be in use by the watch. Tap the pod tile to take it back." : {
+      "comment" : "Phone notice body when the phone yields to an inferred watch loan"
     },
     "This range is usually higher than your correction range when you are not exercising." : {
 
@@ -41182,101 +38902,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未知"
-          }
-        }
-      }
-    },
-    "Unknown Error: %1$@" : {
-      "comment" : "The error message displayed for unknown LoopError errors. (1: unknown error)",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "خطأ غير معروف"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neznámá chyba: %1$@"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ukendt fejl: %1$@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unbekannter Fehler: %1$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Error desconocido: %1$@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erreur inconnue : %1$@"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "תקלה לא ידועה %1$@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Errore sconosciuto: %1$@"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ukjent feil: %1$@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Onbekende fout: %1$@"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nieznany błąd: %1$@"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eroare necunoscută: %1$@"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Неизвестная ошибка: %1$@"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bilinmeyen Hata: %1$@"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "未知错误：%1$@"
           }
         }
       }
@@ -42807,6 +40432,18 @@
           }
         }
       }
+    },
+    "Watch Loan Not Confirmed" : {
+      "comment" : "Phone notification title: the watch never confirmed a takeover"
+    },
+    "Watch Message Unreadable" : {
+      "comment" : "Phone notice title when a loan message cannot be decoded"
+    },
+    "Watch Not Reporting" : {
+      "comment" : "Phone warning title: the watch has stopped reporting loop cycles during a session"
+    },
+    "Watch Session Ended Without Hand-Back" : {
+      "comment" : "Phone notice title after a force reclaim salvaged staged records"
     },
     "What are examples of Critical Alerts and Time Sensitive Notifications?" : {
 

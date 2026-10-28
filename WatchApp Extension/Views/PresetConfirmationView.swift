@@ -26,7 +26,7 @@ struct PresetConfirmationView: View {
     }
 
     var displayState: DisplayState {
-        if let override = loopManager.watchInfo.scheduleOverride {
+        if let override = loopManager.scheduleOverride {
             return .activated(override)
         } else if let preset {
             if isConfirmingFromPresetReminder && !confirmedViaButton {
@@ -78,7 +78,7 @@ struct PresetConfirmationView: View {
                 self.loopManager.pendingPresetReminder = nil
             }
         })
-        .onChange(of: loopManager.watchInfo.scheduleOverride) { oldValue, newVelue in
+        .onChange(of: loopManager.scheduleOverride) { oldValue, newVelue in
             if oldValue != nil, newVelue == nil, preset == nil
             {
                 dismiss()
