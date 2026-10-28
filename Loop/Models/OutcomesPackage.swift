@@ -55,7 +55,6 @@ enum OutcomesPackageError: Error {
 
 struct OutcomesPackageBuilder {
     static let duration = TimeInterval.days(42)
-    static let minimumSetupDuration = TimeInterval.days(14)
     static let exportNames: Set<String> = ["Settings.json", "Glucose.json", "Carbs.json", "DosingDecisions.json", "Doses.json", "Overrides.json"]
 
     private static let sliceDuration = TimeInterval.hours(6)

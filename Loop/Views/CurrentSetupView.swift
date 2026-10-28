@@ -39,9 +39,8 @@ struct CurrentSetupView: View {
                 if let comparison = viewModel.comparison {
                     resultsSection(comparison)
                 }
-                if viewModel.isCurrentSelected, let builder = viewModel.outcomesPackageBuilder,
-                   Date().timeIntervalSince(selected.date) >= OutcomesPackageBuilder.minimumSetupDuration {
-                    Section(footer: Text(NSLocalizedString("Help improve Loop by sending these results, and the history behind them, to the Loop developers.", comment: "Footer of the share outcomes link on the current setup screen"))) {
+                if viewModel.isCurrentSelected, let builder = viewModel.outcomesPackageBuilder {
+                    Section(footer: Text(NSLocalizedString("Help improve Loop by sending these results, and the history behind them, to the Loop developers. Sharing after about 2 weeks without setup changes is ideal, but you can share at any time. Any changes are included in the history.", comment: "Footer of the share outcomes link on the current setup screen"))) {
                         NavigationLink(destination: ShareOutcomesView(viewModel: ShareOutcomesViewModel(change: selected, builder: builder))) {
                             Text(NSLocalizedString("Share Outcomes with Loop Developers", comment: "Link to the share outcomes screen"))
                         }
