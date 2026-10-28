@@ -8,6 +8,7 @@
 
 import Foundation
 import LoopKit
+import LoopCore
 import LoopAlgorithm
 
 struct CarbAbsorptionReview {

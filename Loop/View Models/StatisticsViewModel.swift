@@ -7,6 +7,7 @@
 
 import Foundation
 import LoopKit
+import LoopCore
 import LoopAlgorithm
 
 @MainActor

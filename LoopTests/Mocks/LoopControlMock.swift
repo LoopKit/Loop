@@ -11,6 +11,7 @@ import Foundation
 import LoopAlgorithm
 import LoopKit
 @testable import Loop
+@testable import LoopCore
 
 
 class LoopControlMock: LoopControl {

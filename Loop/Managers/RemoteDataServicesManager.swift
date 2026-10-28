@@ -10,6 +10,7 @@ import os.log
 import Foundation
 import LoopAlgorithm
 import LoopKit
+import LoopCore
 import UIKit
 
 enum RemoteDataType: String, CaseIterable {
@@ -665,7 +666,7 @@ protocol RemoteDataServicesManagerDelegate: AnyObject {
 }
 
 
-fileprivate extension UserDefaults {
+extension UserDefaults {   // not fileprivate: the pod loan moves the glucose bookmark at a hand-back
 
     private func queryAnchorKey(for remoteDataService: RemoteDataService, withRemoteDataType remoteDataType: RemoteDataType) -> String {
         return "com.loopkit.Loop.RemoteDataServicesManager.\(remoteDataService.pluginIdentifier).\(remoteDataType.rawValue)QueryAnchor"
