@@ -426,6 +426,9 @@ class LoopAppManager: NSObject {
             healthStore: healthStore
         )
 
+        // Weak lookup for the pump tile.
+        deviceDataManager.watchManager = watchManager
+
         self.mealDetectionManager = MealDetectionManager(
             algorithmStateProvider: loopDataManager,
             settingsProvider: temporaryPresetsManager,
@@ -433,6 +436,16 @@ class LoopAppManager: NSObject {
         )
 
         loopDataManager.deliveryDelegate = deviceDataManager
+        loopDataManager.isPumpConnectionReleased = { [weak deviceDataManager] in
+            deviceDataManager?.holdsAutomaticDosingForPodLoan ?? false
+        }
+        // During a loan the watch raises the glucose alerts; missed-meal detection pauses.
+        deviceDataManager.glucoseAlertManager.alertsHandledElsewhere = { [weak deviceDataManager] in
+            deviceDataManager?.podLoanWatchOwnsAlerts ?? false
+        }
+        mealDetectionManager.alertsHandledElsewhere = { [weak deviceDataManager] in
+            deviceDataManager?.podLoanWatchOwnsAlerts ?? false
+        }
 
         deviceDataManager.instantiateDeviceManagers()
 
@@ -730,6 +743,9 @@ class LoopAppManager: NSObject {
         guard let notification = notification else {
             return false
         }
+        if let deviceDataManager, deviceDataManager.podLoanHandlesPush(notification) {
+            return true
+        }
         servicesManager.handleRemoteNotification(notification)
         return true
     }
@@ -951,8 +967,14 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
              LoopNotificationCategory.requiredUpdate.rawValue:
             completionHandler([.badge, .sound, .list, .banner])
         default:
-            // For all others, banners are not to be displayed while in the foreground
-            completionHandler([.badge, .sound, .list])
+            // Foreground banners for the loan's notices, whose identifiers are minted per notice;
+            // the phone may be the only device that can reach the user.
+            if notification.request.identifier.hasPrefix("podloan.") {
+                completionHandler([.badge, .sound, .list, .banner])
+            } else {
+                // For all others, banners are not to be displayed while in the foreground
+                completionHandler([.badge, .sound, .list])
+            }
         }
     }
 

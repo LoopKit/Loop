@@ -8,6 +8,7 @@
 import XCTest
 import LoopKit
 import LoopAlgorithm
+import LoopCore
 @testable import Loop
 
 final class SetupComparisonTests: XCTestCase {

@@ -14,19 +14,19 @@ struct LoopHeader: View {
     @Environment(LoopDataManager.self) var loopManager
 
     var freshness: LoopCompletionFreshness {
-        guard loopManager.activeContext?.isClosedLoop == true else {
-            return LoopCompletionFreshness(lastCompletion: loopManager.activeContext?.glucoseDate, at: Date())
+        guard loopManager.displayContext?.isClosedLoop == true else {
+            return LoopCompletionFreshness(lastCompletion: loopManager.displayContext?.glucoseDate, at: Date())
         }
-        return LoopCompletionFreshness(lastCompletion: loopManager.activeContext?.loopLastRunDate, at: Date())
+        return LoopCompletionFreshness(lastCompletion: loopManager.displayContext?.loopLastRunDate, at: Date())
     }
 
     var body: some View {
         HStack {
-            if let activeContext = loopManager.activeContext,
+            if let activeContext = loopManager.displayContext,
                let unit = activeContext.displayGlucoseUnit
             {
                 TimelineView(.animation) { _ in
-                    LoopCircleView(closedLoop: activeContext.isClosedLoop ?? false, freshness: freshness, deviceIssue: loopManager.activeContext?.deviceIssue ?? true)
+                    LoopCircleView(closedLoop: activeContext.isClosedLoop ?? false, freshness: freshness, deviceIssue: loopManager.displayContext?.deviceIssue ?? true)
                         .frame(width: 22, height: 22)
                         .padding(.horizontal)
                 }

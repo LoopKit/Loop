@@ -1,0 +1,371 @@
+//
+//  PodLoanPhoneController.swift
+//  Loop
+//
+//  The phone half of lending the pod to the watch: the persisted state machine, the epoch
+//  that names each loan, and the stored properties the extensions share. Dependencies are
+//  injected (see +Wiring) so the ordering rules are testable.
+//
+
+import Foundation
+import HealthKit
+import LoopKit
+import LoopCore
+import UserNotifications
+
+@MainActor
+final class PodLoanPhoneController {
+    /// Loan: owner → grantOffered → loaned → reconciling → owner. A take-back goes through
+    /// reclaimPending. The phone doses only at owner, and not while yielding to an inferred loan.
+    enum State: String {
+        case owner, grantOffered, loaned, reconciling, reclaimPending
+    }
+
+    /// Derived from a snapshot and a clock (see +UIReads).
+    struct ReclaimProgress: Equatable {
+        enum Phase: Equatable {
+            /// A take-back reaching for the pod's link, before anything is committed.
+            case reachingPod
+
+            /// The settle after a hand-back: the phone re-establishing the pod link.
+            case reconnectingToPod
+
+            /// The settle after a take-back.
+            case forceReclaimingPod
+        }
+        let phase: Phase
+
+        let startedAt: Date
+
+        let expectedBy: Date
+
+        /// nil once overrun; otherwise capped below 1.
+        let fraction: Double?
+
+        let elapsed: TimeInterval
+    }
+
+    /// Defaults are inert, so a test supplies only what it exercises.
+    struct Dependencies {
+        var pumpManager: () -> PumpManager?
+
+        var settings: () -> LoopSettings
+
+        /// Called right after this phone releases the pump (true) or takes it back (false).
+        var pumpControlChanged: (_ released: Bool) -> Void
+
+        var send: ([String: Any]) -> Void
+
+        /// The phone's push address and the user's push key, for the standing copy. nil when the
+        /// feature is off or not set up: the watch then sends nothing.
+        var phoneReach: () -> PhoneReach? = { nil }
+
+        var addPumpEvents: ([NewPumpEvent], _ lastReconciliation: Date?, @escaping (Error?) -> Void) -> Void
+
+        var addCarb: (NewCarbEntry, @escaping (Error?) -> Void) -> Void
+
+        var deleteCarb: (LoanReconciler.DeletedCarb, @escaping (Error?) -> Void) -> Void = { _, done in done(nil) }
+
+        /// Diagnostic only; it lags, so it never gates a grant.
+        var watchAppInstalled: () -> Bool = { true }
+
+        /// The CGM's Read on Apple Watch setting: Sport Mode doses from the watch's own reading.
+        var watchReadsCGM: () -> Bool = { true }
+
+        /// Read and write: the reader tells a clear from the wrist whether there is anything to clear.
+        var scheduleOverride: () -> TemporaryScheduleOverride? = { nil }
+        /// Recorded in the override history at `changedAt`, when the wrist made the change.
+        var applyScheduleOverride: (TemporaryScheduleOverride?, _ changedAt: Date) -> Void = { _, _ in }
+
+        var noteWatchClosedLoop: (Bool) -> Void = { _ in }
+
+        var lastLoopCompleted: () -> Date? = { nil }
+
+        /// The volatility baseline the phone's guard + runway uses; nil while it has none.
+        var volatilityBaseline: () -> Double? = { nil }
+
+        var noteWatchLoopCompleted: (Date) -> Void = { _ in }
+
+        var doseHistory: (_ start: Date, _ completion: @escaping ([DoseEntry]) -> Void) -> Void
+
+        var carbHistory: (_ start: Date, _ completion: @escaping ([LoanCarbRecord]) -> Void) -> Void = { _, done in done([]) }
+
+        var glucoseHistory: (_ start: Date, _ completion: @escaping ([LoanGlucoseRecord]) -> Void) -> Void = { _, done in done([]) }
+
+        /// Overrides overlapping `start` onward, ended ones included, as the phone's history holds them.
+        var overrideHistory: (_ start: Date, _ completion: @escaping ([TemporaryScheduleOverride]) -> Void) -> Void = { _, done in done([]) }
+
+        /// Stock's settings-history queries over the window; nil leaves the wrist on its snapshot.
+        var settingsHistory: (_ start: Date, _ end: Date, _ completion: @escaping (LoanSettingsHistory?) -> Void) -> Void = { _, _, done in done(nil) }
+
+        /// The glucose alert settings, encoded for the grant; nil leaves the wrist without them.
+        var glucoseAlertSettings: (_ completion: @escaping (Data?) -> Void) -> Void = { $0(nil) }
+
+        var issueNotice: (_ title: String, _ body: String) -> Void
+
+        var ownershipDidChange: () -> Void = {}
+
+        var isConnectionReady: () -> Bool = { true }
+
+        var cancelTempBasalAfterPodReturn: (@escaping (Error?) -> Void) -> Void = { $0(nil) }
+
+        var cancelTempBasalForGrant: (@escaping (Error?) -> Void) -> Void = { $0(nil) }
+
+        /// Time-sensitive, so a Focus mode cannot swallow a recording failure.
+        var issueUrgentNotice: (_ title: String, _ body: String) -> Void = { _, _ in }
+
+        var bookGapDose: (_ entry: DoseEntry, _ completion: @escaping (Bool) -> Void) -> Void = { _, done in done(false) }
+
+        var deleteGapDose: (_ syncIdentifier: String, _ completion: @escaping (Bool) -> Void) -> Void = { _, done in done(false) }
+
+        var backfillDoses: (_ doses: [DoseEntry], _ completion: @escaping (Error?) -> Void) -> Void = { _, done in done(nil) }
+
+        /// The watch's dosing decisions into this phone's store, skipping any already there; the
+        /// result is how many were added.
+        var addDosingDecisions: (_ decisions: [StoredDosingDecision], _ completion: @escaping (Result<Int, Error>) -> Void) -> Void = { _, done in done(.success(0)) }
+
+        /// The watch's alert records into this phone's `AlertStore`, one per sync identifier; the
+        /// result is how many were added or updated.
+        var addAlerts: (_ alerts: [SyncAlertObject], _ completion: @escaping (Result<Int, Error>) -> Void) -> Void = { _, done in done(.success(0)) }
+
+        /// The watch's device log lines into this phone's device log, skipping any already there;
+        /// the result is how many were added.
+        var addDeviceLogEntries: (_ entries: [LoanDeviceLogEntry], _ completion: @escaping (Result<Int, Error>) -> Void) -> Void = { _, done in done(.success(0)) }
+
+        /// After a back-dated insulin write; the counteraction memo is append-only.
+        var insulinHistoryRewritten: (_ earliestDoseStart: Date) -> Void = { _ in }
+
+        /// Defers launch-time store work until after first unlock.
+        var whenProtectedDataAvailable: (@escaping () -> Void) -> Void = { $0() }
+
+        var beginReclaimBackgroundTask: () -> Void = {}
+        var endReclaimBackgroundTask: () -> Void = {}
+
+        /// Channel selection, and a positive signal only: false for a healthy backgrounded watch.
+        var isWatchReachable: () -> Bool = { false }
+
+        var isBluetoothPoweredOff: () -> Bool = { false }
+
+        /// The loan's log lines.
+        var logLoanLine: (String) -> Void = { PhoneLog.event("loan", $0) }
+
+        /// Proxy for the phone being near the user.
+        var latestGlucoseDate: () -> Date? = { nil }
+        var now: () -> Date = { Date() }
+
+        /// Storage seam for tests. A nil directory keeps each file in its app location.
+        var stateDirectory: URL? = nil
+
+        /// The scheduled reminders' notification centre; tests replace both so nothing reaches the app.
+        var addNotification: (UNNotificationRequest) -> Void = { UNUserNotificationCenter.current().add($0) }
+        var removeNotifications: ([String]) -> Void = { ids in
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ids)
+        }
+    }
+
+    let log = DiagnosticLog(category: "PodLoanPhoneController")
+
+    var deps: Dependencies
+
+    /// One message at a time, in arrival order: `WatchDataManager` delivers on main.
+    func handleIncoming(userInfo: [String: Any]) {
+        let message: LoanMessage?
+        do {
+            message = try LoanMessage.decode(fromTransport: userInfo)
+        } catch {
+            // Never drop an undecodable message silently: nack it and warn about a build mismatch.
+            sendMessage(.nack(ProtocolNack(seenVersion: nil)))
+            warnProtocolMismatch()
+            return
+        }
+        // A decoded message re-arms the mismatch warning.
+        hasWarnedProtocolMismatch = false
+        guard let message = message else { return }
+
+        switch message {
+        case .request(let request):
+            handleRequest(request)
+        case .takeoverComplete(let complete):
+            handleTakeoverComplete(complete)
+        case .takeoverFailed(let failed):
+            handleTakeoverFailed(failed)
+        case .doseRecordBatch(let batch):
+            handleBatch(batch)
+        case .handbackOffer(let offer):
+            handleHandbackOffer(offer)
+        case .statusReport(let report):
+            handleStatusReport(report)
+        // The watch could not read something this phone sent.
+        case .nack:
+
+            log.error("the watch could not read a message from this phone; the apps may be on different versions")
+        // Phone-authored kinds, seen only if something loops a message back.
+        case .grant, .handbackAck, .revoke, .statusQuery, .denied, .dormantGrant:
+            break
+        }
+    }
+
+    /// Back to the phone without a hand-back, for a loan that never really started.
+    func reclaimToOwner(alert: (title: String, body: String)?, reason: String) {
+        handbackDiag(epoch, "loan abandoned, this phone keeps the pod: \(reason)")
+
+        cancelTakeBackAttempt()
+        deps.endReclaimBackgroundTask()
+
+        grantOfferedAt = nil
+        loanStartedAt = nil
+        reclaimPodConnection()
+        state = .owner
+        if let alert = alert { deps.issueNotice(alert.title, alert.body) }
+    }
+
+    /// Keyed by event ID, so a resend replaces. Tombstones are the watch retracting superseded records.
+    func stage(events: [LoanEvent], tombstones: [UUID]) {
+        for event in events { staged[event.id] = event }
+        stagedTombstones.formUnion(tombstones)
+        persistStaged()
+    }
+
+    /// An unencodable message is dropped: callers are best-effort with a retry.
+    func sendMessage(_ message: LoanMessage) {
+        guard let dictionary = try? message.transportDictionary() else { return }
+        deps.send(dictionary)
+    }
+
+    /// Restores the loan and re-arms what was owed; a loaned state pauses dosing at once.
+    init(dependencies: Dependencies) {
+        self.deps = dependencies
+        let store = dependencies.stateDirectory.map { PersistedProperty<[String: Any]>(key: Self.stateFileKey, directory: $0) }
+            ?? PersistedProperty(key: Self.stateFileKey)
+        self.persisted = store.wrappedValue.flatMap(PodLoanPhoneState.init(rawValue:)) ?? PodLoanPhoneState()
+        self.stateStore = store
+        loadStaged()
+
+        // Re-arm an unruled force-reclaim audit.
+        if let saved = persisted.pendingForceAudit {
+            let e = saved.epoch
+            pendingHandbackAudit = PendingHandbackAudit(
+                epoch: e, deliveredAtStart: saved.deliveredAtStart, windowStart: saved.from, expected: saved.expected,
+                loanMinutes: saved.loanMinutes,
+                watchLatest: nil, flavor: .forceReclaim)
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.handbackDiag(e, "take-back check still owed after a relaunch")
+                self.beginReclaimSettleWindow()
+            }
+        }
+
+        deps.whenProtectedDataAvailable { [weak self] in
+            DispatchQueue.main.async { self?.settleEstimatesAtLaunch() }
+        }
+
+        if podIsOnLoan {
+            // Heal only transient states; a relaunch during a real loan is ordinary.
+            if state == .reconciling {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 120) { [weak self] in
+                    guard let self = self, self.state == .reconciling else { return }
+                    self.forceReclaimToOwner(reason: "the app relaunched during a hand-back and none followed")
+                }
+            } else if state == .reclaimPending {
+                // A take-back cut short by the relaunch: finish the attempt, which refuses if the pod is away.
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self, self.state == .reclaimPending else { return }
+                    self.beginTakeBack(from: self.yieldingToInferredLoan ? .owner : .loaned)
+                }
+            } else if state == .grantOffered {
+                armT1(for: epoch)
+            }
+        }
+    }
+
+    /// The persisted state (+State); written whole by `updateState`.
+    var stateStore: PersistedProperty<[String: Any]>
+    var persisted: PodLoanPhoneState
+
+    var reclaimStartedAt: Date?
+    var reclaimSettleWork: DispatchWorkItem?
+
+    /// Last verified pod round-trip; a new grant waits for it.
+    var reclaimVerifiedAt: Date?
+    var reclaimVerifyInFlight = false
+
+    var reclaimLinkUpAt: Date?
+
+    var reclaimStaleReads = 0
+
+    /// The tile's wait start, kept across a reopened window.
+    var reclaimDisplayAnchor: Date?
+
+    /// The last request answered, for suppressing transport redeliveries of the same one.
+    var lastRequestID: String?
+    var lastRequestAt: Date?
+
+    var hasWarnedProtocolMismatch = false
+
+    /// One write at a time: `committedIDs` updates only in a write's completion.
+    var commitInFlight = false
+
+    /// Offers that arrived mid-write, at most one per epoch.
+    var coalescedOffers: [Int: HandbackOffer] = [:]
+
+    var grantInFlight = false
+    /// A force reclaim that is waiting for the in-flight write to land.
+    var pendingForceReclaimReason: String?
+
+    var staged: [UUID: LoanEvent] = [:]
+    var stagedTombstones: Set<UUID> = []
+    /// The last running-audit line; a wake delivers several batches with the same reading.
+    var lastRunningAuditLine: String?
+    var t1WorkItem: DispatchWorkItem?
+
+    /// A take-back attempt in progress, and the phase to restore if the pod does not answer.
+    var takeBackStartedAt: Date?
+    /// The attempt is a take-over on silence: a bolus in progress is waited out, not refused.
+    var takeBackOnSilence = false
+    var takeBackFrom: State?
+
+    var lastDormantRefreshAt: Date?
+
+    var trailingDormantRefreshPending = false
+
+    var lastClosedSessionRevokeAt: Date?
+    /// A question to the watch awaiting its answer (`askWatch`), and when the last status report came.
+    var watchAskedAt: Date?
+    var lastWatchAnswerAt: Date?
+    /// The last report said the watch holds the pod but cannot reach it.
+    var lastWatchAnswerCannotReachPod = false
+    /// The last report said the watch holds nothing.
+    var lastWatchAnswerHoldsNothing = false
+    /// Loans a revived watch claimed that this phone refused; its records for them get the stop again.
+    var refusedRevivedEpochs: Set<Int> = []
+    /// The silence a "Watch Not Reporting" notice went out for, so it is said once.
+    var silenceWarnedFor: Date?
+    var lastDormantSettingsFingerprint: String?
+    /// The phone's glucose alert settings as last seen; part of the standing copy's fingerprint.
+    var glucoseAlertSettingsSeen: GlucoseAlertSettings?
+
+    /// The newest loan the watch claimed that this phone never granted, and when.
+    var newestForeignLoanEvidence: (epoch: Int, at: Date)?
+
+    /// Per grant; cleared wherever a loan is abandoned.
+    var grantOfferedAt: Date?
+
+    /// The highest loan number the watch reported in its last Start request.
+    var watchKnownEpoch: Int?
+
+    /// The pod fault already announced, as "epoch fault", so a repeated report stays quiet.
+    var podFaultNoticed: String?
+
+    /// Only the force-reclaim flavour persists.
+    var pendingHandbackAudit: PendingHandbackAudit? {
+        didSet {
+            if let p = pendingHandbackAudit, p.flavor == .forceReclaim {
+                updateState { $0.pendingForceAudit = .init(epoch: p.epoch, deliveredAtStart: p.deliveredAtStart, from: p.windowStart,
+                                                            expected: p.expected, loanMinutes: p.loanMinutes) }
+            } else if oldValue?.flavor == .forceReclaim {
+                updateState { $0.pendingForceAudit = nil }
+            }
+        }
+    }
+}
