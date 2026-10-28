@@ -1632,7 +1632,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertTrue(addedDoses.isEmpty)
     }
 
-    /// The banner's freshness line: when the watch's records last came, during a loan only.
+    /// The banner's freshness line: the phone holds every record the watch made by then, during a loan only.
     func testTheBannerSaysWhenTheWatchsRecordsLastCame() throws {
         let controller = makeController(now: { self.clock })
         XCTAssertNil(controller.lastRecordsAtForUI, "no loan, no line")
@@ -1644,6 +1644,72 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         settle()
         let shown = try XCTUnwrap(controller.lastRecordsAtForUI)
         XCTAssertEqual(shown.timeIntervalSince(sentAt), 0, accuracy: 1, "the batch's send time, as the message carries it")
+    }
+
+    /// The watch answering a status question is not a records refresh: the banner keeps its time.
+    func testAStatusAnswerLeavesTheBannerTime() throws {
+        let controller = makeController(now: { self.clock })
+        let grant = establishLoan(controller)
+        clock = clock.addingTimeInterval(.minutes(1))
+        let recordsAt = clock
+        controller.handleIncoming(userInfo: try LoanMessage.doseRecordBatch(
+            DoseRecordBatch(epoch: grant.epoch, events: [], tombstones: [], sentAt: recordsAt)).transportDictionary())
+        settle()
+
+        clock = clock.addingTimeInterval(.minutes(4))
+        let report = StatusReport(epoch: grant.epoch, lastDirectGlucoseAge: nil,
+                                  lastEventSeq: 0, podFault: nil, holdsPod: true, knowsGrant: true)
+        controller.handleIncoming(userInfo: try LoanMessage.statusReport(report).transportDictionary())
+        settle()
+
+        XCTAssertEqual(try XCTUnwrap(controller.holdRenewedAt).timeIntervalSince(clock), 0, accuracy: 1, "the watch is alive")
+        XCTAssertEqual(try XCTUnwrap(controller.lastRecordsAtForUI).timeIntervalSince(recordsAt), 0, accuracy: 1,
+                       "but no records came, so the banner keeps the last records time")
+    }
+
+    /// Standing aside for a loan the watch started alone, the phone's records end at its own last pod
+    /// reading. The watch's records, with this phone's credential, adopt the loan and come in at once.
+    func testAWatchStartedLoanIsAdoptedFromItsRecords() throws {
+        let token = seizeCredentialOutstanding()
+        let controller = makeController(now: { self.clock })
+        let lastPodReading = clock.addingTimeInterval(-.minutes(20))
+        pump.lastSync = lastPodReading
+
+        controller.handleIncoming(userInfo: try LoanMessage.statusReport(StatusReport(
+            epoch: 5, lastDirectGlucoseAge: nil, lastEventSeq: 0, podFault: nil, holdsPod: true, knowsGrant: false)).transportDictionary())
+        waitUntil(timeout: 5, "standing aside") { controller.yieldingToInferredLoan }
+        XCTAssertEqual(try XCTUnwrap(controller.lastRecordsAtForUI).timeIntervalSince(lastPodReading), 0, accuracy: 1,
+                       "nothing from the watch yet: the phone's own last pod reading")
+
+        clock = clock.addingTimeInterval(.minutes(1))
+        let sentAt = clock
+        let bolus = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                              record: LoanDoseRecord(kind: .bolus, startDate: sentAt.addingTimeInterval(-.minutes(10)), amount: 0.5),
+                              loggedAt: sentAt.addingTimeInterval(-.minutes(10)))
+        let ack = expectSend()
+        controller.handleIncoming(userInfo: try LoanMessage.doseRecordBatch(DoseRecordBatch(
+            epoch: 5, events: [bolus], tombstones: [], sentAt: sentAt, seizeToken: token)).transportDictionary())
+        wait(for: [ack], timeout: 5)
+
+        XCTAssertEqual(controller.state, .loaned, "the watch's loan is now this phone's to follow")
+        XCTAssertFalse(controller.yieldingToInferredLoan)
+        XCTAssertEqual(controller.epoch, 5)
+        XCTAssertEqual(addedDoses.flatMap { $0 }.filter { $0.type == .bolus }.count, 1, "the bolus is in the phone's stores")
+        XCTAssertEqual(try XCTUnwrap(controller.lastRecordsAtForUI).timeIntervalSince(sentAt), 0, accuracy: 1)
+    }
+
+    /// Without this phone's credential the records adopt nothing: the phone stands aside and takes none in.
+    func testRecordsWithoutThisPhonesCredentialAreNotAdopted() throws {
+        _ = seizeCredentialOutstanding()
+        let controller = makeController()
+
+        controller.handleIncoming(userInfo: try futureEpochBatch(epoch: 5))
+        waitUntil(timeout: 5, "standing aside") { controller.yieldingToInferredLoan }
+        settle()
+
+        XCTAssertEqual(controller.state, .owner)
+        XCTAssertEqual(sentCount { if case .handbackAck = $0 { return true }; return false }, 0, "nothing acknowledged")
+        XCTAssertTrue(addedDoses.isEmpty, "nothing written")
     }
 
     /// An interim offer acks the open temp's cursor but defers its write to the final offer.

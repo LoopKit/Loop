@@ -25,12 +25,12 @@ extension StatusTableViewController {
         } else {
             subtitle = NSLocalizedString("Apple Watch is controlling the pod. Tap to reclaim.", comment: "The subtitle of the banner indicating the pod is controlled by the watch")
         }
-        // How current the phone's copy is: the time the watch's records last arrived.
+        // How current the phone's copy is: its stores hold every carb and insulin record made by this time.
         var freshness: String?
         if !deviceManager.isPodTakeoverInProgress, !deviceManager.isPodLoanReclaiming,
            let lastRecordsAt = deviceManager.podLoanLastRecordsAt {
             let time = DateFormatter.localizedString(from: lastRecordsAt, dateStyle: .none, timeStyle: .short)
-            freshness = String(format: NSLocalizedString("Last watch update %@", comment: "Banner line during a loan: when the watch's records last arrived (1: time)"), time)
+            freshness = String(format: NSLocalizedString("Insulin and carbs as of %@", comment: "Banner line during a loan: the phone has every insulin and carb record made by this time (1: time)"), time)
         }
         cell.contentConfiguration = UIHostingConfiguration {
             HStack {

@@ -32,7 +32,8 @@ extension PodLoanWatchController {
                                             asOf: asOf, deliveredAtStartAt: persisted.deliveredAtTakeoverAt)
         }
         sendMessage(.doseRecordBatch(DoseRecordBatch(epoch: epoch, events: events, tombstones: tombstones,
-                                                     odometer: odometer, sentAt: self.now())))
+                                                     odometer: odometer, sentAt: self.now(),
+                                                     seizeToken: persisted.seizeToken)))
     }
 
     /// Once per completed cycle, including cycles that recorded nothing.
