@@ -75,6 +75,6 @@ final class CurrentSetupViewModel: ObservableObject {
             comparison = nil
             return
         }
-        comparison = SetupComparison(change: selected, end: history.end(of: selected), samples: samples, insulinHistory: insulin, now: now())
+        comparison = SetupComparison(change: selected, samples: samples, insulinHistory: insulin, now: now())
     }
 }
