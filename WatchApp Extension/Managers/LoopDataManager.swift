@@ -254,17 +254,18 @@ extension LoopDataManager {
         if activeContext == nil || context.shouldReplace(activeContext!) {
             if let newGlucoseSample = context.newGlucoseSample {
                 Task {
-                    try? await self.glucoseStore?.addGlucoseSamples([newGlucoseSample])
+                    let stored = (try? await self.glucoseStore?.addGlucoseSamples([newGlucoseSample])) ?? []
+                    self.podLoanNoteRelayedGlucose(newGlucoseSample, storedNew: !stored.isEmpty)
                 }
             }
             activeContext = context
         }
-        WatchCGMHost.shared.update(from: context)
+        podLoanUpdateWatchCGM(from: context)
     }
 
     /// Readings from the watch's own connection to the CGM. Stored beside the phone's (the same
     /// reading from both carries the same sync identifier, so the store keeps one) and shown while
-    /// newer than the phone's.
+    /// newer than the phone's. With Sport Mode, the loop reacts to what was stored.
     func addDirectGlucose(_ samples: [NewGlucoseSample]) {
         dispatchPrecondition(condition: .onQueue(.main))
         guard let latest = samples.max(by: { $0.date < $1.date }) else { return }
@@ -272,11 +273,13 @@ extension LoopDataManager {
             latestDirectGlucose = latest
         }
         Task {
+            var stored: [StoredGlucoseSample] = []
             do {
-                _ = try await self.glucoseStore?.addGlucoseSamples(samples)
+                stored = try await self.glucoseStore?.addGlucoseSamples(samples) ?? []
             } catch {
                 self.log.error("Failure adding direct glucose samples: %{public}@", String(describing: error))
             }
+            self.podLoanNoteDirectGlucose(samples, storedNew: !stored.isEmpty)
             self.directGlucoseRevision += 1
             self.needsDidUpdateContextNotification = true
             self.sendDidUpdateContextNotificationIfNecessary()
@@ -285,6 +288,12 @@ extension LoopDataManager {
 
     func directGlucoseDidEnd() {
         latestDirectGlucose = nil
+        podLoanNoteDirectGlucoseEnded()
+    }
+
+    /// The sensor reports its data unreliable.
+    func directGlucoseUnreliable() {
+        podLoanNoteDirectGlucoseUnreliable()
     }
 
     /// What the screens show: the phone's context, with the state of the watch holding a lent pod over
@@ -328,14 +337,18 @@ extension LoopDataManager {
         )
     }
 
+    /// Replaces the carb store with the phone's carbs, except while the watch's own carbs are not yet
+    /// home (`pausesPhoneCarbSync`), checked when asking and again when the answer arrives.
     func requestCarbBackfill() {
         dispatchPrecondition(condition: .onQueue(.main))
+        guard !pausesPhoneCarbSync else { return }
 
         let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -CarbMath.maximumAbsorptionTimeInterval))
         let userInfo = CarbBackfillRequestUserInfo(startDate: start)
         WCSession.default.sendCarbBackfillRequestMessage(userInfo) { (result) in
             switch result {
             case .success(let context):
+                guard !self.pausesPhoneCarbSync else { return }
                 self.carbStore.setSyncCarbObjects(context.objects) { (error) in
                     if let error = error {
                         self.log.error("Failure setting sync carb objects: %{public}@", String(describing: error))
@@ -421,6 +434,10 @@ extension LoopDataManager {
     func clearOverride() async throws {
         var watchInfoUpdate = self.watchInfo
         watchInfoUpdate.scheduleOverride = nil
+        if let loan = loanControllerIfActive {
+            return await applyOverrideDuringLoan(loan, TemporaryScheduleOverride?.none,
+                                                 presetId: String?.none, alertIdentifier: String?.none)
+        }
         try await WCSession.default.sendSetPreset(presetIdentifier: nil, alertIdentifier: nil)
         watchInfo = watchInfoUpdate
     }
@@ -428,6 +445,11 @@ extension LoopDataManager {
     func activateOverride(_ override: TemporaryScheduleOverride, alertIdentifierToAcknowledge: String? = nil) async throws {
         var watchInfoUpdate = self.watchInfo
         watchInfoUpdate.scheduleOverride = override
+        if let loan = loanControllerIfActive {
+            return await applyOverrideDuringLoan(loan, override,
+                                                 presetId: override.presetId,
+                                                 alertIdentifier: alertIdentifierToAcknowledge)
+        }
         try await WCSession.default.sendSetPreset(presetIdentifier: override.presetId, alertIdentifier: alertIdentifierToAcknowledge)
         watchInfo = watchInfoUpdate
     }

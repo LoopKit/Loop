@@ -29674,6 +29674,9 @@
     "Please go to the App Store now to update the app." : {
       "comment" : "Required update modal paragraph 3"
     },
+    "Pod Fault" : {
+      "comment" : "Phone notice title when the watch reports a pod fault during a loan"
+    },
     "Pod on Watch" : {
       "comment" : "Title text for the pump tile while the pod is loaned to the watch"
     },
