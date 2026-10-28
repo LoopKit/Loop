@@ -1990,6 +1990,44 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertNotNil(supplement["basalRateSchedule"], "the supplement carries them")
     }
 
+    /// End to end: an override set on the phone, a loan, a wrist clear at a known time, the
+    /// hand-back an hour later. The phone's history ends the override at the clear.
+    @MainActor
+    func testAWristClearEndsThePhonesOverrideAtTheClearNotAtTheHandback() throws {
+        let presets = TemporaryPresetsManager(settingsProvider: MockSettingsProvider(settings: StoredSettings()),
+                                              presetHistory: TemporaryScheduleOverrideHistory())
+        let start = Date().addingTimeInterval(-.hours(2))
+        let exercise = TemporaryScheduleOverride(context: .custom,
+                                                 settings: TemporaryPresetSettings(unit: .milligramsPerDeciliter, targetRange: nil,
+                                                                                   insulinNeedsScaleFactor: 0.5),
+                                                 startDate: start, duration: .indefinite, enactTrigger: .local, syncIdentifier: UUID())
+        presets.scheduleOverride = exercise
+        phoneScheduleOverride = exercise
+
+        let controller = makeController()
+        let grant = establishLoan(controller)
+
+        let clearedAt = Date().addingTimeInterval(-.hours(1))
+        let clear = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                              record: .overrideChange(nil, at: clearedAt), loggedAt: clearedAt)
+        let ackSent = expectSend()
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(HandbackOffer(
+            epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil, odometer: nil,
+            events: [clear], tombstones: [], recovered: false)).transportDictionary())
+        wait(for: [ackSent], timeout: 5)
+
+        // The production setter, applied on main as the wiring's closure applies it.
+        lock.lock(); let changes = appliedOverrideChanges; lock.unlock()
+        XCTAssertEqual(changes.count, 1, "the clear is applied once")
+        for change in changes { presets.setScheduleOverride(change.override, changedAt: change.changedAt) }
+
+        XCTAssertNil(presets.scheduleOverride, "the phone no longer runs the override")
+        let recorded = try XCTUnwrap(presets.presetHistory.getOverrideHistory(startDate: start.addingTimeInterval(-60), endDate: Date()).first)
+        XCTAssertEqual(recorded.syncIdentifier, exercise.syncIdentifier)
+        XCTAssertEqual(recorded.actualEndDate.timeIntervalSince(clearedAt), 0, accuracy: 0.01,
+                       "ended when the wrist cleared it, not an hour later at the hand-back")
+    }
+
     // MARK: - The outbound handover is two states, not one
 
     /// "Taking over…" from grant until the watch confirms, then "Pod on Watch".

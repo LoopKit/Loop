@@ -9880,6 +9880,9 @@
         }
       }
     },
+    "Bolus Not Delivered" : {
+      "comment" : "Notification title when a bolus is refused because the pod is on loan"
+    },
     "Bolus Recommendation Updated" : {
       "comment" : "Alert title for an updated bolus recommendation",
       "localizations" : {

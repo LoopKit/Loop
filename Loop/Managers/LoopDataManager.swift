@@ -378,6 +378,9 @@ final class LoopDataManager: ObservableObject {
         await updateRemoteRecommendation(force: forceStoreRemoteRecommendation)
     }
 
+    /// True while the pod is loaned out, or until a force reclaim's audit rules; injected at wiring — see `LoopDataManager+PodLoan.swift`.
+    var isPumpConnectionReleased: () -> Bool = { false }
+
     /// Cancel the active temp basal if it was automatically issued
     func cancelActiveTempBasal(for reason: CancelActiveTempBasalReason) async throws {
         let cancelled: Bool
@@ -531,8 +534,10 @@ extension LoopDataManager: LoopCycleHost {
         temporaryPresetsManager.activeOverride
     }
 
+    /// While the pod is lent the cycle computes but never enacts (dosingEnabled is untouched), and the
+    /// watch stores the cycles' decisions; the phone stores none.
     var holdsPump: Bool {
-        true
+        !isPumpConnectionReleased()
     }
 
     var isClosedLoop: Bool {
