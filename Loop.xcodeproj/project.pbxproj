@@ -41,6 +41,11 @@
 		104021B7449DA59717EA4E5D /* LoopAlgorithmSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */; };
 		229FEACAEAB2DF60B3DB5C84 /* LoopCycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3DFFEB9BB163D1B87B3563 /* LoopCycle.swift */; };
 		D23A31DF90992466C4626B34 /* LoopCycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3DFFEB9BB163D1B87B3563 /* LoopCycle.swift */; };
+		E62787C09306EF6C572B00AE /* AlertStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219C2469F1F5000EBBDE /* AlertStore.swift */; };
+		D3A7A6C51CA176C05E9DDF04 /* AlertStore.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */; };
+		983E18F38E193C0E5AFB0358 /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
+		83470D3E3277A2B94515726E /* StoredAlert+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */; };
+		F14FCF0777A86C00F21DD16A /* StoredAlert+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */; };
 		01414522FC033F2B7A9B223A /* Loop/Resources/Sounds/crying.caf in Resources */ = {isa = PBXBuildFile; fileRef = 85203550670F2E9BE92F27D8 /* Loop/Resources/Sounds/crying.caf */; };
 		0A02E77AD7536C322933D49B /* Loop/Resources/Sounds/minimal.caf in Resources */ = {isa = PBXBuildFile; fileRef = 74145BE3C46270883D295A1F /* Loop/Resources/Sounds/minimal.caf */; };
 		124B300527D84BE2A1233A91 /* Loop/Resources/Sounds/urgent_low.caf in Resources */ = {isa = PBXBuildFile; fileRef = C9EA3F48338B49BD9C6BD0F9 /* Loop/Resources/Sounds/urgent_low.caf */; };
@@ -165,6 +170,7 @@
 		230BE095719B8D8969B32A9C /* Loop/Resources/Sounds/bloop.caf in Resources */ = {isa = PBXBuildFile; fileRef = AF16A5EDEB9DF756890E0C09 /* Loop/Resources/Sounds/bloop.caf */; };
 		2595BA7C7FB24296BCB3601A /* PodLoanPhoneControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C8F1C82896495CA6E8AF8F /* PodLoanPhoneControllerTests.swift */; };
 		2C694BFD5806E573AFAB5E2E /* Loop/Resources/Sounds/dings.caf in Resources */ = {isa = PBXBuildFile; fileRef = 62F7CB5D5DC337E705032AC7 /* Loop/Resources/Sounds/dings.caf */; };
+		2F17426EF105437983CDF0BC /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42BE0808089545E7BE6AE359 /* NSBundle.swift */; };
 		33644743F20B3706E3107FAC /* Loop/Resources/Sounds/mood_synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = BEC0BA802BE613F144AC3A70 /* Loop/Resources/Sounds/mood_synth.caf */; };
 		73BD135109B5757AA0F756D7 /* LoanControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2FD5B2F0532AE1378EF7AD /* LoanControlTests.swift */; };
 		37F9E89015084C8ABF4404FB /* LoanProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1368A70B6E347BCB432DF4D /* LoanProtocolTests.swift */; };
@@ -4025,6 +4031,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E62787C09306EF6C572B00AE /* AlertStore.swift in Sources */,
+				D3A7A6C51CA176C05E9DDF04 /* AlertStore.xcdatamodeld in Sources */,
+				983E18F38E193C0E5AFB0358 /* StoredAlert.swift in Sources */,
+				83470D3E3277A2B94515726E /* StoredAlert+CoreDataClass.swift in Sources */,
+				F14FCF0777A86C00F21DD16A /* StoredAlert+CoreDataProperties.swift in Sources */,
+				2F17426EF105437983CDF0BC /* NSBundle.swift in Sources */,
 				C1275DD62E808E2F0013B99D /* LoopWatchApp.swift in Sources */,
 				894F6DDD243C0A2300CCE676 /* CarbAmountLabel.swift in Sources */,
 				B455C7352BD14E30002B847E /* Comparable.swift in Sources */,

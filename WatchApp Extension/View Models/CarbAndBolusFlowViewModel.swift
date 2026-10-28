@@ -85,14 +85,14 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
         case .carbEntry:
             // If this new context wasn't generated in response to a potential carb entry message,
             // recompute the recommended bolus for the carb entry under consideration.
-            let wasContextGeneratedFromPotentialCarbEntryMessage = loopManager.activeContext?.potentialCarbEntry != nil
+            let wasContextGeneratedFromPotentialCarbEntryMessage = loopManager.displayContext?.potentialCarbEntry != nil
             if !wasContextGeneratedFromPotentialCarbEntryMessage, let entry = self.carbEntryUnderConsideration {
                 Task { @MainActor in
                     await self.recommendBolus(with: entry)
                 }
             }
         case .manualBolus:
-            let activeContext = loopManager.activeContext
+            let activeContext = loopManager.displayContext
             self.contextDate = activeContext?.creationDate
             if self.recommendedBolusAmount != activeContext?.recommendedBolusDose {
                 self.recommendedBolusAmount = activeContext?.recommendedBolusDose

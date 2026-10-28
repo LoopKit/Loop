@@ -21,7 +21,7 @@ struct PresetsView: View {
     }
 
     var displayState: DisplayState {
-        if let override = loopManager.watchInfo.scheduleOverride {
+        if let override = loopManager.scheduleOverride {
             return .activeOverride(override)
         } else {
             return .presetsList

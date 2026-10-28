@@ -21,9 +21,24 @@ import WatchKit
 class LoopDataManager {
     static let shared = LoopDataManager()
 
+    /// The watch's stores, one set for its screens and, during a loan, its loop. Carbs, doses and
+    /// dosing decisions share one Core Data stack; glucose has its own (see `init`).
     let carbStore: CarbStore
 
     var glucoseStore: GlucoseStore?
+
+    /// The stores only the loop uses; nil until opened.
+    private(set) var loopStores: WatchLoopStores?
+
+    @ObservationIgnored
+    private var storesOpened: Task<Void, Never>?
+
+    /// Every store, once all are open; nil if one could not be.
+    func openedStores() async -> (glucoseStore: GlucoseStore, carbStore: CarbStore, loopStores: WatchLoopStores)? {
+        await storesOpened?.value
+        guard let glucoseStore, let loopStores else { return nil }
+        return (glucoseStore, carbStore, loopStores)
+    }
 
     @ObservationIgnored
     @PersistedProperty(key: "Settings")
@@ -53,7 +68,7 @@ class LoopDataManager {
     }
 
     var activePreset: SelectablePreset? {
-        guard let presetId = watchInfo.scheduleOverride?.presetId else {
+        guard let presetId = scheduleOverride?.presetId else {
             return nil
         }
         return selectablePresets.first(where: { $0.id == presetId })
@@ -80,18 +95,48 @@ class LoopDataManager {
     private let log = OSLog(category: "LoopDosingManager")
 
     // Main queue only
+    /// The phone's last context. Screens read `displayContext`.
     private(set) var activeContext: WatchContext? {
         didSet {
             rawWatchContext = activeContext?.rawValue
-            needsDidUpdateContextNotification = true
-            sendDidUpdateContextNotificationIfNecessary()
+            updateDisplayContext()
         }
+    }
+
+    /// The state of the watch holding a lent pod, published by Sport Mode for the screens; nil otherwise.
+    var wristState: WatchContext? {
+        didSet { updateDisplayContext() }
+    }
+
+    /// The override the watch's loop doses with during a loan, published by Sport Mode for the
+    /// screens: `.none` between loans, `.some(nil)` during a loan with no override.
+    var wristOverride: TemporaryScheduleOverride?? = .none
+
+    /// The active override, as the screens show it (`scheduleOverride(phone:wrist:)`).
+    var scheduleOverride: TemporaryScheduleOverride? {
+        Self.scheduleOverride(phone: watchInfo.scheduleOverride, wrist: wristOverride)
+    }
+
+    /// During a loan, the override the watch's loop doses with; otherwise the phone's.
+    nonisolated static func scheduleOverride(phone: TemporaryScheduleOverride?, wrist: TemporaryScheduleOverride??) -> TemporaryScheduleOverride? {
+        wrist ?? phone
+    }
+
+    /// What the screens show (`displayContext(phone:wrist:directGlucose:)`).
+    private(set) var displayContext: WatchContext?
+
+    private func updateDisplayContext() {
+        displayContext = Self.displayContext(phone: activeContext, wrist: wristState, directGlucose: latestDirectGlucose)
+        needsDidUpdateContextNotification = true
+        sendDidUpdateContextNotificationIfNecessary()
     }
 
     private var needsDidUpdateContextNotification: Bool = false
 
     /// The newest reading from the watch's own connection to the CGM. Main queue only.
-    private(set) var latestDirectGlucose: NewGlucoseSample?
+    private(set) var latestDirectGlucose: NewGlucoseSample? {
+        didSet { updateDisplayContext() }
+    }
 
     /// Bumped once the watch's own readings are in the store, for the chart.
     private(set) var directGlucoseRevision = 0
@@ -106,11 +151,15 @@ class LoopDataManager {
     init() {
         healthStore = HKHealthStore()
         let cacheStore = PersistenceController.controllerInLocalDirectory()
+        let provenanceIdentifier = HKSource.default().bundleIdentifier
+        // The phone's history length, as the loop's stores need; the carb list reads since midnight.
+        let localCacheDuration = Bundle.main.localCacheDuration
 
         carbStore = CarbStore(
+            healthKitSampleStore: nil,
             cacheStore: cacheStore,
-            cacheLength: .hours(24),    // Require 24 hours to store recent carbs "since midnight" for CarbEntryListController
-            syncVersion: 0
+            cacheLength: localCacheDuration,
+            provenanceIdentifier: provenanceIdentifier
         )
 
         self.watchInfo = LoopSettingsUserInfo(
@@ -125,12 +174,6 @@ class LoopDataManager {
         // torn read of a freshly-inserted CachedGlucoseObject (a nil required attribute).
         // A dedicated context removes that cross-store contention.
         let glucoseCacheStore = PersistenceController.controllerInLocalDirectory(named: "com.loopkit.LoopKit.Glucose")
-        Task {
-            glucoseStore = await GlucoseStore(
-                cacheStore: glucoseCacheStore,
-                cacheLength: .hours(4)
-            )
-        }
 
         if let rawWatchInfo, let watchInfo = LoopSettingsUserInfo(rawValue: rawWatchInfo) {
             self.watchInfo = watchInfo
@@ -139,6 +182,64 @@ class LoopDataManager {
         if let rawWatchContext, let watchContext = WatchContext(rawValue: rawWatchContext) {
             self.activeContext = watchContext
         }
+        // Observers do not run in an initializer.
+        displayContext = activeContext
+
+        // Glucose kept 24 hours: the loop reads 12 (the carb absorption window), the chart less.
+        storesOpened = Task {
+            glucoseStore = await GlucoseStore(
+                healthKitSampleStore: nil,
+                cacheStore: glucoseCacheStore,
+                cacheLength: .hours(24),
+                provenanceIdentifier: provenanceIdentifier
+            )
+            loopStores = await WatchLoopStores.open(cacheStore: cacheStore, cacheLength: localCacheDuration,
+                                                    provenanceIdentifier: provenanceIdentifier)
+        }
+    }
+}
+
+/// Stock's `AlertStore` logs through the phone's `DiagnosticLog`, which forwards to logging
+/// services the watch does not have; os_log under the same subsystem stands in.
+typealias DiagnosticLog = OSLog
+
+/// The stores only the loop uses: doses and dosing decisions on the carbs' Core Data stack, as
+/// stock's phone builds them, and its alert history and device log.
+struct WatchLoopStores {
+    let doseStore: DoseStore
+    let dosingDecisionStore: DosingDecisionStore
+    let alertStore: AlertStore
+    let deviceLog: PersistentDeviceLog
+
+    static func open(cacheStore: PersistenceController, cacheLength: TimeInterval, provenanceIdentifier: String) async -> WatchLoopStores? {
+        guard let documents = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true) else {
+            return nil
+        }
+
+        let doseStore = await DoseStore(
+            healthKitSampleStore: nil,
+            cacheStore: cacheStore,
+            cacheLength: cacheLength,
+            longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
+            provenanceIdentifier: provenanceIdentifier
+        )
+        let dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: cacheLength)
+
+        let alertStoreDirectory = documents.appendingPathComponent("AlertStore")
+        try? FileManager.default.createDirectory(at: alertStoreDirectory, withIntermediateDirectories: true,
+                                                 attributes: [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication])
+        let alertStore = AlertStore(storageDirectoryURL: alertStoreDirectory, expireAfter: cacheLength)
+
+        let deviceLogDirectory = documents.appendingPathComponent("DeviceLog")
+        do {
+            try FileManager.default.createDirectory(at: deviceLogDirectory, withIntermediateDirectories: true)
+        } catch {
+            return nil
+        }
+        let deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"),
+                                            maxEntryAge: cacheLength)
+
+        return WatchLoopStores(doseStore: doseStore, dosingDecisionStore: dosingDecisionStore, alertStore: alertStore, deviceLog: deviceLog)
     }
 }
 
@@ -186,12 +287,18 @@ extension LoopDataManager {
         latestDirectGlucose = nil
     }
 
-    /// The phone's context, with the watch's own reading in place of the phone's when it is newer.
-    var glucoseDisplayContext: WatchContext? {
-        guard let activeContext else { return nil }
-        guard let direct = latestDirectGlucose, direct.date > activeContext.glucoseDate ?? .distantPast,
-              let context = WatchContext(rawValue: activeContext.rawValue) else {
-            return activeContext
+    /// What the screens show: the phone's context, with the state of the watch holding a lent pod over
+    /// it, or otherwise with the watch's own reading in place of the phone's when it is newer.
+    nonisolated static func displayContext(phone: WatchContext?, wrist: WatchContext?, directGlucose: NewGlucoseSample?) -> WatchContext? {
+        if let wrist {
+            let context = phone.flatMap { WatchContext(rawValue: $0.rawValue) } ?? WatchContext()
+            context.overlayWatchState(from: wrist)
+            return context
+        }
+        guard let phone else { return nil }
+        guard let direct = directGlucose, direct.date > phone.glucoseDate ?? .distantPast,
+              let context = WatchContext(rawValue: phone.rawValue) else {
+            return phone
         }
         context.glucose = direct.quantity
         context.glucoseDate = direct.date
@@ -373,7 +480,7 @@ extension LoopDataManager {
     }
 
     var glucoseValue: String {
-        guard let activeContext = glucoseDisplayContext,
+        guard let activeContext = displayContext,
               let glucose = activeContext.glucose,
               let unit = activeContext.displayGlucoseUnit else
         {
@@ -395,6 +502,40 @@ extension LoopDataManager {
     }
 }
 
+extension WatchContext {
+    /// The phone's context with the state of the watch holding a lent pod over it: every field the
+    /// watch has its own value for, an empty one included, so nothing of the phone's dosing state
+    /// survives. The rest stay the phone's, so what only the phone knows (its display unit, its CGM,
+    /// whether the watch may read the sensor) carries through a loan.
+    func overlayWatchState(from watch: WatchContext) {
+        creationDate = watch.creationDate
+        isOnboardingCompleted = watch.isOnboardingCompleted
+        glucose = watch.glucose
+        glucoseCondition = watch.glucoseCondition
+        glucoseTrend = watch.glucoseTrend
+        glucoseTrendRate = watch.glucoseTrendRate
+        glucoseDate = watch.glucoseDate
+        glucoseIsDisplayOnly = watch.glucoseIsDisplayOnly
+        glucoseWasUserEntered = watch.glucoseWasUserEntered
+        glucoseSyncIdentifier = watch.glucoseSyncIdentifier
+        predictedGlucose = watch.predictedGlucose
+        loopLastRunDate = watch.loopLastRunDate
+        lastNetTempBasalDose = watch.lastNetTempBasalDose
+        lastNetTempBasalDate = watch.lastNetTempBasalDate
+        recommendedBolusDose = watch.recommendedBolusDose
+        insulinDeliveryState = watch.insulinDeliveryState
+        lastManualBolus = watch.lastManualBolus
+        potentialCarbEntry = watch.potentialCarbEntry
+        cob = watch.cob
+        iob = watch.iob
+        reservoir = watch.reservoir
+        reservoirPercentage = watch.reservoirPercentage
+        batteryPercentage = watch.batteryPercentage
+        isClosedLoop = watch.isClosedLoop
+        deviceIssue = watch.deviceIssue
+    }
+}
+
 extension LoopDataManager {
     var displayGlucoseUnit: LoopUnit {
         activeContext?.displayGlucoseUnit ?? .milligramsPerDeciliter
@@ -404,7 +545,7 @@ extension LoopDataManager {
 extension LoopDataManager {
 
     func generateChartData() async -> GlucoseChartData? {
-        guard let activeContext = activeContext else {
+        guard let activeContext = displayContext else {
             return nil
         }
 
@@ -417,9 +558,10 @@ extension LoopDataManager {
         let chartData = GlucoseChartData(
             unit: activeContext.displayGlucoseUnit,
             correctionRange: self.watchInfo.loopSettings.glucoseTargetRangeSchedule,
-            scheduleOverride: self.watchInfo.scheduleOverride,
+            scheduleOverride: self.scheduleOverride,
             historicalGlucose: historicalGlucose,
-            predictedGlucose: (activeContext.isClosedLoop ?? false) ? activeContext.predictedGlucose?.values : nil
+            // With Sport Mode, draw the prediction in any loop mode, as the phone does.
+            predictedGlucose: (FeatureFlags.sportModeEnabled || (activeContext.isClosedLoop ?? false)) ? activeContext.predictedGlucose?.values : nil
         )
         return chartData
     }
