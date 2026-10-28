@@ -609,6 +609,15 @@ class LoopAppManager: NSObject {
             guard let loopDataManager else { throw CancellationError() }
             return try await loopDataManager.insulinDeliveryHistory(days: days)
         }
+        viewModel.setupHistory = { [weak settingsManager, weak dosingDecisionStore] in
+            let settings = try await settingsManager?.settingsStore?.getStoredSettings() ?? []
+            let now = Date()
+            let start = settings.map(\.date).min() ?? now
+            let experiments = try await ExperimentsHistoryCache().records(since: start, now: now) { readFrom in
+                try await dosingDecisionStore?.getDosingDecisions(start: readFrom, end: now, as: ExperimentsRecord.self) ?? []
+            }
+            return SetupHistory(settings: settings, experiments: experiments)
+        }
 
         return viewModel
     }()
