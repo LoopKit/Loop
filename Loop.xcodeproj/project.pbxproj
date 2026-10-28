@@ -854,6 +854,11 @@
 		6C089A6A6A8AB8F5D835C9F1 /* ComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF57BFE5DDB939285839898 /* ComplicationSnapshot.swift */; };
 		A44984BCF1848A652E02CE8C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A198971FAA313AF6CDD1ACDF /* Foundation.framework */; };
 		EB125CD137FD31CD1EFAD0E0 /* ComplicationPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6515A16900D12040FF31E279 /* ComplicationPublisher.swift */; };
+		28EAD7E064ED541AA9ABE58D /* LoopGlanceWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E508C6EB2C06F7554A9C1759 /* LoopGlanceWidget.swift */; };
+		44CA233C68157DDA296C98FE /* GlanceComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AC351285766326725D8073 /* GlanceComplicationSnapshot.swift */; };
+		46596A54FBF8C7F5C89AF1D1 /* GlanceComplicationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 687DE1D14C48349AF99125E6 /* GlanceComplicationTests.swift */; };
+		4D0555E77F94BD1752D8244D /* GlanceComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AC351285766326725D8073 /* GlanceComplicationSnapshot.swift */; };
+		5155644B2FF8A562552905A3 /* GlanceComplicationPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216A392DC9F44D90F6448717 /* GlanceComplicationPublisher.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1846,6 +1851,10 @@
 		C535A805BFAB88306874F9E2 /* WatchApp.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = WatchApp.entitlements; sourceTree = "<group>"; };
 		F9C8C0BEB6A6B9A65E0D56AF /* LoopComplications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoopComplications.swift; sourceTree = "<group>"; };
 		FCF57BFE5DDB939285839898 /* ComplicationSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComplicationSnapshot.swift; sourceTree = "<group>"; };
+		216A392DC9F44D90F6448717 /* GlanceComplicationPublisher.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GlanceComplicationPublisher.swift; path = "WatchApp Extension/StockLoop/GlanceComplicationPublisher.swift"; sourceTree = SOURCE_ROOT; };
+		63AC351285766326725D8073 /* GlanceComplicationSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GlanceComplicationSnapshot.swift; path = "Loop Complications/GlanceComplicationSnapshot.swift"; sourceTree = SOURCE_ROOT; };
+		687DE1D14C48349AF99125E6 /* GlanceComplicationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GlanceComplicationTests.swift; path = WatchAppTests/GlanceComplicationTests.swift; sourceTree = SOURCE_ROOT; };
+		E508C6EB2C06F7554A9C1759 /* LoopGlanceWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LoopGlanceWidget.swift; path = "Loop Complications/LoopGlanceWidget.swift"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2654,6 +2663,7 @@
 				D7A3000100000000000A0001 /* WatchCGMHost.swift */,
 				D7A3000100000000000A0003 /* WatchDeviceManagers.swift */,
 				898ECA62218ABD21001E9D35 /* ComplicationChartManager.swift */,
+				216A392DC9F44D90F6448717 /* GlanceComplicationPublisher.swift */,
 				6515A16900D12040FF31E279 /* ComplicationPublisher.swift */,
 			);
 			path = Managers;
@@ -3184,6 +3194,7 @@
 				8564B298B7F91A5B62826D45 /* OverrideHistoryTests.swift */,
 				22969076523D145599EA2FBF /* WristCarbDeleteTests.swift */,
 				94E05C050AF4C0CC0B314040 /* WristGlucoseAlertTests.swift */,
+				687DE1D14C48349AF99125E6 /* GlanceComplicationTests.swift */,
 			);
 			path = WatchAppTests;
 			sourceTree = "<group>";
@@ -3384,6 +3395,8 @@
 		BBB8D9B1F2665786DA6D9ED8 /* Loop Complications */ = {
 			isa = PBXGroup;
 			children = (
+				63AC351285766326725D8073 /* GlanceComplicationSnapshot.swift */,
+				E508C6EB2C06F7554A9C1759 /* LoopGlanceWidget.swift */,
 				F9C8C0BEB6A6B9A65E0D56AF /* LoopComplications.swift */,
 				FCF57BFE5DDB939285839898 /* ComplicationSnapshot.swift */,
 				2CA0E8DC01120F1A9593061C /* Info.plist */,
@@ -4546,6 +4559,8 @@
 				894F6DD3243BCBDB00CCE676 /* Environment+SizeClass.swift in Sources */,
 				C17D52042E7F0578001D2AD2 /* LabelValueRow.swift in Sources */,
 				895788B2242E69A2002CB114 /* CircularAccessoryButtonStyle.swift in Sources */,
+				44CA233C68157DDA296C98FE /* GlanceComplicationSnapshot.swift in Sources */,
+				5155644B2FF8A562552905A3 /* GlanceComplicationPublisher.swift in Sources */,
 				40ACF455B8FB3B38F2D8C0CA /* ComplicationSnapshot.swift in Sources */,
 				EB125CD137FD31CD1EFAD0E0 /* ComplicationPublisher.swift in Sources */,
 			);
@@ -4803,6 +4818,7 @@
 				5CD53E8B45B61D0DF32D19BA /* OverrideHistoryTests.swift in Sources */,
 				7AF2FE0D12D46279AA80608B /* WristCarbDeleteTests.swift in Sources */,
 				5FDDEC8709A17CE196A2F202 /* WristGlucoseAlertTests.swift in Sources */,
+				46596A54FBF8C7F5C89AF1D1 /* GlanceComplicationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4825,6 +4841,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4D0555E77F94BD1752D8244D /* GlanceComplicationSnapshot.swift in Sources */,
+				28EAD7E064ED541AA9ABE58D /* LoopGlanceWidget.swift in Sources */,
 				3E1A1B91ED0E8C8F5663988E /* LoopComplications.swift in Sources */,
 				0956C3313D5165B71E491FFA /* ComplicationSnapshot.swift in Sources */,
 			);

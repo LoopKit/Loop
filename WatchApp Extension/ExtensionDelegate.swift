@@ -79,6 +79,15 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
         // At launch, so a relaunch for the CGM's Bluetooth link finds its central.
         _ = WatchCGMHost.shared
 
+        // During a loan the glance complication shows the WATCH's loop: the glance's data is
+        // republished at every landed cycle.
+        notifications.append(NotificationCenter.default.addObserver(forName: WatchLoopManager.glanceDataDidUpdate, object: nil, queue: nil) { [weak self] (_) in
+            DispatchQueue.main.async {
+                guard let self, self.stockLoopSession?.loanController.isLoanActive == true else { return }
+                GlanceComplicationPublisher.publish(from: self)
+            }
+        })
+
         session.activate()
     }
 
@@ -274,6 +283,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             server.reloadTimeline(for: complication)
         }
         ComplicationPublisher.publish(from: loopManager)
+        GlanceComplicationPublisher.publish(from: self)
     }
 }
 

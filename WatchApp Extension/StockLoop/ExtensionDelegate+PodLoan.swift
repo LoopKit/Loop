@@ -111,6 +111,9 @@ extension ExtensionDelegate {
         startStockLoopSession()
         NotificationCenter.default.post(name: Self.didBecomeActiveNotification, object: self)
         SensorSearchAlert.disarm()
+        // In front, a complication reload costs no budget: refresh it on every open, so the face matches
+        // the app after any look at it, even when an earlier budgeted request was never carried out.
+        GlanceComplicationPublisher.publish(from: self, onOpen: true)
     }
 
     /// Called from `applicationWillResignActive()`.

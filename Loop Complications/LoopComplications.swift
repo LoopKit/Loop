@@ -159,5 +159,9 @@ struct LoopComplicationsBundle: WidgetBundle {
     var body: some Widget {
         LoopStatusWidget()
         GlucoseGraphWidget()
+        LoopGlanceCornerWidget()
+        LoopGlanceInlineWidget()
+        LoopGlanceCircularWidget()
+        LoopGlanceRectangularWidget()
     }
 }
