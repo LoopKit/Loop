@@ -358,7 +358,12 @@ extension SettingsView {
                     )
                     .accessibilityIdentifier("settingsViewStatistics")
                 }
-                NavigationLink(destination: CurrentSetupView(setupChange: setupChange)) {
+                NavigationLink(destination: CurrentSetupView(viewModel: CurrentSetupViewModel(
+                    selected: setupChange,
+                    loadHistory: { [viewModel] in try await viewModel.setupHistory?() ?? SetupHistory(settings: [], experiments: []) },
+                    glucoseStore: glucoseStore,
+                    insulinDeliveryHistory: viewModel.insulinDeliveryHistory
+                ))) {
                     LargeButton(
                         action: {},
                         includeArrow: false,
@@ -385,7 +390,7 @@ extension SettingsView {
         guard let item = setupChange.items.first else {
             return setupChange.durationDescription
         }
-        let changed = setupChange.items.count > 1
+        let changed = setupChange.isInitialSetup ? setupChange.itemsDescription : setupChange.items.count > 1
             ? String(format: NSLocalizedString("%@ and more", comment: "Several settings changed together (1: the first one)"), item.title)
             : item.title
         return String(format: NSLocalizedString("%1$@ · Last change: %2$@", comment: "Current setup settings descriptive text (1: time since the last change, 2: what changed)"), setupChange.durationDescription, changed)

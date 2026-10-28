@@ -63,6 +63,19 @@ final class SetupChangeTests: XCTestCase {
         XCTAssertNil(history.end(of: history.changes[1]))
     }
 
+    func testInitialSetup() {
+        let onboarding = StoredSettings(date: start, dosingEnabled: false)
+        let history = history([onboarding, settings(at: 0.1), settings(at: 10, basal: 1.2)])
+        XCTAssertEqual(history.changes.map(\.isInitialSetup), [true, false])
+    }
+
+    func testRecordsWithoutTherapySettingsAreSkipped() {
+        let empty = StoredSettings(date: start.addingTimeInterval(.hours(5)), dosingEnabled: false)
+        let history = history([settings(at: 0), empty, settings(at: 6), settings(at: 10, basal: 1.2)])
+        XCTAssertEqual(history.changes.map(\.date), [start.addingTimeInterval(.hours(10))])
+        XCTAssertEqual(history.changes.map(\.isInitialSetup), [false])
+    }
+
     func testChangesWithinAnHourAreGrouped() {
         let change = history([settings(at: 0), settings(at: 10, isf: 45), settings(at: 10.5, isf: 45, strategy: .tempBasalOnly)]).latest
         XCTAssertEqual(change?.date, start.addingTimeInterval(.hours(10.5)))
