@@ -1083,4 +1083,24 @@ final class StockRunsTests: XCTestCase {
         XCTAssertTrue(manager.claimCGMLoopTrigger(at: now.addingTimeInterval(4.3 * 60)))
     }
 
+    @MainActor
+    func testTheGlanceRingIsFreshInOpenLoopWithAnOldLastLoopCompleted() async {
+        let manager = await makeManager()
+        await manager.laneSettled()
+        manager.lastLoopCompleted = Date().addingTimeInterval(-TimeInterval(2 * 3600))
+
+        let open = GlanceViewModel.activeState(data: await manager.settledGlanceData(), cob: nil, now: Date())
+        XCTAssertEqual(open.loopFreshness, .fresh, "stock: open loop presents fresh")
+
+        manager.setClosedLoopEnabled(true, reason: "test")
+        let closed = GlanceViewModel.activeState(data: await manager.settledGlanceData(), cob: nil, now: Date())
+        XCTAssertEqual(closed.loopFreshness, .stale, "closed loop ages from the last cycle")
+    }
+
+    /// The glance shows glucose in the user's unit, as the watch's other screens do.
+    func testTheGlanceShowsGlucoseInTheUsersUnit() {
+        let reading = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 126)
+        XCTAssertEqual(GlanceViewModel.glucoseText(reading, unit: .milligramsPerDeciliter), "126")
+        XCTAssertTrue(GlanceViewModel.glucoseText(reading, unit: .millimolesPerLiter).hasPrefix("7"), "126 mg/dL reads as 7.0 mmol/L")
+    }
 }
