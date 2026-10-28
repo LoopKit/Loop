@@ -133,10 +133,39 @@ public struct DormantGrant: Codable, Equatable {
     /// Lets the returning phone recognise a loan grown from its own credential.
     public let seizeToken: UUID
 
-    public init(grant: LoanGrant, issuedAt: Date, seizeToken: UUID) {
+    /// How a watch with its own internet can tell this phone that a loan started without it.
+    /// nil unless the phone has a push key set up; absent from older phones.
+    public let phoneReach: PhoneReach?
+
+    public init(grant: LoanGrant, issuedAt: Date, seizeToken: UUID, phoneReach: PhoneReach? = nil) {
         self.grant = grant
         self.issuedAt = issuedAt
         self.seizeToken = seizeToken
+        self.phoneReach = phoneReach
+    }
+}
+
+/// The phone's Apple push address and the user's push key, so the watch can send it a push
+/// without the phone's help.
+public struct PhoneReach: Codable, Equatable {
+    /// The phone app's push device token, in hex.
+    public let deviceToken: String
+    /// The phone app's bundle identifier.
+    public let topic: String
+    /// TestFlight and App Store builds use Apple's production push service; Xcode builds its sandbox.
+    public let production: Bool
+    public let keyID: String
+    public let teamID: String
+    /// The key's PEM text, as in the .p8 file Apple issues.
+    public let key: String
+
+    public init(deviceToken: String, topic: String, production: Bool, keyID: String, teamID: String, key: String) {
+        self.deviceToken = deviceToken
+        self.topic = topic
+        self.production = production
+        self.keyID = keyID
+        self.teamID = teamID
+        self.key = key
     }
 }
 

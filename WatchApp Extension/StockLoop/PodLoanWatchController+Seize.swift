@@ -74,8 +74,25 @@ extension PodLoanWatchController {
 
     /// Tell the phone this watch holds the pod, so it does not read silence as a dead watch.
     func sendHoldsPodStatusReport(reason: String) {
-        guard phase == .active, let current = epoch else { return }
-        sendMessage(.statusReport(StatusReport(
+        guard let report = holdsPodStatusReport() else { return }
+        sendMessage(.statusReport(report))
+        SportLog.event("seize", "told the phone this watch holds the pod\(podReachedLately == false ? " but cannot reach it" : ""): \(reason)")
+    }
+
+    /// At an offline start the phone is out of reach: the same report by Apple push, over this watch's
+    /// own internet, when the standing copy brought the phone's push address and the user's key.
+    func pushHoldsPodStatusReport() {
+        guard let reach = storedDormantGrant()?.phoneReach else {
+            SportLog.event("push", "the phone was not told by push: it has no push key set up")
+            return
+        }
+        guard let token = persisted.seizeToken, let report = holdsPodStatusReport() else { return }
+        LoanPushSender.send(LoanPush(token: token, sentAt: now(), message: .statusReport(report)), to: reach)
+    }
+
+    private func holdsPodStatusReport() -> StatusReport? {
+        guard phase == .active, let current = epoch else { return nil }
+        return StatusReport(
             epoch: current,
             lastDirectGlucoseAge: loopManager.latestGlucoseAge,
             lastEventSeq: journal.lastEventSeq,
@@ -83,8 +100,7 @@ extension PodLoanWatchController {
             holdsPod: true,
             knowsGrant: true,
             podReachable: podReachedLately,
-            loanStartedAt: persisted.deliveredAtTakeoverAt)))
-        SportLog.event("seize", "told the phone this watch holds the pod\(podReachedLately == false ? " but cannot reach it" : ""): \(reason)")
+            loanStartedAt: persisted.deliveredAtTakeoverAt)
     }
 
     /// Latest-only: a new copy replaces the old.

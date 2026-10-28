@@ -850,6 +850,8 @@
 		D7DECBB118052B85680A241B /* SetupComparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E7CDB17CCE70885EE93850 /* SetupComparison.swift */; };
 		6D16FF26E7F84F97B5DB6A88 /* CurrentSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFD4A26A23202AF2EA506FCF /* CurrentSetupView.swift */; };
 		D70F014FFB67BA58678452E9 /* SetupChangeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03EC166B8AD05800AFCD474E /* SetupChangeTests.swift */; };
+		C67DD5BDFD25E0B3BAC31A61 /* LoanPushSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533D4A039573750D44A23B29 /* LoanPushSender.swift */; };
+		FF4EC45EBBB59B2BA7D31FC9 /* SportModePushKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9E50198EC77A38E61C5B98E /* SportModePushKeyView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1821,6 +1823,8 @@
 		D5E7CDB17CCE70885EE93850 /* SetupComparison.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupComparison.swift; sourceTree = "<group>"; };
 		CFD4A26A23202AF2EA506FCF /* CurrentSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSetupView.swift; sourceTree = "<group>"; };
 		03EC166B8AD05800AFCD474E /* SetupChangeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupChangeTests.swift; sourceTree = "<group>"; };
+		533D4A039573750D44A23B29 /* LoanPushSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanPushSender.swift; path = "WatchApp Extension/StockLoop/LoanPushSender.swift"; sourceTree = SOURCE_ROOT; };
+		F9E50198EC77A38E61C5B98E /* SportModePushKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SportModePushKeyView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2451,6 +2455,7 @@
 				B43B5C532EAFBF110096A6AE /* RecentGlucoseTableViewCell.xib */,
 				C151634D2FA2C9C800FEECE8 /* RequiredVersionUpdateView.swift */,
 				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
+				F9E50198EC77A38E61C5B98E /* SportModePushKeyView.swift */,
 				CFD4A26A23202AF2EA506FCF /* CurrentSetupView.swift */,
 				FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */,
 				747DA22B61531CCAAC79E86D /* Statistics/DailyInsulinChartView.swift */,
@@ -2799,6 +2804,7 @@
 				28ADB7DA9E28C018C4707191 /* PodLoanWatchController+Handback.swift */,
 				A113A845D5DDEEDA9A76D9AD /* PodLoanWatchController+Debug.swift */,
 				4D15E99F644E4E50A306CA01 /* StockLoopSession.swift */,
+				533D4A039573750D44A23B29 /* LoanPushSender.swift */,
 				F23412C23E024F9A9399C435 /* StockLoopStack.swift */,
 				AD49ED34A3CE3A86BEFB048E /* WatchPumpManagers.swift */,
 				D0861EE8E371426287E4542F /* LoanTransport.swift */,
@@ -4256,6 +4262,7 @@
 				1D12D3B92548EFDD00B53E8B /* main.swift in Sources */,
 				A9DCF32A25B0FABF00C89088 /* LoopUIColorPalette+Default.swift in Sources */,
 				1DDE273E24AEA4B000796622 /* SettingsView.swift in Sources */,
+				FF4EC45EBBB59B2BA7D31FC9 /* SportModePushKeyView.swift in Sources */,
 				6D16FF26E7F84F97B5DB6A88 /* CurrentSetupView.swift in Sources */,
 				FEEDB0000000000000000004 /* Statistics/TimeInRangeBar.swift in Sources */,
 				A3C9F155FD92DC188BD9A21F /* Statistics/DailyInsulinChartView.swift in Sources */,
@@ -4329,6 +4336,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C67DD5BDFD25E0B3BAC31A61 /* LoanPushSender.swift in Sources */,
 				E62787C09306EF6C572B00AE /* AlertStore.swift in Sources */,
 				D3A7A6C51CA176C05E9DDF04 /* AlertStore.xcdatamodeld in Sources */,
 				983E18F38E193C0E5AFB0358 /* StoredAlert.swift in Sources */,

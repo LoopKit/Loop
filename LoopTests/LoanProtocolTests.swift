@@ -623,6 +623,32 @@ final class LoanProtocolTests: XCTestCase {
         XCTAssertNil(LoanMessage.peekKind(transport: ["name": "WatchContext"]), "foreign payloads peek as nil")
         XCTAssertNil(LoanMessage.peekKind(transport: [:]))
     }
+
+    // MARK: - By Apple push
+
+    /// What the watch pushes survives Apple's JSON and reads back as the same message.
+    func testLoanPushRoundTripsThroughAPushPayload() throws {
+        let push = LoanPush(token: UUID(), sentAt: Date(timeIntervalSince1970: 1_784_338_000.125),
+                            message: .statusReport(StatusReport(epoch: 7, lastDirectGlucoseAge: 30, lastEventSeq: 2,
+                                                                podFault: nil, holdsPod: true, knowsGrant: true)))
+        let delivered = try JSONSerialization.jsonObject(with: JSONSerialization.data(withJSONObject: push.apnsPayload())) as! [AnyHashable: Any]
+        XCTAssertTrue(LoanPush.isLoanPush(delivered))
+        XCTAssertEqual(LoanPush(userInfo: delivered), push)
+        XCTAssertEqual((delivered["aps"] as? [String: Any])?["content-available"] as? Int, 1, "silent: the app is woken, nothing is shown")
+        XCTAssertNil((delivered["aps"] as? [String: Any])?["alert"])
+        XCTAssertFalse(LoanPush.isLoanPush(["aps": ["content-available": 1], "override-name": "Exercise"]), "the services' pushes are not ours")
+    }
+
+    /// The standing copy carries the push address when there is one; an older phone's copy has none.
+    func testDormantGrantCarriesThePushAddressOptionally() throws {
+        let grant = LoanGrant(epoch: 2, expiresAt: Date(timeIntervalSince1970: 1_784_338_000), pumpConfiguration: Data([1]),
+                              therapySettingsRaw: Data([2]), settingsTimeZoneID: "UTC", doseHistory: [])
+        let reach = PhoneReach(deviceToken: "ab12", topic: "com.example.Loop", production: false, keyID: "K", teamID: "T", key: "pem")
+        let with = DormantGrant(grant: grant, issuedAt: Date(timeIntervalSince1970: 1_784_338_000), seizeToken: UUID(), phoneReach: reach)
+        let without = DormantGrant(grant: grant, issuedAt: Date(timeIntervalSince1970: 1_784_338_000), seizeToken: UUID())
+        XCTAssertEqual(try roundTrip(.dormantGrant(with)), .dormantGrant(with))
+        XCTAssertEqual(try roundTrip(.dormantGrant(without)), .dormantGrant(without))
+    }
 }
 
 /// Stock's dosing decisions across a loan: the watch's come home once, the doses carry their

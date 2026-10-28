@@ -195,6 +195,28 @@ extension PodLoanPhoneController {
         reclaimToOwner(alert: nil, reason: "the watch could not take the pod: \(failed.reason)")
     }
 
+    /// The watch's word by Apple push, from a watch that started a loan without this phone and has its
+    /// own internet. Taken as the same message over WatchConnectivity would be, once it shows this phone's
+    /// own offline-start credential and is recent; anything else is logged and dropped.
+    func handlePush(_ push: LoanPush) {
+        let age = deps.now().timeIntervalSince(push.sentAt)
+        let line = String(format: "push from the watch, sent %.0f s ago", age)
+        guard push.token == persisted.seizeToken else {
+            PhoneLog.event("push", "\(line): ignored, not this phone's offline-start credential")
+            return
+        }
+        guard age <= LoanPush.maxAge else {
+            PhoneLog.event("push", "\(line): ignored, too old")
+            return
+        }
+        guard case .statusReport(let report) = push.message else {
+            PhoneLog.event("push", "\(line): ignored, not a status report")
+            return
+        }
+        PhoneLog.event("push", "\(line): the watch holds the pod on e\(report.epoch)")
+        handleStatusReport(report)
+    }
+
     /// The one place an ungranted loan can be recognised. `knowsGrant` nil means no information;
     /// only an explicit false may act. A pod fault is announced once.
     func handleStatusReport(_ report: StatusReport) {

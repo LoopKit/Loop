@@ -313,7 +313,9 @@ extension PodLoanPhoneController {
                 "\(UserDefaults.standard.glucoseBasedApplicationFactorEnabled)",
                 "\(UserDefaults.standard.guardAndRunwayEnabled)",
                 String(describing: deps.pumpManager()?.status.insulinType),
-                String(describing: glucoseAlertSettingsSeen)].joined(separator: "|")
+                String(describing: glucoseAlertSettingsSeen),
+                // A key set up or a new push address reaches the watch at once.
+                deps.phoneReach().map { "\($0.deviceToken.suffix(8)) \($0.keyID) \($0.key.count)" } ?? "-"].joined(separator: "|")
     }
 
     /// The phone's glucose alert settings changed (or were first seen): refresh the copy now.
@@ -382,7 +384,8 @@ extension PodLoanPhoneController {
             }
             // A loan started meanwhile; the watch already has newer materials.
             guard self.state == .owner else { return }
-            self.sendMessage(.dormantGrant(DormantGrant(grant: grant, issuedAt: issuedAt, seizeToken: token)))
+            self.sendMessage(.dormantGrant(DormantGrant(grant: grant, issuedAt: issuedAt, seizeToken: token,
+                                                        phoneReach: self.deps.phoneReach())))
             PhoneLog.event("seize", "standing copy sent to the watch with \(grant.doseHistory.count) dose records")
         }
     }

@@ -195,6 +195,50 @@ extension LoanMessage {
     }
 }
 
+/// A loan message sent by Apple push, for a watch that started a loan without the phone and has
+/// its own internet. The token is the phone's offline-start credential: it proves the message
+/// comes from a loan grown from this phone's own standing copy.
+public struct LoanPush: Equatable {
+    public static let payloadKey = "sportMode"
+
+    /// A push older than this changes nothing: by then the loan may be over.
+    public static let maxAge: TimeInterval = .minutes(10)
+
+    public let token: UUID
+    public let sentAt: Date
+    public let message: LoanMessage
+
+    public init(token: UUID, sentAt: Date, message: LoanMessage) {
+        self.token = token
+        self.sentAt = sentAt
+        self.message = message
+    }
+
+    /// Silent: the app is woken, nothing is shown.
+    public func apnsPayload() throws -> [String: Any] {
+        let envelope = try LoanProtocol.encoder.encode(LoanEnvelope(message: message))
+        return ["aps": ["content-available": 1],
+                Self.payloadKey: ["token": token.uuidString,
+                                  "sentAt": Int64((sentAt.timeIntervalSince1970 * 1000).rounded()),
+                                  "envelope": envelope.base64EncodedString()]]
+    }
+
+    /// Whether a push is ours, readable or not; anything else goes to the services.
+    public static func isLoanPush(_ userInfo: [AnyHashable: Any]) -> Bool {
+        userInfo[payloadKey] != nil
+    }
+
+    /// nil when the payload is not a readable loan push.
+    public init?(userInfo: [AnyHashable: Any]) {
+        guard let body = userInfo[Self.payloadKey] as? [String: Any],
+              let tokenText = body["token"] as? String, let token = UUID(uuidString: tokenText),
+              let sentAt = (body["sentAt"] as? NSNumber)?.int64Value,
+              let encoded = body["envelope"] as? String, let data = Data(base64Encoded: encoded),
+              let message = try? LoanMessage.decode(fromTransport: [LoanProtocol.userInfoKey: data]) else { return nil }
+        self.init(token: token, sentAt: Date(timeIntervalSince1970: Double(sentAt) / 1000), message: message)
+    }
+}
+
 /// What the watch recorded in stock's stores during one loan (its dosing decisions, alert
 /// history and device log), sent home once when the loan closes as one background file (`transferFile`).
 /// Outside the envelope on purpose: a phone that does not know the file kind ignores it, where an

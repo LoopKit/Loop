@@ -9,6 +9,8 @@
 
 import Foundation
 import LoopKit
+import LoopCore
+import UIKit
 
 // MARK: - Pod loan (client API)
 
@@ -16,6 +18,26 @@ extension DeviceDataManager {
     /// nil with the flag off, so every read below is stock's "no loan" and nothing builds the controller.
     private var podLoanController: PodLoanPhoneController? {
         FeatureFlags.sportModeEnabled ? watchManager?.podLoanController : nil
+    }
+
+    /// A push from a watch that started a loan without this phone; false for anything else, which goes
+    /// to the services. The phone stays awake a few seconds so standing aside completes.
+    func podLoanHandlesPush(_ notification: [String: AnyObject]) -> Bool {
+        guard LoanPush.isLoanPush(notification) else { return false }
+        guard FeatureFlags.sportModePushEnabled, let controller = podLoanController else {
+            PhoneLog.event("push", "push from the watch ignored: the feature is off in this build")
+            return true
+        }
+        guard let push = LoanPush(userInfo: notification) else {
+            PhoneLog.event("push", "push from the watch ignored: unreadable")
+            return true
+        }
+        let task = UIApplication.shared.beginBackgroundTask(withName: "LoanPush")
+        controller.handlePush(push)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+            UIApplication.shared.endBackgroundTask(task)
+        }
+        return true
     }
 
     /// The loan's state for the Loop Report; nothing with Sport Mode off.

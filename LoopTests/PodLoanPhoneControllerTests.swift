@@ -2997,6 +2997,30 @@ extension PodLoanPhoneControllerTests {
         XCTAssertTrue(controller.isPodLoanedOut, "pill reads Pod on Watch off the report alone")
     }
 
+    /// The same report by Apple push, from a watch that started without this phone: taken once it
+    /// shows this phone's offline-start credential and is recent.
+    func testPushedHoldsPodReportWithThisPhonesCredentialYields() throws {
+        let token = seizeCredentialOutstanding()
+        let controller = makeController()
+        controller.handlePush(LoanPush(token: token, sentAt: Date(), message: .statusReport(StatusReport(
+            epoch: 5, lastDirectGlucoseAge: 60, lastEventSeq: 2, podFault: nil, holdsPod: true))))
+        waitUntil(timeout: 5, "yielded on the push") { controller.yieldingToInferredLoan }
+    }
+
+    /// Another credential, an old push, or another kind of message changes nothing.
+    func testPushWithoutThisPhonesCredentialOrTooOldChangesNothing() throws {
+        let token = seizeCredentialOutstanding()
+        let controller = makeController()
+        let report = LoanMessage.statusReport(StatusReport(epoch: 5, lastDirectGlucoseAge: 60, lastEventSeq: 2,
+                                                           podFault: nil, holdsPod: true))
+        controller.handlePush(LoanPush(token: UUID(), sentAt: Date(), message: report))
+        controller.handlePush(LoanPush(token: token, sentAt: Date().addingTimeInterval(-LoanPush.maxAge - 60), message: report))
+        controller.handlePush(LoanPush(token: token, sentAt: Date(), message: .takeoverFailed(TakeoverFailed(epoch: 5, reason: "t"))))
+        spinMain(0.5)
+        XCTAssertFalse(controller.yieldingToInferredLoan)
+        XCTAssertEqual(controller.state, .owner)
+    }
+
     /// A `holdsPod` report abandons a ghost grant into the yield.
     func testHoldsPodReportAbandonsAGhostGrantIntoTheYield() throws {
         let token = seizeCredentialOutstanding()

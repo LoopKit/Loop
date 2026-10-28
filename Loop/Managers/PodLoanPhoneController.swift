@@ -56,6 +56,10 @@ final class PodLoanPhoneController {
 
         var send: ([String: Any]) -> Void
 
+        /// The phone's push address and the user's push key, for the standing copy. nil when the
+        /// feature is off or not set up: the watch then sends nothing.
+        var phoneReach: () -> PhoneReach? = { nil }
+
         var addPumpEvents: ([NewPumpEvent], _ lastReconciliation: Date?, @escaping (Error?) -> Void) -> Void
 
         var addCarb: (NewCarbEntry, @escaping (Error?) -> Void) -> Void

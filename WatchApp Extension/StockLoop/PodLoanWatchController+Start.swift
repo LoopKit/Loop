@@ -584,6 +584,7 @@ extension PodLoanWatchController {
                     SportLog.event("loan", String(format: "%@loan %d active: pod taken after %d read(s) in %.1f s, pump total %.2f U",
                                                   offlineStart ? "offline " : "", grant.epoch, attempt + 1, takeoverSecs, delivered))
                     self.sendMessage(.takeoverComplete(TakeoverComplete(epoch: grant.epoch, firstPodStatus: self.currentPodStatus())))
+                    if offlineStart { self.pushHoldsPodStatusReport() }
 
                     // The read's own report closed the ledger's window from the copy's reading and booked
                     // what it could not explain, so the loop can have the pump now; a full `loop()` so

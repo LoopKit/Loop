@@ -102,6 +102,9 @@ struct SettingsView: View {
                     if viewModel.servicesViewModel.showServices {
                         servicesSection
                     }
+                    if FeatureFlags.sportModePushEnabled {
+                        sportModePushSection
+                    }
 
                     // Catch-all for menu items without a dedicated section (e.g. .custom).
                     // .configuration items render in the configuration section and

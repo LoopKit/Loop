@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import CryptoKit
 import HealthKit
 import LoopKit
 import LoopCore
@@ -620,5 +621,40 @@ final class SeizeActivationTests: XCTestCase {
         let (controller, lookedForPod) = try await takeover { _ in }
         XCTAssertTrue(lookedForPod)
         await controller.onMain { controller.teardownPump() }
+    }
+
+    /// The push to the phone: Apple's address for the phone's build, a silent push that expires with
+    /// the phone's age limit, and a provider token the user's key signed.
+    func testPushRequestIsSilentAndSignedWithTheUsersKey() throws {
+        let key = P256.Signing.PrivateKey()
+        let reach = PhoneReach(deviceToken: "ab12cd", topic: "com.example.Loop", production: false,
+                               keyID: "KEY1", teamID: "TEAM1", key: key.pemRepresentation)
+        let sentAt = Date(timeIntervalSince1970: 1_784_338_000)
+        let push = LoanPush(token: UUID(), sentAt: sentAt, message: .statusReport(StatusReport(
+            epoch: 3, lastDirectGlucoseAge: nil, lastEventSeq: 0, podFault: nil, holdsPod: true)))
+        let request = try LoanPushSender.makeRequest(push, reach: reach, issuedAt: sentAt)
+
+        XCTAssertEqual(request.url?.absoluteString, "https://api.sandbox.push.apple.com/3/device/ab12cd")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "apns-push-type"), "background")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "apns-priority"), "5")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "apns-topic"), "com.example.Loop")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "apns-expiration"), String(Int(sentAt.timeIntervalSince1970 + LoanPush.maxAge)))
+
+        let jwt = try XCTUnwrap(request.value(forHTTPHeaderField: "authorization")?.replacingOccurrences(of: "bearer ", with: ""))
+        let parts = jwt.split(separator: ".").map(String.init)
+        XCTAssertEqual(parts.count, 3)
+        func decode(_ part: String) throws -> Data {
+            var text = part.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+            text += String(repeating: "=", count: (4 - text.count % 4) % 4)
+            return try XCTUnwrap(Data(base64Encoded: text))
+        }
+        let claims = try JSONSerialization.jsonObject(with: decode(parts[1])) as? [String: Any]
+        XCTAssertEqual(claims?["iss"] as? String, "TEAM1")
+        let signature = try P256.Signing.ECDSASignature(rawRepresentation: decode(parts[2]))
+        XCTAssertTrue(key.publicKey.isValidSignature(signature, for: Data("\(parts[0]).\(parts[1])".utf8)))
+
+        let body = try XCTUnwrap(request.httpBody)
+        let delivered = try JSONSerialization.jsonObject(with: body) as! [AnyHashable: Any]
+        XCTAssertEqual(LoanPush(userInfo: delivered), push, "the phone reads back what was sent")
     }
 }
