@@ -8,6 +8,7 @@
 
 import SwiftUI
 import LoopKit
+import LoopCore
 import LoopAlgorithm
 
 final class FavoriteFoodAddEditViewModel: ObservableObject {

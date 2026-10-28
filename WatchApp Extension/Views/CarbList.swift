@@ -28,13 +28,17 @@ struct CarbList: View {
 
     @State var entries: [StoredCarbEntry] = []
 
-    private func reloadCarbEntries() async {
+    /// Set when a delete could not be journaled — the one case the user must be told about,
+    /// because the carb is gone here and still live on the phone.
+    @State var warning: String?   // CarbList+PodLoan.swift sets and shows it
+
+    func reloadCarbEntries() async {
         let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -CarbMath.maximumAbsorptionTimeInterval))
         entries = (try? await loopManager.carbStore.getCarbEntries(start: start)) ?? []
     }
 
     var activeCarbs: String? {
-        guard let activeContext = loopManager.activeContext,
+        guard let activeContext = loopManager.displayContext,
               let activeCarbohydrates = activeContext.activeCarbohydrates
         else {
             return nil
@@ -59,6 +63,9 @@ struct CarbList: View {
                         Text(timeFormatter.string(from: entry.startDate))
                         Spacer()
                         Text(carbFormatter.string(from: entry.quantity) ?? "-")
+                    }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        podLoanDeleteButton(entry)
                     }
                 }
             } header: {
@@ -85,9 +92,21 @@ struct CarbList: View {
                     }
                     .padding(.bottom, 4)
                 }
+            } footer: {
+                podLoanWarningFooter
             }
         }
         .onAppear {
+            loopManager.requestCarbBackfill()
+            Task {
+                await reloadCarbEntries()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: LoopDataManager.didUpdateContextNotification)) { _ in
+            loopManager.requestCarbBackfill()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: CarbStore.carbEntriesDidChange, object: loopManager.carbStore)
+            .receive(on: DispatchQueue.main)) { _ in
             Task {
                 await reloadCarbEntries()
             }

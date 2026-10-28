@@ -18,7 +18,7 @@ struct WatchActionsView: View {
     @State private var overrideToShow: TemporaryScheduleOverride?
 
     var overrideActive: Bool {
-        return loopManager.watchInfo.scheduleOverride?.isActive() == true
+        return loopManager.scheduleOverride?.isActive() == true
     }
 
     var body: some View {
@@ -52,7 +52,7 @@ struct WatchActionsView: View {
                     backgroundTint: overrideActive ? .presets : .darkPresets
                 ) {
                     if overrideActive {
-                        overrideToShow = loopManager.watchInfo.scheduleOverride
+                        overrideToShow = loopManager.scheduleOverride
                     } else {
                         isShowingPresets = true
                     }

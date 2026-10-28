@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import LoopCore
+@testable import LoopCore
 import LoopKit
 import LoopAlgorithm
 
