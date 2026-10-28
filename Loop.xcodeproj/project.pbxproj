@@ -165,6 +165,7 @@
 		230BE095719B8D8969B32A9C /* Loop/Resources/Sounds/bloop.caf in Resources */ = {isa = PBXBuildFile; fileRef = AF16A5EDEB9DF756890E0C09 /* Loop/Resources/Sounds/bloop.caf */; };
 		2C694BFD5806E573AFAB5E2E /* Loop/Resources/Sounds/dings.caf in Resources */ = {isa = PBXBuildFile; fileRef = 62F7CB5D5DC337E705032AC7 /* Loop/Resources/Sounds/dings.caf */; };
 		33644743F20B3706E3107FAC /* Loop/Resources/Sounds/mood_synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = BEC0BA802BE613F144AC3A70 /* Loop/Resources/Sounds/mood_synth.caf */; };
+		73BD135109B5757AA0F756D7 /* LoanControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2FD5B2F0532AE1378EF7AD /* LoanControlTests.swift */; };
 		3ED3198A2EB659E600820BCF /* GlucoseLiveActivityConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319882EB659E600820BCF /* GlucoseLiveActivityConfiguration.swift */; };
 		3ED3198B2EB659E600820BCF /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319872EB659E600820BCF /* ChartView.swift */; };
 		3ED3198C2EB659E600820BCF /* BasalViewActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319862EB659E600820BCF /* BasalViewActivity.swift */; };
@@ -308,6 +309,16 @@
 		D7A3000100000000000A0004 /* WatchDeviceManagers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A3000100000000000A0003 /* WatchDeviceManagers.swift */; };
 		8B5CF0144D79477AACBE4A82 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4344628320A7A3BE00C4BE6F /* LoopKit.framework */; };
 		4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
+		7B29B5CF4AAA4DA0B6E2F1A9 /* LoanTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0861EE8E371426287E4542F /* LoanTransport.swift */; };
+		10B149E9B807E4BF43BAC1ED /* LoanMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */; };
+		D188AB9E674D4E223C7E62AC /* PersistedProperty+Directory.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA25D2864BD992EA7BA12649 /* PersistedProperty+Directory.swift */; };
+		10A9A914BD17EC84686043E4 /* LoanControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9F934244F9400F3C1960EB /* LoanControl.swift */; };
+		A72952445BE2F9825FE17298 /* LoanRecords.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBC4D5290F0F35E6B66B7227 /* LoanRecords.swift */; };
+		7CC4501AABA3438A9291A003 /* LoanTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0861EE8E371426287E4542F /* LoanTransport.swift */; };
+		1B377B11C88EA02BAD431175 /* LoanMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */; };
+		A870F1D2BB7B0DD59A729C45 /* PersistedProperty+Directory.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA25D2864BD992EA7BA12649 /* PersistedProperty+Directory.swift */; };
+		79A30E1F01447B98C7792AEF /* LoanControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9F934244F9400F3C1960EB /* LoanControl.swift */; };
+		EE29D32ADAB50ABC07CDCEF6 /* LoanRecords.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBC4D5290F0F35E6B66B7227 /* LoanRecords.swift */; };
 		5021CA8C264146C9DFF33E9D /* PluginPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE102E23D8C1C1291EF66387 /* PluginPickerView.swift */; };
 		7D23667D21250C7E0028B67D /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D23667C21250C7E0028B67D /* LocalizedString.swift */; };
 		7E69CFFC2A16A77E00203CBD /* ResetLoopManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */; };
@@ -524,6 +535,7 @@
 		C10C57FC2E70B8B900A4825C /* EnvironmentValues+GlucoseDisplayUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10C57FB2E70B87500A4825C /* EnvironmentValues+GlucoseDisplayUnit.swift */; };
 		C10C57FE2E71E87D00A4825C /* ActiveOverrideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10C57FD2E71E87400A4825C /* ActiveOverrideView.swift */; };
 		C110888D2A3913C600BA4898 /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = C110888C2A3913C600BA4898 /* BuildDetails.swift */; };
+		474214211EDBB2939A45354A /* BuildDetails+SportMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED4A237EFD018441E29D616 /* BuildDetails+SportMode.swift */; };
 		C11B9D5B286778A800500CF8 /* SwiftCharts in Frameworks */ = {isa = PBXBuildFile; productRef = C11B9D5A286778A800500CF8 /* SwiftCharts */; };
 		C11B9D5E286778D000500CF8 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D5D286778D000500CF8 /* LoopKitUI.framework */; };
 		C11B9D62286779C000500CF8 /* MockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C11B9D60286779C000500CF8 /* MockKit.framework */; };
@@ -1355,6 +1367,7 @@
 		C10C57FB2E70B87500A4825C /* EnvironmentValues+GlucoseDisplayUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EnvironmentValues+GlucoseDisplayUnit.swift"; sourceTree = "<group>"; };
 		C10C57FD2E71E87400A4825C /* ActiveOverrideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveOverrideView.swift; sourceTree = "<group>"; };
 		C110888C2A3913C600BA4898 /* BuildDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildDetails.swift; sourceTree = "<group>"; };
+		DED4A237EFD018441E29D616 /* BuildDetails+SportMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BuildDetails+SportMode.swift"; sourceTree = "<group>"; };
 		C11AA5C7258736CF00BDE12F /* DerivedAssetsBase.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssetsBase.xcassets; sourceTree = "<group>"; };
 		C11B9D5D286778D000500CF8 /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C11B9D60286779C000500CF8 /* MockKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MockKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1522,6 +1535,12 @@
 		B08A706BF6BC6555453D3E56 /* Loop/Resources/Sounds/voice_ulg_amy.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/voice_ulg_amy.caf; sourceTree = SOURCE_ROOT; };
 		1F9BFD4BD97793AAE2407DCB /* Loop/Resources/Sounds/voice_ulg_bryce.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/voice_ulg_bryce.caf; sourceTree = SOURCE_ROOT; };
 		C9SCENED0000000000000002 /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		D0861EE8E371426287E4542F /* LoanTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanTransport.swift; path = LoopCore/PodLoan/LoanTransport.swift; sourceTree = SOURCE_ROOT; };
+		8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LoanMessages.swift"; path = "LoopCore/PodLoan/LoanMessages.swift"; sourceTree = SOURCE_ROOT; };
+		CA25D2864BD992EA7BA12649 /* PersistedProperty+Directory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PersistedProperty+Directory.swift"; path = "LoopCore/PodLoan/PersistedProperty+Directory.swift"; sourceTree = SOURCE_ROOT; };
+		4B9F934244F9400F3C1960EB /* LoanControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanControl.swift; path = LoopCore/PodLoan/LoanControl.swift; sourceTree = SOURCE_ROOT; };
+		FBC4D5290F0F35E6B66B7227 /* LoanRecords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "LoanRecords.swift"; path = "LoopCore/PodLoan/LoanRecords.swift"; sourceTree = SOURCE_ROOT; };
+		AF2FD5B2F0532AE1378EF7AD /* LoanControlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanControlTests.swift; path = LoopTests/LoanControlTests.swift; sourceTree = SOURCE_ROOT; };
 		CE102E23D8C1C1291EF66387 /* PluginPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PluginPickerView.swift; sourceTree = "<group>"; };
 		DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegralRetrospectiveCorrectionSelectionView.swift; sourceTree = "<group>"; };
 		A1B2C3D42E8F000100000001 /* GuardAndRunwaySelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardAndRunwaySelectionView.swift; sourceTree = "<group>"; };
@@ -2386,6 +2405,7 @@
 			isa = PBXGroup;
 			children = (
 				C110888C2A3913C600BA4898 /* BuildDetails.swift */,
+				DED4A237EFD018441E29D616 /* BuildDetails+SportMode.swift */,
 				43C3B6F620BBCAA30026CAFA /* PumpManager.swift */,
 				C1FB428E217921D600FAB378 /* PumpManagerUI.swift */,
 				4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */,
@@ -2484,6 +2504,12 @@
 				C9EA3F48338B49BD9C6BD0F9 /* Loop/Resources/Sounds/urgent_low.caf */,
 				A973A0F6CF644FFAA48989FC /* UserDefaults+LoopIntents.swift */,
 				42BE0808089545E7BE6AE359 /* NSBundle.swift */,
+				D0861EE8E371426287E4542F /* LoanTransport.swift */,
+				8FF10EA3BB7642DAE19471F6 /* LoanMessages.swift */,
+				CA25D2864BD992EA7BA12649 /* PersistedProperty+Directory.swift */,
+				4B9F934244F9400F3C1960EB /* LoanControl.swift */,
+				FBC4D5290F0F35E6B66B7227 /* LoanRecords.swift */,
+				AF2FD5B2F0532AE1378EF7AD /* LoanControlTests.swift */,
 				A9B1F564432BCBF70C0C6CBB /* Loop/Resources/Sounds/acoustic_hg_harsh.caf */,
 				3481DFC7974E27ABE6AAC4C3 /* Loop/Resources/Sounds/acoustic_hg_medium.caf */,
 				1DCC85EA42C8D22C1EC824D8 /* Loop/Resources/Sounds/acoustic_hg_mild.caf */,
@@ -3080,6 +3106,7 @@
 				C1E9CB59294E67060022387B /* Build Derived Assets */,
 				43A9437A1B926B7B0051FA24 /* Sources */,
 				43C667D71C5577280050C674 /* Embed Frameworks */,
+				DDBD0003000000000000BD03 /* Capture Build Details */,
 			);
 			buildRules = (
 			);
@@ -3594,6 +3621,21 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Scripts/build-derived-assets.sh\" \"${SRCROOT}/WatchApp\"\n";
 		};
+		DDBD0003000000000000BD03 /* Capture Build Details */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Capture Build Details";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Scripts/capture-build-details.sh\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -3795,6 +3837,7 @@
 				899433B823FE129800FA4BEA /* OverrideBadgeView.swift in Sources */,
 				89D1503E24B506EB00EDE253 /* Dictionary.swift in Sources */,
 				C110888D2A3913C600BA4898 /* BuildDetails.swift in Sources */,
+				474214211EDBB2939A45354A /* BuildDetails+SportMode.swift in Sources */,
 				A96DAC2C2838F31200D94E38 /* SharedLogging.swift in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
 				1D63DEA526E950D400F46FA5 /* SupportManager.swift in Sources */,
@@ -4010,6 +4053,11 @@
 				0390983B63120E47B543264F /* CarbStoreProtocol.swift in Sources */,
 				D96DC2868F8E7ADEEA335047 /* LoopAlgorithmSupport.swift in Sources */,
 				229FEACAEAB2DF60B3DB5C84 /* LoopCycle.swift in Sources */,
+				7B29B5CF4AAA4DA0B6E2F1A9 /* LoanTransport.swift in Sources */,
+				10B149E9B807E4BF43BAC1ED /* LoanMessages.swift in Sources */,
+				D188AB9E674D4E223C7E62AC /* PersistedProperty+Directory.swift in Sources */,
+				10A9A914BD17EC84686043E4 /* LoanControl.swift in Sources */,
+				A72952445BE2F9825FE17298 /* LoanRecords.swift in Sources */,
 				C1ED6C822E7D8E3D002F91C2 /* AcknowledgeAlertUserInfo.swift in Sources */,
 				E9C00EF324C6222400628F35 /* LoopSettings.swift in Sources */,
 				C1ED6C6D2E7C6EC1002F91C2 /* NotificationActionSelection.swift in Sources */,
@@ -4063,6 +4111,11 @@
 				3CD16E39CAB99674C3AB351C /* CarbStoreProtocol.swift in Sources */,
 				104021B7449DA59717EA4E5D /* LoopAlgorithmSupport.swift in Sources */,
 				D23A31DF90992466C4626B34 /* LoopCycle.swift in Sources */,
+				7CC4501AABA3438A9291A003 /* LoanTransport.swift in Sources */,
+				1B377B11C88EA02BAD431175 /* LoanMessages.swift in Sources */,
+				A870F1D2BB7B0DD59A729C45 /* PersistedProperty+Directory.swift in Sources */,
+				79A30E1F01447B98C7792AEF /* LoanControl.swift in Sources */,
+				EE29D32ADAB50ABC07CDCEF6 /* LoanRecords.swift in Sources */,
 				C1ED6C832E7D8E3D002F91C2 /* AcknowledgeAlertUserInfo.swift in Sources */,
 				C1ED6C652E7C6E2F002F91C2 /* CarbBackfillRequestUserInfo.swift in Sources */,
 				C1ED6C6C2E7C6EC1002F91C2 /* NotificationActionSelection.swift in Sources */,
@@ -4099,6 +4152,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73BD135109B5757AA0F756D7 /* LoanControlTests.swift in Sources */,
 				A9DF02CB24F72B9E00B7C988 /* CriticalEventLogTests.swift in Sources */,
 				1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */,
 				C1777A6625A125F100595963 /* ManualEntryDoseViewModelTests.swift in Sources */,
