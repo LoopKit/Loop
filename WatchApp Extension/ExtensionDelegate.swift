@@ -273,6 +273,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             log.default("Reloading complication timeline")
             server.reloadTimeline(for: complication)
         }
+        ComplicationPublisher.publish(from: loopManager)
     }
 }
 
