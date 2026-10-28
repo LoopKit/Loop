@@ -51,7 +51,7 @@ struct AGPChartView: View {
 
     /// Append a smooth (Catmull-Rom) curve through `points` to a path already
     /// positioned at `points[0]`.
-    private static func addSmoothCurve(through points: [CGPoint], to path: inout Path) {
+    static func addSmoothCurve(through points: [CGPoint], to path: inout Path) {
         guard points.count > 1 else { return }
         for i in 0..<(points.count - 1) {
             let p0 = points[max(0, i - 1)]
