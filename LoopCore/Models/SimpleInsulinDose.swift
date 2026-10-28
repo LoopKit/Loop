@@ -13,13 +13,22 @@ import LoopAlgorithm
 // Implements the bare minimum of InsulinDose, including a slot for InsulinModel
 // We could use DoseEntry, but we need to dynamically lookup user's preferred
 // fast acting insulin model in settings. So until that is removed, we need this.
-struct SimpleInsulinDose: InsulinDose {
-    var deliveryType: InsulinDeliveryType
-    var automatic: Bool
-    var startDate: Date
-    var endDate: Date
-    var volume: Double
-    var insulinModel: InsulinModel
+public struct SimpleInsulinDose: InsulinDose {
+    public var deliveryType: InsulinDeliveryType
+    public var automatic: Bool
+    public var startDate: Date
+    public var endDate: Date
+    public var volume: Double
+    public var insulinModel: InsulinModel
+
+    public init(deliveryType: InsulinDeliveryType, automatic: Bool, startDate: Date, endDate: Date, volume: Double, insulinModel: InsulinModel) {
+        self.deliveryType = deliveryType
+        self.automatic = automatic
+        self.startDate = startDate
+        self.endDate = endDate
+        self.volume = volume
+        self.insulinModel = insulinModel
+    }
 }
 
 extension DoseEntry {
@@ -36,7 +45,7 @@ extension DoseEntry {
         return deliveredUnits ?? programmedUnits
     }
 
-    func simpleDose(with model: InsulinModel) -> SimpleInsulinDose {
+    public func simpleDose(with model: InsulinModel) -> SimpleInsulinDose {
         SimpleInsulinDose(
             deliveryType: deliveryType,
             automatic: automatic ?? false,
@@ -48,7 +57,7 @@ extension DoseEntry {
     }
 }
 
-extension Array where Element == SimpleInsulinDose {
+public extension Array where Element == SimpleInsulinDose {
     func trimmed(to end: Date? = nil) -> [SimpleInsulinDose] {
         return self.compactMap { (dose) -> SimpleInsulinDose? in
             if let end, dose.startDate > end {

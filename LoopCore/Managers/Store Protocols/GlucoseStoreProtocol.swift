@@ -9,7 +9,7 @@
 import LoopKit
 import LoopAlgorithm
 
-protocol GlucoseStoreProtocol: AnyObject {
+public protocol GlucoseStoreProtocol: AnyObject {
     var latestGlucose: GlucoseSampleValue? { get }
     func getGlucoseSamples(start: Date?, end: Date?) async throws -> [StoredGlucoseSample]
     func addGlucoseSamples(_ samples: [NewGlucoseSample]) async throws -> [StoredGlucoseSample]

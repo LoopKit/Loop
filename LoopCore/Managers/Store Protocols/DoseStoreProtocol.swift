@@ -10,7 +10,7 @@ import LoopKit
 import HealthKit
 import LoopAlgorithm
 
-protocol DoseStoreProtocol: AnyObject {
+public protocol DoseStoreProtocol: AnyObject {
     func getNormalizedDoseEntries(start: Date, end: Date?) async throws -> [DoseEntry]
 
     func addDoses(_ doses: [DoseEntry], from device: HKDevice?) async throws

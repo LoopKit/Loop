@@ -34,7 +34,7 @@ extension TempBasalRecommendation {
     ///                                    If `false` and the recommendation matches `neutralBasalRate`, the temp will be recommended
     ///                                    at the scheduled basal rate rather than recommending no temp.
     /// - Returns: A temp basal recommendation
-    func adjustForCurrentDelivery(
+    public func adjustForCurrentDelivery(
         at date: Date,
         neutralBasalRate: Double,
         currentTempBasal: DoseEntry?,

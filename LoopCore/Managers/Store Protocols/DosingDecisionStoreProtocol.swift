@@ -9,17 +9,17 @@
 import LoopAlgorithm
 import LoopKit
 
-struct LightDosingDecision: DosingDecision {
-    let automaticDoseRecommendation: AutomaticDoseRecommendation?
-    let carbEntry: StoredCarbEntry?
-    let id: UUID
-    let manualBolusRecommendation: ManualBolusRecommendationWithDate?
-    let manualBolusRequested: Double?
-    let scheduleOverride: TemporaryScheduleOverride?
-    let syncIdentifier: UUID
+public struct LightDosingDecision: DosingDecision {
+    public let automaticDoseRecommendation: AutomaticDoseRecommendation?
+    public let carbEntry: StoredCarbEntry?
+    public let id: UUID
+    public let manualBolusRecommendation: ManualBolusRecommendationWithDate?
+    public let manualBolusRequested: Double?
+    public let scheduleOverride: TemporaryScheduleOverride?
+    public let syncIdentifier: UUID
 }
 
-protocol DosingDecisionStoreProtocol: CriticalEventLog {
+public protocol DosingDecisionStoreProtocol: CriticalEventLog {
     var delegate: DosingDecisionStoreDelegate? { get set }
 
     func storeDosingDecision(_ dosingDecision: StoredDosingDecision) async

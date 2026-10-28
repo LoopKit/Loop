@@ -8,6 +8,7 @@
 
 import LoopAlgorithm
 import LoopKit
+import LoopCore
 
 @MainActor
 @Observable

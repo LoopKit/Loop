@@ -8,7 +8,7 @@
 
 import LoopKit
 
-extension PumpManagerError {
+public extension PumpManagerError {
     var issueId: String {
         switch self {
         case .configuration:
