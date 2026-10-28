@@ -24,6 +24,8 @@ struct PodLoanPhoneState: RawRepresentable {
 
     /// When the watch last reported a cycle, so a relaunch is not read as silence.
     var holdRenewedAt: Date?
+    /// During a loan, the phone's stores hold every carb and insulin record made by this time.
+    var recordsCurrentAt: Date?
     /// When this phone last took control on silence (a query unanswered); a revived watch's claim to a
     /// loan started before it is refused.
     var tookOverOnSilenceAt: Date?
@@ -79,6 +81,7 @@ struct PodLoanPhoneState: RawRepresentable {
         committedIDs = Set((rawValue["committedIDs"] as? [String] ?? []).compactMap(UUID.init(uuidString:)))
         yieldingToInferredLoan = rawValue["yieldingToInferredLoan"] as? Bool ?? false
         holdRenewedAt = rawValue["holdRenewedAt"] as? Date
+        recordsCurrentAt = rawValue["recordsCurrentAt"] as? Date
         tookOverOnSilenceAt = rawValue["tookOverOnSilenceAt"] as? Date
         watchUsesSportMode = rawValue["watchUsesSportMode"] as? Bool ?? false
         seizeToken = (rawValue["seizeToken"] as? String).flatMap(UUID.init(uuidString:))
@@ -99,6 +102,7 @@ struct PodLoanPhoneState: RawRepresentable {
                                   "watchUsesSportMode": watchUsesSportMode]
         raw["seizeToken"] = seizeToken?.uuidString
         raw["holdRenewedAt"] = holdRenewedAt
+        raw["recordsCurrentAt"] = recordsCurrentAt
         raw["tookOverOnSilenceAt"] = tookOverOnSilenceAt
         raw["loanStartedAt"] = loanStartedAt
         raw["pendingForceAudit"] = pendingForceAudit.map {

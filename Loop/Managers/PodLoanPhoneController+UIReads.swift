@@ -40,7 +40,7 @@ extension PodLoanPhoneController {
         var reclaimVerified = true
         var auditIsForceReclaim = false
         var displayAnchor: Date?
-        /// During a loan: when the watch's records last arrived.
+        /// During a loan: the phone's stores hold every carb and insulin record made by this time.
         var lastRecordsAt: Date?
     }
 
@@ -57,7 +57,7 @@ extension PodLoanPhoneController {
         s.reclaimVerified = reclaimVerifiedAt != nil
         s.auditIsForceReclaim = pendingHandbackAudit?.flavor == .forceReclaim
         s.displayAnchor = reclaimDisplayAnchor
-        s.lastRecordsAt = state == .loaned ? holdRenewedAt : nil
+        s.lastRecordsAt = s.isLoanedOut ? persisted.recordsCurrentAt : nil
         return s
     }
 

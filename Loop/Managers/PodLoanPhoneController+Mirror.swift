@@ -28,9 +28,12 @@ extension PodLoanPhoneController {
         let units = (deps.pumpManager() as? PumpDeliveryOdometer)?.deliveredUnits?.units
         let asOf = deps.pumpManager()?.lastSync ?? deps.now()
         let now = deps.now()
+        let lastPodReading = deps.pumpManager()?.lastSync
         updateState {
             $0.yieldingToInferredLoan = true
             $0.holdRenewedAt = now
+            // Until the watch's records come in, this phone's end at its own last pod reading.
+            $0.recordsCurrentAt = lastPodReading
             if let units {
                 $0.ledger.last = .init(units: units, at: asOf)
                 $0.loanStartedAt = asOf

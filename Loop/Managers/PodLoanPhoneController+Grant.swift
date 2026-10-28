@@ -166,6 +166,7 @@ extension PodLoanPhoneController {
             $0.loanStartedAt = handedOverAt
             if let deliveredAtGrant { $0.ledger.last = .init(units: deliveredAtGrant, at: handedOverAt) }
             $0.holdRenewedAt = handedOverAt
+            $0.recordsCurrentAt = handedOverAt
         }
         stateDidChange(from: previous)
 
