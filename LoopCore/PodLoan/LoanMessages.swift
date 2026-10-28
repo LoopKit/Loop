@@ -256,13 +256,18 @@ public struct DoseRecordBatch: Codable, Equatable {
     /// Liveness is judged by send time, not arrival.
     public let sentAt: Date?
 
+    /// For a loan the watch started without the phone: the phone's offline-start credential, which lets
+    /// the phone adopt the loan from its records.
+    public let seizeToken: UUID?
+
     public init(epoch: Int, events: [LoanEvent], tombstones: [UUID],
-                odometer: LoanOdometerSnapshot? = nil, sentAt: Date? = nil) {
+                odometer: LoanOdometerSnapshot? = nil, sentAt: Date? = nil, seizeToken: UUID? = nil) {
         self.epoch = epoch
         self.events = events
         self.tombstones = tombstones
         self.odometer = odometer
         self.sentAt = sentAt
+        self.seizeToken = seizeToken
     }
 
     /// The latest the loan could have started: nothing is logged or sent before a loan starts. What the

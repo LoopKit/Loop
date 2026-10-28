@@ -30,6 +30,12 @@ extension PodLoanPhoneController {
             if batch.epoch > epoch, decision != .sendStop, newestForeignLoanEvidence.map({ batch.epoch >= $0.epoch }) ?? true {
                 newestForeignLoanEvidence = (batch.epoch, deps.now())
             }
+            // Standing aside for a loan this phone's credential started: adopt it, and its records come in now.
+            guard state == .owner, yieldingToInferredLoan, batch.epoch > epoch,
+                  let token = batch.seizeToken, token == persisted.seizeToken else { return }
+            adoptWatchStartedLoan(epoch: batch.epoch, earliestRecord: batch.events.map(\.record.startDate).min(),
+                                  sentAt: batch.sentAt ?? deps.now(), odometer: batch.odometer, watchHoldsPod: true)
+            handleBatch(batch)
             return
         }
         noteHoldRenewal(sentAt: batch.sentAt)
@@ -44,8 +50,13 @@ extension PodLoanPhoneController {
         // a bolus or temp basal kept back while it ran. Records that arrive during a write wait,
         // staged, for the next one.
         let sentAt = batch.sentAt ?? deps.now()
-        guard !batch.events.isEmpty || !batch.tombstones.isEmpty || heldRecordHasFinished(by: sentAt),
-              !commitInFlight else { return }
+        guard !commitInFlight else { return }
+        guard !batch.events.isEmpty || !batch.tombstones.isEmpty || heldRecordHasFinished(by: sentAt) else {
+            // The watch resends whatever is unacknowledged, so an empty batch means everything it had
+            // recorded by then is already in the stores.
+            noteRecordsCurrent(asOf: sentAt)
+            return
+        }
         let records = HandbackOffer(epoch: batch.epoch, handedBackAt: sentAt, finalStatus: nil,
                                     odometer: batch.odometer, events: batch.events, tombstones: batch.tombstones,
                                     recovered: false, released: false)
@@ -65,6 +76,51 @@ extension PodLoanPhoneController {
         return held.contains { !open.contains($0.id) }
     }
 
+    /// Takes on a loan the watch started without this phone, proven by this phone's offline-start
+    /// credential: from here its records come in as a lent loan's do (control row 17).
+    func adoptWatchStartedLoan(epoch newEpoch: Int, earliestRecord: Date?, sentAt: Date,
+                               odometer: LoanOdometerSnapshot?, watchHoldsPod: Bool) {
+        handbackDiag(newEpoch, "adopting the loan the watch started without this phone, after e\(epoch)")
+
+        let wasStandingAside = yieldingToInferredLoan
+        clearInferredLoanYield(reason: "its loan e\(newEpoch) is adopted")
+        // Anchor the adopted loan at its earliest record, at most six hours back.
+        let anchor = max(earliestRecord ?? sentAt, deps.now().addingTimeInterval(-.hours(6)))
+        let lastPodReading = deps.pumpManager()?.lastSync
+        let previous = state
+        updateState {
+            $0.epoch = newEpoch
+            $0.phase = .loaned
+            $0.holdRenewedAt = sentAt
+            $0.loanStartedAt = anchor
+            // Standing aside set it already; otherwise this phone's records end at its last pod reading.
+            if !wasStandingAside { $0.recordsCurrentAt = lastPodReading }
+        }
+        // The watch's window starts at its takeover reading when the message carries it. With an older
+        // watch it starts at this phone's last reading, so the phone's own doses before it stay its own.
+        if let odometer, let startAt = odometer.deliveredAtStartAt {
+            noteTakeoverReading(units: odometer.deliveredAtStart, at: startAt)
+        } else if let last = ledgerLast {
+            handbackDiag(newEpoch, String(format: "the watch's window starts at this phone's last reading, %.2f U at %@",
+                                          last.units, ISO8601DateFormatter().string(from: last.at)))
+        }
+        stateDidChange(from: previous)
+
+        // Dosing authority and the radio go together.
+        if watchHoldsPod, let control = deps.pumpManager() as? ExclusiveDeviceControl, !control.isControlReleased {
+            control.releaseControl()
+            deps.pumpControlChanged(true)
+            readThePodIfKept()
+        }
+    }
+
+    /// The phone's stores hold every carb and insulin record the watch had made by `date`: what the
+    /// banner shows. Never moves back; messages can arrive out of order.
+    func noteRecordsCurrent(asOf date: Date) {
+        guard date > (persisted.recordsCurrentAt ?? .distantPast) else { return }
+        updateState { $0.recordsCurrentAt = date }
+    }
+
     /// The loan's log line, tagged with its loan number.
     func handbackDiag(_ epoch: Int, _ text: String) {
         deps.logLoanLine("e\(epoch) \(text)")
@@ -81,37 +137,11 @@ extension PodLoanPhoneController {
                 cancelTakeBackAttempt()
                 handbackDiag(offer.epoch, "take-back stopped: the watch is handing back")
             }
-            handbackDiag(offer.epoch, "adopting the loan the watch started without this phone, after e\(epoch)")
-
-            clearInferredLoanYield(reason: "its loan e\(offer.epoch) is adopted")
-            // Anchor the adopted loan at its earliest record, at most six hours back.
-            let anchor = max(offer.events.map(\.record.startDate).min() ?? offer.handedBackAt,
-                             deps.now().addingTimeInterval(-.hours(6)))
-            let previous = state
-            updateState {
-                $0.epoch = offer.epoch
-                $0.phase = .loaned
-                $0.holdRenewedAt = offer.handedBackAt
-                $0.loanStartedAt = anchor
-            }
-            // The watch's window starts at its takeover reading when the offer carries it. With an older
-            // watch it starts at this phone's last reading, so the phone's own doses before it stay its own.
-            if let odometer = offer.odometer, let startAt = odometer.deliveredAtStartAt {
-                noteTakeoverReading(units: odometer.deliveredAtStart, at: startAt)
-            } else if let last = ledgerLast {
-                handbackDiag(offer.epoch, String(format: "the watch's window starts at this phone's last reading, %.2f U at %@",
-                                                 last.units, ISO8601DateFormatter().string(from: last.at)))
-            }
-            stateDidChange(from: previous)
-
-            // A live offer means the watch still holds the pod: dosing authority and the radio go
-            // together. A final or recovered offer is a loan already over; only its records come in.
-            if offer.released != true, !offer.recovered,
-               let control = deps.pumpManager() as? ExclusiveDeviceControl, !control.isControlReleased {
-                control.releaseControl()
-                deps.pumpControlChanged(true)
-                readThePodIfKept()
-            }
+            // A live offer means the watch still holds the pod. A final or recovered offer is a loan
+            // already over; only its records come in.
+            adoptWatchStartedLoan(epoch: offer.epoch, earliestRecord: offer.events.map(\.record.startDate).min(),
+                                  sentAt: offer.handedBackAt, odometer: offer.odometer,
+                                  watchHoldsPod: offer.released != true && !offer.recovered)
         }
 
         // An offer ahead of this phone's epoch cannot be committed.
@@ -307,6 +337,7 @@ extension PodLoanPhoneController {
                                 $0.committedCursor = max($0.committedCursor, newCursor)
                                 $0.committedIDs.formUnion(committable.map(\.id))
                             }
+                            self.noteRecordsCurrent(asOf: offer.handedBackAt)
                             // The ack, and only now that the store has it.
                             self.sendMessage(.handbackAck(HandbackAck(epoch: self.epoch, committedCursor: self.committedCursor)))
                             self.handbackDiag(self.epoch, String(format: "records saved in %.0f ms; acknowledged up to %d", self.deps.now().timeIntervalSince(writeStart) * 1000, self.committedCursor))
