@@ -11,6 +11,8 @@ import LoopKit
 import LoopCore
 import LoopAlgorithm
 import NightscoutServiceKit
+import TidepoolServiceKit
+import TidepoolKit
 @testable import WatchApp
 
 @MainActor
@@ -67,6 +69,25 @@ final class LoanRemoteUploadsTests: XCTestCase {
         XCTAssertFalse(phone.isConfiguredByAnotherController)
 
         XCTAssertNil(NightscoutService(adopting: NightscoutService().exportConfiguration(), localState: nil), "no secret")
+    }
+
+    /// The phone's Tidepool service exports its session and data set; the wrist's, built from that
+    /// export, uploads into the same data set as the same user, and can renew the session itself:
+    /// an access token outlives no loan, and the phone may be out of reach when it expires.
+    func testTheWristAdoptsThePhonesTidepoolServiceWithItsRefreshToken() throws {
+        let phone = TidepoolService(hostIdentifier: "com.example.phone-host", hostVersion: "3.4")
+        phone.session = TSession(environment: TEnvironment(host: "fixture.example", port: 443), accessToken: "fixture-access",
+                                 accessTokenExpiration: Date().addingTimeInterval(3600), refreshToken: "fixture-refresh",
+                                 userId: "fixture-user", username: "fixture@example.com", userRoles: [])
+
+        let wrist = try XCTUnwrap(TidepoolService(adopting: phone.exportConfiguration(), localState: nil))
+        XCTAssertEqual(wrist.session?.accessToken, "fixture-access")
+        XCTAssertEqual(wrist.session?.userId, "fixture-user")
+        XCTAssertEqual(wrist.session?.refreshToken, "fixture-refresh", "the wrist renews the session itself")
+        XCTAssertTrue(wrist.isOnboarded)
+        XCTAssertTrue(wrist.isConfiguredByAnotherController)
+        XCTAssertNil(TidepoolService(adopting: TidepoolService(hostIdentifier: "h", hostVersion: "1").exportConfiguration(),
+                                     localState: nil), "no session")
     }
 
     /// With no service running there is nothing to confirm, and the answer comes at once.
