@@ -18589,6 +18589,9 @@
         }
       }
     },
+    "Estimated Insulin Still Booked" : {
+      "comment" : "Phone reminder title while an unexplained gap bolus stands"
+    },
     "Event" : {
 
     },
@@ -29668,6 +29671,9 @@
     "Please go to the App Store now to update the app." : {
       "comment" : "Required update modal paragraph 3"
     },
+    "Pod on Watch" : {
+      "comment" : "Title text for the pump tile while the pod is loaned to the watch"
+    },
     "Possible Missed Meal" : {
       "comment" : "The notification title for a meal that was possibly not logged in Loop.",
       "localizations" : {
@@ -40336,6 +40342,12 @@
           }
         }
       }
+    },
+    "Watch Message Unreadable" : {
+      "comment" : "Phone notice title when a loan message cannot be decoded"
+    },
+    "Watch Not Reporting" : {
+      "comment" : "Phone warning title: the watch has stopped reporting loop cycles during a session"
     },
     "What are examples of Critical Alerts and Time Sensitive Notifications?" : {
 

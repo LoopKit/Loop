@@ -163,9 +163,11 @@
 		1F0000012FBA000100000001 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 1F0000002FBA000100000001 /* AppIcon.icon */; };
 		1F0000022FBA000100000001 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 1F0000002FBA000100000001 /* AppIcon.icon */; };
 		230BE095719B8D8969B32A9C /* Loop/Resources/Sounds/bloop.caf in Resources */ = {isa = PBXBuildFile; fileRef = AF16A5EDEB9DF756890E0C09 /* Loop/Resources/Sounds/bloop.caf */; };
+		2595BA7C7FB24296BCB3601A /* PodLoanPhoneControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C8F1C82896495CA6E8AF8F /* PodLoanPhoneControllerTests.swift */; };
 		2C694BFD5806E573AFAB5E2E /* Loop/Resources/Sounds/dings.caf in Resources */ = {isa = PBXBuildFile; fileRef = 62F7CB5D5DC337E705032AC7 /* Loop/Resources/Sounds/dings.caf */; };
 		33644743F20B3706E3107FAC /* Loop/Resources/Sounds/mood_synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = BEC0BA802BE613F144AC3A70 /* Loop/Resources/Sounds/mood_synth.caf */; };
 		73BD135109B5757AA0F756D7 /* LoanControlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF2FD5B2F0532AE1378EF7AD /* LoanControlTests.swift */; };
+		3BD58D425AE24815B134F3E1 /* LoanBooksHarnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF6006BAC6EA4034BFD67C0E /* LoanBooksHarnessTests.swift */; };
 		3ED3198A2EB659E600820BCF /* GlucoseLiveActivityConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319882EB659E600820BCF /* GlucoseLiveActivityConfiguration.swift */; };
 		3ED3198B2EB659E600820BCF /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319872EB659E600820BCF /* ChartView.swift */; };
 		3ED3198C2EB659E600820BCF /* BasalViewActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319862EB659E600820BCF /* BasalViewActivity.swift */; };
@@ -419,10 +421,12 @@
 		89F9119624358E6900ECCAF3 /* BolusPickerValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */; };
 		89FE21AD24AC57E30033F501 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FE21AC24AC57E30033F501 /* Collection.swift */; };
 		8B5CF0144D79477AACBE4A82 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4344628320A7A3BE00C4BE6F /* LoopKit.framework */; };
+		95C7AE061FC149ADB8D1928D /* PhoneLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C9DDCE80C384964BDDF1C8B /* PhoneLog.swift */; };
 		992345AB303643A60064B448 /* BuildDetails.plist in Resources */ = {isa = PBXBuildFile; fileRef = C1EE9E802A38D0FB0064784A /* BuildDetails.plist */; };
 		992345AC303643A60064B448 /* BuildDetails.swift in Resources */ = {isa = PBXBuildFile; fileRef = C110888C2A3913C600BA4898 /* BuildDetails.swift */; };
 		9960C6964DD51D81093FAD5D /* Loop/Resources/Sounds/chime.caf in Resources */ = {isa = PBXBuildFile; fileRef = 3F7A1D72697082DC3A14587E /* Loop/Resources/Sounds/chime.caf */; };
 		9B8FCBDD6E3A9E603C4AABAD /* Loop/Resources/Sounds/bright_alarm.caf in Resources */ = {isa = PBXBuildFile; fileRef = 270F994CD56D566028B3CB25 /* Loop/Resources/Sounds/bright_alarm.caf */; };
+		9F0BBEE28E9F45FC8DB3D8C9 /* LoanReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBF9B08E9314F23AB94CF5A /* LoanReconciler.swift */; };
 		A1B2C3D40000000000000002 /* GlucoseAlertManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */; };
 		A1B2C3D40000000000000012 /* AlarmSoundCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000011 /* AlarmSoundCatalogTests.swift */; };
 		A2779286E117BD3627DA0618 /* Loop/Resources/Sounds/simple.caf in Resources */ = {isa = PBXBuildFile; fileRef = 5181B60CBF3CB2DA537F0475 /* Loop/Resources/Sounds/simple.caf */; };
@@ -675,10 +679,23 @@
 		C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
 		C9A47B0180AAB1FC572D3EFE /* CriticalAlertAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0175B13A9543390BC5 /* CriticalAlertAudioPlayer.swift */; };
 		C9A47B0280AAB1FC572D3EFF /* GlucoseAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0275B13A9543390BC6 /* GlucoseAlertManager.swift */; };
+		0CC007AD18915A53154250B6 /* GlucoseAlertManager+Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C71A6661AA828EAFD63C8F08 /* GlucoseAlertManager+Sharing.swift */; };
 		C9A47B0380AAB1FC572D3F00 /* GlucoseAlertSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A47B0375B13A9543390BC7 /* GlucoseAlertSettingsView.swift */; };
 		C9A47B0480AAB1FC572D3F01 /* Loop/Resources/Sounds/critical.caf in Resources */ = {isa = PBXBuildFile; fileRef = C9A47B0475B13A9543390BC8 /* Loop/Resources/Sounds/critical.caf */; };
 		C9SCENED0000000000000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9SCENED0000000000000002 /* SceneDelegate.swift */; };
 		CB1AF8155B1761A30ACA5591 /* Loop/Resources/Sounds/synth.caf in Resources */ = {isa = PBXBuildFile; fileRef = 83081FFB0497A4596F597830 /* Loop/Resources/Sounds/synth.caf */; };
+		D6201CDD83934B508AC33A24 /* PodLoanPhoneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE577A60A96B49F3A608001B /* PodLoanPhoneController.swift */; };
+		BAA532B26247129D23826193 /* PodLoanPhoneController+Ledger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5601535EB4FC12903ED69946 /* PodLoanPhoneController+Ledger.swift */; };
+		A87ACB92DBC4CA2D50EFAB07 /* PodLoanPhoneController+UIReads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F73A2676DA24049E2D391ED /* PodLoanPhoneController+UIReads.swift */; };
+		4E2EBC6125D8F32220F01615 /* PodLoanPhoneController+Reclaim.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3251D935F398630AC07CA3E9 /* PodLoanPhoneController+Reclaim.swift */; };
+		FBAA6DF0227E06A9B478E4DD /* PodLoanPhoneController+Settle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6470B4DA5621FAD246F50E7A /* PodLoanPhoneController+Settle.swift */; };
+		753F51F5EE5F10446805B7C5 /* PodLoanPhoneController+Grant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7704035FC96A99586EB69961 /* PodLoanPhoneController+Grant.swift */; };
+		B4AB64D1F99592A1DCEA95C7 /* PodLoanPhoneController+Mirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = B88AF199D1DE958D1FAA9A72 /* PodLoanPhoneController+Mirror.swift */; };
+		5F448E42359E9920D869F85D /* PodLoanPhoneController+Records.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32989AB666983848B534F128 /* PodLoanPhoneController+Records.swift */; };
+		3AA2F2EB3EA44C712FCEF51E /* PodLoanPhoneController+Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74D589BFE7B5D4BD6BED3D3 /* PodLoanPhoneController+Notifications.swift */; };
+		5E12EA750000000000000050 /* PodLoanPhoneController+Hold.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E12EA760000000000000050 /* PodLoanPhoneController+Hold.swift */; };
+		B6B80446C9117B34FEA7329E /* PodLoanPhoneController+Staging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF82B359AC5A6738CEBD729 /* PodLoanPhoneController+Staging.swift */; };
+		B18A390A68A8C03E20643F4C /* PodLoanPhoneController+State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0817A2A6F276A886CA6A15 /* PodLoanPhoneController+State.swift */; };
 		D6E28676C2C7751C77C7F2FB /* Loop/Resources/Sounds/spring.caf in Resources */ = {isa = PBXBuildFile; fileRef = 9471E156FC10D6D0FF219C77 /* Loop/Resources/Sounds/spring.caf */; };
 		DD3DBD292A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */; };
 		DDBD0002000000000000BD02 /* BuildDetails.plist in Resources */ = {isa = PBXBuildFile; fileRef = C1EE9E802A38D0FB0064784A /* BuildDetails.plist */; };
@@ -1118,6 +1135,7 @@
 		62F7CB5D5DC337E705032AC7 /* Loop/Resources/Sounds/dings.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/dings.caf; sourceTree = SOURCE_ROOT; };
 		6D5FCC7207E50ACC682E9E6E /* Loop/Resources/Sounds/honk.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/honk.caf; sourceTree = SOURCE_ROOT; };
 		74145BE3C46270883D295A1F /* Loop/Resources/Sounds/minimal.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/minimal.caf; sourceTree = SOURCE_ROOT; };
+		7C9DDCE80C384964BDDF1C8B /* PhoneLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PhoneLog.swift; path = Loop/Managers/PhoneLog.swift; sourceTree = SOURCE_ROOT; };
 		7D23667C21250C7E0028B67D /* LocalizedString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LocalizedString.swift; path = LoopUI/Common/LocalizedString.swift; sourceTree = SOURCE_ROOT; };
 		C1F2CAA92B76B3EE00D7F581 /* TempBasalRecommendation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempBasalRecommendation.swift; sourceTree = "<group>"; };
 		7D9BEF132335EC4B005DCFD6 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Intents.strings; sourceTree = "<group>"; };
@@ -1232,6 +1250,7 @@
 		89FE21AC24AC57E30033F501 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
 		8FB2394478FF679F436E8EF1 /* Loop/Resources/Sounds/bloom.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/bloom.caf; sourceTree = SOURCE_ROOT; };
 		9471E156FC10D6D0FF219C77 /* Loop/Resources/Sounds/spring.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/spring.caf; sourceTree = SOURCE_ROOT; };
+		97C8F1C82896495CA6E8AF8F /* PodLoanPhoneControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PodLoanPhoneControllerTests.swift; path = LoopTests/PodLoanPhoneControllerTests.swift; sourceTree = SOURCE_ROOT; };
 		A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseAlertManagerTests.swift; sourceTree = "<group>"; };
 		A1B2C3D40000000000000011 /* AlarmSoundCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSoundCatalogTests.swift; sourceTree = "<group>"; };
 		A900531A28D60862000BC15B /* Loop.shortcut */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop.shortcut; sourceTree = "<group>"; };
@@ -1345,6 +1364,18 @@
 		B66D1F422E6A5D6600471149 /* mul */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = mul; path = mul.lproj/Main.xcstrings; sourceTree = "<group>"; };
 		B6F22EF72E95A03800CCA05F /* hu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hu; path = hu.lproj/Intents.strings; sourceTree = "<group>"; };
 		B6F22EF92E95A03C00CCA05F /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Intents.strings; sourceTree = "<group>"; };
+		BE577A60A96B49F3A608001B /* PodLoanPhoneController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PodLoanPhoneController.swift; path = Loop/Managers/PodLoanPhoneController.swift; sourceTree = SOURCE_ROOT; };
+		5601535EB4FC12903ED69946 /* PodLoanPhoneController+Ledger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Ledger.swift"; path = "Loop/Managers/PodLoanPhoneController+Ledger.swift"; sourceTree = SOURCE_ROOT; };
+		4F73A2676DA24049E2D391ED /* PodLoanPhoneController+UIReads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+UIReads.swift"; path = "Loop/Managers/PodLoanPhoneController+UIReads.swift"; sourceTree = SOURCE_ROOT; };
+		3251D935F398630AC07CA3E9 /* PodLoanPhoneController+Reclaim.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Reclaim.swift"; path = "Loop/Managers/PodLoanPhoneController+Reclaim.swift"; sourceTree = SOURCE_ROOT; };
+		6470B4DA5621FAD246F50E7A /* PodLoanPhoneController+Settle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Settle.swift"; path = "Loop/Managers/PodLoanPhoneController+Settle.swift"; sourceTree = SOURCE_ROOT; };
+		7704035FC96A99586EB69961 /* PodLoanPhoneController+Grant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Grant.swift"; path = "Loop/Managers/PodLoanPhoneController+Grant.swift"; sourceTree = SOURCE_ROOT; };
+		B88AF199D1DE958D1FAA9A72 /* PodLoanPhoneController+Mirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Mirror.swift"; path = "Loop/Managers/PodLoanPhoneController+Mirror.swift"; sourceTree = SOURCE_ROOT; };
+		32989AB666983848B534F128 /* PodLoanPhoneController+Records.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Records.swift"; path = "Loop/Managers/PodLoanPhoneController+Records.swift"; sourceTree = SOURCE_ROOT; };
+		B74D589BFE7B5D4BD6BED3D3 /* PodLoanPhoneController+Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Notifications.swift"; path = "Loop/Managers/PodLoanPhoneController+Notifications.swift"; sourceTree = SOURCE_ROOT; };
+		5E12EA760000000000000050 /* PodLoanPhoneController+Hold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Hold.swift"; path = "Loop/Managers/PodLoanPhoneController+Hold.swift"; sourceTree = SOURCE_ROOT; };
+		1FF82B359AC5A6738CEBD729 /* PodLoanPhoneController+Staging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+Staging.swift"; path = "Loop/Managers/PodLoanPhoneController+Staging.swift"; sourceTree = SOURCE_ROOT; };
+		3E0817A2A6F276A886CA6A15 /* PodLoanPhoneController+State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PodLoanPhoneController+State.swift"; path = "Loop/Managers/PodLoanPhoneController+State.swift"; sourceTree = SOURCE_ROOT; };
 		BEC0BA802BE613F144AC3A70 /* Loop/Resources/Sounds/mood_synth.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/mood_synth.caf; sourceTree = SOURCE_ROOT; };
 		C1004DEF2981F5B700B8CF94 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1004DFD2981F67A00B8CF94 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -1491,6 +1522,7 @@
 		C1FB428E217921D600FAB378 /* PumpManagerUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerUI.swift; sourceTree = "<group>"; };
 		C9A47B0175B13A9543390BC5 /* CriticalAlertAudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CriticalAlertAudioPlayer.swift; sourceTree = "<group>"; };
 		C9A47B0275B13A9543390BC6 /* GlucoseAlertManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseAlertManager.swift; sourceTree = "<group>"; };
+		C71A6661AA828EAFD63C8F08 /* GlucoseAlertManager+Sharing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GlucoseAlertManager+Sharing.swift"; sourceTree = "<group>"; };
 		C9A47B0375B13A9543390BC7 /* GlucoseAlertSettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseAlertSettingsView.swift; sourceTree = "<group>"; };
 		C9A47B0475B13A9543390BC8 /* Loop/Resources/Sounds/critical.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/critical.caf; sourceTree = SOURCE_ROOT; };
 		C9EA3F48338B49BD9C6BD0F9 /* Loop/Resources/Sounds/urgent_low.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/urgent_low.caf; sourceTree = SOURCE_ROOT; };
@@ -1588,6 +1620,7 @@
 		E9C58A7924DB529A00487A17 /* dynamic_glucose_effect_partially_observed.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = dynamic_glucose_effect_partially_observed.json; sourceTree = "<group>"; };
 		E9C58A7A24DB529A00487A17 /* counteraction_effect_falling_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = counteraction_effect_falling_glucose.json; sourceTree = "<group>"; };
 		E9C58A7B24DB529A00487A17 /* insulin_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = insulin_effect.json; sourceTree = "<group>"; };
+		EDBF9B08E9314F23AB94CF5A /* LoanReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanReconciler.swift; path = Loop/Managers/LoanReconciler.swift; sourceTree = SOURCE_ROOT; };
 		F5D9C01727DABBE0002E48F6 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Intents.strings; sourceTree = "<group>"; };
 		F5E0BDD327E1D71C0033557E /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/Intents.strings; sourceTree = "<group>"; };
 		FADE0001000000000000DE01 /* DevelopmentBranchAlerter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevelopmentBranchAlerter.swift; sourceTree = "<group>"; };
@@ -1599,6 +1632,7 @@
 		FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics/TimeInRangeBar.swift; sourceTree = "<group>"; };
 		F69CE2EE3714858772FE7A26 /* InsulinDeliveryHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryHistoryTests.swift; sourceTree = "<group>"; };
 		FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseStatisticsTests.swift; sourceTree = "<group>"; };
+		FF6006BAC6EA4034BFD67C0E /* LoanBooksHarnessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanBooksHarnessTests.swift; path = LoopTests/LoanBooksHarnessTests.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1776,6 +1810,7 @@
 				C9A47B0175B13A9543390BC5 /* CriticalAlertAudioPlayer.swift */,
 				C1A1A00001000000000000A2 /* CriticalAlertAlarmScheduler.swift */,
 				C9A47B0275B13A9543390BC6 /* GlucoseAlertManager.swift */,
+				C71A6661AA828EAFD63C8F08 /* GlucoseAlertManager+Sharing.swift */,
 				1D05219C2469F1F5000EBBDE /* AlertStore.swift */,
 				1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */,
 				1DA649A8244126DA00F61E75 /* InAppModalAlertScheduler.swift */,
@@ -2502,6 +2537,20 @@
 				83081FFB0497A4596F597830 /* Loop/Resources/Sounds/synth.caf */,
 				21F13EB666EBFDD03F99CB7E /* Loop/Resources/Sounds/trill.caf */,
 				C9EA3F48338B49BD9C6BD0F9 /* Loop/Resources/Sounds/urgent_low.caf */,
+				7C9DDCE80C384964BDDF1C8B /* PhoneLog.swift */,
+				EDBF9B08E9314F23AB94CF5A /* LoanReconciler.swift */,
+				BE577A60A96B49F3A608001B /* PodLoanPhoneController.swift */,
+				5601535EB4FC12903ED69946 /* PodLoanPhoneController+Ledger.swift */,
+				4F73A2676DA24049E2D391ED /* PodLoanPhoneController+UIReads.swift */,
+				3251D935F398630AC07CA3E9 /* PodLoanPhoneController+Reclaim.swift */,
+				6470B4DA5621FAD246F50E7A /* PodLoanPhoneController+Settle.swift */,
+				7704035FC96A99586EB69961 /* PodLoanPhoneController+Grant.swift */,
+				B88AF199D1DE958D1FAA9A72 /* PodLoanPhoneController+Mirror.swift */,
+				32989AB666983848B534F128 /* PodLoanPhoneController+Records.swift */,
+				B74D589BFE7B5D4BD6BED3D3 /* PodLoanPhoneController+Notifications.swift */,
+				5E12EA760000000000000050 /* PodLoanPhoneController+Hold.swift */,
+				1FF82B359AC5A6738CEBD729 /* PodLoanPhoneController+Staging.swift */,
+				3E0817A2A6F276A886CA6A15 /* PodLoanPhoneController+State.swift */,
 				A973A0F6CF644FFAA48989FC /* UserDefaults+LoopIntents.swift */,
 				42BE0808089545E7BE6AE359 /* NSBundle.swift */,
 				D0861EE8E371426287E4542F /* LoanTransport.swift */,
@@ -2509,6 +2558,8 @@
 				CA25D2864BD992EA7BA12649 /* PersistedProperty+Directory.swift */,
 				4B9F934244F9400F3C1960EB /* LoanControl.swift */,
 				FBC4D5290F0F35E6B66B7227 /* LoanRecords.swift */,
+				FF6006BAC6EA4034BFD67C0E /* LoanBooksHarnessTests.swift */,
+				97C8F1C82896495CA6E8AF8F /* PodLoanPhoneControllerTests.swift */,
 				AF2FD5B2F0532AE1378EF7AD /* LoanControlTests.swift */,
 				A9B1F564432BCBF70C0C6CBB /* Loop/Resources/Sounds/acoustic_hg_harsh.caf */,
 				3481DFC7974E27ABE6AAC4C3 /* Loop/Resources/Sounds/acoustic_hg_medium.caf */,
@@ -3684,6 +3735,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				95C7AE061FC149ADB8D1928D /* PhoneLog.swift in Sources */,
+				9F0BBEE28E9F45FC8DB3D8C9 /* LoanReconciler.swift in Sources */,
+				D6201CDD83934B508AC33A24 /* PodLoanPhoneController.swift in Sources */,
+				BAA532B26247129D23826193 /* PodLoanPhoneController+Ledger.swift in Sources */,
+				A87ACB92DBC4CA2D50EFAB07 /* PodLoanPhoneController+UIReads.swift in Sources */,
+				4E2EBC6125D8F32220F01615 /* PodLoanPhoneController+Reclaim.swift in Sources */,
+				FBAA6DF0227E06A9B478E4DD /* PodLoanPhoneController+Settle.swift in Sources */,
+				753F51F5EE5F10446805B7C5 /* PodLoanPhoneController+Grant.swift in Sources */,
+				B4AB64D1F99592A1DCEA95C7 /* PodLoanPhoneController+Mirror.swift in Sources */,
+				5F448E42359E9920D869F85D /* PodLoanPhoneController+Records.swift in Sources */,
+				3AA2F2EB3EA44C712FCEF51E /* PodLoanPhoneController+Notifications.swift in Sources */,
+				5E12EA750000000000000050 /* PodLoanPhoneController+Hold.swift in Sources */,
+				B6B80446C9117B34FEA7329E /* PodLoanPhoneController+Staging.swift in Sources */,
+				B18A390A68A8C03E20643F4C /* PodLoanPhoneController+State.swift in Sources */,
 				C17824A51E1AD4D100D9D25C /* ManualBolusRecommendation.swift in Sources */,
 				897A5A9624C2175B00C4E71D /* BolusEntryView.swift in Sources */,
 				4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */,
@@ -3779,6 +3844,7 @@
 				C9A47B0180AAB1FC572D3EFE /* CriticalAlertAudioPlayer.swift in Sources */,
 				C1A1A00001000000000000A1 /* CriticalAlertAlarmScheduler.swift in Sources */,
 				C9A47B0280AAB1FC572D3EFF /* GlucoseAlertManager.swift in Sources */,
+				0CC007AD18915A53154250B6 /* GlucoseAlertManager+Sharing.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
 				149A28E42A8A63A700052EDF /* FavoriteFoodDetailView.swift in Sources */,
 				1DDE274024AEA4F200796622 /* NotificationsCriticalAlertPermissionsView.swift in Sources */,
@@ -4152,6 +4218,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3BD58D425AE24815B134F3E1 /* LoanBooksHarnessTests.swift in Sources */,
+				2595BA7C7FB24296BCB3601A /* PodLoanPhoneControllerTests.swift in Sources */,
 				73BD135109B5757AA0F756D7 /* LoanControlTests.swift in Sources */,
 				A9DF02CB24F72B9E00B7C988 /* CriticalEventLogTests.swift in Sources */,
 				1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */,

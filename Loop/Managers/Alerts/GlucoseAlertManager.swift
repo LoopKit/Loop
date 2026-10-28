@@ -424,7 +424,7 @@ final class GlucoseAlertManager: ObservableObject {
     private static let lowPlaysThroughSilentKey = "GlucoseAlertLowPlaysThroughSilent"
     private static let highPlaysThroughSilentKey = "GlucoseAlertHighPlaysThroughSilent"
     private static let predictedLowPlaysThroughSilentKey = "GlucoseAlertPredictedLowPlaysThroughSilent"
-    private static let episodeStateKey = "GlucoseAlertEpisodeState"
+    static let episodeStateKey = "GlucoseAlertEpisodeState"
     private static let armedTestKey = "GlucoseAlertArmedTest"
 
     // Per-alarm sound defaults: each alarm's own Acoustic set at Medium, the
