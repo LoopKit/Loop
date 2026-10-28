@@ -10,7 +10,7 @@ import HealthKit
 import LoopKit
 import LoopCore
 import LoopAlgorithm
-import os.log
+import os
 
 /// Reads glucose, insulin, carbs and loop runs for the redesigned screens.
 ///
@@ -29,6 +29,7 @@ final class LoopHistoryProvider {
     private let glucoseStore: GlucoseStore
     private let healthStore = HKHealthStore()
     private let log = OSLog(category: "LoopHistoryProvider")
+    private let recordsStartCache = OSAllocatedUnfairLock<(fetched: Date, value: Date?)?>(initialState: nil)
 
     @MainActor
     init(deviceManager: DeviceDataManager, loopDataManager: LoopDataManager, settingsManager: SettingsManager, temporaryPresetsManager: TemporaryPresetsManager) {
@@ -149,8 +150,35 @@ final class LoopHistoryProvider {
 
     // MARK: - Loop runs
 
-    /// Fetch each snapshot independently: overlapping reloads must not append the same anchored page twice.
+    /// Loop runs in the local window, oldest first, with when the record of them begins.
     func loopRuns() async throws -> (runs: [LoopHistoryMath.LoopRun], coverageStart: Date?) {
+        let start = localHistoryStart
+        var runs: [LoopHistoryMath.LoopRun]
+        if let store = dosingDecisionStore as? DosingDecisionStore {
+            // Decode only the fields a run needs, and only Loop's local window.
+            runs = try await store.getDosingDecisions(start: start, end: Date(), as: LoopRunRecord.self)
+                .filter { $0.reason == "loop" }
+                .map { record in
+                    LoopHistoryMath.LoopRun(date: record.date, succeeded: (record.errors ?? []).isEmpty,
+                                           error: record.errors?.first.map { Self.describe(issue: $0.id) })
+                }
+        } else {
+            runs = try await anchoredLoopRuns()
+        }
+        try Task.checkCancellation()
+        runs = runs.filter { $0.date >= start }.sorted { $0.date < $1.date }
+        return (runs, runs.first?.date)
+    }
+
+    private struct LoopRunRecord: Decodable {
+        struct Issue: Decodable { let id: String }
+        let date: Date
+        let reason: String
+        let errors: [Issue]?
+    }
+
+    /// Fetch each snapshot independently: overlapping reloads must not append the same anchored page twice.
+    private func anchoredLoopRuns() async throws -> [LoopHistoryMath.LoopRun] {
         var anchor: DosingDecisionStore.QueryAnchor?
         var runs: [LoopHistoryMath.LoopRun] = []
         while true {
@@ -170,8 +198,7 @@ final class LoopHistoryProvider {
             }
             if page.1.count < 1000 { break }
         }
-        runs = runs.filter { $0.date >= localHistoryStart }.sorted { $0.date < $1.date }
-        return (runs, runs.first?.date)
+        return runs
     }
 
     /// "glucoseTooOld" → "Glucose too old". Loop's own issue ids are localised; any other id falls back to the
@@ -224,7 +251,10 @@ final class LoopHistoryProvider {
             case .prime?:
                 return PumpLogEvent(id: id, date: event.date, kind: .siteChange(NSLocalizedString("Primed", comment: "Pump event in the history: the pump primed the tubing or cannula")))
             case .alarm?:
-                return PumpLogEvent(id: id, date: event.date, kind: .alarm(event.title ?? NSLocalizedString("Pump alarm", comment: "Pump event in the history: an alarm whose pump gave no title")))
+                // `title` is a debug description; only a pump's own alarm text is meant for people.
+                let pumpText: String?
+                if case .other(let details)? = event.alarmType, !details.isEmpty { pumpText = details } else { pumpText = nil }
+                return PumpLogEvent(id: id, date: event.date, kind: .alarm(pumpText ?? NSLocalizedString("Pump alarm", comment: "Pump event in the history: an alarm whose pump gave no title")))
             default:
                 return nil
             }
@@ -273,10 +303,29 @@ final class LoopHistoryProvider {
         }
     }
 
+    /// Doses for `interval`, with the start of Loop's insulin records (its earliest local dose). The start is kept
+    /// for a few minutes so day pages and periods don't each read the whole local history; when it isn't known,
+    /// one read from the start of the local history serves both.
+    private func doses(for interval: DateInterval) async throws -> (doses: [DoseEntry], recordsStart: Date?) {
+        let localStart = localHistoryStart
+        if interval.start <= localStart {
+            let doses = try await doseStore.getNormalizedDoseEntries(start: interval.start, end: interval.end)
+            return (doses, doses.map(\.startDate).min())
+        }
+        if let cached = recordsStartCache.withLock({ $0 }), Date().timeIntervalSince(cached.fetched) < 300 {
+            return (try await doseStore.getNormalizedDoseEntries(start: interval.start, end: interval.end), cached.value)
+        }
+        let local = try await doseStore.getNormalizedDoseEntries(start: localStart, end: interval.end)
+        let recordsStart = local.map(\.startDate).min()
+        recordsStartCache.withLock { $0 = (fetched: Date(), value: recordsStart) }
+        return (local.filter { $0.endDate > interval.start && $0.startDate < interval.end }, recordsStart)
+    }
+
     private func localInsulin(_ interval: DateInterval) async throws -> ([BolusEvent], [BasalSegment], [ScheduledBasalPoint]) {
         let doses: [DoseEntry]
+        let recordsStart: Date?
         do {
-            doses = try await doseStore.getNormalizedDoseEntries(start: interval.start, end: interval.end)
+            (doses, recordsStart) = try await self.doses(for: interval)
         } catch {
             os_log("Dose fetch failed: %{public}@", log: log, type: .error, String(describing: error))
             throw error
@@ -295,8 +344,12 @@ final class LoopHistoryProvider {
         let deliveries = doses.compactMap { LoopHistoryMath.BasalDelivery(dose: $0) }
         let now = Date()
         let window = DateInterval(start: interval.start, end: max(interval.start, min(interval.end, now)))
-        // Totals count pump records, as classic Loop does; an unreported gap is not confirmed delivery.
-        let basal = window.duration > 0 ? LoopHistoryMath.basalSegments(window: window, schedule: schedule, deliveries: deliveries) : []
+        // As in Loop's insulin totals: after the first record, unrecorded time runs at the pump's programmed rate.
+        let programmed = basalHistory.map { LoopHistoryMath.ScheduleValue(start: $0.startDate, end: $0.endDate, rate: $0.value) }
+        let basal = window.duration > 0
+            ? LoopHistoryMath.basalSegments(window: window, schedule: schedule, deliveries: deliveries,
+                                            programmedRates: programmed, recordsStart: recordsStart)
+            : []
         let scheduled = schedule.map { ScheduledBasalPoint(start: max($0.start, interval.start), end: min($0.end, interval.end), rate: $0.rate) }
         return (boluses, basal, scheduled)
     }
