@@ -284,10 +284,13 @@ final class LoopHistoryProvider {
 
         let boluses = doses.compactMap { BolusEvent(dose: $0, in: interval) }
 
+        let basalHistory = try await loopDataManager.settingsProvider.getBasalHistory(startDate: interval.start, endDate: interval.end)
         let temporaryPresetsManager = self.temporaryPresetsManager
-        let scheduleValues = await MainActor.run {
-            temporaryPresetsManager.basalRateScheduleApplyingOverrideHistory?.between(start: interval.start, end: interval.end) ?? []
+        let overrides = await MainActor.run {
+            temporaryPresetsManager.presetHistory.getOverrideHistory(startDate: interval.start, endDate: interval.end)
         }
+        // A resolved daily schedule repeats recent presets on every day. Use the stored profile and dated overrides.
+        let scheduleValues = overrides.applyBasal(over: basalHistory)
         let schedule = scheduleValues.map { LoopHistoryMath.ScheduleValue(start: $0.startDate, end: $0.endDate, rate: $0.value) }
         let deliveries = doses.compactMap { LoopHistoryMath.BasalDelivery(dose: $0) }
         let now = Date()
@@ -438,7 +441,8 @@ extension LoopDataManager {
             .map { $0.simpleDose(with: insulinModel(for: $0.insulinType)) }
         let basalStart = min(dosesStart, doses.map(\.startDate).min() ?? dosesStart)
         let basal = try await settingsProvider.getBasalHistory(startDate: basalStart, endDate: interval.end)
-        return doses.annotated(with: basal).insulinOnBoardTimeline(from: interval.start, to: interval.end)
+        let overrides = temporaryPresetsManager.presetHistory.getOverrideHistory(startDate: basalStart, endDate: interval.end)
+        return doses.annotated(with: overrides.applyBasal(over: basal)).insulinOnBoardTimeline(from: interval.start, to: interval.end)
     }
 
     /// Carbs on board across `interval`, using the same absorption review as Loop's carb screen.

@@ -200,8 +200,8 @@ enum LoopHistoryMath {
         cal.firstWeekday = 2
         let groups = Dictionary(grouping: totals) { cal.dateInterval(of: .weekOfYear, for: $0.day)?.start ?? $0.day }
         return groups.keys.sorted().map { week in
-            let days = groups[week]!
-            let n = Double(days.count)
+            let days = averagingDays(groups[week]!)
+            let n = Double(max(1, days.count))
             return DayTotal(day: week, basal: days.reduce(0) { $0 + $1.basal } / n, bolus: days.reduce(0) { $0 + $1.bolus } / n)
         }
     }
