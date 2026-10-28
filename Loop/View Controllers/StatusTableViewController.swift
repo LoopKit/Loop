@@ -1888,7 +1888,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let error: Error?
         // First, check whether we have a device error after the most recent completion date
         if let deviceError = deviceManager.lastError,
-            deviceError.date > (hudView?.loopCompletionHUD.lastLoopCompleted ?? .distantPast)
+            deviceError.date > (loopManager.lastLoopCompleted ?? .distantPast)
         {
             error = deviceError.error
         } else if let lastLoopError = lastLoopError {

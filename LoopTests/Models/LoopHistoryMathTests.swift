@@ -182,6 +182,26 @@ class LoopHistoryMathTests: XCTestCase {
         XCTAssertEqual(LoopHistoryMath.averageDailyInsulin([today]), 5, accuracy: 1e-9)
     }
 
+    func testWeeklyInsulinUsesTheSummaryAveragingDays() {
+        let monday = Date(timeIntervalSinceReferenceDate: 815_270_400)
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let totals = [
+            LoopHistoryMath.DayTotal(day: monday, basal: 0, bolus: 0),
+            LoopHistoryMath.DayTotal(day: monday.addingTimeInterval(86400), basal: 10, bolus: 20),
+            LoopHistoryMath.DayTotal(day: monday.addingTimeInterval(2 * 86400), basal: 10, bolus: 20),
+            LoopHistoryMath.DayTotal(day: monday.addingTimeInterval(3 * 86400), basal: 1, bolus: 2, isComplete: false),
+        ]
+        let weeks = LoopHistoryMath.weekly(totals, calendar: calendar)
+        XCTAssertEqual(weeks.count, 1)
+        XCTAssertEqual(weeks[0].basal, 10, accuracy: 1e-9)
+        XCTAssertEqual(weeks[0].bolus, 20, accuracy: 1e-9)
+
+        // A current week with no complete day must still show the data it has.
+        let currentWeek = LoopHistoryMath.weekly([totals[3]], calendar: calendar)
+        XCTAssertEqual(currentWeek.first?.total, 3)
+    }
+
     func testGapMessageForADayWithoutReadings() {
         let start = Date(timeIntervalSinceReferenceDate: 815_270_400)
         let day = DateInterval(start: start, duration: 86400)
