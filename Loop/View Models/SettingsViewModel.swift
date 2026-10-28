@@ -123,6 +123,8 @@ class SettingsViewModel {
 
     @ObservationIgnored var setupHistory: (() async throws -> SetupHistory)?
 
+    @ObservationIgnored var outcomesPackageBuilder: OutcomesPackageBuilder?
+
     @MainActor
     var showDeleteTestData: Bool {
         availableSupports.contains(where: { $0.showsDeleteTestDataUI })
