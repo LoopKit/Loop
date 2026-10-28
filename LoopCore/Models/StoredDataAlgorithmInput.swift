@@ -60,36 +60,4 @@ public struct StoredDataAlgorithmInput: AlgorithmInput {
     public var experiments: Set<ExperimentOption> = []
 
     public var volatilityBaseline: Double? = nil
-
-    public init(glucoseHistory: [StoredGlucoseSample], doses: [SimpleInsulinDose], carbEntries: [StoredCarbEntry],
-                predictionStart: Date, basal: [AbsoluteScheduleValue<Double>], sensitivity: [AbsoluteScheduleValue<LoopQuantity>],
-                carbRatio: [AbsoluteScheduleValue<Double>], target: GlucoseRangeTimeline, suspendThreshold: LoopQuantity? = nil,
-                maxBolus: Double, maxBasalRate: Double, useIntegralRetrospectiveCorrection: Bool,
-                includePositiveVelocityAndRC: Bool, carbAbsorptionModel: CarbAbsorptionModel,
-                recommendationInsulinModel: InsulinModel, recommendationType: DoseRecommendationType,
-                automaticBolusApplicationFactor: Double? = nil, maxActiveInsulinMultiplier: Double? = nil,
-                gradualTransitionsThreshold: Double? = nil, experiments: Set<ExperimentOption> = [],
-                volatilityBaseline: Double? = nil) {
-        self.glucoseHistory = glucoseHistory
-        self.doses = doses
-        self.carbEntries = carbEntries
-        self.predictionStart = predictionStart
-        self.basal = basal
-        self.sensitivity = sensitivity
-        self.carbRatio = carbRatio
-        self.target = target
-        self.suspendThreshold = suspendThreshold
-        self.maxBolus = maxBolus
-        self.maxBasalRate = maxBasalRate
-        self.useIntegralRetrospectiveCorrection = useIntegralRetrospectiveCorrection
-        self.includePositiveVelocityAndRC = includePositiveVelocityAndRC
-        self.carbAbsorptionModel = carbAbsorptionModel
-        self.recommendationInsulinModel = recommendationInsulinModel
-        self.recommendationType = recommendationType
-        self.automaticBolusApplicationFactor = automaticBolusApplicationFactor
-        self.maxActiveInsulinMultiplier = maxActiveInsulinMultiplier
-        self.gradualTransitionsThreshold = gradualTransitionsThreshold
-        self.experiments = experiments
-        self.volatilityBaseline = volatilityBaseline
-    }
 }

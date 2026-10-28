@@ -39,6 +39,8 @@
 		3CD16E39CAB99674C3AB351C /* CarbStoreProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95D380224EADF36005E2F50 /* CarbStoreProtocol.swift */; };
 		D96DC2868F8E7ADEEA335047 /* LoopAlgorithmSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */; };
 		104021B7449DA59717EA4E5D /* LoopAlgorithmSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */; };
+		229FEACAEAB2DF60B3DB5C84 /* LoopCycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3DFFEB9BB163D1B87B3563 /* LoopCycle.swift */; };
+		D23A31DF90992466C4626B34 /* LoopCycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3DFFEB9BB163D1B87B3563 /* LoopCycle.swift */; };
 		01414522FC033F2B7A9B223A /* Loop/Resources/Sounds/crying.caf in Resources */ = {isa = PBXBuildFile; fileRef = 85203550670F2E9BE92F27D8 /* Loop/Resources/Sounds/crying.caf */; };
 		0A02E77AD7536C322933D49B /* Loop/Resources/Sounds/minimal.caf in Resources */ = {isa = PBXBuildFile; fileRef = 74145BE3C46270883D295A1F /* Loop/Resources/Sounds/minimal.caf */; };
 		124B300527D84BE2A1233A91 /* Loop/Resources/Sounds/urgent_low.caf in Resources */ = {isa = PBXBuildFile; fileRef = C9EA3F48338B49BD9C6BD0F9 /* Loop/Resources/Sounds/urgent_low.caf */; };
@@ -1395,6 +1397,7 @@
 		C16575742539FD60004AE16E /* LoopCoreConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopCoreConstants.swift; sourceTree = "<group>"; };
 		C16B983D26B4893300256B05 /* DoseEnactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseEnactor.swift; sourceTree = "<group>"; };
 		812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopAlgorithmSupport.swift"; sourceTree = "<group>"; };
+		FB3DFFEB9BB163D1B87B3563 /* LoopCycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopCycle.swift"; sourceTree = "<group>"; };
 		C16B983F26B4898800256B05 /* DoseEnactorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseEnactorTests.swift; sourceTree = "<group>"; };
 		C16DA84122E8E112008624C2 /* PluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginManager.swift; sourceTree = "<group>"; };
 		C4C16D18C8806FF48331134C /* InsulinDeliveryHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryHistory.swift; sourceTree = "<group>"; };
@@ -1698,6 +1701,7 @@
 			children = (
 				00A28F30399B460CABF4EDD2 /* SettingsProvider.swift */,
 				812023C7C7DB7C71CD750B62 /* LoopAlgorithmSupport.swift */,
+				FB3DFFEB9BB163D1B87B3563 /* LoopCycle.swift */,
 				5F0AED2F82294E85F65DE0B9 /* Store Protocols */,
 			);
 			path = Managers;
@@ -4005,6 +4009,7 @@
 				451FFEF51B975CE332CC6C6D /* DoseStoreProtocol.swift in Sources */,
 				0390983B63120E47B543264F /* CarbStoreProtocol.swift in Sources */,
 				D96DC2868F8E7ADEEA335047 /* LoopAlgorithmSupport.swift in Sources */,
+				229FEACAEAB2DF60B3DB5C84 /* LoopCycle.swift in Sources */,
 				C1ED6C822E7D8E3D002F91C2 /* AcknowledgeAlertUserInfo.swift in Sources */,
 				E9C00EF324C6222400628F35 /* LoopSettings.swift in Sources */,
 				C1ED6C6D2E7C6EC1002F91C2 /* NotificationActionSelection.swift in Sources */,
@@ -4057,6 +4062,7 @@
 				690482C3E6D6A94D7BA232B6 /* DoseStoreProtocol.swift in Sources */,
 				3CD16E39CAB99674C3AB351C /* CarbStoreProtocol.swift in Sources */,
 				104021B7449DA59717EA4E5D /* LoopAlgorithmSupport.swift in Sources */,
+				D23A31DF90992466C4626B34 /* LoopCycle.swift in Sources */,
 				C1ED6C832E7D8E3D002F91C2 /* AcknowledgeAlertUserInfo.swift in Sources */,
 				C1ED6C652E7C6E2F002F91C2 /* CarbBackfillRequestUserInfo.swift in Sources */,
 				C1ED6C6C2E7C6EC1002F91C2 /* NotificationActionSelection.swift in Sources */,

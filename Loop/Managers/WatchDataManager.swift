@@ -63,9 +63,9 @@ final class WatchDataManager: NSObject {
         watchSession?.activate()
     }
 
-    private let log = DiagnosticLog(category: "WatchDataManager")
+    let log = DiagnosticLog(category: "WatchDataManager")
 
-    private var watchSession: WCSession? = {
+    var watchSession: WCSession? = {
         if WCSession.isSupported() {
             return WCSession.default
         } else {
@@ -274,13 +274,12 @@ final class WatchDataManager: NSObject {
 
     @MainActor
     private func createWatchContext(recommendingBolusFor potentialCarbEntry: NewCarbEntry? = nil, reason: String = "update") async -> WatchContext {
-        var dosingDecision = BolusDosingDecision(for: .watchBolus)
-
         let glucose = loopDataManager.latestGlucose
         let reservoir = loopDataManager.lastReservoirValue
         let basalDeliveryState = deviceManager.pumpManager?.status.basalDeliveryState
 
-        let (_, algoOutput) = loopDataManager.displayState.asTuple
+        let displayState = loopDataManager.displayState
+        let (_, algoOutput) = displayState.asTuple
 
         let carbsOnBoard = loopDataManager.activeCarbs
 
@@ -293,8 +292,6 @@ final class WatchDataManager: NSObject {
             context.glucoseTrend = glucoseDisplay.trendType
             context.glucoseTrendRate = glucoseDisplay.trendRate
         }
-
-        dosingDecision.carbsOnBoard = carbsOnBoard
 
         context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
         if let sharing = self.deviceManager.cgmManager as? DeviceConfigurationSharing, sharing.isConfigurationSharingEnabled {
@@ -309,14 +306,12 @@ final class WatchDataManager: NSObject {
 
         context.potentialCarbEntry = potentialCarbEntry
 
-        if let recommendedBolus = try? await loopDataManager.recommendManualBolus(
+        let recommendedBolus = try? await loopDataManager.recommendManualBolus(
             manualGlucoseSample: nil,
             carbEntryChange: potentialCarbEntry.map { .add($0) }
-        ) {
+        )
+        if let recommendedBolus {
             context.recommendedBolusDose = recommendedBolus.amount
-            dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(
-                recommendation: recommendedBolus,
-                date: Date())
             log.debug("watch bolus recommended: %{public}@ (with carb entry: %{public}@", String(describing: recommendedBolus.amount), String(describing: potentialCarbEntry))
 
             // TEMP DIAGNOSTIC (watch bolus doubling investigation) — remove before merge.
@@ -330,17 +325,13 @@ final class WatchDataManager: NSObject {
             deviceManager.deviceLog.log(managerIdentifier: "WatchBolusDiag", deviceIdentifier: nil, type: .connection, message: diag, completion: nil)
         }
 
-        var historicalGlucose: [HistoricalGlucoseValue]?
-
         if let glucose = glucose {
             var sample: StoredGlucoseSample?
 
             let historicalGlucoseStartDate = Date(timeIntervalSinceNow: -LoopCoreConstants.dosingDecisionHistoricalGlucoseInterval)
             if let input = loopDataManager.displayState.input {
                 let start = min(historicalGlucoseStartDate, glucose.startDate)
-                let samples = input.glucoseHistory.filterDateRange(start, nil)
-                sample = samples.last
-                historicalGlucose = samples.filter { $0.startDate >= historicalGlucoseStartDate }.map { HistoricalGlucoseValue(startDate: $0.startDate, quantity: $0.quantity) }
+                sample = input.glucoseHistory.filterDateRange(start, nil).last
             }
             context.glucose = sample?.quantity
             context.glucoseDate = sample?.startDate
@@ -372,9 +363,6 @@ final class WatchDataManager: NSObject {
 
         context.lastManualBolus = loopDataManager.lastManualBolus
 
-        dosingDecision.historicalGlucose = historicalGlucose
-        dosingDecision.insulinOnBoard = loopDataManager.activeInsulin
-
         if let basalDeliveryState = basalDeliveryState,
            let basalSchedule = self.temporaryPresetsManager.basalRateScheduleApplyingOverrideHistory,
            let netBasal = basalDeliveryState.getNetBasal(basalSchedule: basalSchedule, maximumBasalRatePerHour: self.settingsManager.settings.maximumBasalRatePerHour)
@@ -390,8 +378,6 @@ final class WatchDataManager: NSObject {
             }
         }
 
-        dosingDecision.predictedGlucose = algoOutput?.predictedGlucose
-
         var preMealOverride = self.temporaryPresetsManager.preMealOverride
         if preMealOverride?.hasFinished() == true {
             preMealOverride = nil
@@ -402,13 +388,12 @@ final class WatchDataManager: NSObject {
             scheduleOverride = nil
         }
 
-        dosingDecision.scheduleOverride = scheduleOverride
-
-        if scheduleOverride != nil || preMealOverride != nil {
-            dosingDecision.glucoseTargetRangeSchedule = self.temporaryPresetsManager.effectiveCorrectionRangeSchedule(presumingMealEntry: potentialCarbEntry != nil)
-        } else {
-            dosingDecision.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
-        }
+        let glucoseTargetRangeSchedule = scheduleOverride != nil || preMealOverride != nil
+            ? self.temporaryPresetsManager.effectiveCorrectionRangeSchedule(presumingMealEntry: potentialCarbEntry != nil)
+            : settings.glucoseTargetRangeSchedule
+        let dosingDecision = BolusDosingDecision.watchBolus(displayState: displayState, recommendation: recommendedBolus,
+                                                            scheduleOverride: scheduleOverride,
+                                                            glucoseTargetRangeSchedule: glucoseTargetRangeSchedule)
 
         // Remove any expired context dosing decisions and add new
         self.contextDosingDecisions = self.contextDosingDecisions.filter { (date, _) in date.timeIntervalSinceNow > self.contextDosingDecisionExpirationDuration }
