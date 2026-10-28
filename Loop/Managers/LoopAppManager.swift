@@ -618,6 +618,7 @@ class LoopAppManager: NSObject {
             }
             return SetupHistory(settings: settings, experiments: experiments)
         }
+        viewModel.outcomesPackageBuilder = criticalEventLogExportManager.map { OutcomesPackageBuilder(logs: $0.logs) }
 
         return viewModel
     }()
