@@ -17,6 +17,19 @@ class LoopHistoryMathTests: XCTestCase {
 
     // MARK: Basal
 
+    func testUnrecordedBasalCountsAtTheProgrammedRateOnlyAfterRecordsBegin() {
+        let window = DateInterval(start: at(0), end: at(240))
+        let programmed = [LoopHistoryMath.ScheduleValue(start: at(0), end: at(240), rate: 1.2)]
+        let temp = LoopHistoryMath.BasalDelivery(start: at(120), end: at(150), rate: 0.4, kind: .temp, automatic: true)
+        let segments = LoopHistoryMath.basalSegments(window: window, schedule: programmed, deliveries: [temp],
+                                                     programmedRates: programmed, recordsStart: at(60))
+        // Nothing before the first record; 60–120 and 150–240 at 1.2 U/h; 120–150 at the temp rate.
+        XCTAssertNil(LoopHistoryMath.basalRate(at: at(30), in: segments))
+        XCTAssertEqual(LoopHistoryMath.basalRate(at: at(90), in: segments)?.kind, .scheduled)
+        XCTAssertEqual(LoopHistoryMath.basalRate(at: at(135), in: segments)?.rate, 0.4)
+        XCTAssertEqual(segments.reduce(0) { $0 + $1.units }, 1.2 * 2.5 + 0.4 * 0.5, accuracy: 1e-9)
+    }
+
     func testBasalGapsDoNotInventDelivery() {
         let window = DateInterval(start: at(0), end: at(120))
         let schedule = [LoopHistoryMath.ScheduleValue(start: at(-60), end: at(240), rate: 1.0)]

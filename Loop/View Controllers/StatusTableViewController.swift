@@ -386,7 +386,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         presets: { [weak self] in self?.presentPresets() },
         showPrediction: { [weak self] in self?.showPredictionFromNow() },
         showToday: { [weak self] in self?.showDay(Date()) },
-        showInsulin: { [weak self] in self?.performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: self) },
+        showInsulin: { [weak self] in self?.showInsulinDelivery(sender: self) },
         showCarbs: { [weak self] in self?.performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: self) },
         pumpTapped: { [weak self] in self?.executeHUDTapAction(self?.deviceManager.didTapOnPumpStatus(), from: self?.view) },
         cgmTapped: { [weak self] in self?.executeHUDTapAction(self?.deviceManager.didTapOnCGMStatus(), from: self?.view) },
@@ -1434,70 +1434,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     performSegue(withIdentifier: PredictionTableViewController.className, sender: indexPath)
                 }
             case .iob:
-                let showLegacy = false
-                
-                if !showLegacy, let pumpManager = deviceManager.pumpManager {
-                    let hostingController = UIHostingController(
-                        rootView: InsulinDeliveryLog(
-                            viewModel: InsulinDeliveryLogViewModel(
-                                loopDataManager: loopManager,
-                                pumpManager: pumpManager
-                            ),
-                            onTapGesture: { [weak navigationController] doseEntry in
-                                Task {
-                                    var dosingDecision: StoredDosingDecision?
-                                    if let decisionId = doseEntry.decisionId {
-                                        do {
-                                            dosingDecision = try await self.loopManager.dosingDecisionStore.findDosingDecisionsById(decisionId)
-                                        } catch {
-                                            self.log.error("Error finding dosing decision: %{public}@", String(describing: error))
-                                        }
-                                    }
-                                    
-                                    let viewController = CommandResponseViewController(command: { (completionHandler) -> String in
-                                        var description = [String]()
-                                        
-                                        let timeFormatter: DateFormatter = {
-                                            let formatter = DateFormatter()
-                                            
-                                            formatter.dateStyle = .none
-                                            formatter.timeStyle = .short
-                                            
-                                            return formatter
-                                        }()
-                                        
-                                        description.append(timeFormatter.string(from: doseEntry.startDate))
-                                        
-                                        description.append(String(describing: doseEntry))
-                                        
-                                        if let dosingDecision {
-                                            description.append(String(describing: dosingDecision))
-                                        }
-                                        
-                                        return description.joined(separator: "\n\n")
-                                    })
-                                    
-                                    navigationController?.pushViewController(viewController, animated: true)
-                                }
-                            },
-                            onEnterManualDose: { [weak self] in
-                                self?.presentManualDoseEntry()
-                            }
-                        )
-                        .navigationTitle(Text("Insulin"))
-                        .environment(\.colorPalette, .default)
-                        .environment(\.loopStatusColorPalette, .loopStatus)
-                    )
-                    
-                    hostingController.hidesBottomBarWhenPushed = true
-                    
-                    navigationController?.pushViewController(
-                        hostingController,
-                        animated: true
-                    )
-                } else {
-                    performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: indexPath)
-                }
+                showInsulinDelivery(sender: indexPath)
             case .cob:
                 performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: indexPath)
             }
@@ -1849,6 +1786,74 @@ final class StatusTableViewController: LoopChartsTableViewController {
         if let hudView = hudView {
             hudView.cgmStatusHUD.presentStatusHighlight(deviceManager.cgmStatusHighlight)
             hudView.cgmStatusHUD.lifecycleProgress = deviceManager.cgmLifecycleProgress
+        }
+    }
+
+    /// The insulin screen behind the IOB chart and the Now screen's IOB tile.
+    private func showInsulinDelivery(sender: Any?) {
+        let showLegacy = false
+        
+        if !showLegacy, let pumpManager = deviceManager.pumpManager {
+            let hostingController = UIHostingController(
+                rootView: InsulinDeliveryLog(
+                    viewModel: InsulinDeliveryLogViewModel(
+                        loopDataManager: loopManager,
+                        pumpManager: pumpManager
+                    ),
+                    onTapGesture: { [weak navigationController] doseEntry in
+                        Task {
+                            var dosingDecision: StoredDosingDecision?
+                            if let decisionId = doseEntry.decisionId {
+                                do {
+                                    dosingDecision = try await self.loopManager.dosingDecisionStore.findDosingDecisionsById(decisionId)
+                                } catch {
+                                    self.log.error("Error finding dosing decision: %{public}@", String(describing: error))
+                                }
+                            }
+                            
+                            let viewController = CommandResponseViewController(command: { (completionHandler) -> String in
+                                var description = [String]()
+                                
+                                let timeFormatter: DateFormatter = {
+                                    let formatter = DateFormatter()
+                                    
+                                    formatter.dateStyle = .none
+                                    formatter.timeStyle = .short
+                                    
+                                    return formatter
+                                }()
+                                
+                                description.append(timeFormatter.string(from: doseEntry.startDate))
+                                
+                                description.append(String(describing: doseEntry))
+                                
+                                if let dosingDecision {
+                                    description.append(String(describing: dosingDecision))
+                                }
+                                
+                                return description.joined(separator: "\n\n")
+                            })
+                            
+                            navigationController?.pushViewController(viewController, animated: true)
+                        }
+                    },
+                    onEnterManualDose: { [weak self] in
+                        self?.presentManualDoseEntry()
+                    }
+                )
+                .navigationTitle(Text("Insulin"))
+                .environment(\.colorPalette, .default)
+                .environment(\.loopStatusColorPalette, .loopStatus)
+            )
+            
+            hostingController.hidesBottomBarWhenPushed = true
+            
+            navigationController?.pushViewController(
+                hostingController,
+                animated: true
+            )
+        } else {
+            performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: sender)
         }
     }
 
@@ -2453,6 +2458,8 @@ extension StatusTableViewController {
 
     func showDay(_ day: Date) {
         let detail = UIHostingController(rootView: DayDetailView(provider: nowModel.provider, day: day))
+        // As for the Insulin, Carbohydrates and Predicted Glucose screens pushed from Now.
+        detail.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(detail, animated: true)
     }
 
@@ -2462,19 +2469,10 @@ extension StatusTableViewController {
             showLastError(self)
         } else if lastLoopError != nil {
             showLastError(self)
-        } else if let lastCompleted {
-            let mode = settingsManager.dosingEnabled
-                ? NSLocalizedString("Closed loop is on.", comment: "Message in the alert shown when tapping the Loop status on the Now screen while closed loop is on")
-                : NSLocalizedString("Closed loop is off: Loop recommends but doesn't adjust insulin.", comment: "Message in the alert shown when tapping the Loop status on the Now screen while closed loop is off")
-            presentLoopCompletionMessage(title: String(format: NSLocalizedString("Loop ran at %1$@", comment: "Title of the alert shown when tapping the Loop status on the Now screen. (1: time Loop last completed, e.g. 14:05)"), LoopFormat.time(lastCompleted)), message: mode)
         } else {
-            presentLoopCompletionMessage(title: NSLocalizedString("Loop hasn't run yet", comment: "Title of the alert shown when tapping the Loop status on the Now screen before Loop has ever completed"), message: NSLocalizedString("Loop runs when it has a new CGM reading and can reach the pump.", comment: "Message in the alert shown when tapping the Loop status on the Now screen before Loop has ever completed"))
+            // The classic HUD keeps this current; the new interface has no HUD, so set it before presenting.
+            loopCompletionModalViewModel.ago = lastCompleted.map { Date().timeIntervalSince($0) }
+            showLoopCompletionMessage(self)
         }
-    }
-
-    private func presentLoopCompletionMessage(title: String, message: String) {
-        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alertController.addAction(UIAlertAction(title: NSLocalizedString("Dismiss", comment: "The button label of the action used to dismiss an error alert"), style: .default))
-        present(alertController, animated: true)
     }
 }

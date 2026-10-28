@@ -226,10 +226,14 @@ enum LoopHistoryMath {
 
     /// Delivered basal over `window` from the pump's records (the latest-starting one wins where they overlap).
     ///
-    /// Gaps remain unknown: a scheduled rate alone is not evidence of delivery.
-    static func basalSegments(window: DateInterval, schedule: [ScheduleValue], deliveries temps: [BasalDelivery]) -> [BasalSegment] {
+    /// From `recordsStart` on, time without a basal record counts at `programmedRates`, since that is what the pump
+    /// delivers on its own; this matches Loop's own insulin totals (`InsulinDeliveryHistory`). Before it, or without
+    /// it, gaps stay unknown.
+    static func basalSegments(window: DateInterval, schedule: [ScheduleValue], deliveries temps: [BasalDelivery],
+                              programmedRates: [ScheduleValue] = [], recordsStart: Date? = nil) -> [BasalSegment] {
         var cuts = Set<Date>([window.start, window.end])
-        for value in schedule {
+        if let recordsStart, window.contains(recordsStart) { cuts.insert(recordsStart) }
+        for value in schedule + programmedRates {
             if window.contains(value.start) { cuts.insert(value.start) }
             if window.contains(value.end) { cuts.insert(value.end) }
         }
@@ -239,14 +243,35 @@ enum LoopHistoryMath {
         }
         let sorted = cuts.sorted()
         let sortedTemps = temps.sorted { $0.start < $1.start }
+        // The furthest end among records up to each index bounds the backward search, so a week of five-minute
+        // records stays linear rather than scanning every record for every cut.
+        var furthestEnd: [Date] = []
+        furthestEnd.reserveCapacity(sortedTemps.count)
+        for temp in sortedTemps { furthestEnd.append(max(furthestEnd.last ?? temp.end, temp.end)) }
+        func latestRecord(covering mid: Date) -> BasalDelivery? {
+            var low = 0, high = sortedTemps.count
+            while low < high {
+                let middle = (low + high) / 2
+                if sortedTemps[middle].start <= mid { low = middle + 1 } else { high = middle }
+            }
+            var index = low - 1
+            while index >= 0, furthestEnd[index] > mid {
+                if mid < sortedTemps[index].end { return sortedTemps[index] }
+                index -= 1
+            }
+            return nil
+        }
         var segments: [BasalSegment] = []
         for (a, b) in zip(sorted, sorted.dropFirst()) where b > a {
             let mid = a.addingTimeInterval(b.timeIntervalSince(a) / 2)
             let scheduled = schedule.first { $0.start <= mid && mid < $0.end }?.rate
             let segment: BasalSegment
-            if let temp = sortedTemps.last(where: { $0.start <= mid && mid < $0.end }) {
+            if let temp = latestRecord(covering: mid) {
                 segment = BasalSegment(start: a, end: b, rate: temp.kind == .suspended ? 0 : temp.rate, scheduledRate: scheduled,
                                        kind: temp.kind, automatic: temp.automatic)
+            } else if let recordsStart, a >= recordsStart,
+                      let programmed = programmedRates.first(where: { $0.start <= mid && mid < $0.end })?.rate {
+                segment = BasalSegment(start: a, end: b, rate: programmed, scheduledRate: scheduled, kind: .scheduled, automatic: false)
             } else {
                 continue
             }
