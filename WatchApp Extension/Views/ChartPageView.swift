@@ -22,11 +22,11 @@ struct ChartPageView: View {
     @ScaledMetric private var iconSize: Double = 26
     
     var presetActive: Bool {
-        return loopManager.watchInfo.scheduleOverride?.isActive() == true
+        return loopManager.scheduleOverride?.isActive() == true
     }
     
     var lastSyncString: String? {
-        guard loopManager.activeContext?.isClosedLoop == true, let date = loopManager.activeContext?.loopLastRunDate else {
+        guard loopManager.displayContext?.isClosedLoop == true, let date = loopManager.displayContext?.loopLastRunDate else {
             return nil
         }
         
@@ -77,7 +77,7 @@ struct ChartPageView: View {
     }
     
     var activeInsulin: String? {
-        guard let activeContext = loopManager.activeContext,
+        guard let activeContext = loopManager.displayContext,
             let activeInsulin = activeContext.activeInsulin
         else {
             return nil
@@ -95,7 +95,7 @@ struct ChartPageView: View {
     }
 
     var activeCarbohydrates: String? {
-        guard let activeContext = loopManager.activeContext,
+        guard let activeContext = loopManager.displayContext,
             let activeCarbohydrates = activeContext.activeCarbohydrates
         else {
             return nil
@@ -108,7 +108,7 @@ struct ChartPageView: View {
     }
 
     var lastBolus: Text {
-        guard let lastBolus = loopManager.activeContext?.lastManualBolus else {
+        guard let lastBolus = loopManager.displayContext?.lastManualBolus else {
             return Text("-")
         }
 
@@ -130,7 +130,7 @@ struct ChartPageView: View {
     }
 
     var netTempBasalDose: String? {
-        guard let activeContext = loopManager.activeContext,
+        guard let activeContext = loopManager.displayContext,
             let tempBasal = activeContext.lastNetTempBasalDose
         else {
             return nil
@@ -151,7 +151,7 @@ struct ChartPageView: View {
     }
 
     var reservoirVolume: String? {
-        guard let activeContext = loopManager.activeContext,
+        guard let activeContext = loopManager.displayContext,
             let reservoirVolume = activeContext.reservoirVolume
         else {
             return nil
@@ -199,7 +199,7 @@ struct ChartPageView: View {
                     LabelValueRow("Last Bolus") {
                         lastBolus
                     }
-                    if let currentDelivery = loopManager.activeContext?.insulinDeliveryState {
+                    if let currentDelivery = loopManager.displayContext?.insulinDeliveryState {
                         Divider()
                         LabelValueRow("Current Delivery") {
                             Text(currentDelivery.iconImage) +
@@ -220,7 +220,7 @@ struct ChartPageView: View {
         .onAppear() {
             updateGlucoseChart()
         }
-        .onChange(of: loopManager.activeContext?.predictedGlucose) { oldValue, newValue in
+        .onChange(of: loopManager.displayContext?.predictedGlucose) { oldValue, newValue in
             updateGlucoseChart()
         }
         .onChange(of: loopManager.directGlucoseRevision) { oldValue, newValue in

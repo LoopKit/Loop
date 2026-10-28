@@ -7,7 +7,7 @@
 //
 
 import HealthKit
-import LoopCore
+@testable import LoopCore
 import LoopKit
 import LoopKitUI
 import SwiftUI
