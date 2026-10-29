@@ -411,6 +411,167 @@ struct TrendsAGPChart: View {
     }
 }
 
+// MARK: - InsulinSplit
+
+/// Basal against bolus in one capsule: basal, then manual bolus, then automatic bolus.
+struct InsulinSplitBar: View {
+    let split: InsulinSplit
+    /// A 4-point line for list headers, where automatic bolus is a tint because stripes don't fit.
+    var hairline = false
+    @Environment(\.colorScheme) private var scheme
+
+    private enum Part: CaseIterable { case basal, manual, automatic }
+
+    private func units(_ part: Part) -> Double {
+        switch part {
+        case .basal: return split.basal
+        // Unclassified bolus draws as plain bolus.
+        case .manual: return split.manualBolus + split.unclassifiedBolus
+        case .automatic: return split.automaticBolus
+        }
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            let parts = Part.allCases.filter { units($0) > 0 }
+            let gap: CGFloat = hairline ? 1 : 2
+            let width = geometry.size.width - gap * CGFloat(max(0, parts.count - 1))
+            let minimum: CGFloat = hairline ? 2 : 4
+            let widths = parts.map { max(minimum, width * units($0) / max(split.total, .ulpOfOne)) }
+            // Take what the minimums add from the widest part, so the bar keeps its length.
+            let excess = widths.reduce(0, +) - width
+            let widest = widths.indices.max { widths[$0] < widths[$1] }
+            HStack(spacing: gap) {
+                ForEach(Array(parts.enumerated()), id: \.offset) { index, part in
+                    segment(part).frame(width: max(0, widths[index] - (index == widest ? excess : 0)))
+                }
+            }
+            .clipShape(Capsule())
+        }
+        .frame(height: hairline ? 4 : 14)
+        .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private func segment(_ part: Part) -> some View {
+        switch part {
+        case .basal:
+            Rectangle().fill(LoopDesign.Palette.basal)
+                .overlay(alignment: .trailing) {
+                    if !hairline { Rectangle().fill(LoopDesign.Palette.basalEdge).frame(width: 2) }
+                }
+        case .manual:
+            Rectangle().fill(LoopDesign.Palette.bolus)
+        case .automatic:
+            if hairline {
+                Rectangle().fill(LoopDesign.Palette.bolus.opacity(0.45))
+            } else {
+                Rectangle().fill(Hatch.paint(LoopDesign.Palette.bolus, scheme: scheme))
+            }
+        }
+    }
+}
+
+/// The basal and bolus card body: the bar, units and shares, how the bolus divides, and the total.
+struct InsulinSplitView: View {
+    let split: InsulinSplit
+    /// Today so far, rather than a whole day or a per-day average.
+    var partial = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: LoopDesign.Space.s3) {
+            InsulinSplitBar(split: split)
+            VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
+                row(.basal, NSLocalizedString("Basal", comment: "Basal and bolus row: insulin delivered as basal"), split.basal, split.basalPercent)
+                row(.solid(LoopDesign.Palette.bolus), NSLocalizedString("Bolus", comment: "Basal and bolus row: insulin delivered as bolus, manual and automatic"), split.bolus, split.bolusPercent)
+                if split.isClassified && split.bolus > 0 {
+                    FlowLayout(spacing: LoopDesign.Space.s3, lineSpacing: 2) {
+                        part(.solid(LoopDesign.Palette.bolus), String(format: NSLocalizedString("Manual %1$@", comment: "Basal and bolus: bolus the person gave. (1: units, e.g. 16.2 U)"), LoopFormat.totalUnits(split.manualBolus)))
+                        part(.hatch(LoopDesign.Palette.bolus), String(format: NSLocalizedString("Automatic %1$@", comment: "Basal and bolus: bolus Loop gave automatically. (1: units, e.g. 5.4 U)"), LoopFormat.totalUnits(split.automaticBolus)))
+                    }
+                    .font(LoopDesign.Typeface.footnote.monospacedDigit())
+                    .foregroundStyle(LoopDesign.Palette.inkMuted)
+                    .padding(.leading, 10 + LoopDesign.Space.s2)
+                }
+                Divider().padding(.vertical, 2)
+                HStack(alignment: .firstTextBaseline) {
+                    Text(partial
+                         ? NSLocalizedString("Total so far", comment: "Basal and bolus total row for today, which isn't over yet")
+                         : NSLocalizedString("Total", comment: "Basal and bolus total row: basal plus bolus"))
+                        .font(LoopDesign.Typeface.subhead.weight(.semibold))
+                        .foregroundStyle(LoopDesign.Palette.ink)
+                    Spacer()
+                    Text(LoopFormat.totalUnits(split.total))
+                        .font(LoopDesign.Typeface.statValueSmall)
+                        .foregroundStyle(LoopDesign.Palette.ink)
+                }
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Self.accessibilityLabel(split, partial: partial))
+    }
+
+    private func row(_ swatch: LegendItem.Swatch, _ label: String, _ units: Double, _ percent: Int) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s2) {
+            LegendSwatch(swatch: swatch).alignmentGuide(.firstTextBaseline) { $0[.bottom] - 1 }
+            Text(label)
+                .font(LoopDesign.Typeface.subhead)
+                .foregroundStyle(LoopDesign.Palette.ink)
+            Spacer()
+            Text(LoopFormat.totalUnits(units))
+                .font(LoopDesign.Typeface.body.weight(.semibold).monospacedDigit())
+                .foregroundStyle(LoopDesign.Palette.ink)
+            Text(verbatim: "\(percent)%")
+                .font(LoopDesign.Typeface.footnote.monospacedDigit())
+                .foregroundStyle(LoopDesign.Palette.inkMuted)
+                .frame(minWidth: 38, alignment: .trailing)
+        }
+    }
+
+    private func part(_ swatch: LegendItem.Swatch, _ text: String) -> some View {
+        HStack(spacing: LoopDesign.Space.s1) {
+            LegendSwatch(swatch: swatch)
+            Text(text)
+        }
+    }
+
+    static func accessibilityLabel(_ split: InsulinSplit, partial: Bool) -> String {
+        var parts = [
+            String(format: NSLocalizedString("Basal %1$@, %2$@ percent", comment: "VoiceOver: basal units and share. (1: units, 2: percentage number)"), LoopFormat.totalUnits(split.basal), "\(split.basalPercent)"),
+            String(format: NSLocalizedString("Bolus %1$@, %2$@ percent", comment: "VoiceOver: bolus units and share. (1: units, 2: percentage number)"), LoopFormat.totalUnits(split.bolus), "\(split.bolusPercent)"),
+        ]
+        if split.isClassified && split.bolus > 0 {
+            parts.append(String(format: NSLocalizedString("%1$@ manual, %2$@ automatic", comment: "VoiceOver: how the bolus divides. (1: manual units, 2: automatic units)"),
+                                LoopFormat.totalUnits(split.manualBolus), LoopFormat.totalUnits(split.automaticBolus)))
+        }
+        parts.append(String(format: partial
+                            ? NSLocalizedString("Total so far %1$@", comment: "VoiceOver: today's total insulin so far. (1: units)")
+                            : NSLocalizedString("Total %1$@", comment: "VoiceOver: total insulin. (1: units)"),
+                            LoopFormat.totalUnits(split.total)))
+        return parts.joined(separator: ". ")
+    }
+}
+
+/// A day's basal and bolus in one line under a list header.
+struct InsulinSplitLine: View {
+    let split: InsulinSplit
+    var partial = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            InsulinSplitBar(split: split, hairline: true)
+            Text(String(format: partial
+                        ? NSLocalizedString("Basal %1$@ · Bolus %2$@ · %3$@ so far", comment: "Logbook day header for today: basal, bolus and total insulin so far. (1: basal units as a number, 2: bolus units as a number, 3: total with unit, e.g. 40.0 U)")
+                        : NSLocalizedString("Basal %1$@ · Bolus %2$@ · %3$@", comment: "Logbook day header: the day's basal, bolus and total insulin. (1: basal units as a number, 2: bolus units as a number, 3: total with unit, e.g. 40.0 U)"),
+                        LoopFormat.number(split.basal, decimals: 1), LoopFormat.number(split.bolus, decimals: 1), LoopFormat.totalUnits(split.total)))
+                .font(LoopDesign.Typeface.footnote.monospacedDigit())
+                .foregroundStyle(LoopDesign.Palette.inkMuted)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(InsulinSplitView.accessibilityLabel(split, partial: partial))
+    }
+}
+
 // MARK: - InsulinDailyTotals
 
 struct InsulinDailyTotalsView: View {
@@ -421,6 +582,7 @@ struct InsulinDailyTotalsView: View {
     let average: Double
     var height: CGFloat = 170
     var onSelectDay: ((Date) -> Void)? = nil
+    @Environment(\.colorScheme) private var scheme
 
     private var yMax: Double {
         let top = max(totals.map(\.total).max() ?? 0, average)
@@ -444,8 +606,13 @@ struct InsulinDailyTotalsView: View {
                     .foregroundStyle(P.basal)
                 BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Basal", max(0, day.basal - yMax * 0.006)), yEnd: .value("Edge", day.basal), width: .ratio(0.7))
                     .foregroundStyle(P.basalEdge)
-                BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Basal", day.basal), yEnd: .value("Total", day.total), width: .ratio(0.7))
-                    .foregroundStyle(P.insulin)
+                let manualTop = day.basal + day.split.manualBolus + day.split.unclassifiedBolus
+                BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Basal", day.basal), yEnd: .value("Bolus", manualTop), width: .ratio(0.7))
+                    .foregroundStyle(P.bolus)
+                if day.split.automaticBolus > 0 {
+                    BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Bolus", manualTop), yEnd: .value("Total", day.total), width: .ratio(0.7))
+                        .foregroundStyle(Hatch.paint(P.bolus, scheme: scheme))
+                }
             }
             RuleMark(y: .value("Average", average))
                 .foregroundStyle(P.ink)

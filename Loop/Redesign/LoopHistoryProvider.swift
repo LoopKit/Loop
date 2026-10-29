@@ -421,13 +421,15 @@ final class LoopHistoryProvider {
         for sample in samples where FeatureFlags.observeHealthKitDoseSamplesFromOtherApps || sample.sourceRevision.source.bundleIdentifier == own {
             let units = sample.quantity.doubleValue(for: .internationalUnit())
             let reason = (sample.metadata?[HKMetadataKeyInsulinDeliveryReason] as? NSNumber)?.intValue
-            let automatic = (sample.metadata?["com.loopkit.InsulinKit.MetadataKeyAutomaticallyIssued"] as? NSNumber)?.boolValue ?? false
+            let automaticFlag = (sample.metadata?["com.loopkit.InsulinKit.MetadataKeyAutomaticallyIssued"] as? NSNumber)?.boolValue
+            let automatic = automaticFlag ?? false
             if reason == HKInsulinDeliveryReason.basal.rawValue {
                 if let segment = BasalSegment(healthSample: sample, in: interval) {
                     basal.append(segment)
                 }
             } else if sample.startDate >= interval.start && sample.startDate < interval.end {
-                boluses.append(BolusEvent(id: sample.uuid.uuidString, date: sample.startDate, units: units, automatic: automatic, manuallyEntered: false))
+                boluses.append(BolusEvent(id: sample.uuid.uuidString, date: sample.startDate, units: units, automatic: automatic, manuallyEntered: false,
+                                          automaticKnown: automaticFlag != nil))
             }
         }
         return (boluses, basal)

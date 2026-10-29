@@ -195,6 +195,32 @@ class LoopHistoryMathTests: XCTestCase {
         XCTAssertEqual(LoopHistoryMath.averageDailyInsulin([today]), 5, accuracy: 1e-9)
     }
 
+    func testInsulinSplitSeparatesManualAutomaticAndUnclassifiedBolus() {
+        let boluses = [
+            BolusEvent(id: "m", date: at(0), units: 4, automatic: false, manuallyEntered: false),
+            BolusEvent(id: "a", date: at(5), units: 0.5, automatic: true, manuallyEntered: false),
+            BolusEvent(id: "u", date: at(10), units: 1, automatic: false, manuallyEntered: false, automaticKnown: false),
+        ]
+        let split = InsulinSplit(basal: 14.5, boluses: Array(boluses.prefix(2)))
+        XCTAssertEqual(split.manualBolus, 4, accuracy: 1e-9)
+        XCTAssertEqual(split.automaticBolus, 0.5, accuracy: 1e-9)
+        XCTAssertEqual(split.total, 19, accuracy: 1e-9)
+        XCTAssertTrue(split.isClassified)
+        // Shares round independently but always add up to 100.
+        XCTAssertEqual(split.basalPercent + split.bolusPercent, 100)
+        XCTAssertEqual(split.bolusPercent, 24)
+
+        // A bolus that doesn't say who gave it still counts, but hides the manual and automatic detail.
+        let health = InsulinSplit(basal: 14.5, boluses: boluses)
+        XCTAssertEqual(health.bolus, 5.5, accuracy: 1e-9)
+        XCTAssertFalse(health.isClassified)
+
+        let average = InsulinSplit.average([split, InsulinSplit(basal: 10.5, manualBolus: 2, automaticBolus: 1.5)])
+        XCTAssertEqual(average.basal, 12.5, accuracy: 1e-9)
+        XCTAssertEqual(average.manualBolus, 3, accuracy: 1e-9)
+        XCTAssertEqual(average.automaticBolus, 1, accuracy: 1e-9)
+    }
+
     func testWeeklyInsulinUsesTheSummaryAveragingDays() {
         let monday = Date(timeIntervalSinceReferenceDate: 815_270_400)
         var calendar = Calendar(identifier: .gregorian)
@@ -250,22 +276,29 @@ class LoopHistoryMathTests: XCTestCase {
     }
 
     @MainActor
-    func testCSVExportsEightColumnsWithASCIINumbers() throws {
+    func testCSVExportsTenColumnsWithASCIINumbers() throws {
         let day = Calendar.current.startOfDay(for: start)
+        let nextDay = day.addingTimeInterval(86400)
         for isMmol in [true, false] {
-            var summary = TrendsModel.Summary(interval: DateInterval(start: day, duration: 86400),
+            var summary = TrendsModel.Summary(interval: DateInterval(start: day, duration: 2 * 86400),
                                               unit: GlucoseUnitStyle(isMmol: isMmol))
             summary.glucose = [GlucosePoint(date: day, mgdl: 131.53286)]
-            summary.totals = [.init(day: day, basal: 1.25, bolus: 2.5)]
+            summary.totals = [
+                .init(day: day, split: InsulinSplit(basal: 1.25, manualBolus: 2, automaticBolus: 0.5)),
+                // From another app in Health: the bolus doesn't say whether it was manual or automatic.
+                .init(day: nextDay, split: InsulinSplit(basal: 1, unclassifiedBolus: 3)),
+            ]
             summary.carbsByDay = [day: 45]
             let url = try TrendsModel.exportCSV(summary)
             defer { try? FileManager.default.removeItem(at: url) }
             let rows = try String(contentsOf: url, encoding: .utf8).components(separatedBy: "\n")
-            XCTAssertEqual(rows.count, 2)
-            XCTAssertEqual(rows[0].components(separatedBy: ",").count, 8)
+            XCTAssertEqual(rows.count, 3)
+            XCTAssertEqual(rows[0].components(separatedBy: ",").count, 10)
+            XCTAssertTrue(rows[0].hasSuffix(",carbs_g,manual_bolus_u,auto_bolus_u"))
             let columns = rows[1].components(separatedBy: ",")
-            XCTAssertEqual(columns.count, 8)
-            XCTAssertEqual(Array(columns.dropFirst()), [isMmol ? "7.3" : "132", "1", "100", "1.25", "2.50", "3.75", "45"])
+            XCTAssertEqual(columns.count, 10)
+            XCTAssertEqual(Array(columns.dropFirst()), [isMmol ? "7.3" : "132", "1", "100", "1.25", "2.50", "3.75", "45", "2.00", "0.50"])
+            XCTAssertEqual(Array(rows[2].components(separatedBy: ",").suffix(5)), ["3.00", "4.00", "0", "", ""])
         }
     }
 

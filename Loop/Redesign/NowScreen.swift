@@ -662,8 +662,8 @@ struct DayTotalsTiles: View {
     let history: DayHistory
 
     static let legend: [LegendItem] = [
-        LegendItem(swatch: .solid(P.insulin), label: NSLocalizedString("Bolus", comment: "Chart legend: solid bars are manual boluses")),
-        LegendItem(swatch: .outline(P.insulin), label: NSLocalizedString("Automatic", comment: "Chart legend: outlined bars are automatic boluses given by Loop")),
+        LegendItem(swatch: .solid(P.bolus), label: NSLocalizedString("Bolus", comment: "Chart legend: solid bars are manual boluses")),
+        LegendItem(swatch: .hatch(P.bolus), label: NSLocalizedString("Automatic", comment: "Chart legend: hatched bars are automatic boluses given by Loop")),
         LegendItem(swatch: .basal, label: NSLocalizedString("Basal given", comment: "Chart legend: filled area is basal insulin actually delivered")),
         LegendItem(swatch: .dash(P.basalScheduled), label: NSLocalizedString("Scheduled", comment: "Chart legend: dashed line is the scheduled basal rate")),
     ]
@@ -673,7 +673,7 @@ struct DayTotalsTiles: View {
             ValueTile(label: NSLocalizedString("Bolus", comment: "Label of a tile showing the day's total bolus insulin")) {
                 Text(LoopFormat.totalUnits(history.bolusUnits))
                     .font(LoopDesign.Typeface.statValueSmall)
-                    .foregroundStyle(P.insulinInk)
+                    .foregroundStyle(P.bolusInk)
             }
             ValueTile(label: NSLocalizedString("Basal", comment: "Label of a tile showing the current basal rate (Now screen) or the day's basal insulin total (Today so far totals)")) {
                 Text(LoopFormat.totalUnits(history.basalUnits))

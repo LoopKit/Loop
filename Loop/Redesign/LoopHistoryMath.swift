@@ -171,12 +171,24 @@ enum LoopHistoryMath {
 
     struct DayTotal: Equatable, Identifiable {
         let day: Date
-        let basal: Double
-        let bolus: Double
+        let split: InsulinSplit
         /// False for a day still in progress, so its partial total doesn't pull per-day averages down.
         var isComplete = true
         var id: Date { day }
-        var total: Double { basal + bolus }
+        var basal: Double { split.basal }
+        var bolus: Double { split.bolus }
+        var total: Double { split.total }
+
+        init(day: Date, split: InsulinSplit, isComplete: Bool = true) {
+            self.day = day
+            self.split = split
+            self.isComplete = isComplete
+        }
+
+        /// A total with no manual or automatic detail: all of its bolus counts as manual.
+        init(day: Date, basal: Double, bolus: Double, isComplete: Bool = true) {
+            self.init(day: day, split: InsulinSplit(basal: basal, manualBolus: bolus), isComplete: isComplete)
+        }
     }
 
     /// The days per-day insulin figures average over: days with insulin, leaving out a day still in progress
@@ -200,9 +212,7 @@ enum LoopHistoryMath {
         cal.firstWeekday = 2
         let groups = Dictionary(grouping: totals) { cal.dateInterval(of: .weekOfYear, for: $0.day)?.start ?? $0.day }
         return groups.keys.sorted().map { week in
-            let days = averagingDays(groups[week]!)
-            let n = Double(max(1, days.count))
-            return DayTotal(day: week, basal: days.reduce(0) { $0 + $1.basal } / n, bolus: days.reduce(0) { $0 + $1.bolus } / n)
+            DayTotal(day: week, split: InsulinSplit.average(averagingDays(groups[week]!).map(\.split)))
         }
     }
 

@@ -42,6 +42,10 @@ final class TrendsModel: ObservableObject {
         var bolusUnits: Double { LoopHistoryMath.averagingDays(totals).reduce(0) { $0 + $1.bolus } }
         var insulinPerDay: Double { LoopHistoryMath.averageDailyInsulin(totals) }
         var basalShare: Double { basalUnits + bolusUnits > 0 ? basalUnits / (basalUnits + bolusUnits) : 0 }
+        /// Per day over the averaged days; a single day in progress when that is all there is.
+        var split: InsulinSplit { InsulinSplit.average(LoopHistoryMath.averagingDays(totals).map(\.split)) }
+        /// The split is today's total so far rather than an average of complete days.
+        var splitIsPartial: Bool { LoopHistoryMath.averagingDays(totals).allSatisfy { !$0.isComplete } }
     }
 
     @Published var period: TrendsPeriod = .twoWeeks
@@ -97,8 +101,8 @@ final class TrendsModel: ObservableObject {
         let calendar = Calendar.current
         summary.totals = LoopHistoryMath.days(in: interval).map { day in
             let basal = history.basal.compactMap { $0.clamped(to: day) }.reduce(0) { $0 + $1.units }
-            let bolus = history.boluses.filter { $0.date >= day.start && $0.date < day.end }.reduce(0) { $0 + $1.units }
-            return LoopHistoryMath.DayTotal(day: day.start, basal: basal, bolus: bolus,
+            let boluses = history.boluses.filter { $0.date >= day.start && $0.date < day.end }
+            return LoopHistoryMath.DayTotal(day: day.start, split: InsulinSplit(basal: basal, boluses: boluses),
                                             isComplete: calendar.date(byAdding: .day, value: 1, to: day.start) == day.end)
         }
         let glucoseDays = Set(history.glucose.map { calendar.startOfDay(for: $0.date) })
@@ -196,7 +200,7 @@ final class TrendsModel: ObservableObject {
 
     static func exportCSV(_ s: Summary) throws -> URL {
         // The CSV header and values are deliberately not localised: fixed English columns and '.' decimals for data interchange.
-        var lines = ["date,mean_glucose_\(s.unit.isMmol ? "mmol_l" : "mg_dl"),readings,time_in_range_pct,basal_u,bolus_u,total_u,carbs_g"]
+        var lines = ["date,mean_glucose_\(s.unit.isMmol ? "mmol_l" : "mg_dl"),readings,time_in_range_pct,basal_u,bolus_u,total_u,carbs_g,manual_bolus_u,auto_bolus_u"]
         let calendar = Calendar.current
         let byDay = Dictionary(grouping: s.glucose) { calendar.startOfDay(for: $0.date) }
         for total in s.totals {
@@ -206,7 +210,9 @@ final class TrendsModel: ObservableObject {
             let tir = readings.isEmpty ? "" : String(format: "%.0f", (LoopHistoryMath.timeInRange(readings)[.inRange] ?? 0) * 100)
             let date = Date.ISO8601FormatStyle(timeZone: .current).year().month().day().format(total.day)
             let carbs = String(format: "%.0f", s.carbsByDay[total.day] ?? 0)
-            lines.append("\(date),\(mean),\(readings.count),\(tir),\(String(format: "%.2f,%.2f,%.2f", total.basal, total.bolus, total.total)),\(carbs)")
+            // Left blank when some of the day's bolus doesn't say whether it was manual or automatic.
+            let bolusSplit = total.split.isClassified ? String(format: "%.2f,%.2f", total.split.manualBolus, total.split.automaticBolus) : ","
+            lines.append("\(date),\(mean),\(readings.count),\(tir),\(String(format: "%.2f,%.2f,%.2f", total.basal, total.bolus, total.total)),\(carbs),\(bolusSplit)")
         }
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(Self.fileName(s.interval) + ".csv")
         try lines.joined(separator: "\n").write(to: url, atomically: true, encoding: .utf8)
@@ -333,6 +339,20 @@ struct TrendsView: View {
                 ])
             }
             LoopCard {
+                CardHeader(title: NSLocalizedString("Basal and bolus", comment: "Trends card title: insulin split into basal and bolus")) {
+                    Text(s.splitIsPartial
+                         ? NSLocalizedString("today so far", comment: "Trends Basal and bolus card subtitle when the figures are today's total so far")
+                         : s.totals.count == 1
+                         ? NSLocalizedString("this day", comment: "Trends Basal and bolus card subtitle when the period is one complete day")
+                         : NSLocalizedString("average per day", comment: "Trends Basal and bolus card subtitle when the figures are averaged per day over the period"))
+                }
+                if s.split.total > 0 {
+                    InsulinSplitView(split: s.split, partial: s.splitIsPartial)
+                } else {
+                    ChartPlaceholder(message: NSLocalizedString("No insulin recorded in this period", comment: "Trends Insulin per day chart placeholder when no insulin was delivered in the period"), height: 80)
+                }
+            }
+            LoopCard {
                 CardHeader(title: NSLocalizedString("Insulin per day", comment: "Trends tile and card title: average total insulin per day")) {
                     Text(s.totals.count > 30
                          ? NSLocalizedString("per day, weekly average", comment: "Trends Insulin per day card subtitle when each bar is a week's average daily total")
@@ -389,18 +409,12 @@ struct TrendsView: View {
         }
     }
 
+    /// The figures are on the Basal and bolus card above, so the legend only names the marks.
     private func insulinLegend(_ s: TrendsModel.Summary) -> [LegendItem] {
-        let total = s.basalUnits + s.bolusUnits
-        let days = Double(max(1, LoopHistoryMath.averagingDays(s.totals).count))
-        let bolusShare = total > 0 ? Int((s.bolusUnits / total * 100).rounded()) : 0
-        let basalShare = total > 0 ? 100 - bolusShare : 0
-        return [
-            LegendItem(swatch: .solid(P.insulin),
-                       label: String(format: NSLocalizedString("Bolus %1$@ U (%2$@%%)", comment: "Trends Insulin per day legend: average bolus insulin per day and its share of the total. (1: units, 2: percentage number)"),
-                                     LoopFormat.number(s.bolusUnits / days, decimals: 1), LoopFormat.number(Double(bolusShare), decimals: 0))),
-            LegendItem(swatch: .basal,
-                       label: String(format: NSLocalizedString("Basal %1$@ U (%2$@%%)", comment: "Trends Insulin per day legend: average basal insulin per day and its share of the total. (1: units, 2: percentage number)"),
-                                     LoopFormat.number(s.basalUnits / days, decimals: 1), LoopFormat.number(Double(basalShare), decimals: 0))),
+        [
+            LegendItem(swatch: .basal, label: NSLocalizedString("Basal", comment: "Chart legend: the basal part of each day's insulin")),
+            LegendItem(swatch: .solid(P.bolus), label: NSLocalizedString("Bolus", comment: "Chart legend: solid bars are manual boluses")),
+            LegendItem(swatch: .hatch(P.bolus), label: NSLocalizedString("Automatic", comment: "Chart legend: hatched bars are automatic boluses given by Loop")),
             LegendItem(swatch: .dash(P.ink),
                        label: String(format: NSLocalizedString("Average %1$@ U", comment: "Trends Insulin per day legend: the dashed line showing average total insulin per day. (1: units)"),
                                      LoopFormat.number(s.insulinPerDay, decimals: 1))),
