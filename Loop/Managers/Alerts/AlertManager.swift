@@ -358,6 +358,7 @@ extension AlertManager: AlertManagerResponder {
     
     func acknowledgeAlert(identifier: Alert.Identifier) async throws {
         self.log.default("acknowledgeAlert called for identifier %{public}@", String(describing: identifier))
+        analyticsServicesManager.didAcknowledgeAlert()
         if let responder = responders[identifier.managerIdentifier]?.value {
             do {
                 try await responder.acknowledgeAlert(alertIdentifier: identifier.alertIdentifier)
