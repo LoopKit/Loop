@@ -151,6 +151,27 @@ final class AnalyticsServicesManager {
         updateDailySummary { $0.usage.alertAcknowledgementCount += 1 }
     }
 
+    // MARK: - Watch Use
+
+    @MainActor
+    func didRequestWatchContext() {
+        updateDailySummary { $0.usage.watchContextRequestCount += 1 }
+    }
+
+    @MainActor
+    func didAcknowledgeAlertOnWatch() {
+        updateDailySummary { $0.usage.watchAlertAcknowledgementCount += 1 }
+    }
+
+    @MainActor
+    func didStartPresetOnWatch() {
+        updateDailySummary { $0.usage.watchPresetCount += 1 }
+    }
+
+    func didReceiveWatchUsage(_ summary: WatchUsageSummary) {
+        logEvent("Watch daily summary", withProperties: summary.properties, outOfSession: true)
+    }
+
     // MARK: - Config Events
 
     func transmitterTimeDidDrift(_ drift: TimeInterval) {
@@ -438,20 +459,8 @@ struct AnalyticsDailySummary: Codable, Equatable {
     }
 
     mutating func addForegroundSession(duration: TimeInterval, touchCount: Int) {
-        usage.foregroundCount += 1
-        usage.foregroundDuration += duration
-        usage.maxForegroundDuration = max(usage.maxForegroundDuration, duration)
+        usage.foreground.add(duration: duration)
         usage.touchCount += touchCount
-        switch duration {
-        case ..<10:
-            usage.foregroundUnder10sCount += 1
-        case ..<60:
-            usage.foreground10To60sCount += 1
-        case ..<300:
-            usage.foreground1To5MinCount += 1
-        default:
-            usage.foregroundOver5MinCount += 1
-        }
     }
 
     var properties: [AnyHashable: Any] {
@@ -480,13 +489,7 @@ struct AnalyticsDailySummary: Codable, Equatable {
 }
 
 struct AnalyticsUsage: Codable, Equatable {
-    var foregroundCount = 0
-    var foregroundDuration: TimeInterval = 0
-    var maxForegroundDuration: TimeInterval = 0
-    var foregroundUnder10sCount = 0
-    var foreground10To60sCount = 0
-    var foreground1To5MinCount = 0
-    var foregroundOver5MinCount = 0
+    var foreground = ForegroundSessions()
     var touchCount = 0
     var notificationOpenCount = 0
     var linkOpenCount = 0
@@ -495,16 +498,12 @@ struct AnalyticsUsage: Codable, Equatable {
     var bolusCounts: [String: Int] = [:]
     var carbEntryCounts: [String: Int] = [:]
     var overrideCounts: [String: Int] = [:]
+    var watchContextRequestCount = 0
+    var watchAlertAcknowledgementCount = 0
+    var watchPresetCount = 0
 
     var properties: [AnyHashable: Any] {
-        [
-            "foregroundCount": foregroundCount,
-            "foregroundSeconds": Int(foregroundDuration),
-            "maxForegroundSeconds": Int(maxForegroundDuration),
-            "foregroundUnder10sCount": foregroundUnder10sCount,
-            "foreground10To60sCount": foreground10To60sCount,
-            "foreground1To5MinCount": foreground1To5MinCount,
-            "foregroundOver5MinCount": foregroundOver5MinCount,
+        var properties: [AnyHashable: Any] = [
             "touchCount": touchCount,
             "notificationOpenCount": notificationOpenCount,
             "linkOpenCount": linkOpenCount,
@@ -515,8 +514,15 @@ struct AnalyticsUsage: Codable, Equatable {
             "carbEntryCount": carbEntryCounts.values.reduce(0, +),
             "carbEntryCounts": carbEntryCounts,
             "overrideCount": overrideCounts.values.reduce(0, +),
-            "overrideCounts": overrideCounts
+            "overrideCounts": overrideCounts,
+            "watchContextRequestCount": watchContextRequestCount,
+            "watchAlertAcknowledgementCount": watchAlertAcknowledgementCount,
+            "watchPresetCount": watchPresetCount
         ]
+        for (key, value) in foreground.properties(prefix: "foreground") {
+            properties[key] = value
+        }
+        return properties
     }
 }
 

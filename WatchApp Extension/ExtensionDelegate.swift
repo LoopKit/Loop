@@ -31,6 +31,14 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
 
     let loopManager = LoopDataManager.shared
 
+    let usageRecorder = WatchUsageRecorder { summary in
+        guard WCSession.default.activationState == .activated else {
+            return false
+        }
+        WCSession.default.transferUserInfo(WatchUsageSummaryUserInfo(summary: summary).rawValue)
+        return true
+    }
+
     override init() {
         super.init()
 
@@ -85,6 +93,8 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     }
 
     func applicationDidBecomeActive() {
+        usageRecorder.didBecomeActive()
+
         if WCSession.default.activationState != .activated {
             WCSession.default.activate()
         }
@@ -100,6 +110,13 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     }
 
     func applicationWillResignActive() {
+        usageRecorder.willResignActive()
+    }
+
+    func handleUserActivity(_ userInfo: [AnyHashable: Any]?) {
+        if userInfo?[CLKLaunchedTimelineEntryDateKey] != nil {
+            usageRecorder.didLaunchFromComplication()
+        }
     }
 
     func handle(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
@@ -205,6 +222,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     func handle(_ userActivity: NSUserActivity) {
         switch userActivity.activityType {
         case NSUserActivity.newCarbEntryActivityType, NSUserActivity.didAddCarbEntryOnWatchActivityType:
+            usageRecorder.didDisplayScreen("carbEntry")
             loopManager.bolusViewModel = CarbAndBolusFlowViewModel(configuration: .carbEntry(nil))
         default:
             break
@@ -270,6 +288,9 @@ extension ExtensionDelegate: WCSessionDelegate {
 
         if activationState == .activated {
             updateContext(session.receivedApplicationContext)
+            Task { @MainActor in
+                self.usageRecorder.sendCompletedDays()
+            }
             Task {
                 await loopManager.requestSettingsUpdate()
             }
@@ -319,6 +340,8 @@ extension ExtensionDelegate: UNUserNotificationCenterDelegate {
 
         log.default("UNNotificationResponse rootInterfaceController = %{public}@", String(describing: WKApplication.shared().rootInterfaceController))
         log.default("UNNotificationResponse visibleInterfaceController = %{public}@", String(describing: WKApplication.shared().visibleInterfaceController))
+
+        usageRecorder.didRespondToNotification()
 
         switch response.actionIdentifier {
         case UNNotificationDefaultActionIdentifier:
