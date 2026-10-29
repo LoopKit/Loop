@@ -51,11 +51,15 @@ public class StatusBarHUDView: UIView, NibLoadable {
         containerView.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(containerView)
 
-        // Use AutoLayout to have the stack view fill its entire container.
+        // Fill the container, up to a phone-like width on wide displays such as iPhone Duo's inner display.
+        let fillWidth = containerView.widthAnchor.constraint(equalTo: widthAnchor)
+        fillWidth.priority = .defaultHigh
         NSLayoutConstraint.activate([
             containerView.centerXAnchor.constraint(equalTo: centerXAnchor),
             containerView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            containerView.widthAnchor.constraint(equalTo: widthAnchor),
+            fillWidth,
+            containerView.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor),
+            containerView.widthAnchor.constraint(lessThanOrEqualToConstant: 500),
             containerView.heightAnchor.constraint(equalTo: heightAnchor),
         ])
         
