@@ -41,6 +41,9 @@ enum LoopDesign {
         static let insulinInk = Color("insulin-ink")
         static let basal = Color("basal")
         static let basalEdge = Color("basal-edge")
+        /// Bolus is insulin's orange made deeper, so it reads against pale basal by lightness, not by a new hue.
+        static let bolus = Color("bolus")
+        static let bolusInk = Color("bolus-ink")
         static let basalScheduled = inkMuted
         static let carbs = Color("carbs")
         static let carbsInk = Color("carbs-ink")
@@ -137,6 +140,7 @@ struct LegendItem: Identifiable {
         case outline(Color)
         case dash(Color)
         case dot(Color)
+        case hatch(Color)
         case basal
     }
 
@@ -152,7 +156,7 @@ struct ChartLegend: View {
         FlowLayout(spacing: LoopDesign.Space.s3, lineSpacing: LoopDesign.Space.s1) {
             ForEach(items) { item in
                 HStack(spacing: LoopDesign.Space.s1) {
-                    swatch(item.swatch)
+                    LegendSwatch(swatch: item.swatch)
                     Text(item.label)
                 }
                 .accessibilityElement(children: .combine)
@@ -161,9 +165,14 @@ struct ChartLegend: View {
         .font(LoopDesign.Typeface.footnote)
         .foregroundStyle(LoopDesign.Palette.inkMuted)
     }
+}
 
-    @ViewBuilder
-    private func swatch(_ swatch: LegendItem.Swatch) -> some View {
+/// The 10-point key for one kind of mark, shared by legends and the basal and bolus rows.
+struct LegendSwatch: View {
+    let swatch: LegendItem.Swatch
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
         switch swatch {
         case .solid(let color):
             RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 10, height: 10)
@@ -178,6 +187,8 @@ struct ChartLegend: View {
             .frame(width: 14, height: 2)
         case .dot(let color):
             Circle().fill(color).frame(width: 8, height: 8)
+        case .hatch(let color):
+            RoundedRectangle(cornerRadius: 2).fill(Hatch.paint(color, scheme: scheme)).frame(width: 10, height: 10)
         case .basal:
             VStack(spacing: 0) {
                 Rectangle().fill(LoopDesign.Palette.basalEdge).frame(height: 2)
@@ -186,6 +197,28 @@ struct ChartLegend: View {
             .frame(width: 10, height: 10)
             .clipShape(RoundedRectangle(cornerRadius: 2))
         }
+    }
+}
+
+/// Diagonal stripes over a pale tint of a colour: automatic bolus, wherever a mark is wide enough to show it.
+enum Hatch {
+    static func paint(_ color: Color, scheme: ColorScheme) -> ImagePaint {
+        let resolved = UIColor(color).resolvedColor(with: UITraitCollection(userInterfaceStyle: scheme == .dark ? .dark : .light))
+        let size: CGFloat = 5
+        let image = UIGraphicsImageRenderer(size: CGSize(width: size, height: size)).image { context in
+            resolved.withAlphaComponent(scheme == .dark ? 0.3 : 0.22).setFill()
+            context.fill(CGRect(x: 0, y: 0, width: size, height: size))
+            resolved.setStroke()
+            // One stripe corner to corner, plus the ends of its neighbours, so tiles join into unbroken lines.
+            let path = UIBezierPath()
+            path.lineWidth = 1.4
+            for offset in [-size, 0, size] {
+                path.move(to: CGPoint(x: offset, y: size))
+                path.addLine(to: CGPoint(x: offset + size, y: 0))
+            }
+            path.stroke()
+        }
+        return ImagePaint(image: Image(uiImage: image))
     }
 }
 

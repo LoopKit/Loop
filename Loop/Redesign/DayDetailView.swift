@@ -44,7 +44,6 @@ struct DayDetailView: View {
                         }
                         InsulinTimelineView(history: history, unit: provider.unitStyle, targetBands: provider.glucoseTargetBands(in: history.window),
                                             now: now, height: 300)
-                        DayTotalsTiles(history: history)
                         ChartLegend(items: DayTotalsTiles.legend)
                         if history.source == .health {
                             Text(NSLocalizedString("From Apple Health: Loop keeps 7 days, so this day has no temp basal or schedule detail.", comment: "Day page note when the day is older than Loop's 7-day history and was read from Apple Health"))
@@ -56,6 +55,16 @@ struct DayDetailView: View {
                                 .font(LoopDesign.Typeface.footnote)
                                 .foregroundStyle(P.inkMuted)
                         }
+                    }
+                    LoopCard {
+                        CardHeader(title: NSLocalizedString("Basal and bolus", comment: "Trends card title: insulin split into basal and bolus"))
+                        InsulinSplitView(split: history.insulinSplit, partial: isToday)
+                        ValueTile(label: NSLocalizedString("Carbs", comment: "Label of a tile showing the day's total carbohydrate")) {
+                            Text(LoopFormat.grams(history.carbGrams))
+                                .font(LoopDesign.Typeface.statValueSmall)
+                                .foregroundStyle(P.carbsInk)
+                        }
+                        .fixedSize(horizontal: false, vertical: true)
                     }
                     LoopCard {
                         CardHeader(title: NSLocalizedString("Active insulin and carbs", comment: "Title of the day page card charting insulin and carbs on board"))

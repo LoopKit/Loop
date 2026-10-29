@@ -84,6 +84,7 @@ struct InsulinTimelineView: View {
     var height: CGFloat = 260
 
     @State private var selection: Date?
+    @Environment(\.colorScheme) private var colorScheme
 
     private static let insulinTop = 30.0
     private static let basalTop = 12.0
@@ -198,17 +199,15 @@ struct InsulinTimelineView: View {
             ForEach(history.boluses) { bolus in
                 if bolus.automatic {
                     RectangleMark(x: .value("Time", bolus.date), yStart: .value("Base", 0), yEnd: .value("Bolus", y(bolus: bolus.units)), width: .fixed(5))
-                        .foregroundStyle(P.insulin)
-                    RectangleMark(x: .value("Time", bolus.date), yStart: .value("Base", 0.6), yEnd: .value("Bolus", max(0.6, y(bolus: bolus.units) - 0.6)), width: .fixed(2))
-                        .foregroundStyle(P.surfaceRaised)
+                        .foregroundStyle(Hatch.paint(P.bolus, scheme: colorScheme))
                 } else {
                     RectangleMark(x: .value("Time", bolus.date), yStart: .value("Base", 0), yEnd: .value("Bolus", y(bolus: bolus.units)), width: .fixed(5))
-                        .foregroundStyle(P.insulin)
+                        .foregroundStyle(P.bolus)
                         .annotation(position: .top, spacing: 2) {
                             if bolusLabels.contains(bolus.id) {
                                 Text(LoopFormat.number(bolus.units, decimals: 1))
                                     .font(LoopDesign.Typeface.caption)
-                                    .foregroundStyle(P.insulinInk)
+                                    .foregroundStyle(P.bolusInk)
                             }
                         }
                 }
@@ -288,7 +287,7 @@ struct InsulinTimelineView: View {
             rows.append(.init(label: bolus.automatic
                               ? NSLocalizedString("Automatic bolus", comment: "Chart callout label for a bolus Loop delivered automatically near the touched time")
                               : NSLocalizedString("Bolus", comment: "Chart callout label for a bolus near the touched time"),
-                              value: LoopFormat.doseUnits(bolus.units), color: P.insulinInk))
+                              value: LoopFormat.doseUnits(bolus.units), color: P.bolusInk))
         }
         return rows
     }

@@ -59,7 +59,7 @@ struct LogEntry: Identifiable {
 struct LogDay: Identifiable {
     let day: Date
     let entries: [LogEntry]
-    let insulin: Double
+    let insulin: InsulinSplit
     let carbs: Double
     var id: Date { day }
 }
@@ -146,9 +146,9 @@ final class LogbookModel: ObservableObject {
                         ? NSLocalizedString("Automatic bolus", comment: "Logbook row title: a bolus Loop delivered automatically")
                         : NSLocalizedString("Bolus", comment: "Logbook row title: a bolus"),
                     subtitle: joined(parts),
-                    amount: LoopFormat.doseUnits(bolus.units), amountColor: P.insulinInk,
+                    amount: LoopFormat.doseUnits(bolus.units), amountColor: P.bolusInk,
                     detail: LoopFormat.time(bolus.date),
-                    icon: "plus", iconFill: P.insulin,
+                    icon: "plus", iconFill: P.bolus,
                     filters: bolus.automatic ? [.bolus, .loop] : [.bolus],
                     delete: canDelete && bolus.manuallyEntered ? bolus.dose.map { .deleteDose($0) } : nil))
             }
@@ -219,7 +219,7 @@ final class LogbookModel: ObservableObject {
                     icon: "circle.dashed", iconFill: P.inkMuted.opacity(0.5), filters: []))
             }
 
-            let insulin = segments.reduce(0) { $0 + $1.units } + history.boluses.filter { inDay($0.date) }.reduce(0) { $0 + $1.units }
+            let insulin = InsulinSplit(basal: segments.reduce(0) { $0 + $1.units }, boluses: history.boluses.filter { inDay($0.date) })
             return LogDay(day: day.start, entries: entries.sorted { $0.date > $1.date }, insulin: insulin,
                           carbs: carbsToday.reduce(0) { $0 + $1.grams })
         }
@@ -317,7 +317,7 @@ struct LogbookView: View {
                         if day.entries.isEmpty {
                             Text(model.filter != .all
                                  ? NSLocalizedString("Nothing to show for this filter", comment: "Logbook day with no entries matching the selected filter")
-                                 : day.insulin > 0
+                                 : day.insulin.total > 0
                                  ? NSLocalizedString("Scheduled basal only", comment: "Logbook day where only the scheduled basal ran, with nothing else logged")
                                  : NSLocalizedString("Nothing logged", comment: "Logbook day with no entries"))
                                 .font(LoopDesign.Typeface.footnote)
@@ -389,16 +389,21 @@ struct LogbookView: View {
             : calendar.isDateInYesterday(day.day)
             ? String(format: NSLocalizedString("Yesterday · %1$@", comment: "Logbook day header for yesterday. (1: weekday and date, e.g. Sat 24 Oct)"), date)
             : date
-        return HStack(alignment: .firstTextBaseline) {
-            Text(title)
-                .font(LoopDesign.Typeface.headline)
-                .foregroundStyle(P.ink)
-            Spacer()
-            Text(LoopFormat.totalUnits(day.insulin)).foregroundStyle(P.insulinInk)
-            Text("·").foregroundStyle(P.inkMuted)
-            Text(LoopFormat.grams(day.carbs)).foregroundStyle(P.carbsInk)
+        return VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(title)
+                    .font(LoopDesign.Typeface.headline)
+                    .foregroundStyle(P.ink)
+                Spacer()
+                Text(LoopFormat.grams(day.carbs))
+                    .font(LoopDesign.Typeface.footnote.monospacedDigit())
+                    .foregroundStyle(P.carbsInk)
+            }
+            if day.insulin.total > 0 {
+                InsulinSplitLine(split: day.insulin, partial: calendar.isDateInToday(day.day))
+            }
         }
-        .font(LoopDesign.Typeface.footnote)
+        .padding(.bottom, 2)
         .textCase(nil)
         .accessibilityElement(children: .combine)
     }

@@ -28,6 +28,8 @@ struct BolusEvent: Equatable, Identifiable {
     let manuallyEntered: Bool
     /// Kept so a manually entered dose can be deleted from the dose store.
     var dose: DoseEntry? = nil
+    /// False when the record doesn't say whether Loop or the person gave it, such as another app's doses in Apple Health.
+    var automaticKnown = true
 
     static func == (lhs: BolusEvent, rhs: BolusEvent) -> Bool {
         lhs.id == rhs.id && lhs.date == rhs.date && lhs.units == rhs.units && lhs.automatic == rhs.automatic
@@ -129,6 +131,49 @@ struct DayHistory {
     var basalUnits: Double { basal.reduce(0) { $0 + $1.units } }
     var carbGrams: Double { carbs.reduce(0) { $0 + $1.grams } }
     var totalUnits: Double { bolusUnits + basalUnits }
+    var insulinSplit: InsulinSplit { InsulinSplit(basal: basalUnits, boluses: boluses) }
+}
+
+/// Basal and bolus for one day, or averaged per day, with bolus split into manual and automatic.
+struct InsulinSplit: Equatable {
+    var basal = 0.0
+    var manualBolus = 0.0
+    var automaticBolus = 0.0
+    /// Bolus that doesn't say whether it was manual or automatic; while there is any, the split isn't shown.
+    var unclassifiedBolus = 0.0
+
+    var bolus: Double { manualBolus + automaticBolus + unclassifiedBolus }
+    var total: Double { basal + bolus }
+    var isClassified: Bool { unclassifiedBolus < 0.005 }
+
+    /// Shares in whole percent that add up to 100.
+    var bolusPercent: Int { total > 0 ? Int((bolus / total * 100).rounded()) : 0 }
+    var basalPercent: Int { total > 0 ? 100 - bolusPercent : 0 }
+}
+
+extension InsulinSplit {
+    init(basal: Double, boluses: [BolusEvent]) {
+        self.basal = basal
+        for bolus in boluses {
+            if !bolus.automaticKnown {
+                unclassifiedBolus += bolus.units
+            } else if bolus.automatic {
+                automaticBolus += bolus.units
+            } else {
+                manualBolus += bolus.units
+            }
+        }
+    }
+
+    /// The per-day average of several days' splits.
+    static func average(_ splits: [InsulinSplit]) -> InsulinSplit {
+        guard !splits.isEmpty else { return InsulinSplit() }
+        let n = Double(splits.count)
+        return InsulinSplit(basal: splits.reduce(0) { $0 + $1.basal } / n,
+                            manualBolus: splits.reduce(0) { $0 + $1.manualBolus } / n,
+                            automaticBolus: splits.reduce(0) { $0 + $1.automaticBolus } / n,
+                            unclassifiedBolus: splits.reduce(0) { $0 + $1.unclassifiedBolus } / n)
+    }
 }
 
 enum HistorySource {
