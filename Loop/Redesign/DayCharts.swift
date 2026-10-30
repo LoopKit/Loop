@@ -194,7 +194,12 @@ struct InsulinTimelineView: View {
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
             }
 
-            // Boluses over basal: solid for manual with a label, outlined for automatic
+            // Boluses over basal: solid for manual with a label, hatched for automatic.
+            // Each sits in a card-coloured slot a point wider, so it never touches the basal behind it.
+            ForEach(history.boluses) { bolus in
+                RectangleMark(x: .value("Time", bolus.date), yStart: .value("Base", 0), yEnd: .value("Bolus", y(bolus: bolus.units)), width: .fixed(7))
+                    .foregroundStyle(P.surfaceRaised)
+            }
             let bolusLabels = labelledBoluses
             ForEach(history.boluses) { bolus in
                 if bolus.automatic {
