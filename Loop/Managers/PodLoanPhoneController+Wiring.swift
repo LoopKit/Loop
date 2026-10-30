@@ -42,8 +42,13 @@ extension WatchDataManager {
                         transfer.cancel()
                     }
                 }
-                guard LoanMessage.isInteractiveHandshake(transport: dictionary),
-                      session.isReachable else {
+                let interactive = LoanMessage.isInteractiveHandshake(transport: dictionary)
+                // The grant is the largest message, and its size is what decides whether it can go urgently.
+                if kind == "grant" {
+                    let bytes = (try? PropertyListSerialization.data(fromPropertyList: dictionary, format: .binary, options: 0))?.count
+                    PhoneLog.event("wc", "grant: \(bytes.map { String(format: "%.1f KB", Double($0) / 1024) } ?? "size unknown"), \(interactive && session.isReachable ? "urgent and queued" : "queued only: the watch is not reachable")")
+                }
+                guard interactive, session.isReachable else {
                     session.transferUserInfo(dictionary)
                     return
                 }
@@ -51,7 +56,10 @@ extension WatchDataManager {
                 // A grant, a query and an answer ride both channels; the watch drops the later duplicate.
                 let ridesBothChannels = LoanMessage.ridesBothChannels(transport: dictionary)
                 session.sendMessage(dictionary, replyHandler: nil, errorHandler: { error in
-                    guard !ridesBothChannels else { return }
+                    guard !ridesBothChannels else {
+                        PhoneLog.event("wc", "urgent send of \(kind ?? "a message") failed, its queued copy stands: \(error.localizedDescription)")
+                        return
+                    }
                     PhoneLog.event("wc", "urgent send of \(kind ?? "a message") failed, sending it queued: \(error.localizedDescription)")
                     session.transferUserInfo(dictionary)
                 })
