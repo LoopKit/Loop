@@ -271,19 +271,17 @@ final class LogbookModel: ObservableObject {
 struct LogbookView: View {
     @StateObject private var model: LogbookModel
     @State private var path: [Route] = []
+    /// Editing is a sheet, as adding carbs is on Now: pushed here, the tab bar covered the bolus screen's button.
+    @State private var editingCarbs: CarbEditRoute?
     private let deviceManager: DeviceDataManager
 
     enum Route: Hashable {
         case basal(String)
-        case editCarbs(CarbEditRoute)
     }
 
-    struct CarbEditRoute: Hashable {
+    struct CarbEditRoute: Identifiable {
         let id = UUID()
         let entry: StoredCarbEntry
-
-        static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
-        func hash(into hasher: inout Hasher) { hasher.combine(id) }
     }
 
     init(provider: LoopHistoryProvider, deviceManager: DeviceDataManager) {
@@ -346,6 +344,19 @@ struct LogbookView: View {
             }
             .navigationDestination(for: Route.self) { route in
                 destination(route)
+            }
+        }
+        .sheet(item: $editingCarbs) { route in
+            NavigationStack {
+                LogbookCarbEditor(entry: route.entry, deviceManager: deviceManager, provider: model.provider) {
+                    editingCarbs = nil
+                    model.reload()
+                }
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(NSLocalizedString("Cancel", comment: "Button label for cancel")) { editingCarbs = nil }
+                    }
+                }
             }
         }
         .onAppear { model.reload() }
@@ -445,7 +456,7 @@ struct LogbookView: View {
                     if let carb = entry.edit, model.carbEditingAllowed {
                         Button {
                             guard model.provider.allowsCarbEditing else { return }
-                            path.append(.editCarbs(CarbEditRoute(entry: carb)))
+                            editingCarbs = CarbEditRoute(entry: carb)
                         } label: { Label(NSLocalizedString("Edit", comment: "Swipe action to edit a Logbook carb entry"), systemImage: "pencil") }
                             .tint(P.accent)
                     }
@@ -466,11 +477,6 @@ struct LogbookView: View {
         case .basal(let id):
             if let entry = model.days.flatMap(\.entries).first(where: { $0.id == id }) {
                 BasalChangesList(changes: entry.basalChanges)
-            }
-        case .editCarbs(let route):
-            LogbookCarbEditor(entry: route.entry, deviceManager: deviceManager, provider: model.provider) {
-                path.removeAll()
-                model.reload()
             }
         }
     }
