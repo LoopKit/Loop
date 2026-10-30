@@ -85,6 +85,7 @@ struct SettingsView: View {
                     }
                     alertManagementSection
                     statisticsSection
+                    interfaceSection
                     if viewModel.pumpManagerSettingsViewModel.isSetUp() {
                         therapySection
                     }
@@ -341,22 +342,25 @@ extension SettingsView {
     private var statisticsSection: some View {
         if let glucoseStore = viewModel.deviceManager?.glucoseStore {
             Section {
-                NavigationLink(destination: StatisticsView(
-                    glucoseStore: glucoseStore,
-                    insulinDeliveryHistory: viewModel.insulinDeliveryHistory,
-                    scheduledBasalTotal: viewModel.therapySettings().basalRateSchedule?.total()
-                )) {
-                    LargeButton(
-                        action: {},
-                        includeArrow: false,
-                        imageView: Image(systemName: "chart.xyaxis.line")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 30),
-                        label: NSLocalizedString("Statistics", comment: "Statistics settings button text"),
-                        descriptiveText: NSLocalizedString("Glucose overview, ambulatory glucose profile and daily insulin", comment: "Statistics settings descriptive text")
-                    )
-                    .accessibilityIdentifier("settingsViewStatistics")
+                // The new interface's Trends tab covers these statistics.
+                if !LoopInterfacePreference.useRedesign {
+                    NavigationLink(destination: StatisticsView(
+                        glucoseStore: glucoseStore,
+                        insulinDeliveryHistory: viewModel.insulinDeliveryHistory,
+                        scheduledBasalTotal: viewModel.therapySettings().basalRateSchedule?.total()
+                    )) {
+                        LargeButton(
+                            action: {},
+                            includeArrow: false,
+                            imageView: Image(systemName: "chart.xyaxis.line")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 30),
+                            label: NSLocalizedString("Statistics", comment: "Statistics settings button text"),
+                            descriptiveText: NSLocalizedString("Glucose overview, ambulatory glucose profile and daily insulin", comment: "Statistics settings descriptive text")
+                        )
+                        .accessibilityIdentifier("settingsViewStatistics")
+                    }
                 }
                 NavigationLink(destination: CurrentSetupView(viewModel: CurrentSetupViewModel(
                     selected: setupChange,
@@ -451,6 +455,21 @@ extension SettingsView {
         .environment(\.glucoseTintColor, self.glucoseTintColor)
         .environment(\.guidanceColors, self.guidanceColors)
         .environment(\.insulinTintColor, self.insulinTintColor)
+    }
+
+    @ViewBuilder
+    private var interfaceSection: some View {
+        Section(footer: Text(NSLocalizedString("The new interface adds Trends and Logbook tabs. Turn it off to go back to the classic status screen; Settings closes to switch.", comment: "Footer for the interface choice in settings"))) {
+            Toggle(NSLocalizedString("New Interface", comment: "Title of the toggle for the redesigned interface"), isOn: Binding(
+                get: { LoopInterfacePreference.useRedesign },
+                set: { LoopInterfacePreference.useRedesign = $0 }
+            ))
+        }
+        Section {
+            NavigationLink(destination: AppearanceSettingsView()) {
+                Text(NSLocalizedString("Appearance and App Icon", comment: "Title of the row that opens the appearance and app icon settings"))
+            }
+        }
     }
 
     private var therapySection: some View {

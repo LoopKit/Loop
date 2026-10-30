@@ -462,6 +462,32 @@ class LoopDataManagerTests: XCTestCase {
 
     }
 
+    func testHistoricalIOBUsesPresetAdjustedBasal() async throws {
+        settingsProvider.basalHistory = [AbsoluteScheduleValue(startDate: d(-.hours(6)), endDate: now, value: 1.0)]
+        let window = DateInterval(start: d(-.minutes(30)), end: now)
+
+        for multiplier in [0.5, 1.5] {
+            let preset = TemporaryScheduleOverride(
+                context: .custom,
+                settings: TemporaryPresetSettings(targetRange: nil, insulinNeedsScaleFactor: multiplier),
+                startDate: d(-.hours(1)),
+                duration: .finite(.hours(2)),
+                enactTrigger: .local,
+                syncIdentifier: UUID()
+            )
+            temporaryPresetsManager.presetHistory.recordOverride(preset, at: now)
+            doseStore.doseHistory = [DoseEntry(type: .tempBasal, startDate: window.start, endDate: window.end,
+                                              value: multiplier, unit: .unitsPerHour, decisionId: nil)]
+
+            let timeline = try await loopDataManager.insulinOnBoardTimeline(in: window)
+            XCTAssertFalse(timeline.isEmpty)
+            for value in timeline {
+                XCTAssertEqual(value.value, 0, accuracy: 1e-9,
+                               "Delivery matching a \(multiplier)× preset's basal must add no net IOB")
+            }
+        }
+    }
+
     func testFetchDataWithHighInsulinNeedsPresetMitigation() async throws {
         var input = try await loopDataManager.fetchData(for: now)
         XCTAssertEqual(input.target.count, 1)
