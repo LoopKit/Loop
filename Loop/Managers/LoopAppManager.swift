@@ -713,6 +713,18 @@ class LoopAppManager: NSObject {
         WidgetCenter.shared.reloadAllTimelines()
     }
 
+    func willEnterForeground() {
+        analyticsServicesManager.didEnterForeground()
+    }
+
+    func didEnterBackground() {
+        analyticsServicesManager.didEnterBackground()
+    }
+
+    func didReceiveTouch() {
+        analyticsServicesManager.didReceiveTouch()
+    }
+
     // MARK: - Remote Notification
     
     func remoteNotificationRegistrationDidFinish(_ result: Swift.Result<Data,Error>) {
@@ -741,7 +753,9 @@ class LoopAppManager: NSObject {
         guard let deeplink = Deeplink(url: url) else {
             return false
         }
-        
+
+        analyticsServicesManager.didOpenFromLink()
+
         switch deeplink {
         case let .carbEntry(carbEntryLink):
             if let carbEntryLink {
@@ -981,6 +995,7 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
             }
 
         case UNNotificationDefaultActionIdentifier:
+            analyticsServicesManager.didOpenFromNotification()
             guard response.notification.request.identifier == LoopNotificationCategory.missedMeal.rawValue else {
                 break
             }

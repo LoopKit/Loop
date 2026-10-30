@@ -193,6 +193,7 @@ struct ChartPageView: View {
                         Text(activeCarbohydrates ?? "-")
                     }
                     .onTapGesture {
+                        ExtensionDelegate.shared().usageRecorder.didDisplayScreen("carbList")
                         isShowingCarbList = true
                     }
                     Divider()

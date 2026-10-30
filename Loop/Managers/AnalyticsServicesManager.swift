@@ -84,20 +84,92 @@ final class AnalyticsServicesManager {
 
     // MARK: - Screens
 
+    @MainActor
     func didDisplayBolusScreen() {
         logEvent("Bolus Screen")
+        updateDailySummary { $0.usage.screenCounts["bolus", default: 0] += 1 }
     }
 
+    @MainActor
     func didDisplayCarbEntryScreen() {
         logEvent("Carb Entry Screen")
+        updateDailySummary { $0.usage.screenCounts["carbEntry", default: 0] += 1 }
     }
 
+    @MainActor
     func didDisplaySettingsScreen() {
         logEvent("Settings Screen")
+        updateDailySummary { $0.usage.screenCounts["settings", default: 0] += 1 }
     }
 
+    @MainActor
     func didDisplayStatusScreen() {
         logEvent("Status Screen")
+        updateDailySummary { $0.usage.screenCounts["status", default: 0] += 1 }
+    }
+
+    // MARK: - Foreground Use
+
+    private var foregroundStart: Date?
+
+    private var foregroundTouchCount = 0
+
+    @MainActor
+    func didEnterForeground(at date: Date = Date()) {
+        foregroundStart = date
+        foregroundTouchCount = 0
+    }
+
+    @MainActor
+    func didEnterBackground(at date: Date = Date()) {
+        guard let foregroundStart else {
+            return
+        }
+        self.foregroundStart = nil
+        let duration = max(0, date.timeIntervalSince(foregroundStart))
+        let touchCount = foregroundTouchCount
+        updateDailySummary({ $0.addForegroundSession(duration: duration, touchCount: touchCount) }, now: date)
+    }
+
+    @MainActor
+    func didReceiveTouch() {
+        foregroundTouchCount += 1
+    }
+
+    @MainActor
+    func didOpenFromNotification() {
+        updateDailySummary { $0.usage.notificationOpenCount += 1 }
+    }
+
+    @MainActor
+    func didOpenFromLink() {
+        updateDailySummary { $0.usage.linkOpenCount += 1 }
+    }
+
+    @MainActor
+    func didAcknowledgeAlert() {
+        updateDailySummary { $0.usage.alertAcknowledgementCount += 1 }
+    }
+
+    // MARK: - Watch Use
+
+    @MainActor
+    func didRequestWatchContext() {
+        updateDailySummary { $0.usage.watchContextRequestCount += 1 }
+    }
+
+    @MainActor
+    func didAcknowledgeAlertOnWatch() {
+        updateDailySummary { $0.usage.watchAlertAcknowledgementCount += 1 }
+    }
+
+    @MainActor
+    func didStartPresetOnWatch() {
+        updateDailySummary { $0.usage.watchPresetCount += 1 }
+    }
+
+    func didReceiveWatchUsage(_ summary: WatchUsageSummary) {
+        logEvent("Watch daily summary", withProperties: summary.properties, outOfSession: true)
     }
 
     // MARK: - Config Events
@@ -182,16 +254,20 @@ final class AnalyticsServicesManager {
         logEvent("CGM Added", withProperties: ["identifier" : identifier])
     }
 
+    @MainActor
     func didAddCarbs(source: String, isFavoriteFood: Bool = false) {
         logEvent("Carb entry created", withProperties: ["source" : source, "isFavoriteFood": isFavoriteFood], outOfSession: source != "Phone")
+        updateDailySummary { $0.usage.carbEntryCounts[source, default: 0] += 1 }
     }
 
     func didRetryBolus() {
         logEvent("Bolus Retry")
     }
 
+    @MainActor
     func didBolus(source: String) {
         logEvent("Bolus set", withProperties: ["source" : source], outOfSession: source != "Phone")
+        updateDailySummary { $0.usage.bolusCounts[source, default: 0] += 1 }
     }
 
     // MARK: - Daily Summary
@@ -284,6 +360,7 @@ final class AnalyticsServicesManager {
         logEvent("Alert Displayed", withProperties: ["identifier": identifier, "interruptionLevel": interruptionLevel.rawValue, "scheduled": scheduled], outOfSession: scheduled)
     }
 
+    @MainActor
     func didEnactOverride(kind: String, duration: TemporaryScheduleOverride.Duration, activityType: String? = nil) {
         var properties: [String: Any] = ["kind": kind]
 
@@ -297,6 +374,7 @@ final class AnalyticsServicesManager {
         properties["activityType"] = activityType
 
         logEvent("Override Enacted", withProperties: properties)
+        updateDailySummary { $0.usage.overrideCounts[kind, default: 0] += 1 }
     }
 
     func didEndOverride(kind: String) {
@@ -369,6 +447,21 @@ struct AnalyticsDailySummary: Codable, Equatable {
     var backfillCount = 0
     var maxBackfillAge: TimeInterval = 0
     var state: AnalyticsState?
+    private var storedUsage: AnalyticsUsage?
+
+    init(day: Date) {
+        self.day = day
+    }
+
+    var usage: AnalyticsUsage {
+        get { storedUsage ?? AnalyticsUsage() }
+        set { storedUsage = newValue }
+    }
+
+    mutating func addForegroundSession(duration: TimeInterval, touchCount: Int) {
+        usage.foreground.add(duration: duration)
+        usage.touchCount += touchCount
+    }
 
     var properties: [AnyHashable: Any] {
         var properties: [AnyHashable: Any] = [
@@ -389,6 +482,45 @@ struct AnalyticsDailySummary: Codable, Equatable {
             properties["integralRetrospectiveCorrection"] = state.integralRetrospectiveCorrection
             properties["glucoseBasedPartialApplication"] = state.glucoseBasedPartialApplication
             properties["guardAndRunway"] = state.guardAndRunway
+        }
+        properties.merge(usage.properties) { current, _ in current }
+        return properties
+    }
+}
+
+struct AnalyticsUsage: Codable, Equatable {
+    var foreground = ForegroundSessions()
+    var touchCount = 0
+    var notificationOpenCount = 0
+    var linkOpenCount = 0
+    var alertAcknowledgementCount = 0
+    var screenCounts: [String: Int] = [:]
+    var bolusCounts: [String: Int] = [:]
+    var carbEntryCounts: [String: Int] = [:]
+    var overrideCounts: [String: Int] = [:]
+    var watchContextRequestCount = 0
+    var watchAlertAcknowledgementCount = 0
+    var watchPresetCount = 0
+
+    var properties: [AnyHashable: Any] {
+        var properties: [AnyHashable: Any] = [
+            "touchCount": touchCount,
+            "notificationOpenCount": notificationOpenCount,
+            "linkOpenCount": linkOpenCount,
+            "alertAcknowledgementCount": alertAcknowledgementCount,
+            "screenCounts": screenCounts,
+            "bolusCount": bolusCounts.values.reduce(0, +),
+            "bolusCounts": bolusCounts,
+            "carbEntryCount": carbEntryCounts.values.reduce(0, +),
+            "carbEntryCounts": carbEntryCounts,
+            "overrideCount": overrideCounts.values.reduce(0, +),
+            "overrideCounts": overrideCounts,
+            "watchContextRequestCount": watchContextRequestCount,
+            "watchAlertAcknowledgementCount": watchAlertAcknowledgementCount,
+            "watchPresetCount": watchPresetCount
+        ]
+        for (key, value) in foreground.properties(prefix: "foreground") {
+            properties[key] = value
         }
         return properties
     }
