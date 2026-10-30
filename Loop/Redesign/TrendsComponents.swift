@@ -434,7 +434,7 @@ struct InsulinSplitBar: View {
     var body: some View {
         GeometryReader { geometry in
             let parts = Part.allCases.filter { units($0) > 0 }
-            let gap: CGFloat = hairline ? 1 : 2
+            let gap: CGFloat = hairline ? 1.5 : 2.5
             let width = geometry.size.width - gap * CGFloat(max(0, parts.count - 1))
             let minimum: CGFloat = hairline ? 2 : 4
             let widths = parts.map { max(minimum, width * units($0) / max(split.total, .ulpOfOne)) }
@@ -606,11 +606,13 @@ struct InsulinDailyTotalsView: View {
                     .foregroundStyle(P.basal)
                 BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Basal", max(0, day.basal - yMax * 0.006)), yEnd: .value("Edge", day.basal), width: .ratio(0.7))
                     .foregroundStyle(P.basalEdge)
+                // A thin gap under each bolus part, so it never touches the part below it
+                let gap = yMax * 0.01
                 let manualTop = day.basal + day.split.manualBolus + day.split.unclassifiedBolus
-                BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Basal", day.basal), yEnd: .value("Bolus", manualTop), width: .ratio(0.7))
+                BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Basal", day.basal + (manualTop - day.basal > gap * 2 ? gap : 0)), yEnd: .value("Bolus", manualTop), width: .ratio(0.7))
                     .foregroundStyle(P.bolus)
                 if day.split.automaticBolus > 0 {
-                    BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Bolus", manualTop), yEnd: .value("Total", day.total), width: .ratio(0.7))
+                    BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Bolus", manualTop + (day.total - manualTop > gap * 2 ? gap : 0)), yEnd: .value("Total", day.total), width: .ratio(0.7))
                         .foregroundStyle(Hatch.paint(P.bolus, scheme: scheme))
                 }
             }

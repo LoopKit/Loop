@@ -41,7 +41,8 @@ enum LoopDesign {
         static let insulinInk = Color("insulin-ink")
         static let basal = Color("basal")
         static let basalEdge = Color("basal-edge")
-        /// Bolus is insulin's orange made deeper, so it reads against pale basal by lightness, not by a new hue.
+        /// Basal is a pale, quiet orange with a tan edge; bolus is insulin's orange made deep. Both stay orange,
+        /// and their lightness is far enough apart (3:1 even where they touch) to tell them apart at a glance.
         static let bolus = Color("bolus")
         static let bolusInk = Color("bolus-ink")
         static let basalScheduled = inkMuted
