@@ -150,12 +150,16 @@ final class NowModel: ObservableObject {
         async let dayFetch = provider.dayHistory(window)
         async let recentFetch = provider.glucose(DateInterval(start: now.addingTimeInterval(-3 * 3600), end: now))
         do {
+            let targets = try await provider.glucoseTargetBands(in: window)
             today = try await dayFetch
+            todayTargets = targets
             historyError = nil
         } catch {
             historyError = error.localizedDescription
         }
         do {
+            let predictionWindow = DateInterval(start: now.addingTimeInterval(-3 * 3600), end: now.addingTimeInterval(3 * 3600))
+            predictionTargets = try await provider.glucoseTargetBands(in: predictionWindow)
             recentGlucose = try await recentFetch
             glucoseHistoryError = nil
         } catch {
@@ -172,8 +176,6 @@ final class NowModel: ObservableObject {
         closedLoopPaused = settingsManager.dosingEnabled && deviceManager.closedLoopDisallowedLocalizedDescription != nil
         closedLoop = settingsManager.dosingEnabled && !closedLoopPaused
         targetRange = provider.glucoseTargetRange
-        predictionTargets = provider.glucoseTargetBands(in: DateInterval(start: now.addingTimeInterval(-3 * 3600), end: now.addingTimeInterval(3 * 3600)))
-        todayTargets = provider.glucoseTargetBands(in: window)
 
         if let latest = loopDataManager.latestGlucose {
             let mgdl = latest.quantity.doubleValue(for: .milligramsPerDeciliter)

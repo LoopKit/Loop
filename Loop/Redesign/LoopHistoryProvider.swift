@@ -65,33 +65,17 @@ final class LoopHistoryProvider {
         return range.lowerBound.doubleValue(for: .milligramsPerDeciliter)...range.upperBound.doubleValue(for: .milligramsPerDeciliter)
     }
 
-    /// The correction range schedule across `interval`, with any preset or pre-meal range over the time it runs,
-    /// as the classic glucose chart draws it.
-    @MainActor
-    func glucoseTargetBands(in interval: DateInterval) -> [TargetBand] {
-        guard let schedule = settingsManager.settings.glucoseTargetRangeSchedule else { return [] }
-        func mgdl(_ range: ClosedRange<LoopQuantity>) -> ClosedRange<Double> {
-            range.lowerBound.doubleValue(for: .milligramsPerDeciliter)...range.upperBound.doubleValue(for: .milligramsPerDeciliter)
+    /// The targets that actually applied, including dated presets and changes to the stored profile.
+    func glucoseTargetBands(in interval: DateInterval) async throws -> [TargetBand] {
+        if let store = settingsManager.settingsStore {
+            let previous = try await store.getStoredSettings(end: interval.start, limit: 1).first
+            if previous?.glucoseTargetRangeSchedule == nil {
+                let changes = try await store.getStoredSettings(start: interval.start, end: interval.end)
+                // LoopKit's historical query requires at least one valid profile, even if settings records exist.
+                guard changes.contains(where: { $0.glucoseTargetRangeSchedule != nil }) else { return [] }
+            }
         }
-        var bands = schedule.quantityBetween(start: interval.start, end: interval.end).map {
-            TargetBand(start: max($0.startDate, interval.start), end: min($0.endDate, interval.end), range: mgdl($0.value))
-        }
-        // Pre-meal goes last so it wins where both run, as in TemporaryPresetsManager.effectiveCorrectionRangeSchedule.
-        for override in [temporaryPresetsManager.scheduleOverride, temporaryPresetsManager.preMealOverride].compactMap({ $0 }) {
-            guard let target = override.settings.targetRange,
-                  let active = override.activeInterval.intersection(with: interval), active.duration > 0 else { continue }
-            bands = bands.flatMap { band -> [TargetBand] in
-                var pieces: [TargetBand] = []
-                if band.start < active.start {
-                    pieces.append(TargetBand(start: band.start, end: min(band.end, active.start), range: band.range))
-                }
-                if band.end > active.end {
-                    pieces.append(TargetBand(start: max(band.start, active.end), end: band.end, range: band.range))
-                }
-                return pieces
-            } + [TargetBand(start: active.start, end: active.end, range: mgdl(target))]
-        }
-        return bands.sorted { $0.start < $1.start }
+        return try await loopDataManager.glucoseTargetBands(in: interval)
     }
 
     // MARK: - Days
@@ -318,7 +302,9 @@ final class LoopHistoryProvider {
         let local = try await doseStore.getNormalizedDoseEntries(start: localStart, end: interval.end)
         let recordsStart = local.map(\.startDate).min()
         recordsStartCache.withLock { $0 = (fetched: Date(), value: recordsStart) }
-        return (local.filter { $0.endDate > interval.start && $0.startDate < interval.end }, recordsStart)
+        return (local.filter {
+            $0.startDate < interval.end && ($0.type == .bolus ? $0.startDate >= interval.start : $0.endDate > interval.start)
+        }, recordsStart)
     }
 
     private func localInsulin(_ interval: DateInterval) async throws -> ([BolusEvent], [BasalSegment], [ScheduledBasalPoint]) {
@@ -489,6 +475,33 @@ final class LoopModeHistory {
 // MARK: - Loop's on-board history
 
 extension LoopDataManager {
+    /// A historical chart must use the profile and presets from that time, rather than repeat today's targets.
+    func glucoseTargetBands(in interval: DateInterval) async throws -> [TargetBand] {
+        guard settingsProvider.settings.glucoseTargetRangeSchedule != nil else { return [] }
+        let schedule = try await settingsProvider.getTargetRangeHistory(startDate: interval.start, endDate: interval.end)
+        var bands = schedule.map {
+            TargetBand(start: max($0.startDate, interval.start), end: min($0.endDate, interval.end),
+                       range: $0.value.lowerBound.doubleValue(for: .milligramsPerDeciliter)...$0.value.upperBound.doubleValue(for: .milligramsPerDeciliter))
+        }
+        let overrides = temporaryPresetsManager.presetHistory.getOverrideHistory(startDate: interval.start, endDate: interval.end)
+        for override in overrides.sorted(by: { $0.startDate < $1.startDate }) {
+            guard let target = override.settings.targetRange,
+                  let active = override.activeInterval.intersection(with: interval), active.duration > 0 else { continue }
+            bands = bands.flatMap { band -> [TargetBand] in
+                var pieces: [TargetBand] = []
+                if band.start < active.start {
+                    pieces.append(TargetBand(start: band.start, end: min(band.end, active.start), range: band.range))
+                }
+                if band.end > active.end {
+                    pieces.append(TargetBand(start: max(band.start, active.end), end: band.end, range: band.range))
+                }
+                return pieces
+            } + [TargetBand(start: active.start, end: active.end,
+                            range: target.lowerBound.doubleValue(for: .milligramsPerDeciliter)...target.upperBound.doubleValue(for: .milligramsPerDeciliter))]
+        }
+        return bands.filter { $0.end > $0.start }.sorted { $0.start < $1.start }
+    }
+
     /// Insulin on board across `interval`, from the doses and basal history Loop keeps, as `iobValues` is for the display window.
     func insulinOnBoardTimeline(in interval: DateInterval) async throws -> [InsulinValue] {
         let dosesStart = interval.start.addingTimeInterval(-InsulinMath.defaultInsulinActivityDuration)

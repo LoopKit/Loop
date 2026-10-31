@@ -98,7 +98,7 @@ final class TrendsModel: ObservableObject {
         let (runs, coverageStart) = try await runsFetch
         if oneDay {
             summary.day = history
-            summary.dayTargets = provider.glucoseTargetBands(in: fetchWindow)
+            summary.dayTargets = try await provider.glucoseTargetBands(in: fetchWindow)
             history = history.clipped(to: interval)
         }
 
