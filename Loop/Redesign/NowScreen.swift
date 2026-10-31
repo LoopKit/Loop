@@ -633,27 +633,51 @@ struct NowChartsView: View {
 
     private var todayCard: some View {
         Button(action: actions.showToday) {
-            LoopCard {
-                CardHeader(title: NSLocalizedString("Today so far", comment: "Title of the card on the Now screen showing today's insulin and carbs")) {
-                    if model.historyError == nil {
-                        HStack(spacing: 4) {
-                            Text(LoopFormat.totalUnits(model.today.totalUnits)).foregroundStyle(P.insulinInk)
-                            Text(verbatim: "·")
-                            Text(LoopFormat.grams(model.today.carbGrams)).foregroundStyle(P.carbsInk)
-                        }
-                    }
-                }
-                if let error = model.historyError {
+            if let error = model.historyError {
+                LoopCard {
+                    CardHeader(title: DayTimelineCard.todayTitle)
                     ChartPlaceholder(message: String(format: NSLocalizedString("Couldn't load today's history: %1$@", comment: "Shown on the Now screen's Today so far card when history couldn't be read. (1: system error description)"), error))
-                } else {
-                    InsulinTimelineView(history: model.today, unit: model.unit, targetBands: model.todayTargets, now: model.now, height: 230)
-                    DayTotalsTiles(history: model.today)
-                    ChartLegend(items: DayTotalsTiles.legend)
                 }
+            } else {
+                DayTimelineCard(title: DayTimelineCard.todayTitle, history: model.today, unit: model.unit, targetBands: model.todayTargets,
+                                now: model.now, height: 230)
             }
         }
         .buttonStyle(.plain)
         .accessibilityHint(NSLocalizedString("Opens the full day", comment: "VoiceOver hint for the Today so far card on the Now screen"))
+    }
+}
+
+/// A day on one timeline with its totals: Today so far on Now, and a one-day period on Trends.
+struct DayTimelineCard: View {
+    let title: String
+    let history: DayHistory
+    let unit: GlucoseUnitStyle
+    let targetBands: [TargetBand]
+    var now: Date = Date()
+    var height: CGFloat = 230
+    /// The bolus, basal and carb tiles; off where a Basal and bolus card follows.
+    var showsTotals = true
+
+    static var todayTitle: String {
+        NSLocalizedString("Today so far", comment: "Title of the card on the Now screen showing today's insulin and carbs")
+    }
+
+    var body: some View {
+        LoopCard {
+            CardHeader(title: title) {
+                HStack(spacing: 4) {
+                    Text(LoopFormat.totalUnits(history.totalUnits)).foregroundStyle(P.insulinInk)
+                    Text(verbatim: "·")
+                    Text(LoopFormat.grams(history.carbGrams)).foregroundStyle(P.carbsInk)
+                }
+            }
+            InsulinTimelineView(history: history, unit: unit, targetBands: targetBands, now: now, height: height)
+            if showsTotals {
+                DayTotalsTiles(history: history)
+            }
+            ChartLegend(items: DayTotalsTiles.legend)
+        }
     }
 }
 
@@ -676,9 +700,10 @@ struct DayTotalsTiles: View {
                     .foregroundStyle(P.bolusInk)
             }
             ValueTile(label: NSLocalizedString("Basal", comment: "Label of a tile showing the current basal rate (Now screen) or the day's basal insulin total (Today so far totals)")) {
+                // Plain ink: basal is the pale fill on the chart, and orange here read as bolus.
                 Text(LoopFormat.totalUnits(history.basalUnits))
                     .font(LoopDesign.Typeface.statValueSmall)
-                    .foregroundStyle(P.insulinInk)
+                    .foregroundStyle(P.ink)
             }
             ValueTile(label: NSLocalizedString("Carbs", comment: "Label of a tile showing the day's total carbohydrate")) {
                 Text(LoopFormat.grams(history.carbGrams))

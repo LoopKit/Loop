@@ -416,7 +416,7 @@ struct TrendsAGPChart: View {
 /// Basal against bolus in one capsule: basal, then manual bolus, then automatic bolus.
 struct InsulinSplitBar: View {
     let split: InsulinSplit
-    /// A 4-point line for list headers, where automatic bolus is a tint because stripes don't fit.
+    /// A 6-point line for list headers. It is still tall enough to show the automatic bolus stripes.
     var hairline = false
     @Environment(\.colorScheme) private var scheme
 
@@ -448,7 +448,7 @@ struct InsulinSplitBar: View {
             }
             .clipShape(Capsule())
         }
-        .frame(height: hairline ? 4 : 14)
+        .frame(height: hairline ? 6 : 14)
         .accessibilityHidden(true)
     }
 
@@ -463,11 +463,7 @@ struct InsulinSplitBar: View {
         case .manual:
             Rectangle().fill(LoopDesign.Palette.bolus)
         case .automatic:
-            if hairline {
-                Rectangle().fill(LoopDesign.Palette.bolus.opacity(0.45))
-            } else {
-                Rectangle().fill(Hatch.paint(LoopDesign.Palette.bolus, scheme: scheme))
-            }
+            Rectangle().fill(Hatch.paint(LoopDesign.Palette.bolus, scheme: scheme))
         }
     }
 }
@@ -552,23 +548,40 @@ struct InsulinSplitView: View {
     }
 }
 
-/// A day's basal and bolus in one line under a list header.
+/// A day's basal and bolus under a list header: the line, then each part keyed the way the charts and rows draw it.
+/// The header shows the day's total itself.
 struct InsulinSplitLine: View {
     let split: InsulinSplit
     var partial = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 6) {
             InsulinSplitBar(split: split, hairline: true)
-            Text(String(format: partial
-                        ? NSLocalizedString("Basal %1$@ · Bolus %2$@ · %3$@ so far", comment: "Logbook day header for today: basal, bolus and total insulin so far. (1: basal units as a number, 2: bolus units as a number, 3: total with unit, e.g. 40.0 U)")
-                        : NSLocalizedString("Basal %1$@ · Bolus %2$@ · %3$@", comment: "Logbook day header: the day's basal, bolus and total insulin. (1: basal units as a number, 2: bolus units as a number, 3: total with unit, e.g. 40.0 U)"),
-                        LoopFormat.number(split.basal, decimals: 1), LoopFormat.number(split.bolus, decimals: 1), LoopFormat.totalUnits(split.total)))
-                .font(LoopDesign.Typeface.footnote.monospacedDigit())
-                .foregroundStyle(LoopDesign.Palette.inkMuted)
+            FlowLayout(spacing: LoopDesign.Space.s3, lineSpacing: 2) {
+                part(.basal, Text(NSLocalizedString("Basal", comment: "Basal and bolus row: insulin delivered as basal")) + Text(verbatim: " ") + Text(LoopFormat.number(split.basal, decimals: 1)))
+                if split.isClassified {
+                    if split.manualBolus > 0 {
+                        part(.solid(LoopDesign.Palette.bolus), Text(String(format: NSLocalizedString("Manual %1$@", comment: "Basal and bolus: bolus the person gave. (1: units, e.g. 16.2 U)"), LoopFormat.number(split.manualBolus, decimals: 1))))
+                    }
+                    if split.automaticBolus > 0 {
+                        part(.hatch(LoopDesign.Palette.bolus), Text(String(format: NSLocalizedString("Automatic %1$@", comment: "Basal and bolus: bolus Loop gave automatically. (1: units, e.g. 5.4 U)"), LoopFormat.number(split.automaticBolus, decimals: 1))))
+                    }
+                } else {
+                    part(.solid(LoopDesign.Palette.bolus), Text(NSLocalizedString("Bolus", comment: "Basal and bolus row: insulin delivered as bolus, manual and automatic")) + Text(verbatim: " ") + Text(LoopFormat.number(split.bolus, decimals: 1)))
+                }
+            }
+            .font(LoopDesign.Typeface.footnote.monospacedDigit())
+            .foregroundStyle(LoopDesign.Palette.inkMuted)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(InsulinSplitView.accessibilityLabel(split, partial: partial))
+    }
+
+    private func part(_ swatch: LegendItem.Swatch, _ text: Text) -> some View {
+        HStack(spacing: LoopDesign.Space.s1) {
+            LegendSwatch(swatch: swatch)
+            text
+        }
     }
 }
 

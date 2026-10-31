@@ -127,7 +127,24 @@ struct InsulinTimelineView: View {
         return kept
     }
 
-    private var labelledCarbs: Set<String> { spacedIDs(history.carbs, date: \.date, id: \.id) }
+    /// One label per run of carb entries closer together than `labelSpacing`, giving the run's total.
+    /// It sits after the run's last marker, so no later marker in the run draws over it.
+    private var carbLabels: [String: Double] {
+        var labels: [String: Double] = [:]
+        var runStart: Date?
+        var runLast: (id: String, total: Double)?
+        for carb in history.carbs.sorted(by: { $0.date < $1.date }) {
+            if let start = runStart, let last = runLast, carb.date.timeIntervalSince(start) < labelSpacing {
+                runLast = (carb.id, last.total + carb.grams)
+            } else {
+                if let last = runLast { labels[last.id] = last.total }
+                runStart = carb.date
+                runLast = (carb.id, carb.grams)
+            }
+        }
+        if let last = runLast { labels[last.id] = last.total }
+        return labels
+    }
     private var labelledBoluses: Set<String> { spacedIDs(history.boluses.filter { !$0.automatic }, date: \.date, id: \.id) }
 
     var body: some View {
@@ -164,14 +181,14 @@ struct InsulinTimelineView: View {
             }
 
             // Carb markers
-            let carbLabels = labelledCarbs
+            let carbLabels = carbLabels
             ForEach(history.carbs) { carb in
                 PointMark(x: .value("Time", carb.date), y: .value("Carbs", Self.carbLane))
                     .symbolSize(60)
                     .foregroundStyle(P.carbs)
                     .annotation(position: .trailing, spacing: 2) {
-                        if carbLabels.contains(carb.id) {
-                            Text(LoopFormat.grams(carb.grams))
+                        if let grams = carbLabels[carb.id] {
+                            Text(LoopFormat.grams(grams))
                                 .font(LoopDesign.Typeface.caption)
                                 .foregroundStyle(P.carbsInk)
                         }

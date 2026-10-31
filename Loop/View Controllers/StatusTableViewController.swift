@@ -1587,9 +1587,14 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let activity {
                 viewModel.restoreUserActivityState(activity)
             }
-            let carbEntryView = CarbEntryView(viewModel: viewModel)
-                .environmentObject(deviceManager.displayGlucosePreference)
-            let hostingController = DismissibleHostingController(rootView: carbEntryView, isModalInPresentation: false)
+            let hostingController: UIViewController
+            if LoopInterfacePreference.useRedesign {
+                hostingController = DismissibleHostingController(rootView: CarbEntryScreen(viewModel: viewModel)
+                    .environmentObject(deviceManager.displayGlucosePreference), isModalInPresentation: false)
+            } else {
+                hostingController = DismissibleHostingController(rootView: CarbEntryView(viewModel: viewModel)
+                    .environmentObject(deviceManager.displayGlucosePreference), isModalInPresentation: false)
+            }
             present(hostingController, animated: true)
         }
         analyticsServicesManager?.didDisplayCarbEntryScreen()

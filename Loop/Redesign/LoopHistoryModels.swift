@@ -132,6 +132,20 @@ struct DayHistory {
     var carbGrams: Double { carbs.reduce(0) { $0 + $1.grams } }
     var totalUnits: Double { bolusUnits + basalUnits }
     var insulinSplit: InsulinSplit { InsulinSplit(basal: basalUnits, boluses: boluses) }
+
+    /// Only what falls inside `interval`, with basal cut at its edges.
+    func clipped(to interval: DateInterval) -> DayHistory {
+        var history = self
+        let inside: (Date) -> Bool = { $0 >= interval.start && $0 < interval.end }
+        history.window = interval
+        history.glucose = glucose.filter { inside($0.date) }
+        history.boluses = boluses.filter { inside($0.date) }
+        history.basal = basal.compactMap { $0.clamped(to: interval) }
+        history.carbs = carbs.filter { inside($0.date) }
+        history.iob = iob.filter { inside($0.date) }
+        history.cob = cob.filter { inside($0.date) }
+        return history
+    }
 }
 
 /// Basal and bolus for one day, or averaged per day, with bolus split into manual and automatic.
