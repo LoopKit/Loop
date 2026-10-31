@@ -25,8 +25,11 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     private var observers: [NSKeyValueObservation] = []
     private var notifications: [NSObjectProtocol] = []
 
+    // WKApplication.shared().delegate is nil under the SwiftUI app lifecycle.
+    private static var instance: ExtensionDelegate!
+
     static func shared() -> ExtensionDelegate {
-        return WKApplication.shared().extensionDelegate
+        return instance
     }
 
     let loopManager = LoopDataManager.shared
@@ -41,6 +44,8 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
 
     override init() {
         super.init()
+
+        Self.instance = self
 
         let session = WCSession.default
         session.delegate = self
@@ -420,12 +425,5 @@ extension ExtensionDelegate {
         dispatchPrecondition(condition: .onQueue(.main))
 
         WKApplication.shared().rootInterfaceController?.presentAlert(withTitle: error.localizedDescription, message: (error as NSError).localizedRecoverySuggestion ?? (error as NSError).localizedFailureReason, preferredStyle: .alert, actions: [WKAlertAction.dismissAction()])
-    }
-}
-
-
-fileprivate extension WKApplication {
-    var extensionDelegate: ExtensionDelegate! {
-        return delegate as? ExtensionDelegate
     }
 }
