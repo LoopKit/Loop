@@ -1002,7 +1002,11 @@ extension DeviceDataManager: CGMManagerDelegate {
         // return string unique to this instance of the CGMManager
         return UUID().uuidString
     }
-    
+
+    nonisolated func supportsWatchDirectRead(for manager: CGMManager) -> Bool {
+        true
+    }
+
     nonisolated
     func cgmManager(_ manager: CGMManager, didUpdate status: CGMManagerStatus) {
         DispatchQueue.main.async {
