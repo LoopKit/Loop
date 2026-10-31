@@ -48,7 +48,7 @@ struct CarbEntryScreen: View {
         self.viewModel = viewModel
         isNewEntry = viewModel.originalCarbEntry == nil
         _amountText = State(initialValue: viewModel.carbsQuantity.flatMap { $0 > 0 ? Self.amountFormatter.string(from: NSNumber(value: $0)) : nil } ?? "")
-        _eatenChoice = State(initialValue: viewModel.originalCarbEntry == nil ? 0 : nil)
+        _eatenChoice = State(initialValue: viewModel.originalCarbEntry == nil && abs(viewModel.time.timeIntervalSinceNow) < 60 ? 0 : nil)
     }
 
     var body: some View {
@@ -127,7 +127,9 @@ struct CarbEntryScreen: View {
             HowAbsorptionTimeWorksView()
         }
         .sheet(isPresented: $showAddFavoriteFood) {
-            FavoriteFoodAddEditView(carbsQuantity: viewModel.carbsQuantity, foodType: viewModel.foodType, absorptionTime: viewModel.absorptionTime) { food in
+            FavoriteFoodAddEditView(carbsQuantity: viewModel.carbsQuantity,
+                                    foodType: viewModel.usesCustomFoodType ? viewModel.foodType : viewModel.selectedDefaultAbsorptionTimeEmoji,
+                                    absorptionTime: viewModel.absorptionTime) { food in
                 showAddFavoriteFood = false
                 viewModel.onFavoriteFoodSave(food)
             }
@@ -152,6 +154,8 @@ struct CarbEntryScreen: View {
             .font(.system(size: 76, weight: .bold, design: .rounded).monospacedDigit())
             .foregroundStyle(P.carbsInk)
             .keyboardType(.decimalPad)
+            .accessibilityLabel(NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"))
+            .accessibilityIdentifier("textField_CarbsAmount")
             .multilineTextAlignment(.trailing)
             .fixedSize()
             .focused($amountFocused)
@@ -247,13 +251,16 @@ struct CarbEntryScreen: View {
                     .accessibilityAddTraits(selected ? .isSelected : [])
                 }
             }
-            HStack {
+            let timeLayout = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: LoopDesign.Space.s2))
+                : AnyLayout(HStackLayout())
+            timeLayout {
                 Text(NSLocalizedString("Time", comment: "Carb entry row label: the exact time the food was eaten"))
                     .font(LoopDesign.Typeface.subhead)
                     .foregroundStyle(P.inkMuted)
-                Spacer()
+                if !typeSize.isAccessibilitySize { Spacer() }
                 DatePicker(selection: Binding(get: { viewModel.time }, set: { viewModel.time = $0; eatenChoice = nil }),
-                           in: viewModel.minimumDate...viewModel.maximumDate, displayedComponents: [.hourAndMinute]) {
+                           in: viewModel.minimumDate...viewModel.maximumDate, displayedComponents: [.date, .hourAndMinute]) {
                     Text(NSLocalizedString("Time", comment: "Carb entry row label: the exact time the food was eaten"))
                 }
                 .labelsHidden()

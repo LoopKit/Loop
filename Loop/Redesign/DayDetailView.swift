@@ -15,6 +15,7 @@ struct DayDetailView: View {
 
     @State private var day: Date
     @State private var history: DayHistory?
+    @State private var targetBands: [TargetBand] = []
     @State private var now = Date()
     @State private var loadError: String?
 
@@ -42,7 +43,7 @@ struct DayDetailView: View {
                                 Text(LoopFormat.grams(history.carbGrams)).foregroundStyle(P.carbsInk)
                             }
                         }
-                        InsulinTimelineView(history: history, unit: provider.unitStyle, targetBands: provider.glucoseTargetBands(in: history.window),
+                        InsulinTimelineView(history: history, unit: provider.unitStyle, targetBands: targetBands,
                                             now: now, height: 300)
                         ChartLegend(items: DayTotalsTiles.legend)
                         if history.source == .health {
@@ -99,9 +100,12 @@ struct DayDetailView: View {
             history = nil
             loadError = nil
             do {
-                let result = try await provider.dayHistory(requestedWindow)
+                async let historyFetch = provider.dayHistory(requestedWindow)
+                async let targetsFetch = provider.glucoseTargetBands(in: requestedWindow)
+                let (result, targets) = try await (historyFetch, targetsFetch)
                 guard !Task.isCancelled, window == requestedWindow else { return }
                 history = result
+                targetBands = targets
             } catch {
                 guard !Task.isCancelled, window == requestedWindow else { return }
                 loadError = error.localizedDescription
