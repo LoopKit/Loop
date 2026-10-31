@@ -730,6 +730,7 @@
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E1D0C9B8A7F6E5D4C3B2A1 /* AppearanceSettings.swift */; };
 		6A6C1E1C7A26EC88AFB4FAB1 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A83D311A9ECAE563F74A51 /* DayDetailView.swift */; };
 		23B98F0A53A093412229364D /* LogbookScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AEDC42672A7A8C57546EA0C /* LogbookScreen.swift */; };
+		C4B5E0A1D2F3A4B5C6D7E8F9 /* CarbEntryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4B5E0A1D2F3A4B5C6D7E8FA /* CarbEntryScreen.swift */; };
 		3ED693ACBF8F9E416055BD56 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844BECBB6357021979B9443F /* MainTabBarController.swift */; };
 		7705483CFFCF0B89F8F1A08E /* NowScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0874B7B679DB9CE661CCE152 /* NowScreen.swift */; };
 		591F13AF435B37B4818E2F2B /* TrendsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFDE56977CC73CBDA1170C5 /* TrendsComponents.swift */; };
@@ -1613,6 +1614,7 @@
 		F2E1D0C9B8A7F6E5D4C3B2A1 /* AppearanceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettings.swift; sourceTree = "<group>"; };
 		E3A83D311A9ECAE563F74A51 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
 		7AEDC42672A7A8C57546EA0C /* LogbookScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogbookScreen.swift; sourceTree = "<group>"; };
+		C4B5E0A1D2F3A4B5C6D7E8FA /* CarbEntryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryScreen.swift; sourceTree = "<group>"; };
 		844BECBB6357021979B9443F /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		0874B7B679DB9CE661CCE152 /* NowScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowScreen.swift; sourceTree = "<group>"; };
 		4BFDE56977CC73CBDA1170C5 /* TrendsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendsComponents.swift; sourceTree = "<group>"; };
@@ -3029,6 +3031,7 @@
 				4BFDE56977CC73CBDA1170C5 /* TrendsComponents.swift */,
 				0874B7B679DB9CE661CCE152 /* NowScreen.swift */,
 				844BECBB6357021979B9443F /* MainTabBarController.swift */,
+				C4B5E0A1D2F3A4B5C6D7E8FA /* CarbEntryScreen.swift */,
 				7AEDC42672A7A8C57546EA0C /* LogbookScreen.swift */,
 				F2E1D0C9B8A7F6E5D4C3B2A1 /* AppearanceSettings.swift */,
 				E3A83D311A9ECAE563F74A51 /* DayDetailView.swift */,
@@ -3701,6 +3704,7 @@
 				7705483CFFCF0B89F8F1A08E /* NowScreen.swift in Sources */,
 				3ED693ACBF8F9E416055BD56 /* MainTabBarController.swift in Sources */,
 				23B98F0A53A093412229364D /* LogbookScreen.swift in Sources */,
+				C4B5E0A1D2F3A4B5C6D7E8F9 /* CarbEntryScreen.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* AppearanceSettings.swift in Sources */,
 				6A6C1E1C7A26EC88AFB4FAB1 /* DayDetailView.swift in Sources */,
 				A743DC26D066EE5AC88C2F45 /* LoopHistoryProvider.swift in Sources */,

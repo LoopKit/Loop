@@ -323,17 +323,68 @@ struct ValueTile<Value: View>: View {
 }
 
 /// The square icon tile at the start of logbook rows.
+///
+/// Insulin tiles are drawn the way the charts draw the same insulin, so a row and its mark read alike: manual bolus
+/// solid, automatic bolus hatched, basal pale with its edge.
 struct IconTile: View {
+    enum Style {
+        case solid(Color)
+        case hatch(Color)
+        case basal
+    }
+
     let systemName: String
-    let fill: Color
+    let style: Style
+    @Environment(\.colorScheme) private var scheme
+
+    init(systemName: String, fill: Color) {
+        self.systemName = systemName
+        self.style = .solid(fill)
+    }
+
+    init(systemName: String, style: Style) {
+        self.systemName = systemName
+        self.style = style
+    }
+
+    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: LoopDesign.Radius.sm, style: .continuous) }
 
     var body: some View {
         Image(systemName: systemName)
-            .font(.system(size: 13, weight: .bold))
-            .foregroundStyle(LoopDesign.Palette.onFill)
+            .font(.system(size: isHatched ? 11 : 13, weight: .bold))
+            .foregroundStyle(glyph)
+            // Stripes behind a glyph blur it, so the hatched tile sets its glyph on a plain disc.
+            .frame(width: isHatched ? 18 : 28, height: isHatched ? 18 : 28)
+            .background { if isHatched { Circle().fill(LoopDesign.Palette.surfaceRaised) } }
             .frame(width: 28, height: 28)
-            .background(fill, in: RoundedRectangle(cornerRadius: LoopDesign.Radius.sm, style: .continuous))
+            .background { background }
             .accessibilityHidden(true)
+    }
+
+    private var isHatched: Bool {
+        if case .hatch = style { return true }
+        return false
+    }
+
+    private var glyph: Color {
+        switch style {
+        case .solid: return LoopDesign.Palette.onFill
+        case .hatch, .basal: return LoopDesign.Palette.bolusInk
+        }
+    }
+
+    @ViewBuilder
+    private var background: some View {
+        switch style {
+        case .solid(let fill):
+            shape.fill(fill)
+        case .hatch(let color):
+            shape.fill(Hatch.paint(color, scheme: scheme))
+                .overlay(shape.strokeBorder(color, lineWidth: 1.5))
+        case .basal:
+            shape.fill(LoopDesign.Palette.basal)
+                .overlay(shape.strokeBorder(LoopDesign.Palette.basalEdge, lineWidth: 1.5))
+        }
     }
 }
 

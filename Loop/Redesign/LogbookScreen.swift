@@ -45,11 +45,17 @@ struct LogEntry: Identifiable {
     let amountColor: Color
     let detail: String
     let icon: String
-    let iconFill: Color
+    let iconStyle: IconTile.Style
     let filters: Set<Filter>
+    /// Loop's own small, frequent doses: the amount is set lighter so the person's own entries stand out.
+    var quiet = false
     var basalChanges: [BasalSegment] = []
     var edit: StoredCarbEntry? = nil
     var delete: Action? = nil
+    /// Units of a single automatic bolus, so runs of them can be folded into one row.
+    var automaticUnits: Double? = nil
+    /// The automatic boluses a folded row stands for, newest first.
+    var bolusRun: [LogEntry] = []
 
     func matches(_ filter: Filter) -> Bool {
         filter == .all || filters.contains(filter)
@@ -148,9 +154,12 @@ final class LogbookModel: ObservableObject {
                     subtitle: joined(parts),
                     amount: LoopFormat.doseUnits(bolus.units), amountColor: P.bolusInk,
                     detail: LoopFormat.time(bolus.date),
-                    icon: "plus", iconFill: P.bolus,
+                    icon: bolus.automatic ? "arrow.triangle.2.circlepath" : "syringe.fill",
+                    iconStyle: bolus.automatic ? .hatch(P.bolus) : .solid(P.bolus),
                     filters: bolus.automatic ? [.bolus, .loop] : [.bolus],
-                    delete: canDelete && bolus.manuallyEntered ? bolus.dose.map { .deleteDose($0) } : nil))
+                    quiet: bolus.automatic,
+                    delete: canDelete && bolus.manuallyEntered ? bolus.dose.map { .deleteDose($0) } : nil,
+                    automaticUnits: bolus.automatic && !bolus.manuallyEntered ? bolus.units : nil))
             }
 
             for carb in carbsToday {
@@ -163,7 +172,7 @@ final class LogbookModel: ObservableObject {
                     title: NSLocalizedString("Carbs", comment: "Logbook row title: a carb entry"), subtitle: joined(parts),
                     amount: LoopFormat.grams(carb.grams), amountColor: P.carbsInk,
                     detail: LoopFormat.time(carb.date),
-                    icon: "fork.knife", iconFill: P.carbs, filters: [.carbs],
+                    icon: "fork.knife", iconStyle: .solid(P.carbs), filters: [.carbs],
                     edit: editable,
                     delete: canDelete ? editable.map { .deleteCarbs($0) } : nil))
             }
@@ -177,9 +186,9 @@ final class LogbookModel: ObservableObject {
                     id: "basal-\(day.start.timeIntervalSince1970)", date: latest.start,
                     title: NSLocalizedString("Basal adjustments", comment: "Logbook row title summarising the temp basals Loop set in a day"),
                     subtitle: String.localizedStringWithFormat(NSLocalizedString("Loop · %lld changes · tap to list", comment: "Logbook basal adjustments row subtitle: how many temp basals Loop set in the day; tapping lists them. (1: number of changes)"), count),
-                    amount: String(format: NSLocalizedString("%1$@ U", comment: "Format string for an amount of insulin in units. (1: amount)"), LoopFormat.signed(net, decimals: 1)), amountColor: P.insulinInk,
+                    amount: String(format: NSLocalizedString("%1$@ U", comment: "Format string for an amount of insulin in units. (1: amount)"), LoopFormat.signed(net, decimals: 1)), amountColor: P.ink,
                     detail: NSLocalizedString("vs plan", comment: "Logbook basal adjustments row: the insulin amount is the difference from the scheduled basal"),
-                    icon: "waveform.path.ecg", iconFill: P.basalEdge, filters: [.basal, .loop],
+                    icon: "waveform.path.ecg", iconStyle: .basal, filters: [.basal, .loop],
                     basalChanges: automaticTemps.reversed()))
             }
             for temp in segments where temp.kind == .temp && !temp.automatic {
@@ -187,9 +196,9 @@ final class LogbookModel: ObservableObject {
                     id: "temp-\(temp.start.timeIntervalSince1970)", date: temp.start,
                     title: NSLocalizedString("Temp basal", comment: "Logbook row title: a temporary basal rate"),
                     subtitle: String(format: NSLocalizedString("Manual · %1$@", comment: "Logbook temp basal row subtitle: set by hand, then the rate and how long. (1: description, e.g. 0.50 U/h for 30m (scheduled 0.80))"), describe(temp)),
-                    amount: LoopFormat.rate(temp.rate), amountColor: P.insulinInk,
+                    amount: LoopFormat.rate(temp.rate), amountColor: P.ink,
                     detail: LoopFormat.time(temp.start),
-                    icon: "waveform.path.ecg", iconFill: P.basalEdge, filters: [.basal]))
+                    icon: "waveform.path.ecg", iconStyle: .basal, filters: [.basal]))
             }
             for suspend in segments where suspend.kind == .suspended {
                 var parts = [suspend.automatic ? sourceLoop : sourceManual, LoopFormat.duration(suspend.end.timeIntervalSince(suspend.start))]
@@ -199,7 +208,7 @@ final class LogbookModel: ObservableObject {
                     title: NSLocalizedString("Basal suspended", comment: "Logbook row title: insulin delivery was suspended"), subtitle: joined(parts),
                     amount: String(format: NSLocalizedString("%1$@ U/h", comment: "Format string for an insulin rate in units per hour. (1: rate)"), LoopFormat.number(0, decimals: 0)), amountColor: P.ink,
                     detail: LoopFormat.time(suspend.start),
-                    icon: "pause.fill", iconFill: P.statusWarning,
+                    icon: "pause.fill", iconStyle: .solid(P.statusWarning),
                     filters: suspend.automatic ? [.basal, .loop] : [.basal]))
             }
 
@@ -216,13 +225,55 @@ final class LogbookModel: ObservableObject {
                     title: title, subtitle: NSLocalizedString("Pump", comment: "Logbook row subtitle: the event was reported by the insulin pump"),
                     amount: "", amountColor: P.ink,
                     detail: LoopFormat.time(event.date),
-                    icon: "circle.dashed", iconFill: P.inkMuted.opacity(0.5), filters: []))
+                    icon: "circle.dashed", iconStyle: .solid(P.inkMuted.opacity(0.5)), filters: []))
             }
 
             let insulin = InsulinSplit(basal: segments.reduce(0) { $0 + $1.units }, boluses: history.boluses.filter { inDay($0.date) })
-            return LogDay(day: day.start, entries: entries.sorted { $0.date > $1.date }, insulin: insulin,
+            return LogDay(day: day.start, entries: foldingAutomaticBoluses(entries.sorted { $0.date > $1.date }), insulin: insulin,
                           carbs: carbsToday.reduce(0) { $0 + $1.grams })
         }
+    }
+
+    /// Loop gives many small automatic boluses; two or more in a row, with nothing else logged between them, become
+    /// one row that lists them. The day's Basal adjustments summary row is dated by its latest change, not where it
+    /// falls, so it doesn't break a run.
+    static func foldingAutomaticBoluses(_ entries: [LogEntry]) -> [LogEntry] {
+        var result: [LogEntry] = []
+        var run: [LogEntry] = []
+        var summaries: [LogEntry] = []
+
+        func flush() {
+            if run.count >= 2, let newest = run.first, let oldest = run.last {
+                let units = run.reduce(0) { $0 + ($1.automaticUnits ?? 0) }
+                result.append(LogEntry(
+                    id: "autorun-\(newest.id)", date: newest.date,
+                    title: NSLocalizedString("Automatic boluses", comment: "Logbook row title: several automatic boluses in a row, folded into one row that lists them"),
+                    subtitle: String(format: NSLocalizedString("Loop · %1$@ · tap to list", comment: "Logbook folded automatic boluses row subtitle: Loop gave them, the time span they cover, and tapping lists them. (1: time range, e.g. 15:08 – 16:14)"),
+                                     "\(LoopFormat.time(oldest.date))–\(LoopFormat.time(newest.date))"),
+                    amount: LoopFormat.doseUnits(units), amountColor: P.bolusInk,
+                    detail: String.localizedStringWithFormat(NSLocalizedString("%lld doses", comment: "Logbook folded automatic boluses row: how many automatic boluses it holds. (1: number)"), run.count),
+                    icon: "arrow.triangle.2.circlepath", iconStyle: .hatch(P.bolus),
+                    filters: [.bolus, .loop], quiet: true,
+                    bolusRun: run))
+            } else {
+                result.append(contentsOf: run)
+            }
+            run = []
+        }
+
+        for entry in entries {
+            if entry.automaticUnits != nil {
+                run.append(entry)
+            } else if !entry.basalChanges.isEmpty {
+                summaries.append(entry)
+            } else {
+                flush()
+                result.append(entry)
+            }
+        }
+        flush()
+        // Put the summary rows back in date order.
+        return (result + summaries).sorted { $0.date > $1.date }
     }
 
     private static var sourceLoop: String {
@@ -273,10 +324,12 @@ struct LogbookView: View {
     @State private var path: [Route] = []
     /// Editing is a sheet, as adding carbs is on Now: pushed here, the tab bar covered the bolus screen's button.
     @State private var editingCarbs: CarbEditRoute?
+    @Environment(\.dynamicTypeSize) private var typeSize
     private let deviceManager: DeviceDataManager
 
     enum Route: Hashable {
         case basal(String)
+        case boluses(String)
     }
 
     struct CarbEditRoute: Identifiable {
@@ -401,16 +454,35 @@ struct LogbookView: View {
             ? String(format: NSLocalizedString("Yesterday · %1$@", comment: "Logbook day header for yesterday. (1: weekday and date, e.g. Sat 24 Oct)"), date)
             : date
         return VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(title)
-                    .font(LoopDesign.Typeface.headline)
-                    .foregroundStyle(P.ink)
-                Spacer()
+            let totals = HStack(spacing: LoopDesign.Space.s3) {
+                if day.insulin.total > 0 {
+                    Text(LoopFormat.totalUnits(day.insulin.total))
+                        .foregroundStyle(P.ink)
+                }
                 Text(LoopFormat.grams(day.carbs))
-                    .font(LoopDesign.Typeface.footnote.monospacedDigit())
                     .foregroundStyle(P.carbsInk)
             }
+            .font(LoopDesign.Typeface.footnote.monospacedDigit())
+            .fixedSize()
+            // The totals drop under the date when both won't fit on one line, rather than breaking numbers apart.
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(title)
+                        .font(LoopDesign.Typeface.headline)
+                        .foregroundStyle(P.ink)
+                        .fixedSize()
+                    Spacer()
+                    totals
+                }
+                VStack(alignment: .leading, spacing: LoopDesign.Space.s1) {
+                    Text(title)
+                        .font(LoopDesign.Typeface.headline)
+                        .foregroundStyle(P.ink)
+                    totals
+                }
+            }
             if day.insulin.total > 0 {
+                // The day's total sits on the line above, so the key keeps to one line.
                 InsulinSplitLine(split: day.insulin, partial: calendar.isDateInToday(day.day))
             }
         }
@@ -421,32 +493,46 @@ struct LogbookView: View {
 
     @ViewBuilder
     private func row(_ entry: LogEntry) -> some View {
-        let content = HStack(spacing: LoopDesign.Space.s3) {
-            IconTile(systemName: entry.icon, fill: entry.iconFill)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(entry.title)
-                    .font(LoopDesign.Typeface.body)
-                    .foregroundStyle(P.ink)
-                Text(entry.subtitle)
-                    .font(LoopDesign.Typeface.footnote)
-                    .foregroundStyle(P.inkMuted)
+        // At accessibility sizes the amount moves under the title, so neither column squeezes the other into fragments.
+        let stacked = typeSize.isAccessibilitySize
+        let titles = VStack(alignment: .leading, spacing: 2) {
+            Text(entry.title)
+                .font(LoopDesign.Typeface.body)
+                .foregroundStyle(P.ink)
+            Text(entry.subtitle)
+                .font(LoopDesign.Typeface.footnote)
+                .foregroundStyle(P.inkMuted)
+        }
+        let amounts = VStack(alignment: stacked ? .leading : .trailing, spacing: 2) {
+            if !entry.amount.isEmpty {
+                Text(entry.amount)
+                    .font(LoopDesign.Typeface.body.weight(entry.quiet ? .regular : .semibold).monospacedDigit())
+                    .foregroundStyle(entry.amountColor)
             }
-            Spacer(minLength: LoopDesign.Space.s2)
-            VStack(alignment: .trailing, spacing: 2) {
-                if !entry.amount.isEmpty {
-                    Text(entry.amount)
-                        .font(LoopDesign.Typeface.body.weight(.semibold).monospacedDigit())
-                        .foregroundStyle(entry.amountColor)
+            Text(entry.detail)
+                .font(LoopDesign.Typeface.footnote)
+                .foregroundStyle(P.inkMuted)
+        }
+        let content = HStack(alignment: stacked ? .top : .center, spacing: LoopDesign.Space.s3) {
+            IconTile(systemName: entry.icon, style: entry.iconStyle)
+            if stacked {
+                VStack(alignment: .leading, spacing: LoopDesign.Space.s1) {
+                    titles
+                    amounts
                 }
-                Text(entry.detail)
-                    .font(LoopDesign.Typeface.footnote)
-                    .foregroundStyle(P.inkMuted)
+                Spacer(minLength: 0)
+            } else {
+                titles
+                Spacer(minLength: LoopDesign.Space.s2)
+                amounts
             }
         }
         .accessibilityElement(children: .combine)
 
         if !entry.basalChanges.isEmpty {
             NavigationLink(value: Route.basal(entry.id)) { content }
+        } else if !entry.bolusRun.isEmpty {
+            NavigationLink(value: Route.boluses(entry.id)) { content }
         } else {
             content
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
@@ -478,6 +564,14 @@ struct LogbookView: View {
             if let entry = model.days.flatMap(\.entries).first(where: { $0.id == id }) {
                 BasalChangesList(changes: entry.basalChanges)
             }
+        case .boluses(let id):
+            if let entry = model.days.flatMap(\.entries).first(where: { $0.id == id }) {
+                List(entry.bolusRun) { bolus in
+                    row(bolus)
+                }
+                .navigationTitle(NSLocalizedString("Automatic boluses", comment: "Logbook row title: several automatic boluses in a row, folded into one row that lists them"))
+                .navigationBarTitleDisplayMode(.inline)
+            }
         }
     }
 }
@@ -497,7 +591,7 @@ private struct LogbookCarbEditor: View {
     }
 
     var body: some View {
-        CarbEntryView(viewModel: viewModel)
+        CarbEntryScreen(viewModel: viewModel)
             .environmentObject(deviceManager.displayGlucosePreference)
             .environment(\.dismissAction, dismiss)
             .navigationTitle(NSLocalizedString("Edit Carb Entry", comment: "Title of the screen for editing a carb entry from the Logbook"))
