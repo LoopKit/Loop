@@ -155,6 +155,28 @@ enum LoopHistoryMath {
         Set(points.map { calendar.startOfDay(for: $0.date) }).count
     }
 
+    /// Whole days from the first reading to the end of `interval`, when that falls short of the period by more than a
+    /// day; nil when the readings span the period, or there are none.
+    static func cgmCoveredDays(_ points: [GlucosePoint], in interval: DateInterval, periodDays: Int) -> Int? {
+        guard periodDays > 1, let first = points.map(\.date).min() else { return nil }
+        let available = interval.end.timeIntervalSince(first) / 86400
+        guard available + 1 < Double(periodDays) else { return nil }
+        return max(1, Int(available.rounded()))
+    }
+
+    /// Units the schedule would deliver over `span`, or nil where the points don't cover all of it.
+    static func scheduledUnits(_ points: [ScheduledBasalPoint], over span: DateInterval) -> Double? {
+        var units = 0.0
+        var covered: TimeInterval = 0
+        for point in points {
+            let overlap = min(point.end, span.end).timeIntervalSince(max(point.start, span.start))
+            guard overlap > 0 else { continue }
+            units += point.rate * overlap / 3600
+            covered += overlap
+        }
+        return covered >= span.duration - 60 ? units : nil
+    }
+
     // MARK: Days
 
     /// Midnight-to-midnight intervals covering `interval`, oldest first, the last one cut off at `interval.end`.
