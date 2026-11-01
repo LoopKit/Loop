@@ -27,7 +27,7 @@ protocol BolusEntryViewModelDelegate: AnyObject {
     var mostRecentGlucoseDataDate: Date? { get }
     var mostRecentPumpDataDate: Date? { get }
 
-    func fetchData(for baseTime: Date?, presumePresetEndingNow: Bool, ensureDosingCoverageStart: Date?, projectOngoingDoses: Bool) async throws -> StoredDataAlgorithmInput
+    func fetchData(for baseTime: Date?, presumePresetEndingNow: Bool, ensureDosingCoverageStart: Date?, ensureCarbCoverageStart: Date?, projectOngoingDoses: Bool) async throws -> StoredDataAlgorithmInput
     func effectiveGlucoseTargetRangeSchedule(presumingMealEntry: Bool) -> GlucoseRangeSchedule?
 
     func addCarbEntry(_ carbEntry: NewCarbEntry) async throws -> StoredCarbEntry

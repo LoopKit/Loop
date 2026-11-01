@@ -538,6 +538,116 @@ class LoopDataManagerTests: XCTestCase {
 
     }
 
+    private func pendingCarbEntry(at date: Date) -> CarbEntryChange {
+        .add(NewCarbEntry(date: now, syncIdentifier: UUID().uuidString,
+                          quantity: LoopQuantity(unit: .gram, doubleValue: 20),
+                          startDate: date, foodType: nil, absorptionTime: .hours(3)))
+    }
+
+    private func assertManualBolusAndPreviewSucceed(for change: CarbEntryChange) async throws {
+        glucoseStore.storedGlucose = [
+            StoredGlucoseSample(startDate: d(.minutes(-1)), quantity: .glucose(value: 150))
+        ]
+        let recommendation = try await loopDataManager.recommendManualBolus(carbEntryChange: change)
+        XCTAssertNotNil(recommendation)
+        let preview = try await loopDataManager.generatePrediction(
+            carbEntryChange: change, potentialDose: nil, manualGlucose: nil)
+        XCTAssertFalse(preview.predictedGlucose.isEmpty)
+    }
+
+    func testPendingCarbEntryRemainsCoveredAfterBolusScreenAges() async throws {
+        let openedAt = now
+        let change = pendingCarbEntry(at: d(.hours(-12)))
+        try await assertManualBolusAndPreviewSucceed(for: change)
+
+        // The same pending entry survives a five-minute refresh. It is now older than
+        // the normal 12-hour-and-one-minute query window in fetchData.
+        TestingDate.setFixedTestingDate(openedAt.addingTimeInterval(.minutes(5)))
+        try await assertManualBolusAndPreviewSucceed(for: change)
+    }
+
+    func testEditedCarbEntryOutsideNormalWindowIsCovered() async throws {
+        let original = StoredCarbEntry(startDate: d(.hours(-13)),
+                                      quantity: LoopQuantity(unit: .gram, doubleValue: 30),
+                                      absorptionTime: .hours(3))
+        carbStore.carbHistory = [original]
+        let update = CarbEntryUpdate(date: now, quantity: LoopQuantity(unit: .gram, doubleValue: 20),
+                                     startDate: original.startDate, foodType: nil, absorptionTime: .hours(3))
+        try await assertManualBolusAndPreviewSucceed(for: .edit(original, update))
+    }
+
+    func testExtendedCarbScheduleCoverageIncludesHistoricalOverride() async throws {
+        let entryDate = d(.hours(-13))
+        let override = TemporaryScheduleOverride(
+            context: .custom,
+            settings: TemporaryPresetSettings(targetRange: nil, insulinNeedsScaleFactor: 2),
+            startDate: entryDate,
+            duration: .finite(.minutes(30)),
+            enactTrigger: .local,
+            syncIdentifier: UUID())
+        temporaryPresetsManager.presetHistory.recordOverride(override)
+
+        let input = try await loopDataManager.fetchData(for: now, ensureCarbCoverageStart: entryDate)
+        let ratio = try XCTUnwrap(input.carbRatio.closestPrior(to: entryDate))
+        let sensitivity = try XCTUnwrap(input.sensitivityMgdlPerUnit.closestPrior(to: entryDate))
+        XCTAssertEqual(ratio.value, settingsProvider.settings.carbRatioSchedule!.value(at: entryDate) / 2)
+        XCTAssertEqual(sensitivity.value,
+                       settingsProvider.settings.insulinSensitivitySchedule!.value(at: entryDate) / 2)
+    }
+
+    func testRecentPendingCarbDoesNotShortenNormalScheduleHistory() async throws {
+        let normal = try await loopDataManager.fetchData(for: now)
+        let recent = try await loopDataManager.fetchData(for: now, ensureCarbCoverageStart: d(.minutes(-5)))
+        XCTAssertEqual(normal.carbRatio, recent.carbRatio)
+        XCTAssertEqual(normal.sensitivityMgdlPerUnit, recent.sensitivityMgdlPerUnit)
+    }
+
+    private func assertMissingCarbScheduleThrows(_ detail: ConfigurationErrorDetail, preview: Bool) async throws {
+        glucoseStore.storedGlucose = [
+            StoredGlucoseSample(startDate: d(.minutes(-1)), quantity: .glucose(value: 150))
+        ]
+        let change = pendingCarbEntry(at: d(.hours(-13)))
+        // Nonempty histories can still fail to cover the pending entry. Simulate a
+        // provider that cannot supply the requested older history.
+        if detail == .carbRatioSchedule {
+            settingsProvider.carbRatioHistory = [
+                AbsoluteScheduleValue(startDate: d(.hours(-12)), endDate: d(.hours(8)), value: 10)
+            ]
+        } else {
+            settingsProvider.insulinSensitivityHistory = [
+                AbsoluteScheduleValue(startDate: d(.hours(-12)), endDate: d(.hours(8)),
+                                      value: .glucose(value: 50))
+            ]
+        }
+        do {
+            if preview {
+                _ = try await loopDataManager.generatePrediction(
+                    carbEntryChange: change, potentialDose: nil, manualGlucose: nil)
+            } else {
+                _ = try await loopDataManager.recommendManualBolus(carbEntryChange: change)
+            }
+            XCTFail("Expected a recoverable missing-schedule error")
+        } catch LoopError.configurationError(let actual) {
+            XCTAssertEqual(actual, detail)
+        }
+    }
+
+    func testManualBolusRejectsMissingCarbRatioCoverage() async throws {
+        try await assertMissingCarbScheduleThrows(.carbRatioSchedule, preview: false)
+    }
+
+    func testManualBolusRejectsMissingSensitivityCoverage() async throws {
+        try await assertMissingCarbScheduleThrows(.insulinSensitivitySchedule, preview: false)
+    }
+
+    func testPreviewRejectsMissingCarbRatioCoverage() async throws {
+        try await assertMissingCarbScheduleThrows(.carbRatioSchedule, preview: true)
+    }
+
+    func testPreviewRejectsMissingSensitivityCoverage() async throws {
+        try await assertMissingCarbScheduleThrows(.insulinSensitivitySchedule, preview: true)
+    }
+
     func testFetchDataWithHighInsulinNeedsPresetMitigation() async throws {
         var input = try await loopDataManager.fetchData(for: now)
         XCTAssertEqual(input.targetMgdl.count, 1)

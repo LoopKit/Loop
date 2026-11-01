@@ -190,7 +190,7 @@ class BolusEntryViewModelTests: XCTestCase {
     
     func testUpdatePredictedGlucoseValues() async throws {
         do {
-            let input = try await delegate.fetchData(for: Self.exampleStartDate, presumePresetEndingNow: false, ensureDosingCoverageStart: nil, projectOngoingDoses: false)
+            let input = try await delegate.fetchData(for: Self.exampleStartDate, presumePresetEndingNow: false, ensureDosingCoverageStart: nil, ensureCarbCoverageStart: nil, projectOngoingDoses: false)
             let prediction = try input.predictGlucose()
             await bolusEntryViewModel.update()
             XCTAssertEqual(prediction, bolusEntryViewModel.predictedGlucoseValues.map { LoopAlgorithm.PredictedGlucoseValue(startDate: $0.startDate, mgdl: $0.quantity.doubleValue(for: .milligramsPerDeciliter)) })
@@ -201,7 +201,7 @@ class BolusEntryViewModelTests: XCTestCase {
     
     func testUpdatePredictedGlucoseValuesWithManual() async throws {
         do {
-            let input = try await delegate.fetchData(for: Self.exampleStartDate, presumePresetEndingNow: false, ensureDosingCoverageStart: nil, projectOngoingDoses: false)
+            let input = try await delegate.fetchData(for: Self.exampleStartDate, presumePresetEndingNow: false, ensureDosingCoverageStart: nil, ensureCarbCoverageStart: nil, projectOngoingDoses: false)
             let prediction = try input.predictGlucose()
             await bolusEntryViewModel.update()
             bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
@@ -359,6 +359,19 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertNil(bolusEntryViewModel.activeNotice)
     }
         
+    func testMissingCarbScheduleClearsPreviousRecommendation() async throws {
+        for detail: ConfigurationErrorDetail in [.carbRatioSchedule, .insulinSensitivitySchedule] {
+            delegate.recommendationResult = .success(ManualBolusRecommendation(amount: 1.25))
+            await bolusEntryViewModel.update()
+            XCTAssertNotNil(bolusEntryViewModel.recommendedBolus)
+
+            delegate.recommendationResult = .failure(LoopError.configurationError(detail))
+            await bolusEntryViewModel.update()
+            XCTAssertNil(bolusEntryViewModel.recommendedBolus)
+            XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
+        }
+    }
+
     func testUpdateRecommendedBolusThrowsMissingDataError() async throws {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         delegate.recommendationResult = .failure(LoopError.missingDataError(.glucose))
@@ -888,7 +901,7 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
         automaticBolusApplicationFactor: 0.4
     )
 
-    func fetchData(for baseTime: Date?, presumePresetEndingNow: Bool, ensureDosingCoverageStart: Date?, projectOngoingDoses: Bool) async throws -> StoredDataAlgorithmInput {
+    func fetchData(for baseTime: Date?, presumePresetEndingNow: Bool, ensureDosingCoverageStart: Date?, ensureCarbCoverageStart: Date?, projectOngoingDoses: Bool) async throws -> StoredDataAlgorithmInput {
         loopStateInput.predictionStart = baseTime ?? Date()
         return loopStateInput
     }
