@@ -255,10 +255,12 @@ class LoopDataManagerTests: XCTestCase {
         XCTAssertEqual(0.2, deliveryDelegate.lastEnact.bolus!, accuracy: defaultAccuracy)
     }
 
-    func testMmolSettingsDoseTheSameAsMgdl() async throws {
-        func mmol(_ mgdl: Double) -> Double {
-            LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl).doubleValue(for: .millimolesPerLiter)
-        }
+    private func mmol(_ mgdl: Double) -> Double {
+        LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl).doubleValue(for: .millimolesPerLiter)
+    }
+
+    /// The setUp therapy settings, expressed in mmol/L
+    private func useMmolSettings() {
         settingsProvider.settings.insulinSensitivitySchedule = InsulinSensitivitySchedule(
             unit: .millimolesPerLiter,
             dailyItems: [
@@ -273,6 +275,10 @@ class LoopDataManagerTests: XCTestCase {
             RepeatingScheduleValue(startTime: TimeInterval(75600), value: DoubleRange(minValue: mmol(100), maxValue: mmol(110)))
         ], timeZone: .utcTimeZone)!
         settingsProvider.settings.suspendThreshold = GlucoseThreshold(unit: .millimolesPerLiter, value: mmol(75))
+    }
+
+    func testMmolSettingsDoseTheSameAsMgdl() async throws {
+        useMmolSettings()
         glucoseStore.storedGlucose = [
             StoredGlucoseSample(startDate: d(.minutes(-1)), quantity: LoopQuantity(unit: .millimolesPerLiter, doubleValue: mmol(120))),
         ]
@@ -290,6 +296,40 @@ class LoopDataManagerTests: XCTestCase {
 
         await loopDataManager.loop()
         XCTAssertEqual(0.2, deliveryDelegate.lastEnact.bolus!, accuracy: defaultAccuracy)
+    }
+
+    func testMmolSettingsRecommendTheSameManualBolusAsMgdl() async throws {
+        let values: [Double] = [100, 130, 160, 190]
+        func history(_ unit: LoopUnit) -> [StoredGlucoseSample] {
+            values.enumerated().map { index, mgdl in
+                let value = unit == .milligramsPerDeciliter ? mgdl : mmol(mgdl)
+                return StoredGlucoseSample(startDate: d(.minutes(Double(5 * index - 18))), quantity: LoopQuantity(unit: unit, doubleValue: value))
+            }
+        }
+        let carbs = CarbEntryChange.add(NewCarbEntry(syncIdentifier: "mmol-test", quantity: .carbs(value: 30), startDate: d(.minutes(-1)), foodType: nil, absorptionTime: .hours(3)))
+
+        glucoseStore.storedGlucose = history(.milligramsPerDeciliter)
+        let mgdlRecommendation = try await loopDataManager.recommendManualBolus(carbEntryChange: carbs)!
+        let mgdlPreview = try await loopDataManager.generatePrediction(carbEntryChange: carbs, potentialDose: nil, manualGlucose: nil).predictedGlucose
+
+        useMmolSettings()
+        glucoseStore.storedGlucose = history(.millimolesPerLiter)
+        let mmolRecommendation = try await loopDataManager.recommendManualBolus(carbEntryChange: carbs)!
+        let mmolPreview = try await loopDataManager.generatePrediction(carbEntryChange: carbs, potentialDose: nil, manualGlucose: nil).predictedGlucose
+
+        XCTAssertGreaterThan(mgdlRecommendation.amount, 0)
+        XCTAssertEqual(mmolRecommendation.amount, mgdlRecommendation.amount, accuracy: 1e-9)
+        XCTAssertEqual(mmolRecommendation.notice == nil, mgdlRecommendation.notice == nil)
+        XCTAssertEqual(mmolPreview.count, mgdlPreview.count)
+        for (mmolValue, mgdlValue) in zip(mmolPreview, mgdlPreview) {
+            XCTAssertEqual(mmolValue.startDate, mgdlValue.startDate)
+            XCTAssertEqual(mmolValue.quantity.doubleValue(for: .milligramsPerDeciliter), mgdlValue.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: 1e-9)
+        }
+    }
+
+    func testLoopCoreConstantsMatchTheAlgorithm() {
+        XCTAssertEqual(LoopCoreConstants.inputDataRecencyInterval, Algorithm.inputDataRecencyInterval)
+        XCTAssertEqual(LoopCoreConstants.maximumCarbAbsorptionTimeInterval, LoopAlgorithm.CarbMath.maximumAbsorptionTimeInterval)
     }
 
     func testHighAndFalling() async {

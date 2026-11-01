@@ -132,11 +132,19 @@ extension LoopAlgorithm.TempBasalRecommendation {
     }
 }
 
+extension LoopAlgorithm.AutomaticDoseRecommendation.Direction {
+    var loopKit: LoopKit.AutomaticDoseRecommendation.Direction {
+        switch self {
+        case .decrease: .decrease
+        case .neutral: .neutral
+        case .increase: .increase
+        }
+    }
+}
+
 extension LoopAlgorithm.AutomaticDoseRecommendation {
     var loopKit: LoopKit.AutomaticDoseRecommendation {
-        LoopKit.AutomaticDoseRecommendation(basalAdjustment: basalAdjustment.loopKit,
-                                            direction: LoopKit.AutomaticDoseRecommendation.Direction(rawValue: direction.rawValue)!,
-                                            bolusUnits: bolusUnits)
+        LoopKit.AutomaticDoseRecommendation(basalAdjustment: basalAdjustment.loopKit, direction: direction.loopKit, bolusUnits: bolusUnits)
     }
 }
 

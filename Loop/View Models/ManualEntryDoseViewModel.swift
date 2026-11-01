@@ -249,7 +249,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
             do {
                 predictedGlucoseValues = try input
                     .addingDose(dose: enteredBolusDose)
-.predictGlucose()
+                    .predictGlucose()
                     .map(\.loopKit)
             } catch {
                 predictedGlucoseValues = []
