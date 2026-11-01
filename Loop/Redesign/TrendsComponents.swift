@@ -460,12 +460,22 @@ struct InsulinSplitView: View {
     let split: InsulinSplit
     /// Today so far, rather than a whole day or a per-day average.
     var partial = false
+    /// What the basal schedule delivers over the same time, shown under the basal row.
+    var scheduledBasal: Double?
+    /// Today against a usual day, e.g. "Usually 28.4 U by 19:46", under the total.
+    var usual: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: LoopDesign.Space.s3) {
             InsulinSplitBar(split: split)
             VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
                 row(.basal, NSLocalizedString("Basal", comment: "Basal and bolus row: insulin delivered as basal"), split.basal, split.basalPercent)
+                if let scheduledBasal {
+                    part(.dash(LoopDesign.Palette.basalScheduled), String(format: NSLocalizedString("Scheduled %1$@", comment: "Basal and bolus: what the basal schedule delivers over the same time, under the basal row. (1: units, e.g. 18.0 U)"), LoopFormat.totalUnits(scheduledBasal)))
+                        .font(LoopDesign.Typeface.footnote.monospacedDigit())
+                        .foregroundStyle(LoopDesign.Palette.inkMuted)
+                        .padding(.leading, 10 + LoopDesign.Space.s2)
+                }
                 row(.solid(LoopDesign.Palette.bolus), NSLocalizedString("Bolus", comment: "Basal and bolus row: insulin delivered as bolus, manual and automatic"), split.bolus, split.bolusPercent)
                 if split.isClassified && split.bolus > 0 {
                     FlowLayout(spacing: LoopDesign.Space.s3, lineSpacing: 2) {
@@ -488,10 +498,16 @@ struct InsulinSplitView: View {
                         .font(LoopDesign.Typeface.statValueSmall)
                         .foregroundStyle(LoopDesign.Palette.insulinInk)
                 }
+                if let usual {
+                    Text(usual)
+                        .font(LoopDesign.Typeface.footnote.monospacedDigit())
+                        .foregroundStyle(LoopDesign.Palette.inkMuted)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Self.accessibilityLabel(split, partial: partial))
+        .accessibilityLabel(Self.accessibilityLabel(split, partial: partial, scheduledBasal: scheduledBasal, usual: usual))
     }
 
     private func row(_ swatch: LegendItem.Swatch, _ label: String, _ units: Double, _ percent: Int) -> some View {
@@ -518,7 +534,7 @@ struct InsulinSplitView: View {
         }
     }
 
-    static func accessibilityLabel(_ split: InsulinSplit, partial: Bool) -> String {
+    static func accessibilityLabel(_ split: InsulinSplit, partial: Bool, scheduledBasal: Double? = nil, usual: String? = nil) -> String {
         var parts = [
             String(format: NSLocalizedString("Basal %1$@, %2$@ percent", comment: "VoiceOver: basal units and share. (1: units, 2: percentage number)"), LoopFormat.totalUnits(split.basal), "\(split.basalPercent)"),
             String(format: NSLocalizedString("Bolus %1$@, %2$@ percent", comment: "VoiceOver: bolus units and share. (1: units, 2: percentage number)"), LoopFormat.totalUnits(split.bolus), "\(split.bolusPercent)"),
@@ -531,6 +547,12 @@ struct InsulinSplitView: View {
                             ? NSLocalizedString("Total so far %1$@", comment: "VoiceOver: today's total insulin so far. (1: units)")
                             : NSLocalizedString("Total %1$@", comment: "VoiceOver: total insulin. (1: units)"),
                             LoopFormat.totalUnits(split.total)))
+        if let scheduledBasal {
+            parts.insert(String(format: NSLocalizedString("Scheduled %1$@", comment: "Basal and bolus: what the basal schedule delivers over the same time, under the basal row. (1: units, e.g. 18.0 U)"), LoopFormat.totalUnits(scheduledBasal)), at: 1)
+        }
+        if let usual {
+            parts.append(usual)
+        }
         return parts.joined(separator: ". ")
     }
 }

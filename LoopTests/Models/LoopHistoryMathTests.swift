@@ -123,6 +123,22 @@ class LoopHistoryMathTests: XCTestCase {
         XCTAssertNil(LoopHistoryMath.glucoseStats([points[0]]))
     }
 
+    func testCGMCoverageNotedOnlyWhenReadingsStartLate() {
+        let interval = DateInterval(start: at(0), end: at(14 * 1440))
+        let late = [GlucosePoint(date: at(9 * 1440), mgdl: 120), GlucosePoint(date: at(10 * 1440), mgdl: 130)]
+        XCTAssertEqual(LoopHistoryMath.cgmCoveredDays(late, in: interval, periodDays: 14), 5)
+        // Within a day of the full period, or a one-day period, says nothing.
+        XCTAssertNil(LoopHistoryMath.cgmCoveredDays([GlucosePoint(date: at(600), mgdl: 120)], in: interval, periodDays: 14))
+        XCTAssertNil(LoopHistoryMath.cgmCoveredDays(late, in: DateInterval(start: at(0), end: at(1440)), periodDays: 1))
+        XCTAssertNil(LoopHistoryMath.cgmCoveredDays([], in: interval, periodDays: 14))
+    }
+
+    func testScheduledUnitsNeedTheWholeSpanCovered() {
+        let points = [ScheduledBasalPoint(start: at(0), end: at(120), rate: 1.0), ScheduledBasalPoint(start: at(120), end: at(240), rate: 0.5)]
+        XCTAssertEqual(try XCTUnwrap(LoopHistoryMath.scheduledUnits(points, over: DateInterval(start: at(60), end: at(180)))), 1.5, accuracy: 1e-9)
+        XCTAssertNil(LoopHistoryMath.scheduledUnits(points, over: DateInterval(start: at(60), end: at(360))))
+    }
+
     func testPercentileInterpolates() {
         XCTAssertEqual(LoopHistoryMath.percentile([1, 2, 3, 4, 5], 0.5), 3)
         XCTAssertEqual(LoopHistoryMath.percentile([1, 2, 3, 4], 0.5), 2.5)
