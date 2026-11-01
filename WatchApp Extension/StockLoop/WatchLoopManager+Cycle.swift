@@ -127,7 +127,7 @@ extension WatchLoopManager {
 
             // Stock's predicted-low alert reads `LoopDataManager.predictedGlucose`, the display
             // run's forecast, on both arms.
-            self.evaluatePredictedLowAlert(self.displayState.output?.predictedGlucose)
+            self.evaluatePredictedLowAlert(self.displayState.output?.predictedGlucose.map(\.loopKit))
         }
     }
 
@@ -136,10 +136,12 @@ extension WatchLoopManager {
         for baseTime: Date? = nil,
         presumePresetEndingNow: Bool = false,
         ensureDosingCoverageStart: Date? = nil,
+        ensureCarbCoverageStart: Date? = nil,
         projectOngoingDoses: Bool = false
     ) async throws -> StoredDataAlgorithmInput {
         try await cycle.fetchData(for: baseTime, presumePresetEndingNow: presumePresetEndingNow,
-                                  ensureDosingCoverageStart: ensureDosingCoverageStart, projectOngoingDoses: projectOngoingDoses)
+                                  ensureDosingCoverageStart: ensureDosingCoverageStart, ensureCarbCoverageStart: ensureCarbCoverageStart,
+                                  projectOngoingDoses: projectOngoingDoses)
     }
 
     /// As stock's `LoopDataManager`: automatic bolus, unless strategy selection is enabled.

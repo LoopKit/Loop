@@ -8,7 +8,6 @@
 
 import Foundation
 import LoopCore
-import LoopAlgorithm
 import LoopKit
 
 struct SimpleBolusCalculator {
@@ -25,7 +24,7 @@ struct SimpleBolusCalculator {
             let sensitivity = sensitivitySchedule.quantity(at: date).doubleValue(for: .milligramsPerDeciliter)
             let correctionRange = correctionRangeSchedule.quantityRange(at: date)
             if (!correctionRange.contains(manualGlucose)) {
-                let correctionTarget = correctionRange.averageValue(for: .milligramsPerDeciliter)
+                let correctionTarget = (correctionRange.lowerBound.doubleValue(for: .milligramsPerDeciliter) + correctionRange.upperBound.doubleValue(for: .milligramsPerDeciliter)) / 2
                 let correctionBolus = (manualGlucose.doubleValue(for: .milligramsPerDeciliter) - correctionTarget) / sensitivity
                 if correctionBolus >= 0 {
                     let activeInsulin = max(0, activeInsulin.doubleValue(for: .internationalUnit))

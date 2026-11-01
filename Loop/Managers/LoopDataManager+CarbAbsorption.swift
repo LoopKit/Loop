@@ -22,7 +22,7 @@ extension LoopDataManager {
 
     func dynamicCarbsOnBoard(from start: Date? = nil, to end: Date? = nil) async -> [CarbValue] {
         if let effects = displayState.output?.effects {
-            return effects.carbStatus.dynamicCarbsOnBoard(from: start, to: end, absorptionModel: carbAbsorptionModel.model)
+            return effects.carbStatus.dynamicCarbsOnBoard(from: start, to: end, absorptionModel: carbAbsorptionModel.model).map(\.loopKit)
         } else {
             return []
         }
@@ -66,10 +66,11 @@ extension LoopDataManager {
         guard !carbRatio.isEmpty else {
             throw LoopError.configurationError(.carbRatioSchedule)
         }
-        let carbRatioWithOverrides = overrides.applyCarbRatio(over: carbRatio)
+        let carbRatioWithOverrides = overrides.applyCarbRatio(over: carbRatio).algorithmSchedule()
+        let algorithmSensitivity = sensitivityWithOverrides.algorithmMgdlSchedule()
 
         // Overlay basal history on basal doses, splitting doses to get amount delivered relative to basal
-        let annotatedDoses = doses.annotated(with: basalWithOverrides)
+        let annotatedDoses = doses.annotated(with: basalWithOverrides.algorithmSchedule())
 
         // Use the standard mid-absorption ISF model — matching LoopAlgorithm's
         // prediction path (useMidAbsorptionISF) — so this review's carb
@@ -78,7 +79,7 @@ extension LoopDataManager {
         // disagreed, an ISF-changing override made the carb screen and the
         // home screen show different COB.
         let insulinEffects = annotatedDoses.glucoseEffectsMidAbsorptionISF(
-            insulinSensitivityHistory: sensitivityWithOverrides,
+            insulinSensitivityHistoryMgdlPerUnit: algorithmSensitivity,
             from: start.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval).dateFlooredToTimeInterval(GlucoseMath.defaultDelta),
             to: nil)
 
@@ -89,22 +90,22 @@ extension LoopDataManager {
         let carbStatus = carbEntries.map(
             to: insulinCounteractionEffects,
             carbRatio: carbRatioWithOverrides,
-            insulinSensitivity: sensitivityWithOverrides
+            insulinSensitivityMgdlPerUnit: algorithmSensitivity
         )
 
         let carbEffects = carbStatus.dynamicGlucoseEffects(
             from: start,
             to: end.addingTimeInterval(InsulinMath.defaultInsulinActivityDuration),
             carbRatios: carbRatioWithOverrides,
-            insulinSensitivities: sensitivityWithOverrides,
+            insulinSensitivitiesMgdlPerUnit: algorithmSensitivity,
             absorptionModel: CarbAbsorptionModel.piecewiseLinear.model
         )
 
         return CarbAbsorptionReview(
             carbEntries: carbEntries,
             carbStatuses: carbStatus,
-            effectsVelocities: insulinCounteractionEffects,
-            carbEffects: carbEffects
+            effectsVelocities: insulinCounteractionEffects.map(\.loopKit),
+            carbEffects: carbEffects.map(\.loopKit)
         )
     }
 }

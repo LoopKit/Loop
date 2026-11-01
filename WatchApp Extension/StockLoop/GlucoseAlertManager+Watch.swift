@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import LoopAlgorithm
 import LoopKit
 
 /// Stock's alert text formats glucose through LoopKitUI's display preference, which the watch does not

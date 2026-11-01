@@ -8,10 +8,8 @@
 //  This class allows Loop to pass context data to the Loop Status Extension.
 
 import Foundation
-import LoopAlgorithm
 import LoopKit
 import LoopKitUI
-import LoopAlgorithm
 
 
 struct NetBasalContext {
