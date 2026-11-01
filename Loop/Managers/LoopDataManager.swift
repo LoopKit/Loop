@@ -363,6 +363,7 @@ final class LoopDataManager: ObservableObject {
         for baseTime: Date? = nil,
         presumePresetEndingNow: Bool = false,
         ensureDosingCoverageStart: Date? = nil,
+        ensureCarbCoverageStart: Date? = nil,
         projectOngoingDoses: Bool = false
     ) async throws -> StoredDataAlgorithmInput {
         // Need to fetch doses back as far as t - (DIA + DCA) for Dynamic carbs
@@ -417,6 +418,9 @@ final class LoopDataManager: ObservableObject {
         let forecastEndTime = baseTime.addingTimeInterval(InsulinMath.defaultInsulinActivityDuration).dateCeiledToTimeInterval(GlucoseMath.defaultDelta)
 
         let carbsStart = baseTime.addingTimeInterval(LoopConstants.maxCarbEntryPastTime + .minutes(-1)) // additional minute to handle difference in seconds between carb entry and carb ratio
+        // A pending carb entry can outlive this rolling window while the bolus screen is open.
+        // Cover it with schedule history without expanding the stored-carb or glucose queries.
+        let carbScheduleStart = min(carbsStart, ensureCarbCoverageStart ?? carbsStart)
 
         // Include future carbs in query, but filter out ones entered after basetime. The filtering is only applicable when running in a retrospective situation.
         let carbEntries = try await carbStore.getCarbEntries(
@@ -427,7 +431,7 @@ final class LoopDataManager: ObservableObject {
         }
 
         let carbRatio = try await settingsProvider.getCarbRatioHistory(
-            startDate: carbsStart,
+            startDate: carbScheduleStart,
             endDate: forecastEndTime
         )
 
@@ -451,12 +455,12 @@ final class LoopDataManager: ObservableObject {
             recommendationEffectInterval: recommendationEffectInterval
         )
 
-        // Carb entries (and a backdated manual-bolus entry) can extend back to carbsStart, and
+        // Carb entries (including a pending manual-bolus entry) can extend back to carbScheduleStart, and
         // CarbMath.map(to:) preconditionFailures if the ISF/carb-ratio timelines don't cover every
         // carb entry's start date. timelineIntervalForSensitivity derives its window from dose and
         // glucose history only — which can be more recent than carbsStart (e.g. after a CGM gap) —
-        // so extend the ISF (and override) window back to cover the carb window, matching carbRatio.
-        let sensitivityStart = min(neededSensitivityTimeline.start, carbsStart)
+        // so extend the ISF (and override) window back to cover every entry, matching carbRatio.
+        let sensitivityStart = min(neededSensitivityTimeline.start, carbScheduleStart)
 
         let sensitivity = try await settingsProvider.getInsulinSensitivityHistory(
             startDate: sensitivityStart,
@@ -825,7 +829,11 @@ final class LoopDataManager: ObservableObject {
             endingPremealOverride = true
         }
 
-        var input = try await self.fetchData(for: now, presumePresetEndingNow: truncatingActiveOverride || endingPremealOverride)
+        var input = try await self.fetchData(
+            for: now,
+            presumePresetEndingNow: truncatingActiveOverride || endingPremealOverride,
+            ensureCarbCoverageStart: carbEntryChange?.startDate
+        )
             .addingGlucoseSample(sample: manualGlucoseSample?.asStoredGlucoseSample)
             .removingCarbEntry(carbEntry: carbEntryChange?.originalEntry)
             .addingCarbEntry(carbEntry: carbEntryChange?.asStoredCarbEntry)
@@ -833,6 +841,7 @@ final class LoopDataManager: ObservableObject {
         input.includePositiveVelocityAndRC = usePositiveMomentumAndRCForManualBoluses
         input.recommendationType = .manualBolus
 
+        try input.validateCarbScheduleCoverage()
         let output = LoopAlgorithm.run(input: input)
 
 
@@ -1325,7 +1334,21 @@ extension StoredDataAlgorithmInput {
         return rval
     }
 
+    func validateCarbScheduleCoverage() throws {
+        // CarbMath traps if either lookup is nil. Validate the final input, including pending
+        // additions/edits, so incomplete history becomes a recoverable recommendation error.
+        for entry in carbEntries {
+            guard carbRatio.closestPrior(to: entry.startDate) != nil else {
+                throw LoopError.configurationError(.carbRatioSchedule)
+            }
+            guard sensitivity.closestPrior(to: entry.startDate) != nil else {
+                throw LoopError.configurationError(.insulinSensitivitySchedule)
+            }
+        }
+    }
+
     func predictGlucose(effectsOptions: AlgorithmEffectsOptions = .all) throws -> [PredictedGlucoseValue] {
+        try validateCarbScheduleCoverage()
         let prediction = LoopAlgorithm.generatePrediction(
             start: predictionStart,
             glucoseHistory: glucoseHistory,
@@ -1553,7 +1576,11 @@ extension LoopDataManager: BolusEntryViewModelDelegate {
             endingPremealOverride = true
         }
 
-        var input = try await fetchData(for: now, presumePresetEndingNow: endingPremealOverride, ensureDosingCoverageStart: nil)
+        var input = try await fetchData(
+            for: now,
+            presumePresetEndingNow: endingPremealOverride,
+            ensureCarbCoverageStart: carbEntryChange?.startDate
+        )
 
         // Add potential bolus, carbs, manual glucose
         input = input
