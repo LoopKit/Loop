@@ -7,7 +7,6 @@
 
 import Foundation
 import LoopKit
-import LoopAlgorithm
 
 struct InsulinDeliveryTotals: Equatable {
     var basal: Double = 0

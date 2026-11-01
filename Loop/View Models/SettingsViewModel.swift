@@ -7,7 +7,6 @@
 //
 
 import Combine
-import LoopAlgorithm
 import LoopCore
 import LoopKit
 import LoopKitUI

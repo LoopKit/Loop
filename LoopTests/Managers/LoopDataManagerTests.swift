@@ -7,8 +7,8 @@
 //
 
 import XCTest
-import LoopKit
 import LoopAlgorithm
+import LoopKit
 
 @testable import LoopCore
 @testable import Loop
@@ -185,7 +185,7 @@ class LoopDataManagerTests: XCTestCase {
         let insulinSensitivitySchedule = InsulinSensitivitySchedule(
             unit: .milligramsPerDeciliter,
             dailyItems: [
-                RepeatingScheduleValue(startTime: 0, value: predictionInput.sensitivity.first!.value.doubleValue(for: .milligramsPerDeciliter))
+                RepeatingScheduleValue(startTime: 0, value: predictionInput.sensitivityMgdlPerUnit.first!.value)
             ],
             timeZone: .utcTimeZone
         )!
@@ -230,7 +230,7 @@ class LoopDataManagerTests: XCTestCase {
 
         for (expected, calculated) in zip(expectedPredictedGlucose, predictedGlucose!) {
             XCTAssertEqual(expected.startDate, calculated.startDate)
-            XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: defaultAccuracy)
+            XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.mgdl, accuracy: defaultAccuracy)
         }
 
         await loopDataManager.loop()
@@ -255,6 +255,42 @@ class LoopDataManagerTests: XCTestCase {
         XCTAssertEqual(0.2, deliveryDelegate.lastEnact.bolus!, accuracy: defaultAccuracy)
     }
 
+    func testMmolSettingsDoseTheSameAsMgdl() async throws {
+        func mmol(_ mgdl: Double) -> Double {
+            LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl).doubleValue(for: .millimolesPerLiter)
+        }
+        settingsProvider.settings.insulinSensitivitySchedule = InsulinSensitivitySchedule(
+            unit: .millimolesPerLiter,
+            dailyItems: [
+                RepeatingScheduleValue(startTime: 0, value: mmol(45)),
+                RepeatingScheduleValue(startTime: 32400, value: mmol(55))
+            ],
+            timeZone: .utcTimeZone
+        )!
+        settingsProvider.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: .millimolesPerLiter, dailyItems: [
+            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: mmol(100), maxValue: mmol(110))),
+            RepeatingScheduleValue(startTime: TimeInterval(28800), value: DoubleRange(minValue: mmol(90), maxValue: mmol(100))),
+            RepeatingScheduleValue(startTime: TimeInterval(75600), value: DoubleRange(minValue: mmol(100), maxValue: mmol(110)))
+        ], timeZone: .utcTimeZone)!
+        settingsProvider.settings.suspendThreshold = GlucoseThreshold(unit: .millimolesPerLiter, value: mmol(75))
+        glucoseStore.storedGlucose = [
+            StoredGlucoseSample(startDate: d(.minutes(-1)), quantity: LoopQuantity(unit: .millimolesPerLiter, doubleValue: mmol(120))),
+        ]
+
+        let input = try await loopDataManager.fetchData(for: now)
+        let sensitivityNow = input.sensitivityMgdlPerUnit.first { $0.startDate <= now && $0.endDate > now }!.value
+        let targetNow = input.targetMgdl.first { $0.startDate <= now && $0.endDate > now }!.value
+        XCTAssertEqual(sensitivityNow, 55, accuracy: 1e-9)
+        XCTAssertEqual(targetNow.lowerBound, 90, accuracy: 1e-9)
+        XCTAssertEqual(targetNow.upperBound, 100, accuracy: 1e-9)
+        XCTAssertEqual(input.suspendThresholdMgdl!, 75, accuracy: 1e-9)
+
+        await loopDataManager.updateDisplayState()
+        XCTAssertEqual(120, loopDataManager.eventualBG!, accuracy: 1e-9)
+
+        await loopDataManager.loop()
+        XCTAssertEqual(0.2, deliveryDelegate.lastEnact.bolus!, accuracy: defaultAccuracy)
+    }
 
     func testHighAndFalling() async {
         glucoseStore.storedGlucose = [
@@ -464,9 +500,9 @@ class LoopDataManagerTests: XCTestCase {
 
     func testFetchDataWithHighInsulinNeedsPresetMitigation() async throws {
         var input = try await loopDataManager.fetchData(for: now)
-        XCTAssertEqual(input.target.count, 1)
-        XCTAssertEqual(input.target[0].value.doubleRange(for: .milligramsPerDeciliter), DoubleRange(minValue: 90, maxValue: 100))
-        XCTAssertEqual(input.suspendThreshold?.doubleValue(for: .milligramsPerDeciliter), 75.0)
+        XCTAssertEqual(input.targetMgdl.count, 1)
+        XCTAssertEqual(input.targetMgdl[0].value, 90...100)
+        XCTAssertEqual(input.suspendThresholdMgdl, 75.0)
 
         let override = TemporaryScheduleOverride(
             context: .custom,
@@ -483,9 +519,9 @@ class LoopDataManagerTests: XCTestCase {
         temporaryPresetsManager.scheduleOverride = override
 
         input = try await loopDataManager.fetchData(for: now)
-        XCTAssertEqual(input.target.count, 1)
-        XCTAssertEqual(input.target[0].value.doubleRange(for: .milligramsPerDeciliter), DoubleRange(minValue: 110, maxValue: 110))
-        XCTAssertEqual(input.suspendThreshold?.doubleValue(for: .milligramsPerDeciliter), 110.0)
+        XCTAssertEqual(input.targetMgdl.count, 1)
+        XCTAssertEqual(input.targetMgdl[0].value, 110...110)
+        XCTAssertEqual(input.suspendThresholdMgdl, 110.0)
 
     }
 }
@@ -524,7 +560,7 @@ extension LoopQuantity {
 
 extension LoopDataManager {
     var eventualBG: Double? {
-        displayState.output?.predictedGlucose.last?.quantity.doubleValue(for: .milligramsPerDeciliter)
+        displayState.output?.predictedGlucose.last?.mgdl
     }
 }
 
@@ -532,9 +568,7 @@ extension StoredGlucoseSample {
     static func from(fixture: FixtureGlucoseSample) -> StoredGlucoseSample {
         return StoredGlucoseSample(
             startDate: fixture.startDate,
-            quantity: fixture.quantity,
-            condition: fixture.condition,
-            trendRate: fixture.trendRate,
+            quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: fixture.mgdl),
             isDisplayOnly: fixture.isDisplayOnly,
             wasUserEntered: fixture.wasUserEntered
         )
@@ -558,7 +592,7 @@ extension StoredCarbEntry {
     static func from(fixture: FixtureCarbEntry) -> StoredCarbEntry {
         return StoredCarbEntry(
             startDate: fixture.startDate,
-            quantity: fixture.quantity,
+            quantity: LoopQuantity(unit: .gram, doubleValue: fixture.grams),
             foodType: fixture.foodType,
             absorptionTime: fixture.absorptionTime
         )

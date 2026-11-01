@@ -17,7 +17,6 @@ import MockKit
 import HealthKit
 import WidgetKit
 import LoopCore
-import LoopAlgorithm
 import SwiftUI
 
 #if targetEnvironment(simulator)
@@ -244,7 +243,7 @@ class LoopAppManager: NSObject {
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitCarbSamplesFromOtherApps, // At some point we should let the user decide which apps they would like to import from.
             type: HealthKitSampleStore.carbType,
-            observationStart: Date().addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval)
+            observationStart: Date().addingTimeInterval(-LoopCoreConstants.maximumCarbAbsorptionTimeInterval)
         )
 
         temporaryPresetsManager = TemporaryPresetsManager(settingsProvider: settingsManager, alertIssuer: alertManager)
@@ -264,7 +263,7 @@ class LoopAppManager: NSObject {
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
             type: HealthKitSampleStore.insulinQuantityType,
-            observationStart: Date().addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval)
+            observationStart: Date().addingTimeInterval(-LoopCoreConstants.maximumCarbAbsorptionTimeInterval)
         )
 
         self.doseStore = await DoseStore(

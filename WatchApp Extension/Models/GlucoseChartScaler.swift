@@ -10,7 +10,6 @@ import Foundation
 import CoreGraphics
 import LoopKit
 import WatchKit
-import LoopAlgorithm
 
 
 enum CoordinateSystem {

@@ -9,7 +9,6 @@
 import ActivityKit
 import Charts
 import HealthKit
-import LoopAlgorithm
 import LoopCore
 import LoopKit
 import SwiftUI

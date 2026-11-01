@@ -7,7 +7,6 @@
 
 import Foundation
 import LoopKit
-import LoopAlgorithm
 
 @MainActor
 final class StatisticsViewModel: ObservableObject {

@@ -8,7 +8,6 @@
 
 import HealthKit
 import LoopKit
-import LoopAlgorithm
 @testable import Loop
 
 class MockDoseStore: DoseStoreProtocol {

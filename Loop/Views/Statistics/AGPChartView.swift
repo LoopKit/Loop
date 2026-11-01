@@ -7,7 +7,6 @@
 
 import SwiftUI
 import LoopKit
-import LoopAlgorithm
 import LoopUI
 
 /// The ambulatory glucose profile, styled after the IDC / captūrAGP report.

@@ -1,0 +1,434 @@
+[
+  {
+    "start_at" : "2016-01-30T20:30:43",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T20:35:41",
+    "type" : "TempBasal",
+    "amount" : 0.90604026845637575,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T20:25:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T20:30:43",
+    "type" : "TempBasal",
+    "amount" : 0.89700996677740863,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T20:20:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T20:25:42",
+    "type" : "TempBasal",
+    "amount" : 0.60000000000000009,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T20:15:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T20:20:42",
+    "type" : "TempBasal",
+    "amount" : 14.352159468438538,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T20:10:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T20:15:41",
+    "type" : "TempBasal",
+    "amount" : 3.0100334448160533,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T20:05:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T20:10:42",
+    "type" : "TempBasal",
+    "amount" : 2.4000000000000004,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T20:00:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T20:05:42",
+    "type" : "TempBasal",
+    "amount" : 2.9900332225913622,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T19:55:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T20:00:41",
+    "type" : "TempBasal",
+    "amount" : 1.8,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T19:50:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T19:55:41",
+    "type" : "TempBasal",
+    "amount" : 2.4000000000000004,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T19:45:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T19:50:41",
+    "type" : "TempBasal",
+    "amount" : 1.2000000000000002,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T19:40:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T19:45:41",
+    "type" : "TempBasal",
+    "amount" : 0.90000000000000002,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T19:35:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T19:40:41",
+    "type" : "TempBasal",
+    "amount" : 9.6321070234113702,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T19:25:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T19:35:42",
+    "type" : "TempBasal",
+    "amount" : 4.2000000000000002,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T19:20:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T19:25:42",
+    "type" : "TempBasal",
+    "amount" : 0.60000000000000009,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T19:15:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T19:20:42",
+    "type" : "TempBasal",
+    "amount" : 0.90000000000000002,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T19:10:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T19:15:42",
+    "type" : "TempBasal",
+    "amount" : 0.89700996677740863,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T19:05:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T19:10:41",
+    "type" : "TempBasal",
+    "amount" : 0.60200668896321063,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T19:00:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T19:05:42",
+    "type" : "TempBasal",
+    "amount" : 0.90000000000000002,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T18:55:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T19:00:42",
+    "type" : "TempBasal",
+    "amount" : 0.89700996677740863,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T18:50:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T18:55:41",
+    "type" : "TempBasal",
+    "amount" : 0,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T18:45:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T18:50:41",
+    "type" : "TempBasal",
+    "amount" : 0,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T18:40:43",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T18:45:41",
+    "type" : "TempBasal",
+    "amount" : 0.30201342281879195,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T18:35:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T18:40:43",
+    "type" : "TempBasal",
+    "amount" : 0.59602649006622521,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T18:30:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T18:35:41",
+    "type" : "TempBasal",
+    "amount" : 0.9030100334448159,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T18:25:43",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T18:30:42",
+    "type" : "TempBasal",
+    "amount" : 0.9030100334448159,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T18:20:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T18:25:43",
+    "type" : "TempBasal",
+    "amount" : 0.89700996677740863,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T18:10:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T18:15:44",
+    "type" : "TempBasal",
+    "amount" : 0,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T18:05:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T18:10:42",
+    "type" : "TempBasal",
+    "amount" : 0.30000000000000004,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T18:00:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T18:05:42",
+    "type" : "TempBasal",
+    "amount" : 16.5,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T17:55:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T18:00:42",
+    "type" : "TempBasal",
+    "amount" : 0.90000000000000002,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T17:50:44",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T17:55:42",
+    "type" : "TempBasal",
+    "amount" : 0.60402684563758391,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T17:45:44",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T17:50:44",
+    "type" : "TempBasal",
+    "amount" : 0.90000000000000002,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T17:40:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T17:45:44",
+    "type" : "TempBasal",
+    "amount" : 1.7880794701986755,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T17:35:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T17:40:42",
+    "type" : "TempBasal",
+    "amount" : 1.2000000000000002,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T17:30:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T17:35:42",
+    "type" : "TempBasal",
+    "amount" : 1.7940199335548173,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T17:25:43",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T17:30:41",
+    "type" : "TempBasal",
+    "amount" : 1.8120805369127515,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T17:20:44",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T17:25:43",
+    "type" : "TempBasal",
+    "amount" : 0.60200668896321063,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T17:15:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T17:20:44",
+    "type" : "TempBasal",
+    "amount" : 0.89403973509933776,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T17:10:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T17:15:42",
+    "type" : "TempBasal",
+    "amount" : 0.89700996677740863,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T17:05:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T17:10:41",
+    "type" : "TempBasal",
+    "amount" : 0.60200668896321063,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T17:00:45",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T17:05:42",
+    "type" : "TempBasal",
+    "amount" : 46.969696969696969,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T16:50:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T17:00:45",
+    "type" : "TempBasal",
+    "amount" : 2.9850746268656714,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T16:45:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T16:50:42",
+    "type" : "TempBasal",
+    "amount" : 2.4000000000000004,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T16:40:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T16:45:42",
+    "type" : "TempBasal",
+    "amount" : 2.4000000000000004,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T16:35:43",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T16:40:42",
+    "type" : "TempBasal",
+    "amount" : 3.0100334448160533,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T16:30:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T16:35:43",
+    "type" : "TempBasal",
+    "amount" : 1.7940199335548173,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T16:25:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T16:30:42",
+    "type" : "TempBasal",
+    "amount" : 1.8,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T16:20:41",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T16:25:42",
+    "type" : "TempBasal",
+    "amount" : 0.59800664451827246,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T16:15:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T16:20:41",
+    "type" : "TempBasal",
+    "amount" : 0.9030100334448159,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T16:10:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T16:15:42",
+    "type" : "TempBasal",
+    "amount" : 0.90000000000000002,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T16:05:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T16:10:42",
+    "type" : "TempBasal",
+    "amount" : 0.60000000000000009,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T16:00:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T16:05:42",
+    "type" : "TempBasal",
+    "amount" : 0,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T15:45:42",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T15:50:42",
+    "type" : "TempBasal",
+    "amount" : 0,
+    "unit" : "U/hour"
+  },
+  {
+    "start_at" : "2016-01-30T15:40:49",
+    "scheduled" : 0.80000000000000004,
+    "end_at" : "2016-01-30T15:45:42",
+    "type" : "TempBasal",
+    "amount" : 2.4573378839590441,
+    "unit" : "U/hour"
+  }
+]

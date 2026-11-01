@@ -8,7 +8,6 @@
 
 import Foundation
 import LoopKit
-import LoopAlgorithm
 
 public enum InsulinDeliveryWatchState: Int, Equatable {
     case neutralNoOverride

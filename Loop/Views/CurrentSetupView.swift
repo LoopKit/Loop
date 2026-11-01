@@ -7,8 +7,8 @@
 
 import SwiftUI
 import LoopKit
-import LoopKitUI
 import LoopAlgorithm
+import LoopKitUI
 
 struct CurrentSetupView: View {
     @StateObject private var viewModel: CurrentSetupViewModel
@@ -269,6 +269,8 @@ extension ExperimentOption {
             return NSLocalizedString("Glucose Based Partial Application", comment: "Title of glucose based partial application experiment")
         case .integralRetrospectiveCorrection:
             return NSLocalizedString("Integral Retrospective Correction", comment: "Title of integral retrospective correction experiment")
+        case .slowRetrospectiveCorrection:
+            return NSLocalizedString("Slow Retrospective Correction", comment: "Title of slow retrospective correction experiment")
         }
     }
 }

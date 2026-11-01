@@ -9,7 +9,6 @@
 import WatchConnectivity
 import WatchKit
 import HealthKit
-import LoopAlgorithm
 import Intents
 import os
 import os.log

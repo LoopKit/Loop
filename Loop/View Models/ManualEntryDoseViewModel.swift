@@ -15,7 +15,6 @@ import LoopKit
 import LoopKitUI
 import LoopUI
 import SwiftUI
-import LoopAlgorithm
 
 enum ManualEntryDoseViewModelError: Error {
     case notAuthenticated
@@ -237,7 +236,7 @@ final class ManualEntryDoseViewModel: ObservableObject {
             startDate: selectedDoseDate,
             endDate: selectedDoseDate,
             volume: enteredBolus.doubleValue(for: .internationalUnit),
-            insulinModel: insulinModel
+            insulinModel: AlgorithmInsulinModel(insulinModel)
         )
 
         self.activeInsulin = state.activeInsulin?.quantity
@@ -250,7 +249,8 @@ final class ManualEntryDoseViewModel: ObservableObject {
             do {
                 predictedGlucoseValues = try input
                     .addingDose(dose: enteredBolusDose)
-                    .predictGlucose()
+.predictGlucose()
+                    .map(\.loopKit)
             } catch {
                 predictedGlucoseValues = []
             }

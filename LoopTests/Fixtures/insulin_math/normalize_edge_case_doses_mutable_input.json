@@ -1,0 +1,18 @@
+[
+    {
+        "type": "TempBasal",
+        "start_at": "2015-07-12T23:59:59",
+        "end_at": "2015-07-13T07:54:00",
+        "amount": 2.0,
+        "unit": "U/hour",
+        "isMutable": true
+    },
+    {
+        "type": "Bolus",
+        "start_at": "2015-07-13T11:00:00",
+        "end_at": "2015-07-13T11:00:00",
+        "amount": 3.0,
+        "unit": "U",
+        "isMutable": true
+    }
+]

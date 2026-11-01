@@ -7,8 +7,8 @@
 //
 
 import LoopKit
-import LoopKitUI
 import LoopAlgorithm
+import LoopKitUI
 import os.log
 import Combine
 

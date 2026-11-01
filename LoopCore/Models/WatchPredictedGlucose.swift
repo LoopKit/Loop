@@ -8,7 +8,6 @@
 
 import Foundation
 import LoopKit
-import LoopAlgorithm
 
 public struct WatchPredictedGlucose: Equatable {
     public let values: [PredictedGlucoseValue]
