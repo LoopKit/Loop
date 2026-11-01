@@ -422,6 +422,118 @@ struct ScrubCallout: View {
     }
 }
 
+// MARK: - Prediction
+
+/// The last three hours of readings and Loop's dashed prediction for the next three.
+struct PredictionChartView: View {
+    let readings: [GlucosePoint]
+    let prediction: [GlucosePoint]
+    let unit: GlucoseUnitStyle
+    let targetBands: [TargetBand]
+    var now: Date = Date()
+    var height: CGFloat = 150
+
+    @State private var selection: Date?
+
+    private var window: DateInterval {
+        DateInterval(start: now.addingTimeInterval(-3 * 3600), end: now.addingTimeInterval(3 * 3600))
+    }
+
+    private func clamp(_ mgdl: Double) -> Double {
+        min(max(unit.value(mgdl), unit.dayDomain.lowerBound), unit.dayDomain.upperBound)
+    }
+
+    private var futurePrediction: [GlucosePoint] {
+        prediction.filter { $0.date >= now.addingTimeInterval(-5 * 60) && $0.date <= window.end }
+    }
+
+    var body: some View {
+        Chart {
+            ForEach(Array(targetBands.enumerated()), id: \.offset) { _, band in
+                RectangleMark(xStart: .value("Start", band.start), xEnd: .value("End", band.end),
+                              yStart: .value("Low", clamp(band.range.lowerBound)), yEnd: .value("High", clamp(band.range.upperBound)))
+                    .foregroundStyle(P.targetBand)
+            }
+            ForEach(Array(readings.filter { window.contains($0.date) }.enumerated()), id: \.offset) { _, point in
+                PointMark(x: .value("Time", point.date), y: .value("Glucose", clamp(point.mgdl)))
+                    .symbolSize(12)
+                    .foregroundStyle(P.glucose)
+            }
+            ForEach(Array(futurePrediction.enumerated()), id: \.offset) { index, point in
+                LineMark(x: .value("Time", point.date), y: .value("Predicted", clamp(point.mgdl)), series: .value("Series", "prediction"))
+                    .foregroundStyle(P.glucose)
+                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                    .annotation(position: .topTrailing, spacing: 0) {
+                        if index == futurePrediction.count - 1 {
+                            Text(unit.format(point.mgdl))
+                                .font(LoopDesign.Typeface.caption.weight(.semibold))
+                                .foregroundStyle(P.ink)
+                        }
+                    }
+            }
+            RuleMark(x: .value("Now", now))
+                .foregroundStyle(P.inkMuted)
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: [2, 3]))
+            if let selection {
+                RuleMark(x: .value("Selected", selection))
+                    .foregroundStyle(P.ink.opacity(0.6))
+            }
+        }
+        .frame(height: height)
+        .chartXScale(domain: window.start...window.end)
+        .chartYScale(domain: unit.dayDomain)
+        .chartXAxis {
+            AxisMarks(values: [window.start, now, window.end]) { value in
+                AxisGridLine().foregroundStyle(P.grid)
+                AxisValueLabel {
+                    if let date = value.as(Date.self) {
+                        Text(abs(date.timeIntervalSince(now)) < 60 ? NSLocalizedString("now", comment: "Prediction chart x-axis label marking the current time") : LoopFormat.time(date))
+                    }
+                }
+                .font(LoopDesign.Typeface.caption)
+                .foregroundStyle(P.inkMuted)
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading, values: unit.dayTicks) { _ in
+                AxisGridLine().foregroundStyle(P.grid)
+                AxisValueLabel().font(LoopDesign.Typeface.caption).foregroundStyle(P.inkMuted)
+            }
+        }
+        .chartOverlay { proxy in
+            ScrubOverlay(proxy: proxy, selection: $selection, clampTo: window)
+        }
+        .overlay(alignment: .top) {
+            if let selection {
+                ScrubCallout(rows: scrubRows(at: selection)).allowsHitTesting(false)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
+    }
+
+    private func scrubRows(at date: Date) -> [ScrubCallout.Row] {
+        var rows: [ScrubCallout.Row] = [.init(label: nil, value: LoopFormat.time(date), color: P.ink)]
+        let source = date <= now ? readings : prediction
+        if let value = nearest(source.map { ($0.date, $0.mgdl) }, to: date, within: 10 * 60) {
+            rows.append(.init(label: date <= now
+                              ? NSLocalizedString("Glucose", comment: "Chart callout label for the glucose reading at the touched time")
+                              : NSLocalizedString("Predicted", comment: "Prediction chart callout label for Loop's predicted glucose at the touched time"),
+                              value: "\(unit.format(value)) \(unit.unitName)", color: P.glucoseInk))
+        }
+        return rows
+    }
+
+    private var accessibilitySummary: String {
+        guard let last = futurePrediction.last else {
+            return NSLocalizedString("Glucose prediction unavailable", comment: "VoiceOver label for the prediction chart when Loop has no prediction")
+        }
+        return String(format: NSLocalizedString("Loop predicts %1$@ %2$@ by %3$@", comment: "VoiceOver summary of the prediction chart. (1: predicted glucose value; 2: glucose unit, mmol/L or mg/dL; 3: time of the prediction)"), unit.format(last.mgdl), unit.unitName, LoopFormat.time(last.date))
+    }
+}
+
+// MARK: - IOB and COB
+
 /// Insulin and carbs on board over the same window, each against its own coloured axis.
 struct IOBCOBChartView: View {
     let iob: [TimedValue]

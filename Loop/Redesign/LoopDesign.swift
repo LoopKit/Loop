@@ -63,6 +63,7 @@ enum LoopDesign {
         // Loop state
         static let statusAutomated = Color("fresh")
         static let statusWarning = Color("warning")
+        static let statusCritical = Color("status-critical")
         static let criticalInk = Color("critical-ink")
     }
 
@@ -83,6 +84,7 @@ enum LoopDesign {
 
     /// Text styles follow Dynamic Type; the large numbers are fixed sizes in SF Pro Rounded with tabular figures.
     enum Typeface {
+        static let glucoseHero = Font.system(size: 64, weight: .bold, design: .rounded).monospacedDigit()
         static let statValue = Font.system(.title, design: .rounded).weight(.semibold).monospacedDigit()
         static let statValueSmall = Font.system(.title3, design: .rounded).weight(.semibold).monospacedDigit()
         static let title = Font.title.bold()
@@ -277,9 +279,29 @@ struct AdaptiveRow<Content: View>: View {
     }
 }
 
-// MARK: - Tiles
+// MARK: - Pills and tiles
 
-/// A small sunken tile with a label over a value, as used under the timeline.
+struct StatusPill: View {
+    let text: String
+    var dot: Color? = nil
+
+    var body: some View {
+        HStack(spacing: LoopDesign.Space.s1) {
+            if let dot {
+                Circle().fill(dot).frame(width: 8, height: 8)
+            }
+            Text(text)
+                .lineLimit(1)
+        }
+        .font(LoopDesign.Typeface.footnote.weight(.medium))
+        .foregroundStyle(LoopDesign.Palette.ink)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(LoopDesign.Palette.surfaceSunken, in: Capsule())
+    }
+}
+
+/// A small sunken tile with a label over a value, as used under the hero and the timeline.
 struct ValueTile<Value: View>: View {
     let label: String
     @ViewBuilder var value: Value

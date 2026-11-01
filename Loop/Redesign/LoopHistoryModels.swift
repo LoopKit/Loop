@@ -116,7 +116,7 @@ struct PumpLogEvent: Equatable, Identifiable {
     let kind: Kind
 }
 
-/// Everything known about one day or reporting period, for InsulinTimeline.
+/// Everything known about one day or reporting period, for InsulinTimeline and the Now screen.
 struct DayHistory {
     var window: DateInterval
     var glucose: [GlucosePoint] = []
@@ -308,6 +308,16 @@ enum LoopFormat {
         formatter.unitsStyle = .abbreviated
         formatter.allowedUnits = minutes >= 1440 ? [.day, .hour] : minutes >= 60 ? [.hour, .minute] : [.minute]
         formatter.zeroFormattingBehavior = .dropAll
+        return formatter.string(from: TimeInterval(minutes * 60)) ?? ""
+    }
+
+    /// "2m", "1h 5m": how long ago, for the status pill.
+    static func ago(_ date: Date, now: Date = Date()) -> String {
+        let minutes = max(0, Int(now.timeIntervalSince(date) / 60))
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .abbreviated
+        formatter.allowedUnits = minutes >= 1440 ? [.day, .hour] : minutes >= 60 ? [.hour, .minute] : [.minute]
+        formatter.zeroFormattingBehavior = minutes == 0 ? .pad : .dropAll
         return formatter.string(from: TimeInterval(minutes * 60)) ?? ""
     }
 }

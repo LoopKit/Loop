@@ -94,6 +94,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
         tableView.register(InsulinSuspendedTableViewCell.nib(), forCellReuseIdentifier: InsulinSuspendedTableViewCell.className)
         tableView.register(RecentGlucoseTableViewCell.nib(), forCellReuseIdentifier: RecentGlucoseTableViewCell.className)
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.nowHostingCellIdentifier)
 
         applyDisplayPreferences()
 
@@ -228,6 +229,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
         addScenarioStepGestureRecognizers()
 
         setupPresetsStatusBar()
+
+        if usesRedesign {
+            tableView.backgroundColor = .systemGroupedBackground
+            tableView.separatorStyle = .none
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -360,6 +366,32 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private var bolusProgressReporter: DoseProgressReporter?
 
+    // MARK: - Redesign
+
+    /// Read once, so a table never mixes the two layouts; LoopAppManager rebuilds the screen when the preference changes.
+    let usesRedesign = LoopInterfacePreference.useRedesign
+
+    private static let nowHostingCellIdentifier = "NowHostingCell"
+
+    private lazy var nowModel: NowModel = {
+        let model = NowModel(deviceManager: deviceManager, loopDataManager: loopManager, settingsManager: settingsManager, temporaryPresetsManager: temporaryPresetsManager)
+        model.isOnboardingComplete = { [weak self] in self?.onboardingManager.isComplete ?? false }
+        return model
+    }()
+
+    private lazy var nowActions = NowActions(
+        addCarbs: { [weak self] in self?.userTappedAddCarbs() },
+        bolus: { [weak self] in self?.presentBolusScreen() },
+        presets: { [weak self] in self?.presentPresets() },
+        showPrediction: { [weak self] in self?.showPredictionFromNow() },
+        showToday: { [weak self] in self?.showDay(Date()) },
+        showInsulin: { [weak self] in self?.showInsulinDelivery(sender: self) },
+        showCarbs: { [weak self] in self?.performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: self) },
+        pumpTapped: { [weak self] in self?.executeHUDTapAction(self?.deviceManager.didTapOnPumpStatus(), from: self?.view) },
+        cgmTapped: { [weak self] in self?.executeHUDTapAction(self?.deviceManager.didTapOnCGMStatus(), from: self?.view) },
+        loopStatusTapped: { [weak self] in self?.showLoopStatusFromNow() }
+    )
+
     private func updateBolusProgress() {
         if let cell = tableView.cellForRow(at: IndexPath(row: StatusRow.status.rawValue, section: Section.status.rawValue)) as? BolusProgressTableViewCell {
             if case let .bolusing(_, total) = cell.configuration {
@@ -402,7 +434,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
     
     private var shouldShowHUD: Bool {
-        return !landscapeMode
+        return !landscapeMode && !usesRedesign
     }
 
     // With a vertical status bar there is no top safe area inset, so keep the first row clear of the display corners.
@@ -412,7 +444,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
 
     private var shouldShowStatus: Bool {
-        return !landscapeMode && statusRowMode.hasRow
+        return (!landscapeMode || usesRedesign) && statusRowMode.hasRow
     }
 
     override func glucoseUnitDidChange() {
@@ -699,9 +731,13 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let statusRowMode = self.determineStatusRowMode()
 
         updateBannerAndHUDandStatusRows(statusRowMode: statusRowMode, newSize: currentContext.newSize, animated: animated)
-        tableView.contentInset = UIEdgeInsets(top: shouldShowBannerWarning ? 0 : cornerClearanceTopInset, left: 0, bottom: ActionTabBarMetrics.tableContentInset, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: shouldShowBannerWarning ? 0 : cornerClearanceTopInset, left: 0, bottom: usesRedesign ? 0 : ActionTabBarMetrics.tableContentInset, right: 0)
         
         redrawCharts()
+
+        if usesRedesign {
+            nowModel.refresh()
+        }
 
         reloading = false
         let reloadNow = !self.refreshContext.isEmpty
@@ -717,8 +753,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case presets
         case alertWarning
         case hud
+        case nowHeader
         case status
         case charts
+        case nowCharts
     }
 
     // MARK: - Chart Section Data
@@ -979,9 +1017,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case .hud:
             return shouldShowHUD ? 1 : 0
         case .charts:
-            return ChartRow.allCases.count
+            return usesRedesign ? 0 : ChartRow.allCases.count
         case .status:
             return shouldShowStatus ? StatusRow.allCases.count : 0
+        case .nowHeader, .nowCharts:
+            return usesRedesign ? 1 : 0
         }
     }
     
@@ -1067,6 +1107,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
             cell.hudView.loopCompletionHUD.loopStatusColors = .loopStatus
 
             return cell
+        case .nowHeader:
+            return nowHostingCell(for: indexPath) { NowHeaderView(model: self.nowModel, actions: self.nowActions) }
+        case .nowCharts:
+            return nowHostingCell(for: indexPath) { NowChartsView(model: self.nowModel, actions: self.nowActions) }
         case .charts:
             let cell = tableView.dequeueReusableCell(withIdentifier: ChartTableViewCell.className, for: indexPath) as! ChartTableViewCell
 
@@ -1273,7 +1317,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     cell.setSubtitleLabel(label: nil)
                 }
             }
-        case .presets, .hud, .status, .alertWarning:
+        case .presets, .hud, .status, .alertWarning, .nowHeader, .nowCharts:
             break
         }
     }
@@ -1298,7 +1342,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
         case .alertWarning:
             return UITableView.automaticDimension
-        case .presets, .hud, .status:
+        case .presets, .hud, .status, .nowHeader, .nowCharts:
             return UITableView.automaticDimension
         }
     }
@@ -1315,7 +1359,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 tableView.deselectRow(at: indexPath, animated: true)
                 presentUnmuteAlertConfirmation()
             }
-        case .hud:
+        case .hud, .nowHeader, .nowCharts:
             break
         case .status:
             switch StatusRow(rawValue: indexPath.row)! {
@@ -1389,70 +1433,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     performSegue(withIdentifier: PredictionTableViewController.className, sender: indexPath)
                 }
             case .iob:
-                let showLegacy = false
-                
-                if !showLegacy, let pumpManager = deviceManager.pumpManager {
-                    let hostingController = UIHostingController(
-                        rootView: InsulinDeliveryLog(
-                            viewModel: InsulinDeliveryLogViewModel(
-                                loopDataManager: loopManager,
-                                pumpManager: pumpManager
-                            ),
-                            onTapGesture: { [weak navigationController] doseEntry in
-                                Task {
-                                    var dosingDecision: StoredDosingDecision?
-                                    if let decisionId = doseEntry.decisionId {
-                                        do {
-                                            dosingDecision = try await self.loopManager.dosingDecisionStore.findDosingDecisionsById(decisionId)
-                                        } catch {
-                                            self.log.error("Error finding dosing decision: %{public}@", String(describing: error))
-                                        }
-                                    }
-                                    
-                                    let viewController = CommandResponseViewController(command: { (completionHandler) -> String in
-                                        var description = [String]()
-                                        
-                                        let timeFormatter: DateFormatter = {
-                                            let formatter = DateFormatter()
-                                            
-                                            formatter.dateStyle = .none
-                                            formatter.timeStyle = .short
-                                            
-                                            return formatter
-                                        }()
-                                        
-                                        description.append(timeFormatter.string(from: doseEntry.startDate))
-                                        
-                                        description.append(String(describing: doseEntry))
-                                        
-                                        if let dosingDecision {
-                                            description.append(String(describing: dosingDecision))
-                                        }
-                                        
-                                        return description.joined(separator: "\n\n")
-                                    })
-                                    
-                                    navigationController?.pushViewController(viewController, animated: true)
-                                }
-                            },
-                            onEnterManualDose: { [weak self] in
-                                self?.presentManualDoseEntry()
-                            }
-                        )
-                        .navigationTitle(Text("Insulin"))
-                        .environment(\.colorPalette, .default)
-                        .environment(\.loopStatusColorPalette, .loopStatus)
-                    )
-                    
-                    hostingController.hidesBottomBarWhenPushed = true
-                    
-                    navigationController?.pushViewController(
-                        hostingController,
-                        animated: true
-                    )
-                } else {
-                    performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: indexPath)
-                }
+                showInsulinDelivery(sender: indexPath)
             case .cob:
                 performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: indexPath)
             }
@@ -1807,6 +1788,74 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
     }
 
+    /// The insulin screen behind the IOB chart and the Now screen's IOB tile.
+    private func showInsulinDelivery(sender: Any?) {
+        let showLegacy = false
+        
+        if !showLegacy, let pumpManager = deviceManager.pumpManager {
+            let hostingController = UIHostingController(
+                rootView: InsulinDeliveryLog(
+                    viewModel: InsulinDeliveryLogViewModel(
+                        loopDataManager: loopManager,
+                        pumpManager: pumpManager
+                    ),
+                    onTapGesture: { [weak navigationController] doseEntry in
+                        Task {
+                            var dosingDecision: StoredDosingDecision?
+                            if let decisionId = doseEntry.decisionId {
+                                do {
+                                    dosingDecision = try await self.loopManager.dosingDecisionStore.findDosingDecisionsById(decisionId)
+                                } catch {
+                                    self.log.error("Error finding dosing decision: %{public}@", String(describing: error))
+                                }
+                            }
+                            
+                            let viewController = CommandResponseViewController(command: { (completionHandler) -> String in
+                                var description = [String]()
+                                
+                                let timeFormatter: DateFormatter = {
+                                    let formatter = DateFormatter()
+                                    
+                                    formatter.dateStyle = .none
+                                    formatter.timeStyle = .short
+                                    
+                                    return formatter
+                                }()
+                                
+                                description.append(timeFormatter.string(from: doseEntry.startDate))
+                                
+                                description.append(String(describing: doseEntry))
+                                
+                                if let dosingDecision {
+                                    description.append(String(describing: dosingDecision))
+                                }
+                                
+                                return description.joined(separator: "\n\n")
+                            })
+                            
+                            navigationController?.pushViewController(viewController, animated: true)
+                        }
+                    },
+                    onEnterManualDose: { [weak self] in
+                        self?.presentManualDoseEntry()
+                    }
+                )
+                .navigationTitle(Text("Insulin"))
+                .environment(\.colorPalette, .default)
+                .environment(\.loopStatusColorPalette, .loopStatus)
+            )
+            
+            hostingController.hidesBottomBarWhenPushed = true
+            
+            navigationController?.pushViewController(
+                hostingController,
+                animated: true
+            )
+        } else {
+            performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: sender)
+        }
+    }
+
     private func addPumpManagerViewToHUD(_ view: BaseHUDView) {
         if let hudView = hudView {
             view.stateColors = .pumpStatus
@@ -1843,7 +1892,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let error: Error?
         // First, check whether we have a device error after the most recent completion date
         if let deviceError = deviceManager.lastError,
-            deviceError.date > (hudView?.loopCompletionHUD.lastLoopCompleted ?? .distantPast)
+            deviceError.date > (loopManager.lastLoopCompleted ?? .distantPast)
         {
             error = deviceError.error
         } else if let lastLoopError = lastLoopError {
@@ -2379,6 +2428,50 @@ private struct WarningBannerStyle: ViewModifier {
                 .padding(8)
                 .background(Color.critical.cornerRadius(10))
                 .padding([.top, .horizontal], 8)
+        }
+    }
+}
+
+// MARK: - Redesigned Now screen
+
+extension StatusTableViewController {
+    private func nowHostingCell<Content: View>(for indexPath: IndexPath, @ViewBuilder content: () -> Content) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: Self.nowHostingCellIdentifier, for: indexPath)
+        cell.selectionStyle = .none
+        cell.backgroundColor = .clear
+        cell.contentConfiguration = UIHostingConfiguration(content: content).margins(.all, 0)
+        return cell
+    }
+
+    func presentSettingsFromTab() {
+        if presentedViewController != nil {
+            return
+        }
+        presentSettings()
+    }
+
+    private func showPredictionFromNow() {
+        guard settingsManager.dosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled else { return }
+        performSegue(withIdentifier: PredictionTableViewController.className, sender: self)
+    }
+
+    func showDay(_ day: Date) {
+        let detail = UIHostingController(rootView: DayDetailView(provider: nowModel.provider, day: day))
+        // As for the Insulin, Carbohydrates and Predicted Glucose screens pushed from Now.
+        detail.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(detail, animated: true)
+    }
+
+    private func showLoopStatusFromNow() {
+        let lastCompleted = loopManager.lastLoopCompleted
+        if let deviceError = deviceManager.lastError, deviceError.date > (lastCompleted ?? .distantPast) {
+            showLastError(self)
+        } else if lastLoopError != nil {
+            showLastError(self)
+        } else {
+            // The classic HUD keeps this current; the new interface has no HUD, so set it before presenting.
+            loopCompletionModalViewModel.ago = lastCompleted.map { Date().timeIntervalSince($0) }
+            showLoopCompletionMessage(self)
         }
     }
 }

@@ -130,7 +130,7 @@ struct DayDetailView: View {
     }
 }
 
-/// A day on one timeline with its totals, for a one-day period on Trends.
+/// A day on one timeline with its totals: Today so far on Now, and a one-day period on Trends.
 struct DayTimelineCard: View {
     let title: String
     let history: DayHistory

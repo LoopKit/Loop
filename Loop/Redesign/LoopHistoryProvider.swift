@@ -132,6 +132,19 @@ final class LoopHistoryProvider {
         return history
     }
 
+    /// CGM readings for any period, local and Health combined.
+    func glucose(_ interval: DateInterval) async throws -> [GlucosePoint] {
+        let boundary = localHistoryStart
+        var points: [GlucosePoint] = []
+        if interval.start < boundary {
+            points += try await healthGlucose(DateInterval(start: interval.start, end: min(interval.end, boundary)))
+        }
+        if interval.end > boundary {
+            points += try await localGlucose(DateInterval(start: max(interval.start, boundary), end: interval.end))
+        }
+        return points
+    }
+
     // MARK: - Loop runs
 
     /// Loop runs in the local window, oldest first, with when the record of them begins.
