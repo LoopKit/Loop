@@ -10,8 +10,8 @@ import Foundation
 import OSLog
 import LoopCore
 import LoopKit
-import Combine
 import LoopAlgorithm
+import Combine
 
 enum MissedMealStatus: Equatable {
     case hasMissedMeal(startTime: Date, carbAmount: Double)
@@ -108,9 +108,9 @@ class MealDetectionManager {
     // MARK: Meal Detection
     func hasMissedMeal(
         at date: Date,
-        glucoseSamples: [some GlucoseSampleValue],
-        insulinCounteractionEffects: [GlucoseEffectVelocity],
-        carbEffects: [GlucoseEffect],
+        glucoseSamples: [some LoopAlgorithm.GlucoseSampleValue],
+        insulinCounteractionEffects: [LoopAlgorithm.GlucoseEffectVelocity],
+        carbEffects: [LoopAlgorithm.GlucoseEffect],
         sensitivitySchedule: InsulinSensitivitySchedule,
         carbRatioSchedule: CarbRatioSchedule
     ) -> MissedMealStatus
@@ -136,11 +136,11 @@ class MealDetectionManager {
         var effectValueCache: [Date: Double] = [:]
 
         /// Carb effects are cumulative, so we have to subtract the previous effect value
-        var previousEffectValue: Double = filteredCarbEffects.first?.quantity.doubleValue(for: unit) ?? 0
+        var previousEffectValue: Double = filteredCarbEffects.first?.mgdl ?? 0
 
         /// Counteraction effects only take insulin into account, so we need to account for the carb effects when computing the unexpected deviations
         for effect in filteredCarbEffects {
-            let value = effect.quantity.doubleValue(for: unit)
+            let value = effect.mgdl
             /// We do `-1 * (value - previousEffectValue)` because this will compute the carb _counteraction_ effect
             effectValueCache[effect.startDate] = (effectValueCache[effect.startDate] ?? 0) +  -1 * (value - previousEffectValue)
             previousEffectValue = value
@@ -154,16 +154,16 @@ class MealDetectionManager {
                 let end = min($0.endDate, now)
 
                 guard let effect = $0.effect(from: start, to: end) else {
-                    let item: GlucoseEffect? = nil // FIXME: we get a compiler error if we try to return `nil` directly
+                    let item: LoopAlgorithm.GlucoseEffect? = nil // FIXME: we get a compiler error if we try to return `nil` directly
                     return item
                 }
 
-                return GlucoseEffect(startDate: effect.endDate.dateCeiledToTimeInterval(delta),
-                                     quantity: effect.quantity)
+                return LoopAlgorithm.GlucoseEffect(startDate: effect.endDate.dateCeiledToTimeInterval(delta),
+                                     mgdl: effect.mgdl)
             }
         
         for effect in processedICE {
-            let value = effect.quantity.doubleValue(for: unit)
+            let value = effect.mgdl
             effectValueCache[effect.startDate] = (effectValueCache[effect.startDate] ?? 0) + value
         }
         
@@ -282,9 +282,9 @@ class MealDetectionManager {
     ///    - carbEffects: the effects of any active carb entries. Must include effects from `currentDate() - MissedMealSettings.maxRecency` until `currentDate()`.
     func generateMissedMealNotificationIfNeeded(
         at date: Date,
-        glucoseSamples: [some GlucoseSampleValue],
-        insulinCounteractionEffects: [GlucoseEffectVelocity],
-        carbEffects: [GlucoseEffect],
+        glucoseSamples: [some LoopAlgorithm.GlucoseSampleValue],
+        insulinCounteractionEffects: [LoopAlgorithm.GlucoseEffectVelocity],
+        carbEffects: [LoopAlgorithm.GlucoseEffect],
         sensitivitySchedule: InsulinSensitivitySchedule,
         carbRatioSchedule: CarbRatioSchedule,
         maxBolus: Double
@@ -374,7 +374,7 @@ class MealDetectionManager {
     }
 }
 
-fileprivate extension BidirectionalCollection where Element: GlucoseSampleValue, Index == Int {
+fileprivate extension BidirectionalCollection where Element: LoopAlgorithm.GlucoseSampleValue, Index == Int {
     /// Returns whether there are any user-entered or calibration points
     /// Runtime: O(n)
     func containsUserEntered() -> Bool {
@@ -391,9 +391,9 @@ extension BolusStateProvider {
     }
 }
 
-extension GlucoseEffectVelocity {
+extension LoopAlgorithm.GlucoseEffectVelocity {
     /// The integration of the velocity span from `start` to `end`
-    public func effect(from start: Date, to end: Date) -> GlucoseEffect? {
+    public func effect(from start: Date, to end: Date) -> LoopAlgorithm.GlucoseEffect? {
         guard
             start <= end,
             startDate <= start,
@@ -403,15 +403,7 @@ extension GlucoseEffectVelocity {
         }
 
         let duration = end.timeIntervalSince(start)
-        let velocityPerSecond = quantity.doubleValue(for: GlucoseEffectVelocity.perSecondUnit)
-
-        return GlucoseEffect(
-            startDate: end,
-            quantity: LoopQuantity(
-                unit: .milligramsPerDeciliter,
-                doubleValue: velocityPerSecond * duration
-            )
-        )
+        return LoopAlgorithm.GlucoseEffect(startDate: end, mgdl: mgdlPerSecond * duration)
     }
 }
 

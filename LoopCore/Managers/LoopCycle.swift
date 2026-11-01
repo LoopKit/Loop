@@ -23,7 +23,7 @@ public protocol DeliveryDelegate: AnyObject {
     var pumpStatusHighlight: DeviceStatusHighlight? { get }
     var cgmManagerStatus: CGMManagerStatus? { get }
 
-    func enact(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?) async throws
+    func enact(bolus: Double?, tempBasal: LoopKit.TempBasalRecommendation?, decisionId: UUID?) async throws
     func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws
     func roundBasalRate(unitsPerHour: Double) -> Double
     func roundBolusVolume(units: Double) -> Double
@@ -37,7 +37,7 @@ public protocol PumpManagerDeliveryDelegate: DeliveryDelegate {
     var cgmManager: CGMManager? { get }
 
     /// Sends a dose `enact` has checked, logged the device's way.
-    func send(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?, to pumpManager: PumpManager) async throws
+    func send(bolus: Double?, tempBasal: LoopKit.TempBasalRecommendation?, decisionId: UUID?, to pumpManager: PumpManager) async throws
 }
 
 public extension PumpManagerDeliveryDelegate {
@@ -89,7 +89,7 @@ public extension PumpManagerDeliveryDelegate {
     }
 
     /// Refused while the pump's last command is unconfirmed: its driver settles it at its next session.
-    func enact(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?) async throws {
+    func enact(bolus: Double?, tempBasal: LoopKit.TempBasalRecommendation?, decisionId: UUID?) async throws {
         guard let pumpManager = pumpManager else {
             throw LoopError.configurationError(.pumpManager)
         }
@@ -126,7 +126,7 @@ public protocol LoopCycleHost: AnyObject {
     var currentDosingStrategy: AutomaticDosingStrategy { get }
     var usePositiveMomentumAndRCForManualBoluses: Bool { get }
     var carbAbsorptionModel: CarbAbsorptionModel { get }
-    func insulinModel(for type: InsulinType?) -> InsulinModel
+    func insulinModel(for type: InsulinType?) -> LoopKit.InsulinModel
 
     /// This device holds the pump: it may command it, and its dosing decisions are the record.
     var holdsPump: Bool { get }
@@ -145,9 +145,9 @@ public final class LoopCycle {
         public var output: AlgorithmOutput<StoredCarbEntry>?
         /// The automatic recommendation as it was to be enacted: rounded and adjusted for the
         /// pump's current temp.
-        public var recommendation: AutomaticDoseRecommendation?
+        public var recommendation: LoopKit.AutomaticDoseRecommendation?
         /// The temp basal command; nil when the pump's current temp already serves.
-        public var basalAdjustment: TempBasalRecommendation?
+        public var basalAdjustment: LoopKit.TempBasalRecommendation?
         /// The dose went to the pump and the pump took it.
         public var enacted = false
         public var error: LoopError?
@@ -165,7 +165,7 @@ public final class LoopCycle {
     private let log = OSLog(subsystem: "com.loopkit.Loop", category: "LoopCycle")
 
     /// The manual recommendation in the last stored remote recommendation.
-    private var lastManualBolusRecommendation: ManualBolusRecommendation?
+    private var lastManualBolusRecommendation: LoopKit.ManualBolusRecommendation?
 
     public init(doseStore: DoseStoreProtocol, carbStore: CarbStoreProtocol, glucoseStore: GlucoseStoreProtocol,
          dosingDecisionStore: DosingDecisionStoreProtocol?, settingsProvider: SettingsProvider,
@@ -188,6 +188,7 @@ public final class LoopCycle {
         for baseTime: Date? = nil,
         presumePresetEndingNow: Bool = false,
         ensureDosingCoverageStart: Date? = nil,
+        ensureCarbCoverageStart: Date? = nil,
         projectOngoingDoses: Bool = false,
         isolation: isolated (any Actor)? = #isolation
     ) async throws -> StoredDataAlgorithmInput {
@@ -199,6 +200,7 @@ public final class LoopCycle {
             for: baseTime,
             presumePresetEndingNow: presumePresetEndingNow,
             ensureDosingCoverageStart: ensureDosingCoverageStart,
+            ensureCarbCoverageStart: ensureCarbCoverageStart,
             projectOngoingDoses: projectOngoingDoses,
             now: now,
             doseStore: doseStore,
@@ -240,7 +242,7 @@ public final class LoopCycle {
 
             try input.checkRecency(at: loopBaseTime, lastAddedPumpData: doseStore.lastAddedPumpData)
 
-            var output = LoopAlgorithm.run(input: input)
+            var output = Algorithm.run(input: input)
             outcome.output = output
             outcome.dosingDecision.algorithmExperiments = host.algorithmExperiments(for: dosingStrategy, guardAndRunway: output.guardAndRunway)
 
@@ -265,7 +267,7 @@ public final class LoopCycle {
                 let scheduledBasalRate = input.basal.closestPrior(to: loopBaseTime)!.value
                 let activeOverride = host.overrideHistory.activeOverride(at: loopBaseTime)
 
-                let basalAdjustment = basal.adjustForCurrentDelivery(
+                let basalAdjustment = basal.loopKit.adjustForCurrentDelivery(
                     at: loopBaseTime,
                     neutralBasalRate: scheduledBasalRate,
                     currentTempBasal: deliveryDelegate.basalDeliveryState?.currentTempBasal,
@@ -274,12 +276,12 @@ public final class LoopCycle {
                 )
 
                 if let basalAdjustment {
-                    recommendationToEnact.basalAdjustment = basalAdjustment
+                    recommendationToEnact.basalAdjustment = basalAdjustment.algorithm
                 }
 
                 output.recommendationResult = .success(.init(automatic: recommendationToEnact))
                 outcome.output = output
-                outcome.recommendation = recommendationToEnact
+                outcome.recommendation = recommendationToEnact.loopKit
                 outcome.basalAdjustment = basalAdjustment
 
                 if recommendationToEnact != algoRecommendation {
@@ -347,7 +349,11 @@ public final class LoopCycle {
             endingPremealOverride = true
         }
 
-        var input = try await fetchData(for: now(), presumePresetEndingNow: truncatingActiveOverride || endingPremealOverride)
+        var input = try await fetchData(
+            for: now(),
+            presumePresetEndingNow: truncatingActiveOverride || endingPremealOverride,
+            ensureCarbCoverageStart: carbEntryChange?.startDate
+        )
             .addingGlucoseSample(sample: manualGlucoseSample?.asStoredGlucoseSample)
             .removingCarbEntry(carbEntry: carbEntryChange?.originalEntry)
             .addingCarbEntry(carbEntry: carbEntryChange?.asStoredCarbEntry)
@@ -362,11 +368,12 @@ public final class LoopCycle {
         carbEntryChange: CarbEntryChange? = nil,
         truncatingActiveOverride: Bool = false,
         isolation: isolated (any Actor)? = #isolation
-    ) async throws -> ManualBolusRecommendation? {
+    ) async throws -> LoopKit.ManualBolusRecommendation? {
         let input = try await manualBolusInput(manualGlucoseSample: manualGlucoseSample, carbEntryChange: carbEntryChange,
                                                truncatingActiveOverride: truncatingActiveOverride)
 
-        let output = LoopAlgorithm.run(input: input)
+        try input.validateCarbScheduleCoverage()
+        let output = Algorithm.run(input: input)
 
         switch output.recommendationResult {
         case .success(let prediction):
@@ -374,7 +381,7 @@ public final class LoopCycle {
             if let roundedAmount = requiredHost.deliveryDelegate?.roundBolusVolume(units: manualBolusRecommendation.amount) {
                 manualBolusRecommendation.amount = roundedAmount
             }
-            return manualBolusRecommendation
+            return manualBolusRecommendation.loopKit
         case .failure(let error):
             throw error
         }
@@ -412,7 +419,7 @@ public final class LoopCycle {
     /// owns the program). A failure stores nothing. The hooks bracket the send.
     public func cancelActiveTempBasal(
         for reason: CancelActiveTempBasalReason,
-        dosingStarted: (AutomaticDoseRecommendation) -> Void = { _ in },
+        dosingStarted: (LoopKit.AutomaticDoseRecommendation) -> Void = { _ in },
         dosingFinished: () -> Void = {},
         isolation: isolated (any Actor)? = #isolation
     ) async throws -> Bool {
@@ -427,7 +434,7 @@ public final class LoopCycle {
 
         os_log("Cancelling active temp basal for reason: %{public}@", log: log, type: .default, reason.rawValue)
 
-        let recommendation = AutomaticDoseRecommendation(basalAdjustment: .cancel, direction: .decrease)
+        let recommendation = LoopKit.AutomaticDoseRecommendation(basalAdjustment: .cancel, direction: .decrease)
 
         var dosingDecision = StoredDosingDecision(date: now(), reason: reason.rawValue)
         dosingDecision.settings = StoredDosingDecision.Settings(settingsProvider.settings)
@@ -451,29 +458,29 @@ public final class LoopCycle {
         guard host.holdsPump else { return }
 
         if lastManualBolusRecommendation == nil {
-            lastManualBolusRecommendation = displayState.output?.recommendation?.manual
+            lastManualBolusRecommendation = displayState.output?.recommendation?.manual?.loopKit
         }
 
-        let recommendationChanged = lastManualBolusRecommendation != displayState.output?.recommendation?.manual
+        let recommendationChanged = lastManualBolusRecommendation != displayState.output?.recommendation?.manual?.loopKit
 
         guard force || recommendationChanged else {
             return
         }
 
-        lastManualBolusRecommendation = displayState.output?.recommendation?.manual
+        lastManualBolusRecommendation = displayState.output?.recommendation?.manual?.loopKit
 
         guard let output = displayState.output else { return }
 
         var dosingDecision = StoredDosingDecision(date: now(), reason: "updateRemoteRecommendation")
         dosingDecision.algorithmExperiments = host.algorithmExperiments(for: host.currentDosingStrategy, guardAndRunway: output.guardAndRunway)
-        dosingDecision.predictedGlucose = output.predictedGlucose
+        dosingDecision.predictedGlucose = output.predictedGlucose.map(\.loopKit)
         dosingDecision.insulinOnBoard = displayState.activeInsulin
         dosingDecision.carbsOnBoard = displayState.activeCarbs
         switch output.recommendationResult {
         case .success(let recommendation):
-            dosingDecision.automaticDoseRecommendation = recommendation.automatic
+            dosingDecision.automaticDoseRecommendation = recommendation.automatic?.loopKit
             if let recommendationDate = displayState.input?.predictionStart, let manualRec = recommendation.manual {
-                dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: manualRec, date: recommendationDate)
+                dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: manualRec.loopKit, date: recommendationDate)
             }
         case .failure(let error):
             if let loopError = error as? LoopError {
@@ -519,6 +526,6 @@ public final class LoopCycle {
 
     /// Off the caller's actor.
     private static func runAlgorithm(input: StoredDataAlgorithmInput) async -> AlgorithmOutput<StoredCarbEntry> {
-        LoopAlgorithm.run(input: input)
+        Algorithm.run(input: input)
     }
 }

@@ -7,7 +7,6 @@
 //
 
 import LoopKit
-import LoopAlgorithm
 
 public protocol GlucoseStoreProtocol: AnyObject {
     var latestGlucose: GlucoseSampleValue? { get }

@@ -75,7 +75,11 @@ final class StockRunsTests: XCTestCase {
 
     private let mgdl = LoopUnit.milligramsPerDeciliter
 
-    private func makeManager(maximumBasalRatePerHour: Double = 4) async -> WatchLoopManager {
+    /// `glucoseUnit` writes the same therapy (ISF 70, target 100-115, suspend 80 mg/dL) in that unit.
+    private func makeManager(maximumBasalRatePerHour: Double = 4, glucoseUnit: LoopUnit = .milligramsPerDeciliter) async -> WatchLoopManager {
+        func g(_ mgdl: Double) -> Double {
+            LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl).doubleValue(for: glucoseUnit)
+        }
         let cacheStore = PersistenceController(directoryURL: dir.appendingPathComponent(UUID().uuidString))
         let doseStore = await DoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
                                         longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
@@ -89,14 +93,14 @@ final class StockRunsTests: XCTestCase {
         var settings = LoopSettings()
         settings.basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 0.7)])
         settings.insulinSensitivitySchedule = InsulinSensitivitySchedule(
-            unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 70)])
+            unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: 0, value: g(70))])
         settings.carbRatioSchedule = CarbRatioSchedule(unit: .gram, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 7)])
         settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(
-            unit: .milligramsPerDeciliter,
-            dailyItems: [RepeatingScheduleValue(startTime: 0, value: DoubleRange(minValue: 100, maxValue: 115))])
+            unit: glucoseUnit,
+            dailyItems: [RepeatingScheduleValue(startTime: 0, value: DoubleRange(minValue: g(100), maxValue: g(115)))])
         settings.maximumBolus = 10
         settings.maximumBasalRatePerHour = maximumBasalRatePerHour
-        settings.suspendThreshold = GlucoseThreshold(unit: .milligramsPerDeciliter, value: 80)
+        settings.suspendThreshold = GlucoseThreshold(unit: glucoseUnit, value: g(80))
 
         let defaults = UserDefaults(suiteName: "StockRunsTests-\(UUID().uuidString)")!
         return WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
@@ -106,10 +110,11 @@ final class StockRunsTests: XCTestCase {
     }
 
     /// A flat hour of readings ending at `latest` (or `count` readings, five minutes apart).
-    private func seedGlucose(_ manager: WatchLoopManager, mgdl value: Double = 250, latest: Date = Date(), count: Int = 12) async {
+    private func seedGlucose(_ manager: WatchLoopManager, mgdl value: Double = 250, latest: Date = Date(), count: Int = 12,
+                             unit: LoopUnit = .milligramsPerDeciliter) async {
         let samples: [NewGlucoseSample] = (0..<count).reversed().map { i in
             NewGlucoseSample(date: latest.addingTimeInterval(-Double(i) * 5 * 60),
-                             quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: value),
+                             quantity: LoopQuantity(unit: unit, doubleValue: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: value).doubleValue(for: unit)),
                              condition: nil, trend: .flat, trendRate: nil,
                              isDisplayOnly: false, wasUserEntered: false,
                              syncIdentifier: "stock-runs-\(UUID().uuidString)")
@@ -180,13 +185,11 @@ final class StockRunsTests: XCTestCase {
     }
 
     private func target(_ input: StoredDataAlgorithmInput) -> ClosedRange<Double>? {
-        input.target.closestPrior(to: input.predictionStart).map {
-            $0.value.lowerBound.doubleValue(for: .milligramsPerDeciliter)...$0.value.upperBound.doubleValue(for: .milligramsPerDeciliter)
-        }
+        input.targetMgdl.closestPrior(to: input.predictionStart)?.value
     }
 
     private func isf(_ input: StoredDataAlgorithmInput, at date: Date) -> Double? {
-        input.sensitivity.first { $0.startDate <= date && date < $0.endDate }?.value.doubleValue(for: .milligramsPerDeciliter)
+        input.sensitivityMgdlPerUnit.first { $0.startDate <= date && date < $0.endDate }?.value
     }
 
     /// An Omnipod manager with a completed pod, optionally faulted or running a temp.
@@ -279,10 +282,10 @@ final class StockRunsTests: XCTestCase {
         await runLoop(manager)
         let loopRun = await loopInput(manager)
         let loop = try XCTUnwrap(loopRun)
-        XCTAssertEqual(try XCTUnwrap(loop.suspendThreshold).doubleValue(for: mgdl), 110, accuracy: 0.001, "the loop")
+        XCTAssertEqual(try XCTUnwrap(loop.suspendThresholdMgdl), 110, accuracy: 0.001, "the loop")
 
         let bolus = try await bolusInput(manager)
-        XCTAssertEqual(try XCTUnwrap(bolus.suspendThreshold).doubleValue(for: mgdl), 110, accuracy: 0.001, "the recommended bolus")
+        XCTAssertEqual(try XCTUnwrap(bolus.suspendThresholdMgdl), 110, accuracy: 0.001, "the recommended bolus")
     }
 
     // MARK: - 4. The display run
@@ -311,7 +314,7 @@ final class StockRunsTests: XCTestCase {
         let glance = await manager.settledGlanceData()
         XCTAssertEqual(try XCTUnwrap(glance.iob), try XCTUnwrap(output.activeInsulin), accuracy: 0.0001)
         XCTAssertEqual(try XCTUnwrap(glance.eventual).doubleValue(for: mgdl),
-                       try XCTUnwrap(output.predictedGlucose.last).quantity.doubleValue(for: mgdl), accuracy: 0.0001)
+                       try XCTUnwrap(output.predictedGlucose.last).mgdl, accuracy: 0.0001)
         let cob: Double? = await withCheckedContinuation { done in manager.glanceCarbsOnBoard { done.resume(returning: $0) } }
         XCTAssertEqual(cob, output.activeCarbs)
     }
@@ -360,7 +363,7 @@ final class StockRunsTests: XCTestCase {
         let loopEventual = try XCTUnwrap(manager.loopRunState.output?.predictedGlucose.last)
         let glance = await manager.settledGlanceData()
         XCTAssertEqual(try XCTUnwrap(glance.dosingEventual).doubleValue(for: mgdl),
-                       loopEventual.quantity.doubleValue(for: mgdl), accuracy: 0.0001)
+                       loopEventual.mgdl, accuracy: 0.0001)
         XCTAssertGreaterThan(try XCTUnwrap(glance.dosingEventual).doubleValue(for: mgdl),
                              try XCTUnwrap(glance.eventual).doubleValue(for: mgdl) + 5,
                              "the loop's run cuts the temp at now; the display run credits the rest of it")
@@ -1095,6 +1098,51 @@ final class StockRunsTests: XCTestCase {
         manager.setClosedLoopEnabled(true, reason: "test")
         let closed = GlanceViewModel.activeState(data: await manager.settledGlanceData(), cob: nil, now: Date())
         XCTAssertEqual(closed.loopFreshness, .stale, "closed loop ages from the last cycle")
+    }
+
+    // MARK: - mmol/L, as stock's `testMmolSettingsDoseTheSameAsMgdl`
+
+    /// Settings and glucose in mmol/L reach the algorithm in mg/dL, so the watch's loop, its display run and
+    /// its recommended bolus come out exactly as with the same therapy in mg/dL.
+    func testMmolSettingsDoseTheSameAsMgdl() async throws {
+        let now = Date()
+        struct Run { var input: StoredDataAlgorithmInput; var eventual: Double; var recommendation: AutomaticDoseRecommendation
+                     var displayEventual: Double; var manualBolus: Double }
+        var runs: [Run] = []
+        for unit in [LoopUnit.milligramsPerDeciliter, .millimolesPerLiter] {
+            let manager = await makeManager(glucoseUnit: unit)
+            manager.now = { now }
+            manager.pumpManager = try makePump()
+            await seedGlucose(manager, mgdl: 180, latest: now.addingTimeInterval(-.minutes(1)), unit: unit)
+            await report(manager, reconciledAt: now)
+            await runLoop(manager)
+            await runDisplay(manager)
+            let input = try XCTUnwrap(manager.loopRunState.input, "\(unit)")
+            let manual = try await manager.manualBolusRecommendation().get()
+            runs.append(Run(input: input,
+                            eventual: try XCTUnwrap(manager.loopRunState.output?.predictedGlucose.last).mgdl,
+                            recommendation: try XCTUnwrap(manager.lastRecommendation),
+                            displayEventual: try XCTUnwrap(manager.displayState.output?.predictedGlucose.last).mgdl,
+                            manualBolus: try XCTUnwrap(manual).amount))
+        }
+        let (mgdl, mmol) = (runs[0], runs[1])
+
+        let isfNow = try XCTUnwrap(mmol.input.sensitivityMgdlPerUnit.first { $0.startDate <= now && now < $0.endDate }).value
+        let targetNow = try XCTUnwrap(mmol.input.targetMgdl.first { $0.startDate <= now && now < $0.endDate }).value
+        XCTAssertEqual(isfNow, 70, accuracy: 1e-9)
+        XCTAssertEqual(targetNow.lowerBound, 100, accuracy: 1e-9)
+        XCTAssertEqual(targetNow.upperBound, 115, accuracy: 1e-9)
+        XCTAssertEqual(try XCTUnwrap(mmol.input.suspendThresholdMgdl), 80, accuracy: 1e-9)
+
+        XCTAssertEqual(mmol.input.glucoseHistory.count, mgdl.input.glucoseHistory.count)
+        XCTAssertEqual(mmol.eventual, mgdl.eventual, accuracy: 1e-9)
+        XCTAssertEqual(mmol.displayEventual, mgdl.displayEventual, accuracy: 1e-9)
+        XCTAssertTrue((mgdl.recommendation.bolusUnits ?? 0) > 0 || mgdl.recommendation.basalAdjustment.unitsPerHour > 0.7,
+                      "high glucose: a correction to compare")
+        XCTAssertEqual(mmol.recommendation.basalAdjustment.unitsPerHour, mgdl.recommendation.basalAdjustment.unitsPerHour, accuracy: 1e-9)
+        XCTAssertEqual(mmol.recommendation.bolusUnits ?? 0, mgdl.recommendation.bolusUnits ?? 0, accuracy: 1e-9)
+        XCTAssertGreaterThan(mgdl.manualBolus, 0)
+        XCTAssertEqual(mmol.manualBolus, mgdl.manualBolus, accuracy: 1e-9)
     }
 
     /// The glance shows glucose in the user's unit, as the watch's other screens do.

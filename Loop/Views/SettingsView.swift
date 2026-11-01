@@ -365,7 +365,8 @@ extension SettingsView {
                     selected: setupChange,
                     loadHistory: { [viewModel] in try await viewModel.setupHistory?() ?? SetupHistory(settings: [], experiments: []) },
                     glucoseStore: glucoseStore,
-                    insulinDeliveryHistory: viewModel.insulinDeliveryHistory
+                    insulinDeliveryHistory: viewModel.insulinDeliveryHistory,
+                    outcomesPackageBuilder: viewModel.outcomesPackageBuilder
                 ))) {
                     LargeButton(
                         action: {},

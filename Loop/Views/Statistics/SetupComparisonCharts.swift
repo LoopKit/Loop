@@ -7,7 +7,6 @@
 
 import SwiftUI
 import LoopKit
-import LoopAlgorithm
 
 /// A horizontal time-in-range bar for one period, lows on the left.
 struct TimeInRangeStripe: View {

@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import LoopAlgorithm
+import LoopKit
 
 @MainActor
 private struct GlucoseDisplayUnitKey: @preconcurrency EnvironmentKey {

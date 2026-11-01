@@ -9,7 +9,6 @@
 import Foundation
 import LoopKit
 import LoopCore
-import LoopAlgorithm
 import UserNotifications
 import WatchKit
 

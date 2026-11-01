@@ -18,7 +18,6 @@ import SwiftCharts
 import os.log
 import Combine
 import WidgetKit
-import LoopAlgorithm
 
 private extension RefreshContext {
     static let all: Set<RefreshContext> = [.status, .glucose, .insulin, .carbs, .targets]
@@ -558,7 +557,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         let podLoanedToWatch = deviceManager.isPodLoanedToWatch
 
         let state = await loopManager.algorithmDisplayState
-        predictedGlucoseValues = state.output?.predictedGlucose ?? []
+        predictedGlucoseValues = state.output?.predictedGlucose.map(\.loopKit) ?? []
 
         /// Update the status HUDs immediately
         let lastLoopError: Error?

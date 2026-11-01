@@ -9,7 +9,6 @@
 import HealthKit
 import UIKit
 import WatchConnectivity
-import LoopAlgorithm
 import LoopKit
 import LoopCore
 
@@ -384,7 +383,7 @@ final class WatchDataManager: NSObject {
             // Drop the first element in predictedGlucose because it is the current glucose
             let filteredPredictedGlucose = predictedGlucose.dropFirst()
             if filteredPredictedGlucose.count > 0 {
-                context.predictedGlucose = WatchPredictedGlucose(values: Array(filteredPredictedGlucose))
+                context.predictedGlucose = WatchPredictedGlucose(values: filteredPredictedGlucose.map(\.loopKit))
             }
         }
 
@@ -482,6 +481,7 @@ final class WatchDataManager: NSObject {
             if let userInfo = SetPresetUserInfo(rawValue: message) {
                 if let presetIdentifier = userInfo.presetIdentifier {
                     temporaryPresetsManager.startPreset(withIdentifier: presetIdentifier)
+                    analyticsServicesManager?.didStartPresetOnWatch()
                 } else {
                     temporaryPresetsManager.clearOverride()
                 }
@@ -502,6 +502,7 @@ final class WatchDataManager: NSObject {
             log.default("Acknowledge alert from watch: %{public}@", String(describing: message))
             if let userInfo = AcknowledgeAlertUserInfo(rawValue: message) {
                 let id = Alert.Identifier(managerIdentifier: userInfo.managerIdentifier, alertIdentifier: userInfo.alertIdentifier)
+                analyticsServicesManager?.didAcknowledgeAlertOnWatch()
                 try? await alertManager.acknowledgeAlert(identifier: id)
             }
             return [:]
@@ -530,6 +531,7 @@ final class WatchDataManager: NSObject {
                 return [:]
             }
         case WatchContextRequestUserInfo.name?:
+            analyticsServicesManager?.didRequestWatchContext()
             return await createWatchContext(reason: "contextRequest").rawValue
         case NotificationActionSelection.name?:
             if let selection = NotificationActionSelection(rawValue: message) {
@@ -562,7 +564,14 @@ extension WatchDataManager: WCSessionDelegate {
     }
 
     nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
-        podLoanHandleReceivedUserInfo(userInfo)
+        guard let summary = WatchUsageSummaryUserInfo(rawValue: userInfo)?.summary else {
+            // Anything else is loan traffic, or logged there.
+            podLoanHandleReceivedUserInfo(userInfo)
+            return
+        }
+        Task { @MainActor in
+            self.analyticsServicesManager?.didReceiveWatchUsage(summary)
+        }
     }
 
     nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {

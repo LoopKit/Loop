@@ -9,7 +9,6 @@
 import Foundation
 import LoopKit
 import LoopUI
-import LoopAlgorithm
 import MKRingProgressView
 
 

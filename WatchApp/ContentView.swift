@@ -68,6 +68,7 @@ struct ContentView: View {
         }
         .onChange(of: selectedPage, { oldValue, newValue in
             podLoanRememberPage(newValue)
+            ExtensionDelegate.shared().usageRecorder.didDisplayScreen(newValue == 0 ? "actions" : newValue == 1 ? "chart" : newValue == Self.sportPage ? "sportMode" : "sensor")
         })
         // A loan activating shows the glance; handled once the phase change has finished.
         .onReceive(NotificationCenter.default.publisher(for: .podLoanPhaseDidChange).receive(on: RunLoop.main)) { _ in

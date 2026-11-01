@@ -9,7 +9,6 @@
 
 import SwiftUI
 import AVFoundation
-import LoopAlgorithm
 import LoopKit
 import LoopKitUI
 

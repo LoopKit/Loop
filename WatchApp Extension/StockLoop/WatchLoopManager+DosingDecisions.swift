@@ -11,7 +11,6 @@
 
 import Foundation
 import LoopKit
-import LoopAlgorithm
 import LoopCore
 import WatchKit
 

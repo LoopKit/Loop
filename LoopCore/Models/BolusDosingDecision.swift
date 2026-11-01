@@ -7,7 +7,6 @@
 //
 
 import LoopKit
-import LoopAlgorithm
 
 public struct BolusDosingDecision {
     public enum Reason: String {
@@ -53,7 +52,7 @@ extension BolusDosingDecision {
                 .map { HistoricalGlucoseValue(startDate: $0.startDate, quantity: $0.quantity) }
         }
         decision.insulinOnBoard = displayState.activeInsulin
-        decision.predictedGlucose = displayState.output?.predictedGlucose
+        decision.predictedGlucose = displayState.output?.predictedGlucose.map(\.loopKit)
         decision.scheduleOverride = scheduleOverride
         decision.glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
         return decision

@@ -7,8 +7,8 @@
 //
 
 import XCTest
-import LoopKit
 import LoopAlgorithm
+import LoopKit
 
 @testable import LoopCore
 @testable import Loop
@@ -185,7 +185,7 @@ class LoopDataManagerTests: XCTestCase {
         let insulinSensitivitySchedule = InsulinSensitivitySchedule(
             unit: .milligramsPerDeciliter,
             dailyItems: [
-                RepeatingScheduleValue(startTime: 0, value: predictionInput.sensitivity.first!.value.doubleValue(for: .milligramsPerDeciliter))
+                RepeatingScheduleValue(startTime: 0, value: predictionInput.sensitivityMgdlPerUnit.first!.value)
             ],
             timeZone: .utcTimeZone
         )!
@@ -230,7 +230,7 @@ class LoopDataManagerTests: XCTestCase {
 
         for (expected, calculated) in zip(expectedPredictedGlucose, predictedGlucose!) {
             XCTAssertEqual(expected.startDate, calculated.startDate)
-            XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: defaultAccuracy)
+            XCTAssertEqual(expected.quantity.doubleValue(for: .milligramsPerDeciliter), calculated.mgdl, accuracy: defaultAccuracy)
         }
 
         await loopDataManager.loop()
@@ -255,6 +255,82 @@ class LoopDataManagerTests: XCTestCase {
         XCTAssertEqual(0.2, deliveryDelegate.lastEnact.bolus!, accuracy: defaultAccuracy)
     }
 
+    private func mmol(_ mgdl: Double) -> Double {
+        LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl).doubleValue(for: .millimolesPerLiter)
+    }
+
+    /// The setUp therapy settings, expressed in mmol/L
+    private func useMmolSettings() {
+        settingsProvider.settings.insulinSensitivitySchedule = InsulinSensitivitySchedule(
+            unit: .millimolesPerLiter,
+            dailyItems: [
+                RepeatingScheduleValue(startTime: 0, value: mmol(45)),
+                RepeatingScheduleValue(startTime: 32400, value: mmol(55))
+            ],
+            timeZone: .utcTimeZone
+        )!
+        settingsProvider.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: .millimolesPerLiter, dailyItems: [
+            RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: mmol(100), maxValue: mmol(110))),
+            RepeatingScheduleValue(startTime: TimeInterval(28800), value: DoubleRange(minValue: mmol(90), maxValue: mmol(100))),
+            RepeatingScheduleValue(startTime: TimeInterval(75600), value: DoubleRange(minValue: mmol(100), maxValue: mmol(110)))
+        ], timeZone: .utcTimeZone)!
+        settingsProvider.settings.suspendThreshold = GlucoseThreshold(unit: .millimolesPerLiter, value: mmol(75))
+    }
+
+    func testMmolSettingsDoseTheSameAsMgdl() async throws {
+        useMmolSettings()
+        glucoseStore.storedGlucose = [
+            StoredGlucoseSample(startDate: d(.minutes(-1)), quantity: LoopQuantity(unit: .millimolesPerLiter, doubleValue: mmol(120))),
+        ]
+
+        let input = try await loopDataManager.fetchData(for: now)
+        let sensitivityNow = input.sensitivityMgdlPerUnit.first { $0.startDate <= now && $0.endDate > now }!.value
+        let targetNow = input.targetMgdl.first { $0.startDate <= now && $0.endDate > now }!.value
+        XCTAssertEqual(sensitivityNow, 55, accuracy: 1e-9)
+        XCTAssertEqual(targetNow.lowerBound, 90, accuracy: 1e-9)
+        XCTAssertEqual(targetNow.upperBound, 100, accuracy: 1e-9)
+        XCTAssertEqual(input.suspendThresholdMgdl!, 75, accuracy: 1e-9)
+
+        await loopDataManager.updateDisplayState()
+        XCTAssertEqual(120, loopDataManager.eventualBG!, accuracy: 1e-9)
+
+        await loopDataManager.loop()
+        XCTAssertEqual(0.2, deliveryDelegate.lastEnact.bolus!, accuracy: defaultAccuracy)
+    }
+
+    func testMmolSettingsRecommendTheSameManualBolusAsMgdl() async throws {
+        let values: [Double] = [100, 130, 160, 190]
+        func history(_ unit: LoopUnit) -> [StoredGlucoseSample] {
+            values.enumerated().map { index, mgdl in
+                let value = unit == .milligramsPerDeciliter ? mgdl : mmol(mgdl)
+                return StoredGlucoseSample(startDate: d(.minutes(Double(5 * index - 18))), quantity: LoopQuantity(unit: unit, doubleValue: value))
+            }
+        }
+        let carbs = CarbEntryChange.add(NewCarbEntry(syncIdentifier: "mmol-test", quantity: .carbs(value: 30), startDate: d(.minutes(-1)), foodType: nil, absorptionTime: .hours(3)))
+
+        glucoseStore.storedGlucose = history(.milligramsPerDeciliter)
+        let mgdlRecommendation = try await loopDataManager.recommendManualBolus(carbEntryChange: carbs)!
+        let mgdlPreview = try await loopDataManager.generatePrediction(carbEntryChange: carbs, potentialDose: nil, manualGlucose: nil).predictedGlucose
+
+        useMmolSettings()
+        glucoseStore.storedGlucose = history(.millimolesPerLiter)
+        let mmolRecommendation = try await loopDataManager.recommendManualBolus(carbEntryChange: carbs)!
+        let mmolPreview = try await loopDataManager.generatePrediction(carbEntryChange: carbs, potentialDose: nil, manualGlucose: nil).predictedGlucose
+
+        XCTAssertGreaterThan(mgdlRecommendation.amount, 0)
+        XCTAssertEqual(mmolRecommendation.amount, mgdlRecommendation.amount, accuracy: 1e-9)
+        XCTAssertEqual(mmolRecommendation.notice == nil, mgdlRecommendation.notice == nil)
+        XCTAssertEqual(mmolPreview.count, mgdlPreview.count)
+        for (mmolValue, mgdlValue) in zip(mmolPreview, mgdlPreview) {
+            XCTAssertEqual(mmolValue.startDate, mgdlValue.startDate)
+            XCTAssertEqual(mmolValue.quantity.doubleValue(for: .milligramsPerDeciliter), mgdlValue.quantity.doubleValue(for: .milligramsPerDeciliter), accuracy: 1e-9)
+        }
+    }
+
+    func testLoopCoreConstantsMatchTheAlgorithm() {
+        XCTAssertEqual(LoopCoreConstants.inputDataRecencyInterval, Algorithm.inputDataRecencyInterval)
+        XCTAssertEqual(LoopCoreConstants.maximumCarbAbsorptionTimeInterval, LoopAlgorithm.CarbMath.maximumAbsorptionTimeInterval)
+    }
 
     func testHighAndFalling() async {
         glucoseStore.storedGlucose = [
@@ -462,11 +538,121 @@ class LoopDataManagerTests: XCTestCase {
 
     }
 
+    private func pendingCarbEntry(at date: Date) -> CarbEntryChange {
+        .add(NewCarbEntry(date: now, syncIdentifier: UUID().uuidString,
+                          quantity: LoopQuantity(unit: .gram, doubleValue: 20),
+                          startDate: date, foodType: nil, absorptionTime: .hours(3)))
+    }
+
+    private func assertManualBolusAndPreviewSucceed(for change: CarbEntryChange) async throws {
+        glucoseStore.storedGlucose = [
+            StoredGlucoseSample(startDate: d(.minutes(-1)), quantity: .glucose(value: 150))
+        ]
+        let recommendation = try await loopDataManager.recommendManualBolus(carbEntryChange: change)
+        XCTAssertNotNil(recommendation)
+        let preview = try await loopDataManager.generatePrediction(
+            carbEntryChange: change, potentialDose: nil, manualGlucose: nil)
+        XCTAssertFalse(preview.predictedGlucose.isEmpty)
+    }
+
+    func testPendingCarbEntryRemainsCoveredAfterBolusScreenAges() async throws {
+        let openedAt = now
+        let change = pendingCarbEntry(at: d(.hours(-12)))
+        try await assertManualBolusAndPreviewSucceed(for: change)
+
+        // The same pending entry survives a five-minute refresh. It is now older than
+        // the normal 12-hour-and-one-minute query window in fetchData.
+        TestingDate.setFixedTestingDate(openedAt.addingTimeInterval(.minutes(5)))
+        try await assertManualBolusAndPreviewSucceed(for: change)
+    }
+
+    func testEditedCarbEntryOutsideNormalWindowIsCovered() async throws {
+        let original = StoredCarbEntry(startDate: d(.hours(-13)),
+                                      quantity: LoopQuantity(unit: .gram, doubleValue: 30),
+                                      absorptionTime: .hours(3))
+        carbStore.carbHistory = [original]
+        let update = CarbEntryUpdate(date: now, quantity: LoopQuantity(unit: .gram, doubleValue: 20),
+                                     startDate: original.startDate, foodType: nil, absorptionTime: .hours(3))
+        try await assertManualBolusAndPreviewSucceed(for: .edit(original, update))
+    }
+
+    func testExtendedCarbScheduleCoverageIncludesHistoricalOverride() async throws {
+        let entryDate = d(.hours(-13))
+        let override = TemporaryScheduleOverride(
+            context: .custom,
+            settings: TemporaryPresetSettings(targetRange: nil, insulinNeedsScaleFactor: 2),
+            startDate: entryDate,
+            duration: .finite(.minutes(30)),
+            enactTrigger: .local,
+            syncIdentifier: UUID())
+        temporaryPresetsManager.presetHistory.recordOverride(override)
+
+        let input = try await loopDataManager.fetchData(for: now, ensureCarbCoverageStart: entryDate)
+        let ratio = try XCTUnwrap(input.carbRatio.closestPrior(to: entryDate))
+        let sensitivity = try XCTUnwrap(input.sensitivityMgdlPerUnit.closestPrior(to: entryDate))
+        XCTAssertEqual(ratio.value, settingsProvider.settings.carbRatioSchedule!.value(at: entryDate) / 2)
+        XCTAssertEqual(sensitivity.value,
+                       settingsProvider.settings.insulinSensitivitySchedule!.value(at: entryDate) / 2)
+    }
+
+    func testRecentPendingCarbDoesNotShortenNormalScheduleHistory() async throws {
+        let normal = try await loopDataManager.fetchData(for: now)
+        let recent = try await loopDataManager.fetchData(for: now, ensureCarbCoverageStart: d(.minutes(-5)))
+        XCTAssertEqual(normal.carbRatio, recent.carbRatio)
+        XCTAssertEqual(normal.sensitivityMgdlPerUnit, recent.sensitivityMgdlPerUnit)
+    }
+
+    private func assertMissingCarbScheduleThrows(_ detail: ConfigurationErrorDetail, preview: Bool) async throws {
+        glucoseStore.storedGlucose = [
+            StoredGlucoseSample(startDate: d(.minutes(-1)), quantity: .glucose(value: 150))
+        ]
+        let change = pendingCarbEntry(at: d(.hours(-13)))
+        // Nonempty histories can still fail to cover the pending entry. Simulate a
+        // provider that cannot supply the requested older history.
+        if detail == .carbRatioSchedule {
+            settingsProvider.carbRatioHistory = [
+                AbsoluteScheduleValue(startDate: d(.hours(-12)), endDate: d(.hours(8)), value: 10)
+            ]
+        } else {
+            settingsProvider.insulinSensitivityHistory = [
+                AbsoluteScheduleValue(startDate: d(.hours(-12)), endDate: d(.hours(8)),
+                                      value: .glucose(value: 50))
+            ]
+        }
+        do {
+            if preview {
+                _ = try await loopDataManager.generatePrediction(
+                    carbEntryChange: change, potentialDose: nil, manualGlucose: nil)
+            } else {
+                _ = try await loopDataManager.recommendManualBolus(carbEntryChange: change)
+            }
+            XCTFail("Expected a recoverable missing-schedule error")
+        } catch LoopError.configurationError(let actual) {
+            XCTAssertEqual(actual, detail)
+        }
+    }
+
+    func testManualBolusRejectsMissingCarbRatioCoverage() async throws {
+        try await assertMissingCarbScheduleThrows(.carbRatioSchedule, preview: false)
+    }
+
+    func testManualBolusRejectsMissingSensitivityCoverage() async throws {
+        try await assertMissingCarbScheduleThrows(.insulinSensitivitySchedule, preview: false)
+    }
+
+    func testPreviewRejectsMissingCarbRatioCoverage() async throws {
+        try await assertMissingCarbScheduleThrows(.carbRatioSchedule, preview: true)
+    }
+
+    func testPreviewRejectsMissingSensitivityCoverage() async throws {
+        try await assertMissingCarbScheduleThrows(.insulinSensitivitySchedule, preview: true)
+    }
+
     func testFetchDataWithHighInsulinNeedsPresetMitigation() async throws {
         var input = try await loopDataManager.fetchData(for: now)
-        XCTAssertEqual(input.target.count, 1)
-        XCTAssertEqual(input.target[0].value.doubleRange(for: .milligramsPerDeciliter), DoubleRange(minValue: 90, maxValue: 100))
-        XCTAssertEqual(input.suspendThreshold?.doubleValue(for: .milligramsPerDeciliter), 75.0)
+        XCTAssertEqual(input.targetMgdl.count, 1)
+        XCTAssertEqual(input.targetMgdl[0].value, 90...100)
+        XCTAssertEqual(input.suspendThresholdMgdl, 75.0)
 
         let override = TemporaryScheduleOverride(
             context: .custom,
@@ -483,9 +669,9 @@ class LoopDataManagerTests: XCTestCase {
         temporaryPresetsManager.scheduleOverride = override
 
         input = try await loopDataManager.fetchData(for: now)
-        XCTAssertEqual(input.target.count, 1)
-        XCTAssertEqual(input.target[0].value.doubleRange(for: .milligramsPerDeciliter), DoubleRange(minValue: 110, maxValue: 110))
-        XCTAssertEqual(input.suspendThreshold?.doubleValue(for: .milligramsPerDeciliter), 110.0)
+        XCTAssertEqual(input.targetMgdl.count, 1)
+        XCTAssertEqual(input.targetMgdl[0].value, 110...110)
+        XCTAssertEqual(input.suspendThresholdMgdl, 110.0)
 
     }
 }
@@ -524,7 +710,7 @@ extension LoopQuantity {
 
 extension LoopDataManager {
     var eventualBG: Double? {
-        displayState.output?.predictedGlucose.last?.quantity.doubleValue(for: .milligramsPerDeciliter)
+        displayState.output?.predictedGlucose.last?.mgdl
     }
 }
 
@@ -532,9 +718,7 @@ extension StoredGlucoseSample {
     static func from(fixture: FixtureGlucoseSample) -> StoredGlucoseSample {
         return StoredGlucoseSample(
             startDate: fixture.startDate,
-            quantity: fixture.quantity,
-            condition: fixture.condition,
-            trendRate: fixture.trendRate,
+            quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: fixture.mgdl),
             isDisplayOnly: fixture.isDisplayOnly,
             wasUserEntered: fixture.wasUserEntered
         )
@@ -558,7 +742,7 @@ extension StoredCarbEntry {
     static func from(fixture: FixtureCarbEntry) -> StoredCarbEntry {
         return StoredCarbEntry(
             startDate: fixture.startDate,
-            quantity: fixture.quantity,
+            quantity: LoopQuantity(unit: .gram, doubleValue: fixture.grams),
             foodType: fixture.foodType,
             absorptionTime: fixture.absorptionTime
         )
