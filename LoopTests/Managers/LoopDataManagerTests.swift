@@ -648,6 +648,34 @@ class LoopDataManagerTests: XCTestCase {
         try await assertMissingCarbScheduleThrows(.insulinSensitivitySchedule, preview: true)
     }
 
+    func testFavoriteSelectionCannotOverwriteAReplacementMeal() async throws {
+        let viewModel = CarbEntryViewModel(delegate: loopDataManager)
+        let savedFoods = viewModel.favoriteFoods
+        defer { viewModel.favoriteFoods = savedFoods }
+        viewModel.favoriteFoods = [StoredFavoriteFood(name: "Meal", carbsQuantity: LoopQuantity(unit: .gram, doubleValue: 35),
+                                                     foodType: "🌮", absorptionTime: .hours(3))]
+        viewModel.selectedFavoriteFoodIndex = 0
+        let selected = expectation(description: "Favourite selection settled")
+        RunLoop.main.perform { selected.fulfill() }
+        await fulfillment(of: [selected], timeout: 2)
+        XCTAssertEqual(viewModel.carbsQuantity, 35)
+
+        // The person replaces the favourite with a fast meal, retaining its amount.
+        let quantity = viewModel.carbsQuantity
+        viewModel.selectedFavoriteFoodIndex = -1
+        viewModel.carbsQuantity = quantity
+        viewModel.usesCustomFoodType = false
+        viewModel.selectedDefaultAbsorptionTimeEmoji = "🍭"
+        viewModel.absorptionTime = .minutes(30)
+        let settled = expectation(description: "Replacement meal settled")
+        RunLoop.main.perform { settled.fulfill() }
+        await fulfillment(of: [settled], timeout: 2)
+
+        XCTAssertEqual(viewModel.carbsQuantity, 35)
+        XCTAssertEqual(viewModel.absorptionTime, .minutes(30))
+        XCTAssertFalse(viewModel.continueButtonDisabled)
+    }
+
     func testHistoricalTargetsUseStoredProfilesAndEndedPresets() async throws {
         func target(_ low: Double, _ high: Double) -> ClosedRange<LoopQuantity> {
             LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: low)...LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: high)

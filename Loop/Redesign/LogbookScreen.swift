@@ -602,7 +602,7 @@ private struct LogbookCarbEditor: View {
     }
 
     var body: some View {
-        CarbEntryView(viewModel: viewModel)
+        CarbEntryScreen(viewModel: viewModel)
             .environmentObject(deviceManager.displayGlucosePreference)
             .environment(\.dismissAction, dismiss)
             .navigationTitle(NSLocalizedString("Edit Carb Entry", comment: "Title of the screen for editing a carb entry from the Logbook"))
