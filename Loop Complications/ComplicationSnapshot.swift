@@ -28,8 +28,8 @@ struct ComplicationSnapshot: Codable, Equatable {
     var loopDate: Date?
     var freshUntil: Date?
     var agingUntil: Date?
-    /// When the glucose graph image beside this snapshot was rendered (nil: no graph).
-    var graphRenderedAt: Date?
+    /// What the glucose graph draws; the widget renders it at its slot's size (nil: no graph).
+    var graph: ComplicationGraph?
 
     enum Freshness { case fresh, aging, stale }
 
@@ -69,7 +69,6 @@ struct ComplicationSnapshot: Codable, Equatable {
     // MARK: - Shared storage
 
     static let defaultsKey = "ComplicationSnapshot"
-    static let graphFileName = "ComplicationGlucoseGraph.png"
 
     /// The app group both targets share, from each one's own Info.plist.
     static var appGroupIdentifier: String? {
@@ -77,12 +76,6 @@ struct ComplicationSnapshot: Codable, Equatable {
     }
 
     static var sharedDefaults: UserDefaults? { appGroupIdentifier.flatMap { UserDefaults(suiteName: $0) } }
-
-    static var graphURL: URL? {
-        appGroupIdentifier
-            .flatMap { FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: $0) }?
-            .appendingPathComponent(graphFileName)
-    }
 
     static func load(from defaults: UserDefaults? = sharedDefaults) -> ComplicationSnapshot? {
         defaults?.data(forKey: defaultsKey).flatMap { try? JSONDecoder().decode(Self.self, from: $0) }
@@ -97,7 +90,49 @@ struct ComplicationSnapshot: Codable, Equatable {
         return ComplicationSnapshot(glucoseText: "106", trendSymbol: "↗", glucoseStaleAt: now.addingTimeInterval(15 * 60),
                                     eventualText: "108", inlineText: "106↗ 108", inlineStaleText: "--- 108",
                                     loopDate: now, freshUntil: now.addingTimeInterval(6 * 60),
-                                    agingUntil: now.addingTimeInterval(16 * 60), graphRenderedAt: nil)
+                                    agingUntil: now.addingTimeInterval(16 * 60), graph: .sample(now: now))
+    }
+}
+
+/// The glucose graph in the display unit, as plain numbers, so the widget can draw it at its own size.
+struct ComplicationGraph: Codable, Equatable {
+    struct Point: Codable, Equatable {
+        var date: Date
+        var value: Double
+        var isManual = false
+    }
+
+    struct Band: Codable, Equatable {
+        var start: Date
+        var end: Date
+        var min: Double
+        var max: Double
+    }
+
+    /// The span shown on each side of the moment drawn, as stock's ClockKit graph (4 h centered on now).
+    static let halfSpan: TimeInterval = 2 * 60 * 60
+
+    var glucoseMin: Double
+    var glucoseMax: Double
+    var minLabel: String
+    var maxLabel: String
+    var targetRanges: [Band]
+    /// The active override's target, over its active interval.
+    var override: Band?
+    var historical: [Point]
+    var predicted: [Point]
+
+    static func sample(now: Date) -> ComplicationGraph {
+        let historical = (0..<24).map { i in
+            Point(date: now.addingTimeInterval(TimeInterval(i - 24) * 300), value: 110 + 25 * sin(Double(i) / 4))
+        }
+        let predicted = (0..<24).map { i in
+            Point(date: now.addingTimeInterval(TimeInterval(i) * 300), value: 120 - Double(i))
+        }
+        return ComplicationGraph(glucoseMin: 75, glucoseMax: 150, minLabel: "75", maxLabel: "150",
+                                 targetRanges: [Band(start: now.addingTimeInterval(-halfSpan), end: now.addingTimeInterval(halfSpan),
+                                                     min: 100, max: 110)],
+                                 override: nil, historical: historical, predicted: predicted)
     }
 }
 
