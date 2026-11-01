@@ -59,6 +59,7 @@ public final class AlertManager {
     let alertStore: AlertStore
 
     private let bluetoothPoweredOffIdentifier = Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "bluetoothPoweredOff")
+    static let bluetoothPoweredOffAlertDelay = TimeInterval(minutes: 10)
 
     var analyticsServicesManager: AnalyticsServicesManager
 
@@ -177,8 +178,8 @@ public final class AlertManager {
             await issueAlert(Alert(identifier: bluetoothPoweredOffIdentifier,
                              foregroundContent: fgcontent,
                              backgroundContent: bgcontent,
-                             trigger: .immediate,
-                             interruptionLevel: .critical))
+                             trigger: .delayed(interval: Self.bluetoothPoweredOffAlertDelay),
+                             interruptionLevel: .timeSensitive))
         }
     }
 
