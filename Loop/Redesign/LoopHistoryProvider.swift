@@ -59,6 +59,19 @@ final class LoopHistoryProvider {
         return range.lowerBound.doubleValue(for: .milligramsPerDeciliter)...range.upperBound.doubleValue(for: .milligramsPerDeciliter)
     }
 
+    /// What the basal schedule delivers in a day, for days the stored profile history doesn't reach.
+    @MainActor
+    var scheduledBasalPerDay: Double? {
+        loopDataManager.settingsProvider.settings.basalRateSchedule?.total()
+    }
+
+    /// The median insulin delivered from midnight to this time of day over the last 14 days, as on Statistics.
+    func typicalInsulinByNow() async -> (typical: TypicalInsulinDelivery, at: Date)? {
+        guard let history = try? await loopDataManager.insulinDeliveryHistory(days: 14),
+              let typical = history.typicalDelivery(by: history.end) else { return nil }
+        return (typical, history.end)
+    }
+
     /// The targets that actually applied, including dated presets and changes to the stored profile.
     func glucoseTargetBands(in interval: DateInterval) async throws -> [TargetBand] {
         if let store = settingsManager.settingsStore {
@@ -203,7 +216,7 @@ final class LoopHistoryProvider {
             let samples = try await glucoseStore.getGlucoseSamples(start: interval.start, end: interval.end)
             return samples
                 .filter { !$0.isDisplayOnly }
-                .map { GlucosePoint(date: $0.startDate, mgdl: $0.quantity.doubleValue(for: .milligramsPerDeciliter)) }
+                .map { GlucosePoint(date: $0.startDate, mgdl: $0.quantity.doubleValue(for: .milligramsPerDeciliter), userEntered: $0.wasUserEntered) }
         } catch {
             os_log("Glucose fetch failed: %{public}@", log: log, type: .error, String(describing: error))
             throw error
@@ -320,7 +333,8 @@ final class LoopHistoryProvider {
         for sample in samples where !sample.isDisplayOnly
             && (FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps || sample.sourceRevision.source.bundleIdentifier == own) {
             if let last = points.last, sample.startDate.timeIntervalSince(last.date) < 150 { continue }
-            points.append(GlucosePoint(date: sample.startDate, mgdl: sample.quantity.doubleValue(for: .milligramsPerDeciliter)))
+            points.append(GlucosePoint(date: sample.startDate, mgdl: sample.quantity.doubleValue(for: .milligramsPerDeciliter),
+                                       userEntered: sample.wasUserEntered))
         }
         return points
     }
