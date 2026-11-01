@@ -648,6 +648,90 @@ class LoopDataManagerTests: XCTestCase {
         try await assertMissingCarbScheduleThrows(.insulinSensitivitySchedule, preview: true)
     }
 
+    func testFavoriteSelectionCannotOverwriteAReplacementMeal() async throws {
+        let viewModel = CarbEntryViewModel(delegate: loopDataManager)
+        let savedFoods = viewModel.favoriteFoods
+        defer { viewModel.favoriteFoods = savedFoods }
+        viewModel.favoriteFoods = [StoredFavoriteFood(name: "Meal", carbsQuantity: LoopQuantity(unit: .gram, doubleValue: 35),
+                                                     foodType: "🌮", absorptionTime: .hours(3))]
+        viewModel.selectedFavoriteFoodIndex = 0
+        let selected = expectation(description: "Favourite selection settled")
+        RunLoop.main.perform { selected.fulfill() }
+        await fulfillment(of: [selected], timeout: 2)
+        XCTAssertEqual(viewModel.carbsQuantity, 35)
+
+        // The person replaces the favourite with a fast meal, retaining its amount.
+        let quantity = viewModel.carbsQuantity
+        viewModel.selectedFavoriteFoodIndex = -1
+        viewModel.carbsQuantity = quantity
+        viewModel.usesCustomFoodType = false
+        viewModel.selectedDefaultAbsorptionTimeEmoji = "🍭"
+        viewModel.absorptionTime = .minutes(30)
+        let settled = expectation(description: "Replacement meal settled")
+        RunLoop.main.perform { settled.fulfill() }
+        await fulfillment(of: [settled], timeout: 2)
+
+        XCTAssertEqual(viewModel.carbsQuantity, 35)
+        XCTAssertEqual(viewModel.absorptionTime, .minutes(30))
+        XCTAssertFalse(viewModel.continueButtonDisabled)
+    }
+
+    func testHistoricalTargetsUseStoredProfilesAndEndedPresets() async throws {
+        func target(_ low: Double, _ high: Double) -> ClosedRange<LoopQuantity> {
+            LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: low)...LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: high)
+        }
+        let window = DateInterval(start: d(-.hours(3)), end: d(-.minutes(30)))
+        settingsProvider.targetRangeHistory = [
+            AbsoluteScheduleValue(startDate: window.start, endDate: d(-.hours(2)), value: target(100, 110)),
+            AbsoluteScheduleValue(startDate: d(-.hours(2)), endDate: window.end, value: target(120, 130)),
+        ]
+        var preset = TemporaryScheduleOverride(context: .custom,
+                                             settings: TemporaryPresetSettings(targetRange: target(150, 160), insulinNeedsScaleFactor: 1),
+                                             startDate: d(-.minutes(150)), duration: .finite(.hours(2)),
+                                             enactTrigger: .local, syncIdentifier: UUID())
+        preset.actualEnd = .early(d(-.minutes(90)))
+        temporaryPresetsManager.presetHistory.recordOverride(preset, at: d(-.minutes(150)))
+
+        let bands = try await loopDataManager.glucoseTargetBands(in: window)
+        XCTAssertEqual(bands, [
+            TargetBand(start: window.start, end: d(-.minutes(150)), range: 100...110),
+            TargetBand(start: d(-.minutes(150)), end: d(-.minutes(90)), range: 150...160),
+            TargetBand(start: d(-.minutes(90)), end: window.end, range: 120...130),
+        ])
+    }
+
+    func testTargetBandsAreUnknownBeforeTherapyIsConfigured() async throws {
+        settingsProvider.settings.glucoseTargetRangeSchedule = nil
+        let bands = try await loopDataManager.glucoseTargetBands(in: DateInterval(start: d(-.hours(3)), end: now))
+        XCTAssertTrue(bands.isEmpty)
+    }
+
+    func testHistoricalIOBUsesPresetAdjustedBasal() async throws {
+        settingsProvider.basalHistory = [AbsoluteScheduleValue(startDate: d(-.hours(6)), endDate: now, value: 1.0)]
+        let window = DateInterval(start: d(-.minutes(30)), end: now)
+
+        for multiplier in [0.5, 1.5] {
+            let preset = TemporaryScheduleOverride(
+                context: .custom,
+                settings: TemporaryPresetSettings(targetRange: nil, insulinNeedsScaleFactor: multiplier),
+                startDate: d(-.hours(1)),
+                duration: .finite(.hours(2)),
+                enactTrigger: .local,
+                syncIdentifier: UUID()
+            )
+            temporaryPresetsManager.presetHistory.recordOverride(preset, at: now)
+            doseStore.doseHistory = [DoseEntry(type: .tempBasal, startDate: window.start, endDate: window.end,
+                                              value: multiplier, unit: .unitsPerHour, decisionId: nil)]
+
+            let timeline = try await loopDataManager.insulinOnBoardTimeline(in: window)
+            XCTAssertFalse(timeline.isEmpty)
+            for value in timeline {
+                XCTAssertEqual(value.value, 0, accuracy: 1e-9,
+                               "Delivery matching a \(multiplier)× preset's basal must add no net IOB")
+            }
+        }
+    }
+
     func testFetchDataWithHighInsulinNeedsPresetMitigation() async throws {
         var input = try await loopDataManager.fetchData(for: now)
         XCTAssertEqual(input.targetMgdl.count, 1)
