@@ -4180,145 +4180,288 @@
         }
       }
     },
-    "Aim: over 70%% in range, under 4%% low." : {
-      "comment" : "Trends Time in range card footnote: the consensus targets for time in range and time low",
+    "Aim: average under %1$@ %2$@, GMI under 7%%, CV 36%% or less." : {
+      "comment" : "Trends Summary footnote: the consensus targets for average glucose, GMI and glucose variability (CV). (1: glucose value, 2: glucose unit)",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الهدف: أكثر من 70%% ضمن النطاق، وأقل من 4%% منخفض."
+            "value" : "الهدف: متوسط أقل من %1$@ %2$@، وGMI أقل من 7%%، وCV ‏36%% أو أقل."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cíl: přes 70%% v rozsahu, pod 4%% nízko."
+            "value" : "Cíl: průměr pod %1$@ %2$@, GMI pod 7%%, CV nejvýše 36%%."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mål: over 70 %% i området, under 4 %% lavt."
+            "value" : "Mål: gennemsnit under %1$@ %2$@, GMI under 7 %%, CV højst 36 %%."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ziel: über 70 %% im Zielbereich, unter 4 %% niedrig."
+            "value" : "Ziel: Durchschnitt unter %1$@ %2$@, GMI unter 7 %%, VK höchstens 36 %%."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Objetivo: más del 70%% en rango, menos del 4%% bajo."
+            "value" : "Objetivo: promedio por debajo de %1$@ %2$@, GMI por debajo del 7%%, CV del 36%% o menos."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tavoite: yli 70 %% tavoitealueella, alle 4 %% matalalla."
+            "value" : "Tavoite: keskiarvo alle %1$@ %2$@, GMI alle 7 %%, CV enintään 36 %%."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Objectif : plus de 70 %% dans la cible, moins de 4 %% en hypo."
+            "value" : "Objectif : moyenne sous %1$@ %2$@, GMI sous 7 %%, CV de 36 %% au plus."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "יעד: מעל 70%% בטווח, מתחת ל-4%% נמוך."
+            "value" : "יעד: ממוצע מתחת ל-%1$@ %2$@, GMI מתחת ל-7%%, CV ‏36%% או פחות."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cél: több mint 70%% tartományban, kevesebb mint 4%% alacsony."
+            "value" : "Cél: átlag %1$@ %2$@ alatt, GMI 7%% alatt, CV legfeljebb 36%%."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obiettivo: oltre il 70%% nell'intervallo, meno del 4%% bassa."
+            "value" : "Obiettivo: media sotto %1$@ %2$@, GMI sotto il 7%%, CV al massimo 36%%."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "目標：範囲内70%%超、低値4%%未満。"
+            "value" : "目標：平均%1$@ %2$@未満、GMI 7%%未満、CV 36%%以下。"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mål: over 70 %% i målområdet, under 4 %% lavt."
+            "value" : "Mål: gjennomsnitt under %1$@ %2$@, GMI under 7 %%, CV høyst 36 %%."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Doel: meer dan 70%% binnen bereik, minder dan 4%% laag."
+            "value" : "Doel: gemiddelde onder %1$@ %2$@, GMI onder 7%%, CV hoogstens 36%%."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cel: ponad 70%% w zakresie, poniżej 4%% niskich."
+            "value" : "Cel: średnia poniżej %1$@ %2$@, GMI poniżej 7%%, CV najwyżej 36%%."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meta: mais de 70%% no alvo, menos de 4%% baixo."
+            "value" : "Meta: média abaixo de %1$@ %2$@, GMI abaixo de 7%%, CV de no máximo 36%%."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Țintă: peste 70%% în interval, sub 4%% scăzut."
+            "value" : "Țintă: medie sub %1$@ %2$@, GMI sub 7%%, CV de cel mult 36%%."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Цель: в диапазоне более 70%%, низкая — менее 4%%."
+            "value" : "Цель: среднее ниже %1$@ %2$@, GMI ниже 7%%, CV не более 36%%."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cieľ: nad 70%% v rozsahu, pod 4%% nízko."
+            "value" : "Cieľ: priemer pod %1$@ %2$@, GMI pod 7%%, CV najviac 36%%."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mål: över 70 %% inom målområdet, under 4 %% lågt."
+            "value" : "Mål: genomsnitt under %1$@ %2$@, GMI under 7 %%, CV högst 36 %%."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hedef: aralıkta %%70'in üzeri, düşükte %%4'ün altı."
+            "value" : "Hedef: ortalama %1$@ %2$@ altı, GMI %%7 altı, CV en fazla %%36."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Мета: у діапазоні понад 70%%, низька — менше 4%%."
+            "value" : "Мета: середнє нижче %1$@ %2$@, GMI нижче 7%%, CV не більше 36%%."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mục tiêu: trên 70%% trong khoảng, dưới 4%% thấp."
+            "value" : "Mục tiêu: trung bình dưới %1$@ %2$@, GMI dưới 7%%, CV từ 36%% trở xuống."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "目标：范围内超过70%%，低血糖低于4%%。"
+            "value" : "目标：平均值低于 %1$@ %2$@，GMI 低于 7%%，CV 不超过 36%%。"
+          }
+        }
+      }
+    },
+    "Aim: over 70%% in range; under 25%% above and 4%% below; under 5%% very high and 1%% very low; CGM active over 70%%." : {
+      "comment" : "Trends Time in range card footnote: the consensus targets for time in range, above and below range, very high, very low and CGM wear",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الهدف: أكثر من 70%% ضمن النطاق؛ أقل من 25%% فوق و4%% تحت؛ أقل من 5%% مرتفع جدًا و1%% منخفض جدًا؛ وCGM نشط أكثر من 70%%."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cíl: přes 70%% v rozsahu; pod 25%% nad a 4%% pod; pod 5%% velmi vysoko a 1%% velmi nízko; CGM aktivní přes 70%%."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mål: over 70 %% i området; under 25 %% over og 4 %% under; under 5 %% meget højt og 1 %% meget lavt; CGM aktiv over 70 %%."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziel: über 70 %% im Zielbereich; unter 25 %% darüber und 4 %% darunter; unter 5 %% sehr hoch und 1 %% sehr niedrig; CGM über 70 %% aktiv."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objetivo: más del 70%% en rango; menos del 25%% por encima y del 4%% por debajo; menos del 5%% muy alto y del 1%% muy bajo; CGM activo más del 70%%."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tavoite: yli 70 %% tavoitealueella; alle 25 %% yläpuolella ja 4 %% alapuolella; alle 5 %% erittäin korkealla ja 1 %% erittäin matalalla; CGM aktiivinen yli 70 %%."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif : plus de 70 %% dans la cible ; moins de 25 %% au-dessus et 4 %% en dessous ; moins de 5 %% très haut et 1 %% très bas ; CGM actif plus de 70 %%."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יעד: מעל 70%% בטווח; מתחת ל-25%% מעל ו-4%% מתחת; מתחת ל-5%% גבוה מאוד ו-1%% נמוך מאוד; CGM פעיל מעל 70%%."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cél: több mint 70%% tartományban; kevesebb mint 25%% felette és 4%% alatta; kevesebb mint 5%% nagyon magas és 1%% nagyon alacsony; CGM aktív több mint 70%%."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obiettivo: oltre il 70%% nell'intervallo; meno del 25%% sopra e del 4%% sotto; meno del 5%% molto alta e dell'1%% molto bassa; CGM attivo oltre il 70%%."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目標：範囲内70%%超、範囲上25%%未満・範囲下4%%未満、非常に高い5%%未満・非常に低い1%%未満、CGM稼働70%%超。"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mål: over 70 %% i målområdet; under 25 %% over og 4 %% under; under 5 %% svært høyt og 1 %% svært lavt; CGM aktiv over 70 %%."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doel: meer dan 70%% binnen bereik; minder dan 25%% erboven en 4%% eronder; minder dan 5%% zeer hoog en 1%% zeer laag; CGM meer dan 70%% actief."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cel: ponad 70%% w zakresie; poniżej 25%% powyżej i 4%% poniżej; poniżej 5%% bardzo wysokich i 1%% bardzo niskich; CGM aktywny ponad 70%%."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta: mais de 70%% no alvo; menos de 25%% acima e 4%% abaixo; menos de 5%% muito alto e 1%% muito baixo; CGM ativo mais de 70%%."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Țintă: peste 70%% în interval; sub 25%% peste și 4%% sub; sub 5%% foarte ridicat și 1%% foarte scăzut; CGM activ peste 70%%."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цель: в диапазоне более 70%%; выше — менее 25%%, ниже — менее 4%%; очень высокая — менее 5%%, очень низкая — менее 1%%; CGM активен более 70%%."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cieľ: nad 70%% v rozsahu; pod 25%% nad a 4%% pod; pod 5%% veľmi vysoko a 1%% veľmi nízko; CGM aktívny nad 70%%."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mål: över 70 %% inom målområdet; under 25 %% över och 4 %% under; under 5 %% mycket högt och 1 %% mycket lågt; CGM aktiv över 70 %%."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hedef: aralıkta %%70'in üzeri; üstünde %%25'in, altında %%4'ün altı; çok yüksekte %%5'in, çok düşükte %%1'in altı; CGM aktif %%70'in üzeri."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мета: у діапазоні понад 70%%; вище — менше 25%%, нижче — менше 4%%; дуже висока — менше 5%%, дуже низька — менше 1%%; CGM активний понад 70%%."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mục tiêu: trên 70%% trong khoảng; dưới 25%% trên khoảng và 4%% dưới khoảng; dưới 5%% rất cao và 1%% rất thấp; CGM hoạt động trên 70%%."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目标：范围内超过70%%；高于范围低于25%%，低于范围低于4%%；极高低于5%%，极低低于1%%；CGM 在线超过70%%。"
           }
         }
       }
@@ -6464,6 +6607,149 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "每日碳水"
+          }
+        }
+      }
+    },
+    "CGM data covers %1$@." : {
+      "comment" : "Trends Summary note when glucose readings start partway through the period. (1: days covered, e.g. 5 of 14 days)",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بيانات CGM تغطي %1$@."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data CGM pokrývají %1$@."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CGM-data dækker %1$@."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CGM-Daten decken %1$@ ab."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los datos de CGM cubren %1$@."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CGM-data kattaa %1$@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les données CGM couvrent %1$@."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נתוני CGM מכסים %1$@."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CGM-adat: %1$@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I dati CGM coprono %1$@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CGMデータ：%1$@。"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CGM-data dekker %1$@."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CGM-gegevens beslaan %1$@."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dane CGM obejmują %1$@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dados de CGM cobrem %1$@."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datele CGM acoperă %1$@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Данные CGM: %1$@."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Údaje CGM pokrývajú %1$@."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CGM-data täcker %1$@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CGM verisi: %1$@."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дані CGM: %1$@."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dữ liệu CGM bao phủ %1$@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CGM 数据覆盖 %1$@。"
           }
         }
       }
@@ -16055,6 +16341,149 @@
         }
       }
     },
+    "Scheduled %1$@" : {
+      "comment" : "Basal and bolus: what the basal schedule delivers over the same time, under the basal row. (1: units, e.g. 18.0 U)",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المجدول %1$@"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plánovaný %1$@"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planlagt %1$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geplant %1$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programado %1$@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohjelmoitu %1$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programmé %1$@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מתוזמן %1$@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ütemezett %1$@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programmato %1$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スケジュール %1$@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planlagt %1$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gepland %1$@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaplanowane %1$@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programada %1$@"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programat %1$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запланировано %1$@"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plánovaný %1$@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schemalagd %1$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planlanan %1$@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "За розкладом %1$@"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Theo lịch %1$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预设 %1$@"
+          }
+        }
+      }
+    },
     "SD %1$@ · CV %2$@%%" : {
       "comment" : "Trends Average tile detail: standard deviation and coefficient of variation of glucose. (1: standard deviation in the glucose unit, 2: coefficient of variation as a percentage number)",
       "localizations" : {
@@ -17485,6 +17914,149 @@
         }
       }
     },
+    "Today so far %1$@, usually %2$@ by %3$@." : {
+      "comment" : "Trends Insulin per day footnote: today's insulin so far against the median by this time of day over the last 14 days. (1: today's units, 2: usual units, 3: time of day)",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اليوم حتى الآن %1$@، وعادةً %2$@ بحلول %3$@."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dnes zatím %1$@, obvykle %2$@ do %3$@."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I dag indtil nu %1$@, normalt %2$@ kl. %3$@."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heute bisher %1$@, üblicherweise %2$@ bis %3$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy hasta ahora %1$@, normalmente %2$@ a las %3$@."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tänään tähän mennessä %1$@, yleensä %2$@ klo %3$@ mennessä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aujourd'hui jusqu'ici %1$@, d'habitude %2$@ à %3$@."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היום עד כה %1$@, בדרך כלל %2$@ עד %3$@."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ma eddig %1$@, általában %2$@ ilyenkorra (%3$@)."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oggi finora %1$@, di solito %2$@ entro le %3$@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日のこれまで%1$@、通常は%3$@までに%2$@。"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I dag så langt %1$@, vanligvis %2$@ innen %3$@."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vandaag tot nu toe %1$@, meestal %2$@ om %3$@."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dziś do tej pory %1$@, zwykle %2$@ do %3$@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoje até agora %1$@, normalmente %2$@ até %3$@."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Azi până acum %1$@, de obicei %2$@ până la %3$@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня на данный момент %1$@, обычно %2$@ к %3$@."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dnes zatiaľ %1$@, zvyčajne %2$@ do %3$@."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hittills i dag %1$@, vanligtvis %2$@ vid %3$@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugün şu ana kadar %1$@, genelde %3$@ itibarıyla %2$@."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сьогодні наразі %1$@, зазвичай %2$@ до %3$@."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hôm nay đến giờ %1$@, thường %2$@ trước %3$@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日至今 %1$@，通常到 %3$@ 为 %2$@。"
+          }
+        }
+      }
+    },
     "Total" : {
       "comment" : "Basal and bolus total row: basal plus bolus",
       "localizations" : {
@@ -18625,6 +19197,149 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未知错误"
+          }
+        }
+      }
+    },
+    "Usually %1$@ by %2$@" : {
+      "comment" : "Trends: the median insulin delivered by this time of day over the last 14 days. (1: units, e.g. 28.4 U, 2: time of day)",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عادةً %1$@ بحلول %2$@"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obvykle %1$@ do %2$@"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalt %1$@ kl. %2$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üblicherweise %1$@ bis %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalmente %1$@ a las %2$@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yleensä %1$@ klo %2$@ mennessä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D'habitude %1$@ à %2$@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בדרך כלל %1$@ עד %2$@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Általában %1$@ ilyenkorra (%2$@)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Di solito %1$@ entro le %2$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通常は%2$@までに%1$@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vanligvis %1$@ innen %2$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meestal %1$@ om %2$@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zwykle %1$@ do %2$@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalmente %1$@ até %2$@"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De obicei %1$@ până la %2$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обычно %1$@ к %2$@"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvyčajne %1$@ do %2$@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vanligtvis %1$@ vid %2$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genelde %2$@ itibarıyla %1$@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зазвичай %1$@ до %2$@"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thường %1$@ trước %2$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通常到 %2$@ 为 %1$@"
           }
         }
       }
