@@ -113,7 +113,7 @@ extension PodLoanWatchController {
                 trendRate: r.trendRateMgdlPerMin.map { LoopQuantity(unit: mgdlPerMin, doubleValue: $0) },
                 isDisplayOnly: r.isDisplayOnly,
                 wasUserEntered: r.wasUserEntered,
-                syncIdentifier: r.syncIdentifier ?? "loanv2-glucose-\(Int(r.startDate.timeIntervalSince1970 * 1000))")
+                syncIdentifier: r.syncIdentifier ?? "loanv2-glucose-\(Int64(r.startDate.timeIntervalSince1970 * 1000))")
         }
 
         // These samples came from the phone, so stamp them as such.
