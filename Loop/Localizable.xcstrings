@@ -14679,6 +14679,9 @@
     "Above range (>180): %d%% · goal <25%%" : {
       "comment" : "TIR above-range summary"
     },
+    "Absorbed by %1$@" : {
+      "comment" : "Under the end of the carb absorption curve: when the carbs will have absorbed (1: time)"
+    },
     "Absorption Time" : {
       "comment" : "Label for food absorption entry on add favorite food screen",
       "localizations" : {
@@ -24978,6 +24981,9 @@
           }
         }
       }
+    },
+    "Eaten at %1$@, absorbed by %2$@" : {
+      "comment" : "Accessibility summary of the carb entry preview chart (1: time eaten, 2: time absorbed)"
     },
     "Edit" : {
       "comment" : "Swipe action to edit a Logbook carb entry",
