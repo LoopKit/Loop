@@ -4,7 +4,7 @@
 //
 //  Feeds the Loop Complications widget extension. On every context update the watch app formats what
 //  the complications show (with the same formatters and localized strings the ClockKit templates
-//  used), renders the glucose graph with ComplicationChartManager, writes both to the shared app
+//  used), gathers the glucose graph's data for the widget to draw, writes both to the shared app
 //  group, and asks WidgetKit to reload (ComplicationReloadThrottle decides when).
 //
 
@@ -18,20 +18,49 @@ import WidgetKit
 enum ComplicationPublisher {
 
     private static var throttle = ComplicationReloadThrottle<ComplicationSnapshot>()
-    private static let chartManager = ComplicationChartManager()
 
     /// Called on main at each context update.
     @MainActor static func publish(from loopManager: LoopDataManager) {
         guard let context = loopManager.activeContext else { return }
         Task { @MainActor in
-            chartManager.data = await loopManager.generateChartData()
-            let graphRendered = renderGraph()
-            store(snapshot(from: context, graphRenderedAt: graphRendered ? Date() : nil), now: Date())
+            let now = Date()
+            let graph = await loopManager.generateChartData().map { self.graph(from: $0, now: now) }
+            store(snapshot(from: context, graph: graph), now: now)
         }
     }
 
+    /// The graph's data as stock's ClockKit chart drew it, kept an extra hour ahead for later timeline entries.
+    static func graph(from data: GlucoseChartData, now: Date) -> ComplicationGraph {
+        let unit = data.unit ?? .milligramsPerDeciliter
+        let span = ComplicationGraph.halfSpan
+        let visible = DateInterval(start: now - span, end: now + span)
+        let kept = DateInterval(start: now - span, end: now + span + .hours(1))
+        let range = data.chartableGlucoseRange(from: visible)
+        let formatter = NumberFormatter.glucoseFormatter(for: unit)
+
+        let targetRanges = data.correctionRange?.quantityBetween(start: kept.start, end: kept.end).map {
+            ComplicationGraph.Band(start: $0.startDate, end: $0.endDate,
+                                   min: $0.value.lowerBound.doubleValue(for: unit), max: $0.value.upperBound.doubleValue(for: unit))
+        } ?? []
+        let override = data.activeScheduleOverride.flatMap(TemporaryScheduleOverrideHashable.init).map {
+            ComplicationGraph.Band(start: $0.start, end: $0.end,
+                                   min: $0.min.doubleValue(for: unit), max: $0.max.doubleValue(for: unit))
+        }
+        let historical = (data.historicalGlucose ?? []).filter { kept.contains($0.startDate) }.map {
+            ComplicationGraph.Point(date: $0.startDate, value: $0.quantity.doubleValue(for: unit), isManual: $0.isManualGlucose)
+        }
+        let predicted = (data.predictedGlucose ?? []).filter { kept.contains($0.startDate) }.map {
+            ComplicationGraph.Point(date: $0.startDate, value: $0.quantity.doubleValue(for: unit))
+        }
+        let glucoseMin = range.lowerBound.doubleValue(for: unit)
+        let glucoseMax = range.upperBound.doubleValue(for: unit)
+        return ComplicationGraph(glucoseMin: glucoseMin, glucoseMax: glucoseMax,
+                                 minLabel: formatter.string(from: glucoseMin) ?? "", maxLabel: formatter.string(from: glucoseMax) ?? "",
+                                 targetRanges: targetRanges, override: override, historical: historical, predicted: predicted)
+    }
+
     /// The strings each complication shows, formatted as the ClockKit templates formatted them.
-    static func snapshot(from context: WatchContext, graphRenderedAt: Date?) -> ComplicationSnapshot {
+    static func snapshot(from context: WatchContext, graph: ComplicationGraph?) -> ComplicationSnapshot {
         let unit = context.displayGlucoseUnit ?? .milligramsPerDeciliter
         let formatter = NumberFormatter.glucoseFormatter(for: unit)
         let staleGlucose = NSLocalizedString("---", comment: "No glucose value representation (3 dashes for mg/dL; no spaces as this will get truncated in the watch complication)")
@@ -66,22 +95,8 @@ enum ComplicationPublisher {
             loopDate: loopDate,
             freshUntil: loopDate.flatMap { date in LoopCompletionFreshness.fresh.maxAge.map { date.addingTimeInterval($0) } },
             agingUntil: loopDate.flatMap { date in LoopCompletionFreshness.aging.maxAge.map { date.addingTimeInterval($0) } },
-            graphRenderedAt: graphRenderedAt
+            graph: graph
         )
-    }
-
-    /// The graph at the size the ClockKit template used; the widget scales it to its slot.
-    @MainActor private static func renderGraph() -> Bool {
-        guard let url = ComplicationSnapshot.graphURL else { return false }
-        let size: CGSize = WKInterfaceDevice.current().screenBounds.width > 180
-            ? CGSize(width: 171, height: 54)    // 44 mm and larger
-            : CGSize(width: 150, height: 47)    // 40 mm
-        guard let image = chartManager.renderChartImage(size: size, scale: WKInterfaceDevice.current().screenScale),
-              let png = image.pngData() else {
-            try? FileManager.default.removeItem(at: url)
-            return false
-        }
-        return (try? png.write(to: url, options: .atomic)) != nil
     }
 
     @MainActor private static func store(_ snapshot: ComplicationSnapshot, now: Date) {

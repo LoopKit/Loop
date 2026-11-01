@@ -19,7 +19,7 @@ final class ComplicationSnapshotTests: XCTestCase {
                                     glucoseStaleAt: reading.addingTimeInterval(15 * 60), eventualText: "108",
                                     inlineText: "106↗ 108 8:47 PM", inlineStaleText: "--- 108 8:47 PM",
                                     loopDate: loop, freshUntil: loop.addingTimeInterval(6 * 60),
-                                    agingUntil: loop.addingTimeInterval(16 * 60), graphRenderedAt: nil)
+                                    agingUntil: loop.addingTimeInterval(16 * 60), graph: nil)
     }
 
     func testAFreshReadingShowsWithItsTrend() {
@@ -61,6 +61,10 @@ final class ComplicationSnapshotTests: XCTestCase {
         defaults.removePersistentDomain(forName: "ComplicationSnapshotTests")
         snapshot().save(to: defaults)
         XCTAssertEqual(ComplicationSnapshot.load(from: defaults), snapshot())
+
+        let withGraph = ComplicationSnapshot.sample
+        withGraph.save(to: defaults)
+        XCTAssertEqual(ComplicationSnapshot.load(from: defaults)?.graph, withGraph.graph)
     }
 
     /// Reloads are budgeted: at most one per window, and a change inside the window is not lost.
