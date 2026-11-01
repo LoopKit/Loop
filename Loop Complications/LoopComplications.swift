@@ -16,15 +16,19 @@ import WidgetKit
 struct ComplicationEntry: TimelineEntry {
     let date: Date
     let snapshot: ComplicationSnapshot?
+    /// The face editor's preview, which shows sample content.
+    var isPreview = false
 }
 
 struct ComplicationProvider: TimelineProvider {
     func placeholder(in context: Context) -> ComplicationEntry {
-        ComplicationEntry(date: Date(), snapshot: .sample)
+        ComplicationEntry(date: Date(), snapshot: .sample, isPreview: true)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (ComplicationEntry) -> Void) {
-        completion(ComplicationEntry(date: Date(), snapshot: context.isPreview ? .sample : ComplicationSnapshot.load()))
+        completion(context.isPreview
+                   ? ComplicationEntry(date: Date(), snapshot: .sample, isPreview: true)
+                   : ComplicationEntry(date: Date(), snapshot: ComplicationSnapshot.load()))
     }
 
     /// Now, then each moment something visible changes on its own (the reading goes stale, the loop's
@@ -122,24 +126,59 @@ struct GlucoseGraphView: View {
     private var snapshot: ComplicationSnapshot { entry.snapshot ?? ComplicationSnapshot() }
 
     var body: some View {
+        // Stock's layout: the reading and its trend, the chart under it across the slot.
         VStack(alignment: .leading, spacing: 1) {
-            HStack(spacing: 4) {
-                Text(snapshot.glucose(at: entry.date) + snapshot.trend(at: entry.date))
-                    .font(.headline)
-                    .widgetAccentable()
-                if let loopDate = snapshot.loopDate {
-                    Text(loopDate, style: .relative)
-                        .font(.caption2)
-                        .foregroundStyle(snapshot.freshness(at: entry.date).color)
-                }
-            }
-            if snapshot.graphRenderedAt != nil, let url = ComplicationSnapshot.graphURL,
-               let image = UIImage(contentsOfFile: url.path) {
-                Image(uiImage: image).resizable().aspectRatio(contentMode: .fit)
+            Text(snapshot.glucose(at: entry.date) + snapshot.trend(at: entry.date))
+                .font(.headline)
+                .widgetAccentable()
+            GeometryReader { space in
+                chart(in: space.size)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .complicationBackground()
+    }
+
+    /// The app draws the chart at the size this slot reports, so it fills the width on every watch.
+    @ViewBuilder private func chart(in size: CGSize) -> some View {
+        if entry.isPreview {
+            SampleGraph()
+        } else {
+            let _ = ComplicationSnapshot.saveGraphSize(size)
+            if snapshot.graphRenderedAt != nil, let url = ComplicationSnapshot.graphURL,
+               let image = UIImage(contentsOfFile: url.path) {
+                Image(uiImage: image).resizable().aspectRatio(contentMode: .fit)
+                    .frame(width: size.width, height: size.height, alignment: .leading)
+            }
+        }
+    }
+}
+
+/// The face editor's preview of the chart, in the real one's style: the target band, the recent
+/// readings dotted, the prediction dashed. The real chart exists only once the watch app has drawn one.
+private struct SampleGraph: View {
+    var body: some View {
+        GeometryReader { space in
+            let w = space.size.width, h = space.size.height
+            let target = h * 0.7
+            // A rise and fall back to the target: readings to 60 % of the width, the prediction after.
+            let point = { (x: CGFloat) -> CGPoint in
+                CGPoint(x: x * w, y: x < 0.75 ? target - h * 0.55 * sin(.pi * x / 0.75) : target)
+            }
+            let curve = { (from: CGFloat, to: CGFloat) -> Path in
+                Path { path in
+                    path.move(to: point(from))
+                    stride(from: from, through: to, by: 0.02).forEach { path.addLine(to: point($0)) }
+                }
+            }
+            ZStack(alignment: .topLeading) {
+                Rectangle().fill(Color.blue.opacity(0.4))
+                    .frame(width: w, height: h * 0.12)
+                    .offset(y: target - h * 0.06)
+                curve(0, 0.6).stroke(Color.blue, style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [0.5, 3]))
+                curve(0.6, 1).stroke(Color.white.opacity(0.8), style: StrokeStyle(lineWidth: 1, dash: [3, 2]))
+            }
+        }
     }
 }
 

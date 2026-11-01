@@ -84,6 +84,20 @@ struct ComplicationSnapshot: Codable, Equatable {
             .appendingPathComponent(graphFileName)
     }
 
+    /// The space the Glucose Graph complication gives its chart, measured by the widget each time it
+    /// draws; the app draws the chart in that shape (stock's fixed sizes until the widget has drawn).
+    static let graphSizeKey = "ComplicationGlucoseGraphSize"
+
+    static func graphSize(from defaults: UserDefaults? = sharedDefaults) -> CGSize? {
+        guard let wh = defaults?.array(forKey: graphSizeKey) as? [Double], wh.count == 2, wh[0] > 0, wh[1] > 0 else { return nil }
+        return CGSize(width: wh[0], height: wh[1])
+    }
+
+    static func saveGraphSize(_ size: CGSize, to defaults: UserDefaults? = sharedDefaults) {
+        guard size.width > 0, size.height > 0, graphSize(from: defaults) != size else { return }
+        defaults?.set([Double(size.width), Double(size.height)], forKey: graphSizeKey)
+    }
+
     static func load(from defaults: UserDefaults? = sharedDefaults) -> ComplicationSnapshot? {
         defaults?.data(forKey: defaultsKey).flatMap { try? JSONDecoder().decode(Self.self, from: $0) }
     }
