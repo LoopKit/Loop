@@ -115,26 +115,17 @@ struct DayDetailView: View {
 
     private var dayStepper: some View {
         HStack {
-            Button {
+            StepButton(systemName: "chevron.left", label: NSLocalizedString("Previous day", comment: "Accessibility label for the day page button that steps back a day")) {
                 day = Calendar.current.date(byAdding: .day, value: -1, to: day)!
-            } label: {
-                Image(systemName: "chevron.left").frame(width: 44, height: 44)
             }
-            .accessibilityLabel(NSLocalizedString("Previous day", comment: "Accessibility label for the day page button that steps back a day"))
             Spacer()
             Text(LoopFormat.day(day))
                 .font(LoopDesign.Typeface.headline)
                 .foregroundStyle(P.ink)
             Spacer()
-            Button {
+            StepButton(systemName: "chevron.right", label: NSLocalizedString("Next day", comment: "Accessibility label for the day page button that steps forward a day"), enabled: !isToday) {
                 day = Calendar.current.date(byAdding: .day, value: 1, to: day)!
-            } label: {
-                Image(systemName: "chevron.right").frame(width: 44, height: 44)
             }
-            .disabled(isToday)
-            .accessibilityLabel(NSLocalizedString("Next day", comment: "Accessibility label for the day page button that steps forward a day"))
         }
-        .font(.body.weight(.semibold))
-        .foregroundStyle(P.accentInk)
     }
 }

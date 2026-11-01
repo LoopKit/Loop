@@ -165,6 +165,7 @@ struct CarbEntryScreen: View {
                 }
                 .font(.system(size: 72, weight: .bold, design: .rounded).monospacedDigit())
                 .foregroundStyle(P.carbsInk)
+                .tint(P.carbsInk)
                 .keyboardType(.decimalPad)
                 .accessibilityLabel(NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"))
                 .accessibilityIdentifier("textField_CarbsAmount")
@@ -481,7 +482,8 @@ struct CarbEntryScreen: View {
         }
         .padding(LoopDesign.Space.s3)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(P.statusCritical.opacity(0.12), in: RoundedRectangle(cornerRadius: LoopDesign.Radius.lg, style: .continuous))
+        .background(P.statusCritical.opacity(0.16), in: RoundedRectangle(cornerRadius: LoopDesign.Radius.lg, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: LoopDesign.Radius.lg, style: .continuous).strokeBorder(P.statusCritical.opacity(0.45), lineWidth: 1))
     }
 
     private func warningText(_ warning: CarbEntryViewModel.Warning) -> String {

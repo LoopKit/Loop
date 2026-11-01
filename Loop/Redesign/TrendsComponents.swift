@@ -80,13 +80,13 @@ struct RangeSelectorView: View {
             .background(P.surfaceSunken, in: Capsule())
 
             HStack {
-                stepButton(systemName: "chevron.left", label: NSLocalizedString("Previous period", comment: "VoiceOver label for the Trends button that moves back one period"), enabled: true) { step(-1) }
+                StepButton(systemName: "chevron.left", label: NSLocalizedString("Previous period", comment: "VoiceOver label for the Trends button that moves back one period")) { step(-1) }
                 Spacer()
                 Text(LoopFormat.range(period.interval(endingOn: endDay, now: now).start, endDay))
                     .font(LoopDesign.Typeface.headline.monospacedDigit())
                     .foregroundStyle(P.ink)
                 Spacer()
-                stepButton(systemName: "chevron.right", label: NSLocalizedString("Next period", comment: "VoiceOver label for the Trends button that moves forward one period"), enabled: canStepForward) { step(1) }
+                StepButton(systemName: "chevron.right", label: NSLocalizedString("Next period", comment: "VoiceOver label for the Trends button that moves forward one period"), enabled: canStepForward) { step(1) }
             }
         }
     }
@@ -94,20 +94,6 @@ struct RangeSelectorView: View {
     private func step(_ direction: Int) {
         guard let next = calendar.date(byAdding: .day, value: direction * period.rawValue, to: endDay) else { return }
         endDay = min(next, now)
-    }
-
-    private func stepButton(systemName: String, label: String, enabled: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: systemName)
-                .font(.footnote.weight(.semibold))
-                .frame(width: 30, height: 30)
-                .background(P.surfaceRaised, in: Circle())
-                .overlay(Circle().strokeBorder(P.separator))
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(enabled ? P.ink : P.inkMuted.opacity(0.5))
-        .disabled(!enabled)
-        .accessibilityLabel(label)
     }
 }
 
@@ -118,6 +104,7 @@ struct StatTile: Identifiable {
     let value: String
     let unit: String?
     let detail: String?
+    var valueColor: Color = LoopDesign.Palette.ink
     var id: String { label }
 }
 
@@ -152,7 +139,7 @@ struct StatGridView: View {
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(tile.value)
                     .font(LoopDesign.Typeface.statValue)
-                    .foregroundStyle(P.ink)
+                    .foregroundStyle(tile.valueColor)
                     .minimumScaleFactor(0.7)
                     .lineLimit(1)
                 if let unit = tile.unit {
@@ -499,7 +486,7 @@ struct InsulinSplitView: View {
                     Spacer()
                     Text(LoopFormat.totalUnits(split.total))
                         .font(LoopDesign.Typeface.statValueSmall)
-                        .foregroundStyle(LoopDesign.Palette.ink)
+                        .foregroundStyle(LoopDesign.Palette.insulinInk)
                 }
             }
         }
@@ -714,7 +701,7 @@ struct LoopModeBarView: View {
         switch mode {
         case .closed: return P.statusAutomated
         case .limited: return P.statusWarning
-        case .open: return P.statusCritical
+        case .open: return P.inkMuted
         }
     }
 

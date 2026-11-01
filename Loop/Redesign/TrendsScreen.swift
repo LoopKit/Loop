@@ -181,7 +181,7 @@ final class TrendsModel: ObservableObject {
                                 : NSLocalizedString("Insulin per day", comment: "Trends tile and card title: average total insulin per day"),
                               value: LoopFormat.number(s.insulinPerDay, decimals: 1),
                               unit: NSLocalizedString("U", comment: "Abbreviation for insulin units"),
-                              detail: insulinDetail))
+                              detail: insulinDetail, valueColor: P.insulinInk))
         tiles.append(StatTile(label: oneDay
                                 ? NSLocalizedString("Carbs", comment: "Trends summary tile for a one-day period: the day's total carbohydrate")
                                 : NSLocalizedString("Carbs per day", comment: "Trends summary tile: average grams of carbohydrate entered per day"),
@@ -190,7 +190,8 @@ final class TrendsModel: ObservableObject {
                               detail: oneDay
                                 ? String(format: NSLocalizedString("%lld entries", comment: "Trends Carbs tile detail for a one-day period: how many carb entries were made that day. (1: number)"), s.carbEntries)
                                 : String(format: NSLocalizedString("%1$@ entries", comment: "Trends Carbs per day tile detail: average number of carb entries per day, a fractional value such as 2.5, so not pluralised. (1: number with one decimal)"),
-                                         LoopFormat.number(Double(s.carbEntries) / s.days, decimals: 1))))
+                                         LoopFormat.number(Double(s.carbEntries) / s.days, decimals: 1)),
+                              valueColor: P.carbsInk))
         tiles.append(StatTile(label: oneDay
                                 ? NSLocalizedString("Boluses", comment: "Trends summary tile for a one-day period: how many manual boluses were given that day")
                                 : NSLocalizedString("Boluses per day", comment: "Trends summary tile: average number of manual boluses per day"),
