@@ -146,7 +146,7 @@ extension PodLoanWatchController {
         let at = now()
         let entry = DoseEntry(type: .bolus, startDate: at, endDate: at, value: unexplained, unit: .units,
                               decisionId: nil, deliveredUnits: unexplained,
-                              syncIdentifier: "\(Self.estimateSyncPrefix)-\(Int(at.timeIntervalSince1970))", insulinType: insulinType)
+                              syncIdentifier: "\(Self.estimateSyncPrefix)-\(Int64(at.timeIntervalSince1970))", insulinType: insulinType)
         do {
             try await loopManager.seedInsulinHistory([entry])
         } catch {
