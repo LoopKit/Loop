@@ -21,18 +21,18 @@ public struct AlgorithmDisplayState {
         self.output = output
     }
 
-    public var activeInsulin: InsulinValue? {
+    public var activeInsulin: LoopKit.InsulinValue? {
         guard let input, let value = output?.activeInsulin else {
             return nil
         }
-        return InsulinValue(startDate: input.predictionStart, value: value)
+        return LoopKit.InsulinValue(startDate: input.predictionStart, value: value)
     }
 
-    public var activeCarbs: CarbValue? {
+    public var activeCarbs: LoopKit.CarbValue? {
         guard let input, let value = output?.activeCarbs else {
             return nil
         }
-        return CarbValue(startDate: input.predictionStart, value: value)
+        return LoopKit.CarbValue(startDate: input.predictionStart, value: value)
     }
 
     public var asTuple: (algoInput: StoredDataAlgorithmInput?, algoOutput: AlgorithmOutput<StoredCarbEntry>?) {
@@ -198,10 +198,10 @@ public extension StoredDosingDecision {
             self.appendError(error as? LoopError ?? .unknownError(error))
         }
         if let activeInsulin = output.activeInsulin {
-            self.insulinOnBoard = InsulinValue(startDate: input.predictionStart, value: activeInsulin)
+            self.insulinOnBoard = LoopKit.InsulinValue(startDate: input.predictionStart, value: activeInsulin)
         }
         if let activeCarbs = output.activeCarbs {
-            self.carbsOnBoard = CarbValue(startDate: input.predictionStart, value: activeCarbs)
+            self.carbsOnBoard = LoopKit.CarbValue(startDate: input.predictionStart, value: activeCarbs)
         }
         self.predictedGlucose = output.predictedGlucose.map(\.loopKit)
     }
@@ -224,13 +224,13 @@ public extension StoredDataAlgorithmInput {
         overrideHistory: TemporaryScheduleOverrideHistory,
         activeOverride: TemporaryScheduleOverride?,
         pumpInsulinType: InsulinType?,
-        insulinModel insulinModelForType: (InsulinType?) -> InsulinModel,
+        insulinModel insulinModelForType: (InsulinType?) -> LoopKit.InsulinModel,
         experiments: Set<ExperimentOption>,
         volatilityBaseline: Double?,
         carbAbsorptionModel: CarbAbsorptionModel,
         isolation: isolated (any Actor)? = #isolation
     ) async throws -> StoredDataAlgorithmInput {
-        func insulinModel(for type: InsulinType?) -> InsulinModel { insulinModelForType(type) }
+        func insulinModel(for type: InsulinType?) -> LoopKit.InsulinModel { insulinModelForType(type) }
 
         // Need to fetch doses back as far as t - (DIA + DCA) for Dynamic carbs
         let dosesInputHistory = CarbMath.maximumAbsorptionTimeInterval + InsulinMath.defaultInsulinActivityDuration
@@ -273,9 +273,9 @@ public extension StoredDataAlgorithmInput {
         // boundaries, and the continuous-delivery IOB integrator doesn't join the
         // resulting sub-doses perfectly across the boundary -- visible as a small
         // bump in Active Insulin at midnight even with a single-rate schedule.
-        let basal: [AbsoluteScheduleValue<Double>] = rawBasal.reduce(into: []) { acc, entry in
+        let basal: [LoopKit.AbsoluteScheduleValue<Double>] = rawBasal.reduce(into: []) { acc, entry in
             if let last = acc.last, last.value == entry.value, last.endDate == entry.startDate {
-                acc[acc.count - 1] = AbsoluteScheduleValue(startDate: last.startDate, endDate: entry.endDate, value: last.value)
+                acc[acc.count - 1] = LoopKit.AbsoluteScheduleValue(startDate: last.startDate, endDate: entry.endDate, value: last.value)
             } else {
                 acc.append(entry)
             }
@@ -369,7 +369,7 @@ public extension StoredDataAlgorithmInput {
         let carbRatioWithOverrides = overrides.applyCarbRatio(over: carbRatio)
 
 
-        var target: [AbsoluteScheduleValue<ClosedRange<LoopQuantity>>]
+        var target: [LoopKit.AbsoluteScheduleValue<ClosedRange<LoopQuantity>>]
 
         guard var suspendThreshold = dosingLimits.suspendThreshold else {
             throw LoopError.configurationError(.suspendThreshold)
@@ -388,7 +388,7 @@ public extension StoredDataAlgorithmInput {
             let scheduledRange = schedule.quantityRange(at: baseTime)
             let overriddenTargetRange = activeOverride.effectiveCorrectionRangeDuring(scheduledRange: scheduledRange)
             target = [
-                AbsoluteScheduleValue(
+                LoopKit.AbsoluteScheduleValue(
                     startDate: baseTime,
                     endDate: forecastEndTime,
                     value: overriddenTargetRange

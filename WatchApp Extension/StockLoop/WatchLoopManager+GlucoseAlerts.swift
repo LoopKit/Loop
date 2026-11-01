@@ -8,7 +8,6 @@
 
 import Foundation
 import LoopKit
-import LoopAlgorithm
 
 extension WatchLoopManager {
     /// Built for each loan from the grant; nil data (an older phone) leaves the wrist without them.

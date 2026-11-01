@@ -23,7 +23,7 @@ public protocol DeliveryDelegate: AnyObject {
     var pumpStatusHighlight: DeviceStatusHighlight? { get }
     var cgmManagerStatus: CGMManagerStatus? { get }
 
-    func enact(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?) async throws
+    func enact(bolus: Double?, tempBasal: LoopKit.TempBasalRecommendation?, decisionId: UUID?) async throws
     func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws
     func roundBasalRate(unitsPerHour: Double) -> Double
     func roundBolusVolume(units: Double) -> Double
@@ -37,7 +37,7 @@ public protocol PumpManagerDeliveryDelegate: DeliveryDelegate {
     var cgmManager: CGMManager? { get }
 
     /// Sends a dose `enact` has checked, logged the device's way.
-    func send(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?, to pumpManager: PumpManager) async throws
+    func send(bolus: Double?, tempBasal: LoopKit.TempBasalRecommendation?, decisionId: UUID?, to pumpManager: PumpManager) async throws
 }
 
 public extension PumpManagerDeliveryDelegate {
@@ -89,7 +89,7 @@ public extension PumpManagerDeliveryDelegate {
     }
 
     /// Refused while the pump's last command is unconfirmed: its driver settles it at its next session.
-    func enact(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?) async throws {
+    func enact(bolus: Double?, tempBasal: LoopKit.TempBasalRecommendation?, decisionId: UUID?) async throws {
         guard let pumpManager = pumpManager else {
             throw LoopError.configurationError(.pumpManager)
         }
@@ -126,7 +126,7 @@ public protocol LoopCycleHost: AnyObject {
     var currentDosingStrategy: AutomaticDosingStrategy { get }
     var usePositiveMomentumAndRCForManualBoluses: Bool { get }
     var carbAbsorptionModel: CarbAbsorptionModel { get }
-    func insulinModel(for type: InsulinType?) -> InsulinModel
+    func insulinModel(for type: InsulinType?) -> LoopKit.InsulinModel
 
     /// This device holds the pump: it may command it, and its dosing decisions are the record.
     var holdsPump: Bool { get }
@@ -145,9 +145,9 @@ public final class LoopCycle {
         public var output: AlgorithmOutput<StoredCarbEntry>?
         /// The automatic recommendation as it was to be enacted: rounded and adjusted for the
         /// pump's current temp.
-        public var recommendation: AutomaticDoseRecommendation?
+        public var recommendation: LoopKit.AutomaticDoseRecommendation?
         /// The temp basal command; nil when the pump's current temp already serves.
-        public var basalAdjustment: TempBasalRecommendation?
+        public var basalAdjustment: LoopKit.TempBasalRecommendation?
         /// The dose went to the pump and the pump took it.
         public var enacted = false
         public var error: LoopError?
@@ -165,7 +165,7 @@ public final class LoopCycle {
     private let log = OSLog(subsystem: "com.loopkit.Loop", category: "LoopCycle")
 
     /// The manual recommendation in the last stored remote recommendation.
-    private var lastManualBolusRecommendation: ManualBolusRecommendation?
+    private var lastManualBolusRecommendation: LoopKit.ManualBolusRecommendation?
 
     public init(doseStore: DoseStoreProtocol, carbStore: CarbStoreProtocol, glucoseStore: GlucoseStoreProtocol,
          dosingDecisionStore: DosingDecisionStoreProtocol?, settingsProvider: SettingsProvider,
@@ -368,7 +368,7 @@ public final class LoopCycle {
         carbEntryChange: CarbEntryChange? = nil,
         truncatingActiveOverride: Bool = false,
         isolation: isolated (any Actor)? = #isolation
-    ) async throws -> ManualBolusRecommendation? {
+    ) async throws -> LoopKit.ManualBolusRecommendation? {
         let input = try await manualBolusInput(manualGlucoseSample: manualGlucoseSample, carbEntryChange: carbEntryChange,
                                                truncatingActiveOverride: truncatingActiveOverride)
 
@@ -419,7 +419,7 @@ public final class LoopCycle {
     /// owns the program). A failure stores nothing. The hooks bracket the send.
     public func cancelActiveTempBasal(
         for reason: CancelActiveTempBasalReason,
-        dosingStarted: (AutomaticDoseRecommendation) -> Void = { _ in },
+        dosingStarted: (LoopKit.AutomaticDoseRecommendation) -> Void = { _ in },
         dosingFinished: () -> Void = {},
         isolation: isolated (any Actor)? = #isolation
     ) async throws -> Bool {
@@ -434,7 +434,7 @@ public final class LoopCycle {
 
         os_log("Cancelling active temp basal for reason: %{public}@", log: log, type: .default, reason.rawValue)
 
-        let recommendation = AutomaticDoseRecommendation(basalAdjustment: .cancel, direction: .decrease)
+        let recommendation = LoopKit.AutomaticDoseRecommendation(basalAdjustment: .cancel, direction: .decrease)
 
         var dosingDecision = StoredDosingDecision(date: now(), reason: reason.rawValue)
         dosingDecision.settings = StoredDosingDecision.Settings(settingsProvider.settings)

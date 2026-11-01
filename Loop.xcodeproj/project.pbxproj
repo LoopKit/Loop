@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		52CB9A826E3B3DFC4E483084 /* AlgorithmBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */; };
+		01F99A06F17502CC60E9535C /* AlgorithmBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */; };
+		9950DD7109C8F6C854AAAB48 /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
 		527427E1C81FAB157FEEA18B /* BolusDosingDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */; };
 		B2F374A7AC2458B5AC5CE371 /* BolusDosingDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */; };
 		3EC6DF601CC5B95DD71BB52D /* TempBasalRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F2CAA92B76B3EE00D7F581 /* TempBasalRecommendation.swift */; };
@@ -862,7 +865,6 @@
 		1C99EE4A3BB181BB23DEF066 /* LoopAlgorithm in Frameworks */ = {isa = PBXBuildFile; productRef = C42F6B8A2B1B9E0142078BF9 /* LoopAlgorithm */; };
 		BD37CA2F10445DB600A35199 /* TemporaryScheduleOverrideAlgorithmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C372374D3D3D9C5F8E3AD93 /* TemporaryScheduleOverrideAlgorithmTests.swift */; };
 		5E77F6516D69B22A57EB850A /* LoopAlgorithm in Frameworks */ = {isa = PBXBuildFile; productRef = 761F6A285BE2833DF06F7E55 /* LoopAlgorithm */; };
-		613BF2B78104AB9694590C65 /* AlgorithmBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */; };
 		767B36174D190F3191F2EA73 /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
 		8DC1CE32F39301122B550325 /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
 		ABD9218EB98C9216FBB04382 /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
@@ -2158,7 +2160,6 @@
 				D5E7CDB17CCE70885EE93850 /* SetupComparison.swift */,
 				C152B9F42C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift */,
 				84213C882D94941000642E78 /* InsulinDeliveryLogEvent.swift */,
-				36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3291,6 +3292,7 @@
 			children = (
 				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
 				C16F511A2B89363A00EFD7A1 /* SimpleInsulinDose.swift */,
+				36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */,
 				C16F51182B891DB600EFD7A1 /* StoredDataAlgorithmInput.swift */,
 				A9B996EF27235191002DC09C /* LoopWarning.swift */,
 				436A0DA41D236A2A00104B24 /* LoopError.swift */,
@@ -4373,7 +4375,6 @@
 				14C970862C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift in Sources */,
 				5021CA8C264146C9DFF33E9D /* PluginPickerView.swift in Sources */,
 				17EA66859884C0208DED47CF /* LoopKitTypeAliases.swift in Sources */,
-				613BF2B78104AB9694590C65 /* AlgorithmBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4548,6 +4549,7 @@
 				451FFEF51B975CE332CC6C6D /* DoseStoreProtocol.swift in Sources */,
 				0390983B63120E47B543264F /* CarbStoreProtocol.swift in Sources */,
 				D96DC2868F8E7ADEEA335047 /* LoopAlgorithmSupport.swift in Sources */,
+				01F99A06F17502CC60E9535C /* AlgorithmBridge.swift in Sources */,
 				229FEACAEAB2DF60B3DB5C84 /* LoopCycle.swift in Sources */,
 				7B29B5CF4AAA4DA0B6E2F1A9 /* LoanTransport.swift in Sources */,
 				10B149E9B807E4BF43BAC1ED /* LoanMessages.swift in Sources */,
@@ -4607,6 +4609,7 @@
 				690482C3E6D6A94D7BA232B6 /* DoseStoreProtocol.swift in Sources */,
 				3CD16E39CAB99674C3AB351C /* CarbStoreProtocol.swift in Sources */,
 				104021B7449DA59717EA4E5D /* LoopAlgorithmSupport.swift in Sources */,
+				52CB9A826E3B3DFC4E483084 /* AlgorithmBridge.swift in Sources */,
 				D23A31DF90992466C4626B34 /* LoopCycle.swift in Sources */,
 				7CC4501AABA3438A9291A003 /* LoanTransport.swift in Sources */,
 				1B377B11C88EA02BAD431175 /* LoanMessages.swift in Sources */,
@@ -4773,6 +4776,7 @@
 				5E12EA730000000000000049 /* PodReturnsWithUnknownDeliveryStateTests.swift in Sources */,
 				5E12EA7A000000000000004B /* EndDuringBolusTests.swift in Sources */,
 				9A7CE02E302D82A800A03F53 /* WatchAppTests.swift in Sources */,
+				9950DD7109C8F6C854AAAB48 /* LoopKitTypeAliases.swift in Sources */,
 				9A7CE071302D82A800A03F53 /* RecordingWristAlertScheduler.swift in Sources */,
 				9A7CE081302D82A800A03F53 /* GlanceSurfaceTests.swift in Sources */,
 				BB7CE081302D82A800A03F53 /* InsulinBookTests.swift in Sources */,

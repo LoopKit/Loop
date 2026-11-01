@@ -11,7 +11,6 @@
 import Foundation
 import HealthKit
 import LoopKit
-import LoopAlgorithm
 import LoopCore
 
 enum StockLoopStack {

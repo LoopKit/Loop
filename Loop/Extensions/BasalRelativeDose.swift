@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import LoopAlgorithm
+import LoopKitUI
 
 public extension Array where Element == BasalRelativeDose {
     func trimmed(from start: Date? = nil, to end: Date? = nil) -> [BasalRelativeDose] {
@@ -48,5 +49,16 @@ extension BasalRelativeDose {
             endDate: endDate,
             volume: trimmedVolume
         )
+    }
+}
+
+extension LoopAlgorithm.BasalRelativeDose {
+    var chartedDose: ChartedDose {
+        let type: ChartedDose.DoseType
+        switch self.type {
+        case .bolus: type = .bolus
+        case .basal: type = .basal
+        }
+        return ChartedDose(type: type, startDate: startDate, endDate: endDate, volume: volume, netBasalUnits: netBasalUnits)
     }
 }
