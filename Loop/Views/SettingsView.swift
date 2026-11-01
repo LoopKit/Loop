@@ -56,6 +56,7 @@ struct SettingsView: View {
             case favoriteFoods
             case presets
             case trends
+            case logbook
         }
     }
     
@@ -161,6 +162,10 @@ struct SettingsView: View {
                         if let historyProvider = viewModel.historyProvider {
                             // Trends brings its own navigation stack, so it is a sheet rather than a push. Done closes only Trends.
                             TrendsView(provider: historyProvider, done: { self.sheet = nil })
+                        }
+                    case .logbook:
+                        if let historyProvider = viewModel.historyProvider, let deviceManager = viewModel.deviceManager {
+                            LogbookView(provider: historyProvider, deviceManager: deviceManager, done: { self.sheet = nil })
                         }
                     }
                 }
@@ -375,6 +380,16 @@ extension SettingsView {
                         descriptiveText: NSLocalizedString("Time in range, daily pattern, insulin per day and Loop status", comment: "Trends settings descriptive text")
                     )
                     .accessibilityIdentifier("settingsViewTrends")
+                    LargeButton(
+                        action: { sheet = .logbook },
+                        imageView: Image(systemName: "list.bullet.rectangle")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 30),
+                        label: NSLocalizedString("Logbook", comment: "Logbook settings button text"),
+                        descriptiveText: NSLocalizedString("Boluses, basal changes, carbs and pump events from the last 7 days", comment: "Logbook settings descriptive text")
+                    )
+                    .accessibilityIdentifier("settingsViewLogbook")
                 }
                 NavigationLink(destination: CurrentSetupView(viewModel: CurrentSetupViewModel(
                     selected: setupChange,

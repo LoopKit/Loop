@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// Pure calculations behind the Trends screen. Nothing here touches a store.
+/// Pure calculations behind the Trends and Logbook screens. Nothing here touches a store.
 enum LoopHistoryMath {
 
     // MARK: Glucose statistics

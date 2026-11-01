@@ -557,6 +557,43 @@ struct InsulinSplitView: View {
     }
 }
 
+/// A day's basal and bolus under a list header: the line, then each part keyed the way the charts and rows draw it.
+/// The header shows the day's total itself.
+struct InsulinSplitLine: View {
+    let split: InsulinSplit
+    var partial = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            InsulinSplitBar(split: split, hairline: true)
+            FlowLayout(spacing: LoopDesign.Space.s3, lineSpacing: 2) {
+                part(.basal, Text(NSLocalizedString("Basal", comment: "Basal and bolus row: insulin delivered as basal")) + Text(verbatim: " ") + Text(LoopFormat.number(split.basal, decimals: 1)))
+                if split.isClassified {
+                    if split.manualBolus > 0 {
+                        part(.solid(LoopDesign.Palette.bolus), Text(String(format: NSLocalizedString("Manual %1$@", comment: "Basal and bolus: bolus the person gave. (1: units, e.g. 16.2 U)"), LoopFormat.number(split.manualBolus, decimals: 1))))
+                    }
+                    if split.automaticBolus > 0 {
+                        part(.hatch(LoopDesign.Palette.bolus), Text(String(format: NSLocalizedString("Automatic %1$@", comment: "Basal and bolus: bolus Loop gave automatically. (1: units, e.g. 5.4 U)"), LoopFormat.number(split.automaticBolus, decimals: 1))))
+                    }
+                } else {
+                    part(.solid(LoopDesign.Palette.bolus), Text(NSLocalizedString("Bolus", comment: "Basal and bolus row: insulin delivered as bolus, manual and automatic")) + Text(verbatim: " ") + Text(LoopFormat.number(split.bolus, decimals: 1)))
+                }
+            }
+            .font(LoopDesign.Typeface.footnote.monospacedDigit())
+            .foregroundStyle(LoopDesign.Palette.inkMuted)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(InsulinSplitView.accessibilityLabel(split, partial: partial))
+    }
+
+    private func part(_ swatch: LegendItem.Swatch, _ text: Text) -> some View {
+        HStack(spacing: LoopDesign.Space.s1) {
+            LegendSwatch(swatch: swatch)
+            text
+        }
+    }
+}
+
 // MARK: - InsulinDailyTotals
 
 struct InsulinDailyTotalsView: View {

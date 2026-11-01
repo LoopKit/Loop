@@ -732,6 +732,7 @@
 		2ADBB92A8ABB74360D18EEFA /* LoopHistoryModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471FFD525A4EB897745608BE /* LoopHistoryModels.swift */; };
 		A743DC26D066EE5AC88C2F45 /* LoopHistoryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09448CF97996C40BEDDE6588 /* LoopHistoryProvider.swift */; };
 		6A6C1E1C7A26EC88AFB4FAB1 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A83D311A9ECAE563F74A51 /* DayDetailView.swift */; };
+		23B98F0A53A093412229364D /* LogbookScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AEDC42672A7A8C57546EA0C /* LogbookScreen.swift */; };
 		591F13AF435B37B4818E2F2B /* TrendsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFDE56977CC73CBDA1170C5 /* TrendsComponents.swift */; };
 		5CD0888FF33D6F844A81E638 /* TrendsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF0FD64B2B3E9C9AA8764684 /* TrendsScreen.swift */; };
 		97CF13197936D2794766C84A /* LoopHistoryMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42B08644C3031D9E815F9892 /* LoopHistoryMathTests.swift */; };
@@ -1611,6 +1612,7 @@
 		471FFD525A4EB897745608BE /* LoopHistoryModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopHistoryModels.swift; sourceTree = "<group>"; };
 		09448CF97996C40BEDDE6588 /* LoopHistoryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopHistoryProvider.swift; sourceTree = "<group>"; };
 		E3A83D311A9ECAE563F74A51 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
+		7AEDC42672A7A8C57546EA0C /* LogbookScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogbookScreen.swift; sourceTree = "<group>"; };
 		4BFDE56977CC73CBDA1170C5 /* TrendsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendsComponents.swift; sourceTree = "<group>"; };
 		AF0FD64B2B3E9C9AA8764684 /* TrendsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendsScreen.swift; sourceTree = "<group>"; };
 		42B08644C3031D9E815F9892 /* LoopHistoryMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopHistoryMathTests.swift; sourceTree = "<group>"; };
@@ -3017,6 +3019,7 @@
 			children = (
 				AF0FD64B2B3E9C9AA8764684 /* TrendsScreen.swift */,
 				4BFDE56977CC73CBDA1170C5 /* TrendsComponents.swift */,
+				7AEDC42672A7A8C57546EA0C /* LogbookScreen.swift */,
 				E3A83D311A9ECAE563F74A51 /* DayDetailView.swift */,
 				09448CF97996C40BEDDE6588 /* LoopHistoryProvider.swift */,
 				471FFD525A4EB897745608BE /* LoopHistoryModels.swift */,
@@ -3687,6 +3690,7 @@
 			files = (
 				5CD0888FF33D6F844A81E638 /* TrendsScreen.swift in Sources */,
 				591F13AF435B37B4818E2F2B /* TrendsComponents.swift in Sources */,
+				23B98F0A53A093412229364D /* LogbookScreen.swift in Sources */,
 				6A6C1E1C7A26EC88AFB4FAB1 /* DayDetailView.swift in Sources */,
 				A743DC26D066EE5AC88C2F45 /* LoopHistoryProvider.swift in Sources */,
 				2ADBB92A8ABB74360D18EEFA /* LoopHistoryModels.swift in Sources */,
