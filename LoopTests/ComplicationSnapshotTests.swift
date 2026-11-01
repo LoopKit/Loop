@@ -63,6 +63,17 @@ final class ComplicationSnapshotTests: XCTestCase {
         XCTAssertEqual(ComplicationSnapshot.load(from: defaults), snapshot())
     }
 
+    /// The graph complication's measured space reaches the app; nothing until it has drawn, nor for an empty one.
+    func testTheGraphSizeRoundTripsThroughDefaults() {
+        let defaults = UserDefaults(suiteName: "ComplicationSnapshotTests")!
+        defaults.removePersistentDomain(forName: "ComplicationSnapshotTests")
+        XCTAssertNil(ComplicationSnapshot.graphSize(from: defaults))
+        ComplicationSnapshot.saveGraphSize(.zero, to: defaults)
+        XCTAssertNil(ComplicationSnapshot.graphSize(from: defaults))
+        ComplicationSnapshot.saveGraphSize(CGSize(width: 160, height: 37), to: defaults)
+        XCTAssertEqual(ComplicationSnapshot.graphSize(from: defaults), CGSize(width: 160, height: 37))
+    }
+
     /// Reloads are budgeted: at most one per window, and a change inside the window is not lost.
     func testReloadsAreThrottledButNeverLost() {
         var throttle = ComplicationReloadThrottle<ComplicationSnapshot>()
