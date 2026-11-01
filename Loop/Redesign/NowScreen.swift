@@ -52,6 +52,7 @@ final class NowModel: ObservableObject {
     @Published private(set) var iob: Double?
     @Published private(set) var cob: Double?
     @Published private(set) var basalDeliveryState: PumpManagerStatus.BasalDeliveryState?
+    @Published private(set) var programmedBasalRate: Double?
     @Published private(set) var scheduledBasalRate: Double?
     @Published private(set) var suspended = false
     @Published private(set) var targetRange: ClosedRange<Double>?
@@ -94,8 +95,8 @@ final class NowModel: ObservableObject {
     var basalRate: Double? {
         switch basalDeliveryState {
         case .tempBasal(let dose)?:
-            return dose.startDate <= now && now < dose.endDate ? dose.unitsPerHour : scheduledBasalRate
-        case .active?: return scheduledBasalRate
+            return dose.startDate <= now && now < dose.endDate ? dose.unitsPerHour : programmedBasalRate
+        case .active?: return programmedBasalRate
         case .suspended?, .suspending?: return 0
         default: return nil
         }
@@ -192,6 +193,8 @@ final class NowModel: ObservableObject {
 
         let scheduled = temporaryPresetsManager.basalRateScheduleApplyingOverrideHistory?.value(at: now)
         scheduledBasalRate = scheduled
+        // Presets change Loop's plan; without a temp basal the pump still delivers its programmed profile.
+        programmedBasalRate = settingsManager.settings.basalRateSchedule?.value(at: now)
         basalDeliveryState = deviceManager.pumpManagerStatus?.basalDeliveryState
         switch basalDeliveryState {
         case .suspended?, .suspending?: suspended = true
