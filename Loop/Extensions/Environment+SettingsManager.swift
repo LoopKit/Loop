@@ -8,7 +8,6 @@
 
 import SwiftUI
 import LoopKit
-import LoopAlgorithm
 
 
 @MainActor

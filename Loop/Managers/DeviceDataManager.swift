@@ -13,7 +13,7 @@ import LoopCore
 import LoopTestingKit
 import UserNotifications
 import Combine
-import LoopAlgorithm
+import LoopKit
 
 public enum DemoError: LocalizedError {
     case CommsError
@@ -669,7 +669,7 @@ final class DeviceDataManager {
     var isGlucoseValueStale: Bool {
         guard let latestGlucoseDataDate = glucoseStore.latestGlucose?.startDate else { return true }
 
-        return Date().timeIntervalSince(latestGlucoseDataDate) > LoopAlgorithm.inputDataRecencyInterval
+        return Date().timeIntervalSince(latestGlucoseDataDate) > LoopCoreConstants.inputDataRecencyInterval
     }
 }
 
@@ -1002,7 +1002,11 @@ extension DeviceDataManager: CGMManagerDelegate {
         // return string unique to this instance of the CGMManager
         return UUID().uuidString
     }
-    
+
+    nonisolated func supportsWatchDirectRead(for manager: CGMManager) -> Bool {
+        true
+    }
+
     nonisolated
     func cgmManager(_ manager: CGMManager, didUpdate status: CGMManagerStatus) {
         DispatchQueue.main.async {

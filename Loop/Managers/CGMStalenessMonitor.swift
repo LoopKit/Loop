@@ -9,7 +9,6 @@
 import Foundation
 import LoopKit
 import LoopCore
-import LoopAlgorithm
 
 protocol CGMStalenessMonitorDelegate: AnyObject {
     func getLatestCGMGlucose(since: Date) async throws -> StoredGlucoseSample?
@@ -38,9 +37,9 @@ class CGMStalenessMonitor {
         
         let mostRecentGlucose = samples.map { $0.date }.max()!
         let cgmDataAge = -mostRecentGlucose.timeIntervalSinceNow
-        if cgmDataAge < LoopAlgorithm.inputDataRecencyInterval {
+        if cgmDataAge < LoopCoreConstants.inputDataRecencyInterval {
             self.cgmDataIsStale = false
-            self.updateCGMStalenessTimer(expiration: mostRecentGlucose.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval))
+            self.updateCGMStalenessTimer(expiration: mostRecentGlucose.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval))
         } else {
             self.cgmDataIsStale = true
         }
@@ -60,11 +59,11 @@ class CGMStalenessMonitor {
     
     func checkCGMStaleness() async {
         do {
-            let sample = try await delegate?.getLatestCGMGlucose(since: Date(timeIntervalSinceNow: -LoopAlgorithm.inputDataRecencyInterval))
+            let sample = try await delegate?.getLatestCGMGlucose(since: Date(timeIntervalSinceNow: -LoopCoreConstants.inputDataRecencyInterval))
             self.log.debug("Fetched latest CGM Glucose for checkCGMStaleness: %{public}@", String(describing: sample))
             if let sample = sample {
                 self.cgmDataIsStale = false
-                self.updateCGMStalenessTimer(expiration: sample.startDate.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval + CGMStalenessMonitor.cgmStalenessTimerTolerance))
+                self.updateCGMStalenessTimer(expiration: sample.startDate.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval + CGMStalenessMonitor.cgmStalenessTimerTolerance))
             } else {
                 self.cgmDataIsStale = true
             }

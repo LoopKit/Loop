@@ -331,6 +331,24 @@ class AlertManagerTests: XCTestCase {
             XCTAssertEqual(request.content.sound, .defaultCriticalSound(withAudioVolume: 0))
         }
     }
+
+    func testBluetoothPoweredOffIssuesDelayedTimeSensitiveAlert() async {
+        mockModalScheduler.alertScheduledExpectation = expectation(description: "alert scheduled")
+        alertManager.bluetoothDidUpdateState(.poweredOff)
+        await fulfillment(of: [mockModalScheduler.alertScheduledExpectation!], timeout: 1)
+
+        let alert = mockModalScheduler.scheduledAlert
+        XCTAssertEqual(alert?.identifier.alertIdentifier, "bluetoothPoweredOff")
+        XCTAssertEqual(alert?.trigger, .delayed(interval: AlertManager.bluetoothPoweredOffAlertDelay))
+        XCTAssertEqual(alert?.interruptionLevel, .timeSensitive)
+    }
+
+    func testBluetoothPoweredOnRetractsAlert() async {
+        mockModalScheduler.alertUnscheduledExpectation = expectation(description: "alert unscheduled")
+        alertManager.bluetoothDidUpdateState(.poweredOn)
+        await fulfillment(of: [mockModalScheduler.alertUnscheduledExpectation!], timeout: 1)
+        XCTAssertEqual(mockModalScheduler.unscheduledAlertIdentifier?.alertIdentifier, "bluetoothPoweredOff")
+    }
 }
 
 extension Swift.Result {

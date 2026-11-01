@@ -6,7 +6,6 @@
 //  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
-import LoopAlgorithm
 import LoopKit
 
 @MainActor

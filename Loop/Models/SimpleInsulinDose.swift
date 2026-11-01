@@ -19,7 +19,7 @@ struct SimpleInsulinDose: InsulinDose {
     var startDate: Date
     var endDate: Date
     var volume: Double
-    var insulinModel: InsulinModel
+    var insulinModel: LoopAlgorithm.InsulinModel
 }
 
 extension DoseEntry {
@@ -36,14 +36,14 @@ extension DoseEntry {
         return deliveredUnits ?? programmedUnits
     }
 
-    func simpleDose(with model: InsulinModel) -> SimpleInsulinDose {
+    func simpleDose(with model: LoopKit.InsulinModel) -> SimpleInsulinDose {
         SimpleInsulinDose(
             deliveryType: deliveryType,
             automatic: automatic ?? false,
             startDate: startDate,
             endDate: endDate,
             volume: volume,
-            insulinModel: model
+            insulinModel: AlgorithmInsulinModel(model)
         )
     }
 }

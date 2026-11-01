@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import LoopAlgorithm
+import LoopKit
 
 public struct AutomationHistoryEntry: Codable, Hashable {
     var startDate: Date

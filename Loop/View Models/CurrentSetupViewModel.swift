@@ -18,6 +18,7 @@ final class CurrentSetupViewModel: ObservableObject {
     @Published private(set) var timeInRange: [Date: Double] = [:]
     @Published private(set) var isLoading = true
 
+    let outcomesPackageBuilder: OutcomesPackageBuilder?
     private let loadHistory: () async throws -> SetupHistory
     private let glucoseStore: GlucoseStoreProtocol?
     private let insulinDeliveryHistory: ((Int) async throws -> InsulinDeliveryHistory)?
@@ -31,9 +32,11 @@ final class CurrentSetupViewModel: ObservableObject {
          loadHistory: @escaping () async throws -> SetupHistory,
          glucoseStore: GlucoseStoreProtocol?,
          insulinDeliveryHistory: ((Int) async throws -> InsulinDeliveryHistory)?,
+         outcomesPackageBuilder: OutcomesPackageBuilder? = nil,
          cacheDuration: TimeInterval = Bundle.main.localCacheDuration,
          now: @escaping () -> Date = { Date() }) {
         self.selected = selected
+        self.outcomesPackageBuilder = outcomesPackageBuilder
         self.loadHistory = loadHistory
         self.glucoseStore = glucoseStore
         self.insulinDeliveryHistory = insulinDeliveryHistory
@@ -75,6 +78,6 @@ final class CurrentSetupViewModel: ObservableObject {
             comparison = nil
             return
         }
-        comparison = SetupComparison(change: selected, end: history.end(of: selected), samples: samples, insulinHistory: insulin, now: now())
+        comparison = SetupComparison(change: selected, samples: samples, insulinHistory: insulin, now: now())
     }
 }

@@ -6,7 +6,6 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
-import LoopAlgorithm
 import LoopKit
 
 struct LightDosingDecision: DosingDecision {

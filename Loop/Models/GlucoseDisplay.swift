@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import LoopAlgorithm
 import LoopKit
 
 struct GlucoseDisplay: GlucoseDisplayable {

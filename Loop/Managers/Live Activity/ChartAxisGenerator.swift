@@ -8,7 +8,7 @@
 
 import Foundation
 import HealthKit
-import LoopAlgorithm
+import LoopKit
 import SwiftCharts
 import UIKit
 

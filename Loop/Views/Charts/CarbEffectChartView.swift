@@ -9,7 +9,6 @@
 import SwiftUI
 import LoopKit
 import LoopKitUI
-import LoopAlgorithm
 
 struct CarbEffectChartView: View {
     let chartManager: ChartsManager

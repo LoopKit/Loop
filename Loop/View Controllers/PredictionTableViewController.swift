@@ -8,11 +8,11 @@
 
 import LoopCore
 import LoopKit
+import LoopAlgorithm
 import LoopKitUI
 import LoopUI
 import UIKit
 import os.log
-import LoopAlgorithm
 
 
 private extension RefreshContext {
@@ -126,18 +126,18 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
             glucoseSamples = algoInput.glucoseHistory.filterDateRange(self.chartStartDate, nil)
         }
 
-        self.retrospectiveGlucoseDiscrepancies = algoOutput?.effects.retrospectiveGlucoseDiscrepancies
-        totalRetrospectiveCorrection = algoOutput?.effects.totalRetrospectiveCorrectionEffect
+        self.retrospectiveGlucoseDiscrepancies = algoOutput?.effects.retrospectiveGlucoseDiscrepancies.map(\.loopKit)
+        totalRetrospectiveCorrection = algoOutput?.effects.totalRetrospectiveCorrectionEffect.map { LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: $0) }
         self.guardAndRunway = algoOutput?.guardAndRunway
 
-        self.glucoseChart.setPredictedGlucoseValues(algoOutput?.predictedGlucose ?? [])
+        self.glucoseChart.setPredictedGlucoseValues((algoOutput?.predictedGlucose ?? []).map(\.loopKit))
 
         do {
             var glucose = try algoInput?.predictGlucose(effectsOptions: self.selectedInputs.algorithmEffectOptions) ?? []
             if self.selectedInputs.contains(.guardAndRunway), let guardAndRunway = self.guardAndRunway {
                 glucose = guardAndRunway.guarded(glucose)
             }
-            self.glucoseChart.setAlternatePredictedGlucoseValues(glucose)
+            self.glucoseChart.setAlternatePredictedGlucoseValues(glucose.map(\.loopKit))
         } catch {
             self.refreshContext.update(with: .status)
             self.glucoseChart.setAlternatePredictedGlucoseValues([])

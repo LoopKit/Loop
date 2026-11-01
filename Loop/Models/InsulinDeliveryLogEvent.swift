@@ -8,7 +8,6 @@
 
 import Foundation
 import LoopKit
-import LoopAlgorithm
 
 struct InsulinDeliveryLogEvent: Hashable, Identifiable {
     enum EventType: Hashable {
