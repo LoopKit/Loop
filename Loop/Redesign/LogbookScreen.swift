@@ -152,7 +152,7 @@ final class LogbookModel: ObservableObject {
                         ? NSLocalizedString("Automatic bolus", comment: "Logbook row title: a bolus Loop delivered automatically")
                         : NSLocalizedString("Bolus", comment: "Logbook row title: a bolus"),
                     subtitle: joined(parts),
-                    amount: LoopFormat.doseUnits(bolus.units), amountColor: P.bolusInk,
+                    amount: LoopFormat.doseUnits(bolus.units), amountColor: P.insulinInk,
                     detail: LoopFormat.time(bolus.date),
                     icon: bolus.automatic ? "arrow.triangle.2.circlepath" : "syringe.fill",
                     iconStyle: bolus.automatic ? .hatch(P.bolus) : .solid(P.bolus),
@@ -250,7 +250,7 @@ final class LogbookModel: ObservableObject {
                     title: NSLocalizedString("Automatic boluses", comment: "Logbook row title: several automatic boluses in a row, folded into one row that lists them"),
                     subtitle: String(format: NSLocalizedString("Loop · %1$@ · tap to list", comment: "Logbook folded automatic boluses row subtitle: Loop gave them, the time span they cover, and tapping lists them. (1: time range, e.g. 15:08 – 16:14)"),
                                      "\(LoopFormat.time(oldest.date))–\(LoopFormat.time(newest.date))"),
-                    amount: LoopFormat.doseUnits(units), amountColor: P.bolusInk,
+                    amount: LoopFormat.doseUnits(units), amountColor: P.insulinInk,
                     detail: String.localizedStringWithFormat(NSLocalizedString("%lld doses", comment: "Logbook folded automatic boluses row: how many automatic boluses it holds. (1: number)"), run.count),
                     icon: "arrow.triangle.2.circlepath", iconStyle: .hatch(P.bolus),
                     filters: [.bolus, .loop], quiet: true,
@@ -457,7 +457,7 @@ struct LogbookView: View {
             let totals = HStack(spacing: LoopDesign.Space.s3) {
                 if day.insulin.total > 0 {
                     Text(LoopFormat.totalUnits(day.insulin.total))
-                        .foregroundStyle(P.ink)
+                        .foregroundStyle(P.insulinInk)
                 }
                 Text(LoopFormat.grams(day.carbs))
                     .foregroundStyle(P.carbsInk)

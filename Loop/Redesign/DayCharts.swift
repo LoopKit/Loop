@@ -229,7 +229,7 @@ struct InsulinTimelineView: View {
                             if bolusLabels.contains(bolus.id) {
                                 Text(LoopFormat.number(bolus.units, decimals: 1))
                                     .font(LoopDesign.Typeface.caption)
-                                    .foregroundStyle(P.bolusInk)
+                                    .foregroundStyle(P.insulinInk)
                             }
                         }
                 }
@@ -309,7 +309,7 @@ struct InsulinTimelineView: View {
             rows.append(.init(label: bolus.automatic
                               ? NSLocalizedString("Automatic bolus", comment: "Chart callout label for a bolus Loop delivered automatically near the touched time")
                               : NSLocalizedString("Bolus", comment: "Chart callout label for a bolus near the touched time"),
-                              value: LoopFormat.doseUnits(bolus.units), color: P.bolusInk))
+                              value: LoopFormat.doseUnits(bolus.units), color: P.insulinInk))
         }
         return rows
     }

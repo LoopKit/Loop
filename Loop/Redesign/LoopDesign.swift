@@ -13,6 +13,9 @@ import UIKit
 /// Quantity colours reuse Loop's existing assets (`glucose`, `insulin`, `carbs`, `fresh`, `warning`, `accent`)
 /// so a DerivedAssetsOverride still recolours them. Grounds and text map onto the iOS system colours they
 /// were taken from; the rest are colour sets in DerivedAssetsBase.xcassets named after their token.
+///
+/// Insulin and carb amounts are set in `insulinInk` and `carbsInk` wherever they stand alone. Glucose, basal,
+/// counts and figures beside a legend swatch stay `ink`. Red is only for something that needs action now.
 enum LoopDesign {
 
     enum Palette {
@@ -37,14 +40,15 @@ enum LoopDesign {
         static let targetBand = Color("target-band")
         static let agpOuter = Color("agp-outer")
         static let agpInner = Color("agp-inner")
+        /// Insulin as a quantity and an action: the Bolus button and the active insulin curve.
         static let insulin = Color("insulin")
+        /// Every insulin amount set as text, whether a bolus, a day's total or active insulin.
         static let insulinInk = Color("insulin-ink")
         static let basal = Color("basal")
         static let basalEdge = Color("basal-edge")
         /// Basal is a pale, quiet orange with a tan edge; bolus is insulin's orange made deep. Both stay orange,
         /// and their lightness is far enough apart (3:1 even where they touch) to tell them apart at a glance.
         static let bolus = Color("bolus")
-        static let bolusInk = Color("bolus-ink")
         static let basalScheduled = inkMuted
         static let carbs = Color("carbs")
         static let carbsInk = Color("carbs-ink")
@@ -369,7 +373,7 @@ struct IconTile: View {
     private var glyph: Color {
         switch style {
         case .solid: return LoopDesign.Palette.onFill
-        case .hatch, .basal: return LoopDesign.Palette.bolusInk
+        case .hatch, .basal: return LoopDesign.Palette.insulinInk
         }
     }
 
@@ -385,6 +389,30 @@ struct IconTile: View {
             shape.fill(LoopDesign.Palette.basal)
                 .overlay(shape.strokeBorder(LoopDesign.Palette.basalEdge, lineWidth: 1.5))
         }
+    }
+}
+
+/// The round previous and next buttons beside a date or period.
+struct StepButton: View {
+    let systemName: String
+    let label: String
+    var enabled = true
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.footnote.weight(.semibold))
+                .frame(width: 30, height: 30)
+                .background(LoopDesign.Palette.surfaceRaised, in: Circle())
+                .overlay(Circle().strokeBorder(LoopDesign.Palette.separator))
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(enabled ? LoopDesign.Palette.ink : LoopDesign.Palette.inkMuted.opacity(0.5))
+        .disabled(!enabled)
+        .accessibilityLabel(label)
     }
 }
 

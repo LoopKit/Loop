@@ -479,7 +479,7 @@ struct NowHeaderView: View {
                         } else if let rate = model.basalRate, let scheduled = model.scheduledBasalRate {
                             Text(String(format: NSLocalizedString("%1$@ vs plan", comment: "Basal tile on the Now screen: how the current basal rate differs from the scheduled rate. (1: signed difference in U/h, e.g. +0.25)"), LoopFormat.signed(rate - scheduled)))
                                 .font(LoopDesign.Typeface.footnote)
-                                .foregroundStyle(P.insulinInk)
+                                .foregroundStyle(P.inkMuted)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
                         }
@@ -699,7 +699,7 @@ struct DayTotalsTiles: View {
             ValueTile(label: NSLocalizedString("Bolus", comment: "Label of a tile showing the day's total bolus insulin")) {
                 Text(LoopFormat.totalUnits(history.bolusUnits))
                     .font(LoopDesign.Typeface.statValueSmall)
-                    .foregroundStyle(P.bolusInk)
+                    .foregroundStyle(P.insulinInk)
             }
             ValueTile(label: NSLocalizedString("Basal", comment: "Label of a tile showing the current basal rate (Now screen) or the day's basal insulin total (Today so far totals)")) {
                 // Plain ink: basal is the pale fill on the chart, and orange here read as bolus.
