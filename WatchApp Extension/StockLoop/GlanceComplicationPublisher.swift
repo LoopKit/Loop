@@ -12,7 +12,6 @@
 
 import Foundation
 import G7SensorKit
-import LoopAlgorithm
 import LoopCore
 import LoopKit
 import WatchKit
@@ -59,7 +58,7 @@ enum GlanceComplicationPublisher {
         var s = loop(date: data.lastLoopCompleted, closed: data.closedLoopEnabled)
         s.bgText = text(data.glucose)
         s.trendSymbol = data.trend?.symbol
-        s.bgStaleAt = data.glucoseDate.map { $0.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval) }
+        s.bgStaleAt = data.glucoseDate.map { $0.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval) }
         s.bgDate = data.glucoseDate
         switch glance.bgColor {
         case .low: s.bgRange = .low
@@ -89,7 +88,7 @@ enum GlanceComplicationPublisher {
         s.trendSymbol = context.glucoseTrend?.symbol
         // Coloured as during a loan; who holds the pod is the icon's job, not the colour's.
         s.bgRange = context.glucose.map { range(mgdl: $0.doubleValue(for: .milligramsPerDeciliter), suspendThreshold: suspendThreshold) }
-        s.bgStaleAt = context.glucoseDate.map { $0.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval) }
+        s.bgStaleAt = context.glucoseDate.map { $0.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval) }
         s.bgDate = context.glucoseDate
         s.eventualText = context.eventualGlucose.flatMap { formatter.string(from: $0.doubleValue(for: unit)) }
         s.iobText = context.iob.map { String(format: "%.1f", $0) }
@@ -112,7 +111,7 @@ enum GlanceComplicationPublisher {
         var s = GlanceComplicationSnapshot()
         s.loopClosed = closed
         s.loopDate = date
-        s.loopValuesStaleAt = date.map { $0.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval) }
+        s.loopValuesStaleAt = date.map { $0.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval) }
         s.freshUntil = date.flatMap { d in LoopCompletionFreshness.fresh.maxAge.map { d.addingTimeInterval($0) } }
         s.agingUntil = date.flatMap { d in LoopCompletionFreshness.aging.maxAge.map { d.addingTimeInterval($0) } }
         return s
