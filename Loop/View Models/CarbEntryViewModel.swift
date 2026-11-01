@@ -263,8 +263,9 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     private func observeFavoriteFoodIndexChange() {
+        // Selection is already on the main actor. Apply it before a caller sets a replacement
+        // amount or absorption time; a queued reset would otherwise overwrite that choice.
         $selectedFavoriteFoodIndex
-            .receive(on: RunLoop.main)
             .dropFirst()
             .sink { [weak self] index in
                 self?.favoriteFoodSelected(at: index)

@@ -98,7 +98,10 @@ struct StatusTableView: View {
     var wrappedView: some View { wrapped }
     
     @Bindable var viewModel: StatusTableViewModel
-    
+
+    /// The redesign puts these actions on the Now screen and its own tab bar.
+    private var actionTabsShown = true
+
     init(viewModel: StatusTableViewModel) {
         self.viewModel = viewModel
         
@@ -124,20 +127,39 @@ struct StatusTableView: View {
         )
     }
 
+    func showsActionTabs(_ shown: Bool) -> StatusTableView {
+        var view = self
+        view.actionTabsShown = shown
+        return view
+    }
+
+    private var statusContent: some View {
+        wrappedView
+            .ignoresSafeArea(edges: [.horizontal, .bottom])
+            .onChange(of: viewModel.temporaryPresetsManager.activeOverride) { _, _ in
+                Task {
+                    await viewController.reloadData(animated: true)
+                }
+            }
+            .sheet(item: $viewModel.pendingPreset) { preset in
+                // This is the active preset; edit disabled
+                PresetDetentView(preset: preset, roundBasalRate: viewModel.loopDataManager.deliveryDelegate?.roundBasalRate, didTapEdit: { })
+                    .accessibilityIdentifier("bar_Presets")
+            }
+    }
+
+    @ViewBuilder
     var body: some View {
+        if actionTabsShown {
+            actionTabView
+        } else {
+            statusContent
+        }
+    }
+
+    private var actionTabView: some View {
         ActionTabView {
-            wrappedView
-                .ignoresSafeArea(edges: [.horizontal, .bottom])
-                .onChange(of: viewModel.temporaryPresetsManager.activeOverride) { _, _ in
-                    Task {
-                        await viewController.reloadData(animated: true)
-                    }
-                }
-                .sheet(item: $viewModel.pendingPreset) { preset in
-                    // This is the active preset; edit disabled
-                    PresetDetentView(preset: preset, roundBasalRate: viewModel.loopDataManager.deliveryDelegate?.roundBasalRate, didTapEdit: { })
-                        .accessibilityIdentifier("bar_Presets")
-                }
+            statusContent
         } tabs: {
             ActionTab(
                 title: "Add Carbs",

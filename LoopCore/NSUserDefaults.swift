@@ -24,6 +24,7 @@ extension UserDefaults {
         case userRequestedLoopReset = "com.loopkit.Loop.userRequestedLoopReset"
         case liveActivity = "com.loopkit.Loop.liveActivity"
         case defaultEnvironment = "org.tidepool.TidepoolKit.DefaultEnvironment"
+        case redesignEnabled = "com.loopkit.Loop.redesign.enabled"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -155,6 +156,13 @@ extension UserDefaults {
         }
     }
     
+    /// Whether the redesigned interface is on. The app mirrors its setting into the app group so the
+    /// widget and Live Activity can match it; they default to the redesign, as the app does.
+    public var redesignEnabled: Bool {
+        get { object(forKey: Key.redesignEnabled.rawValue) as? Bool ?? true }
+        set { set(newValue, forKey: Key.redesignEnabled.rawValue) }
+    }
+
     public var liveActivity: LiveActivitySettings? {
         get {
             let decoder = JSONDecoder()
