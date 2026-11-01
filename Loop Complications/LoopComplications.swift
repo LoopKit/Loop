@@ -122,17 +122,11 @@ struct GlucoseGraphView: View {
     private var snapshot: ComplicationSnapshot { entry.snapshot ?? ComplicationSnapshot() }
 
     var body: some View {
+        // Stock's layout: the reading and its trend, the chart under it.
         VStack(alignment: .leading, spacing: 1) {
-            HStack(spacing: 4) {
-                Text(snapshot.glucose(at: entry.date) + snapshot.trend(at: entry.date))
-                    .font(.headline)
-                    .widgetAccentable()
-                if let loopDate = snapshot.loopDate {
-                    Text(loopDate, style: .relative)
-                        .font(.caption2)
-                        .foregroundStyle(snapshot.freshness(at: entry.date).color)
-                }
-            }
+            Text(snapshot.glucose(at: entry.date) + snapshot.trend(at: entry.date))
+                .font(.headline)
+                .widgetAccentable()
             if let graph = snapshot.graph {
                 GlucoseGraphCanvas(graph: graph, now: entry.date)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
