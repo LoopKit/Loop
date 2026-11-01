@@ -70,13 +70,12 @@ enum ComplicationPublisher {
         )
     }
 
-    /// The graph at the size the complication measured for it, so it fills the slot; until the
-    /// complication has drawn once, at the size the ClockKit template used.
+    /// The graph at the size the ClockKit template used; the widget scales it to its slot.
     @MainActor private static func renderGraph() -> Bool {
         guard let url = ComplicationSnapshot.graphURL else { return false }
-        let size: CGSize = ComplicationSnapshot.graphSize() ?? (WKInterfaceDevice.current().screenBounds.width > 180
+        let size: CGSize = WKInterfaceDevice.current().screenBounds.width > 180
             ? CGSize(width: 171, height: 54)    // 44 mm and larger
-            : CGSize(width: 150, height: 47))   // 40 mm
+            : CGSize(width: 150, height: 47)    // 40 mm
         guard let image = chartManager.renderChartImage(size: size, scale: WKInterfaceDevice.current().screenScale),
               let png = image.pngData() else {
             try? FileManager.default.removeItem(at: url)
