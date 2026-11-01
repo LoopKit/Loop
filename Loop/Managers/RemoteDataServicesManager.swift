@@ -111,9 +111,13 @@ final class RemoteDataServicesManager {
         Array(lockedFailedUploads.value)
     }
 
-    func uploadFailed(_ key: UploadTaskKey) {
+    func uploadFailed(_ key: UploadTaskKey, error: Error) {
         lockedFailedUploads.mutate { failedUploads in
             failedUploads.insert(key)
+        }
+        lockedUploadStatuses.mutate { statuses in
+            statuses[key, default: UploadStatus()].lastFailed = Date()
+            statuses[key, default: UploadStatus()].lastError = String(describing: error)
         }
         log.debug("RemoteDataType %{public}@ upload failed", key.remoteDataType.rawValue)
     }
@@ -122,6 +126,43 @@ final class RemoteDataServicesManager {
         lockedFailedUploads.mutate { failedUploads in
             failedUploads.remove(key)
         }
+        lockedUploadStatuses.mutate { statuses in
+            statuses[key, default: UploadStatus()].lastSucceeded = Date()
+        }
+    }
+
+    private struct UploadStatus {
+        var inFlightSince: Date?
+        var lastFinished: Date?
+        var lastSucceeded: Date?
+        var lastFailed: Date?
+        var lastError: String?
+    }
+
+    nonisolated(unsafe) private let lockedUploadStatuses = Locked<[UploadTaskKey: UploadStatus]>([:])
+
+    nonisolated private func uploadStarted(_ key: UploadTaskKey) {
+        lockedUploadStatuses.mutate { statuses in
+            statuses[key, default: UploadStatus()].inFlightSince = Date()
+        }
+    }
+
+    nonisolated private func uploadFinished(_ key: UploadTaskKey) {
+        lockedUploadStatuses.mutate { statuses in
+            statuses[key, default: UploadStatus()].inFlightSince = nil
+            statuses[key, default: UploadStatus()].lastFinished = Date()
+        }
+    }
+
+    func generateDiagnosticReport() -> String {
+        let statuses = lockedUploadStatuses.value
+        let lines = statuses.keys
+            .sorted { ($0.serviceIdentifier, $0.remoteDataType.rawValue) < ($1.serviceIdentifier, $1.remoteDataType.rawValue) }
+            .map { key -> String in
+                let status = statuses[key]!
+                return "* \(key.serviceIdentifier) \(key.remoteDataType.rawValue): inFlightSince: \(status.inFlightSince?.description ?? "-"), lastFinished: \(status.lastFinished?.description ?? "-"), lastSucceeded: \(status.lastSucceeded?.description ?? "-"), lastFailed: \(status.lastFailed?.description ?? "-"), lastError: \(status.lastError ?? "-")"
+            }
+        return (["## RemoteDataServicesManager", "* failedUploads: \(failedUploads.map { "\($0.serviceIdentifier) \($0.remoteDataType.rawValue)" }.sorted())"] + lines).joined(separator: "\n")
     }
 
     let uploadGroup = DispatchGroup()
@@ -263,6 +304,7 @@ extension RemoteDataServicesManager {
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
+            self.uploadStarted(key)
             let queryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .alert) ?? AlertStore.QueryAnchor()
 
             self.alertStore.executeAlertQuery(fromQueryAnchor: queryAnchor, limit: remoteDataService.alertDataLimit ?? Int.max) { result in
@@ -278,13 +320,14 @@ extension RemoteDataServicesManager {
                             self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing alert data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
+                            self.uploadFailed(key, error: error)
                         }
                         semaphore.signal()
                     }
                 }
             }
             semaphore.wait()
+            self.uploadFinished(key)
             self.uploadGroup.leave()
         }
     }
@@ -298,6 +341,7 @@ extension RemoteDataServicesManager {
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
+            self.uploadStarted(key)
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .carb) ?? CarbStore.QueryAnchor()
             var continueUpload = false
 
@@ -315,7 +359,7 @@ extension RemoteDataServicesManager {
                             self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing carb data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
+                            self.uploadFailed(key, error: error)
                         }
                         semaphore.signal()
                     }
@@ -323,6 +367,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadFinished(key)
             self.uploadGroup.leave()
 
             if continueUpload {
@@ -340,6 +385,7 @@ extension RemoteDataServicesManager {
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
+            self.uploadStarted(key)
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .dose) ?? InsulinDeliveryStore.QueryAnchor()
             var continueUpload = false
 
@@ -357,7 +403,7 @@ extension RemoteDataServicesManager {
                             await self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing dose data: %{public}@", String(describing: error))
-                            await self.uploadFailed(key)
+                            await self.uploadFailed(key, error: error)
                         }
                         semaphore.signal()
                     }
@@ -365,6 +411,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadFinished(key)
             self.uploadGroup.leave()
 
             if continueUpload {
@@ -382,6 +429,7 @@ extension RemoteDataServicesManager {
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
+            self.uploadStarted(key)
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .dosingDecision) ?? DosingDecisionStore.QueryAnchor()
             var continueUpload = false
 
@@ -400,7 +448,7 @@ extension RemoteDataServicesManager {
 
                         } catch {
                             self.log.error("Error synchronizing dosing decision data: %{public}@", String(describing: error))
-                            self.uploadFailed(key)
+                            self.uploadFailed(key, error: error)
                         }
                         semaphore.signal()
                     }
@@ -408,6 +456,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadFinished(key)
             self.uploadGroup.leave()
 
             if continueUpload {
@@ -427,6 +476,7 @@ extension RemoteDataServicesManager {
 
         dispatchQueue(key).async {
             let semaphore = DispatchSemaphore(value: 0)
+            self.uploadStarted(key)
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .glucose) ?? GlucoseStore.QueryAnchor()
             var continueUpload = false
 
@@ -440,7 +490,7 @@ extension RemoteDataServicesManager {
                         await self.uploadSucceeded(key)
                     } catch {
                         self.log.error("Error synchronizing glucose data: %{public}@", String(describing: error))
-                        await self.uploadFailed(key)
+                        await self.uploadFailed(key, error: error)
                     }
                     semaphore.signal()
                 } catch {
@@ -450,6 +500,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadFinished(key)
             self.uploadGroup.leave()
 
             if continueUpload {
@@ -467,6 +518,7 @@ extension RemoteDataServicesManager {
 
         dispatchQueue(for: remoteDataService, withRemoteDataType: .pumpEvent).async {
             let semaphore = DispatchSemaphore(value: 0)
+            self.uploadStarted(key)
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .pumpEvent) ?? DoseStore.QueryAnchor()
             var continueUpload = false
             Task {
@@ -479,7 +531,7 @@ extension RemoteDataServicesManager {
                         await self.uploadSucceeded(key)
                     } catch {
                         self.log.error("Error synchronizing pump event data: %{public}@", String(describing: error))
-                        await self.uploadFailed(key)
+                        await self.uploadFailed(key, error: error)
                     }
                     semaphore.signal()
                 } catch {
@@ -489,6 +541,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadFinished(key)
             self.uploadGroup.leave()
 
             if continueUpload {
@@ -506,6 +559,7 @@ extension RemoteDataServicesManager {
 
         dispatchQueue(for: remoteDataService, withRemoteDataType: .settings).async {
             let semaphore = DispatchSemaphore(value: 0)
+            self.uploadStarted(key)
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .settings) ?? SettingsStore.QueryAnchor()
             var continueUpload = false
 
@@ -523,7 +577,7 @@ extension RemoteDataServicesManager {
                             await self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing settings data: %{public}@", String(describing: error))
-                            await self.uploadFailed(key)
+                            await self.uploadFailed(key, error: error)
                         }
                         semaphore.signal()
                     }
@@ -531,6 +585,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadFinished(key)
             self.uploadGroup.leave()
 
             if continueUpload {
@@ -548,6 +603,7 @@ extension RemoteDataServicesManager {
 
         dispatchQueue(for: remoteDataService, withRemoteDataType: .overrides).async {
             let semaphore = DispatchSemaphore(value: 0)
+            self.uploadStarted(key)
 
             let queryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .overrides) ?? TemporaryScheduleOverrideHistory.QueryAnchor()
 
@@ -560,12 +616,13 @@ extension RemoteDataServicesManager {
                     await self.uploadSucceeded(key)
                 } catch {
                     self.log.error("Error synchronizing temporary override data: %{public}@", String(describing: error))
-                    await self.uploadFailed(key)
+                    await self.uploadFailed(key, error: error)
                 }
                 semaphore.signal()
             }
 
             semaphore.wait()
+            self.uploadFinished(key)
             self.uploadGroup.leave()
         }
     }
@@ -579,6 +636,7 @@ extension RemoteDataServicesManager {
 
         dispatchQueue(for: remoteDataService, withRemoteDataType: .cgmEvent).async {
             let semaphore = DispatchSemaphore(value: 0)
+            self.uploadStarted(key)
             let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .cgmEvent) ?? CgmEventStore.QueryAnchor()
             var continueUpload = false
 
@@ -596,7 +654,7 @@ extension RemoteDataServicesManager {
                             await self.uploadSucceeded(key)
                         } catch {
                             self.log.error("Error synchronizing cgm event data: %{public}@", String(describing: error))
-                            await self.uploadFailed(key)
+                            await self.uploadFailed(key, error: error)
                         }
                         semaphore.signal()
                     }
@@ -604,6 +662,7 @@ extension RemoteDataServicesManager {
             }
 
             semaphore.wait()
+            self.uploadFinished(key)
             self.uploadGroup.leave()
 
             if continueUpload {
