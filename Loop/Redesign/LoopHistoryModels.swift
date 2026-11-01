@@ -16,6 +16,8 @@ import LoopAlgorithm
 struct GlucosePoint: Equatable {
     let date: Date
     let mgdl: Double
+    /// A fingerstick or other reading typed in: drawn on charts, but left out of CGM statistics.
+    var userEntered = false
 }
 
 struct BolusEvent: Equatable, Identifiable {

@@ -17,7 +17,10 @@ final class TrendsModel: ObservableObject {
     struct Summary {
         var interval: DateInterval
         var unit: GlucoseUnitStyle
+        /// CGM readings only: typed-in fingersticks are left out of every figure, as on Statistics.
         var glucose: [GlucosePoint] = []
+        /// Days from the first reading, when that is short of the period; nil when the readings span it.
+        var cgmCoveredDays: Int?
         var stats: LoopHistoryMath.GlucoseStats?
         var cgmActive: Double = 0
         var timeInRange: [LoopHistoryMath.RangeBand: Double] = [:]
@@ -36,6 +39,10 @@ final class TrendsModel: ObservableObject {
         /// The whole calendar day, for a one-day period: drawn as the same timeline as Now's Today so far.
         var day: DayHistory?
         var dayTargets: [TargetBand] = []
+        /// What the basal schedule delivers over the same days the split averages.
+        var scheduledBasal: Double?
+        /// The median insulin by this time of day over the last 14 days, when the period ends now.
+        var typicalByNow: (typical: TypicalInsulinDelivery, at: Date)?
 
         /// The days per-day figures divide by: insulin's averaging days, or complete days with CGM data when there is
         /// no insulin (today only when no complete day has any), never the period length.
@@ -102,12 +109,15 @@ final class TrendsModel: ObservableObject {
             history = history.clipped(to: interval)
         }
 
-        summary.glucose = history.glucose
-        summary.stats = LoopHistoryMath.glucoseStats(history.glucose)
-        summary.cgmActive = LoopHistoryMath.cgmActiveFraction(history.glucose, over: interval)
-        summary.timeInRange = LoopHistoryMath.timeInRange(history.glucose)
-        summary.agp = LoopHistoryMath.agp(history.glucose)
-        summary.agpDays = LoopHistoryMath.daysWithReadings(history.glucose)
+        let cgm = history.glucose.filter { !$0.userEntered }
+        summary.glucose = cgm
+        summary.stats = LoopHistoryMath.glucoseStats(cgm)
+        summary.cgmActive = LoopHistoryMath.cgmActiveFraction(cgm, over: interval)
+        summary.timeInRange = LoopHistoryMath.timeInRange(cgm)
+        summary.agp = LoopHistoryMath.agp(cgm)
+        summary.agpDays = LoopHistoryMath.daysWithReadings(cgm)
+        summary.cgmCoveredDays = LoopHistoryMath.cgmCoveredDays(cgm, in: interval,
+                                                                periodDays: LoopHistoryMath.days(in: interval).count)
 
         let calendar = Calendar.current
         summary.totals = LoopHistoryMath.days(in: interval).map { day in
@@ -136,6 +146,20 @@ final class TrendsModel: ObservableObject {
         summary.automaticBoluses = boluses.filter(\.automatic).count
 
         summary.loopCoverageStart = coverageStart
+        // Days the stored profile history doesn't reach (older ones, read from Health) use today's schedule.
+        let spans = Dictionary(uniqueKeysWithValues: LoopHistoryMath.days(in: interval).map { ($0.start, $0) })
+        let perDay = provider.scheduledBasalPerDay
+        let scheduled = insulinDays.compactMap { day -> Double? in
+            guard let span = spans[day.day] else { return nil }
+            return LoopHistoryMath.scheduledUnits(history.scheduledBasal, over: span) ?? perDay.map { $0 * span.duration / 86400 }
+        }
+        if !scheduled.isEmpty, scheduled.count == insulinDays.count {
+            summary.scheduledBasal = scheduled.reduce(0, +) / Double(scheduled.count)
+        }
+        if interval.end.timeIntervalSinceNow > -300 {
+            summary.typicalByNow = await provider.typicalInsulinByNow()
+        }
+
         summary.loopSpans = LoopHistoryMath.loopModeSpans(interval: interval, runs: runs, modeChanges: LoopModeHistory.shared.changes,
                                                           coverageStart: coverageStart)
         return summary
@@ -352,9 +376,7 @@ struct TrendsView: View {
                 } else {
                     TimeInRangeView(fractions: s.timeInRange, unit: s.unit)
                 }
-                Text(String(format: NSLocalizedString("Aim: over 70%% in range, under 4%% low.", comment: "Trends Time in range card footnote: the consensus targets for time in range and time low")))
-                    .font(LoopDesign.Typeface.footnote)
-                    .foregroundStyle(P.inkMuted)
+                Footnote(String(format: NSLocalizedString("Aim: over 70%% in range; under 25%% above and 4%% below; under 5%% very high and 1%% very low; CGM active over 70%%.", comment: "Trends Time in range card footnote: the consensus targets for time in range, above and below range, very high, very low and CGM wear")))
             }
             if s.day == nil {
                 patternCard(s)
@@ -368,7 +390,8 @@ struct TrendsView: View {
                          : NSLocalizedString("average per day", comment: "Trends Basal and bolus card subtitle when the figures are averaged per day over the period"))
                 }
                 if s.split.total > 0 {
-                    InsulinSplitView(split: s.split, partial: s.splitIsPartial)
+                    InsulinSplitView(split: s.split, partial: s.splitIsPartial, scheduledBasal: s.scheduledBasal,
+                                     usual: s.splitIsPartial ? usualByNow(s) : nil)
                 } else {
                     ChartPlaceholder(message: NSLocalizedString("No insulin recorded in this period", comment: "Trends Insulin per day chart placeholder when no insulin was delivered in the period"), height: 80)
                 }
@@ -386,6 +409,9 @@ struct TrendsView: View {
                         path.append(.day(day))
                     }
                     ChartLegend(items: insulinLegend(s))
+                    if let today = todaySoFar(s) {
+                        Footnote(today)
+                    }
                 }
             }
             LoopCard {
@@ -396,9 +422,7 @@ struct TrendsView: View {
                 }
                 LoopModeBarView(spans: s.loopSpans)
                 if let note = coverageNote(s) {
-                    Text(note)
-                        .font(LoopDesign.Typeface.footnote)
-                        .foregroundStyle(P.inkMuted)
+                    Footnote(note)
                 }
             }
         } else if let error = model.loadError {
@@ -445,9 +469,37 @@ struct TrendsView: View {
                 }
                 .foregroundStyle(P.accentInk)
             }
+            if let covered = s.cgmCoveredDays {
+                Footnote(String(format: NSLocalizedString("CGM data covers %1$@.", comment: "Trends Summary note when glucose readings start partway through the period. (1: days covered, e.g. 5 of 14 days)"),
+                                daysOf(covered, s.totals.count)))
+            }
             StatGridView(tiles: model.tiles(s))
                 .opacity(model.loading ? 0.5 : 1)
+            if s.stats != nil {
+                Footnote(String(format: NSLocalizedString("Aim: average under %1$@ %2$@, GMI under 7%%, CV 36%% or less.", comment: "Trends Summary footnote: the consensus targets for average glucose, GMI and glucose variability (CV). (1: glucose value, 2: glucose unit)"),
+                                s.unit.isMmol ? LoopFormat.number(8.6, decimals: 1) : "154", s.unit.unitName))
+            }
         }
+    }
+
+    /// "5 of 14 days".
+    private func daysOf(_ count: Int, _ total: Int) -> String {
+        let days = String.localizedStringWithFormat(NSLocalizedString("%lld days", comment: "A number of days, e.g. a Trends period or how many days are averaged. (1: number of days)"), total)
+        return String(format: NSLocalizedString("%1$@ of %2$@", comment: "Trends: how many days of the period are averaged. (1: days averaged, a number; 2: days in the period, e.g. 14 days)"), LoopFormat.number(Double(count), decimals: 0), days)
+    }
+
+    /// "Usually 28.4 U by 19:46": today's insulin against the last 14 days at the same time.
+    private func usualByNow(_ s: TrendsModel.Summary) -> String? {
+        guard let usual = s.typicalByNow else { return nil }
+        return String(format: NSLocalizedString("Usually %1$@ by %2$@", comment: "Trends: the median insulin delivered by this time of day over the last 14 days. (1: units, e.g. 28.4 U, 2: time of day)"),
+                      LoopFormat.totalUnits(usual.typical.median), LoopFormat.time(usual.at))
+    }
+
+    /// Today's bar is still growing, so say where it stands against a usual day.
+    private func todaySoFar(_ s: TrendsModel.Summary) -> String? {
+        guard let today = s.totals.last, !today.isComplete, today.total > 0, let usual = s.typicalByNow else { return nil }
+        return String(format: NSLocalizedString("Today so far %1$@, usually %2$@ by %3$@.", comment: "Trends Insulin per day footnote: today's insulin so far against the median by this time of day over the last 14 days. (1: today's units, 2: usual units, 3: time of day)"),
+                      LoopFormat.totalUnits(today.total), LoopFormat.totalUnits(usual.typical.median), LoopFormat.time(usual.at))
     }
 
     private func export(_ make: () throws -> URL) {
@@ -492,6 +544,22 @@ struct ShareSheet: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
+}
+
+/// A card's quiet closing line: a target, a caveat or a comparison.
+private struct Footnote: View {
+    let text: String
+
+    init(_ text: String) {
+        self.text = text
+    }
+
+    var body: some View {
+        Text(text)
+            .font(LoopDesign.Typeface.footnote)
+            .foregroundStyle(P.inkMuted)
+            .fixedSize(horizontal: false, vertical: true)
+    }
 }
 
 // MARK: - PDF report
