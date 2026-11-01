@@ -575,7 +575,7 @@ extension RemoteDataServicesManager {
     private func uploadCgmEventData(to remoteDataService: RemoteDataService) {
         uploadGroup.enter()
 
-        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .pumpEvent)
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .cgmEvent)
 
         dispatchQueue(for: remoteDataService, withRemoteDataType: .cgmEvent).async {
             let semaphore = DispatchSemaphore(value: 0)
@@ -595,7 +595,7 @@ extension RemoteDataServicesManager {
                             continueUpload = queryAnchor != previousQueryAnchor
                             await self.uploadSucceeded(key)
                         } catch {
-                            self.log.error("Error synchronizing pump event data: %{public}@", String(describing: error))
+                            self.log.error("Error synchronizing cgm event data: %{public}@", String(describing: error))
                             await self.uploadFailed(key)
                         }
                         semaphore.signal()
@@ -607,7 +607,7 @@ extension RemoteDataServicesManager {
             self.uploadGroup.leave()
 
             if continueUpload {
-                self.uploadPumpEventData(to: remoteDataService)
+                self.uploadCgmEventData(to: remoteDataService)
             }
         }
     }
