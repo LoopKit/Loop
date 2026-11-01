@@ -10,7 +10,6 @@ import LoopKit
 import LoopUI
 import LoopKitUI
 import SwiftCharts
-import LoopAlgorithm
 
 
 class StatusChartsManager: ChartsManager {

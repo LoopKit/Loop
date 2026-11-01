@@ -9,7 +9,6 @@
 import SwiftUI
 import LoopKit
 import LoopCore
-import LoopAlgorithm
 import SpriteKit
 
 struct ChartPageView: View {
@@ -193,6 +192,7 @@ struct ChartPageView: View {
                         Text(activeCarbohydrates ?? "-")
                     }
                     .onTapGesture {
+                        ExtensionDelegate.shared().usageRecorder.didDisplayScreen("carbList")
                         isShowingCarbList = true
                     }
                     Divider()

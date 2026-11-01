@@ -10,7 +10,6 @@
 import Foundation
 import HealthKit
 import LoopKit
-import LoopAlgorithm
 import LoopCore
 import G7SensorKit
 import WatchConnectivity
@@ -57,9 +56,9 @@ extension WatchLoopManager {
                 phoneRelayAt: sources.phone,
                 trend: (latest as? StoredGlucoseSample)?.trend,
 
-                eventual: displayState.output?.predictedGlucose.last?.quantity,
+                eventual: displayState.output?.predictedGlucose.last?.loopKit.quantity,
                 iob: displayState.activeInsulin?.value,
-                dosingEventual: loopOutput?.predictedGlucose.last?.quantity,
+                dosingEventual: loopOutput?.predictedGlucose.last?.loopKit.quantity,
                 dosingIOB: loopOutput?.activeInsulin,
                 dosingCOB: loopOutput?.activeCarbs,
                 tempRate: tempRate,
@@ -131,7 +130,7 @@ extension WatchLoopManager {
             // Drop the first element in predictedGlucose because it is the current glucose
             let filteredPredictedGlucose = predictedGlucose.dropFirst()
             if filteredPredictedGlucose.count > 0 {
-                ctx.predictedGlucose = WatchPredictedGlucose(values: Array(filteredPredictedGlucose))
+                ctx.predictedGlucose = WatchPredictedGlucose(values: filteredPredictedGlucose.map(\.loopKit))
             }
         }
         let latest = glucoseStore.latestGlucose

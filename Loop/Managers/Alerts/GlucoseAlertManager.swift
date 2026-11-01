@@ -11,7 +11,6 @@
 
 import Combine
 import Foundation
-import LoopAlgorithm
 import LoopKit
 #if canImport(LoopKitUI)
 import LoopKitUI

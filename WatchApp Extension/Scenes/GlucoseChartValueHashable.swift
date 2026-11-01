@@ -6,7 +6,6 @@
 //
 
 import LoopKit
-import LoopAlgorithm
 
 
 protocol GlucoseChartValueHashable {
