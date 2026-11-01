@@ -9,7 +9,6 @@
 //
 
 import Foundation
-import LoopAlgorithm
 import LoopCore
 import LoopKit
 import WatchKit
@@ -88,7 +87,7 @@ enum ComplicationPublisher {
             glucoseText: glucoseText,
             trendSymbol: trendSymbol,
             staleGlucoseText: staleGlucose,
-            glucoseStaleAt: context.glucoseDate.map { $0.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval) },
+            glucoseStaleAt: context.glucoseDate.map { $0.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval) },
             eventualText: eventualText,
             inlineText: inlineText,
             inlineStaleText: inlineStaleText,
