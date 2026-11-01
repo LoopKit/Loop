@@ -32,6 +32,7 @@ struct WatchActionsView: View {
                     foregroundTint: .carbs,
                     backgroundTint: .darkCarbs
                 ) {
+                    ExtensionDelegate.shared().usageRecorder.didDisplayScreen("carbEntry")
                     loopManager.bolusViewModel = CarbAndBolusFlowViewModel(configuration: .carbEntry(nil))
                 }
                 CircleTintedButton(
@@ -40,6 +41,7 @@ struct WatchActionsView: View {
                     foregroundTint: .insulin,
                     backgroundTint: .darkInsulin
                 ) {
+                    ExtensionDelegate.shared().usageRecorder.didDisplayScreen("bolus")
                     loopManager.bolusViewModel = CarbAndBolusFlowViewModel(configuration: .manualBolus)
                 }
             }
@@ -51,6 +53,7 @@ struct WatchActionsView: View {
                     foregroundTint: overrideActive ? .darkPresets : .presets,
                     backgroundTint: overrideActive ? .presets : .darkPresets
                 ) {
+                    ExtensionDelegate.shared().usageRecorder.didDisplayScreen("presets")
                     if overrideActive {
                         overrideToShow = loopManager.scheduleOverride
                     } else {

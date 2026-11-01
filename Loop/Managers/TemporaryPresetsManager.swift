@@ -10,8 +10,8 @@ import Foundation
 import LoopKit
 import os.log
 import LoopCore
-import LoopAlgorithm
 
+@MainActor
 protocol PresetActivationObserver: AnyObject {
     func presetActivated(context: TemporaryScheduleOverride.Context, duration: TemporaryScheduleOverride.Duration)
     func presetDeactivated(context: TemporaryScheduleOverride.Context)

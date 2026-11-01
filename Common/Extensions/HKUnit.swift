@@ -6,7 +6,7 @@
 //  Copyright © 2016 LoopKit Authors. All rights reserved.
 //
 
-import LoopAlgorithm
+import LoopKit
 import LoopCore
 
 // Code in this extension is duplicated from:

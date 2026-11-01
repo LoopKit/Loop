@@ -10,7 +10,6 @@ import LoopKit
 import LoopKitUI
 import SwiftUI
 import LoopCore
-import LoopAlgorithm
 
 struct PresetDetentView: View {
 

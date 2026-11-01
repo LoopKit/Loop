@@ -9,7 +9,6 @@
 import XCTest
 import Foundation
 import LoopKit
-import LoopAlgorithm
 
 @testable import Loop
 

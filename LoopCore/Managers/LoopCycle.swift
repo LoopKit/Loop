@@ -188,6 +188,7 @@ public final class LoopCycle {
         for baseTime: Date? = nil,
         presumePresetEndingNow: Bool = false,
         ensureDosingCoverageStart: Date? = nil,
+        ensureCarbCoverageStart: Date? = nil,
         projectOngoingDoses: Bool = false,
         isolation: isolated (any Actor)? = #isolation
     ) async throws -> StoredDataAlgorithmInput {
@@ -199,6 +200,7 @@ public final class LoopCycle {
             for: baseTime,
             presumePresetEndingNow: presumePresetEndingNow,
             ensureDosingCoverageStart: ensureDosingCoverageStart,
+            ensureCarbCoverageStart: ensureCarbCoverageStart,
             projectOngoingDoses: projectOngoingDoses,
             now: now,
             doseStore: doseStore,
@@ -240,7 +242,7 @@ public final class LoopCycle {
 
             try input.checkRecency(at: loopBaseTime, lastAddedPumpData: doseStore.lastAddedPumpData)
 
-            var output = LoopAlgorithm.run(input: input)
+            var output = Algorithm.run(input: input)
             outcome.output = output
             outcome.dosingDecision.algorithmExperiments = host.algorithmExperiments(for: dosingStrategy, guardAndRunway: output.guardAndRunway)
 
@@ -265,7 +267,7 @@ public final class LoopCycle {
                 let scheduledBasalRate = input.basal.closestPrior(to: loopBaseTime)!.value
                 let activeOverride = host.overrideHistory.activeOverride(at: loopBaseTime)
 
-                let basalAdjustment = basal.adjustForCurrentDelivery(
+                let basalAdjustment = basal.loopKit.adjustForCurrentDelivery(
                     at: loopBaseTime,
                     neutralBasalRate: scheduledBasalRate,
                     currentTempBasal: deliveryDelegate.basalDeliveryState?.currentTempBasal,
@@ -274,12 +276,12 @@ public final class LoopCycle {
                 )
 
                 if let basalAdjustment {
-                    recommendationToEnact.basalAdjustment = basalAdjustment
+                    recommendationToEnact.basalAdjustment = basalAdjustment.algorithm
                 }
 
                 output.recommendationResult = .success(.init(automatic: recommendationToEnact))
                 outcome.output = output
-                outcome.recommendation = recommendationToEnact
+                outcome.recommendation = recommendationToEnact.loopKit
                 outcome.basalAdjustment = basalAdjustment
 
                 if recommendationToEnact != algoRecommendation {
@@ -347,7 +349,11 @@ public final class LoopCycle {
             endingPremealOverride = true
         }
 
-        var input = try await fetchData(for: now(), presumePresetEndingNow: truncatingActiveOverride || endingPremealOverride)
+        var input = try await fetchData(
+            for: now(),
+            presumePresetEndingNow: truncatingActiveOverride || endingPremealOverride,
+            ensureCarbCoverageStart: carbEntryChange?.startDate
+        )
             .addingGlucoseSample(sample: manualGlucoseSample?.asStoredGlucoseSample)
             .removingCarbEntry(carbEntry: carbEntryChange?.originalEntry)
             .addingCarbEntry(carbEntry: carbEntryChange?.asStoredCarbEntry)
@@ -366,7 +372,8 @@ public final class LoopCycle {
         let input = try await manualBolusInput(manualGlucoseSample: manualGlucoseSample, carbEntryChange: carbEntryChange,
                                                truncatingActiveOverride: truncatingActiveOverride)
 
-        let output = LoopAlgorithm.run(input: input)
+        try input.validateCarbScheduleCoverage()
+        let output = Algorithm.run(input: input)
 
         switch output.recommendationResult {
         case .success(let prediction):
@@ -374,7 +381,7 @@ public final class LoopCycle {
             if let roundedAmount = requiredHost.deliveryDelegate?.roundBolusVolume(units: manualBolusRecommendation.amount) {
                 manualBolusRecommendation.amount = roundedAmount
             }
-            return manualBolusRecommendation
+            return manualBolusRecommendation.loopKit
         case .failure(let error):
             throw error
         }
@@ -451,29 +458,29 @@ public final class LoopCycle {
         guard host.holdsPump else { return }
 
         if lastManualBolusRecommendation == nil {
-            lastManualBolusRecommendation = displayState.output?.recommendation?.manual
+            lastManualBolusRecommendation = displayState.output?.recommendation?.manual?.loopKit
         }
 
-        let recommendationChanged = lastManualBolusRecommendation != displayState.output?.recommendation?.manual
+        let recommendationChanged = lastManualBolusRecommendation != displayState.output?.recommendation?.manual?.loopKit
 
         guard force || recommendationChanged else {
             return
         }
 
-        lastManualBolusRecommendation = displayState.output?.recommendation?.manual
+        lastManualBolusRecommendation = displayState.output?.recommendation?.manual?.loopKit
 
         guard let output = displayState.output else { return }
 
         var dosingDecision = StoredDosingDecision(date: now(), reason: "updateRemoteRecommendation")
         dosingDecision.algorithmExperiments = host.algorithmExperiments(for: host.currentDosingStrategy, guardAndRunway: output.guardAndRunway)
-        dosingDecision.predictedGlucose = output.predictedGlucose
+        dosingDecision.predictedGlucose = output.predictedGlucose.map(\.loopKit)
         dosingDecision.insulinOnBoard = displayState.activeInsulin
         dosingDecision.carbsOnBoard = displayState.activeCarbs
         switch output.recommendationResult {
         case .success(let recommendation):
-            dosingDecision.automaticDoseRecommendation = recommendation.automatic
+            dosingDecision.automaticDoseRecommendation = recommendation.automatic?.loopKit
             if let recommendationDate = displayState.input?.predictionStart, let manualRec = recommendation.manual {
-                dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: manualRec, date: recommendationDate)
+                dosingDecision.manualBolusRecommendation = ManualBolusRecommendationWithDate(recommendation: manualRec.loopKit, date: recommendationDate)
             }
         case .failure(let error):
             if let loopError = error as? LoopError {
@@ -519,6 +526,6 @@ public final class LoopCycle {
 
     /// Off the caller's actor.
     private static func runAlgorithm(input: StoredDataAlgorithmInput) async -> AlgorithmOutput<StoredCarbEntry> {
-        LoopAlgorithm.run(input: input)
+        Algorithm.run(input: input)
     }
 }

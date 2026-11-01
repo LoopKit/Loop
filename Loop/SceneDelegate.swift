@@ -33,6 +33,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, WindowProvider {
             return
         }
 
+        window?.addGestureRecognizer(TouchCountingGestureRecognizer { [weak loopAppManager] in
+            loopAppManager?.didReceiveTouch()
+        })
+
         loopAppManager.initialize(windowProvider: self, launchOptions: appDelegate.launchOptions)
         loopAppManager.launch()
 
@@ -59,6 +63,8 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, WindowProvider {
     func sceneWillEnterForeground(_ scene: UIScene) {
         log.default(#function)
 
+        loopAppManager?.willEnterForeground()
+
         guard let loopAppManager, loopAppManager.isLaunchComplete else {
             return
         }
@@ -67,6 +73,8 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, WindowProvider {
 
     func sceneDidEnterBackground(_ scene: UIScene) {
         log.default(#function)
+
+        loopAppManager?.didEnterBackground()
     }
 
     // MARK: - UIWindowSceneDelegate - Deeplinking
@@ -84,5 +92,30 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, WindowProvider {
         log.default(#function)
 
         _ = loopAppManager?.userActivity(userActivity, restorationHandler: { _ in })
+    }
+}
+
+/// Counts each touch sequence without taking part in gesture recognition.
+private final class TouchCountingGestureRecognizer: UIGestureRecognizer {
+
+    private let onTouch: () -> Void
+
+    init(onTouch: @escaping () -> Void) {
+        self.onTouch = onTouch
+        super.init(target: nil, action: nil)
+        cancelsTouchesInView = false
+        delaysTouchesBegan = false
+        delaysTouchesEnded = false
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        if state == .possible {
+            onTouch()
+        }
+        state = .failed
+    }
+
+    override func canPrevent(_ preventedGestureRecognizer: UIGestureRecognizer) -> Bool {
+        false
     }
 }

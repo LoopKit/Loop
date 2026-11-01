@@ -120,14 +120,28 @@ public extension StoredDataAlgorithmInput {
         return rval
     }
 
-    func predictGlucose(effectsOptions: AlgorithmEffectsOptions = .all) throws -> [PredictedGlucoseValue] {
-        let prediction = LoopAlgorithm.generatePrediction(
+    func validateCarbScheduleCoverage() throws {
+        // CarbMath traps if either lookup is nil. Validate the final input, including pending
+        // additions/edits, so incomplete history becomes a recoverable recommendation error.
+        for entry in carbEntries {
+            guard carbRatio.closestPrior(to: entry.startDate) != nil else {
+                throw LoopError.configurationError(.carbRatioSchedule)
+            }
+            guard sensitivityMgdlPerUnit.closestPrior(to: entry.startDate) != nil else {
+                throw LoopError.configurationError(.insulinSensitivitySchedule)
+            }
+        }
+    }
+
+    func predictGlucose(effectsOptions: AlgorithmEffectsOptions = .all) throws -> [LoopAlgorithm.PredictedGlucoseValue] {
+        try validateCarbScheduleCoverage()
+        let prediction = Algorithm.generatePrediction(
             start: predictionStart,
             glucoseHistory: glucoseHistory,
             doses: doses,
             carbEntries: carbEntries,
             basal: basal,
-            sensitivity: sensitivity,
+            sensitivityMgdlPerUnit: sensitivityMgdlPerUnit,
             carbRatio: carbRatio,
             algorithmEffectsOptions: effectsOptions,
             useIntegralRetrospectiveCorrection: self.useIntegralRetrospectiveCorrection,
@@ -179,7 +193,7 @@ public extension StoredDosingDecision {
         self.historicalGlucose = input.glucoseHistory.map { HistoricalGlucoseValue(startDate: $0.startDate, quantity: $0.quantity) }
         switch output.recommendationResult {
         case .success(let recommendation):
-            self.automaticDoseRecommendation = recommendation.automatic
+            self.automaticDoseRecommendation = recommendation.automatic?.loopKit
         case .failure(let error):
             self.appendError(error as? LoopError ?? .unknownError(error))
         }
@@ -189,7 +203,7 @@ public extension StoredDosingDecision {
         if let activeCarbs = output.activeCarbs {
             self.carbsOnBoard = CarbValue(startDate: input.predictionStart, value: activeCarbs)
         }
-        self.predictedGlucose = output.predictedGlucose
+        self.predictedGlucose = output.predictedGlucose.map(\.loopKit)
     }
 }
 
@@ -200,6 +214,7 @@ public extension StoredDataAlgorithmInput {
         for baseTime: Date?,
         presumePresetEndingNow: Bool,
         ensureDosingCoverageStart: Date?,
+        ensureCarbCoverageStart: Date? = nil,
         projectOngoingDoses: Bool,
         now: Date,
         doseStore: DoseStoreProtocol,
@@ -269,6 +284,9 @@ public extension StoredDataAlgorithmInput {
         let forecastEndTime = baseTime.addingTimeInterval(InsulinMath.defaultInsulinActivityDuration).dateCeiledToTimeInterval(GlucoseMath.defaultDelta)
 
         let carbsStart = baseTime.addingTimeInterval(LoopConstants.maxCarbEntryPastTime + .minutes(-1)) // additional minute to handle difference in seconds between carb entry and carb ratio
+        // A pending carb entry can outlive this rolling window while the bolus screen is open.
+        // Cover it with schedule history without expanding the stored-carb or glucose queries.
+        let carbScheduleStart = min(carbsStart, ensureCarbCoverageStart ?? carbsStart)
 
         // Include future carbs in query, but filter out ones entered after basetime. The filtering is only applicable when running in a retrospective situation.
         let carbEntries = try await carbStore.getCarbEntries(
@@ -279,7 +297,7 @@ public extension StoredDataAlgorithmInput {
         }
 
         let carbRatio = try await settingsProvider.getCarbRatioHistory(
-            startDate: carbsStart,
+            startDate: carbScheduleStart,
             endDate: forecastEndTime
         )
 
@@ -297,18 +315,18 @@ public extension StoredDataAlgorithmInput {
             start: baseTime,
             duration: recommendationInsulinModel.effectDuration
         )
-        let neededSensitivityTimeline = LoopAlgorithm.timelineIntervalForSensitivity(
+        let neededSensitivityTimeline = Algorithm.timelineIntervalForSensitivity(
             doses: dosesWithModel,
             glucoseHistoryStart: glucose.first?.startDate ?? baseTime,
             recommendationEffectInterval: recommendationEffectInterval
         )
 
-        // Carb entries (and a backdated manual-bolus entry) can extend back to carbsStart, and
+        // Carb entries (including a pending manual-bolus entry) can extend back to carbScheduleStart, and
         // CarbMath.map(to:) preconditionFailures if the ISF/carb-ratio timelines don't cover every
         // carb entry's start date. timelineIntervalForSensitivity derives its window from dose and
         // glucose history only — which can be more recent than carbsStart (e.g. after a CGM gap) —
-        // so extend the ISF (and override) window back to cover the carb window, matching carbRatio.
-        let sensitivityStart = min(neededSensitivityTimeline.start, carbsStart)
+        // so extend the ISF (and override) window back to cover every entry, matching carbRatio.
+        let sensitivityStart = min(neededSensitivityTimeline.start, carbScheduleStart)
 
         let sensitivity = try await settingsProvider.getInsulinSensitivityHistory(
             startDate: sensitivityStart,
@@ -395,17 +413,17 @@ public extension StoredDataAlgorithmInput {
             doses: dosesWithModel,
             carbEntries: carbEntries,
             predictionStart: baseTime,
-            basal: basalWithOverrides,
-            sensitivity: sensitivityWithOverrides,
-            carbRatio: carbRatioWithOverrides,
-            target: target,
-            suspendThreshold: suspendThreshold,
+            basal: basalWithOverrides.algorithmSchedule(),
+            sensitivityMgdlPerUnit: sensitivityWithOverrides.algorithmMgdlSchedule(),
+            carbRatio: carbRatioWithOverrides.algorithmSchedule(),
+            targetMgdl: target.algorithmMgdlRanges(),
+            suspendThresholdMgdl: suspendThreshold.doubleValue(for: .milligramsPerDeciliter),
             maxBolus: maxBolus,
             maxBasalRate: maxBasalRate,
             useIntegralRetrospectiveCorrection: false,
             includePositiveVelocityAndRC: true,
             carbAbsorptionModel: carbAbsorptionModel,
-            recommendationInsulinModel: recommendationInsulinModel,
+            recommendationInsulinModel: AlgorithmInsulinModel(recommendationInsulinModel),
             recommendationType: .manualBolus,
             automaticBolusApplicationFactor: nil,
             experiments: experiments,
@@ -474,15 +492,15 @@ public extension StoredDataAlgorithmInput {
             throw LoopError.missingDataError(.glucose)
         }
 
-        guard loopBaseTime.timeIntervalSince(latestGlucose.startDate) <= LoopAlgorithm.inputDataRecencyInterval else {
+        guard loopBaseTime.timeIntervalSince(latestGlucose.startDate) <= LoopCoreConstants.inputDataRecencyInterval else {
             throw LoopError.glucoseTooOld(date: latestGlucose.startDate)
         }
 
-        guard latestGlucose.startDate.timeIntervalSince(loopBaseTime) <= LoopAlgorithm.inputDataRecencyInterval else {
+        guard latestGlucose.startDate.timeIntervalSince(loopBaseTime) <= LoopCoreConstants.inputDataRecencyInterval else {
             throw LoopError.invalidFutureGlucose(date: latestGlucose.startDate)
         }
 
-        guard loopBaseTime.timeIntervalSince(lastAddedPumpData) <= LoopAlgorithm.inputDataRecencyInterval else {
+        guard loopBaseTime.timeIntervalSince(lastAddedPumpData) <= LoopCoreConstants.inputDataRecencyInterval else {
             throw LoopError.pumpDataTooOld(date: lastAddedPumpData)
         }
     }

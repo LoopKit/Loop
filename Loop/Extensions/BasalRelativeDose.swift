@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import LoopKit
 import LoopAlgorithm
 
 public extension Array where Element == BasalRelativeDose {
