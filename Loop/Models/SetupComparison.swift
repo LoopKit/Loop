@@ -8,7 +8,7 @@
 import Foundation
 import LoopKit
 
-/// Outcomes since the last setup change, compared with the period before it.
+/// Outcomes from a setup change until now, compared with the weeks before it.
 struct SetupComparison: Equatable {
     struct Period: Equatable {
         let start: Date
@@ -22,7 +22,7 @@ struct SetupComparison: Equatable {
         var timeBelowRange: Double? { glucose.timeInRange.isEmpty ? nil : glucose.timeInRange[.low, default: 0] + glucose.timeInRange[.veryLow, default: 0] }
     }
 
-    static let beforeDuration = TimeInterval.days(14)
+    static let beforeDuration = TimeInterval.days(21)
     static let suggestedDuration = TimeInterval.days(14)
     /// Less CGM data than this in a period makes its numbers unreliable.
     static let minimumCGMActive = 0.7
@@ -30,35 +30,29 @@ struct SetupComparison: Equatable {
 
     let before: Period?
     let after: Period
-    /// The setup is still in use, rather than replaced by a later change.
-    let isCurrent: Bool
 
-    /// The current setup's comparison is still settling until it has run for about two weeks.
-    var isSettling: Bool { isCurrent && after.days * .days(1) < Self.suggestedDuration }
+    /// The comparison is still settling until about two weeks have passed since the change.
+    var isSettling: Bool { after.days * .days(1) < Self.suggestedDuration }
 
-    /// Compares the setup `change` started, until `end` (the next change) or `now`, with the period before it.
+    /// Compares the time from `change` until `now`, including any later changes, with the `beforeDuration` before it.
     init?(change: SetupChange,
-          end: Date? = nil,
           samples: [StoredGlucoseSample],
           insulinHistory: InsulinDeliveryHistory?,
           now: Date,
           calendar: Calendar = .current) {
-        let afterEnd = min(end ?? now, now)
-        guard !change.isLowerBound, afterEnd.timeIntervalSince(change.date) >= Self.minimumPeriod else {
+        guard !change.isLowerBound, now.timeIntervalSince(change.date) >= Self.minimumPeriod else {
             return nil
         }
-        isCurrent = end == nil
         func period(_ start: Date, _ end: Date) -> Period {
             Period(start: start,
                    end: end,
                    glucose: GlucoseStatistics(samples: samples, start: start, end: end, calendar: calendar),
                    insulinPerDay: Self.insulinPerDay(insulinHistory, from: start, to: end))
         }
-        after = period(change.date, afterEnd)
+        after = period(change.date, now)
 
-        let beforeStart = max(change.date - Self.beforeDuration, change.previousDate ?? .distantPast)
-        let candidate = period(beforeStart, change.date)
-        before = change.date.timeIntervalSince(beforeStart) >= Self.minimumPeriod && candidate.glucose.percentActive >= Self.minimumCGMActive ? candidate : nil
+        let candidate = period(change.date - Self.beforeDuration, change.date)
+        before = candidate.glucose.percentActive >= Self.minimumCGMActive ? candidate : nil
     }
 
     private static func insulinPerDay(_ history: InsulinDeliveryHistory?, from start: Date, to end: Date) -> Double? {

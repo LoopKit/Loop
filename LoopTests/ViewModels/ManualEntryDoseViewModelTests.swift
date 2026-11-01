@@ -9,7 +9,6 @@
 @testable import LoopCore
 import LoopKit
 import XCTest
-import LoopAlgorithm
 
 @testable import Loop
 
@@ -87,7 +86,7 @@ fileprivate class MockManualEntryDoseViewModelDelegate: ManualDoseViewModelDeleg
     }
     
     func insulinActivityDuration(for type: InsulinType?) -> TimeInterval {
-        return InsulinMath.defaultInsulinActivityDuration
+        return ExponentialInsulinModelPreset.rapidActingAdult.effectDuration
     }
     
     var algorithmDisplayState = AlgorithmDisplayState()

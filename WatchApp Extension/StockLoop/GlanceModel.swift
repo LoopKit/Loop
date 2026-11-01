@@ -12,7 +12,6 @@ import Combine
 import WatchKit
 import HealthKit
 import LoopKit
-import LoopAlgorithm
 import LoopCore
 import G7SensorKit
 

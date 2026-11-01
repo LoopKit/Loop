@@ -10,7 +10,6 @@
 import Foundation
 import HealthKit
 import LoopKit
-import LoopAlgorithm
 import LoopCore
 import WatchKit
 import os.log

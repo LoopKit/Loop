@@ -59,6 +59,7 @@ public final class AlertManager {
     let alertStore: AlertStore
 
     private let bluetoothPoweredOffIdentifier = Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "bluetoothPoweredOff")
+    static let bluetoothPoweredOffAlertDelay = TimeInterval(minutes: 10)
 
     var analyticsServicesManager: AnalyticsServicesManager
 
@@ -177,8 +178,8 @@ public final class AlertManager {
             await issueAlert(Alert(identifier: bluetoothPoweredOffIdentifier,
                              foregroundContent: fgcontent,
                              backgroundContent: bgcontent,
-                             trigger: .immediate,
-                             interruptionLevel: .critical))
+                             trigger: .delayed(interval: Self.bluetoothPoweredOffAlertDelay),
+                             interruptionLevel: .timeSensitive))
         }
     }
 
@@ -364,6 +365,7 @@ extension AlertManager: AlertManagerResponder {
     
     func acknowledgeAlert(identifier: Alert.Identifier) async throws {
         self.log.default("acknowledgeAlert called for identifier %{public}@", String(describing: identifier))
+        analyticsServicesManager.didAcknowledgeAlert()
         if let responder = responders[identifier.managerIdentifier]?.value {
             do {
                 try await responder.acknowledgeAlert(alertIdentifier: identifier.alertIdentifier)

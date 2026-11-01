@@ -22,11 +22,10 @@ extension WatchLoopManager {
         let predictedGlucose = loopRunState.output?.predictedGlucose
 
         /// An effect's change from now to the end of its forecast; nil with none ahead.
-        func delta(_ effects: [GlucoseEffect]?) -> Double? {
+        func delta(_ effects: [LoopAlgorithm.GlucoseEffect]?) -> Double? {
             let forward = (effects ?? []).filter { $0.startDate >= now() }
             guard let first = forward.first, let last = forward.last else { return nil }
-            let mgdl = LoopUnit.milligramsPerDeciliter
-            return last.quantity.doubleValue(for: mgdl) - first.quantity.doubleValue(for: mgdl)
+            return last.mgdl - first.mgdl
         }
 
         let mgdlU = LoopUnit.milligramsPerDeciliter
@@ -34,7 +33,7 @@ extension WatchLoopManager {
 
         lastPredictionBreakdown = {
             guard let start = glucoseStore.latestGlucose?.quantity.doubleValue(for: mgdlU),
-                  let eventualValue = predictedGlucose?.last?.quantity.doubleValue(for: mgdlU) else { return nil }
+                  let eventualValue = predictedGlucose?.last?.mgdl else { return nil }
             return PredictionBreakdown(
                 startMgdl: start,
                 eventualMgdl: eventualValue,
@@ -47,12 +46,11 @@ extension WatchLoopManager {
 
     /// The inputs behind a dose, for its line.
     func algorithmSummary(input: StoredDataAlgorithmInput, output: AlgorithmOutput<StoredCarbEntry>) -> String {
-        let mgdl = LoopUnit.milligramsPerDeciliter
-        let target = input.target.closestPrior(to: input.predictionStart)?.value
+        let target = input.targetMgdl.closestPrior(to: input.predictionStart)?.value
         return String(
             format: "eventual %@ mg/dL against target %@, IOB %.2f U, COB %.0f g",
-            output.predictedGlucose.last.map { String(format: "%.0f", $0.quantity.doubleValue(for: mgdl)) } ?? "—",
-            target.map { String(format: "%.0f-%.0f", $0.lowerBound.doubleValue(for: mgdl), $0.upperBound.doubleValue(for: mgdl)) } ?? "—",
+            output.predictedGlucose.last.map { String(format: "%.0f", $0.mgdl) } ?? "—",
+            target.map { String(format: "%.0f-%.0f", $0.lowerBound, $0.upperBound) } ?? "—",
             output.activeInsulin ?? 0,
             output.activeCarbs ?? 0)
     }

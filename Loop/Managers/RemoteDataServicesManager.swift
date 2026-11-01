@@ -8,7 +8,6 @@
 
 import os.log
 import Foundation
-import LoopAlgorithm
 import LoopKit
 import LoopCore
 import UIKit

@@ -117,12 +117,16 @@ final class OverrideHistoryTests: XCTestCase {
                                   startDate: start, duration: .finite(duration), enactTrigger: .local, syncIdentifier: UUID())
     }
 
+    private func value(_ timeline: [LoopAlgorithm.AbsoluteScheduleValue<Double>], at date: Date) -> Double? {
+        timeline.first { $0.startDate <= date && date < $0.endDate }?.value
+    }
+
     private func value(_ timeline: [AbsoluteScheduleValue<Double>], at date: Date) -> Double? {
         timeline.first { $0.startDate <= date && date < $0.endDate }?.value
     }
 
     private func sensitivity(_ input: StoredDataAlgorithmInput, at date: Date) -> Double? {
-        input.sensitivity.first { $0.startDate <= date && date < $0.endDate }?.value.doubleValue(for: .milligramsPerDeciliter)
+        input.sensitivityMgdlPerUnit.first { $0.startDate <= date && date < $0.endDate }?.value
     }
 
     // MARK: - Stock's windows
@@ -142,14 +146,14 @@ final class OverrideHistoryTests: XCTestCase {
         let input = try await manager.fetchData(for: Date())
 
         XCTAssertEqual(input.carbEntries.count, 1, "the 6-hour-old carb is in the input")
-        let isfStart = try XCTUnwrap(input.sensitivity.first?.startDate)
+        let isfStart = try XCTUnwrap(input.sensitivityMgdlPerUnit.first?.startDate)
         XCTAssertLessThanOrEqual(isfStart, carbStart, "the ISF timeline covers the carb, though glucose starts 3 h ago")
         XCTAssertEqual(try XCTUnwrap(value(input.carbRatio, at: carbStart)), 20, accuracy: 0.001,
                        "the override over the carb doubles its carb ratio")
         XCTAssertEqual(try XCTUnwrap(sensitivity(input, at: carbStart)), 100, accuracy: 0.001, "and its ISF")
 
         // Before, this trapped in CarbMath; now it runs.
-        let output = LoopAlgorithm.run(input: input)
+        let output = Algorithm.run(input: input)
         XCTAssertFalse(output.predictedGlucose.isEmpty)
     }
 

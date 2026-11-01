@@ -39,9 +39,11 @@ private let fieldCarbRatio = CarbRatioSchedule(unit: .gram, dailyItems: [Repeati
 private let fieldISF = InsulinSensitivitySchedule(unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 50.0)])!
 
 /// A glucose sample for stock ICE: one provenance, 5-min grid.
-private struct SimGlucoseSample: GlucoseSampleValue {
+private struct SimGlucoseSample: LoopAlgorithm.GlucoseSampleValue {
     let startDate: Date
     let quantity: LoopQuantity
+    var endDate: Date { startDate }
+    var mgdl: Double { quantity.doubleValue(for: .milligramsPerDeciliter) }
     let provenanceIdentifier = "LoanBooksHarnessTests"
     let isDisplayOnly = false
     let wasUserEntered = false
@@ -235,7 +237,7 @@ private final class LoanBooksDriver {
         let start = doses.map { $0.startDate }.min() ?? date
         let end = max(date, doses.map { $0.endDate }.max() ?? date).addingTimeInterval(duration)
         let basal = schedule.between(start: start, end: end).map {
-            AbsoluteScheduleValue(startDate: $0.startDate, endDate: $0.endDate, value: $0.value)
+            LoopAlgorithm.AbsoluteScheduleValue(startDate: $0.startDate, endDate: $0.endDate, value: $0.value)
         }
         let timeline = doses
             .map { $0.simpleDose(with: ExponentialInsulinModelPreset.rapidActingAdult) }
@@ -589,7 +591,7 @@ final class LoanBooksHarnessTests: XCTestCase {
 
     /// Carb status built as `LoopDataManager.fetchData` builds it.
     private func carbStatus(_ store: CarbStore, start: Date, end: Date,
-                            velocities: [GlucoseEffectVelocity]) -> [CarbStatus<StoredCarbEntry>] {
+                            velocities: [LoopAlgorithm.GlucoseEffectVelocity]) -> [CarbStatus<StoredCarbEntry>] {
         let entries = carbEntries(store, start: start, end: end)
         guard !entries.isEmpty else { return [] }
         let spanStart = min(start, entries.map { $0.startDate }.min() ?? start)
@@ -597,11 +599,11 @@ final class LoanBooksHarnessTests: XCTestCase {
             .addingTimeInterval(CarbMath.maximumAbsorptionTimeInterval)
         return entries.map(
             to: velocities,
-            carbRatio: fieldCarbRatio.between(start: spanStart, end: spanEnd),
-            insulinSensitivity: fieldISF.quantitiesBetween(start: spanStart, end: spanEnd))
+            carbRatio: fieldCarbRatio.between(start: spanStart, end: spanEnd).algorithmSchedule(),
+            insulinSensitivityMgdlPerUnit: fieldISF.quantitiesBetween(start: spanStart, end: spanEnd).algorithmMgdlSchedule())
     }
 
-    private func cob(_ store: CarbStore, at date: Date, velocities: [GlucoseEffectVelocity]?) -> Double {
+    private func cob(_ store: CarbStore, at date: Date, velocities: [LoopAlgorithm.GlucoseEffectVelocity]?) -> Double {
         let status = carbStatus(store,
                                 start: date.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval),
                                 end: date,
@@ -610,7 +612,7 @@ final class LoanBooksHarnessTests: XCTestCase {
         return status.dynamicCarbsOnBoard(at: date, absorptionModel: PiecewiseLinearAbsorption())
     }
 
-    private func carbEffects(_ store: CarbStore, start: Date, end: Date, velocities: [GlucoseEffectVelocity]) -> [GlucoseEffect] {
+    private func carbEffects(_ store: CarbStore, start: Date, end: Date, velocities: [LoopAlgorithm.GlucoseEffectVelocity]) -> [GlucoseEffect] {
         // Entries are fetched one absorption window before `start`; effects over [start, end],
         // as fetchAlgorithmInput does.
         let entriesStart = start.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval)
@@ -621,9 +623,9 @@ final class LoanBooksHarnessTests: XCTestCase {
             from: start,
             to: spanEnd,
             // Schedules must cover the entries, or a pre-midnight meal trips a precondition.
-            carbRatios: fieldCarbRatio.between(start: entriesStart, end: spanEnd),
-            insulinSensitivities: fieldISF.quantitiesBetween(start: entriesStart, end: spanEnd),
-            absorptionModel: PiecewiseLinearAbsorption())
+            carbRatios: fieldCarbRatio.between(start: entriesStart, end: spanEnd).algorithmSchedule(),
+            insulinSensitivitiesMgdlPerUnit: fieldISF.quantitiesBetween(start: entriesStart, end: spanEnd).algorithmMgdlSchedule(),
+            absorptionModel: PiecewiseLinearAbsorption()).map(\.loopKit)
     }
 
     /// Sinusoidal BG, 100 → 140 → 180 mg/dL over 90 min.
@@ -637,12 +639,11 @@ final class LoanBooksHarnessTests: XCTestCase {
     }
 
     /// Stock ICE via `counteractionEffects(to:)`; flat insulin effects make ICE the glucose velocity.
-    private func stockICE(samples: [SimGlucoseSample], flatInsulinEffectsFrom start: Date, to end: Date) -> [GlucoseEffectVelocity] {
-        var effects: [GlucoseEffect] = []
+    private func stockICE(samples: [SimGlucoseSample], flatInsulinEffectsFrom start: Date, to end: Date) -> [LoopAlgorithm.GlucoseEffectVelocity] {
+        var effects: [LoopAlgorithm.GlucoseEffect] = []
         var date = start
         while date <= end {
-            effects.append(GlucoseEffect(startDate: date,
-                                         quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 0)))
+            effects.append(LoopAlgorithm.GlucoseEffect(startDate: date, mgdl: 0))
             date = date.addingTimeInterval(.minutes(5))
         }
         return samples.counteractionEffects(to: effects)

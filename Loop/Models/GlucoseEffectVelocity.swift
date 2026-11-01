@@ -6,7 +6,6 @@
 //
 
 import LoopKit
-import LoopAlgorithm
 
 
 extension GlucoseEffectVelocity: @retroactive RawRepresentable {

@@ -12,7 +12,6 @@ import LoopKit
 import LoopCore
 import WatchConnectivity
 import os.log
-import LoopAlgorithm
 import UserNotifications
 import WatchKit
 
@@ -343,7 +342,7 @@ extension LoopDataManager {
         dispatchPrecondition(condition: .onQueue(.main))
         guard !pausesPhoneCarbSync else { return }
 
-        let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -CarbMath.maximumAbsorptionTimeInterval))
+        let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -LoopCoreConstants.maximumCarbAbsorptionTimeInterval))
         let userInfo = CarbBackfillRequestUserInfo(startDate: start)
         WCSession.default.sendCarbBackfillRequestMessage(userInfo) { (result) in
             switch result {

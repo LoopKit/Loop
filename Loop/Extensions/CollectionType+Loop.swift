@@ -8,10 +8,9 @@
 
 import Foundation
 import LoopKit
-import LoopAlgorithm
 
 
-public extension Sequence where Element: TimelineValue {
+public extension Sequence where Element: LoopKit.TimelineValue {
     /// Returns the closest element index in the sorted sequence prior to the specified date
     ///
     /// - parameter date: The date to use in the search
