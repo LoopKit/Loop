@@ -8,7 +8,6 @@
 
 import SwiftUI
 import LoopKit
-import LoopAlgorithm
 
 final class FavoriteFoodAddEditViewModel: ObservableObject {
     enum Alert: Identifiable {

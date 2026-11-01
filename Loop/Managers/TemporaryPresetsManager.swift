@@ -10,7 +10,6 @@ import Foundation
 import LoopKit
 import os.log
 import LoopCore
-import LoopAlgorithm
 
 @MainActor
 protocol PresetActivationObserver: AnyObject {

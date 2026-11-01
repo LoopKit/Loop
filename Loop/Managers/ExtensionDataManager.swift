@@ -6,7 +6,6 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
-import LoopAlgorithm
 import UIKit
 import LoopKit
 import LoopCore
@@ -149,7 +148,7 @@ final class ExtensionDataManager {
             let first = predictedGlucose[predictedGlucose.startIndex]
             let second = predictedGlucose[predictedGlucose.startIndex.advanced(by: 1)]
             context.predictedGlucose = PredictedGlucoseContext(
-                values: predictedGlucose.map { $0.quantity.doubleValue(for: glucoseUnit) },
+                values: predictedGlucose.map { $0.loopKit.quantity.doubleValue(for: glucoseUnit) },
                 unit: glucoseUnit,
                 startDate: first.startDate,
                 interval: second.startDate.timeIntervalSince(first.startDate))

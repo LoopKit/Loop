@@ -6,8 +6,8 @@
 //
 
 import XCTest
-import LoopKit
 import LoopAlgorithm
+import LoopKit
 @testable import Loop
 
 final class InsulinDeliveryHistoryTests: XCTestCase {
@@ -23,11 +23,11 @@ final class InsulinDeliveryHistoryTests: XCTestCase {
     }
 
     private func bolus(_ units: Double, at start: Date, duration: TimeInterval = 0, automatic: Bool = false) -> SimpleInsulinDose {
-        SimpleInsulinDose(deliveryType: .bolus, automatic: automatic, startDate: start, endDate: start.addingTimeInterval(duration), volume: units, insulinModel: ExponentialInsulinModelPreset.rapidActingAdult)
+        SimpleInsulinDose(deliveryType: .bolus, automatic: automatic, startDate: start, endDate: start.addingTimeInterval(duration), volume: units, insulinModel: LoopAlgorithm.ExponentialInsulinModelPreset.rapidActingAdult)
     }
 
     private func tempBasal(rate: Double, from start: Date, to end: Date) -> SimpleInsulinDose {
-        SimpleInsulinDose(deliveryType: .basal, automatic: true, startDate: start, endDate: end, volume: rate * end.timeIntervalSince(start).hours, insulinModel: ExponentialInsulinModelPreset.rapidActingAdult)
+        SimpleInsulinDose(deliveryType: .basal, automatic: true, startDate: start, endDate: end, volume: rate * end.timeIntervalSince(start).hours, insulinModel: LoopAlgorithm.ExponentialInsulinModelPreset.rapidActingAdult)
     }
 
     private func scheduledBasal(_ rate: Double, from start: Date, to end: Date) -> [AbsoluteScheduleValue<Double>] {

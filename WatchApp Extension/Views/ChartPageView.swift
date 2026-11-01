@@ -9,7 +9,6 @@
 import SwiftUI
 import LoopKit
 import LoopCore
-import LoopAlgorithm
 import SpriteKit
 
 struct ChartPageView: View {

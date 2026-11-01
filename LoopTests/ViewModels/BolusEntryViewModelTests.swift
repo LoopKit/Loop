@@ -7,12 +7,12 @@
 //
 
 import HealthKit
+import LoopAlgorithm
 import LoopCore
 import LoopKit
 import LoopKitUI
 import SwiftUI
 import XCTest
-import LoopAlgorithm
 
 @testable import Loop
 
@@ -193,7 +193,7 @@ class BolusEntryViewModelTests: XCTestCase {
             let input = try await delegate.fetchData(for: Self.exampleStartDate, presumePresetEndingNow: false, ensureDosingCoverageStart: nil, ensureCarbCoverageStart: nil, projectOngoingDoses: false)
             let prediction = try input.predictGlucose()
             await bolusEntryViewModel.update()
-            XCTAssertEqual(prediction, bolusEntryViewModel.predictedGlucoseValues.map { PredictedGlucoseValue(startDate: $0.startDate, quantity: $0.quantity) })
+            XCTAssertEqual(prediction, bolusEntryViewModel.predictedGlucoseValues.map { LoopAlgorithm.PredictedGlucoseValue(startDate: $0.startDate, mgdl: $0.quantity.doubleValue(for: .milligramsPerDeciliter)) })
         } catch {
             XCTFail("Unable to generate prediction")
         }
@@ -205,7 +205,7 @@ class BolusEntryViewModelTests: XCTestCase {
             let prediction = try input.predictGlucose()
             await bolusEntryViewModel.update()
             bolusEntryViewModel.manualGlucoseQuantity = Self.exampleManualGlucoseQuantity
-            XCTAssertEqual(prediction, bolusEntryViewModel.predictedGlucoseValues.map { PredictedGlucoseValue(startDate: $0.startDate, quantity: $0.quantity) })
+            XCTAssertEqual(prediction, bolusEntryViewModel.predictedGlucoseValues.map { LoopAlgorithm.PredictedGlucoseValue(startDate: $0.startDate, mgdl: $0.quantity.doubleValue(for: .milligramsPerDeciliter)) })
         } catch {
             XCTFail("Unable to generate prediction")
         }
@@ -302,7 +302,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         let recommendation = ManualBolusRecommendation(amount: 1.25)
-        delegate.algorithmOutput.recommendationResult = .success(.init(manual: recommendation))
+        delegate.recommendationResult = .success(recommendation)
 
         await bolusEntryViewModel.update()
 
@@ -325,7 +325,7 @@ class BolusEntryViewModelTests: XCTestCase {
             amount: 1.25,
             notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue)
         )
-        delegate.algorithmOutput.recommendationResult = .success(.init(manual: recommendation))
+        delegate.recommendationResult = .success(recommendation)
         await bolusEntryViewModel.update()
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -338,7 +338,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         delegate.settings.suspendThreshold = nil
         let recommendation = ManualBolusRecommendation(amount: 1.25, notice: BolusRecommendationNotice.glucoseBelowSuspendThreshold(minGlucose: Self.exampleGlucoseValue))
-        delegate.algorithmOutput.recommendationResult = .success(.init(manual: recommendation))
+        delegate.recommendationResult = .success(recommendation)
         await bolusEntryViewModel.update()
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -350,7 +350,7 @@ class BolusEntryViewModelTests: XCTestCase {
     func testUpdateRecommendedBolusWithOtherNotice() async throws {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         let recommendation = ManualBolusRecommendation(amount: 1.25, notice: BolusRecommendationNotice.currentGlucoseBelowTarget(glucose: Self.exampleGlucoseValue))
-        delegate.algorithmOutput.recommendationResult = .success(.init(manual: recommendation))
+        delegate.recommendationResult = .success(recommendation)
         await bolusEntryViewModel.update()
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -361,11 +361,11 @@ class BolusEntryViewModelTests: XCTestCase {
         
     func testMissingCarbScheduleClearsPreviousRecommendation() async throws {
         for detail: ConfigurationErrorDetail in [.carbRatioSchedule, .insulinSensitivitySchedule] {
-            delegate.algorithmOutput.recommendationResult = .success(.init(manual: ManualBolusRecommendation(amount: 1.25)))
+            delegate.recommendationResult = .success(ManualBolusRecommendation(amount: 1.25))
             await bolusEntryViewModel.update()
             XCTAssertNotNil(bolusEntryViewModel.recommendedBolus)
 
-            delegate.algorithmOutput.recommendationResult = .failure(LoopError.configurationError(detail))
+            delegate.recommendationResult = .failure(LoopError.configurationError(detail))
             await bolusEntryViewModel.update()
             XCTAssertNil(bolusEntryViewModel.recommendedBolus)
             XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
@@ -374,7 +374,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
     func testUpdateRecommendedBolusThrowsMissingDataError() async throws {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        delegate.algorithmOutput.recommendationResult = .failure(LoopError.missingDataError(.glucose))
+        delegate.recommendationResult = .failure(LoopError.missingDataError(.glucose))
         await bolusEntryViewModel.update()
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -384,7 +384,7 @@ class BolusEntryViewModelTests: XCTestCase {
     
     func testUpdateRecommendedBolusThrowsPumpDataTooOld() async throws {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        delegate.algorithmOutput.recommendationResult = .failure(LoopError.pumpDataTooOld(date: now))
+        delegate.recommendationResult = .failure(LoopError.pumpDataTooOld(date: now))
         await bolusEntryViewModel.update()
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -394,7 +394,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
     func testUpdateRecommendedBolusThrowsGlucoseTooOld() async throws {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        delegate.algorithmOutput.recommendationResult = .failure(LoopError.glucoseTooOld(date: now))
+        delegate.recommendationResult = .failure(LoopError.glucoseTooOld(date: now))
         await bolusEntryViewModel.update()
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -404,7 +404,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
     func testUpdateRecommendedBolusThrowsInvalidFutureGlucose() async throws {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        delegate.algorithmOutput.recommendationResult = .failure(LoopError.invalidFutureGlucose(date: now))
+        delegate.recommendationResult = .failure(LoopError.invalidFutureGlucose(date: now))
         await bolusEntryViewModel.update()
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -414,7 +414,7 @@ class BolusEntryViewModelTests: XCTestCase {
 
     func testUpdateRecommendedBolusThrowsOtherError() async throws {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
-        delegate.algorithmOutput.recommendationResult = .failure(LoopError.pumpSuspended)
+        delegate.recommendationResult = .failure(LoopError.pumpSuspended)
         await bolusEntryViewModel.update()
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
         let recommendedBolus = bolusEntryViewModel.recommendedBolus
@@ -436,7 +436,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertFalse(bolusEntryViewModel.isBolusRecommended)
 
         let recommendation = ManualBolusRecommendation(amount: 1.25)
-        delegate.algorithmOutput.recommendationResult = .success(.init(manual: recommendation))
+        delegate.recommendationResult = .success(recommendation)
         await bolusEntryViewModel.update()
 
         XCTAssertTrue(bolusEntryViewModel.isBolusRecommended)
@@ -887,16 +887,16 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
         carbEntries: [],
         predictionStart: Date(),
         basal: [],
-        sensitivity: [],
+        sensitivityMgdlPerUnit: [],
         carbRatio: [],
-        target: [],
-        suspendThreshold: nil,
+        targetMgdl: [],
+        suspendThresholdMgdl: nil,
         maxBolus: 3,
         maxBasalRate: 6,
         useIntegralRetrospectiveCorrection: false,
         includePositiveVelocityAndRC: true,
         carbAbsorptionModel: .piecewiseLinear,
-        recommendationInsulinModel: ExponentialInsulinModelPreset.rapidActingAdult,
+        recommendationInsulinModel: LoopAlgorithm.ExponentialInsulinModelPreset.rapidActingAdult,
         recommendationType: .manualBolus,
         automaticBolusApplicationFactor: 0.4
     )
@@ -971,14 +971,7 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
         return (historicGlucose: loopStateInput.glucoseHistory, predictedGlucose: prediction)
     }
 
-    var algorithmOutput: AlgorithmOutput = AlgorithmOutput<StoredCarbEntry>(
-        recommendationResult: .success(.init()),
-        predictedGlucose: [],
-        effects: LoopAlgorithmEffects.emptyMock,
-        dosesRelativeToBasal: [],
-        activeInsulin: nil,
-        activeCarbs: nil
-    )
+    var recommendationResult: Result<ManualBolusRecommendation?, Error> = .success(nil)
 
     var manualGlucoseSampleForBolusRecommendation: NewGlucoseSample?
     var carbEntryChangeForBolusRecommendation: CarbEntryChange?
@@ -992,9 +985,9 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
         manualGlucoseSampleForBolusRecommendation = manualGlucoseSample
         carbEntryChangeForBolusRecommendation = carbEntryChange
 
-        switch algorithmOutput.recommendationResult {
+        switch recommendationResult {
         case .success(let recommendation):
-            return recommendation.manual
+            return recommendation
         case .failure(let error):
             throw error
         }
@@ -1044,20 +1037,6 @@ extension BolusDosingDecision: @retroactive Equatable {
 extension ManualBolusRecommendationWithDate: @retroactive Equatable {
     public static func == (lhs: ManualBolusRecommendationWithDate, rhs: ManualBolusRecommendationWithDate) -> Bool {
         return lhs.recommendation == rhs.recommendation && lhs.date == rhs.date
-    }
-}
-
-extension LoopAlgorithmEffects {
-    public static var emptyMock: LoopAlgorithmEffects {
-        return LoopAlgorithmEffects(
-            insulin: [],
-            carbs: [],
-            carbStatus: [],
-            retrospectiveCorrection: [],
-            momentum: [],
-            insulinCounteraction: [],
-            retrospectiveGlucoseDiscrepancies: []
-        )
     }
 }
 

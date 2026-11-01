@@ -9,7 +9,6 @@
 import Foundation
 import LoopKit
 import LoopCore
-import LoopAlgorithm
 
 final class AnalyticsServicesManager {
 

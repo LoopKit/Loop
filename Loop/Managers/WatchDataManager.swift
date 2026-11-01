@@ -9,7 +9,6 @@
 import HealthKit
 import UIKit
 import WatchConnectivity
-import LoopAlgorithm
 import LoopKit
 import LoopCore
 
@@ -386,11 +385,11 @@ final class WatchDataManager: NSObject {
             // Drop the first element in predictedGlucose because it is the current glucose
             let filteredPredictedGlucose = predictedGlucose.dropFirst()
             if filteredPredictedGlucose.count > 0 {
-                context.predictedGlucose = WatchPredictedGlucose(values: Array(filteredPredictedGlucose))
+                context.predictedGlucose = WatchPredictedGlucose(values: filteredPredictedGlucose.map(\.loopKit))
             }
         }
 
-        dosingDecision.predictedGlucose = algoOutput?.predictedGlucose
+        dosingDecision.predictedGlucose = algoOutput?.predictedGlucose.map(\.loopKit)
 
         var preMealOverride = self.temporaryPresetsManager.preMealOverride
         if preMealOverride?.hasFinished() == true {

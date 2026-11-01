@@ -717,6 +717,15 @@
 		FEEDB0000000000000000004 /* Statistics/TimeInRangeBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */; };
 		30E4A68B8C914C5E4B245555 /* InsulinDeliveryHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69CE2EE3714858772FE7A26 /* InsulinDeliveryHistoryTests.swift */; };
 		FEEDB0000000000000000005 /* GlucoseStatisticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */; };
+		17EA66859884C0208DED47CF /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
+		1C99EE4A3BB181BB23DEF066 /* LoopAlgorithm in Frameworks */ = {isa = PBXBuildFile; productRef = C42F6B8A2B1B9E0142078BF9 /* LoopAlgorithm */; };
+		BD37CA2F10445DB600A35199 /* TemporaryScheduleOverrideAlgorithmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C372374D3D3D9C5F8E3AD93 /* TemporaryScheduleOverrideAlgorithmTests.swift */; };
+		5E77F6516D69B22A57EB850A /* LoopAlgorithm in Frameworks */ = {isa = PBXBuildFile; productRef = 761F6A285BE2833DF06F7E55 /* LoopAlgorithm */; };
+		613BF2B78104AB9694590C65 /* AlgorithmBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */; };
+		767B36174D190F3191F2EA73 /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
+		8DC1CE32F39301122B550325 /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
+		ABD9218EB98C9216FBB04382 /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
+		AF79DFAB0F55143D66022668 /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1584,6 +1593,9 @@
 		FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics/TimeInRangeBar.swift; sourceTree = "<group>"; };
 		F69CE2EE3714858772FE7A26 /* InsulinDeliveryHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryHistoryTests.swift; sourceTree = "<group>"; };
 		FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseStatisticsTests.swift; sourceTree = "<group>"; };
+		35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoopKitTypeAliases.swift; sourceTree = "<group>"; };
+		36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AlgorithmBridge.swift; sourceTree = "<group>"; };
+		6C372374D3D3D9C5F8E3AD93 /* TemporaryScheduleOverrideAlgorithmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryScheduleOverrideAlgorithmTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1637,6 +1649,7 @@
 			files = (
 				43D9002D21EB225D00AF44BF /* HealthKit.framework in Frameworks */,
 				C1BE2ADD2FCDE9F700D5A369 /* LoopKit.framework in Frameworks */,
+				1C99EE4A3BB181BB23DEF066 /* LoopAlgorithm in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1645,6 +1658,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C1275DDE2E81FD470013B99D /* LoopKit.framework in Frameworks */,
+				5E77F6516D69B22A57EB850A /* LoopAlgorithm in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1856,6 +1870,7 @@
 				C16F511A2B89363A00EFD7A1 /* SimpleInsulinDose.swift */,
 				C152B9F42C9C7D4A00ACBC06 /* AutomationHistoryEntry.swift */,
 				84213C882D94941000642E78 /* InsulinDeliveryLogEvent.swift */,
+				36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2363,6 +2378,7 @@
 				43785E9B2120E7060057DED1 /* Intents.intentdefinition */,
 				89E267FB2292456700A3F2AF /* FeatureFlags.swift */,
 				7D9BEEF52335CF8D005DCFD6 /* Localizable.strings */,
+				35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -2807,6 +2823,7 @@
 				A9BD28E6272226B40071DF15 /* TestLocalizedError.swift */,
 				A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */,
 				A9C1719625366F780053BCBD /* WatchHistoricalGlucoseTest.swift */,
+				6C372374D3D3D9C5F8E3AD93 /* TemporaryScheduleOverrideAlgorithmTests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3092,6 +3109,9 @@
 			dependencies = (
 			);
 			name = "LoopCore-watchOS";
+			packageProductDependencies = (
+				C42F6B8A2B1B9E0142078BF9 /* LoopAlgorithm */,
+			);
 			productName = LoopCore;
 			productReference = 43D9002A21EB209400AF44BF /* LoopCore.framework */;
 			productType = "com.apple.product-type.framework";
@@ -3110,6 +3130,9 @@
 			dependencies = (
 			);
 			name = LoopCore;
+			packageProductDependencies = (
+				761F6A285BE2833DF06F7E55 /* LoopAlgorithm */,
+			);
 			productName = LoopCore;
 			productReference = 43D9FFCF21EAE05D00AF44BF /* LoopCore.framework */;
 			productType = "com.apple.product-type.framework";
@@ -3619,6 +3642,7 @@
 				84AA81DD2A4A2999000B658B /* StatusWidgetTimelineProvider.swift in Sources */,
 				84D2879F2AC756C8007ED283 /* ContentMargin.swift in Sources */,
 				8496F7312B5711C4003E672C /* ContentMargin.swift in Sources */,
+				ABD9218EB98C9216FBB04382 /* LoopKitTypeAliases.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3893,6 +3917,8 @@
 				43C2FAE11EB656A500364AFF /* GlucoseEffectVelocity.swift in Sources */,
 				14C970862C5C358C00E8A01B /* FavoriteFoodInsightsChartsView.swift in Sources */,
 				5021CA8C264146C9DFF33E9D /* PluginPickerView.swift in Sources */,
+				17EA66859884C0208DED47CF /* LoopKitTypeAliases.swift in Sources */,
+				613BF2B78104AB9694590C65 /* AlgorithmBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3993,6 +4019,7 @@
 				894F6DD3243BCBDB00CCE676 /* Environment+SizeClass.swift in Sources */,
 				C17D52042E7F0578001D2AD2 /* LabelValueRow.swift in Sources */,
 				895788B2242E69A2002CB114 /* CircularAccessoryButtonStyle.swift in Sources */,
+				8DC1CE32F39301122B550325 /* LoopKitTypeAliases.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4129,6 +4156,8 @@
 				E93E86B224DDE21D00FF40C8 /* MockCarbStore.swift in Sources */,
 				C1DA43592B1A784900CBD33F /* MockDeliveryDelegate.swift in Sources */,
 				C18859A02AF1612B0010F21F /* PersistenceController.swift in Sources */,
+				BD37CA2F10445DB600A35199 /* TemporaryScheduleOverrideAlgorithmTests.swift in Sources */,
+				AF79DFAB0F55143D66022668 /* LoopKitTypeAliases.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4173,6 +4202,7 @@
 				B4E96D57248A7B0F002DABAD /* StatusHighlightHUDView.swift in Sources */,
 				B42C951424A3C76000857C73 /* CGMStatusHUDViewModel.swift in Sources */,
 				4F75289E1DFE1F6000C322D6 /* LoopCompletionHUDView.swift in Sources */,
+				767B36174D190F3191F2EA73 /* LoopKitTypeAliases.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5509,6 +5539,14 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C1CCF10B2858F4F70035389C /* XCRemoteSwiftPackageReference "SwiftCharts" */;
 			productName = SwiftCharts;
+		};
+		761F6A285BE2833DF06F7E55 /* LoopAlgorithm */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LoopAlgorithm;
+		};
+		C42F6B8A2B1B9E0142078BF9 /* LoopAlgorithm */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LoopAlgorithm;
 		};
 /* End XCSwiftPackageProductDependency section */
 

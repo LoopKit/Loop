@@ -12,11 +12,11 @@ import Intents
 import os.log
 import LoopCore
 import LoopKit
+import LoopAlgorithm
 import LoopKitUI
 import LoopUI
 import SwiftUI
 import SwiftCharts
-import LoopAlgorithm
 
 @MainActor
 protocol BolusEntryViewModelDelegate: AnyObject {
@@ -530,7 +530,7 @@ final class BolusEntryViewModel: ObservableObject {
                 startDate: startDate,
                 endDate: startDate,
                 volume: enteredBolus.doubleValue(for: .internationalUnit),
-                insulinModel: insulinModel
+                insulinModel: AlgorithmInsulinModel(insulinModel)
             )
 
             let (glucoseHistory, prediction) = try await delegate.generatePrediction(
@@ -737,12 +737,12 @@ extension BolusEntryViewModel {
     
     var isGlucoseDataStale: Bool {
         guard let latestGlucoseDataDate = delegate?.mostRecentGlucoseDataDate else { return true }
-        return now().timeIntervalSince(latestGlucoseDataDate) > LoopAlgorithm.inputDataRecencyInterval
+        return now().timeIntervalSince(latestGlucoseDataDate) > LoopCoreConstants.inputDataRecencyInterval
     }
     
     var isPumpDataStale: Bool {
         guard let latestPumpDataDate = delegate?.mostRecentPumpDataDate else { return true }
-        return now().timeIntervalSince(latestPumpDataDate) > LoopAlgorithm.inputDataRecencyInterval
+        return now().timeIntervalSince(latestPumpDataDate) > LoopCoreConstants.inputDataRecencyInterval
     }
 
     var isManualGlucosePromptVisible: Bool {

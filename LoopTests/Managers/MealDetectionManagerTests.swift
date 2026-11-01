@@ -7,22 +7,18 @@
 //
 
 import XCTest
+import LoopAlgorithm
 import LoopCore
 import LoopKit
-import LoopAlgorithm
 
 @testable import Loop
 
-fileprivate class MockGlucoseSample: GlucoseSampleValue {
+fileprivate class MockGlucoseSample: LoopAlgorithm.GlucoseSampleValue {
 
     let provenanceIdentifier = ""
     let isDisplayOnly: Bool
     let wasUserEntered: Bool
-    let condition: GlucoseCondition? = nil
-    let trendRate: LoopQuantity? = nil
-    var trend: LoopKit.GlucoseTrend?
-    var syncIdentifier: String?
-    let quantity: LoopQuantity = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)
+    let mgdl: Double = 100
     let startDate: Date
     
     init(startDate: Date, isDisplayOnly: Bool = false, wasUserEntered: Bool = false) {
@@ -222,17 +218,17 @@ class MealDetectionManagerTests: XCTestCase {
             doses: [],
             carbEntries: testType.carbEntries.map { $0.asStoredCarbEntry },
             predictionStart: date,
-            basal: BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.0)])!.between(start: historyStart, end: date),
-            sensitivity: testType.insulinSensitivitySchedule.quantitiesBetween(start: historyStart, end: date),
-            carbRatio: testType.carbSchedule.between(start: historyStart, end: date),
-            target: glucoseTarget!.quantityBetween(start: historyStart, end: date),
-            suspendThreshold: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 65),
+            basal: BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.0)])!.between(start: historyStart, end: date).algorithmSchedule(),
+            sensitivityMgdlPerUnit: testType.insulinSensitivitySchedule.quantitiesBetween(start: historyStart, end: date).algorithmMgdlSchedule(),
+            carbRatio: testType.carbSchedule.between(start: historyStart, end: date).algorithmSchedule(),
+            targetMgdl: glucoseTarget!.quantityBetween(start: historyStart, end: date).algorithmMgdlRanges(),
+            suspendThresholdMgdl: 65,
             maxBolus: maximumBolus!,
             maxBasalRate: maximumBasalRatePerHour,
             useIntegralRetrospectiveCorrection: false,
             includePositiveVelocityAndRC: true,
             carbAbsorptionModel: .piecewiseLinear,
-            recommendationInsulinModel: ExponentialInsulinModelPreset.rapidActingAdult.model,
+            recommendationInsulinModel: AlgorithmInsulinModel(ExponentialInsulinModelPreset.rapidActingAdult.model),
             recommendationType: .automaticBolus)
 
         // These tests don't actually run the loop algorithm directly; they were written to take ICE from fixtures, compute carb effects, and subtract them.
@@ -243,13 +239,13 @@ class MealDetectionManagerTests: XCTestCase {
         let carbStatus = carbEntries.map(
             to: counteractionEffects,
             carbRatio: algorithmInput.carbRatio,
-            insulinSensitivity: algorithmInput.sensitivity
+            insulinSensitivityMgdlPerUnit: algorithmInput.sensitivityMgdlPerUnit
         )
 
         let carbEffects = carbStatus.dynamicGlucoseEffects(
-            from: date.addingTimeInterval(-IntegralRetrospectiveCorrection.retrospectionInterval),
+            from: date.addingTimeInterval(-.minutes(180)),
             carbRatios: algorithmInput.carbRatio,
-            insulinSensitivities: algorithmInput.sensitivity,
+            insulinSensitivitiesMgdlPerUnit: algorithmInput.sensitivityMgdlPerUnit,
             absorptionModel: algorithmInput.carbAbsorptionModel.model
         )
 
@@ -279,15 +275,15 @@ class MealDetectionManagerTests: XCTestCase {
 
     }
     
-    private func counteractionEffects(for testType: MissedMealTestType) -> [GlucoseEffectVelocity] {
+    private func counteractionEffects(for testType: MissedMealTestType) -> [LoopAlgorithm.GlucoseEffectVelocity] {
         let fixture: [JSONDictionary] = loadFixture(testType.counteractionEffectFixture)
         let dateFormatter = ISO8601DateFormatter.localTimeDate()
 
         return fixture.map {
-            GlucoseEffectVelocity(startDate: dateFormatter.date(from: $0["startDate"] as! String)!,
-                                  endDate: dateFormatter.date(from: $0["endDate"] as! String)!,
-                                  quantity: LoopQuantity(unit: LoopUnit(from: $0["unit"] as! String),
-                                                       doubleValue:$0["value"] as! Double))
+            LoopAlgorithm.GlucoseEffectVelocity(startDate: dateFormatter.date(from: $0["startDate"] as! String)!,
+                                                endDate: dateFormatter.date(from: $0["endDate"] as! String)!,
+                                                mgdlPerSecond: LoopQuantity(unit: LoopUnit(from: $0["unit"] as! String),
+                                                                            doubleValue: $0["value"] as! Double).doubleValue(for: .milligramsPerDeciliterPerSecond))
         }
     }
     
