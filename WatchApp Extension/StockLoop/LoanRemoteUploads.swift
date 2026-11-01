@@ -16,7 +16,6 @@ import Foundation
 import LoopKit
 import Network
 import WatchKit
-import LoopAlgorithm
 import LoopCore
 import NightscoutServiceKit
 
