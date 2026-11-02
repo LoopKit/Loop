@@ -6105,6 +6105,9 @@
         }
       }
     },
+    "Add Watch" : {
+      "comment" : "The title of the watch chooser in settings\nTitle text for button to add a watch device"
+    },
     "Adjust Preset Duration" : {
 
     },
@@ -15303,8 +15306,7 @@
       }
     },
     "Custom Preset" : {
-      "comment" : "The title of the cell indicating a generic custom preset is enabled",
-      "extractionState" : "stale",
+      "comment" : "Name of a custom preset sent to a watch",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -31460,6 +31462,9 @@
     "Power lifting" : {
 
     },
+    "Pre-Meal" : {
+      "comment" : "Name of the pre-meal preset sent to a watch"
+    },
     "Pre-meal Preset" : {
       "comment" : "Status row title for premeal override enabled"
     },
@@ -38080,6 +38085,9 @@
         }
       }
     },
+    "Tap here to set up a watch" : {
+      "comment" : "Descriptive text for button to add a watch device"
+    },
     "Tap to Add" : {
       "comment" : "The subtitle of the cell displaying an action to add a manually measurement glucose value",
       "extractionState" : "stale",
@@ -42807,6 +42815,9 @@
           }
         }
       }
+    },
+    "Watch" : {
+      "comment" : "Descriptive text for a watch plugin in Settings → Devices"
     },
     "What are examples of Critical Alerts and Time Sensitive Notifications?" : {
 
