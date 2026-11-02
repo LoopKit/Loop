@@ -25,6 +25,14 @@ SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited)
 // General [DEFAULT]
 LOOP_LOCAL_CACHE_DURATION_DAYS = 90
 
+// Background modes [DEFAULT]
+// LOOP_BLUETOOTH_PERIPHERAL adds the bluetooth-peripheral background mode to
+// Info.plist, which watch plugins that publish a Bluetooth service need to keep
+// the watch updated while Loop is in the background. Set
+// INFOPLIST_PREPROCESSOR_DEFINITIONS to nothing to leave it out.
+INFOPLIST_PREPROCESS = YES
+INFOPLIST_PREPROCESSOR_DEFINITIONS = LOOP_BLUETOOTH_PERIPHERAL=1
+
 // Entitlements [DEFAULT]
 LOOP_ENTITLEMENTS = Loop/Loop.entitlements
 
