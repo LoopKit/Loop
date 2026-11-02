@@ -101,6 +101,8 @@ enum ComplicationPublisher {
     @MainActor private static func store(_ snapshot: ComplicationSnapshot, now: Date) {
         let decision = throttle.offer(snapshot, now: now)
         if decision.save { snapshot.save() }
+        // With the watch's own G7 link, the glance complication's requests redraw this one too.
+        if let delegate = ExtensionDelegate.sharedIfAvailable(), GlanceComplicationPublisher.sensorLinkUp(delegate) != nil { return }
         // Only these kinds: WidgetKit budgets reloads per widget, and other widgets keep their own.
         if decision.reload { LoopComplicationKind.all.forEach { WidgetCenter.shared.reloadTimelines(ofKind: $0) } }
     }

@@ -7,7 +7,8 @@
 //  `glanceData`; otherwise the phone's context, which on next-dev carries the watch's own G7 reading. So a
 //  complication never disagrees with the Start screen. Published at every wake — each landed cycle
 //  during a loan, each context update otherwise. Every change is saved; WidgetKit is asked to redraw
-//  by GlanceReloadPolicy, which spends watchOS's one free refresh per 300 s on the reading.
+//  by GlanceReloadPolicy, which spends watchOS's one free refresh per 300 s on the reading. Each request
+//  reloads the Glucose Graph and Loop Status complications too, which then ask for nothing of their own.
 //
 
 import Foundation
@@ -45,7 +46,7 @@ enum GlanceComplicationPublisher {
 
     /// When the watch's G7 link last came up: a background reload is free only while the app holds a
     /// Bluetooth connection, and not in its first moments (see GlanceReloadPolicy.linkSettle).
-    @MainActor private static func sensorLinkUp(_ delegate: ExtensionDelegate) -> Date? {
+    @MainActor static func sensorLinkUp(_ delegate: ExtensionDelegate) -> Date? {
         (delegate.stockLoopSession?.stack.loopManager.cgmManager as? G7CGMManager)?.lastConnect
     }
 
@@ -174,7 +175,7 @@ enum GlanceComplicationPublisher {
         guard let plan = policy.plan(now: now, inFront: inFront, opened: false, sensorLinkUp: sensorLinkUp,
                                      inLoan: inLoan, lastRenderAt: GlanceComplicationSnapshot.lastServed()),
               plan.at.timeIntervalSince(now) <= 0.05 else { return }
-        GlanceComplicationKind.all.forEach { WidgetCenter.shared.reloadTimelines(ofKind: $0) }
+        (GlanceComplicationKind.all + LoopComplicationKind.all).forEach { WidgetCenter.shared.reloadTimelines(ofKind: $0) }
         policy.asked(at: now)
         let attached = GlanceReloadPolicy.attached(at: now, sensorLinkUp: sensorLinkUp, inLoan: inLoan)
         let release = holdProcess(reason: "glance complication check", upTo: GlanceReloadPolicy.renderCheck + 1)
