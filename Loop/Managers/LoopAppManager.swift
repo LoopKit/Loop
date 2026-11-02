@@ -1139,6 +1139,8 @@ extension LoopAppManager: DiagnosticReportGenerator {
             await alertManager.generateDiagnosticReport(),
             await deviceDataManager.generateDiagnosticReport(),
             "",
+            remoteDataServicesManager.generateDiagnosticReport(),
+            "",
             String(reflecting: self.watchManager!),
             "",
             String(reflecting: self.statusExtensionManager!),
