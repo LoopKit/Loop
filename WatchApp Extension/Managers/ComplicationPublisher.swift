@@ -20,7 +20,7 @@ enum ComplicationPublisher {
 
     /// Called on main at each context update.
     @MainActor static func publish(from loopManager: LoopDataManager) {
-        guard let context = loopManager.activeContext else { return }
+        guard let context = loopManager.displayContext else { return }
         Task { @MainActor in
             let now = Date()
             let graph = await loopManager.generateChartData().map { self.graph(from: $0, now: now) }
