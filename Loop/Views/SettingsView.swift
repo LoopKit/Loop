@@ -91,6 +91,9 @@ struct SettingsView: View {
                     }
                     presetsSection
                     deviceSettingsSection
+                    if offersWatchPermissions {
+                        watchPermissionsSection
+                    }
                     healthAccessSection
                     if FeatureFlags.allowExperimentalFeatures {
                         favoriteFoodsSection
@@ -508,6 +511,36 @@ extension SettingsView {
         }
     }
     
+    /// Watch Permissions appear only when the watch plugin offers a remote action
+    /// (`.remoteMute`, `.remoteBolus`, `.remoteCarbs`, `.remoteOverride`). No plugin does yet, so the
+    /// screen stays hidden; it is kept compiled for when one does.
+    private var offersWatchPermissions: Bool {
+        let _ = viewModel.smartwatchManagerRevision
+        guard let manager = viewModel.deviceManager?.smartwatchManager else {
+            return false
+        }
+        return !manager.effectiveCapabilities.isDisjoint(with: [.remoteMute, .remoteBolus, .remoteCarbs, .remoteOverride])
+    }
+
+    /// Opens what the watch may ask Loop to do.
+    private var watchPermissionsSection: some View {
+        Section {
+            NavigationLink(destination: WatchPermissionsView()) {
+                LargeButton(
+                    action: {},
+                    includeArrow: false,
+                    imageView: Image(systemName: "hand.raised.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 30),
+                    label: NSLocalizedString("Watch Permissions", comment: "Watch permissions button text"),
+                    descriptiveText: NSLocalizedString("What the watch may ask Loop to do", comment: "Watch permissions descriptive text")
+                )
+                .accessibilityIdentifier("settingsViewWatchPermissions")
+            }
+        }
+    }
+
     @ViewBuilder
     private var pumpSection: some View {
         if viewModel.pumpManagerSettingsViewModel.isSetUp() {
@@ -953,6 +986,42 @@ struct DisplaySettingsView: View {
         VStack(alignment: .leading) {
             Text(title)
             Text(detail).font(.footnote).foregroundColor(.secondary)
+        }
+    }
+}
+
+/// What the watch may ask Loop to do. Each request is refused unless its
+/// toggle is on, and the watch plugin must declare the matching capability.
+private struct WatchPermissionsView: View {
+    @Environment(\.appName) private var appName
+    @AppStorage(UserDefaults.allowWatchMuteKey) private var allowWatchMute = false
+    @AppStorage(UserDefaults.allowWatchCarbsKey) private var allowWatchCarbs = false
+    @AppStorage(UserDefaults.allowWatchBolusKey) private var allowWatchBolus = false
+    @AppStorage(UserDefaults.allowWatchOverridesKey) private var allowWatchOverrides = false
+
+    var body: some View {
+        List {
+            Section(footer: Text(String(format: NSLocalizedString("Mutes all %1$@ sounds for as long as the watch asks, rounded up to one of the app's mute durations, the same as Mute All App Sounds, including critical alerts.", comment: "Footer for Allow Mute from Watch (1: app name)"), appName))) {
+                Toggle(NSLocalizedString("Allow Mute from Watch", comment: "Toggle allowing a watch to mute the app's alerts"), isOn: $allowWatchMute)
+            }
+
+            Section(footer: Text(String(format: NSLocalizedString("%1$@ starts the preset picked on the watch, for the preset's own duration, or ends the running one, like a remote override.", comment: "Footer for Allow Presets from Watch (1: app name)"), appName))) {
+                Toggle(NSLocalizedString("Allow Presets from Watch", comment: "Toggle allowing a watch to start and end override presets"), isOn: $allowWatchOverrides)
+            }
+
+            Section(footer: Text(String(format: NSLocalizedString("%1$@ adds the watch's carb entry like a remote carb entry, at most one every 15 minutes. In closed loop, %1$@ may dose for it.", comment: "Footer for Allow Carbs from Watch (1: app name)"), appName))) {
+                Toggle(NSLocalizedString("Allow Carbs from Watch", comment: "Toggle allowing carb entries requested from a watch plugin"), isOn: $allowWatchCarbs)
+            }
+
+            // SmartwatchBolusPolicy checks every request.
+            Section(footer: Text(String(format: NSLocalizedString("%1$@ delivers a bolus requested on the watch only within your maximum bolus and at most one every 15 minutes, and never more than the current recommendation unless the watch marks the request as forced.", comment: "Footer for Allow Boluses from Watch (1: app name)"), appName))) {
+                Toggle(NSLocalizedString("Allow Boluses from Watch", comment: "Toggle allowing boluses requested from a watch plugin"), isOn: $allowWatchBolus)
+            }
+        }
+        .insetGroupedListStyle()
+        .navigationTitle(NSLocalizedString("Watch Permissions", comment: "Watch permissions screen title"))
+        .onChange(of: [allowWatchMute, allowWatchOverrides, allowWatchCarbs, allowWatchBolus]) {
+            NotificationCenter.default.post(name: .WatchPermissionsChanged, object: nil)
         }
     }
 }

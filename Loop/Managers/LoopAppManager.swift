@@ -431,7 +431,35 @@ class LoopAppManager: NSObject {
             loopDataManager: loopDataManager,
             settingsManager: settingsManager,
             glucoseStore: glucoseStore,
-            healthStore: healthStore
+            healthStore: healthStore,
+            alertMuter: alertManager.alertMuter,
+            // The same path as remote boluses: maximum bolus check, notifications, upload.
+            deliverBolus: { [weak servicesManager] units in
+                guard let servicesManager else {
+                    throw SmartwatchBolusError.notAllowed
+                }
+                try await servicesManager.deliverRemoteBolus(amountInUnits: units, decisionId: nil)
+            },
+            // The same path as remote carbs: validation, notification, upload.
+            deliverCarbs: { [weak servicesManager] grams, date in
+                guard let servicesManager else {
+                    throw SmartwatchCarbEntryError.notAllowed
+                }
+                try await servicesManager.deliverRemoteCarbs(amountInGrams: grams, absorptionTime: nil, foodType: nil, startDate: date)
+            },
+            // The same path as remote overrides: the preset's own duration, upload.
+            startOverride: { [weak servicesManager] name in
+                guard let servicesManager else {
+                    throw SmartwatchPresetError.notAllowed
+                }
+                try await servicesManager.enactRemoteOverride(name: name, durationTime: nil, remoteAddress: "Watch")
+            },
+            cancelOverride: { [weak servicesManager] in
+                guard let servicesManager else {
+                    throw SmartwatchPresetError.notAllowed
+                }
+                try await servicesManager.cancelRemoteOverride()
+            }
         )
         deviceDataManager.smartwatchManagerHost = smartwatchManagerHost
         // Forward Loop's alerts to the watch plugin so it buzzes in step with the phone.

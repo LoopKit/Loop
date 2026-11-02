@@ -16,6 +16,10 @@ import LoopKit
 /// A new glucose reading is sent as soon as the glucose store saves it, before
 /// the loop runs; the snapshot is sent again when the loop's output changes.
 /// Unchanged snapshots are not resent.
+///
+/// For plugins that declare `.remoteBolus`, it also issues the bolus context and
+/// decides on bolus requests with `SmartwatchBolusPolicy`. Watch boluses stay off
+/// unless the user allows them in Watch Permissions.
 @MainActor
 final class SmartwatchManagerHost {
     unowned let deviceManager: DeviceDataManager
@@ -23,10 +27,18 @@ final class SmartwatchManagerHost {
     unowned let settingsManager: SettingsManager
     let glucoseStore: GlucoseStore
     private let healthStore: HKHealthStore
+    let deliverBolus: (Double) async throws -> Void
+    let alertMuter: AlertMuter
+    /// Adds grams of carbs dated when the user confirmed them on the watch.
+    let deliverCarbs: (Double, Date) async throws -> Void
+    let startOverride: (String) async throws -> Void
+    let cancelOverride: () async throws -> Void
 
     let log = DiagnosticLog(category: "SmartwatchManagerHost")
 
     private var lastSentSnapshot: SmartwatchStatusSnapshot?
+    /// Hands out the bolus context and tracks the watch bolus being delivered.
+    var bolusContextIssuer = SmartwatchBolusContextIssuer()
     /// Incremented per update so a slower glucose fetch cannot overwrite a newer snapshot.
     private var updateGeneration = 0
     private var notificationObservers: [Any] = []
@@ -41,13 +53,23 @@ final class SmartwatchManagerHost {
         loopDataManager: LoopDataManager,
         settingsManager: SettingsManager,
         glucoseStore: GlucoseStore,
-        healthStore: HKHealthStore
+        healthStore: HKHealthStore,
+        alertMuter: AlertMuter,
+        deliverBolus: @escaping (Double) async throws -> Void,
+        deliverCarbs: @escaping (Double, Date) async throws -> Void,
+        startOverride: @escaping (String) async throws -> Void,
+        cancelOverride: @escaping () async throws -> Void
     ) {
         self.deviceManager = deviceManager
         self.loopDataManager = loopDataManager
         self.settingsManager = settingsManager
         self.glucoseStore = glucoseStore
         self.healthStore = healthStore
+        self.deliverBolus = deliverBolus
+        self.alertMuter = alertMuter
+        self.deliverCarbs = deliverCarbs
+        self.startOverride = startOverride
+        self.cancelOverride = cancelOverride
 
         notificationObservers = [
             // Posted as soon as new samples are saved, before LoopDataManager
@@ -66,6 +88,9 @@ final class SmartwatchManagerHost {
             },
             NotificationCenter.default.addObserver(forName: .SmartwatchManagerChanged, object: deviceManager, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated { self?.refresh() }
+            },
+            NotificationCenter.default.addObserver(forName: .WatchPermissionsChanged, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.update() }
             },
         ]
     }
@@ -149,6 +174,19 @@ final class SmartwatchManagerHost {
         if capabilities.contains(.therapy) {
             snapshot.therapy = currentTherapyContext()
         }
+        if capabilities.contains(.remoteBolus) {
+            snapshot.bolusContext = await currentBolusContext(latestGlucoseDate: samples.last?.startDate)
+        }
+        if capabilities.contains(.remoteOverride) {
+            snapshot.overridePresets = currentOverridePresets()
+        }
+        snapshot.permittedActions = UserDefaults.standard.permittedWatchActions(within: capabilities)
+        if capabilities.contains(.remoteCarbs) {
+            snapshot.maximumCarbEntry = LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram)
+        }
+        if capabilities.contains(.remoteBolus) {
+            snapshot.bolusIncrement = SmartwatchStatusSnapshot.bolusIncrement(of: deviceManager.pumpManager?.supportedBolusVolumes ?? [])
+        }
         return snapshot
     }
 
@@ -179,6 +217,16 @@ final class SmartwatchManagerHost {
             activePresetName: presetName,
             activePresetEnd: override?.scheduledEndDate
         )
+    }
+
+    /// Loop's presets, with the running one marked.
+    private func currentOverridePresets(now: Date = Date()) -> [SmartwatchPreset] {
+        let running = loopDataManager.temporaryPresetsManager.scheduleOverride.flatMap { $0.isActive(at: now) ? $0 : nil }
+        let runningID: String? = if case .preset(let preset) = running?.context { preset.id } else { nil }
+        return settingsManager.settings.overridePresets.map { preset in
+            let duration: TimeInterval? = if case .finite(let interval) = preset.duration { interval } else { nil }
+            return SmartwatchPreset(id: preset.id, name: preset.name, isActive: preset.id == runningID, duration: duration)
+        }
     }
 
     /// The undeclared capabilities a plugin last requested, so each set is logged once.

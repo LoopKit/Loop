@@ -187,6 +187,7 @@ class SettingsViewModel {
         self.deviceManager = deviceManager
 
         NotificationCenter.default.publisher(for: .SmartwatchManagerChanged)
+            .merge(with: NotificationCenter.default.publisher(for: .SmartwatchManagerCapabilitiesChanged))
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.smartwatchManagerRevision += 1 }
             .store(in: &cancellables)
