@@ -11,7 +11,6 @@ import LoopCore
 import LoopKit
 import OSLog
 import WidgetKit
-import LoopAlgorithm
 
 class StatusWidgetTimelineProvider: TimelineProvider {
     lazy var defaults = UserDefaults.appGroup
@@ -74,7 +73,7 @@ class StatusWidgetTimelineProvider: TimelineProvider {
 
             // Date glucose staleness changes
             if let lastBGTime = newEntry.currentGlucose?.startDate {
-                let staleBgRefreshTime = lastBGTime.addingTimeInterval(LoopAlgorithm.inputDataRecencyInterval+1)
+                let staleBgRefreshTime = lastBGTime.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval+1)
                 datesToRefreshWidget.append(staleBgRefreshTime)
             }
 
@@ -97,7 +96,7 @@ class StatusWidgetTimelineProvider: TimelineProvider {
     
     func update(completion: @escaping (StatusWidgetTimelimeEntry) -> Void) {
 
-        let startDate = Date(timeIntervalSinceNow: -LoopAlgorithm.inputDataRecencyInterval)
+        let startDate = Date(timeIntervalSinceNow: -LoopCoreConstants.inputDataRecencyInterval)
 
         Task {
 

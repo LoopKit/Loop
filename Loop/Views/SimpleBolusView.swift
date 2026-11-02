@@ -10,7 +10,6 @@ import SwiftUI
 import LoopKit
 import LoopKitUI
 import LoopCore
-import LoopAlgorithm
 
 struct SimpleBolusView: View {
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference

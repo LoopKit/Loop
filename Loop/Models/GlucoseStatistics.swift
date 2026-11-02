@@ -7,7 +7,6 @@
 
 import Foundation
 import LoopKit
-import LoopAlgorithm
 
 /// Glucose ranges for the time-in-range breakdown, using the international
 /// consensus thresholds (mg/dL) shared by the AGP report:

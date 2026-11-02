@@ -8,7 +8,6 @@
 
 import Foundation
 import Combine
-import LoopAlgorithm
 import WatchKit
 import WatchConnectivity
 import LoopKit

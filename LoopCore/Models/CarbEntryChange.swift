@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import LoopAlgorithm
 import LoopKit
 
 /// A carb entry about to be saved: a new entry, or new content for a stored one.

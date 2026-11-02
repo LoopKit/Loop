@@ -8,7 +8,7 @@
 
 import SwiftUI
 import LoopKit
-import LoopAlgorithm
+import LoopCore
 
 struct CarbList: View {
     @Environment(LoopDataManager.self) var loopManager
@@ -29,7 +29,7 @@ struct CarbList: View {
     @State var entries: [StoredCarbEntry] = []
 
     private func reloadCarbEntries() async {
-        let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -CarbMath.maximumAbsorptionTimeInterval))
+        let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -LoopCoreConstants.maximumCarbAbsorptionTimeInterval))
         entries = (try? await loopManager.carbStore.getCarbEntries(start: start)) ?? []
     }
 

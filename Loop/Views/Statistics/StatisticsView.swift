@@ -9,7 +9,6 @@ import SwiftUI
 import LoopKit
 import LoopCore
 import LoopKitUI
-import LoopAlgorithm
 import LoopUI
 
 /// "How am I doing?" overview — an Ambulatory Glucose Profile report: summary

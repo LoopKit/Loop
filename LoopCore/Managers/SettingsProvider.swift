@@ -7,7 +7,6 @@
 
 import Foundation
 import LoopKit
-import LoopAlgorithm
 import Observation
 
 public protocol SettingsProvider: Observable {

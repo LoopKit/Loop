@@ -8,8 +8,8 @@
 
 import SwiftUI
 import LoopKit
-import LoopKitUI
 import LoopAlgorithm
+import LoopKitUI
 
 struct DoseChartView: View {
     let chartManager: ChartsManager
@@ -20,7 +20,7 @@ struct DoseChartView: View {
     
     var body: some View {
         LoopChartView<LegacyDoseChart>(chartManager: chartManager, dateInterval: dateInterval, isInteractingWithChart: $isInteractingWithChart) { doseChart in
-            doseChart.doseEntries = doses
+            doseChart.doseEntries = doses.map(\.chartedDose)
         }
     }
 }

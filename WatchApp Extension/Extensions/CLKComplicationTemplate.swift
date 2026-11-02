@@ -10,7 +10,6 @@ import ClockKit
 import LoopKit
 import Foundation
 import LoopCore
-import LoopAlgorithm
 
 extension CLKComplicationTemplate {
 

@@ -21,18 +21,23 @@ public struct AlgorithmDisplayState {
         self.output = output
     }
 
-    public var activeInsulin: InsulinValue? {
+    /// The ISF multiplier slow retrospective correction applied on the last run, 1 when it is off.
+    public var sensitivityMultiplier: Double {
+        output?.slowRetrospectiveCorrection?.multiplier ?? 1
+    }
+
+    public var activeInsulin: LoopKit.InsulinValue? {
         guard let input, let value = output?.activeInsulin else {
             return nil
         }
-        return InsulinValue(startDate: input.predictionStart, value: value)
+        return LoopKit.InsulinValue(startDate: input.predictionStart, value: value)
     }
 
-    public var activeCarbs: CarbValue? {
+    public var activeCarbs: LoopKit.CarbValue? {
         guard let input, let value = output?.activeCarbs else {
             return nil
         }
-        return CarbValue(startDate: input.predictionStart, value: value)
+        return LoopKit.CarbValue(startDate: input.predictionStart, value: value)
     }
 
     public var asTuple: (algoInput: StoredDataAlgorithmInput?, algoOutput: AlgorithmOutput<StoredCarbEntry>?) {
@@ -120,14 +125,31 @@ public extension StoredDataAlgorithmInput {
         return rval
     }
 
-    func predictGlucose(effectsOptions: AlgorithmEffectsOptions = .all) throws -> [PredictedGlucoseValue] {
-        let prediction = LoopAlgorithm.generatePrediction(
+    func validateCarbScheduleCoverage() throws {
+        // CarbMath traps if either lookup is nil. Validate the final input, including pending
+        // additions/edits, so incomplete history becomes a recoverable recommendation error.
+        for entry in carbEntries {
+            guard carbRatio.closestPrior(to: entry.startDate) != nil else {
+                throw LoopError.configurationError(.carbRatioSchedule)
+            }
+            guard sensitivityMgdlPerUnit.closestPrior(to: entry.startDate) != nil else {
+                throw LoopError.configurationError(.insulinSensitivitySchedule)
+            }
+        }
+    }
+
+    /// `sensitivityMultiplier` is slow retrospective correction's, from the algorithm's last run.
+    func predictGlucose(effectsOptions: AlgorithmEffectsOptions = .all, sensitivityMultiplier: Double = 1) throws -> [LoopAlgorithm.PredictedGlucoseValue] {
+        try validateCarbScheduleCoverage()
+        let prediction = Algorithm.generatePrediction(
             start: predictionStart,
             glucoseHistory: glucoseHistory,
             doses: doses,
             carbEntries: carbEntries,
             basal: basal,
-            sensitivity: sensitivity,
+            sensitivityMgdlPerUnit: sensitivityMgdlPerUnit.map {
+                LoopAlgorithm.AbsoluteScheduleValue(startDate: $0.startDate, endDate: $0.endDate, value: $0.value * sensitivityMultiplier)
+            },
             carbRatio: carbRatio,
             algorithmEffectsOptions: effectsOptions,
             useIntegralRetrospectiveCorrection: self.useIntegralRetrospectiveCorrection,
@@ -179,17 +201,17 @@ public extension StoredDosingDecision {
         self.historicalGlucose = input.glucoseHistory.map { HistoricalGlucoseValue(startDate: $0.startDate, quantity: $0.quantity) }
         switch output.recommendationResult {
         case .success(let recommendation):
-            self.automaticDoseRecommendation = recommendation.automatic
+            self.automaticDoseRecommendation = recommendation.automatic?.loopKit
         case .failure(let error):
             self.appendError(error as? LoopError ?? .unknownError(error))
         }
         if let activeInsulin = output.activeInsulin {
-            self.insulinOnBoard = InsulinValue(startDate: input.predictionStart, value: activeInsulin)
+            self.insulinOnBoard = LoopKit.InsulinValue(startDate: input.predictionStart, value: activeInsulin)
         }
         if let activeCarbs = output.activeCarbs {
-            self.carbsOnBoard = CarbValue(startDate: input.predictionStart, value: activeCarbs)
+            self.carbsOnBoard = LoopKit.CarbValue(startDate: input.predictionStart, value: activeCarbs)
         }
-        self.predictedGlucose = output.predictedGlucose
+        self.predictedGlucose = output.predictedGlucose.map(\.loopKit)
     }
 }
 
@@ -200,6 +222,7 @@ public extension StoredDataAlgorithmInput {
         for baseTime: Date?,
         presumePresetEndingNow: Bool,
         ensureDosingCoverageStart: Date?,
+        ensureCarbCoverageStart: Date? = nil,
         projectOngoingDoses: Bool,
         now: Date,
         doseStore: DoseStoreProtocol,
@@ -209,16 +232,23 @@ public extension StoredDataAlgorithmInput {
         overrideHistory: TemporaryScheduleOverrideHistory,
         activeOverride: TemporaryScheduleOverride?,
         pumpInsulinType: InsulinType?,
-        insulinModel insulinModelForType: (InsulinType?) -> InsulinModel,
+        insulinModel insulinModelForType: (InsulinType?) -> LoopKit.InsulinModel,
         experiments: Set<ExperimentOption>,
         volatilityBaseline: Double?,
         carbAbsorptionModel: CarbAbsorptionModel,
         isolation: isolated (any Actor)? = #isolation
     ) async throws -> StoredDataAlgorithmInput {
-        func insulinModel(for type: InsulinType?) -> InsulinModel { insulinModelForType(type) }
+        func insulinModel(for type: InsulinType?) -> LoopKit.InsulinModel { insulinModelForType(type) }
+
+        // Slow retrospective correction keeps no state, so it reads its whole window of glucose on every run,
+        // with the carbs and doses that explain it.
+        let slowRetrospectiveCorrectionHistory: TimeInterval? = experiments.contains(.slowRetrospectiveCorrection) ? .hours(72) : nil
 
         // Need to fetch doses back as far as t - (DIA + DCA) for Dynamic carbs
-        let dosesInputHistory = CarbMath.maximumAbsorptionTimeInterval + InsulinMath.defaultInsulinActivityDuration
+        var dosesInputHistory = CarbMath.maximumAbsorptionTimeInterval + InsulinMath.defaultInsulinActivityDuration
+        if let slowRetrospectiveCorrectionHistory {
+            dosesInputHistory = max(dosesInputHistory, slowRetrospectiveCorrectionHistory + InsulinMath.defaultInsulinActivityDuration)
+        }
 
         let baseTime = baseTime ?? now
 
@@ -258,9 +288,9 @@ public extension StoredDataAlgorithmInput {
         // boundaries, and the continuous-delivery IOB integrator doesn't join the
         // resulting sub-doses perfectly across the boundary -- visible as a small
         // bump in Active Insulin at midnight even with a single-rate schedule.
-        let basal: [AbsoluteScheduleValue<Double>] = rawBasal.reduce(into: []) { acc, entry in
+        let basal: [LoopKit.AbsoluteScheduleValue<Double>] = rawBasal.reduce(into: []) { acc, entry in
             if let last = acc.last, last.value == entry.value, last.endDate == entry.startDate {
-                acc[acc.count - 1] = AbsoluteScheduleValue(startDate: last.startDate, endDate: entry.endDate, value: last.value)
+                acc[acc.count - 1] = LoopKit.AbsoluteScheduleValue(startDate: last.startDate, endDate: entry.endDate, value: last.value)
             } else {
                 acc.append(entry)
             }
@@ -268,7 +298,15 @@ public extension StoredDataAlgorithmInput {
 
         let forecastEndTime = baseTime.addingTimeInterval(InsulinMath.defaultInsulinActivityDuration).dateCeiledToTimeInterval(GlucoseMath.defaultDelta)
 
-        let carbsStart = baseTime.addingTimeInterval(LoopConstants.maxCarbEntryPastTime + .minutes(-1)) // additional minute to handle difference in seconds between carb entry and carb ratio
+        var glucoseStart = baseTime.addingTimeInterval(LoopConstants.maxCarbEntryPastTime + .minutes(-1)) // additional minute to handle difference in seconds between carb entry and carb ratio
+        var carbsStart = glucoseStart
+        if let slowRetrospectiveCorrectionHistory {
+            glucoseStart = baseTime.addingTimeInterval(-slowRetrospectiveCorrectionHistory)
+            carbsStart = glucoseStart.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval + .minutes(-1))
+        }
+        // A pending carb entry can outlive this rolling window while the bolus screen is open.
+        // Cover it with schedule history without expanding the stored-carb or glucose queries.
+        let carbScheduleStart = min(carbsStart, ensureCarbCoverageStart ?? carbsStart)
 
         // Include future carbs in query, but filter out ones entered after basetime. The filtering is only applicable when running in a retrospective situation.
         let carbEntries = try await carbStore.getCarbEntries(
@@ -279,7 +317,7 @@ public extension StoredDataAlgorithmInput {
         }
 
         let carbRatio = try await settingsProvider.getCarbRatioHistory(
-            startDate: carbsStart,
+            startDate: carbScheduleStart,
             endDate: forecastEndTime
         )
 
@@ -287,7 +325,7 @@ public extension StoredDataAlgorithmInput {
             throw LoopError.configurationError(.carbRatioSchedule)
         }
 
-        let glucose = try await glucoseStore.getGlucoseSamples(start: carbsStart, end: baseTime)
+        let glucose = try await glucoseStore.getGlucoseSamples(start: glucoseStart, end: baseTime)
 
         let dosesWithModel = doses.map { $0.simpleDose(with: insulinModel(for: $0.insulinType)) }
 
@@ -297,18 +335,18 @@ public extension StoredDataAlgorithmInput {
             start: baseTime,
             duration: recommendationInsulinModel.effectDuration
         )
-        let neededSensitivityTimeline = LoopAlgorithm.timelineIntervalForSensitivity(
+        let neededSensitivityTimeline = Algorithm.timelineIntervalForSensitivity(
             doses: dosesWithModel,
             glucoseHistoryStart: glucose.first?.startDate ?? baseTime,
             recommendationEffectInterval: recommendationEffectInterval
         )
 
-        // Carb entries (and a backdated manual-bolus entry) can extend back to carbsStart, and
+        // Carb entries (including a pending manual-bolus entry) can extend back to carbScheduleStart, and
         // CarbMath.map(to:) preconditionFailures if the ISF/carb-ratio timelines don't cover every
         // carb entry's start date. timelineIntervalForSensitivity derives its window from dose and
         // glucose history only — which can be more recent than carbsStart (e.g. after a CGM gap) —
-        // so extend the ISF (and override) window back to cover the carb window, matching carbRatio.
-        let sensitivityStart = min(neededSensitivityTimeline.start, carbsStart)
+        // so extend the ISF (and override) window back to cover every entry, matching carbRatio.
+        let sensitivityStart = min(neededSensitivityTimeline.start, carbScheduleStart)
 
         let sensitivity = try await settingsProvider.getInsulinSensitivityHistory(
             startDate: sensitivityStart,
@@ -351,7 +389,7 @@ public extension StoredDataAlgorithmInput {
         let carbRatioWithOverrides = overrides.applyCarbRatio(over: carbRatio)
 
 
-        var target: [AbsoluteScheduleValue<ClosedRange<LoopQuantity>>]
+        var target: [LoopKit.AbsoluteScheduleValue<ClosedRange<LoopQuantity>>]
 
         guard var suspendThreshold = dosingLimits.suspendThreshold else {
             throw LoopError.configurationError(.suspendThreshold)
@@ -370,7 +408,7 @@ public extension StoredDataAlgorithmInput {
             let scheduledRange = schedule.quantityRange(at: baseTime)
             let overriddenTargetRange = activeOverride.effectiveCorrectionRangeDuring(scheduledRange: scheduledRange)
             target = [
-                AbsoluteScheduleValue(
+                LoopKit.AbsoluteScheduleValue(
                     startDate: baseTime,
                     endDate: forecastEndTime,
                     value: overriddenTargetRange
@@ -395,17 +433,17 @@ public extension StoredDataAlgorithmInput {
             doses: dosesWithModel,
             carbEntries: carbEntries,
             predictionStart: baseTime,
-            basal: basalWithOverrides,
-            sensitivity: sensitivityWithOverrides,
-            carbRatio: carbRatioWithOverrides,
-            target: target,
-            suspendThreshold: suspendThreshold,
+            basal: basalWithOverrides.algorithmSchedule(),
+            sensitivityMgdlPerUnit: sensitivityWithOverrides.algorithmMgdlSchedule(),
+            carbRatio: carbRatioWithOverrides.algorithmSchedule(),
+            targetMgdl: target.algorithmMgdlRanges(),
+            suspendThresholdMgdl: suspendThreshold.doubleValue(for: .milligramsPerDeciliter),
             maxBolus: maxBolus,
             maxBasalRate: maxBasalRate,
             useIntegralRetrospectiveCorrection: false,
             includePositiveVelocityAndRC: true,
             carbAbsorptionModel: carbAbsorptionModel,
-            recommendationInsulinModel: recommendationInsulinModel,
+            recommendationInsulinModel: AlgorithmInsulinModel(recommendationInsulinModel),
             recommendationType: .manualBolus,
             automaticBolusApplicationFactor: nil,
             experiments: experiments,
@@ -414,32 +452,45 @@ public extension StoredDataAlgorithmInput {
 }
 
 public extension AlgorithmExperiment {
-    /// `LoopDataManager.algorithmExperiments(for:guardAndRunway:)`'s body, shared with the watch: the
+    /// `LoopDataManager.algorithmExperiments(for:output:)`'s body, shared with the watch: the
     /// enabled experiments as a dosing decision records them. Glucose based partial application only
     /// affects automatic boluses, so it is in effect only with that strategy.
     static func records(enabled: Set<ExperimentOption>, dosingStrategy: AutomaticDosingStrategy,
-                        volatilityBaseline: Double?, guardAndRunway: GuardAndRunwayOutput? = nil) -> [AlgorithmExperiment] {
+                        volatilityBaseline: Double?, output: AlgorithmOutput<StoredCarbEntry>? = nil) -> [AlgorithmExperiment] {
         enabled
             .filter { $0 != .glucoseBasedApplicationFactor || dosingStrategy == .automaticBolus }
             .sorted { $0.rawValue < $1.rawValue }
             .map { experiment in
-                guard experiment == .guardAndRunway else {
+                switch experiment {
+                case .guardAndRunway:
+                    return guardAndRunwayRecord(output?.guardAndRunway, volatilityBaseline: volatilityBaseline)
+                case .slowRetrospectiveCorrection:
+                    var parameters: [String: JSONValue] = [:]
+                    if let slow = output?.slowRetrospectiveCorrection {
+                        parameters["level"] = .number(slow.level)
+                        parameters["multiplier"] = .number(slow.multiplier)
+                    }
+                    return AlgorithmExperiment(identifier: experiment.rawValue, parameters: parameters.isEmpty ? nil : .object(parameters))
+                default:
                     return AlgorithmExperiment(identifier: experiment.rawValue)
                 }
-                var parameters: [String: JSONValue] = [:]
-                if let volatilityBaseline {
-                    parameters["volatilityBaseline"] = .number(volatilityBaseline)
-                }
-                if let guardAndRunway {
-                    parameters["volatility"] = .number(guardAndRunway.volatility)
-                    parameters["bandApplied"] = .bool(guardAndRunway.bandApplied)
-                    parameters["bandGain"] = .number(guardAndRunway.bandGain)
-                    parameters["bandDepth"] = .number(guardAndRunway.bandDepth)
-                    parameters["runwayShift"] = .number(guardAndRunway.runwayShift)
-                    parameters["postLowRiseCutActive"] = .bool(guardAndRunway.postLowRiseCutActive)
-                }
-                return AlgorithmExperiment(identifier: experiment.rawValue, parameters: parameters.isEmpty ? nil : .object(parameters))
             }
+    }
+
+    private static func guardAndRunwayRecord(_ guardAndRunway: GuardAndRunwayOutput?, volatilityBaseline: Double?) -> AlgorithmExperiment {
+        var parameters: [String: JSONValue] = ["version": .number(2)]
+        if let volatilityBaseline {
+            parameters["volatilityBaseline"] = .number(volatilityBaseline)
+        }
+        if let guardAndRunway {
+            parameters["volatility"] = .number(guardAndRunway.volatility)
+            parameters["bandApplied"] = .bool(guardAndRunway.bandApplied)
+            parameters["bandGain"] = .number(guardAndRunway.bandGain)
+            parameters["bandDepth"] = .number(guardAndRunway.bandDepth)
+            parameters["runwayShift"] = .number(guardAndRunway.runwayShift)
+            parameters["postLowRiseCutActive"] = .bool(guardAndRunway.postLowRiseCutActive)
+        }
+        return AlgorithmExperiment(identifier: ExperimentOption.guardAndRunway.rawValue, parameters: .object(parameters))
     }
 }
 
@@ -474,15 +525,15 @@ public extension StoredDataAlgorithmInput {
             throw LoopError.missingDataError(.glucose)
         }
 
-        guard loopBaseTime.timeIntervalSince(latestGlucose.startDate) <= LoopAlgorithm.inputDataRecencyInterval else {
+        guard loopBaseTime.timeIntervalSince(latestGlucose.startDate) <= LoopCoreConstants.inputDataRecencyInterval else {
             throw LoopError.glucoseTooOld(date: latestGlucose.startDate)
         }
 
-        guard latestGlucose.startDate.timeIntervalSince(loopBaseTime) <= LoopAlgorithm.inputDataRecencyInterval else {
+        guard latestGlucose.startDate.timeIntervalSince(loopBaseTime) <= LoopCoreConstants.inputDataRecencyInterval else {
             throw LoopError.invalidFutureGlucose(date: latestGlucose.startDate)
         }
 
-        guard loopBaseTime.timeIntervalSince(lastAddedPumpData) <= LoopAlgorithm.inputDataRecencyInterval else {
+        guard loopBaseTime.timeIntervalSince(lastAddedPumpData) <= LoopCoreConstants.inputDataRecencyInterval else {
             throw LoopError.pumpDataTooOld(date: lastAddedPumpData)
         }
     }

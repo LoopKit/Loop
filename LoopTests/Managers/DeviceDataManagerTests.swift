@@ -8,7 +8,6 @@
 
 import XCTest
 import HealthKit
-import LoopAlgorithm
 import LoopKit
 import LoopKitUI
 import LoopCore

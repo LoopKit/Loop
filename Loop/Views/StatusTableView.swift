@@ -6,7 +6,6 @@
 //  Copyright © 2024 LoopKit Authors. All rights reserved.
 //
 
-import LoopAlgorithm
 import LoopKit
 import LoopKitUI
 import SwiftUI
@@ -127,7 +126,7 @@ struct StatusTableView: View {
     var body: some View {
         ActionTabView {
             wrappedView
-                .ignoresSafeArea(edges: .bottom)
+                .ignoresSafeArea(edges: [.horizontal, .bottom])
                 .onChange(of: viewModel.temporaryPresetsManager.activeOverride) { _, _ in
                     Task {
                         await viewController.reloadData(animated: true)

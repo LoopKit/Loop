@@ -8,7 +8,6 @@
 import XCTest
 import LoopKit
 import LoopKitUI
-import LoopAlgorithm
 @testable import Loop
 
 final class GlucoseStatisticsTests: XCTestCase {

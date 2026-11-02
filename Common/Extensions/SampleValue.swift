@@ -6,7 +6,6 @@
 //
 
 import LoopKit
-import LoopAlgorithm
 
 extension SampleValue {
     /// A glucose value entered by hand, such as a fingerstick or calibration.

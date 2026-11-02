@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import LoopAlgorithm
+import LoopKit
 
 extension GlucoseCondition {
     var localizedDescription: String {

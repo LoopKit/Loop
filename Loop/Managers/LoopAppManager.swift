@@ -17,7 +17,6 @@ import MockKit
 import HealthKit
 import WidgetKit
 import LoopCore
-import LoopAlgorithm
 import SwiftUI
 
 #if targetEnvironment(simulator)
@@ -244,7 +243,7 @@ class LoopAppManager: NSObject {
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitCarbSamplesFromOtherApps, // At some point we should let the user decide which apps they would like to import from.
             type: HealthKitSampleStore.carbType,
-            observationStart: Date().addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval)
+            observationStart: Date().addingTimeInterval(-LoopCoreConstants.maximumCarbAbsorptionTimeInterval)
         )
 
         temporaryPresetsManager = TemporaryPresetsManager(settingsProvider: settingsManager, alertIssuer: alertManager)
@@ -264,7 +263,7 @@ class LoopAppManager: NSObject {
             healthStore: healthStore,
             observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitDoseSamplesFromOtherApps,
             type: HealthKitSampleStore.insulinQuantityType,
-            observationStart: Date().addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval)
+            observationStart: Date().addingTimeInterval(-LoopCoreConstants.maximumCarbAbsorptionTimeInterval)
         )
 
         self.doseStore = await DoseStore(
@@ -491,7 +490,8 @@ class LoopAppManager: NSObject {
                 dosingStrategy: settingsManager.loopSettings.automaticDosingStrategy.analyticsValue,
                 integralRetrospectiveCorrection: UserDefaults.standard.integralRetrospectiveCorrectionEnabled,
                 glucoseBasedPartialApplication: UserDefaults.standard.glucoseBasedApplicationFactorEnabled,
-                guardAndRunway: UserDefaults.standard.guardAndRunwayEnabled
+                guardAndRunway: UserDefaults.standard.guardAndRunwayEnabled,
+                slowRetrospectiveCorrection: UserDefaults.standard.slowRetrospectiveCorrectionEnabled
             )
         }
         analyticsServicesManager.identifyState()
@@ -609,6 +609,16 @@ class LoopAppManager: NSObject {
             guard let loopDataManager else { throw CancellationError() }
             return try await loopDataManager.insulinDeliveryHistory(days: days)
         }
+        viewModel.setupHistory = { [weak settingsManager, weak dosingDecisionStore] in
+            let settings = try await settingsManager?.settingsStore?.getStoredSettings() ?? []
+            let now = Date()
+            let start = settings.map(\.date).min() ?? now
+            let experiments = try await ExperimentsHistoryCache().records(since: start, now: now) { readFrom in
+                try await dosingDecisionStore?.getDosingDecisions(start: readFrom, end: now, as: ExperimentsRecord.self) ?? []
+            }
+            return SetupHistory(settings: settings, experiments: experiments)
+        }
+        viewModel.outcomesPackageBuilder = criticalEventLogExportManager.map { OutcomesPackageBuilder(logs: $0.logs) }
 
         return viewModel
     }()
@@ -703,6 +713,18 @@ class LoopAppManager: NSObject {
         WidgetCenter.shared.reloadAllTimelines()
     }
 
+    func willEnterForeground() {
+        analyticsServicesManager.didEnterForeground()
+    }
+
+    func didEnterBackground() {
+        analyticsServicesManager.didEnterBackground()
+    }
+
+    func didReceiveTouch() {
+        analyticsServicesManager.didReceiveTouch()
+    }
+
     // MARK: - Remote Notification
     
     func remoteNotificationRegistrationDidFinish(_ result: Swift.Result<Data,Error>) {
@@ -731,7 +753,9 @@ class LoopAppManager: NSObject {
         guard let deeplink = Deeplink(url: url) else {
             return false
         }
-        
+
+        analyticsServicesManager.didOpenFromLink()
+
         switch deeplink {
         case let .carbEntry(carbEntryLink):
             if let carbEntryLink {
@@ -971,6 +995,7 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
             }
 
         case UNNotificationDefaultActionIdentifier:
+            analyticsServicesManager.didOpenFromNotification()
             guard response.notification.request.identifier == LoopNotificationCategory.missedMeal.rawValue else {
                 break
             }

@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import LoopAlgorithm
+import LoopKit
 
 enum Deeplink: Hashable {
     enum Host: String, CaseIterable {

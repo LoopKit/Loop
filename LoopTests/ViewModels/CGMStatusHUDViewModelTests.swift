@@ -7,7 +7,6 @@
 //
 
 import XCTest
-import LoopAlgorithm
 import LoopKit
 @testable import LoopUI
 

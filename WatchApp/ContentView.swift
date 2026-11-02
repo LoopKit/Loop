@@ -53,6 +53,7 @@ struct ContentView: View {
         }
         .onChange(of: selectedPage, { oldValue, newValue in
             UserDefaults.standard.startOnChartPage = selectedPage == 1
+            ExtensionDelegate.shared().usageRecorder.didDisplayScreen(newValue == 0 ? "actions" : newValue == 1 ? "chart" : "sensor")
         })
     }
 }

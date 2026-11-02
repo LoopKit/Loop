@@ -25,15 +25,15 @@ public struct StoredDataAlgorithmInput: AlgorithmInput {
     
     public var predictionStart: Date
     
-    public var basal: [AbsoluteScheduleValue<Double>]
+    public var basal: [LoopAlgorithm.AbsoluteScheduleValue<Double>]
     
-    public var sensitivity: [AbsoluteScheduleValue<LoopQuantity>]
+    public var sensitivityMgdlPerUnit: [LoopAlgorithm.AbsoluteScheduleValue<Double>]
     
-    public var carbRatio: [AbsoluteScheduleValue<Double>]
+    public var carbRatio: [LoopAlgorithm.AbsoluteScheduleValue<Double>]
     
-    public var target: GlucoseRangeTimeline
+    public var targetMgdl: LoopAlgorithm.GlucoseRangeTimeline
     
-    public var suspendThreshold: LoopQuantity?
+    public var suspendThresholdMgdl: Double?
     
     public var maxBolus: Double
     
@@ -45,7 +45,7 @@ public struct StoredDataAlgorithmInput: AlgorithmInput {
     
     public var carbAbsorptionModel: CarbAbsorptionModel
     
-    public var recommendationInsulinModel: InsulinModel
+    public var recommendationInsulinModel: LoopAlgorithm.InsulinModel
     
     public var recommendationType: DoseRecommendationType
     

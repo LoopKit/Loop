@@ -9,7 +9,6 @@
 import LoopCore
 import LoopKit
 import WidgetKit
-import LoopAlgorithm
 
 
 struct StatusWidgetTimelimeEntry: TimelineEntry {
@@ -56,6 +55,6 @@ struct StatusWidgetTimelimeEntry: TimelineEntry {
         }
         let glucoseAge = date - glucoseDate
 
-        return glucoseAge >= LoopAlgorithm.inputDataRecencyInterval
+        return glucoseAge >= LoopCoreConstants.inputDataRecencyInterval
     }
 }
