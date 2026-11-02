@@ -590,7 +590,7 @@ extension SettingsView {
                         includeArrow: false,
                         imageView: plusImage,
                         label: NSLocalizedString("Add Watch", comment: "Title text for button to add a watch device"),
-                        descriptiveText: NSLocalizedString("Tap here to set up a watch", comment: "Descriptive text for button to add a watch device"))
+                        descriptiveText: NSLocalizedString("Tap here to set up a watch other than Apple Watch", comment: "Descriptive text for button to add a watch device: Apple Watch uses Loop's own watch app"))
         }
     }
 

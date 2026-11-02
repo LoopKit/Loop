@@ -7956,6 +7956,9 @@
     "Apple Health" : {
       "comment" : "Apple Health settings button text\nTitle of the Apple Health access screen"
     },
+    "Apple Watch isn't added here. Loop's Apple Watch app is installed from the Watch app on your iPhone." : {
+      "comment" : "Footer of the watch chooser in settings: Apple Watch is not set up there"
+    },
     "Are you sure you want to delete all history entries?" : {
       "comment" : "Action sheet confirmation message for pump history deletion",
       "localizations" : {
@@ -38109,8 +38112,8 @@
         }
       }
     },
-    "Tap here to set up a watch" : {
-      "comment" : "Descriptive text for button to add a watch device"
+    "Tap here to set up a watch other than Apple Watch" : {
+      "comment" : "Descriptive text for button to add a watch device: Apple Watch uses Loop's own watch app"
     },
     "Tap to Add" : {
       "comment" : "The subtitle of the cell displaying an action to add a manually measurement glucose value",

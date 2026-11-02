@@ -34,6 +34,16 @@ struct PluginPickerView: View {
             }
         }
         
+        /// Shown below the list, for what the list doesn't cover.
+        var footer: String? {
+            switch self {
+            case .watch:
+                NSLocalizedString("Apple Watch isn't added here. Loop's Apple Watch app is installed from the Watch app on your iPhone.", comment: "Footer of the watch chooser in settings: Apple Watch is not set up there")
+            case .cgm, .pump, .service:
+                nil
+            }
+        }
+
         var fallbackSystemImage: String {
             switch self {
             case .cgm:
@@ -41,7 +51,7 @@ struct PluginPickerView: View {
             case .pump:
                 "ivfluid.bag"
             case .watch:
-                "applewatch"
+                "watch.analog"
             case .service:
                 "network"
             }
@@ -105,6 +115,11 @@ struct PluginPickerView: View {
                 ForEach(groups) { group in
                     Section(header: SectionHeader(label: group.id)) {
                         rows(for: group)
+                    }
+                }
+                if let footer = pluginType.footer {
+                    Section(footer: Text(footer)) {
+                        EmptyView()
                     }
                 }
             }
