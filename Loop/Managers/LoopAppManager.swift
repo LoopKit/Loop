@@ -93,6 +93,7 @@ class LoopAppManager: NSObject {
     private var mealDetectionManager: MealDetectionManager!
     private var statusExtensionManager: ExtensionDataManager!
     private var watchManager: WatchDataManager!
+    private var smartwatchManagerHost: SmartwatchManagerHost!
     private var crashRecoveryManager: CrashRecoveryManager!
     private var cgmEventStore: CgmEventStore!
     private var servicesManager: ServicesManager!
@@ -425,6 +426,17 @@ class LoopAppManager: NSObject {
             healthStore: healthStore
         )
 
+        smartwatchManagerHost = SmartwatchManagerHost(
+            deviceManager: deviceDataManager,
+            loopDataManager: loopDataManager,
+            settingsManager: settingsManager,
+            glucoseStore: glucoseStore,
+            healthStore: healthStore
+        )
+        deviceDataManager.smartwatchManagerHost = smartwatchManagerHost
+        // Forward Loop's alerts to the watch plugin so it buzzes in step with the phone.
+        alertManager.addAlertForwarder(smartwatchManagerHost)
+
         self.mealDetectionManager = MealDetectionManager(
             algorithmStateProvider: loopDataManager,
             settingsProvider: temporaryPresetsManager,
@@ -605,6 +617,13 @@ class LoopAppManager: NSObject {
         )
         
         viewModel.favoriteFoodInsightsDelegate = loopDataManager
+        viewModel.smartwatchManagerSettingsViewModel = SmartwatchManagerViewModel(
+            image: {[weak self] in self?.deviceDataManager.smartwatchManager?.smallImage },
+            name: {[weak self] in self?.deviceDataManager.smartwatchManager?.localizedTitle ?? "" },
+            isSetUp: {[weak self] in self?.deviceDataManager.smartwatchManager?.isOnboarded == true },
+            availableDevices: deviceDataManager.availableSmartwatchManagers
+        )
+
         viewModel.insulinDeliveryHistory = { [weak loopDataManager] days in
             guard let loopDataManager else { throw CancellationError() }
             return try await loopDataManager.insulinDeliveryHistory(days: days)
@@ -751,7 +770,9 @@ class LoopAppManager: NSObject {
     
     func handle(_ url: URL) -> Bool {
         guard let deeplink = Deeplink(url: url) else {
-            return false
+            // Not one of Loop's own links: offer it to the watch plugin, for a
+            // companion app's callback such as a watch picker.
+            return deviceDataManager?.smartwatchManager?.watchHostDidReceiveURL(url) ?? false
         }
 
         analyticsServicesManager.didOpenFromLink()

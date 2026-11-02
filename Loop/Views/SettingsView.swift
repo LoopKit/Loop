@@ -45,6 +45,7 @@ struct SettingsView: View {
             
             case cgmPicker
             case pumpPicker
+            case watchPicker
             case servicePicker
         }
         
@@ -501,6 +502,9 @@ extension SettingsView {
             
             cgmSection
                 .accessibilityIdentifier("settingsViewCGM")
+
+            watchSection
+                .accessibilityIdentifier("settingsViewWatch")
         }
     }
     
@@ -538,6 +542,25 @@ extension SettingsView {
         }
     }
     
+    /// Only shown when a watch plugin is installed or set up.
+    @ViewBuilder
+    private var watchSection: some View {
+        let _ = viewModel.smartwatchManagerRevision
+        if viewModel.smartwatchManagerSettingsViewModel.isSetUp() {
+            LargeButton(action: self.viewModel.smartwatchManagerSettingsViewModel.didTap,
+                        includeArrow: true,
+                        imageView: deviceImage(uiImage: viewModel.smartwatchManagerSettingsViewModel.image()),
+                        label: viewModel.smartwatchManagerSettingsViewModel.name(),
+                        descriptiveText: NSLocalizedString("Watch", comment: "Descriptive text for a watch plugin in Settings → Devices"))
+        } else if !viewModel.smartwatchManagerSettingsViewModel.availableDevices.isEmpty {
+            LargeButton(action: { pluginPicker = .watchPicker },
+                        includeArrow: false,
+                        imageView: plusImage,
+                        label: NSLocalizedString("Add Watch", comment: "Title text for button to add a watch device"),
+                        descriptiveText: NSLocalizedString("Tap here to set up a watch", comment: "Descriptive text for button to add a watch device"))
+        }
+    }
+
     private var favoriteFoodsSection: some View {
         Section {
             LargeButton(action: { sheet = .favoriteFoods },
@@ -570,6 +593,18 @@ extension SettingsView {
                 onSelect: { item in
                     if let device = viewModel.cgmManagerSettingsViewModel.availableDevices.first(where: { $0.identifier == item.id }) {
                         pluginSelection = { viewModel.cgmManagerSettingsViewModel.didTapAdd(device) }
+                    }
+                    pluginPicker = nil
+                },
+                onCancel: { pluginPicker = nil }
+            )
+        case .watchPicker:
+            PluginPickerView(
+                pluginType: .watch,
+                items: viewModel.smartwatchManagerSettingsViewModel.availableDevices.map { PluginPickerView.Item($0) },
+                onSelect: { item in
+                    if let device = viewModel.smartwatchManagerSettingsViewModel.availableDevices.first(where: { $0.identifier == item.id }) {
+                        pluginSelection = { viewModel.smartwatchManagerSettingsViewModel.didTapAdd(device) }
                     }
                     pluginPicker = nil
                 },
