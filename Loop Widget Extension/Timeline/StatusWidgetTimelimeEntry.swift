@@ -28,7 +28,9 @@ struct StatusWidgetTimelimeEntry: TimelineEntry {
     let sensor: GlucoseDisplayableContext?
 
     let pumpHighlight: DeviceStatusHighlightContext?
+    var cgmHighlight: DeviceStatusHighlightContext? = nil
     let netBasal: NetBasalContext?
+    var carbsOnBoard: Double? = nil
     
     let eventualGlucose: GlucoseContext?
     
