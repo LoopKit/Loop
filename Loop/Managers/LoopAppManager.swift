@@ -1084,12 +1084,6 @@ extension LoopAppManager: ResetLoopManagerDelegate {
             }
         }
     }
-    
-    func presentCouldNotResetLoopAlert(error: Error) {
-        Task {
-            await alertManager.presentCouldNotResetLoopAlert(error: error)
-        }
-    }
 }
 
 // MARK: - ServicesManagerDosingDelegate

@@ -2037,13 +2037,11 @@ final class StatusTableViewController: LoopChartsTableViewController {
             fatalError("Test Crash")
         })
         actionSheet.addAction(UIAlertAction(title: "Delete CGM Manager", style: .destructive) { _ in
-            self.deviceManager.cgmManager?.delete() { }
+            Task { await self.deviceManager.cgmManager?.delete() }
         })
-        
+
         actionSheet.addAction(UIAlertAction(title: "Delete Pump Manager", style: .destructive) { _ in
-            self.deviceManager.pumpManager?.prepareForDeactivation(){ [weak self] _ in
-                self?.deviceManager.pumpManager?.notifyDelegateOfDeactivation() { }
-            }
+            Task { await self.deviceManager.pumpManager?.delete() }
         })
 
         actionSheet.addCancelAction()
