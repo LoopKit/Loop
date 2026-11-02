@@ -29,6 +29,10 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         tableView.rowHeight = UITableView.automaticDimension
         tableView.cellLayoutMarginsFollowReadableWidth = true
 
+        // No pump connected means no basal delivery — default prediction to suspension effect
+        if self.defaultPredictionShouldIncludeNoDelivery {
+            self.selectedInputs.insert(.suspend)
+        }
         glucoseChart.glucoseDisplayRange = LoopConstants.glucoseChartDefaultDisplayRangeWide
 
         let notificationCenter = NotificationCenter.default
@@ -87,6 +91,19 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         }
     }
 
+    private func selectedEffectsMatchBasePrediction() -> Bool {
+        var baseEffects = PredictionInputEffect.all
+        if self.defaultPredictionShouldIncludeNoDelivery {
+            baseEffects.insert(.suspend)
+        }
+        return selectedInputs == baseEffects
+    }
+
+    private var defaultPredictionShouldIncludeNoDelivery: Bool {
+        guard let pumpManager = self.deviceManager.pumpManager else { return true }
+        return pumpManager.status.shouldModelAsNoDelivery
+    }
+
     let glucoseChart = PredictedGlucoseChart(yAxisStepSizeMGDLOverride: FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil)
 
     override func createChartsManager() -> ChartsManager {
@@ -135,14 +152,20 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
             self.glucoseChart.setPredictedGlucoseValues(state.predictedGlucoseIncludingPendingInsulin ?? [])
 
             do {
-                let glucose = try state.predictGlucose(using: self.selectedInputs, includingPendingInsulin: true)
-                self.glucoseChart.setAlternatePredictedGlucoseValues(glucose)
+                if self.selectedEffectsMatchBasePrediction() {
+                    self.glucoseChart.setAlternatePredictedGlucoseValues([])
+                } else {
+                    let glucose = try state.predictGlucose(using: self.selectedInputs, includingPendingInsulin: true)
+                    self.glucoseChart.setAlternatePredictedGlucoseValues(glucose)
+                }
             } catch {
                 self.refreshContext.update(with: .status)
                 self.glucoseChart.setAlternatePredictedGlucoseValues([])
             }
 
-            if let lastPoint = self.glucoseChart.alternatePredictedGlucosePoints?.last?.y {
+            if let lastPoint = (self.selectedEffectsMatchBasePrediction() ?
+                                self.glucoseChart.predictedGlucosePoints.last?.y :
+                                    self.glucoseChart.alternatePredictedGlucosePoints?.last?.y) {
                 self.eventualGlucoseDescription = String(describing: lastPoint)
             } else {
                 self.eventualGlucoseDescription = nil
@@ -233,6 +256,18 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         case .inputs:
             let cell = tableView.dequeueReusableCell(withIdentifier: PredictionInputEffectTableViewCell.className, for: indexPath) as! PredictionInputEffectTableViewCell
             self.tableView(tableView, updateTextFor: cell, at: indexPath)
+            let input = availableInputs[indexPath.row]
+            if input == .suspend && self.defaultPredictionShouldIncludeNoDelivery {
+                // When no pump connected, suspend effect is marked as active, so we show it as permanently selected and non-interactive
+                cell.contentView.alpha = 0.5
+                cell.selectionStyle = .none
+                let checkmark = UIImageView(image: UIImage(systemName: "checkmark"))
+                checkmark.tintColor = .systemGray
+                cell.accessoryView = checkmark
+            } else {
+                cell.contentView.alpha = 1.0
+                cell.selectionStyle = .default
+            }
             return cell
         }
     }
@@ -297,6 +332,10 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         
         }
 
+        if input == .suspend && self.defaultPredictionShouldIncludeNoDelivery {
+            subtitleText = NSLocalizedString("Always active when no pump is connected", comment: "Subtitle for suspend prediction input when no pump is connected")
+        }
+        
         cell.subtitleLabel?.text = subtitleText
     }
 
@@ -315,6 +354,13 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         guard Section(rawValue: indexPath.section) == .inputs else { return }
 
         let input = availableInputs[indexPath.row]
+        
+        // When no pump connected, suspend effect is permanently active — ignore taps
+        if input == .suspend && self.defaultPredictionShouldIncludeNoDelivery {
+            tableView.deselectRow(at: indexPath, animated: true)
+            return
+        }
+        
         let isSelected = selectedInputs.contains(input)
 
         if let cell = tableView.cellForRow(at: indexPath) {
