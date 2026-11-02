@@ -163,6 +163,10 @@ public struct LoanGrant: Codable, Equatable {
     /// The phone's volatility baseline for guard + runway (LoopAlgorithm's `volatilityBaseline`).
     public let volatilityBaseline: Double?
 
+    /// The phone runs slow retrospective correction. The watch can't compute it yet, so it doesn't start
+    /// from a copy that has it on.
+    public let slowRetrospectiveCorrectionEnabled: Bool
+
     public let phoneClosedLoopEnabled: Bool?
 
     public let carbHistory: [LoanCarbRecord]?
@@ -193,6 +197,7 @@ public struct LoanGrant: Codable, Equatable {
                 glucoseBasedApplicationFactorEnabled: Bool? = nil,
                 guardAndRunwayEnabled: Bool? = nil,
                 volatilityBaseline: Double? = nil,
+                slowRetrospectiveCorrectionEnabled: Bool = false,
                 phoneClosedLoopEnabled: Bool? = nil,
                 carbHistory: [LoanCarbRecord]? = nil,
                 glucoseHistory: [LoanGlucoseRecord]? = nil,
@@ -212,6 +217,7 @@ public struct LoanGrant: Codable, Equatable {
         self.glucoseBasedApplicationFactorEnabled = glucoseBasedApplicationFactorEnabled
         self.guardAndRunwayEnabled = guardAndRunwayEnabled
         self.volatilityBaseline = volatilityBaseline
+        self.slowRetrospectiveCorrectionEnabled = slowRetrospectiveCorrectionEnabled
         self.phoneClosedLoopEnabled = phoneClosedLoopEnabled
         self.carbHistory = carbHistory
         self.glucoseHistory = glucoseHistory

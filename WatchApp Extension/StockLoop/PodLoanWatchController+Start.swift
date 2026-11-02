@@ -188,7 +188,9 @@ extension PodLoanWatchController {
 
             // Decided when the silence is known, with the copy as it is now: offer the offline start if this
             // watch holds a copy (its age is shown, not enforced), else say the phone did not answer.
-            let dormant = self.storedDormantGrant()
+            // The watch can't compute slow retrospective correction yet: a copy with it on is not offered.
+            let stored = self.storedDormantGrant()
+            let dormant = stored?.grant.slowRetrospectiveCorrectionEnabled == true ? nil : stored
             let situation = LoanControl.Situation(device: .watch, trigger: .startTapped, watchHasStoredCopy: dormant != nil,
                                                   watchReadsCGM: self.loopManager.cgmManager != nil)
             guard case .query(_, let onSilence) = LoanControl.decide(situation) else { return }
@@ -203,6 +205,11 @@ extension PodLoanWatchController {
             if case .tell(.noResponseFromPhoneAndNoCGM) = LoanControl.afterQuery(.silence, onSilence: onSilence) {
                 self.lastIdleNote = NSLocalizedString("No answer from iPhone. The watch isn't reading the CGM, so Sport Mode can't start without the iPhone.", comment: "Glance: loan request timed out and the watch has no CGM of its own")
                 SportLog.event("loan", "no answer from the phone in \(Int(timeout)) s and the watch reads no CGM; no offline start offered")
+                return
+            }
+            if stored != nil, dormant == nil {
+                self.lastIdleNote = NSLocalizedString("No answer from iPhone. Sport Mode can't start without it while Slow Retrospective Correction is on.", comment: "Glance: loan request timed out and the stored copy has slow retrospective correction on")
+                SportLog.event("loan", "no answer from the phone in \(Int(timeout)) s; the stored copy has slow retrospective correction on, so no offline start offered")
                 return
             }
             self.lastIdleNote = NSLocalizedString("No answer from iPhone. Open Loop on the iPhone and try again.", comment: "Glance: loan request timed out")
