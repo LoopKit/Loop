@@ -19,8 +19,9 @@ struct PredictionInputEffect: OptionSet {
     static let retrospection    = PredictionInputEffect(rawValue: 1 << 3)
     static let suspend          = PredictionInputEffect(rawValue: 1 << 4)
     static let guardAndRunway   = PredictionInputEffect(rawValue: 1 << 5)
+    static let slowRetrospectiveCorrection = PredictionInputEffect(rawValue: 1 << 6)
 
-    static let all: PredictionInputEffect = [.carbs, .insulin, .momentum, .retrospection, .guardAndRunway]
+    static let all: PredictionInputEffect = [.carbs, .insulin, .momentum, .retrospection, .guardAndRunway, .slowRetrospectiveCorrection]
 
     var localizedTitle: String? {
         switch self {
@@ -35,7 +36,9 @@ struct PredictionInputEffect: OptionSet {
         case [.suspend]:
             return NSLocalizedString("Suspension of Insulin Delivery", comment: "Title of the prediction input effect for suspension of insulin delivery")
         case [.guardAndRunway]:
-            return NSLocalizedString("Guard + Runway", comment: "Title of the prediction input effect for the guard and runway experiment")
+            return NSLocalizedString("Guard + Runway v2", comment: "Title of the prediction input effect for the guard and runway experiment, second version")
+        case [.slowRetrospectiveCorrection]:
+            return NSLocalizedString("Slow Retrospective Correction", comment: "Title of the prediction input effect for the slow retrospective correction experiment")
         default:
             return nil
         }
@@ -54,7 +57,9 @@ struct PredictionInputEffect: OptionSet {
         case [.suspend]:
              return NSLocalizedString("Glucose effect of suspending insulin delivery", comment: "Description of the prediction input effect for suspension of insulin delivery")
         case [.guardAndRunway]:
-            return NSLocalizedString("Forecast lowered by recent glucose volatility over the next 2 hours, and the automatic dosing target lowered when there is room above the suspend threshold", comment: "Description of the prediction input effect for the guard and runway experiment")
+            return NSLocalizedString("The low guard checks the forecast lowered by recent glucose volatility over the next 2 hours (dotted line), and the automatic dosing target is lowered when there is room above the suspend threshold", comment: "Description of the prediction input effect for the guard and runway experiment, second version")
+        case [.slowRetrospectiveCorrection]:
+            return NSLocalizedString("Insulin sensitivity adjusted for glucose change your settings did not explain over the last 3 days", comment: "Description of the prediction input effect for the slow retrospective correction experiment")
         default:
             return nil
         }
