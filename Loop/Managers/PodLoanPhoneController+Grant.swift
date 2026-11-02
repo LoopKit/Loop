@@ -83,6 +83,11 @@ extension PodLoanPhoneController {
             deny("Sport Mode needs the watch to read the CGM. Turn on Read on Apple Watch in the CGM's settings on the iPhone.")
             return
         }
+        // The watch can't compute slow retrospective correction yet.
+        guard !UserDefaults.standard.slowRetrospectiveCorrectionEnabled else {
+            deny("Sport Mode doesn't support Slow Retrospective Correction yet. Turn it off in Algorithm Experiments on the iPhone.")
+            return
+        }
 
         // A grant supersedes an inferred loan; the radio comes back first.
         if yieldingToInferredLoan {
@@ -269,6 +274,7 @@ extension PodLoanPhoneController {
                             glucoseBasedApplicationFactorEnabled: UserDefaults.standard.glucoseBasedApplicationFactorEnabled,
                             guardAndRunwayEnabled: UserDefaults.standard.guardAndRunwayEnabled,
                             volatilityBaseline: self.deps.volatilityBaseline(),
+                            slowRetrospectiveCorrectionEnabled: UserDefaults.standard.slowRetrospectiveCorrectionEnabled,
 
                             phoneClosedLoopEnabled: settings.dosingEnabled,
                             carbHistory: carbs,
@@ -317,6 +323,7 @@ extension PodLoanPhoneController {
                 "\(UserDefaults.standard.integralRetrospectiveCorrectionEnabled)",
                 "\(UserDefaults.standard.glucoseBasedApplicationFactorEnabled)",
                 "\(UserDefaults.standard.guardAndRunwayEnabled)",
+                "\(UserDefaults.standard.slowRetrospectiveCorrectionEnabled)",
                 String(describing: deps.pumpManager()?.status.insulinType),
                 String(describing: glucoseAlertSettingsSeen)].joined(separator: "|")
     }
