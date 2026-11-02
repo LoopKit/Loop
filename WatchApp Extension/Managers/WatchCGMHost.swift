@@ -101,7 +101,7 @@ final class WatchCGMHost {
     private func remove() {
         guard let previous = cgmManager else { return }
         previous.cgmManagerDelegate = nil
-        previous.delete {}
+        Task { await previous.delete() }
         cgmManager = nil
         builtFrom = nil
         rawManager = nil

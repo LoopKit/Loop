@@ -324,23 +324,20 @@ extension TestingScenariosManager {
     }
     
     private func reloadCGMManager(withIdentifier cgmManagerIdentifier: String) async -> TestingCGMManager {
-        await withCheckedContinuation { continuation in
-            self.deviceManager.cgmManager?.delete() { [weak self] in
-                let result = self?.deviceManager.setupCGMManager(withIdentifier: cgmManagerIdentifier, prefersToSkipUserInteraction: true)
-                switch result {
-                case .success(let setupUIResult):
-                    switch setupUIResult {
-                    case .createdAndOnboarded(let cgmManager):
-                        let cgmManager = cgmManager as! TestingCGMManager
-                        cgmManager.autoStartTrace = false
-                        continuation.resume(returning: cgmManager)
-                    default:
-                        fatalError("Failed to reload CGM manager. UI interaction required for setup")
-                    }
-                default:
-                    fatalError("Failed to reload CGM manager. Setup failed")
-                }
+        await deviceManager.cgmManager?.delete()
+        let result = deviceManager.setupCGMManager(withIdentifier: cgmManagerIdentifier, prefersToSkipUserInteraction: true)
+        switch result {
+        case .success(let setupUIResult):
+            switch setupUIResult {
+            case .createdAndOnboarded(let cgmManager):
+                let cgmManager = cgmManager as! TestingCGMManager
+                cgmManager.autoStartTrace = false
+                return cgmManager
+            default:
+                fatalError("Failed to reload CGM manager. UI interaction required for setup")
             }
+        default:
+            fatalError("Failed to reload CGM manager. Setup failed")
         }
     }
 

@@ -946,19 +946,13 @@ extension DeviceDataManager: PersistedAlertStore {
 
 // MARK: - CGMManagerDelegate
 extension DeviceDataManager: CGMManagerDelegate {
-    nonisolated
     func cgmManagerWantsDeletion(_ manager: CGMManager) async {
-        await withCheckedContinuation { continuation in
-            DispatchQueue.main.async {
-                self.log.default("CGM manager with identifier '%{public}@' wants deletion", manager.pluginIdentifier)
-                if let cgmManagerUI = self.cgmManager as? CGMManagerUI {
-                    self.displayGlucoseUnitBroadcaster?.removeDisplayGlucoseUnitObserver(cgmManagerUI)
-                }
-                self.cgmManager = nil
-                self.settingsManager.storeSettings()
-                continuation.resume()
-            }
+        log.default("CGM manager with identifier '%{public}@' wants deletion", manager.pluginIdentifier)
+        if let cgmManagerUI = cgmManager as? CGMManagerUI {
+            displayGlucoseUnitBroadcaster?.removeDisplayGlucoseUnitObserver(cgmManagerUI)
         }
+        cgmManager = nil
+        settingsManager.storeSettings()
     }
 
     nonisolated
@@ -1130,14 +1124,12 @@ extension DeviceDataManager: PumpManagerDelegate {
     nonisolated func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) {
     }
     
-    nonisolated func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
-        Task { @MainActor in
-            log.default("Pump manager with identifier '%{public}@' will deactivate", pumpManager.pluginIdentifier)
+    func pumpManagerWantsDeletion(_ pumpManager: PumpManager) async {
+        log.default("Pump manager with identifier '%{public}@' wants deletion", pumpManager.pluginIdentifier)
 
-            self.pumpManager = nil
-            deliveryUncertaintyAlertManager = nil
-            settingsManager.storeSettings()
-        }
+        self.pumpManager = nil
+        deliveryUncertaintyAlertManager = nil
+        settingsManager.storeSettings()
     }
 
     nonisolated func pumpManager(_ pumpManager: PumpManager, didUpdatePumpRecordsBasalProfileStartEvents pumpRecordsBasalProfileStartEvents: Bool) {
