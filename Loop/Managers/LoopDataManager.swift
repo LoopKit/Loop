@@ -19,6 +19,11 @@ struct AlgorithmDisplayState {
     var input: StoredDataAlgorithmInput?
     var output: AlgorithmOutput<StoredCarbEntry>?
 
+    /// The ISF multiplier slow retrospective correction applied on the last run, 1 when it is off.
+    var sensitivityMultiplier: Double {
+        output?.slowRetrospectiveCorrection?.multiplier ?? 1
+    }
+
     var activeInsulin: InsulinValue? {
         guard let input, let value = output?.activeInsulin else {
             return nil
@@ -366,8 +371,17 @@ final class LoopDataManager: ObservableObject {
         ensureCarbCoverageStart: Date? = nil,
         projectOngoingDoses: Bool = false
     ) async throws -> StoredDataAlgorithmInput {
+        let experiments = enabledAlgorithmExperiments
+
+        // Slow retrospective correction keeps no state, so it reads its whole window of glucose on every run,
+        // with the carbs and doses that explain it.
+        let slowRetrospectiveCorrectionHistory: TimeInterval? = experiments.contains(.slowRetrospectiveCorrection) ? .hours(72) : nil
+
         // Need to fetch doses back as far as t - (DIA + DCA) for Dynamic carbs
-        let dosesInputHistory = CarbMath.maximumAbsorptionTimeInterval + InsulinMath.defaultInsulinActivityDuration
+        var dosesInputHistory = CarbMath.maximumAbsorptionTimeInterval + InsulinMath.defaultInsulinActivityDuration
+        if let slowRetrospectiveCorrectionHistory {
+            dosesInputHistory = max(dosesInputHistory, slowRetrospectiveCorrectionHistory + InsulinMath.defaultInsulinActivityDuration)
+        }
 
         let baseTime = baseTime ?? now
 
@@ -417,7 +431,12 @@ final class LoopDataManager: ObservableObject {
 
         let forecastEndTime = baseTime.addingTimeInterval(InsulinMath.defaultInsulinActivityDuration).dateCeiledToTimeInterval(GlucoseMath.defaultDelta)
 
-        let carbsStart = baseTime.addingTimeInterval(LoopConstants.maxCarbEntryPastTime + .minutes(-1)) // additional minute to handle difference in seconds between carb entry and carb ratio
+        var glucoseStart = baseTime.addingTimeInterval(LoopConstants.maxCarbEntryPastTime + .minutes(-1)) // additional minute to handle difference in seconds between carb entry and carb ratio
+        var carbsStart = glucoseStart
+        if let slowRetrospectiveCorrectionHistory {
+            glucoseStart = baseTime.addingTimeInterval(-slowRetrospectiveCorrectionHistory)
+            carbsStart = glucoseStart.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval + .minutes(-1))
+        }
         // A pending carb entry can outlive this rolling window while the bolus screen is open.
         // Cover it with schedule history without expanding the stored-carb or glucose queries.
         let carbScheduleStart = min(carbsStart, ensureCarbCoverageStart ?? carbsStart)
@@ -439,7 +458,7 @@ final class LoopDataManager: ObservableObject {
             throw LoopError.configurationError(.carbRatioSchedule)
         }
 
-        let glucose = try await glucoseStore.getGlucoseSamples(start: carbsStart, end: baseTime)
+        let glucose = try await glucoseStore.getGlucoseSamples(start: glucoseStart, end: baseTime)
 
         let dosesWithModel = doses.map { $0.simpleDose(with: insulinModel(for: $0.insulinType)) }
 
@@ -542,7 +561,6 @@ final class LoopDataManager: ObservableObject {
         }
 
 
-        let experiments = enabledAlgorithmExperiments
         let volatilityBaseline = experiments.contains(.guardAndRunway) ? await currentVolatilityBaseline(at: baseTime) : nil
 
         return StoredDataAlgorithmInput(
@@ -577,6 +595,9 @@ final class LoopDataManager: ObservableObject {
         }
         if UserDefaults.standard.guardAndRunwayEnabled {
             experiments.insert(.guardAndRunway)
+        }
+        if UserDefaults.standard.slowRetrospectiveCorrectionEnabled {
+            experiments.insert(.slowRetrospectiveCorrection)
         }
         return experiments
     }
@@ -719,7 +740,7 @@ final class LoopDataManager: ObservableObject {
             }
 
             var output = Algorithm.run(input: input)
-            dosingDecision.algorithmExperiments = algorithmExperiments(for: dosingStrategy, guardAndRunway: output.guardAndRunway)
+            dosingDecision.algorithmExperiments = algorithmExperiments(for: dosingStrategy, output: output)
 
             switch output.recommendationResult {
             case .success(let recommendation):
@@ -924,7 +945,7 @@ final class LoopDataManager: ObservableObject {
 
         if let output = displayState.output {
             var dosingDecision = StoredDosingDecision(date: now, reason: "updateRemoteRecommendation")
-            dosingDecision.algorithmExperiments = algorithmExperiments(for: currentDosingStrategy, guardAndRunway: output.guardAndRunway)
+            dosingDecision.algorithmExperiments = algorithmExperiments(for: currentDosingStrategy, output: output)
             dosingDecision.predictedGlucose = output.predictedGlucose.map(\.loopKit)
             dosingDecision.insulinOnBoard = displayState.activeInsulin
             dosingDecision.carbsOnBoard = displayState.activeCarbs
@@ -1065,28 +1086,41 @@ extension LoopDataManager {
     }
 
     /// Glucose based partial application only affects automatic boluses, so it is in effect only with that strategy
-    private func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy, guardAndRunway: GuardAndRunwayOutput? = nil) -> [AlgorithmExperiment] {
+    private func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy, output: AlgorithmOutput<StoredCarbEntry>? = nil) -> [AlgorithmExperiment] {
         enabledAlgorithmExperiments
             .filter { $0 != .glucoseBasedApplicationFactor || dosingStrategy == .automaticBolus }
             .sorted { $0.rawValue < $1.rawValue }
             .map { experiment in
-                guard experiment == .guardAndRunway else {
+                switch experiment {
+                case .guardAndRunway:
+                    return guardAndRunwayExperiment(output?.guardAndRunway)
+                case .slowRetrospectiveCorrection:
+                    var parameters: [String: JSONValue] = [:]
+                    if let slow = output?.slowRetrospectiveCorrection {
+                        parameters["level"] = .number(slow.level)
+                        parameters["multiplier"] = .number(slow.multiplier)
+                    }
+                    return AlgorithmExperiment(identifier: experiment.rawValue, parameters: parameters.isEmpty ? nil : .object(parameters))
+                default:
                     return AlgorithmExperiment(identifier: experiment.rawValue)
                 }
-                var parameters: [String: JSONValue] = [:]
-                if let baseline = volatilityBaseline?.value {
-                    parameters["volatilityBaseline"] = .number(baseline)
-                }
-                if let guardAndRunway {
-                    parameters["volatility"] = .number(guardAndRunway.volatility)
-                    parameters["bandApplied"] = .bool(guardAndRunway.bandApplied)
-                    parameters["bandGain"] = .number(guardAndRunway.bandGain)
-                    parameters["bandDepth"] = .number(guardAndRunway.bandDepth)
-                    parameters["runwayShift"] = .number(guardAndRunway.runwayShift)
-                    parameters["postLowRiseCutActive"] = .bool(guardAndRunway.postLowRiseCutActive)
-                }
-                return AlgorithmExperiment(identifier: experiment.rawValue, parameters: parameters.isEmpty ? nil : .object(parameters))
             }
+    }
+
+    private func guardAndRunwayExperiment(_ guardAndRunway: GuardAndRunwayOutput?) -> AlgorithmExperiment {
+        var parameters: [String: JSONValue] = ["version": .number(2)]
+        if let baseline = volatilityBaseline?.value {
+            parameters["volatilityBaseline"] = .number(baseline)
+        }
+        if let guardAndRunway {
+            parameters["volatility"] = .number(guardAndRunway.volatility)
+            parameters["bandApplied"] = .bool(guardAndRunway.bandApplied)
+            parameters["bandGain"] = .number(guardAndRunway.bandGain)
+            parameters["bandDepth"] = .number(guardAndRunway.bandDepth)
+            parameters["runwayShift"] = .number(guardAndRunway.runwayShift)
+            parameters["postLowRiseCutActive"] = .bool(guardAndRunway.postLowRiseCutActive)
+        }
+        return AlgorithmExperiment(identifier: ExperimentOption.guardAndRunway.rawValue, parameters: .object(parameters))
     }
 
     /// The median σ5 over the last four weeks, for guard + runway's volatility band. Nil until there is a day of glucose.
@@ -1347,7 +1381,8 @@ extension StoredDataAlgorithmInput {
         }
     }
 
-    func predictGlucose(effectsOptions: AlgorithmEffectsOptions = .all) throws -> [LoopAlgorithm.PredictedGlucoseValue] {
+    /// `sensitivityMultiplier` is slow retrospective correction's, from the algorithm's last run.
+    func predictGlucose(effectsOptions: AlgorithmEffectsOptions = .all, sensitivityMultiplier: Double = 1) throws -> [LoopAlgorithm.PredictedGlucoseValue] {
         try validateCarbScheduleCoverage()
         let prediction = Algorithm.generatePrediction(
             start: predictionStart,
@@ -1355,7 +1390,9 @@ extension StoredDataAlgorithmInput {
             doses: doses,
             carbEntries: carbEntries,
             basal: basal,
-            sensitivityMgdlPerUnit: sensitivityMgdlPerUnit,
+            sensitivityMgdlPerUnit: sensitivityMgdlPerUnit.map {
+                LoopAlgorithm.AbsoluteScheduleValue(startDate: $0.startDate, endDate: $0.endDate, value: $0.value * sensitivityMultiplier)
+            },
             carbRatio: carbRatio,
             algorithmEffectsOptions: effectsOptions,
             useIntegralRetrospectiveCorrection: self.useIntegralRetrospectiveCorrection,
@@ -1589,7 +1626,7 @@ extension LoopDataManager: BolusEntryViewModelDelegate {
             .removingCarbEntry(carbEntry: carbEntryChange?.originalEntry)
             .addingCarbEntry(carbEntry: carbEntryChange?.asStoredCarbEntry)
 
-        let prediction = try input.predictGlucose()
+        let prediction = try input.predictGlucose(sensitivityMultiplier: displayState.sensitivityMultiplier)
 
         return (historicGlucose: input.glucoseHistory, predictedGlucose: prediction.map(\.loopKit))
     }
