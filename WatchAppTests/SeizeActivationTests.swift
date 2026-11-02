@@ -72,11 +72,12 @@ final class SeizeActivationTests: XCTestCase {
     /// A dormant credential as the phone builds it (expiresAt == issuedAt). `completeSettings` gets
     /// an activation as far as the journal; it still dies at the pump rebuild.
     private func fixtureDormant(issuedAt: Date, epoch: Int = 3, token: UUID = UUID(),
-                                completeSettings: Bool = false) -> DormantGrant {
+                                completeSettings: Bool = false, slowRetrospectiveCorrection: Bool = false) -> DormantGrant {
         let grant = LoanGrant(epoch: epoch, expiresAt: issuedAt,
                               pumpConfiguration: Data([1, 2, 3]), therapySettingsRaw: completeSettings ? Self.completeTherapySettingsRaw() : Data([4, 5]),
                               settingsTimeZoneID: "GMT",
                               doseHistory: [],
+                              slowRetrospectiveCorrectionEnabled: slowRetrospectiveCorrection,
                               // `LoopSettings.rawValue` drops the schedules, so a complete grant carries the supplement.
                               therapySettingsSupplementRaw: completeSettings ? Self.settingsSupplementRaw() : nil)
         return DormantGrant(grant: grant, issuedAt: issuedAt, seizeToken: token)
@@ -195,6 +196,20 @@ final class SeizeActivationTests: XCTestCase {
         let snap = await controller.fencedSnapshot()
         XCTAssertNil(snap.seizeOfferIssuedAt, "credential stored, but no CGM on the watch: no offer")
         XCTAssertEqual(snap.lastIdleNote?.contains("isn't reading the CGM"), true)
+    }
+
+    /// The watch can't compute slow retrospective correction yet: a copy with it on gets no offer, and the
+    /// note says why.
+    func testTimedOutRequestOffersNoOfflineStartWhileSlowRetrospectiveCorrectionIsOn() async {
+        let controller = await makeController()
+        controller.send = { _ in }
+        controller.scheduler = { _, _, work in work.perform() }
+
+        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-1200), slowRetrospectiveCorrection: true))
+        controller.requestLoan(watchBuild: "seize-test")
+        let snap = await controller.fencedSnapshot()
+        XCTAssertNil(snap.seizeOfferIssuedAt, "credential stored, but with slow retrospective correction on: no offer")
+        XCTAssertEqual(snap.lastIdleNote?.contains("Slow Retrospective Correction"), true)
     }
 
     // MARK: - The request is the question

@@ -342,7 +342,7 @@ final class OverrideHistoryTests: XCTestCase {
         let records = c.loopManager.algorithmExperiments(for: .tempBasalOnly)
         XCTAssertEqual(records.map(\.identifier), [ExperimentOption.guardAndRunway.rawValue],
                        "the application factor is in effect only with automatic bolus, as on the phone")
-        XCTAssertEqual(records.first?.parameters, .object(["volatilityBaseline": .number(4.2)]))
+        XCTAssertEqual(records.first?.parameters, .object(["version": .number(2), "volatilityBaseline": .number(4.2)]))
     }
 
     /// An older phone sends no flag: guard + runway stays off, and a baseline alone is not used.
