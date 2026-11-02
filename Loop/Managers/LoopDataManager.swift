@@ -330,6 +330,9 @@ final class LoopDataManager: ObservableObject {
         if UserDefaults.standard.guardAndRunwayEnabled {
             experiments.insert(.guardAndRunway)
         }
+        if UserDefaults.standard.slowRetrospectiveCorrectionEnabled {
+            experiments.insert(.slowRetrospectiveCorrection)
+        }
         return experiments
     }
 
@@ -621,9 +624,9 @@ extension LoopDataManager {
         dosingStrategySelectionEnabled ? settingsProvider.settings.automaticDosingStrategy : .automaticBolus
     }
 
-    func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy, guardAndRunway: GuardAndRunwayOutput? = nil) -> [AlgorithmExperiment] {
+    func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy, output: AlgorithmOutput<StoredCarbEntry>? = nil) -> [AlgorithmExperiment] {
         AlgorithmExperiment.records(enabled: enabledAlgorithmExperiments, dosingStrategy: dosingStrategy,
-                                    volatilityBaseline: volatilityBaseline?.value, guardAndRunway: guardAndRunway)
+                                    volatilityBaseline: volatilityBaseline?.value, output: output)
     }
 
     /// The median σ5 over the last four weeks, for guard + runway's volatility band. Nil until there is a day of glucose.
@@ -970,7 +973,7 @@ extension LoopDataManager: BolusEntryViewModelDelegate {
             .removingCarbEntry(carbEntry: carbEntryChange?.originalEntry)
             .addingCarbEntry(carbEntry: carbEntryChange?.asStoredCarbEntry)
 
-        let prediction = try input.predictGlucose()
+        let prediction = try input.predictGlucose(sensitivityMultiplier: displayState.sensitivityMultiplier)
 
         return (historicGlucose: input.glucoseHistory, predictedGlucose: prediction.map(\.loopKit))
     }

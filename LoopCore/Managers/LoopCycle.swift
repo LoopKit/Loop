@@ -121,7 +121,7 @@ public protocol LoopCycleHost: AnyObject {
     var enabledAlgorithmExperiments: Set<ExperimentOption> { get }
     /// Guard + runway's volatility baseline; asked only while that experiment is enabled.
     func currentVolatilityBaseline(at date: Date) async -> Double?
-    func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy, guardAndRunway: GuardAndRunwayOutput?) -> [AlgorithmExperiment]
+    func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy, output: AlgorithmOutput<StoredCarbEntry>?) -> [AlgorithmExperiment]
 
     var currentDosingStrategy: AutomaticDosingStrategy { get }
     var usePositiveMomentumAndRCForManualBoluses: Bool { get }
@@ -237,14 +237,14 @@ public final class LoopCycle {
 
             let dosingStrategy = host.currentDosingStrategy
             input.recommendationType = dosingStrategy.recommendationType
-            outcome.dosingDecision.algorithmExperiments = host.algorithmExperiments(for: dosingStrategy, guardAndRunway: nil)
+            outcome.dosingDecision.algorithmExperiments = host.algorithmExperiments(for: dosingStrategy, output: nil)
             outcome.input = input
 
             try input.checkRecency(at: loopBaseTime, lastAddedPumpData: doseStore.lastAddedPumpData)
 
             var output = Algorithm.run(input: input)
             outcome.output = output
-            outcome.dosingDecision.algorithmExperiments = host.algorithmExperiments(for: dosingStrategy, guardAndRunway: output.guardAndRunway)
+            outcome.dosingDecision.algorithmExperiments = host.algorithmExperiments(for: dosingStrategy, output: output)
 
             switch output.recommendationResult {
             case .success(let recommendation):
@@ -410,7 +410,7 @@ public final class LoopCycle {
                                                   predictedGlucose: bolusDosingDecision.predictedGlucose,
                                                   manualBolusRecommendation: bolusDosingDecision.manualBolusRecommendation,
                                                   manualBolusRequested: bolusDosingDecision.manualBolusRequested)
-        dosingDecision.algorithmExperiments = host.algorithmExperiments(for: host.currentDosingStrategy, guardAndRunway: nil)
+        dosingDecision.algorithmExperiments = host.algorithmExperiments(for: host.currentDosingStrategy, output: nil)
         return dosingDecision
     }
 
@@ -472,7 +472,7 @@ public final class LoopCycle {
         guard let output = displayState.output else { return }
 
         var dosingDecision = StoredDosingDecision(date: now(), reason: "updateRemoteRecommendation")
-        dosingDecision.algorithmExperiments = host.algorithmExperiments(for: host.currentDosingStrategy, guardAndRunway: output.guardAndRunway)
+        dosingDecision.algorithmExperiments = host.algorithmExperiments(for: host.currentDosingStrategy, output: output)
         dosingDecision.predictedGlucose = output.predictedGlucose.map(\.loopKit)
         dosingDecision.insulinOnBoard = displayState.activeInsulin
         dosingDecision.carbsOnBoard = displayState.activeCarbs

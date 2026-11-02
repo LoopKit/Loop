@@ -21,6 +21,11 @@ public struct AlgorithmDisplayState {
         self.output = output
     }
 
+    /// The ISF multiplier slow retrospective correction applied on the last run, 1 when it is off.
+    public var sensitivityMultiplier: Double {
+        output?.slowRetrospectiveCorrection?.multiplier ?? 1
+    }
+
     public var activeInsulin: LoopKit.InsulinValue? {
         guard let input, let value = output?.activeInsulin else {
             return nil
@@ -133,7 +138,8 @@ public extension StoredDataAlgorithmInput {
         }
     }
 
-    func predictGlucose(effectsOptions: AlgorithmEffectsOptions = .all) throws -> [LoopAlgorithm.PredictedGlucoseValue] {
+    /// `sensitivityMultiplier` is slow retrospective correction's, from the algorithm's last run.
+    func predictGlucose(effectsOptions: AlgorithmEffectsOptions = .all, sensitivityMultiplier: Double = 1) throws -> [LoopAlgorithm.PredictedGlucoseValue] {
         try validateCarbScheduleCoverage()
         let prediction = Algorithm.generatePrediction(
             start: predictionStart,
@@ -141,7 +147,9 @@ public extension StoredDataAlgorithmInput {
             doses: doses,
             carbEntries: carbEntries,
             basal: basal,
-            sensitivityMgdlPerUnit: sensitivityMgdlPerUnit,
+            sensitivityMgdlPerUnit: sensitivityMgdlPerUnit.map {
+                LoopAlgorithm.AbsoluteScheduleValue(startDate: $0.startDate, endDate: $0.endDate, value: $0.value * sensitivityMultiplier)
+            },
             carbRatio: carbRatio,
             algorithmEffectsOptions: effectsOptions,
             useIntegralRetrospectiveCorrection: self.useIntegralRetrospectiveCorrection,
@@ -232,8 +240,15 @@ public extension StoredDataAlgorithmInput {
     ) async throws -> StoredDataAlgorithmInput {
         func insulinModel(for type: InsulinType?) -> LoopKit.InsulinModel { insulinModelForType(type) }
 
+        // Slow retrospective correction keeps no state, so it reads its whole window of glucose on every run,
+        // with the carbs and doses that explain it.
+        let slowRetrospectiveCorrectionHistory: TimeInterval? = experiments.contains(.slowRetrospectiveCorrection) ? .hours(72) : nil
+
         // Need to fetch doses back as far as t - (DIA + DCA) for Dynamic carbs
-        let dosesInputHistory = CarbMath.maximumAbsorptionTimeInterval + InsulinMath.defaultInsulinActivityDuration
+        var dosesInputHistory = CarbMath.maximumAbsorptionTimeInterval + InsulinMath.defaultInsulinActivityDuration
+        if let slowRetrospectiveCorrectionHistory {
+            dosesInputHistory = max(dosesInputHistory, slowRetrospectiveCorrectionHistory + InsulinMath.defaultInsulinActivityDuration)
+        }
 
         let baseTime = baseTime ?? now
 
@@ -283,7 +298,12 @@ public extension StoredDataAlgorithmInput {
 
         let forecastEndTime = baseTime.addingTimeInterval(InsulinMath.defaultInsulinActivityDuration).dateCeiledToTimeInterval(GlucoseMath.defaultDelta)
 
-        let carbsStart = baseTime.addingTimeInterval(LoopConstants.maxCarbEntryPastTime + .minutes(-1)) // additional minute to handle difference in seconds between carb entry and carb ratio
+        var glucoseStart = baseTime.addingTimeInterval(LoopConstants.maxCarbEntryPastTime + .minutes(-1)) // additional minute to handle difference in seconds between carb entry and carb ratio
+        var carbsStart = glucoseStart
+        if let slowRetrospectiveCorrectionHistory {
+            glucoseStart = baseTime.addingTimeInterval(-slowRetrospectiveCorrectionHistory)
+            carbsStart = glucoseStart.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval + .minutes(-1))
+        }
         // A pending carb entry can outlive this rolling window while the bolus screen is open.
         // Cover it with schedule history without expanding the stored-carb or glucose queries.
         let carbScheduleStart = min(carbsStart, ensureCarbCoverageStart ?? carbsStart)
@@ -305,7 +325,7 @@ public extension StoredDataAlgorithmInput {
             throw LoopError.configurationError(.carbRatioSchedule)
         }
 
-        let glucose = try await glucoseStore.getGlucoseSamples(start: carbsStart, end: baseTime)
+        let glucose = try await glucoseStore.getGlucoseSamples(start: glucoseStart, end: baseTime)
 
         let dosesWithModel = doses.map { $0.simpleDose(with: insulinModel(for: $0.insulinType)) }
 
@@ -432,32 +452,45 @@ public extension StoredDataAlgorithmInput {
 }
 
 public extension AlgorithmExperiment {
-    /// `LoopDataManager.algorithmExperiments(for:guardAndRunway:)`'s body, shared with the watch: the
+    /// `LoopDataManager.algorithmExperiments(for:output:)`'s body, shared with the watch: the
     /// enabled experiments as a dosing decision records them. Glucose based partial application only
     /// affects automatic boluses, so it is in effect only with that strategy.
     static func records(enabled: Set<ExperimentOption>, dosingStrategy: AutomaticDosingStrategy,
-                        volatilityBaseline: Double?, guardAndRunway: GuardAndRunwayOutput? = nil) -> [AlgorithmExperiment] {
+                        volatilityBaseline: Double?, output: AlgorithmOutput<StoredCarbEntry>? = nil) -> [AlgorithmExperiment] {
         enabled
             .filter { $0 != .glucoseBasedApplicationFactor || dosingStrategy == .automaticBolus }
             .sorted { $0.rawValue < $1.rawValue }
             .map { experiment in
-                guard experiment == .guardAndRunway else {
+                switch experiment {
+                case .guardAndRunway:
+                    return guardAndRunwayRecord(output?.guardAndRunway, volatilityBaseline: volatilityBaseline)
+                case .slowRetrospectiveCorrection:
+                    var parameters: [String: JSONValue] = [:]
+                    if let slow = output?.slowRetrospectiveCorrection {
+                        parameters["level"] = .number(slow.level)
+                        parameters["multiplier"] = .number(slow.multiplier)
+                    }
+                    return AlgorithmExperiment(identifier: experiment.rawValue, parameters: parameters.isEmpty ? nil : .object(parameters))
+                default:
                     return AlgorithmExperiment(identifier: experiment.rawValue)
                 }
-                var parameters: [String: JSONValue] = [:]
-                if let volatilityBaseline {
-                    parameters["volatilityBaseline"] = .number(volatilityBaseline)
-                }
-                if let guardAndRunway {
-                    parameters["volatility"] = .number(guardAndRunway.volatility)
-                    parameters["bandApplied"] = .bool(guardAndRunway.bandApplied)
-                    parameters["bandGain"] = .number(guardAndRunway.bandGain)
-                    parameters["bandDepth"] = .number(guardAndRunway.bandDepth)
-                    parameters["runwayShift"] = .number(guardAndRunway.runwayShift)
-                    parameters["postLowRiseCutActive"] = .bool(guardAndRunway.postLowRiseCutActive)
-                }
-                return AlgorithmExperiment(identifier: experiment.rawValue, parameters: parameters.isEmpty ? nil : .object(parameters))
             }
+    }
+
+    private static func guardAndRunwayRecord(_ guardAndRunway: GuardAndRunwayOutput?, volatilityBaseline: Double?) -> AlgorithmExperiment {
+        var parameters: [String: JSONValue] = ["version": .number(2)]
+        if let volatilityBaseline {
+            parameters["volatilityBaseline"] = .number(volatilityBaseline)
+        }
+        if let guardAndRunway {
+            parameters["volatility"] = .number(guardAndRunway.volatility)
+            parameters["bandApplied"] = .bool(guardAndRunway.bandApplied)
+            parameters["bandGain"] = .number(guardAndRunway.bandGain)
+            parameters["bandDepth"] = .number(guardAndRunway.bandDepth)
+            parameters["runwayShift"] = .number(guardAndRunway.runwayShift)
+            parameters["postLowRiseCutActive"] = .bool(guardAndRunway.postLowRiseCutActive)
+        }
+        return AlgorithmExperiment(identifier: ExperimentOption.guardAndRunway.rawValue, parameters: .object(parameters))
     }
 }
 
