@@ -149,10 +149,10 @@ extension WatchLoopManager {
         FeatureFlags.dosingStrategySelectionEnabled ? settingsProvider.settings.automaticDosingStrategy : .automaticBolus
     }
 
-    /// Stock `LoopDataManager.algorithmExperiments(for:guardAndRunway:)`, from the grant's experiments.
-    func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy, guardAndRunway: GuardAndRunwayOutput? = nil) -> [AlgorithmExperiment] {
+    /// Stock `LoopDataManager.algorithmExperiments(for:output:)`, from the grant's experiments.
+    func algorithmExperiments(for dosingStrategy: AutomaticDosingStrategy, output: AlgorithmOutput<StoredCarbEntry>? = nil) -> [AlgorithmExperiment] {
         AlgorithmExperiment.records(enabled: enabledAlgorithmExperiments, dosingStrategy: dosingStrategy,
-                                    volatilityBaseline: guardAndRunwayEnabled ? volatilityBaseline : nil, guardAndRunway: guardAndRunway)
+                                    volatilityBaseline: guardAndRunwayEnabled ? volatilityBaseline : nil, output: output)
     }
 
     /// The grant's experiment flags as LoopAlgorithm's experiments, with the phone's volatility baseline.
