@@ -393,7 +393,7 @@ final class PodLoanWatchController {
         // sounding while the phone raises the same alert.
         if let pumpIdentifier = pumpManager?.pluginIdentifier {
             let loopManager = self.loopManager
-            Task { await loopManager.retractStandingAlerts(managerIdentifier: pumpIdentifier) }
+            Task { await loopManager.retractStandingAlerts(ofPump: pumpIdentifier) }
         }
         pumpControl?.releaseControl()
         // Still the driver's delegate: the release lets a command under way finish, and its report

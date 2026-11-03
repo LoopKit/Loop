@@ -222,8 +222,16 @@ extension PodLoanWatchController {
         }
 
         // No pod read here: the phone judges the loan by its own read after it takes the pod back.
-        finalOfferSent = true
-        sendHandbackOffer(recovered: false)
+        let pumpIdentifier = manager.pluginIdentifier, loopManager = self.loopManager
+        Task {
+            // The pod's alerts are the phone's from here. Closed before the final offer, so its
+            // records carry the close; one left open, the phone replays at its next launch.
+            await loopManager.retractStandingAlerts(ofPump: pumpIdentifier)
+            DispatchQueue.main.async {
+                self.finalOfferSent = true
+                self.sendHandbackOffer(recovered: false)
+            }
+        }
     }
 
     /// Sends one offer, by every path, and arms the next: a late interim offer only stores records,
