@@ -100,14 +100,17 @@ struct LoopCard<Content: View>: View {
 struct CardHeader<Trailing: View>: View {
     let title: String
     @ViewBuilder var trailing: Trailing
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
+        AdaptiveRow(spacing: typeSize.isAccessibilitySize ? LoopDesign.Space.s1 : LoopDesign.Space.s2) {
             Text(title)
                 .font(LoopDesign.Typeface.headline)
                 .foregroundStyle(LoopDesign.Palette.ink)
                 .accessibilityAddTraits(.isHeader)
-            Spacer(minLength: LoopDesign.Space.s2)
+            if !typeSize.isAccessibilitySize {
+                Spacer(minLength: LoopDesign.Space.s2)
+            }
             trailing
                 .font(LoopDesign.Typeface.footnote)
                 .foregroundStyle(LoopDesign.Palette.inkMuted)
