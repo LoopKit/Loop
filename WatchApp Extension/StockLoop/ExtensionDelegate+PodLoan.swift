@@ -9,7 +9,6 @@
 import Foundation
 import LoopCore
 import LoopKit
-import G7SensorKit
 import UserNotifications
 import WatchConnectivity
 import WatchKit
@@ -72,9 +71,9 @@ extension ExtensionDelegate {
     /// Called from `applicationDidFinishLaunching()`. With the flag off, nothing of Sport Mode starts.
     func podLoanDidFinishLaunching() {
         guard FeatureFlags.sportModeEnabled else { return }
-        NotificationCenter.default.addObserver(forName: G7CGMManager.statusDidChange, object: nil, queue: .main) { note in
-            guard let manager = note.object as? G7CGMManager else { return }
-            if !manager.isSearchingForSensor {
+        NotificationCenter.default.addObserver(forName: watchCGMStatusDidChange, object: nil, queue: .main) { note in
+            guard let manager = note.object as? CGMManager else { return }
+            if !watchCGMIsSearching(manager) {
                 SensorSearchAlert.disarm()
             } else if WKApplication.shared().applicationState != .active {
                 SensorSearchAlert.arm()
@@ -120,7 +119,7 @@ extension ExtensionDelegate {
     func podLoanWillResignActive() {
         guard FeatureFlags.sportModeEnabled else { return }
         NotificationCenter.default.post(name: Self.willResignActiveNotification, object: self)
-        if (WatchCGMHost.shared.cgmManager as? G7CGMManager)?.isSearchingForSensor == true {
+        if watchCGMIsSearching(WatchCGMHost.shared.cgmManager) {
             SensorSearchAlert.arm()
         }
     }
