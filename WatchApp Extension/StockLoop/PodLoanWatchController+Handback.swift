@@ -86,6 +86,17 @@ extension PodLoanWatchController {
         return NSLocalizedString("Sport Mode is ending. Bolus on the iPhone once it has the pod.", comment: "Watch: a bolus refused while an End is waiting for the phone")
     }
 
+    /// Where a bolus asked for on the watch goes. Refused while an End is under way: stock's route
+    /// would send it to the phone, which gives it once it has the pod back.
+    enum BolusRoute: Equatable {
+        case watchPump, stockRouteToPhone, refused(String)
+    }
+
+    func bolusRoute(units: Double) -> BolusRoute {
+        if units > 0, let refusal = bolusRefusalWhileEnding() { return .refused(refusal) }
+        return isLoanActive ? .watchPump : .stockRouteToPhone
+    }
+
     /// Cancellable until `finalizeHandback`.
     func cancelHandback() {
         DispatchQueue.main.async {
