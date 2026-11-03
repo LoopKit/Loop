@@ -17,7 +17,7 @@ final class TrendsModel: ObservableObject {
     struct Summary {
         var interval: DateInterval
         var unit: GlucoseUnitStyle
-        /// CGM readings only: typed-in fingersticks are left out of every figure, as on Statistics.
+        /// CGM readings only: typed-in fingersticks are left out of every figure.
         var glucose: [GlucosePoint] = []
         /// Days from the first reading, when that is short of the period; nil when the readings span it.
         var cgmCoveredDays: Int?

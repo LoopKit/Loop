@@ -65,7 +65,7 @@ final class LoopHistoryProvider {
         loopDataManager.settingsProvider.settings.basalRateSchedule?.total()
     }
 
-    /// The median insulin delivered from midnight to this time of day over the last 14 days, as on Statistics.
+    /// The median insulin delivered from midnight to this time of day over the last 14 days.
     func typicalInsulinByNow() async -> (typical: TypicalInsulinDelivery, at: Date)? {
         guard let history = try? await loopDataManager.insulinDeliveryHistory(days: 14),
               let typical = history.typicalDelivery(by: history.end) else { return nil }
