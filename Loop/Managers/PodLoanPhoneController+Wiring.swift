@@ -46,7 +46,10 @@ extension WatchDataManager {
                 // The grant is the largest message, and its size is what decides whether it can go urgently.
                 if kind == "grant" {
                     let bytes = (try? PropertyListSerialization.data(fromPropertyList: dictionary, format: .binary, options: 0))?.count
-                    PhoneLog.event("wc", "grant: \(bytes.map { String(format: "%.1f KB", Double($0) / 1024) } ?? "size unknown"), \(interactive && session.isReachable ? "urgent and queued" : "queued only: the watch is not reachable")")
+                    let json = (try? LoanProtocol.envelopeData(fromTransport: dictionary))??.count
+                    let how = !interactive ? "queued only: too large for the urgent channel"
+                        : session.isReachable ? "urgent and queued" : "queued only: the watch is not reachable"
+                    PhoneLog.event("wc", "grant: \(bytes.map { String(format: "%.1f KB", Double($0) / 1024) } ?? "size unknown")\(json.map { String(format: " (%.1f KB before compression)", Double($0) / 1024) } ?? ""), \(how)")
                 }
                 guard interactive, session.isReachable else {
                     session.transferUserInfo(dictionary)
