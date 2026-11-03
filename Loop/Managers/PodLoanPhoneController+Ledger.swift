@@ -103,13 +103,22 @@ extension PodLoanPhoneController {
     }
 
     /// The phone loop's dosing gate: a grant is under way, the pod is lent out, a take-back is
-    /// reaching for it, or a take-back's audit has not ruled.
+    /// reaching for it, a take-back's audit has not ruled, or this phone is asking the watch about
+    /// insulin it cannot explain.
     var holdsAutomaticDosing: Bool {
         let saved = persisted
         return grantInFlight
             || (deps.pumpManager() as? ExclusiveDeviceControl)?.isControlReleased == true
             || saved.phase == .reclaimPending || saved.pendingForceAudit != nil
             || Self.watchLoopsThePod(saved)
+            || askingAboutUnexplainedInsulin
+    }
+
+    /// Holding the pod, this phone asks the watch only after a reading shows insulin its records cannot
+    /// explain (rows 5, 17 and 18): the watch may be looping the pod. The cycle that reading feeds doses
+    /// nothing until the answer; silence lets this phone loop again.
+    var askingAboutUnexplainedInsulin: Bool {
+        watchAskedAt != nil && controlRole == .holdsPod
     }
 
     /// The watch loops the pod: lent to it, or this phone standing aside for a loan it never granted.
