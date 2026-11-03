@@ -98,15 +98,42 @@ final class LoopHistoryProvider {
 
     /// The targets that actually applied, including dated presets and changes to the stored profile.
     func glucoseTargetBands(in interval: DateInterval) async throws -> [TargetBand] {
-        if let store = settingsStore {
-            let previous = try await store.getStoredSettings(end: interval.start, limit: 1).first
-            if previous?.glucoseTargetRangeSchedule == nil {
-                let changes = try await store.getStoredSettings(start: interval.start, end: interval.end)
-                // LoopKit's historical query requires at least one valid profile, even if settings records exist.
-                guard changes.contains(where: { $0.glucoseTargetRangeSchedule != nil }) else { return [] }
+        guard let settingsStore else { return [] }
+        return try await loopDataManager.glucoseTargetBands(in: interval, settingsStore: settingsStore)
+    }
+
+    /// SettingsStore's schedule queries extend the first profile backwards to the requested start. Reporting must
+    /// instead leave time before the first saved profile, and settings records without a profile, unknown.
+    private static func settingsHistory(in interval: DateInterval, from store: SettingsStore) async throws -> [(settings: StoredSettings, interval: DateInterval)] {
+        var records = Array(try await store.getStoredSettings(start: interval.start, end: interval.end).reversed())
+        if let previous = try await store.getStoredSettings(end: interval.start, limit: 1).first {
+            records.insert(previous, at: 0)
+        }
+        return records.enumerated().compactMap { index, settings in
+            let start = max(interval.start, settings.date)
+            let end = min(interval.end, index + 1 < records.count ? records[index + 1].date : interval.end)
+            guard end > start else { return nil }
+            return (settings, DateInterval(start: start, end: end))
+        }
+    }
+
+    static func basalHistory(in interval: DateInterval, from store: SettingsStore) async throws -> [AbsoluteScheduleValue<Double>] {
+        let history = try await settingsHistory(in: interval, from: store)
+        return history.flatMap { record in
+            record.settings.basalRateSchedule?.truncatingBetween(start: record.interval.start, end: record.interval.end) ?? []
+        }
+    }
+
+    static func targetHistory(in interval: DateInterval, from store: SettingsStore) async throws -> [TargetBand] {
+        let history = try await settingsHistory(in: interval, from: store)
+        return history.flatMap { record -> [TargetBand] in
+            guard let schedule = record.settings.glucoseTargetRangeSchedule else { return [] }
+            return schedule.truncatingBetween(start: record.interval.start, end: record.interval.end).map {
+                let range = $0.value.quantityRange(for: schedule.unit)
+                return TargetBand(start: $0.startDate, end: $0.endDate,
+                                  range: range.lowerBound.doubleValue(for: .milligramsPerDeciliter)...range.upperBound.doubleValue(for: .milligramsPerDeciliter))
             }
         }
-        return try await loopDataManager.glucoseTargetBands(in: interval)
     }
 
     // MARK: - Days
@@ -312,7 +339,12 @@ final class LoopHistoryProvider {
 
         let boluses = doses.compactMap { BolusEvent(dose: $0, in: interval) }
 
-        let basalHistory = try await loopDataManager.settingsProvider.getBasalHistory(startDate: interval.start, endDate: interval.end)
+        let basalHistory: [AbsoluteScheduleValue<Double>]
+        if let store = settingsStore {
+            basalHistory = try await Self.basalHistory(in: interval, from: store)
+        } else {
+            basalHistory = []
+        }
         let temporaryPresetsManager = self.temporaryPresetsManager
         let overrides = await MainActor.run {
             temporaryPresetsManager.presetHistory.getOverrideHistory(startDate: interval.start, endDate: interval.end)
@@ -433,13 +465,8 @@ final class LoopHistoryProvider {
 
 extension LoopDataManager {
     /// A historical chart must use the profile and presets from that time, rather than repeat today's targets.
-    func glucoseTargetBands(in interval: DateInterval) async throws -> [TargetBand] {
-        guard settingsProvider.settings.glucoseTargetRangeSchedule != nil else { return [] }
-        let schedule = try await settingsProvider.getTargetRangeHistory(startDate: interval.start, endDate: interval.end)
-        var bands = schedule.map {
-            TargetBand(start: max($0.startDate, interval.start), end: min($0.endDate, interval.end),
-                       range: $0.value.lowerBound.doubleValue(for: .milligramsPerDeciliter)...$0.value.upperBound.doubleValue(for: .milligramsPerDeciliter))
-        }
+    func glucoseTargetBands(in interval: DateInterval, settingsStore: SettingsStore) async throws -> [TargetBand] {
+        var bands = try await LoopHistoryProvider.targetHistory(in: interval, from: settingsStore)
         let overrides = temporaryPresetsManager.presetHistory.getOverrideHistory(startDate: interval.start, endDate: interval.end)
         for override in overrides.sorted(by: { $0.startDate < $1.startDate }) {
             guard let target = override.settings.targetRange,
