@@ -31394,9 +31394,6 @@
     "CAUTION - Investigational device. Limited by Federal (or United States) law to investigational use." : {
 
     },
-    "CGM Active" : {
-      "comment" : "Percent of time CGM data present metric title"
-    },
     "Change the pump battery immediately" : {
       "comment" : "The notification alert describing a low pump battery",
       "extractionState" : "manual",
@@ -34644,12 +34641,6 @@
         }
       }
     },
-    "Daily glucose pattern" : {
-      "comment" : "Accessibility label for the daily glucose pattern (AGP) chart"
-    },
-    "Daily Glucose Pattern" : {
-      "comment" : "Daily glucose pattern (AGP) section header"
-    },
     "Date" : {
       "comment" : "Date picker label",
       "localizations" : {
@@ -37158,12 +37149,6 @@
     },
     "During this kind of hard exercise, your body may release hormones that raise glucose. This is more common in the morning before eating." : {
 
-    },
-    "Each 1% time in range ≈ 15 minutes." : {
-      "comment" : "TIR helper"
-    },
-    "Each 5% increase in range is clinically beneficial." : {
-      "comment" : "TIR suggestion"
     },
     "Easy breath. Can carry on a conversation." : {
 
@@ -40896,9 +40881,6 @@
         }
       }
     },
-    "Glucose Metrics" : {
-      "comment" : "Glucose metrics section header"
-    },
     "Glucose Momentum" : {
       "comment" : "Title of the prediction input effect for glucose momentum",
       "localizations" : {
@@ -41172,24 +41154,6 @@
     },
     "Go to Settings > Focus." : {
       "comment" : "Focus modes step 1"
-    },
-    "Goal: <%@" : {
-      "comment" : "Average glucose goal"
-    },
-    "Goal: <1%" : {
-      "comment" : "TIR goal for very low"
-    },
-    "Goal: <5%" : {
-      "comment" : "TIR goal for very high"
-    },
-    "Goal: <7%" : {
-      "comment" : "GMI goal"
-    },
-    "Goal: >70%" : {
-      "comment" : "CGM active goal\nTIR goal for target range"
-    },
-    "Goal: ≤36%" : {
-      "comment" : "Glucose variability goal"
     },
     "grams" : {
 
@@ -42073,9 +42037,6 @@
           }
         }
       }
-    },
-    "In Range" : {
-      "comment" : "Time-in-range band label (70–180 mg/dL)"
     },
     "Includes basal and automated boluses" : {
 
@@ -46685,9 +46646,6 @@
     "Meal Timing" : {
 
     },
-    "Median (line) with 25–75% and 5–95% bands, by time of day." : {
-      "comment" : "AGP chart explanation"
-    },
     "Medium Intensity (Aerobic)" : {
 
     },
@@ -48099,9 +48057,6 @@
     "No Delivery" : {
 
     },
-    "No glucose data for this period." : {
-      "comment" : "Statistics empty state"
-    },
     "No Maximum Bolus Configured" : {
       "comment" : "Alert title for a missing maximum bolus setting error",
       "localizations" : {
@@ -48797,9 +48752,6 @@
     },
     "None in last 24 hours" : {
 
-    },
-    "Not enough data to plot a profile." : {
-      "comment" : "AGP empty state"
     },
     "Not Set" : {
       "comment" : "Health sharing status: not determined"
@@ -54520,9 +54472,6 @@
     "She can do this by raising her **Overall Insulin** setting. This tells %@ to deliver more than her usual amount, making her insulin settings stronger." : {
 
     },
-    "Showing %1$d days of data — not enough for the full %2$d-day period yet." : {
-      "comment" : "Notice when the selected statistics range has incomplete data"
-    },
     "Shows last loop error" : {
       "comment" : "Loop Completion HUD accessibility hint",
       "localizations" : {
@@ -55570,9 +55519,6 @@
     },
     "Starting your exercise with high active insulin" : {
 
-    },
-    "Statistics" : {
-      "comment" : "Statistics screen title\nStatistics settings button text"
     },
     "Stay hydrated" : {
 
@@ -57784,9 +57730,6 @@
     },
     "These recommendations should be used as a starting point. Checking your glucose during exercise will help you find the settings that work best for you." : {
 
-    },
-    "This device keeps %d days of glucose. Increase the cache duration and rebuild to review the full period." : {
-      "comment" : "Notice when the local cache limits the statistics history"
     },
     "This dose still has active insulin. Deleting it may cause Loop to make up for the reduced active insulin by dosing more." : {
       "comment" : "Warning when deleting a Loop-recorded dose that still has active insulin"
@@ -60450,9 +60393,6 @@
           }
         }
       }
-    },
-    "Variability" : {
-      "comment" : "Coefficient of variation metric title"
     },
     "Version" : {
       "comment" : "Label for the app version row in the Support section"

@@ -17,8 +17,6 @@ Please understand that this project:
 <a href="/Documentation/Screenshots/Phone%20Presets.png"><img src="/Documentation/Screenshots/Phone%20Presets.png?raw=true" alt="Presets screen" width="170"></a>
 <a href="/Documentation/Screenshots/Phone%20Live%20Activity.jpg"><img src="/Documentation/Screenshots/Phone%20Live%20Activity.jpg?raw=true" alt="Live Activity on the Lock Screen" width="170"></a>
 
-<a href="/Documentation/Screenshots/Phone%20Statistics.png"><img src="/Documentation/Screenshots/Phone%20Statistics.png?raw=true" alt="Statistics with glucose metrics and time in range" width="170"></a>
-<a href="/Documentation/Screenshots/Phone%20Daily%20Insulin.png"><img src="/Documentation/Screenshots/Phone%20Daily%20Insulin.png?raw=true" alt="Daily insulin totals on the Statistics screen" width="170"></a>
 <a href="/Documentation/Screenshots/Phone%20Add%20CGM.png"><img src="/Documentation/Screenshots/Phone%20Add%20CGM.png?raw=true" alt="Choosing a CGM" width="170"></a>
 
 <a href="/Documentation/Screenshots/Watch%20Home.png"><img src="/Documentation/Screenshots/Watch%20Home.png?raw=true" alt="Apple Watch app" width="141"></a>
@@ -34,7 +32,7 @@ Please understand that this project:
 - **Automated insulin delivery.** Loop forecasts glucose several hours ahead and adjusts delivery with each new glucose reading, using either temporary basal rates or automatic boluses.
 - **Meal and correction boluses** with a recommended amount and a forecast of where glucose is heading. Carb entries can include food type, absorption time and saved favorite foods.
 - **Presets** that temporarily adjust insulin needs and correction range: pre-meal, your own custom presets, and built-in activity presets for walking, jogging, biking and strength training (which can be hidden). Presets can be scheduled, and in-app training explains how to use them.
-- **Statistics**: GMI, average glucose, variability and time in range, an ambulatory glucose profile, and daily insulin totals split into basal, automatic bolus and manual bolus.
+- **Trends**: time in range, GMI, average glucose and variability, a daily glucose pattern, insulin per day split into basal, manual bolus and automatic bolus, and time in closed loop, for one day or for 7 to 90 days.
 - **Live Activity** on the Lock Screen, in the Dynamic Island and on CarPlay.
 - **Apple Watch app** with glucose and forecast, carb entry, bolus and presets.
 - **Alerts** for glucose and device conditions, with urgent alerts that sound even when the phone is silenced or in a Focus.
