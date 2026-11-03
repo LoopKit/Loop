@@ -87,8 +87,8 @@ final class LoopHistoryProvider {
 
     // MARK: - Days
 
-    /// Everything in `window`; IOB and COB only when asked, as they are the slowest part.
-    func dayHistory(_ window: DateInterval, includeOnBoard: Bool = true) async throws -> DayHistory {
+    /// Glucose, insulin and carbs in `window`.
+    func dayHistory(_ window: DateInterval) async throws -> DayHistory {
         var history = DayHistory(window: window)
         let boundary = localHistoryStart
 
@@ -100,12 +100,6 @@ final class LoopHistoryProvider {
             history.glucose = try await glucose
             (history.boluses, history.basal, history.scheduledBasal) = try await insulin
             history.carbs = try await carbs
-            if includeOnBoard {
-                async let iob = localIOB(local)
-                async let cob = localCOB(local)
-                history.iob = try await iob
-                history.cob = try await cob
-            }
         }
 
         if window.start < boundary {
@@ -297,14 +291,6 @@ final class LoopHistoryProvider {
         }
     }
 
-    private func localIOB(_ interval: DateInterval) async throws -> [TimedValue] {
-        try await loopDataManager.insulinOnBoardTimeline(in: interval).map { TimedValue(date: $0.startDate, value: $0.value) }
-    }
-
-    private func localCOB(_ interval: DateInterval) async throws -> [TimedValue] {
-        try await loopDataManager.carbsOnBoardTimeline(in: interval).map { TimedValue(date: $0.startDate, value: $0.quantity.doubleValue(for: .gram)) }
-    }
-
     // MARK: - Apple Health
 
     private func healthSamples(_ type: HKQuantityType, _ interval: DateInterval, options: HKQueryOptions = .strictStartDate) async throws -> [HKQuantitySample] {
@@ -412,7 +398,7 @@ final class LoopModeHistory {
     }
 }
 
-// MARK: - Loop's on-board history
+// MARK: - Historical targets
 
 extension LoopDataManager {
     /// A historical chart must use the profile and presets from that time, rather than repeat today's targets.
@@ -442,23 +428,4 @@ extension LoopDataManager {
         return bands.filter { $0.end > $0.start }.sorted { $0.start < $1.start }
     }
 
-    /// Insulin on board across `interval`, from the doses and basal history Loop keeps, as `iobValues` is for the display window.
-    func insulinOnBoardTimeline(in interval: DateInterval) async throws -> [InsulinValue] {
-        let dosesStart = interval.start.addingTimeInterval(-InsulinMath.defaultInsulinActivityDuration)
-        let doses = try await doseStore.getNormalizedDoseEntries(start: dosesStart, end: interval.end)
-            .map { $0.simpleDose(with: insulinModel(for: $0.insulinType)) }
-        let basalStart = min(dosesStart, doses.map(\.startDate).min() ?? dosesStart)
-        let basal = try await settingsProvider.getBasalHistory(startDate: basalStart, endDate: interval.end)
-        let overrides = temporaryPresetsManager.presetHistory.getOverrideHistory(startDate: basalStart, endDate: interval.end)
-        return doses.annotated(with: overrides.applyBasal(over: basal).algorithmSchedule())
-            .insulinOnBoardTimeline(from: interval.start, to: interval.end)
-            .map(\.loopKit)
-    }
-
-    /// Carbs on board across `interval`, using the same absorption review as Loop's carb screen.
-    func carbsOnBoardTimeline(in interval: DateInterval) async throws -> [CarbValue] {
-        let review = try await fetchCarbAbsorptionReview(start: interval.start.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval), end: interval.end)
-        return review.carbStatuses.dynamicCarbsOnBoard(from: interval.start, to: interval.end, absorptionModel: carbAbsorptionModel.model)
-            .map(\.loopKit)
-    }
 }

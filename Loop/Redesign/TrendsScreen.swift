@@ -98,7 +98,7 @@ final class TrendsModel: ObservableObject {
 
         // A single day is read to midnight, as Today so far is, so the scheduled basal still to come is drawn.
         let fetchWindow = oneDay ? DateInterval(start: interval.start, end: Calendar.current.date(byAdding: .day, value: 1, to: interval.start)!) : interval
-        async let historyFetch = provider.dayHistory(fetchWindow, includeOnBoard: false)
+        async let historyFetch = provider.dayHistory(fetchWindow)
         async let runsFetch = provider.loopRuns()
         var history = try await historyFetch
         let (runs, coverageStart) = try await runsFetch
@@ -240,79 +240,15 @@ final class TrendsModel: ObservableObject {
         let total = String.localizedStringWithFormat(NSLocalizedString("%lld days", comment: "A number of days, e.g. a Trends period or how many days are averaged. (1: number of days)"), s.totals.count)
         return String(format: NSLocalizedString("%1$@ of %2$@", comment: "Trends: how many days of the period are averaged. (1: days averaged, a number; 2: days in the period, e.g. 14 days)"), LoopFormat.number(Double(insulinDays), decimals: 0), total)
     }
-
-    // MARK: Export
-
-    static func exportCSV(_ s: Summary) throws -> URL {
-        // The CSV header and values are deliberately not localised: fixed English columns and '.' decimals for data interchange.
-        var lines = ["date,mean_glucose_\(s.unit.isMmol ? "mmol_l" : "mg_dl"),readings,time_in_range_pct,basal_u,bolus_u,total_u,carbs_g,manual_bolus_u,auto_bolus_u"]
-        let calendar = Calendar.current
-        let byDay = Dictionary(grouping: s.glucose) { calendar.startOfDay(for: $0.date) }
-        for total in s.totals {
-            let readings = byDay[total.day] ?? []
-            let mean = readings.isEmpty ? "" : String(format: "%.*f", locale: Locale(identifier: "en_US_POSIX"),
-                                                      s.unit.isMmol ? 1 : 0, s.unit.value(readings.reduce(0) { $0 + $1.mgdl } / Double(readings.count)))
-            let tir = readings.isEmpty ? "" : String(format: "%.0f", (LoopHistoryMath.timeInRange(readings)[.inRange] ?? 0) * 100)
-            let date = Date.ISO8601FormatStyle(timeZone: .current).year().month().day().format(total.day)
-            let carbs = String(format: "%.0f", s.carbsByDay[total.day] ?? 0)
-            // Left blank when some of the day's bolus doesn't say whether it was manual or automatic.
-            let bolusSplit = total.split.isClassified ? String(format: "%.2f,%.2f", total.split.manualBolus, total.split.automaticBolus) : ","
-            lines.append("\(date),\(mean),\(readings.count),\(tir),\(String(format: "%.2f,%.2f,%.2f", total.basal, total.bolus, total.total)),\(carbs),\(bolusSplit)")
-        }
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent(Self.fileName(s.interval) + ".csv")
-        try lines.joined(separator: "\n").write(to: url, atomically: true, encoding: .utf8)
-        return url
-    }
-
-    func exportPDF(_ s: Summary) throws -> URL {
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent(Self.fileName(s.interval) + ".pdf")
-        let report = TrendsReport(summary: s, tiles: tiles(s))
-            .frame(width: 560)
-            .environment(\.colorScheme, .light)
-        let renderer = ImageRenderer(content: report)
-        renderer.proposedSize = ProposedViewSize(width: 560, height: nil)
-        var thrown: Error?
-        renderer.render { size, draw in
-            var box = CGRect(x: 0, y: 0, width: 612, height: max(792, size.height + 52))
-            guard let consumer = CGDataConsumer(url: url as CFURL), let context = CGContext(consumer: consumer, mediaBox: &box, nil) else {
-                thrown = CocoaError(.fileWriteUnknown)
-                return
-            }
-            context.beginPDFPage(nil)
-            context.translateBy(x: 26, y: box.height - size.height - 26)
-            draw(context)
-            context.endPDFPage()
-            context.closePDF()
-        }
-        if let thrown { throw thrown }
-        return url
-    }
-
-    private static func fileName(_ interval: DateInterval) -> String {
-        String(format: NSLocalizedString("Loop trends %1$@", comment: "File name of an exported Trends report or CSV, without the extension. (1: date range of the period)"),
-               fileStamp(interval))
-    }
-
-    private static func fileStamp(_ interval: DateInterval) -> String {
-        LoopFormat.range(interval.start, interval.end.addingTimeInterval(-1)).replacingOccurrences(of: " – ", with: " to ")
-    }
 }
 
 // MARK: - Screen
 
 struct TrendsView: View {
     @StateObject private var model: TrendsModel
-    @State private var path: [TrendsRoute] = []
-    @State private var exportURL: URL?
-    @State private var exportError: String?
 
     /// Closes Trends when it is presented on its own; nil where Trends has nowhere to return to.
     private let done: (() -> Void)?
-
-    enum TrendsRoute: Hashable {
-        case day(Date)
-        case gaps
-    }
 
     init(provider: LoopHistoryProvider, done: (() -> Void)? = nil) {
         _model = StateObject(wrappedValue: TrendsModel(provider: provider))
@@ -320,7 +256,7 @@ struct TrendsView: View {
     }
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: LoopDesign.Space.s6, pinnedViews: [.sectionHeaders]) {
                     Section {
@@ -344,27 +280,10 @@ struct TrendsView: View {
                     }
                 }
             }
-            .navigationDestination(for: TrendsRoute.self) { route in
-                switch route {
-                case .day(let day):
-                    DayDetailView(provider: model.provider, day: day)
-                case .gaps:
-                    LoopGapsList(spans: model.summary?.loopSpans ?? [])
-                }
-            }
         }
         .onAppear { model.reload() }
         .onChange(of: model.period) { _, _ in model.reload() }
         .onChange(of: model.endDay) { _, _ in model.reload() }
-        .sheet(item: $exportURL) { url in
-            ShareSheet(items: [url])
-        }
-        .alert(NSLocalizedString("Couldn't export", comment: "Alert title when exporting the Trends PDF or CSV fails"),
-               isPresented: Binding(get: { exportError != nil }, set: { if !$0 { exportError = nil } })) {
-            Button(NSLocalizedString("OK", comment: "Button to dismiss an alert"), role: .cancel) {}
-        } message: {
-            Text(exportError ?? "")
-        }
     }
 
     @ViewBuilder
@@ -414,9 +333,7 @@ struct TrendsView: View {
                              : NSLocalizedString("basal and bolus", comment: "Trends Insulin per day card subtitle when each bar is one day's basal and bolus"))
                     }
                     InsulinDailyTotalsView(totals: s.totals.count > 30 ? LoopHistoryMath.weekly(s.totals) : s.totals,
-                                           weekly: s.totals.count > 30, average: s.insulinPerDay) { day in
-                        path.append(.day(day))
-                    }
+                                           weekly: s.totals.count > 30, average: s.insulinPerDay)
                     ChartLegend(items: insulinLegend(s))
                     if let today = todaySoFar(s) {
                         Footnote(today)
@@ -424,11 +341,7 @@ struct TrendsView: View {
                 }
             }
             LoopCard {
-                CardHeader(title: NSLocalizedString("Loop status", comment: "Trends card title: how long Loop spent in closed loop, limited or open loop")) {
-                    Button(NSLocalizedString("Gaps", comment: "Trends Loop status button and screen title: list of times Loop wasn't in closed loop")) { path.append(.gaps) }
-                        .foregroundStyle(P.accentInk)
-                        .disabled(s.loopSpans.isEmpty)
-                }
+                CardHeader(title: NSLocalizedString("Loop status", comment: "Trends card title: how long Loop spent in closed loop, limited or open loop"))
                 LoopModeBarView(spans: s.loopSpans)
                 if let note = coverageNote(s) {
                     Footnote(note)
@@ -447,14 +360,8 @@ struct TrendsView: View {
     /// The same timeline as Today so far: glucose, every bolus and basal change, and carbs, through the day.
     private func dayCard(_ day: DayHistory, targets: [TargetBand], unit: GlucoseUnitStyle) -> some View {
         let isToday = Calendar.current.isDateInToday(day.window.start)
-        return Button {
-            path.append(.day(day.window.start))
-        } label: {
-            DayTimelineCard(title: isToday ? DayTimelineCard.todayTitle : LoopFormat.weekdayDay(day.window.start),
-                            history: day, unit: unit, targetBands: targets, height: 260, showsTotals: false)
-        }
-        .buttonStyle(.plain)
-        .accessibilityHint(NSLocalizedString("Opens the full day", comment: "VoiceOver hint for the Today so far card on the Now screen"))
+        return DayTimelineCard(title: isToday ? DayTimelineCard.todayTitle : LoopFormat.weekdayDay(day.window.start),
+                               history: day, unit: unit, targetBands: targets, height: 260)
     }
 
     private func patternCard(_ s: TrendsModel.Summary) -> some View {
@@ -471,13 +378,7 @@ struct TrendsView: View {
 
     private func summaryCard(_ s: TrendsModel.Summary) -> some View {
         LoopCard {
-            CardHeader(title: NSLocalizedString("Summary", comment: "Trends card title: the summary statistics tiles")) {
-                Menu(NSLocalizedString("Export", comment: "Trends menu title: export the period as a PDF report or CSV file")) {
-                    Button(NSLocalizedString("PDF report", comment: "Trends export menu item: share a PDF report of the period")) { export { try model.exportPDF(s) } }
-                    Button(NSLocalizedString("CSV, one row per day", comment: "Trends export menu item: share a CSV spreadsheet file with one row for each day")) { export { try TrendsModel.exportCSV(s) } }
-                }
-                .foregroundStyle(P.accentInk)
-            }
+            CardHeader(title: NSLocalizedString("Summary", comment: "Trends card title: the summary statistics tiles"))
             if let covered = s.cgmCoveredDays {
                 Footnote(String(format: NSLocalizedString("CGM data covers %1$@.", comment: "Trends Summary note when glucose readings start partway through the period. (1: days covered, e.g. 5 of 14 days)"),
                                 daysOf(covered, s.totals.count)))
@@ -511,14 +412,6 @@ struct TrendsView: View {
                       LoopFormat.totalUnits(today.total), LoopFormat.totalUnits(usual.typical.median), LoopFormat.time(usual.at))
     }
 
-    private func export(_ make: () throws -> URL) {
-        do {
-            exportURL = try make()
-        } catch {
-            exportError = error.localizedDescription
-        }
-    }
-
     /// The figures are on the Basal and bolus card above, so the legend only names the marks.
     private func insulinLegend(_ s: TrendsModel.Summary) -> [LegendItem] {
         [
@@ -541,20 +434,6 @@ struct TrendsView: View {
     }
 }
 
-extension URL: @retroactive Identifiable {
-    public var id: String { absoluteString }
-}
-
-struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-
-    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
-}
-
 /// A card's quiet closing line: a target, a caveat or a comparison.
 private struct Footnote: View {
     let text: String
@@ -568,56 +447,5 @@ private struct Footnote: View {
             .font(LoopDesign.Typeface.footnote)
             .foregroundStyle(P.inkMuted)
             .fixedSize(horizontal: false, vertical: true)
-    }
-}
-
-// MARK: - PDF report
-
-/// The Trends cards laid out for paper.
-private struct TrendsReport: View {
-    let summary: TrendsModel.Summary
-    let tiles: [StatTile]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: LoopDesign.Space.s4) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(NSLocalizedString("Loop trends", comment: "Title of the exported Trends PDF report")).font(.title2.bold())
-                Text(LoopFormat.range(summary.interval.start, summary.interval.end.addingTimeInterval(-1)))
-                    .font(.subheadline)
-                    .foregroundStyle(P.inkMuted)
-            }
-            StatGridView(tiles: tiles)
-            HStack(alignment: .top, spacing: LoopDesign.Space.s4) {
-                VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
-                    Text(NSLocalizedString("Time in range", comment: "Trends card title: share of glucose readings in each range")).font(.headline)
-                    TimeInRangeView(fractions: summary.timeInRange, unit: summary.unit)
-                }
-                .frame(maxWidth: .infinity)
-            }
-            if let day = summary.day {
-                VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
-                    Text(LoopFormat.weekdayDay(day.window.start)).font(.headline)
-                    InsulinTimelineView(history: day, unit: summary.unit, targetBands: summary.dayTargets, height: 220)
-                    ChartLegend(items: DayTotalsTiles.legend)
-                }
-            } else {
-                VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
-                    Text(NSLocalizedString("Daily pattern", comment: "Trends card title: the ambulatory glucose profile, glucose by time of day across the period")).font(.headline)
-                    TrendsAGPChart(slots: summary.agp, readings: summary.glucose, days: summary.agpDays, unit: summary.unit,
-                                 targetRange: summary.targetRange, height: 160)
-                }
-                VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
-                    Text(NSLocalizedString("Insulin per day", comment: "Trends tile and card title: average total insulin per day")).font(.headline)
-                    InsulinDailyTotalsView(totals: summary.totals.count > 30 ? LoopHistoryMath.weekly(summary.totals) : summary.totals,
-                                           weekly: summary.totals.count > 30, average: summary.insulinPerDay, height: 140)
-                }
-            }
-            VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
-                Text(NSLocalizedString("Loop status", comment: "Trends card title: how long Loop spent in closed loop, limited or open loop")).font(.headline)
-                LoopModeBarView(spans: summary.loopSpans)
-            }
-        }
-        .padding(LoopDesign.Space.s2)
-        .background(Color.white)
     }
 }
