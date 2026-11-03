@@ -700,10 +700,12 @@ class LoopDataManagerTests: XCTestCase {
             LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: low)...LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: high)
         }
         let window = DateInterval(start: d(-.hours(3)), end: d(-.minutes(30)))
-        settingsProvider.targetRangeHistory = [
-            AbsoluteScheduleValue(startDate: window.start, endDate: d(-.hours(2)), value: target(100, 110)),
-            AbsoluteScheduleValue(startDate: d(-.hours(2)), endDate: window.end, value: target(120, 130)),
-        ]
+        let store = try await reportingSettingsStore([
+            StoredSettings(date: window.start, glucoseTargetRangeSchedule: GlucoseRangeSchedule(
+                unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: DoubleRange(minValue: 100, maxValue: 110))], timeZone: .utcTimeZone)),
+            StoredSettings(date: d(-.hours(2)), glucoseTargetRangeSchedule: GlucoseRangeSchedule(
+                unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: DoubleRange(minValue: 120, maxValue: 130))], timeZone: .utcTimeZone)),
+        ])
         var preset = TemporaryScheduleOverride(context: .custom,
                                              settings: TemporaryPresetSettings(targetRange: target(150, 160), insulinNeedsScaleFactor: 1),
                                              startDate: d(-.minutes(150)), duration: .finite(.hours(2)),
@@ -711,7 +713,7 @@ class LoopDataManagerTests: XCTestCase {
         preset.actualEnd = .early(d(-.minutes(90)))
         temporaryPresetsManager.presetHistory.recordOverride(preset, at: d(-.minutes(150)))
 
-        let bands = try await loopDataManager.glucoseTargetBands(in: window)
+        let bands = try await loopDataManager.glucoseTargetBands(in: window, settingsStore: store)
         XCTAssertEqual(bands, [
             TargetBand(start: window.start, end: d(-.minutes(150)), range: 100...110),
             TargetBand(start: d(-.minutes(150)), end: d(-.minutes(90)), range: 150...160),
@@ -720,9 +722,62 @@ class LoopDataManagerTests: XCTestCase {
     }
 
     func testTargetBandsAreUnknownBeforeTherapyIsConfigured() async throws {
-        settingsProvider.settings.glucoseTargetRangeSchedule = nil
-        let bands = try await loopDataManager.glucoseTargetBands(in: DateInterval(start: d(-.hours(3)), end: now))
+        // Today's profile must not fill in a period whose saved settings had no profile.
+        let store = try await reportingSettingsStore([StoredSettings(date: d(-.hours(4)))])
+        let bands = try await loopDataManager.glucoseTargetBands(in: DateInterval(start: d(-.hours(3)), end: now), settingsStore: store)
         XCTAssertTrue(bands.isEmpty)
+    }
+
+    func testReportingSchedulesLeaveUnrecordedHistoryUnknown() async throws {
+        let window = DateInterval(start: d(-.hours(4)), end: now)
+        let first = window.start.addingTimeInterval(.hours(1))
+        let missing = first.addingTimeInterval(.hours(1))
+        let resumed = missing.addingTimeInterval(.hours(1))
+        func profile(at date: Date, rate: Double, target: Double) -> StoredSettings {
+            StoredSettings(date: date, glucoseTargetRangeSchedule: GlucoseRangeSchedule(
+                unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: DoubleRange(minValue: target, maxValue: target + 10))], timeZone: .utcTimeZone),
+                           basalRateSchedule: BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: rate)], timeZone: .utcTimeZone))
+        }
+        let store = try await reportingSettingsStore([
+            profile(at: first, rate: 1, target: 100),
+            StoredSettings(date: missing),
+            profile(at: resumed, rate: 2, target: 120),
+        ])
+
+        let basal = try await LoopHistoryProvider.basalHistory(in: window, from: store)
+        let schedule = basal.map { LoopHistoryMath.ScheduleValue(start: $0.startDate, end: $0.endDate, rate: $0.value) }
+        let delivered = LoopHistoryMath.basalSegments(window: window, schedule: schedule, deliveries: [],
+                                                       programmedRates: schedule, recordsStart: window.start)
+        XCTAssertEqual(delivered.reduce(0) { $0 + $1.units }, 3, accuracy: 1e-9,
+                       "Only the two recorded hours can supply inferred basal, not the earlier time or missing profile")
+        XCTAssertNil(LoopHistoryMath.scheduledUnits(basal.map { ScheduledBasalPoint(start: $0.startDate, end: $0.endDate, rate: $0.value) }, over: window))
+        let targets = try await loopDataManager.glucoseTargetBands(in: window, settingsStore: store)
+        XCTAssertEqual(targets, [TargetBand(start: first, end: missing, range: 100...110),
+                                 TargetBand(start: resumed, end: window.end, range: 120...130)])
+
+        // A query starting during a known profile still includes the setting saved before its start.
+        let inside = DateInterval(start: first.addingTimeInterval(.minutes(30)), end: missing)
+        let partial = try await LoopHistoryProvider.basalHistory(in: inside, from: store)
+        XCTAssertEqual(partial.first?.startDate, inside.start)
+        XCTAssertEqual(partial.reduce(0) { $0 + $1.value * $1.endDate.timeIntervalSince($1.startDate) / 3600 }, 0.5, accuracy: 1e-9)
+        let before = DateInterval(start: window.start, end: first)
+        let earlierBasal = try await LoopHistoryProvider.basalHistory(in: before, from: store)
+        let earlierTargets = try await loopDataManager.glucoseTargetBands(in: before, settingsStore: store)
+        XCTAssertTrue(earlierBasal.isEmpty)
+        XCTAssertTrue(earlierTargets.isEmpty)
+    }
+
+    private func reportingSettingsStore(_ settings: [StoredSettings]) async throws -> SettingsStore {
+        let store = SettingsStore(store: PersistenceController.mock(), expireAfter: .days(3650))
+        for record in settings {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                store.storeSettings(record) { error in
+                    if let error { continuation.resume(throwing: error) }
+                    else { continuation.resume() }
+                }
+            }
+        }
+        return store
     }
 
     func testFetchDataWithHighInsulinNeedsPresetMitigation() async throws {
