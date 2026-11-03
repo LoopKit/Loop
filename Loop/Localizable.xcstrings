@@ -3608,6 +3608,149 @@
         }
       }
     },
+    "+ %1$@ automatic, %2$@ unknown" : {
+      "comment" : "Trends Boluses per day tile detail when some boluses don't say whether they were manual or automatic, such as another app's in Apple Health. (1: automatic boluses per day; 2: boluses of unknown kind per day; both fractional, such as 4.2)",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ تلقائية، %2$@ غير معروفة"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automatických, %2$@ neznámých"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automatiske, %2$@ ukendte"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automatisch, %2$@ unbekannt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automáticos, %2$@ desconocidos"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automaattista, %2$@ tuntematonta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automatiques, %2$@ inconnus"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ אוטומטיים, %2$@ לא ידועים"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automatikus, %2$@ ismeretlen"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automatici, %2$@ sconosciuti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ 自動 %1$@、不明 %2$@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automatiske, %2$@ ukjente"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automatisch, %2$@ onbekend"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automatycznych, %2$@ nieznanych"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automáticos, %2$@ desconhecidos"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automate, %2$@ necunoscute"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ автоматических, %2$@ неизвестных"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automatických, %2$@ neznámych"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ automatiska, %2$@ okända"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ otomatik, %2$@ bilinmeyen"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ автоматичних, %2$@ невідомих"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %1$@ tự động, %2$@ không rõ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ 自动 %1$@，未知 %2$@"
+          }
+        }
+      }
+    },
     "25–75%" : {
       "comment" : "Trends Daily pattern legend: band between the 25th and 75th percentiles of glucose",
       "localizations" : {
@@ -10760,6 +10903,149 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "当前"
+          }
+        }
+      }
+    },
+    "Older days come from Apple Health, which doesn't record the basal schedule, or whether another app's bolus was manual or automatic." : {
+      "comment" : "Trends Insulin per day footnote when the period reaches back past Loop's own records, so scheduled basal or the manual and automatic split can't be shown",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأيام الأقدم مأخوذة من Apple Health، الذي لا يسجّل جدول القاعدي، ولا ما إذا كانت جرعة تطبيق آخر يدوية أم تلقائية."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starší dny pocházejí z Apple Health, který nezaznamenává plán bazálu ani to, zda byl bolus z jiné aplikace ruční, nebo automatický."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ældre dage kommer fra Apple Health, som ikke registrerer basalplanen, eller om en anden apps bolus var manuel eller automatisk."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ältere Tage stammen aus Apple Health. Dort sind weder das Basalprogramm noch die Angabe gespeichert, ob ein Bolus aus einer anderen App manuell oder automatisch war."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los días anteriores provienen de Apple Health, que no registra el programa basal ni si un bolo de otra app fue manual o automático."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vanhemmat päivät tulevat Apple Healthista, joka ei tallenna basaaliohjelmaa eikä sitä, oliko toisen apin bolus manuaalinen vai automaattinen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les jours plus anciens viennent d'Apple Santé, qui n'enregistre ni le programme basal, ni si un bolus d'une autre app était manuel ou automatique."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ימים ישנים יותר מגיעים מ-Apple Health, שאינו שומר את תוכנית הבזאלי, או אם בולוס מאפליקציה אחרת היה ידני או אוטומטי."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A régebbi napok az Apple Egészségből származnak, amely nem rögzíti a bázisprogramot, sem azt, hogy egy másik app bólusa kézi vagy automatikus volt-e."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I giorni precedenti provengono da Apple Salute, che non registra il programma basale, né se un bolo di un'altra app era manuale o automatico."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "それ以前の日はAppleヘルスケアのデータです。ベーサルのスケジュールや、他のAppのボーラスが手動か自動かは記録されません。"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eldre dager kommer fra Apple Helse, som ikke registrerer basalplanen, eller om en annen apps bolus var manuell eller automatisk."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oudere dagen komen uit Apple Gezondheid, dat het basaalschema niet vastlegt, en ook niet of een bolus van een andere app handmatig of automatisch was."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starsze dni pochodzą z Apple Zdrowie, które nie zapisuje harmonogramu bazy ani tego, czy bolus z innej aplikacji był ręczny, czy automatyczny."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dias mais antigos vêm do app Saúde, que não registra a programação basal nem se o bolus de outro app foi manual ou automático."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zilele mai vechi provin din Apple Sănătate, care nu înregistrează programul bazal sau dacă un bolus din altă aplicație a fost manual ori automat."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Более ранние дни взяты из Apple Здоровье, где не хранятся базальная программа и то, был ли болюс из другого приложения ручным или автоматическим."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staršie dni pochádzajú z Apple Zdravie, ktoré nezaznamenáva plán bazálu ani to, či bol bolus z inej aplikácie manuálny, alebo automatický."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Äldre dagar kommer från Apple Hälsa, som inte registrerar basalschemat, eller om en annan apps bolus var manuell eller automatisk."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha eski günler Apple Sağlık'tan gelir; bazal programı veya başka bir uygulamanın bolusunun manuel mi otomatik mi olduğu orada kaydedilmez."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Давніші дні взято з Apple Здоровʼя, де не зберігаються базальна програма та те, чи був болюс з іншої програми ручним чи автоматичним."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Các ngày cũ hơn lấy từ Apple Sức khỏe, nơi không ghi lại lịch basal, hay liều bolus của ứng dụng khác là thủ công hay tự động."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "较早的日子来自 Apple“健康”，其中不记录基础率计划，也不记录其他 App 的大剂量是手动还是自动。"
           }
         }
       }

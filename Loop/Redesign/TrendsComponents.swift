@@ -484,6 +484,12 @@ struct InsulinSplitView: View {
     var partial = false
     /// What the basal schedule delivers over the same time, shown under the basal row.
     var scheduledBasal: Double?
+    /// How many of the days the schedule covers, e.g. "20 of 90 days", when that is fewer than the split's.
+    var scheduledNote: String?
+    /// Manual and automatic bolus over only the days that say which each bolus was, when some days don't.
+    var classifiedSplit: InsulinSplit?
+    /// How many days `classifiedSplit` covers, e.g. "60 of 90 days".
+    var classifiedNote: String?
     /// Today against a usual day, e.g. "Usually 28.4 U by 19:46", under the total.
     var usual: String?
     /// The split as one capsule, where no chart above already draws it.
@@ -499,16 +505,19 @@ struct InsulinSplitView: View {
             VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
                 row(.basal, NSLocalizedString("Basal", comment: "Basal and bolus row: insulin delivered as basal"), split.basal, split.basalPercent)
                 if let scheduledBasal {
-                    part(.dash(LoopDesign.Palette.basalScheduled), String(format: NSLocalizedString("Scheduled %1$@", comment: "Basal and bolus: what the basal schedule delivers over the same time, under the basal row. (1: units, e.g. 18.0 U)"), LoopFormat.totalUnits(scheduledBasal)))
+                    part(.dash(LoopDesign.Palette.basalScheduled), Self.scheduledText(scheduledBasal, note: scheduledNote))
                         .font(LoopDesign.Typeface.footnote.monospacedDigit())
                         .foregroundStyle(LoopDesign.Palette.inkMuted)
                         .padding(.leading, 10 + LoopDesign.Space.s2)
                 }
                 row(.solid(LoopDesign.Palette.bolus), NSLocalizedString("Bolus", comment: "Basal and bolus row: insulin delivered as bolus, manual and automatic"), split.bolus, split.bolusPercent)
-                if split.isClassified && split.bolus > 0 {
+                if let detail = bolusDetail, split.bolus > 0 {
                     FlowLayout(spacing: LoopDesign.Space.s3, lineSpacing: 2) {
-                        part(.solid(LoopDesign.Palette.bolus), String(format: NSLocalizedString("Manual %1$@", comment: "Basal and bolus: bolus the person gave. (1: units, e.g. 16.2 U)"), LoopFormat.totalUnits(split.manualBolus)))
-                        part(.hatch(LoopDesign.Palette.bolus), String(format: NSLocalizedString("Automatic %1$@", comment: "Basal and bolus: bolus Loop gave automatically. (1: units, e.g. 5.4 U)"), LoopFormat.totalUnits(split.automaticBolus)))
+                        part(.solid(LoopDesign.Palette.bolus), String(format: NSLocalizedString("Manual %1$@", comment: "Basal and bolus: bolus the person gave. (1: units, e.g. 16.2 U)"), LoopFormat.totalUnits(detail.manualBolus)))
+                        part(.hatch(LoopDesign.Palette.bolus), String(format: NSLocalizedString("Automatic %1$@", comment: "Basal and bolus: bolus Loop gave automatically. (1: units, e.g. 5.4 U)"), LoopFormat.totalUnits(detail.automaticBolus)))
+                        if let classifiedNote {
+                            Text(verbatim: "· \(classifiedNote)")
+                        }
                     }
                     .font(LoopDesign.Typeface.footnote.monospacedDigit())
                     .foregroundStyle(LoopDesign.Palette.inkMuted)
@@ -538,7 +547,19 @@ struct InsulinSplitView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Self.accessibilityLabel(split, partial: partial, scheduledBasal: scheduledBasal, usual: usual))
+        .accessibilityLabel(Self.accessibilityLabel(split, partial: partial, scheduledBasal: scheduledBasal.map { Self.scheduledText($0, note: scheduledNote) },
+                                                    bolusDetail: bolusDetail, bolusDetailNote: classifiedNote, usual: usual))
+    }
+
+    /// The whole split's manual and automatic bolus, or only the days that record it; nil when nothing does.
+    private var bolusDetail: InsulinSplit? {
+        classifiedSplit ?? (split.isClassified ? split : nil)
+    }
+
+    /// "Scheduled 18.0 U", or "Scheduled 18.0 U · 20 of 90 days" when the schedule is known for only some days.
+    private static func scheduledText(_ units: Double, note: String?) -> String {
+        let text = String(format: NSLocalizedString("Scheduled %1$@", comment: "Basal and bolus: what the basal schedule delivers over the same time, under the basal row. (1: units, e.g. 18.0 U)"), LoopFormat.totalUnits(units))
+        return note.map { "\(text) · \($0)" } ?? text
     }
 
     private func row(_ swatch: LegendItem.Swatch, _ label: String, _ units: Double, _ percent: Int) -> some View {
@@ -565,21 +586,23 @@ struct InsulinSplitView: View {
         }
     }
 
-    static func accessibilityLabel(_ split: InsulinSplit, partial: Bool, scheduledBasal: Double? = nil, usual: String? = nil) -> String {
+    static func accessibilityLabel(_ split: InsulinSplit, partial: Bool, scheduledBasal: String? = nil, bolusDetail: InsulinSplit? = nil,
+                                   bolusDetailNote: String? = nil, usual: String? = nil) -> String {
         var parts = [
             String(format: NSLocalizedString("Basal %1$@, %2$@ percent", comment: "VoiceOver: basal units and share. (1: units, 2: percentage number)"), LoopFormat.totalUnits(split.basal), "\(split.basalPercent)"),
             String(format: NSLocalizedString("Bolus %1$@, %2$@ percent", comment: "VoiceOver: bolus units and share. (1: units, 2: percentage number)"), LoopFormat.totalUnits(split.bolus), "\(split.bolusPercent)"),
         ]
-        if split.isClassified && split.bolus > 0 {
-            parts.append(String(format: NSLocalizedString("%1$@ manual, %2$@ automatic", comment: "VoiceOver: how the bolus divides. (1: manual units, 2: automatic units)"),
-                                LoopFormat.totalUnits(split.manualBolus), LoopFormat.totalUnits(split.automaticBolus)))
+        if let detail = bolusDetail, split.bolus > 0 {
+            let text = String(format: NSLocalizedString("%1$@ manual, %2$@ automatic", comment: "VoiceOver: how the bolus divides. (1: manual units, 2: automatic units)"),
+                              LoopFormat.totalUnits(detail.manualBolus), LoopFormat.totalUnits(detail.automaticBolus))
+            parts.append(bolusDetailNote.map { "\(text), \($0)" } ?? text)
         }
         parts.append(String(format: partial
                             ? NSLocalizedString("Total so far %1$@", comment: "VoiceOver: today's total insulin so far. (1: units)")
                             : NSLocalizedString("Total %1$@", comment: "VoiceOver: total insulin. (1: units)"),
                             LoopFormat.totalUnits(split.total)))
         if let scheduledBasal {
-            parts.insert(String(format: NSLocalizedString("Scheduled %1$@", comment: "Basal and bolus: what the basal schedule delivers over the same time, under the basal row. (1: units, e.g. 18.0 U)"), LoopFormat.totalUnits(scheduledBasal)), at: 1)
+            parts.insert(scheduledBasal, at: 1)
         }
         if let usual {
             parts.append(usual)

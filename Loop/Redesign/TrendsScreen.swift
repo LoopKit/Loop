@@ -33,13 +33,20 @@ final class TrendsModel: ObservableObject {
         var carbsByDay: [Date: Double] = [:]
         var manualBoluses = 0
         var automaticBoluses = 0
+        /// Boluses whose record doesn't say whether Loop or the person gave them, such as another app's in Apple Health.
+        var unknownBoluses = 0
         var loopSpans: [LoopModeSpan] = []
         var targetRange: ClosedRange<Double>?
         /// The whole calendar day, for a one-day period: drawn as one timeline.
         var day: DayHistory?
         var dayTargets: [TargetBand] = []
-        /// What the basal schedule delivers over the same days the split averages.
+        /// What the basal schedule delivers per day, over the averaged days Loop has its schedule for.
         var scheduledBasal: Double?
+        /// The averaged days `scheduledBasal` covers: Apple Health doesn't record the schedule for older days.
+        var scheduledDays = 0
+        /// Manual and automatic bolus per day over the averaged days that say which each bolus was, when some don't.
+        var classifiedSplit: InsulinSplit?
+        var classifiedDays = 0
         /// The median insulin by this time of day over the last 14 days, when the period ends now.
         var typicalByNow: (typical: TypicalInsulinDelivery, at: Date)?
 
@@ -139,18 +146,21 @@ final class TrendsModel: ObservableObject {
         summary.carbGrams = carbs.reduce(0) { $0 + $1.grams }
         summary.carbEntries = carbs.count
         let boluses = history.boluses.filter { inAveragedDays($0.date) }
-        summary.manualBoluses = boluses.filter { !$0.automatic }.count
-        summary.automaticBoluses = boluses.filter(\.automatic).count
+        summary.manualBoluses = boluses.filter { $0.automaticKnown && !$0.automatic }.count
+        summary.automaticBoluses = boluses.filter { $0.automaticKnown && $0.automatic }.count
+        summary.unknownBoluses = boluses.filter { !$0.automaticKnown }.count
 
-        // Days the stored profile history doesn't reach (older ones, read from Health) use today's schedule.
+        // Only days Loop has its schedule for: older days come from Health, which doesn't record it.
         let spans = Dictionary(uniqueKeysWithValues: LoopHistoryMath.days(in: interval).map { ($0.start, $0) })
-        let perDay = provider.scheduledBasalPerDay
-        let scheduled = insulinDays.compactMap { day -> Double? in
-            guard let span = spans[day.day] else { return nil }
-            return LoopHistoryMath.scheduledUnits(history.scheduledBasal, over: span) ?? perDay.map { $0 * span.duration / 86400 }
-        }
-        if !scheduled.isEmpty, scheduled.count == insulinDays.count {
+        let scheduled = insulinDays.compactMap { day in spans[day.day].flatMap { LoopHistoryMath.scheduledUnits(history.scheduledBasal, over: $0) } }
+        if !scheduled.isEmpty {
             summary.scheduledBasal = scheduled.reduce(0, +) / Double(scheduled.count)
+            summary.scheduledDays = scheduled.count
+        }
+        let classified = insulinDays.filter(\.split.isClassified)
+        if !classified.isEmpty, classified.count < insulinDays.count {
+            summary.classifiedSplit = InsulinSplit.average(classified.map(\.split))
+            summary.classifiedDays = classified.count
         }
         if interval.end.timeIntervalSinceNow > -300 {
             summary.typicalByNow = await provider.typicalInsulinByNow()
@@ -201,8 +211,12 @@ final class TrendsModel: ObservableObject {
                                 ? NSLocalizedString("Boluses", comment: "Trends summary tile for a one-day period: how many manual boluses were given that day")
                                 : NSLocalizedString("Boluses per day", comment: "Trends summary tile: average number of manual boluses per day"),
                               value: LoopFormat.number(Double(s.manualBoluses) / s.days, decimals: countDecimals), unit: nil,
-                              detail: String(format: NSLocalizedString("+ %1$@ automatic", comment: "Trends Boluses per day tile detail: average number of automatic boluses per day on top of the manual ones, a fractional value such as 4.2. (1: number with one decimal)"),
-                                             LoopFormat.number(Double(s.automaticBoluses) / s.days, decimals: countDecimals))))
+                              detail: s.unknownBoluses > 0
+                                ? String(format: NSLocalizedString("+ %1$@ automatic, %2$@ unknown", comment: "Trends Boluses per day tile detail when some boluses don't say whether they were manual or automatic, such as another app's in Apple Health. (1: automatic boluses per day; 2: boluses of unknown kind per day; both fractional, such as 4.2)"),
+                                         LoopFormat.number(Double(s.automaticBoluses) / s.days, decimals: countDecimals),
+                                         LoopFormat.number(Double(s.unknownBoluses) / s.days, decimals: countDecimals))
+                                : String(format: NSLocalizedString("+ %1$@ automatic", comment: "Trends Boluses per day tile detail: average number of automatic boluses per day on top of the manual ones, a fractional value such as 4.2. (1: number with one decimal)"),
+                                         LoopFormat.number(Double(s.automaticBoluses) / s.days, decimals: countDecimals))))
         return tiles
     }
 
@@ -333,11 +347,19 @@ struct TrendsView: View {
                     InsulinDailyTotalsView(totals: weekly ? LoopHistoryMath.weekly(s.totals) : s.totals, weekly: weekly, average: s.insulinPerDay)
                 }
                 // Under the chart, the rows name its marks, so there is no separate legend.
+                let averaged = LoopHistoryMath.averagingDays(s.totals).count
                 InsulinSplitView(split: s.split, partial: s.splitIsPartial, scheduledBasal: s.scheduledBasal,
+                                 scheduledNote: s.scheduledDays < averaged ? daysOf(s.scheduledDays, averaged) : nil,
+                                 classifiedSplit: s.classifiedSplit,
+                                 classifiedNote: s.classifiedSplit != nil ? daysOf(s.classifiedDays, averaged) : nil,
                                  usual: s.day != nil && s.splitIsPartial ? usualByNow(s) : nil, showsBar: s.day != nil,
                                  averageLine: s.day == nil)
                 if s.day == nil, let today = todaySoFar(s) {
                     Footnote(today)
+                }
+                // Days read from Apple Health have no schedule, and other apps' boluses there don't say which they were.
+                if s.interval.start < model.provider.localHistoryStart, s.scheduledBasal == nil || (s.split.bolus > 0 && !s.split.isClassified && s.classifiedSplit == nil) {
+                    Footnote(NSLocalizedString("Older days come from Apple Health, which doesn't record the basal schedule, or whether another app's bolus was manual or automatic.", comment: "Trends Insulin per day footnote when the period reaches back past Loop's own records, so scheduled basal or the manual and automatic split can't be shown"))
                 }
             } else {
                 ChartPlaceholder(message: NSLocalizedString("No insulin recorded in this period", comment: "Trends Insulin per day chart placeholder when no insulin was delivered in the period"), height: 80)

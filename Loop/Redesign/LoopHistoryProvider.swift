@@ -14,9 +14,10 @@ import os
 
 /// Reads glucose, insulin, carbs and loop runs for the redesigned screens.
 ///
-/// Loop keeps `LOOP_LOCAL_CACHE_DURATION_DAYS` (7) days in its own stores. Inside that window everything comes from
-/// those stores, so manual and automatic doses, temp basals and the schedule are known. Older days come from Apple
-/// Health, which has glucose, carbs and insulin split only into basal and bolus.
+/// Loop keeps `LOOP_LOCAL_CACHE_DURATION_DAYS` (90 by default) days in its own stores. Inside that window everything
+/// comes from those stores, so manual and automatic doses, temp basals and the schedule are known. Older days come from
+/// Apple Health, which has glucose, carbs and insulin split into basal and bolus, and whether Loop gave a bolus
+/// automatically only for the doses Loop wrote, but not the basal schedule.
 final class LoopHistoryProvider {
 
     private let deviceManager: DeviceDataManager
@@ -62,12 +63,6 @@ final class LoopHistoryProvider {
     var glucoseTargetRange: ClosedRange<Double>? {
         guard let range = temporaryPresetsManager.effectiveCorrectionRange() else { return nil }
         return range.lowerBound.doubleValue(for: .milligramsPerDeciliter)...range.upperBound.doubleValue(for: .milligramsPerDeciliter)
-    }
-
-    /// What the basal schedule delivers in a day, for days the stored profile history doesn't reach.
-    @MainActor
-    var scheduledBasalPerDay: Double? {
-        loopDataManager.settingsProvider.settings.basalRateSchedule?.total()
     }
 
     /// The median insulin delivered from midnight to this time of day over the last 14 days.

@@ -174,7 +174,8 @@ extension InsulinSplit {
 enum HistorySource {
     /// Loop's own stores: manual versus automatic, temp basals and the schedule are all known.
     case loop
-    /// Apple Health, for days older than Loop keeps. Doses are split into basal and bolus only.
+    /// Apple Health, for days older than Loop keeps. There is no basal schedule, and only the boluses Loop wrote say
+    /// whether they were automatic.
     case health
 }
 
