@@ -186,7 +186,13 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func sendSetBolusUserInfo(carbEntry: NewCarbEntry?, bolus: Double) async throws {
-        if let session = loanSessionIfActive { return podLoanDeliverOnWrist(carbEntry: carbEntry, bolus: bolus, session: session) }
+        if let session = podLoanSession {
+            switch session.loanController.bolusRoute(units: bolus) {
+            case .watchPump: return podLoanDeliverOnWrist(carbEntry: carbEntry, bolus: bolus, session: session)
+            case .refused(let reason): return podLoanRefuseBolus(bolus, reason: reason)
+            case .stockRouteToPhone: break
+            }
+        }
 
         let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), contextDate: self.contextDate, carbEntry: carbEntry, activationType: .activationTypeFor(recommendedAmount: recommendedBolusAmount, bolusAmount: bolus))
         // The phone saves the entry and pushes a context with it in COB before

@@ -95,6 +95,14 @@ struct GlanceUIState {
     var handbackPending: Bool = false
 
     var handbackStartedAt: Date? = nil
+
+    /// A failed pod: what the kit says, its deactivation action, the attempt and its error, and the
+    /// pod deactivated (rows 26 and 27).
+    var podFaultText: String? = nil
+    var deactivateTitle: String? = nil
+    var deactivating: Bool = false
+    var deactivateError: String? = nil
+    var podDeactivated: Bool = false
 }
 
 /// Repaints come from the 2 s tick, the glance snapshot's observer, explicit refreshes and the freshness
@@ -105,6 +113,9 @@ final class GlanceViewModel: ObservableObject {
 
     /// Hides the idle frame until the first controller snapshot is read.
     @Published var hasControllerState = false
+
+    /// The Deactivate confirmation, asked for by the button or by the pod alarm's notification.
+    @Published var confirmingDeactivation = false
 
     /// A loan in any phase but idle, from the controller itself: `state` can still show the frame from
     /// before the phase change its observers are reacting to.
@@ -159,6 +170,9 @@ final class GlanceViewModel: ObservableObject {
             center.addObserver(forName: ExtensionDelegate.willResignActiveNotification,
                                object: nil, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated { self?.stopRefreshing() }
+            },
+            center.addObserver(forName: .podLoanDeactivateRequested, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.askToDeactivate() }
             },
         ]
     }
@@ -281,6 +295,20 @@ final class GlanceViewModel: ObservableObject {
 
         session.loanController.requestLoan(watchBuild: build)
         refresh()
+    }
+
+    /// Only while the kit offers it: a pod that recovered, or is already deactivated, is not asked about.
+    func askToDeactivate() {
+        refresh()
+        confirmingDeactivation = state.deactivateTitle != nil && !state.deactivating
+    }
+
+    func deactivatePod() {
+        guard !isPreview else { state.deactivating = true; return }
+        WKInterfaceDevice.current().play(.click)
+        state.deactivating = true
+        ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController.deactivateFailedPod()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in self?.refresh() }
     }
 
     /// The watch keeps dosing and stays cancellable until the phone acks the records.
@@ -442,6 +470,19 @@ final class GlanceViewModel: ObservableObject {
                Date().timeIntervalSince(at) < 20 {
                 s.bolusDelivery = nil
                 s.transientText = text
+            }
+
+            // A failed pod replaces the prediction and the rail; a deactivated one says what happens next.
+            s.podFaultText = snap.podFault
+            s.deactivateTitle = snap.failedPodDeactivationTitle
+            s.deactivating = snap.deactivatingPod
+            s.deactivateError = snap.podDeactivationError
+            if snap.podDeactivated {
+                s.podDeactivated = true
+                s.transientText = nil
+                s.idleNote = snap.phoneReachable
+                    ? NSLocalizedString("Pod deactivated. Ending Sport Mode…", comment: "Glance note after the faulted pod was deactivated on the watch, phone in reach")
+                    : NSLocalizedString("Pod deactivated. Your iPhone ends Sport Mode when it's back. Pair a new pod there.", comment: "Glance note after the faulted pod was deactivated on the watch, phone away")
             }
             state = s
             // COB arrives asynchronously, so this frame drew the previous value and only a CHANGE

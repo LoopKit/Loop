@@ -105,6 +105,34 @@ final class LoanHistoryTests: XCTestCase {
         XCTAssertLessThanOrEqual(record.issuedDate, try XCTUnwrap(record.acknowledgedDate))
     }
 
+    /// When the pod goes home or is deactivated, every alert it raised closes, including the fault
+    /// alarm it files under a name of its own: an alert left open, the phone replays at its next launch.
+    func testThePodsStandingAlertsCloseWhateverNameTheyAreFiledUnder() async throws {
+        let manager = await makeManager()
+        manager.pumpManager = try makePump()
+        let content = LoopKit.Alert.Content(title: "Occlusion Detected", body: "Insulin delivery stopped. Change Pod now.",
+                                            acknowledgeActionButtonLabel: "OK")
+        let fault = LoopKit.Alert(identifier: .init(managerIdentifier: "Omni:pumpFault", alertIdentifier: "Fault Event Code 0x14: Occluded"),
+                                  foregroundContent: content, backgroundContent: content, trigger: .immediate)
+        let low = LoopKit.Alert(identifier: .init(managerIdentifier: "Omni", alertIdentifier: "lowReservoir"),
+                                foregroundContent: content, backgroundContent: content, trigger: .immediate)
+        let sensor = LoopKit.Alert(identifier: .init(managerIdentifier: "G7CGMManager", alertIdentifier: "signalLoss"),
+                                   foregroundContent: content, backgroundContent: content, trigger: .immediate)
+        manager.issueAlert(fault)
+        manager.issueAlert(low)
+        manager.issueAlert(sensor)
+
+        await manager.retractStandingAlerts(ofPump: "Omni")
+
+        let faultRecords = try await stored(manager, fault)
+        let lowRecords = try await stored(manager, low)
+        let sensorRecords = try await stored(manager, sensor)
+        XCTAssertNotNil(faultRecords.first?.retractedDate, "the fault alarm is the pod's, though filed as Omni:pumpFault")
+        XCTAssertNotNil(lowRecords.first?.retractedDate)
+        XCTAssertNil(sensorRecords.first?.retractedDate, "another device's alert stands")
+        XCTAssertEqual(scheduler.pending.map(\.identifier), [WatchAlertPresenter.requestIdentifier(for: sensor.identifier)])
+    }
+
     /// The lookups a kit may call answer from the store, as stock's do.
     func testTheLookupsAnswerFromTheStore() async throws {
         let manager = await makeManager()

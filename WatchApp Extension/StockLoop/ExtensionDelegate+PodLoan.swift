@@ -89,6 +89,11 @@ extension ExtensionDelegate {
     func podLoanHandleAlertResponse(_ response: UNNotificationResponse) async -> Bool {
         let request = response.notification.request
         guard FeatureFlags.sportModeEnabled, WatchAlertPresenter.isWristAlert(request.identifier) else { return false }
+        // Deactivate Pod opened the app: the glance asks for the confirmation.
+        if response.actionIdentifier == WatchAlertPresenter.deactivateAction {
+            await MainActor.run { NotificationCenter.default.post(name: .podLoanDeactivateRequested, object: nil) }
+            return true
+        }
         guard WatchAlertPresenter.acknowledges(response.actionIdentifier),
               let identifier = WatchAlertPresenter.alertIdentifier(in: request.content.userInfo) else { return true }
         stockLoopSession?.stack.loopManager.recordAlertAcknowledgement(identifier)

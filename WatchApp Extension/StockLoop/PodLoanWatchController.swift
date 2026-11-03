@@ -21,6 +21,9 @@ extension Notification.Name {
     static let manualBolusStateDidChange = Notification.Name("com.loopkit.Loop.manualBolusStateDidChange")
 
     static let carbAndBolusFlowDidComplete = Notification.Name("com.loopkit.Loop.carbAndBolusFlowDidComplete")
+
+    /// Deactivate Pod tapped on a failed pod's alert: the glance asks for the confirmation.
+    static let podLoanDeactivateRequested = Notification.Name("com.loopkit.Loop.podLoanDeactivateRequested")
 }
 
 /// Why a hand-back gets no acks. A wedge is claimed only after three offers with the phone
@@ -393,7 +396,7 @@ final class PodLoanWatchController {
         // sounding while the phone raises the same alert.
         if let pumpIdentifier = pumpManager?.pluginIdentifier {
             let loopManager = self.loopManager
-            Task { await loopManager.retractStandingAlerts(managerIdentifier: pumpIdentifier) }
+            Task { await loopManager.retractStandingAlerts(ofPump: pumpIdentifier) }
         }
         pumpControl?.releaseControl()
         // Still the driver's delegate: the release lets a command under way finish, and its report
@@ -419,7 +422,11 @@ final class PodLoanWatchController {
     /// Persisted only once the loan is active (a fold persists at once).
     var pendingSeizeToken: UUID?
 
-    /// The odometer captured before a revoke tears the pump down.
+    /// The faulted pod is being deactivated, and why the last attempt failed.
+    var deactivatingPod = false
+    var podDeactivationError: String?
+
+    /// The odometer captured before a revoke tears the pump down, or before a deactivated pod is forgotten.
     var revokeCapturedDelivered: Double?
 
     var revokeCapturedDeliveredAt: Date?

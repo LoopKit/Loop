@@ -23,6 +23,12 @@ extension PodLoanPhoneController {
 
     /// Called on every route back to `.owner`, before `.owner` is announced.
     func beginReclaimSettleWindow() {
+        // No pod to reach: it was deactivated on the watch and forgotten.
+        if reclaimForgotPod {
+            reclaimDisplayAnchor = nil
+            deps.endReclaimBackgroundTask()
+            return
+        }
         let started = deps.now()
         reclaimStartedAt = started
         reclaimVerifiedAt = nil
@@ -111,9 +117,15 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// Verified means a reading newer than the window's start.
+    /// Verified means a reading newer than the window's start, or a final one.
     func attemptReclaimVerificationNow(started: Date) {
         guard reclaimStartedAt == started, reclaimVerifiedAt == nil else { return }
+        // A failed pump refuses reads, and its last total, however early, is final.
+        if let odometer = deps.pumpManager() as? PumpDeliveryOdometer, odometer.deliveredUnitsAreFinal,
+           odometer.deliveredUnits != nil {
+            noteReclaimVerified(started: started, how: "the pump has stopped for good, so its last total is final")
+            return
+        }
         if deps.isConnectionReady(), !reclaimVerifyInFlight, let pump = deps.pumpManager() {
             reclaimVerifyInFlight = true
             let read: (@escaping (Date?) -> Void) -> Void
@@ -136,19 +148,9 @@ extension PodLoanPhoneController {
 
                     if let sync = lastSync, sync > started {
                         let elapsed = self.deps.now().timeIntervalSince(started)
-                        self.reclaimVerifiedAt = self.deps.now()
-                        self.reclaimSettleWork?.cancel()
-                        self.reclaimStartedAt = nil
-                        self.reclaimDisplayAnchor = nil
-                        self.deps.endReclaimBackgroundTask()
-
                         let linkWait = self.reclaimLinkUpAt.map { $0.timeIntervalSince(started) } ?? elapsed
-                        self.handbackDiag(self.epoch,
-                            String(format: "back in control of the pod after %.0f s: link up at %.1f s, %d stale reads",
-                                   elapsed, linkWait, self.reclaimStaleReads))
-                        self.deps.ownershipDidChange()
-
-                        self.finishPendingHandbackAudit()
+                        self.noteReclaimVerified(started: started, how: String(format: "link up at %.1f s, %d stale reads",
+                                                                               linkWait, self.reclaimStaleReads))
                     } else {
                         // Stale read: counted, to tell a caching failure from a radio one.
                         self.reclaimStaleReads += 1
@@ -156,6 +158,20 @@ extension PodLoanPhoneController {
                 }
             }
         }
+    }
+
+    private func noteReclaimVerified(started: Date, how: String) {
+        let elapsed = deps.now().timeIntervalSince(started)
+        reclaimVerifiedAt = deps.now()
+        reclaimSettleWork?.cancel()
+        reclaimStartedAt = nil
+        reclaimDisplayAnchor = nil
+        deps.endReclaimBackgroundTask()
+
+        handbackDiag(epoch, String(format: "back in control of the pod after %.0f s: %@", elapsed, how))
+        deps.ownershipDidChange()
+
+        finishPendingHandbackAudit()
     }
 
     /// At the verified round-trip: read the pod's total, rule on the loan, then cancel the watch's
@@ -205,6 +221,25 @@ extension PodLoanPhoneController {
 
         // The watch's temp ends here, after the reading.
         cancelWatchTemp(epoch: pending.epoch)
+    }
+
+    /// The pod was deactivated on the watch, so the phone cannot read it: the watch's last reading,
+    /// which came with the hand-back, stands in. A take-back has none, and nothing is ruled.
+    func ruleOnWatchReading(_ pending: PendingHandbackAudit) {
+        defer {
+            pendingHandbackAudit = nil
+            loanStartedAt = nil
+        }
+        guard pending.flavor == .handback, let latest = pending.watchLatest else {
+            handbackDiag(pending.epoch, "no insulin check: the pod was deactivated on the watch and no reading of it came home")
+            return
+        }
+        let delivered = latest - pending.deliveredAtStart
+        let residual = ((delivered - pending.expected) * 1000).rounded() / 1000
+        handbackDiag(pending.epoch, String(format:
+            "hand-back check on the watch's last reading, the pod being deactivated: delivered %.3f U, expected %.3f U, residual %+.3f U over %.0f min",
+            delivered, pending.expected, residual, pending.loanMinutes))
+        applyReconciliationVerdict(residual: residual, epoch: pending.epoch)
     }
 
     /// On failure the watch's temp runs until the phone's next cycle.

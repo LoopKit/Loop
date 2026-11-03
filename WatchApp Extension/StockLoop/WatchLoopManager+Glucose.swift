@@ -93,7 +93,10 @@ extension WatchLoopManager: AlertIssuer, PersistedAlertStore {
     /// The watch is the only device hearing the pump during a loan.
     func issueAlert(_ alert: LoopKit.Alert) {
         SportLog.event("alert", "alert \(alert.identifier.value) issued: \(alert.backgroundContent.title)")
-        WatchAlertPresenter.present(alert)
+        // The failed pod's own alerts offer to end it, the alarm with it.
+        let offersDeactivation = pumpManager.map { Self.isAlert(alert.identifier.managerIdentifier, ofPump: $0.pluginIdentifier) } == true
+            && (pumpManager as? ExclusiveDeviceControl)?.failedDeviceDeactivationTitle != nil
+        WatchAlertPresenter.present(alert, offeringDeactivation: offersDeactivation)
         guard pumpManager != nil else { return }
         recordAlert { await $0.recordIssued(alert: alert) }
     }
@@ -106,10 +109,17 @@ extension WatchLoopManager: AlertIssuer, PersistedAlertStore {
         recordAlert { try? await $0.recordRetraction(of: identifier) }
     }
 
-    /// Every alert from one manager still standing on the wrist, withdrawn.
-    func retractStandingAlerts(managerIdentifier: String) async {
-        let standing = (try? await lookupAllUnretracted(managerIdentifier: managerIdentifier)) ?? []
-        for persisted in standing { await retractAlert(identifier: persisted.alert.identifier) }
+    /// Every alert of the pump still standing on the wrist, withdrawn and recorded as retracted.
+    func retractStandingAlerts(ofPump pluginIdentifier: String) async {
+        guard let alertStore = await settledAlertStore() else { return }
+        let standing = ((try? await alertStore.lookupAllUnretracted()) ?? [])
+            .filter { Self.isAlert($0.managerIdentifier, ofPump: pluginIdentifier) }
+        for stored in standing { retractAlert(identifier: stored.identifier) }
+    }
+
+    /// A pump files some alerts under names of its own, such as the pod's "Omni:pumpFault".
+    static func isAlert(_ managerIdentifier: String, ofPump pluginIdentifier: String) -> Bool {
+        managerIdentifier.hasPrefix(pluginIdentifier)
     }
 
     /// The wrist's OK or dismissal, recorded as stock `AlertManager.acknowledgeAlert` records it,
