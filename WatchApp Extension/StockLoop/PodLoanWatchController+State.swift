@@ -37,6 +37,8 @@ struct PodLoanWatchState: RawRepresentable {
     var ledgerLast: (units: Double, at: Date)?
     /// The reunion token for a seized loan, echoed by every offer until the loan closes.
     var seizeToken: UUID?
+    /// The loan in which the looper deactivated the faulted pod here; told to the phone until it closes.
+    var podDeactivatedEpoch: Int?
     /// The dosing decision store's query anchor as of the last decisions sent home.
     var dosingDecisionsSent: [String: Any]?
     /// The alert store's query anchor as of the last alerts sent home.
@@ -58,6 +60,7 @@ struct PodLoanWatchState: RawRepresentable {
             ledgerLast = (units: units, at: at)
         }
         seizeToken = (rawValue["seizeToken"] as? String).flatMap(UUID.init(uuidString:))
+        podDeactivatedEpoch = rawValue["podDeactivatedEpoch"] as? Int
         dosingDecisionsSent = rawValue["dosingDecisionsSent"] as? [String: Any]
         alertsSent = rawValue["alertsSent"] as? [String: Any]
         deviceLogSent = rawValue["deviceLogSent"] as? Date
@@ -79,6 +82,7 @@ struct PodLoanWatchState: RawRepresentable {
         raw["ledgerLastUnits"] = ledgerLast?.units
         raw["ledgerLastAt"] = ledgerLast?.at
         raw["seizeToken"] = seizeToken?.uuidString
+        raw["podDeactivatedEpoch"] = podDeactivatedEpoch
         raw["dosingDecisionsSent"] = dosingDecisionsSent
         raw["alertsSent"] = alertsSent
         raw["deviceLogSent"] = deviceLogSent

@@ -29,6 +29,8 @@ struct PodLoanPhoneState: RawRepresentable {
     /// When this phone last took control on silence (a query unanswered); a revived watch's claim to a
     /// loan started before it is refused.
     var tookOverOnSilenceAt: Date?
+    /// The loan in which the looper deactivated the pod on the watch: the next return forgets the pod.
+    var podDeactivatedOnWatch: Int?
 
     /// The watch has asked for a loan at least once; no standing copy goes to a watch that never has.
     var watchUsesSportMode = false
@@ -83,6 +85,7 @@ struct PodLoanPhoneState: RawRepresentable {
         holdRenewedAt = rawValue["holdRenewedAt"] as? Date
         recordsCurrentAt = rawValue["recordsCurrentAt"] as? Date
         tookOverOnSilenceAt = rawValue["tookOverOnSilenceAt"] as? Date
+        podDeactivatedOnWatch = rawValue["podDeactivatedOnWatch"] as? Int
         watchUsesSportMode = rawValue["watchUsesSportMode"] as? Bool ?? false
         seizeToken = (rawValue["seizeToken"] as? String).flatMap(UUID.init(uuidString:))
         loanStartedAt = rawValue["loanStartedAt"] as? Date
@@ -104,6 +107,7 @@ struct PodLoanPhoneState: RawRepresentable {
         raw["holdRenewedAt"] = holdRenewedAt
         raw["recordsCurrentAt"] = recordsCurrentAt
         raw["tookOverOnSilenceAt"] = tookOverOnSilenceAt
+        raw["podDeactivatedOnWatch"] = podDeactivatedOnWatch
         raw["loanStartedAt"] = loanStartedAt
         raw["pendingForceAudit"] = pendingForceAudit.map {
             ["epoch": $0.epoch, "atStart": $0.deliveredAtStart, "from": $0.from, "expected": $0.expected, "loanMinutes": $0.loanMinutes]
@@ -153,6 +157,8 @@ extension PodLoanPhoneController {
         // can be asked at once.
         watchAskedAt = nil
         if oldValue != .owner, state == .owner {
+            // The return has forgotten or taken the pod; a mark never outlives its loan.
+            if persisted.podDeactivatedOnWatch != nil { updateState { $0.podDeactivatedOnWatch = nil } }
             beginReclaimSettleWindow()
         }
         deps.ownershipDidChange()

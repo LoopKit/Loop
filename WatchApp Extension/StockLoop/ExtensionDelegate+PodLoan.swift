@@ -9,7 +9,6 @@
 import Foundation
 import LoopCore
 import LoopKit
-import G7SensorKit
 import UserNotifications
 import WatchConnectivity
 import WatchKit
@@ -72,9 +71,9 @@ extension ExtensionDelegate {
     /// Called from `applicationDidFinishLaunching()`. With the flag off, nothing of Sport Mode starts.
     func podLoanDidFinishLaunching() {
         guard FeatureFlags.sportModeEnabled else { return }
-        NotificationCenter.default.addObserver(forName: G7CGMManager.statusDidChange, object: nil, queue: .main) { note in
-            guard let manager = note.object as? G7CGMManager else { return }
-            if !manager.isSearchingForSensor {
+        NotificationCenter.default.addObserver(forName: watchCGMStatusDidChange, object: nil, queue: .main) { note in
+            guard let manager = note.object as? CGMManager else { return }
+            if !watchCGMIsSearching(manager) {
                 SensorSearchAlert.disarm()
             } else if WKApplication.shared().applicationState != .active {
                 SensorSearchAlert.arm()
@@ -90,6 +89,11 @@ extension ExtensionDelegate {
     func podLoanHandleAlertResponse(_ response: UNNotificationResponse) async -> Bool {
         let request = response.notification.request
         guard FeatureFlags.sportModeEnabled, WatchAlertPresenter.isWristAlert(request.identifier) else { return false }
+        // Deactivate Pod opened the app: the glance asks for the confirmation.
+        if response.actionIdentifier == WatchAlertPresenter.deactivateAction {
+            await MainActor.run { NotificationCenter.default.post(name: .podLoanDeactivateRequested, object: nil) }
+            return true
+        }
         guard WatchAlertPresenter.acknowledges(response.actionIdentifier),
               let identifier = WatchAlertPresenter.alertIdentifier(in: request.content.userInfo) else { return true }
         stockLoopSession?.stack.loopManager.recordAlertAcknowledgement(identifier)
@@ -117,7 +121,7 @@ extension ExtensionDelegate {
     func podLoanWillResignActive() {
         guard FeatureFlags.sportModeEnabled else { return }
         NotificationCenter.default.post(name: Self.willResignActiveNotification, object: self)
-        if (WatchCGMHost.shared.cgmManager as? G7CGMManager)?.isSearchingForSensor == true {
+        if watchCGMIsSearching(WatchCGMHost.shared.cgmManager) {
             SensorSearchAlert.arm()
         }
     }

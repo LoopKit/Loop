@@ -78,6 +78,11 @@ extension CarbAndBolusFlowViewModel {
         return content
     }
 
+    /// The Sport Mode session, loan or not.
+    var podLoanSession: StockLoopSession? {
+        ExtensionDelegate.sharedIfAvailable()?.stockLoopSession
+    }
+
     /// The Sport Mode session while a loan is live; nil otherwise.
     var loanSessionIfActive: StockLoopSession? {
         guard let session = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession,
@@ -114,6 +119,14 @@ extension CarbAndBolusFlowViewModel {
         }
     }
 
+    /// An End is under way: the pod is going back to the phone, so no bolus starts, by the watch's
+    /// pump or stock's route (nor its carbs, which the looper enters with it on the phone).
+    func podLoanRefuseBolus(_ bolus: Double, reason: String) {
+        SportLog.event("bolus-ui", String(format: "bolus of %.2f U refused: an End is waiting", bolus))
+        Self.notifyBolusFailure(units: bolus, carbGrams: nil, error: BolusRefusedWhileEnding(reason: reason))
+        WKInterfaceDevice.current().play(.failure)
+    }
+
     /// Called from `sendSetBolusUserInfo(carbEntry:bolus:)` while a loan is live: the phone has
     /// released the pod, so the bolus goes to the watch's pump, and the carbs to the local store
     /// and the loan journal rather than the stock relay.
@@ -130,14 +143,6 @@ extension CarbAndBolusFlowViewModel {
     /// entry in its decision.
     private static func podLoanDeliver(carbEntry: NewCarbEntry?, bolus: Double,
                                                    activationType: BolusActivationType, session: StockLoopSession) {
-        // An End is waiting: the pod is going back to the phone, so no bolus starts (nor its carbs, which
-        // the looper enters with it on the phone).
-        if bolus > 0, let refusal = session.loanController.bolusRefusalWhileEnding() {
-            SportLog.event("bolus-ui", String(format: "bolus of %.2f U refused: an End is waiting", bolus))
-            notifyBolusFailure(units: bolus, carbGrams: nil, error: BolusRefusedWhileEnding(reason: refusal))
-            DispatchQueue.main.async { WKInterfaceDevice.current().play(.failure) }
-            return
-        }
         guard let carbEntry else {
             if bolus > 0 {
                 deliverLoanBolus(units: bolus, activationType: activationType, carbEntry: nil, storedCarbEntry: nil, session: session)

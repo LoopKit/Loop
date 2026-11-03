@@ -97,9 +97,21 @@ extension PodLoanPhoneController {
         sendMessage(.revoke(Revoke(epoch: closed)))
     }
 
-    /// Take the radio back; every route back to ownership must call it.
+    /// Take the radio back; every route back to ownership must call it. A pod the looper deactivated
+    /// on the watch is forgotten instead (rows 26 and 27).
     func reclaimPodConnection() {
         guard let control = deps.pumpManager() as? ExclusiveDeviceControl else { return }
+        if let deactivatedIn = persisted.podDeactivatedOnWatch {
+            // Only the pod this phone let go of: one paired here since is not the watch's to end.
+            guard control.isControlReleased else {
+                updateState { $0.podDeactivatedOnWatch = nil }
+                handbackDiag(deactivatedIn, "the watch deactivated a pod this phone no longer holds released; nothing forgotten")
+                return reclaimPodConnection()
+            }
+            forgetPodDeactivatedOnWatch(control, loan: deactivatedIn)
+            return
+        }
+        reclaimForgotPod = false
         let wasReleased = control.isControlReleased
         control.takeControl()
         if wasReleased { deps.pumpControlChanged(false) }
@@ -227,8 +239,10 @@ extension PodLoanPhoneController {
         if report.holdsPod {
             let loan: LoanControl.ClaimedLoan = report.epoch > epoch ? .newer
                 : (report.epoch == epoch && state != .owner ? .current : .closed)
+            if report.podDeactivated, loan != .closed { notePodDeactivatedOnWatch(loan: report.epoch) }
             let claim = LoanControl.Claim(loan: loan, startedAt: report.loanStartedAt, podReachable: report.podReachable,
-                                          refusedBefore: refusedRevivedEpochs.contains(report.epoch))
+                                          refusedBefore: refusedRevivedEpochs.contains(report.epoch),
+                                          podDeactivated: report.podDeactivated)
             let decision = decideAndAct(.watchClaims(claim), why: "the watch says it holds the pod on e\(report.epoch)",
                                         claimEpoch: report.epoch)
             if loan == .newer {
@@ -273,6 +287,29 @@ extension PodLoanPhoneController {
             handbackDiag(report.epoch, "the watch reports a pod fault: \(fault)")
             noticePodFault(fault, epoch: report.epoch)
         }
+    }
+
+    /// Kept until the phone's next return to the pod, which forgets it.
+    func notePodDeactivatedOnWatch(loan: Int) {
+        guard persisted.podDeactivatedOnWatch != loan else { return }
+        updateState { $0.podDeactivatedOnWatch = loan }
+        handbackDiag(loan, "the watch deactivated the pod; this phone forgets it when Sport Mode ends")
+    }
+
+    /// The watch booked the pod's last delivery, so nothing is booked here, and there is no pod to read:
+    /// the insulin check rules on the watch's last reading, and no settle window opens.
+    private func forgetPodDeactivatedOnWatch(_ control: ExclusiveDeviceControl, loan: Int) {
+        updateState { $0.podDeactivatedOnWatch = nil }
+        reclaimForgotPod = true
+        if let pending = pendingHandbackAudit {
+            ruleOnWatchReading(pending)
+        }
+        Task { await control.forgetDeviceDeactivatedElsewhere() }
+        deps.pumpControlChanged(false)
+        handbackDiag(loan, "the pod was deactivated on the watch: forgotten here; pair a new pod")
+        deps.issueUrgentNotice(
+            NSLocalizedString("Pod Deactivated on the Watch", comment: "Phone notice title: the looper deactivated the faulted pod on the watch"),
+            NSLocalizedString("Pair a new pod to resume insulin delivery.", comment: "Phone notice body: the looper deactivated the faulted pod on the watch"))
     }
 
     /// The watch alarms too, but the user may be nearer the phone.

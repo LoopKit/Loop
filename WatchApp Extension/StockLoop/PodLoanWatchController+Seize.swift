@@ -99,7 +99,8 @@ extension PodLoanWatchController {
             holdsPod: true,
             knowsGrant: true,
             podReachable: podReachedLately,
-            loanStartedAt: persisted.deliveredAtTakeoverAt)
+            loanStartedAt: persisted.deliveredAtTakeoverAt,
+            podDeactivated: persisted.podDeactivatedEpoch == current)
     }
 
     /// Latest-only: a new copy replaces the old.

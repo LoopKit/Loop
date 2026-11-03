@@ -56,12 +56,16 @@ public enum LoanControl {
         public var podReachable: Bool?
         /// The phone already refused this loan as a revived claim.
         public var refusedBefore: Bool
+        /// The looper deactivated the pod on the watch.
+        public var podDeactivated: Bool
 
-        public init(loan: ClaimedLoan, startedAt: Date? = nil, podReachable: Bool? = nil, refusedBefore: Bool = false) {
+        public init(loan: ClaimedLoan, startedAt: Date? = nil, podReachable: Bool? = nil, refusedBefore: Bool = false,
+                    podDeactivated: Bool = false) {
             self.loan = loan
             self.startedAt = startedAt
             self.podReachable = podReachable
             self.refusedBefore = refusedBefore
+            self.podDeactivated = podDeactivated
         }
     }
 
@@ -74,6 +78,8 @@ public enum LoanControl {
         case backFromOff
         /// A message from the phone while no loan runs: the watch hears the phone, which loops (state 1).
         case phoneHeardWithNoLoan
+        /// The looper deactivated the faulted pod on the watch.
+        case podDeactivated
 
         // The phone's observations and taps
         /// A pod reading: whether it shows a difference from the phone's records beyond the band.
@@ -142,6 +148,8 @@ public enum LoanControl {
         /// No answer, and the watch has no CGM reading of its own to dose from.
         case noResponseFromPhoneAndNoCGM
         case notHearingFromPhone
+        /// The pod is deactivated, and the phone ends Sport Mode when it hears.
+        case podDeactivatedPhoneAway
     }
 
     public enum Prompt: Equatable {
@@ -246,6 +254,11 @@ public enum LoanControl {
 
         // Rows 6, 12, 16, 17 and 19 · The watch says it holds the pod.
         case (.phone, .watchClaims(let claim)):
+            // Row 27 · The looper deactivated the pod on the watch: the latest decision, as a tap. The pod is
+            // gone, so the phone takes the loan back without reaching for it and forgets the pod.
+            if claim.podDeactivated, claim.loan != .closed {
+                return .takeOnTap
+            }
             switch claim.loan {
             // Row 6, and row 12 from the phone's side · A loan the phone has ended: the watch missed the
             // stop, so it gets it again.
@@ -296,6 +309,14 @@ public enum LoanControl {
         // where it lands. With no answer it is the only device there and carries on.
         case (.watch, .backFromOff):
             return .query(.inBackground, onSilence: .carryOn)
+
+        // Rows 26 and 27 · The looper deactivated the faulted pod on the watch. Nothing is left to loop, so
+        // Sport Mode ends: the hand-back offer is the query, as for End. With the phone there it is a
+        // hand-back (transfer H) and the phone forgets the pod. With no answer the End cannot finish, but
+        // unlike row 8 there is no loop to keep: the looper is told, and the watch's report reaches the
+        // phone (queued, and by push) so it ends Sport Mode when it hears (row 27).
+        case (.watch, .podDeactivated):
+            return .query(.onScreen, onSilence: .tell(.podDeactivatedPhoneAway))
 
         // Rows 11, 15, 22 and 23 have no acting device. Any other pairing is not a decision point.
         default:

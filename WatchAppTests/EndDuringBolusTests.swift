@@ -199,6 +199,24 @@ final class EndDuringBolusTests: XCTestCase {
         XCTAssertEqual(content.title, "Bolus Not Sent")
     }
 
+    /// Where a bolus asked for on the watch goes, phase by phase. Once the End has stopped dosing the
+    /// loan is no longer active, and stock's route would send the bolus to the phone, which gave it once
+    /// it had the pod back (rig, T22): it is refused until the loan closes.
+    func testABolusAskedForDuringTheEndNeverTakesStocksRoute() async throws {
+        let c = await makeController()
+        XCTAssertEqual(c.bolusRoute(units: 1), .stockRouteToPhone, "no loan: stock's route, unchanged")
+        _ = try await activeLoan(c)
+        XCTAssertEqual(c.bolusRoute(units: 1), .watchPump)
+
+        await c.onMain { c.handbackRequested = true }
+        XCTAssertEqual(c.bolusRoute(units: 1), .refused("Sport Mode is ending. Bolus on the iPhone once it has the pod."))
+
+        await c.onMain { c.handbackRequested = false; c.phase = .handingBack }
+        XCTAssertEqual(c.bolusRoute(units: 1), .refused("Sport Mode is ending. Bolus on the iPhone once it has the pod."),
+                       "dosing stopped, loan not closed: refused, not sent to the phone")
+        XCTAssertEqual(c.bolusRoute(units: 0), .stockRouteToPhone, "carbs alone may go")
+    }
+
     /// A Start the phone denies (its own bolus still being given, for one) is felt on the watch too.
     func testAStartThePhoneDeniesIsFelt() async throws {
         let c = await makeController()

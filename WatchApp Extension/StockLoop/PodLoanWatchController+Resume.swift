@@ -127,13 +127,20 @@ extension PodLoanWatchController {
 
     /// Nothing doses before the pod reports: after a relaunch the loop's recency check refuses until the
     /// first report, and that report closes the ledger's open window, booking what the pod delivered
-    /// while this watch was off, before it completes.
+    /// while this watch was off, before it completes. The report is a real read: the driver's saved
+    /// state counts as fresh, so its own check would skip the pod for up to 6 minutes.
     func handPodToLoop(_ manager: PumpManager) {
         endResuming()
         loopManager.pumpManager = manager
         loopManager.updateDisplayState()
-        // As at any launch: a cycle now, not at the next reading.
-        loopManager.checkPumpDataAndLoop()
+        guard let odometer = manager as? PumpDeliveryOdometer else { return loopManager.checkPumpDataAndLoop() }
+        Task { @MainActor in
+            let read = await odometer.refreshDeliveredUnits()
+            SportLog.event("loan", "first pod read after the relaunch \(read ? "done" : "failed; the loop's own check retries")")
+            // As at any launch: a cycle now, not at the next reading.
+            guard self.isCurrentDriver(manager) else { return }
+            self.loopManager.checkPumpDataAndLoop()
+        }
     }
 
     /// For a session that cannot resume: records may not have reached the phone yet.

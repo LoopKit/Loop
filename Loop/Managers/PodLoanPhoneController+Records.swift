@@ -151,6 +151,9 @@ extension PodLoanPhoneController {
             return
         }
 
+        // Only while the pod is out: a queued offer arriving after the take-back must not mark the next pod.
+        if offer.podDeactivated, offer.epoch == epoch, podIsOnLoan { notePodDeactivatedOnWatch(loan: offer.epoch) }
+
         // One commit at a time; coalesce by epoch, and never let an interim replace a waiting final.
         if commitInFlight {
             let storedIsFinal = coalescedOffers[offer.epoch]?.released == true
@@ -339,14 +342,14 @@ extension PodLoanPhoneController {
                             }
                             self.noteRecordsCurrent(asOf: offer.handedBackAt)
                             // The ack, and only now that the store has it.
-                            self.sendMessage(.handbackAck(HandbackAck(epoch: self.epoch, committedCursor: self.committedCursor)))
+                            self.sendMessage(.handbackAck(HandbackAck(epoch: self.epoch, committedCursor: self.committedCursor, released: isFinal)))
                             self.handbackDiag(self.epoch, String(format: "records saved in %.0f ms; acknowledged up to %d", self.deps.now().timeIntervalSince(writeStart) * 1000, self.committedCursor))
                             if isFinal, self.state == .reconciling {
                                 self.finishLoanAfterCommit()
                             }
                         } else {
                             // Acked so the watch can let go; no dedup state moves.
-                            self.sendMessage(.handbackAck(HandbackAck(epoch: offer.epoch, committedCursor: newCursor, stale: true)))
+                            self.sendMessage(.handbackAck(HandbackAck(epoch: offer.epoch, committedCursor: newCursor, stale: true, released: isFinal)))
                         }
 
                         // Any back-dated insulin write invalidates the counteraction memo from its earliest dose.
