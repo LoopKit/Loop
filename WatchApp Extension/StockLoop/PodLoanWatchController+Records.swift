@@ -55,6 +55,10 @@ extension PodLoanWatchController {
                 SportLog.event("loan", "temp basal cancel recorded for the phone")
                 continue
             }
+            if record.kind == .suspend {
+                SportLog.event("loan", "pump suspend recorded for the phone: delivery stopped at \(record.startDate)")
+                continue
+            }
             SportLog.event("loan", record.kind == .bolus ? String(format: "bolus %.2f U recorded for the phone", record.amount ?? 0)
                                                          : String(format: "temp basal %.2f U/hr recorded for the phone", record.unitsPerHour ?? 0))
         }
@@ -81,6 +85,9 @@ extension PodLoanWatchController {
 
     /// Identity is the hex of the pod-native raw. Delivered units and insulin type travel
     /// explicitly: the pod floors to whole pulses, and a rapid analogue must keep its own curve.
+    /// The watch never suspends the pod; a pod that stops by itself (a fault) reports a suspend, an
+    /// instant. It travels open, so the phone's books stop the scheduled basal there until the loan's
+    /// end, where the phone cuts it. A resume ends it as a cancel does: a zero-length rate record.
     static func loanRecord(for dose: DoseEntry, raw: Data) -> LoanDoseRecord? {
         let identity = raw.map { String(format: "%02x", $0) }.joined()
         switch dose.type {
@@ -94,6 +101,12 @@ extension PodLoanWatchController {
                                   unitsPerHour: dose.unitsPerHour, syncIdentifier: identity,
                                   insulinType: dose.insulinType, deliveredUnits: dose.deliveredUnits,
                                   decisionId: dose.decisionId)
+        case .suspend:
+            return LoanDoseRecord(kind: .suspend, startDate: dose.startDate, endDate: .distantFuture,
+                                  unitsPerHour: 0, syncIdentifier: identity, insulinType: dose.insulinType)
+        case .resume:
+            return LoanDoseRecord(kind: .tempBasal, startDate: dose.startDate, endDate: dose.startDate,
+                                  unitsPerHour: 0, syncIdentifier: identity, insulinType: dose.insulinType)
         default:
             SportLog.event("loan", "pump reported a \(dose.type) dose, which is not recorded for the phone")
             return nil

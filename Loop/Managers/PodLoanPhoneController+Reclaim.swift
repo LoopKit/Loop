@@ -56,7 +56,8 @@ extension PodLoanPhoneController {
 
     /// The user's take-back from the pod tile; nothing takes the pod back on a timer. One path:
     /// reach for the pod first. With the link up the phone holds the pod, so it tells the watch to
-    /// stop and takes over; without it nothing has changed and the user is asked to try again.
+    /// stop and takes over; without it nothing has changed and the user is asked to try again. A pod
+    /// deactivated on the watch is not reached for: it is gone.
     func reclaimNow(onSilence: Bool = false) {
         // A hand-back already being written ends the loan by itself.
         guard self.podIsOnLoan, self.state != .reconciling, self.state != .reclaimPending else { return }
@@ -73,8 +74,13 @@ extension PodLoanPhoneController {
 
         // Background time from the tap, so pocketing the phone cannot freeze the attempt.
         deps.beginReclaimBackgroundTask()
-        handbackDiag(epoch, String(format: "take-back: reaching for the pod, giving up after %.0f s", Self.takeBackLinkLimit))
         state = .reclaimPending
+        if persisted.podDeactivatedOnWatch != nil {
+            handbackDiag(epoch, "take-back: the pod was deactivated on the watch, not reaching for it")
+            finishTakeBack(waited: 0)
+            return
+        }
+        handbackDiag(epoch, String(format: "take-back: reaching for the pod, giving up after %.0f s", Self.takeBackLinkLimit))
         reclaimPodConnection()
         awaitPodForTakeBack(started: started, tick: 0)
     }
@@ -224,8 +230,10 @@ extension PodLoanPhoneController {
         armForceReclaimAudit()
 
         reclaimPodConnection()
+        // Becoming owner opens the settle window; a phone already owner, standing aside, opens it here.
+        let wasOwner = state == .owner
         state = .owner
-        beginReclaimSettleWindow()
+        if wasOwner { beginReclaimSettleWindow() }
         // Clear staging only after the audit has read it.
         staged = [:]
         stagedTombstones = []

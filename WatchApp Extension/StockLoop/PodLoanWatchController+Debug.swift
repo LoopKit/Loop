@@ -46,6 +46,12 @@ extension PodLoanWatchController {
         let takeoverPodReached: Bool
         /// Resting: the next Start must find a pump this watch has never met.
         let pumpFirstContactExpected: Bool
+
+        /// A failed pod: the kit's name for deactivating it, the attempt, and the result.
+        let failedPodDeactivationTitle: String?
+        let deactivatingPod: Bool
+        let podDeactivationError: String?
+        let podDeactivated: Bool
     }
 
     var isLoanActive: Bool {
@@ -81,7 +87,11 @@ extension PodLoanWatchController {
                     ? Self.takeoverHint(firstContact: takeoverFirstContact, podReached: takeoverPodReached, nudged: takeoverNudges > 0)
                     : nil,
                 takeoverPodReached: phase == .takingOver && takeoverPodReached,
-                pumpFirstContactExpected: pumpFirstContactExpected())
+                pumpFirstContactExpected: pumpFirstContactExpected(),
+                failedPodDeactivationTitle: failedPodDeactivationTitle,
+                deactivatingPod: deactivatingPod,
+                podDeactivationError: podDeactivationError,
+                podDeactivated: podDeactivatedHere)
     }
 
     /// nil: no pump manager, as opposed to a failed read.

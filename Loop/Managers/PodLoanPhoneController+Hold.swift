@@ -92,6 +92,12 @@ extension PodLoanPhoneController {
             tellLooper(tell)
             reclaimNow(onSilence: true)
         case .takeOnTap:
+            // A loan this phone never lent, whose pod the watch deactivated (row 27): stop it and forget the pod.
+            if !podIsOnLoan, let claimEpoch, persisted.podDeactivatedOnWatch != nil {
+                sendMessage(.revoke(Revoke(epoch: claimEpoch)))
+                reclaimPodConnection()
+                return
+            }
             reclaimNow()
         case .standAside:
             engageInferredLoanYield(evidence: why)
@@ -112,7 +118,8 @@ extension PodLoanPhoneController {
             deps.issueUrgentNotice(
                 NSLocalizedString("Watch Not Looping", comment: "Phone notice title: the watch did not answer, or cannot reach the pod, and the phone is taking the pod back"),
                 NSLocalizedString("The watch has stopped looping (off or out of range). This iPhone is taking the pod back; insulin the watch gave is counted.", comment: "Phone notice body: the phone takes the pod back from a silent watch"))
-        case .phoneAwayCannotHandBack, .noResponseFromPhone, .noResponseFromPhoneAndNoCGM, .notHearingFromPhone:
+        case .phoneAwayCannotHandBack, .noResponseFromPhone, .noResponseFromPhoneAndNoCGM, .notHearingFromPhone,
+             .podDeactivatedPhoneAway:
             break
         }
     }

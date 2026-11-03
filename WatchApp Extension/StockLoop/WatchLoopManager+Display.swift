@@ -11,7 +11,6 @@ import Foundation
 import HealthKit
 import LoopKit
 import LoopCore
-import G7SensorKit
 import WatchConnectivity
 import os.log
 

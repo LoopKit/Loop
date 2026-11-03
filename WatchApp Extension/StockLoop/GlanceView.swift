@@ -53,6 +53,17 @@ struct GlanceView: View {
             .receive(on: DispatchQueue.main)) { _ in
             model.refreshNow()
         }
+
+        // A tap, not a crown turn: a faulted pod delivers nothing, so ending it cannot dose.
+        .confirmationDialog(model.state.deactivateTitle.map { "\($0)?" } ?? "",
+                            isPresented: $model.confirmingDeactivation, titleVisibility: .visible) {
+            Button(NSLocalizedString("Deactivate", comment: "Glance confirmation: deactivate the faulted pod"), role: .destructive) {
+                model.deactivatePod()
+            }
+            Button(NSLocalizedString("Cancel", comment: "Glance confirmation: keep the faulted pod for now"), role: .cancel) {}
+        } message: {
+            Text(NSLocalizedString("The pod stops for good and its alarm ends. Pair a new pod on your iPhone.", comment: "Glance confirmation body for deactivating a faulted pod"))
+        }
     }
 
     /// The override label scales down rather than truncating.
@@ -86,10 +97,10 @@ struct GlanceView: View {
         }
     }
 
-    /// End, or Cancel while a hand-back drains; nothing otherwise.
+    /// End, or Cancel while a hand-back drains; nothing otherwise, nor once the pod is deactivated.
     @ViewBuilder
     private var statusRight: some View {
-        if model.state.phase == .active && !model.isResuming {
+        if model.state.phase == .active && !model.isResuming && !model.state.podDeactivated {
             if model.state.handbackPending {
                 Button { model.cancelHandback() } label: {
                     Text(NSLocalizedString("Cancel", comment: "Glance top-right: abort a pending hand-back"))
@@ -280,7 +291,16 @@ struct GlanceView: View {
                         .padding(.top, 8)
                 }
             }
-            if let stale = model.state.staleAgeText {
+            if model.state.podDeactivated {
+                // The note below the number says what happens next.
+            } else if model.state.phase == .active, let fault = model.state.podFaultText {
+                Text(String(format: NSLocalizedString("%@: insulin stopped", comment: "Glance line for a faulted pod (1: the pod's fault, in the pod driver's words)"), fault))
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.glanceCrit)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+            } else if let stale = model.state.staleAgeText {
                 Text(stale).font(.system(size: 12)).foregroundColor(.glanceWarn)
             } else if let eventual = model.state.eventualText {
                 (Text("eventually ").foregroundColor(.glanceDim)
@@ -343,6 +363,10 @@ struct GlanceView: View {
     @ViewBuilder
     private var bottomBlock: some View {
         switch model.state.phase {
+        case .active where model.state.podDeactivated:
+            podDeactivatedBlock
+        case .active where model.state.deactivateTitle != nil || model.state.deactivating:
+            deactivateBlock
         case .active:
             VStack(spacing: 4) {
                 HStack {
@@ -385,6 +409,52 @@ struct GlanceView: View {
             }
             .padding(.bottom, 6)
         }
+    }
+
+    /// A failed pod: its frozen numbers give way to the one thing to do.
+    private var deactivateBlock: some View {
+        VStack(spacing: 3) {
+            Button { model.askToDeactivate() } label: {
+                HStack(spacing: 5) {
+                    if model.state.deactivating { ProgressView().frame(width: 16, height: 16) }
+                    Text(model.state.deactivating
+                         ? NSLocalizedString("Deactivating…", comment: "Glance button while the faulted pod is being deactivated")
+                         : model.state.deactivateTitle ?? "")
+                }
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(Capsule().fill(Color.glanceCrit))
+            }
+            .buttonStyle(.plain)
+            .disabled(model.state.deactivating)
+            if let error = model.state.deactivateError {
+                Text(error)
+                    .font(.system(size: 11))
+                    .foregroundColor(.glanceWarn)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+            }
+        }
+        .padding(.horizontal, 6)
+        .padding(.bottom, 2)
+    }
+
+    /// The pod is gone: what happens next, while the End reaches the phone.
+    private var podDeactivatedBlock: some View {
+        VStack(spacing: 4) {
+            if model.state.handbackPending { ProgressView() }
+            if let note = model.state.idleNote {
+                Text(note)
+                    .font(.system(size: 11))
+                    .foregroundColor(.glanceWarn)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.bottom, 2)
     }
 
     /// The fast mode's boundary of a bimodal distribution; pacing to the median pins the bar.

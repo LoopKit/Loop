@@ -40,7 +40,7 @@ final class LoanProtocolTests: XCTestCase {
             .handbackOffer(HandbackOffer(epoch: 5, handedBackAt: now, finalStatus: status,
                                          odometer: LoanOdometerSnapshot(deliveredAtStart: 10, deliveredLatest: 12),
                                          events: [event], tombstones: [], recovered: false)),
-            .handbackAck(HandbackAck(epoch: 5, committedCursor: 3)),
+            .handbackAck(HandbackAck(epoch: 5, committedCursor: 3, released: true)),
             .revoke(Revoke(epoch: 5)),
             .statusQuery(StatusQuery(epoch: 5)),
             .statusReport(StatusReport(epoch: 5, lastDirectGlucoseAge: 120, lastEventSeq: 3, podFault: nil, holdsPod: true)),
@@ -662,7 +662,7 @@ final class LoanProtocolTests: XCTestCase {
         XCTAssertTrue(LoanMessage.statusReport(StatusReport(epoch: 1, lastDirectGlucoseAge: nil,
                                                             lastEventSeq: 0, podFault: nil, holdsPod: true)).ridesBothChannels)
         XCTAssertTrue(LoanMessage.revoke(Revoke(epoch: 1)).ridesBothChannels)
-        XCTAssertFalse(LoanMessage.handbackAck(HandbackAck(epoch: 1, committedCursor: 0)).ridesBothChannels)
+        XCTAssertFalse(LoanMessage.handbackAck(HandbackAck(epoch: 1, committedCursor: 0, released: false)).ridesBothChannels)
     }
 
     // MARK: - Transport kind peek
