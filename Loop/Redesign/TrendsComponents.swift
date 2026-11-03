@@ -93,6 +93,8 @@ struct StatTile: Identifiable {
     var valueColor: Color = LoopDesign.Palette.ink
     /// The consensus target for the figure, e.g. "aim < 7%".
     var aim: String? = nil
+    /// When the figure is less representative than usual, e.g. GMI over a short period.
+    var caveat: String? = nil
     var id: String { label }
 }
 
@@ -146,6 +148,12 @@ struct StatGridView: View {
                 Text(aim)
                     .font(LoopDesign.Typeface.footnote)
                     .foregroundStyle(P.inkMuted)
+            }
+            if let caveat = tile.caveat {
+                Text(caveat)
+                    .font(LoopDesign.Typeface.caption)
+                    .foregroundStyle(P.inkMuted)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(LoopDesign.Space.s3)
@@ -210,6 +218,7 @@ enum ConsensusTarget {
     static func under(_ percent: Double) -> String { "< " + percentText(percent) }
     static func over(_ percent: Double) -> String { "> " + percentText(percent) }
     static func atMost(_ percent: Double) -> String { "≤ " + percentText(percent) }
+    static func percent(_ percent: Double) -> String { percentText(percent) }
 
     /// "aim < 7%", under a figure.
     static func aim(_ target: String) -> String {
@@ -220,8 +229,10 @@ enum ConsensusTarget {
 struct TimeInRangeView: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
-    /// Fractions per band, 0–1.
+    /// Fractions per band, 0–1, of the time with CGM readings.
     let fractions: [LoopHistoryMath.RangeBand: Double]
+    /// Hours a day with CGM readings, so a band's hours leave out time without them.
+    let hoursPerDay: Double
     let unit: GlucoseUnitStyle
 
     private var percentages: [LoopHistoryMath.RangeBand: Int] { LoopHistoryMath.roundedPercentages(fractions) }
@@ -240,7 +251,7 @@ struct TimeInRangeView: View {
         HStack(alignment: .top, spacing: LoopDesign.Space.s4) {
             bar
                 .frame(width: 14)
-            VStack(spacing: LoopDesign.Space.s2) {
+            VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
                 ForEach(LoopHistoryMath.RangeBand.allCases) { band in
                     row(band)
                 }
@@ -273,7 +284,7 @@ struct TimeInRangeView: View {
 
     private func row(_ band: LoopHistoryMath.RangeBand) -> some View {
         let fraction = fractions[band] ?? 0
-        let hours = fraction * 24
+        let hours = fraction * hoursPerDay
         let hoursText = String(format: NSLocalizedString("%1$@ h", comment: "Time in range row: average hours a day spent in the band, abbreviated. (1: hours with one decimal)"),
                                LoopFormat.number(hours, decimals: 1))
         let percent = Text(percentText(Double(percentages[band] ?? 0)))
@@ -295,6 +306,7 @@ struct TimeInRangeView: View {
                         .foregroundStyle(P.inkMuted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s2) {
                     percent.frame(minWidth: 52, alignment: .trailing)
@@ -496,10 +508,6 @@ struct InsulinSplitView: View {
     var scheduledBasal: Double?
     /// How many of the days the schedule covers, e.g. "20 of 90 days", when that is fewer than the split's.
     var scheduledNote: String?
-    /// Manual and automatic bolus over only the days that say which each bolus was, when some days don't.
-    var classifiedSplit: InsulinSplit?
-    /// How many days `classifiedSplit` covers, e.g. "60 of 90 days".
-    var classifiedNote: String?
     /// Today against a usual day, e.g. "Usually 28.4 U by 19:46", under the total.
     var usual: String?
     /// The split as one capsule, where no chart above already draws it.
@@ -515,19 +523,24 @@ struct InsulinSplitView: View {
             }
             VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
                 row(.basal, NSLocalizedString("Basal", comment: "Basal and bolus row: insulin delivered as basal"), split.basal, split.basalPercent)
+                // No swatch: nothing on the chart draws the schedule.
                 if let scheduledBasal {
-                    part(.dash(LoopDesign.Palette.basalScheduled), Self.scheduledText(scheduledBasal, note: scheduledNote))
+                    Text(Self.scheduledText(scheduledBasal, note: scheduledNote))
                         .font(LoopDesign.Typeface.footnote.monospacedDigit())
                         .foregroundStyle(LoopDesign.Palette.inkMuted)
                         .padding(.leading, 10 + LoopDesign.Space.s2)
                 }
                 row(.solid(LoopDesign.Palette.bolus), NSLocalizedString("Bolus", comment: "Basal and bolus row: insulin delivered as bolus, manual and automatic"), split.bolus, split.bolusPercent)
-                if let detail = bolusDetail, split.bolus > 0 {
+                // Manual, automatic and unknown add up to the bolus row. Unknown has no swatch of its own: it is drawn
+                // as plain bolus, like manual.
+                if split.bolus >= 0.005 {
                     FlowLayout(spacing: LoopDesign.Space.s3, lineSpacing: 2) {
-                        part(.solid(LoopDesign.Palette.bolus), String(format: NSLocalizedString("Manual %1$@", comment: "Basal and bolus: bolus the person gave. (1: units, e.g. 16.2 U)"), LoopFormat.totalUnits(detail.manualBolus)))
-                        part(.hatch(LoopDesign.Palette.bolus), String(format: NSLocalizedString("Automatic %1$@", comment: "Basal and bolus: bolus Loop gave automatically. (1: units, e.g. 5.4 U)"), LoopFormat.totalUnits(detail.automaticBolus)))
-                        if let classifiedNote {
-                            Text(verbatim: "· \(classifiedNote)")
+                        if showsBolusDetail {
+                            part(.solid(LoopDesign.Palette.bolus), String(format: NSLocalizedString("Manual %1$@", comment: "Basal and bolus: bolus the person gave. (1: units, e.g. 16.2 U)"), LoopFormat.totalUnits(split.manualBolus)))
+                            part(.hatch(LoopDesign.Palette.bolus), String(format: NSLocalizedString("Automatic %1$@", comment: "Basal and bolus: bolus Loop gave automatically. (1: units, e.g. 5.4 U)"), LoopFormat.totalUnits(split.automaticBolus)))
+                        }
+                        if !split.isClassified {
+                            Text(Self.unknownText(split.unclassifiedBolus))
                         }
                     }
                     .font(LoopDesign.Typeface.footnote.monospacedDigit())
@@ -559,12 +572,17 @@ struct InsulinSplitView: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Self.accessibilityLabel(split, partial: partial, scheduledBasal: scheduledBasal.map { Self.scheduledText($0, note: scheduledNote) },
-                                                    bolusDetail: bolusDetail, bolusDetailNote: classifiedNote, usual: usual))
+                                                    showsBolusDetail: showsBolusDetail, usual: usual))
     }
 
-    /// The whole split's manual and automatic bolus, or only the days that record it; nil when nothing does.
-    private var bolusDetail: InsulinSplit? {
-        classifiedSplit ?? (split.isClassified ? split : nil)
+    /// Manual and automatic, when any bolus says which it was; a split that is all unknown shows only that.
+    private var showsBolusDetail: Bool {
+        split.manualBolus + split.automaticBolus >= 0.005
+    }
+
+    /// "3.2 U unknown": bolus whose record doesn't say whether it was manual or automatic.
+    private static func unknownText(_ units: Double) -> String {
+        String(format: NSLocalizedString("%1$@ unknown", comment: "Basal and bolus: bolus whose record doesn't say whether it was manual or automatic, such as another app's in Apple Health, after the manual and automatic amounts. (1: units, e.g. 3.2 U)"), LoopFormat.totalUnits(units))
     }
 
     /// "Scheduled 18.0 U", or "Scheduled 18.0 U · 20 of 90 days" when the schedule is known for only some days.
@@ -604,16 +622,18 @@ struct InsulinSplitView: View {
         }
     }
 
-    static func accessibilityLabel(_ split: InsulinSplit, partial: Bool, scheduledBasal: String? = nil, bolusDetail: InsulinSplit? = nil,
-                                   bolusDetailNote: String? = nil, usual: String? = nil) -> String {
+    static func accessibilityLabel(_ split: InsulinSplit, partial: Bool, scheduledBasal: String? = nil, showsBolusDetail: Bool = false,
+                                   usual: String? = nil) -> String {
         var parts = [
             String(format: NSLocalizedString("Basal %1$@, %2$@ percent", comment: "VoiceOver: basal units and share. (1: units, 2: percentage number)"), LoopFormat.totalUnits(split.basal), "\(split.basalPercent)"),
             String(format: NSLocalizedString("Bolus %1$@, %2$@ percent", comment: "VoiceOver: bolus units and share. (1: units, 2: percentage number)"), LoopFormat.totalUnits(split.bolus), "\(split.bolusPercent)"),
         ]
-        if let detail = bolusDetail, split.bolus > 0 {
+        if showsBolusDetail {
             let text = String(format: NSLocalizedString("%1$@ manual, %2$@ automatic", comment: "VoiceOver: how the bolus divides. (1: manual units, 2: automatic units)"),
-                              LoopFormat.totalUnits(detail.manualBolus), LoopFormat.totalUnits(detail.automaticBolus))
-            parts.append(bolusDetailNote.map { "\(text), \($0)" } ?? text)
+                              LoopFormat.totalUnits(split.manualBolus), LoopFormat.totalUnits(split.automaticBolus))
+            parts.append(split.isClassified ? text : "\(text), \(unknownText(split.unclassifiedBolus))")
+        } else if !split.isClassified {
+            parts.append(unknownText(split.unclassifiedBolus))
         }
         parts.append(String(format: partial
                             ? NSLocalizedString("Total so far %1$@", comment: "VoiceOver: today's total insulin so far. (1: units)")
@@ -645,6 +665,27 @@ struct InsulinDailyTotalsView: View {
         return max(10, Self.niceStep(top / 4) * 5)
     }
 
+    struct BolusPart: Equatable {
+        let start: Double
+        let end: Double
+        let automatic: Bool
+    }
+
+    /// Where a day's bolus parts sit above its basal: manual (with bolus of unknown kind), then automatic. Each
+    /// starts a gap of the card's colour above the part below it, so no two parts touch. A part taller than two gaps
+    /// gives the gap from its own height; a shorter one moves up by a gap instead, so it stays visible.
+    static func bolusParts(_ day: LoopHistoryMath.DayTotal, gap: Double) -> [BolusPart] {
+        var parts: [BolusPart] = []
+        var below = day.basal
+        for (units, automatic) in [(day.split.manualBolus + day.split.unclassifiedBolus, false), (day.split.automaticBolus, true)] where units > 0 {
+            let start = below + gap
+            let end = units > gap * 2 ? below + units : start + units
+            parts.append(BolusPart(start: start, end: end, automatic: automatic))
+            below = end
+        }
+        return parts
+    }
+
     /// 1, 2 or 5 times a power of ten, at or above `raw`.
     static func niceStep(_ raw: Double) -> Double {
         guard raw > 0 else { return 1 }
@@ -671,14 +712,9 @@ struct InsulinDailyTotalsView: View {
                     .foregroundStyle(P.basal)
                 BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Basal", max(0, day.basal - yMax * 0.006)), yEnd: .value("Edge", day.basal), width: .ratio(0.7))
                     .foregroundStyle(P.basalEdge)
-                // A thin gap under each bolus part, so it never touches the part below it
-                let gap = yMax * 0.01
-                let manualTop = day.basal + day.split.manualBolus + day.split.unclassifiedBolus
-                BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Basal", day.basal + (manualTop - day.basal > gap * 2 ? gap : 0)), yEnd: .value("Bolus", manualTop), width: .ratio(0.7))
-                    .foregroundStyle(P.bolus)
-                if day.split.automaticBolus > 0 {
-                    BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Bolus", manualTop + (day.total - manualTop > gap * 2 ? gap : 0)), yEnd: .value("Total", day.total), width: .ratio(0.7))
-                        .foregroundStyle(Hatch.paint(P.bolus, scheme: scheme))
+                ForEach(Self.bolusParts(day, gap: yMax * 0.015), id: \.automatic) { part in
+                    BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Bolus start", part.start), yEnd: .value("Bolus end", part.end), width: .ratio(0.7))
+                        .foregroundStyle(part.automatic ? AnyShapeStyle(Hatch.paint(P.bolus, scheme: scheme)) : AnyShapeStyle(P.bolus))
                 }
             }
             // The average's value is the Total row under the chart.

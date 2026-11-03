@@ -350,6 +350,8 @@ extension SettingsView {
                 if viewModel.historyProvider != nil {
                     LargeButton(
                         action: { sheet = .trends },
+                        // Opens a sheet, but sits among navigation rows, so it shows their chevron.
+                        arrowLikeNavigationLink: true,
                         imageView: Image(systemName: "chart.bar.doc.horizontal")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -790,6 +792,7 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
     
     let action: () -> Void
     var includeArrow: Bool
+    var arrowLikeNavigationLink: Bool
     let imageView: Content
     let secondaryImageView: SecondaryContent
     let label: String
@@ -798,6 +801,7 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
     init(
         action: @escaping () -> Void,
         includeArrow: Bool = true,
+        arrowLikeNavigationLink: Bool = false,
         imageView: Content,
         secondaryImageView: SecondaryContent = EmptyView(),
         label: String,
@@ -805,6 +809,7 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
     ) {
         self.action = action
         self.includeArrow = includeArrow
+        self.arrowLikeNavigationLink = arrowLikeNavigationLink
         self.imageView = imageView
         self.secondaryImageView = secondaryImageView
         self.label = label
@@ -841,7 +846,14 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
                 
                 if includeArrow {
                     // TODO: Ick. I can't use a NavigationLink because we're not Navigating, but this seems worse somehow.
-                    Image(systemName: "chevron.right").foregroundColor(.gray).font(.footnote)
+                    if arrowLikeNavigationLink {
+                        Image(systemName: "chevron.forward")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Color(uiColor: .tertiaryLabel))
+                            .padding(.trailing, 1)
+                    } else {
+                        Image(systemName: "chevron.right").foregroundColor(.gray).font(.footnote)
+                    }
                 }
             }
             .padding(EdgeInsets(top: topBottomPadding, leading: 0, bottom: topBottomPadding, trailing: 0))

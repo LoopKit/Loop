@@ -133,6 +133,62 @@ class LoopHistoryMathTests: XCTestCase {
         XCTAssertNil(LoopHistoryMath.cgmCoveredDays([], in: interval, periodDays: 14))
     }
 
+    func testGMIIsRepresentativeFromFourteenDaysAtSeventyPercent() {
+        // "14 d" ending today still counts as 14 days, and exactly 70% passes.
+        XCTAssertTrue(LoopHistoryMath.gmiIsRepresentative(periodDays: 14, cgmActive: 0.73))
+        XCTAssertTrue(LoopHistoryMath.gmiIsRepresentative(periodDays: 14, cgmActive: 0.7))
+        XCTAssertTrue(LoopHistoryMath.gmiIsRepresentative(periodDays: 90, cgmActive: 0.95))
+        // Each condition on its own is enough to add the caption.
+        XCTAssertFalse(LoopHistoryMath.gmiIsRepresentative(periodDays: 14, cgmActive: 0.69))
+        XCTAssertFalse(LoopHistoryMath.gmiIsRepresentative(periodDays: 7, cgmActive: 1))
+        XCTAssertFalse(LoopHistoryMath.gmiIsRepresentative(periodDays: 1, cgmActive: 1))
+    }
+
+    func testBandHoursCountOnlyTimeWithReadings() {
+        // Today until 15:00 with readings 15% of the time: 2.25 h with readings, not 24.
+        let today = DateInterval(start: at(0), end: at(15 * 60))
+        XCTAssertEqual(LoopHistoryMath.cgmHoursPerDay(cgmActive: 0.15, over: today, periodDays: 1), 2.25, accuracy: 1e-9)
+        // A longer period averages over its days.
+        let fortnight = DateInterval(start: at(0), end: at(14 * 1440))
+        XCTAssertEqual(LoopHistoryMath.cgmHoursPerDay(cgmActive: 0.75, over: fortnight, periodDays: 14), 18, accuracy: 1e-9)
+    }
+
+    func testHealthBoundaryIsTheLaterOfLocalHistoryAndFirstRecord() {
+        let localStart = at(0), now = at(90 * 1440)
+        // Loop began recording 20 days into its 90-day history: Health covers the days before.
+        XCTAssertEqual(LoopHistoryMath.healthBoundary(localHistoryStart: localStart, firstLocalRecord: at(20 * 1440), now: now), at(20 * 1440))
+        // A record older than the local history has been purged up to its start.
+        XCTAssertEqual(LoopHistoryMath.healthBoundary(localHistoryStart: localStart, firstLocalRecord: at(-60), now: now), localStart)
+        // No records of a kind: all of it comes from Health.
+        XCTAssertEqual(LoopHistoryMath.healthBoundary(localHistoryStart: localStart, firstLocalRecord: nil, now: now), now)
+    }
+
+    func testHealthAndLocalPartsMeetWithoutOverlap() {
+        let window = DateInterval(start: at(0), end: at(1440))
+        let straddling = LoopHistoryMath.split(window, at: at(600))
+        XCTAssertEqual(straddling.health, DateInterval(start: at(0), end: at(600)))
+        XCTAssertEqual(straddling.local, DateInterval(start: at(600), end: at(1440)))
+        let allLocal = LoopHistoryMath.split(window, at: at(-60))
+        XCTAssertNil(allLocal.health)
+        XCTAssertEqual(allLocal.local, window)
+        let allHealth = LoopHistoryMath.split(window, at: at(1440))
+        XCTAssertEqual(allHealth.health, window)
+        XCTAssertNil(allHealth.local)
+    }
+
+    func testBolusPartsNeverTouchAndKeepTheirHeight() {
+        let day = LoopHistoryMath.DayTotal(day: at(0), split: InsulinSplit(basal: 20, manualBolus: 10, automaticBolus: 0.2, unclassifiedBolus: 2))
+        let parts = InsulinDailyTotalsView.bolusParts(day, gap: 0.5)
+        XCTAssertEqual(parts.map(\.automatic), [false, true])
+        // Manual and unknown together, a gap above basal, keeping its top.
+        XCTAssertEqual(parts[0].start, 20.5, accuracy: 1e-9)
+        XCTAssertEqual(parts[0].end, 32, accuracy: 1e-9)
+        // Automatic is shorter than two gaps, so it moves up a gap and keeps its full height.
+        XCTAssertEqual(parts[1].start, 32.5, accuracy: 1e-9)
+        XCTAssertEqual(parts[1].end - parts[1].start, 0.2, accuracy: 1e-9)
+        XCTAssertTrue(InsulinDailyTotalsView.bolusParts(LoopHistoryMath.DayTotal(day: at(0), basal: 20, bolus: 0), gap: 0.5).isEmpty)
+    }
+
     func testScheduledUnitsNeedTheWholeSpanCovered() {
         let points = [ScheduledBasalPoint(start: at(0), end: at(120), rate: 1.0), ScheduledBasalPoint(start: at(120), end: at(240), rate: 0.5)]
         XCTAssertEqual(try XCTUnwrap(LoopHistoryMath.scheduledUnits(points, over: DateInterval(start: at(60), end: at(180)))), 1.5, accuracy: 1e-9)
@@ -182,6 +238,20 @@ class LoopHistoryMathTests: XCTestCase {
         XCTAssertEqual(spans.map(\.mode), [.closed, .open, .closed])
         XCTAssertEqual(spans[1].start, at(15), "The slot holding the first held run is open")
         XCTAssertEqual(spans[2].start, at(40), "Closed again with the first good run after it")
+    }
+
+    func testManualTempBasalStaysOpenWhenALaterRunFailsForAnotherReason() {
+        let interval = DateInterval(start: at(0), end: at(60))
+        // A manual temp basal runs 20–40 min. The run at 25 is held by it; from 30 glucose is stale, so later runs fail
+        // on that before Loop checks for the manual temp basal.
+        let runs = stride(from: 0.0, through: 60, by: 5).map { minute in
+            LoopHistoryMath.LoopRun(date: at(minute), succeeded: minute < 20 || minute > 40, manualTempBasal: minute == 25)
+        }
+        let spans = LoopHistoryMath.loopModeSpans(interval: interval, runs: runs, modeChanges: [.init(date: at(0), closedLoop: true)],
+                                                  coverageStart: at(0), manualTempBasals: [DateInterval(start: at(20), end: at(40))])
+        XCTAssertEqual(spans.map(\.mode), [.closed, .open, .closed])
+        XCTAssertEqual(spans[1].start, at(20))
+        XCTAssertEqual(spans[1].end, at(40), "Open for the whole manual temp basal, not just after the run it held")
     }
 
     // MARK: Calendar

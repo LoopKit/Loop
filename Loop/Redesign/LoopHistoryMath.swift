@@ -39,6 +39,18 @@ enum LoopHistoryMath {
         return min(1, Double(points.count) / expected)
     }
 
+    /// Whether GMI is as representative as the consensus asks: a period of at least 14 calendar days (today counts,
+    /// so "14 d" does while it runs), with CGM data for at least 70% of it.
+    static func gmiIsRepresentative(periodDays: Int, cgmActive: Double) -> Bool {
+        periodDays >= 14 && cgmActive >= 0.7
+    }
+
+    /// Hours a day with CGM readings: what a band's share of readings is a share of. One day gives that day's hours
+    /// with readings, so far when it is today; a longer period gives the average over its days.
+    static func cgmHoursPerDay(cgmActive: Double, over interval: DateInterval, periodDays: Int) -> Double {
+        periodDays <= 1 ? cgmActive * interval.duration / 3600 : cgmActive * 24
+    }
+
     // MARK: Time in range
 
     enum RangeBand: Int, CaseIterable, Identifiable {
@@ -146,6 +158,24 @@ enum LoopHistoryMath {
             covered += overlap
         }
         return covered >= span.duration - 60 ? units : nil
+    }
+
+    // MARK: Loop's stores and Apple Health
+
+    /// Where one kind of data switches from Apple Health to Loop's own records: the later of the start of Loop's
+    /// local history and its first record of that kind. With no records of that kind, it is `now`, so all of it
+    /// comes from Health. Loop writes what it records to Health too, so reading Health only before this point and
+    /// Loop's stores only from it counts nothing twice.
+    static func healthBoundary(localHistoryStart: Date, firstLocalRecord: Date?, now: Date) -> Date {
+        max(localHistoryStart, firstLocalRecord ?? now)
+    }
+
+    /// `window` cut at `boundary`: the part before it is read from Apple Health, the part from it on from Loop's
+    /// stores. Either is nil when the window has none of it; the two never overlap.
+    static func split(_ window: DateInterval, at boundary: Date) -> (health: DateInterval?, local: DateInterval?) {
+        let health = window.start < boundary ? DateInterval(start: window.start, end: min(window.end, boundary)) : nil
+        let local = window.end > boundary ? DateInterval(start: max(window.start, boundary), end: window.end) : nil
+        return (health, local)
     }
 
     // MARK: Days
@@ -316,6 +346,7 @@ enum LoopHistoryMath {
     /// run in those 15 minutes, and limited when it didn't. Before the first mode change the setting is unknown, so the
     /// result starts at the later of `coverageStart` and the first mode change.
     static func loopModeSpans(interval: DateInterval, runs: [LoopRun], modeChanges: [ModeChange], coverageStart: Date?,
+                              manualTempBasals: [DateInterval] = [],
                               recency: TimeInterval = 15 * 60, slot: TimeInterval = 5 * 60) -> [LoopModeSpan] {
         guard let coverageStart, let firstChange = modeChanges.map(\.date).min() else { return [] }
         let start = max(interval.start, coverageStart, firstChange)
@@ -329,6 +360,8 @@ enum LoopHistoryMath {
         var lastSuccess: Date? = nil
         var changeIndex = 0
         var closedSetting: Bool? = nil
+        let manualTemps = manualTempBasals.sorted { $0.start < $1.start }
+        var manualIndex = 0
 
         var t = start
         while t < interval.end {
@@ -346,8 +379,15 @@ enum LoopHistoryMath {
                 changeIndex += 1
             }
 
+            // A manual temp basal holds Loop open for as long as the pump runs it, whatever a later run failed on.
+            let middle = t.addingTimeInterval(slotEnd.timeIntervalSince(t) / 2)
+            while manualIndex < manualTemps.count && manualTemps[manualIndex].end <= middle {
+                manualIndex += 1
+            }
+            let inManualTemp = manualIndex < manualTemps.count && manualTemps[manualIndex].start <= middle
+
             let mode: LoopModeSpan.Mode
-            if closedSetting == false {
+            if closedSetting == false || inManualTemp {
                 mode = .open
             } else if let lastRun, lastRun.manualTempBasal, slotEnd.timeIntervalSince(lastRun.date) <= recency {
                 mode = .open

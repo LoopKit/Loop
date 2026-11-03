@@ -23,6 +23,8 @@ final class TrendsModel: ObservableObject {
         var cgmCoveredDays: Int?
         var stats: LoopHistoryMath.GlucoseStats?
         var cgmActive: Double = 0
+        /// Hours a day with CGM readings, which the time in range shares are of.
+        var cgmHoursPerDay: Double = 0
         var timeInRange: [LoopHistoryMath.RangeBand: Double] = [:]
         var agp: [LoopHistoryMath.AGPSlot] = []
         var agpDays = 0
@@ -44,9 +46,8 @@ final class TrendsModel: ObservableObject {
         var scheduledBasal: Double?
         /// The averaged days `scheduledBasal` covers: Apple Health doesn't record the schedule for older days.
         var scheduledDays = 0
-        /// Manual and automatic bolus per day over the averaged days that say which each bolus was, when some don't.
-        var classifiedSplit: InsulinSplit?
-        var classifiedDays = 0
+        /// Some of the insulin comes from Apple Health, before Loop's own dose records begin.
+        var readsHealthInsulin = false
         /// The median insulin by this time of day over the last 14 days, when the period ends now.
         var typicalByNow: (typical: TypicalInsulinDelivery, at: Date)?
 
@@ -105,6 +106,7 @@ final class TrendsModel: ObservableObject {
         async let historyFetch = provider.dayHistory(fetchWindow)
         async let runsFetch = provider.loopRuns()
         async let modeFetch = provider.loopModeChanges(in: interval)
+        async let manualTempFetch = provider.manualTempBasals(in: interval)
         var history = try await historyFetch
         let (runs, coverageStart) = try await runsFetch
         if oneDay {
@@ -117,6 +119,8 @@ final class TrendsModel: ObservableObject {
         summary.glucose = cgm
         summary.stats = LoopHistoryMath.glucoseStats(cgm)
         summary.cgmActive = LoopHistoryMath.cgmActiveFraction(cgm, over: interval)
+        summary.cgmHoursPerDay = LoopHistoryMath.cgmHoursPerDay(cgmActive: summary.cgmActive, over: interval,
+                                                                periodDays: LoopHistoryMath.days(in: interval).count)
         summary.timeInRange = LoopHistoryMath.timeInRange(cgm)
         summary.agp = LoopHistoryMath.agp(cgm)
         summary.agpDays = LoopHistoryMath.daysWithReadings(cgm)
@@ -157,17 +161,13 @@ final class TrendsModel: ObservableObject {
             summary.scheduledBasal = scheduled.reduce(0, +) / Double(scheduled.count)
             summary.scheduledDays = scheduled.count
         }
-        let classified = insulinDays.filter(\.split.isClassified)
-        if !classified.isEmpty, classified.count < insulinDays.count {
-            summary.classifiedSplit = InsulinSplit.average(classified.map(\.split))
-            summary.classifiedDays = classified.count
-        }
+        summary.readsHealthInsulin = interval.start < history.localInsulinStart
         if interval.end.timeIntervalSinceNow > -300 {
             summary.typicalByNow = await provider.typicalInsulinByNow()
         }
 
         summary.loopSpans = LoopHistoryMath.loopModeSpans(interval: interval, runs: runs, modeChanges: try await modeFetch,
-                                                          coverageStart: coverageStart)
+                                                          coverageStart: coverageStart, manualTempBasals: try await manualTempFetch)
         return summary
     }
 
@@ -183,13 +183,14 @@ final class TrendsModel: ObservableObject {
                                   detail: String(format: NSLocalizedString("SD %1$@ · CV %2$@%%", comment: "Trends Average tile detail: standard deviation and coefficient of variation of glucose. (1: standard deviation in the glucose unit, 2: coefficient of variation as a percentage number)"),
                                                  unit.format(stats.sdMgdl), LoopFormat.number(stats.cv * 100, decimals: 0)),
                                   aim: averageAim(unit)))
-            let enough = s.cgmActive * s.interval.duration / 86400 >= 10
+            // Always shown, as Statistics did. The consensus says how representative it is: 14 days, 70% CGM data.
             tiles.append(StatTile(label: gmiLabel, value: LoopFormat.number(stats.gmiPercent, decimals: 1), unit: "%",
-                                  detail: enough
-                                    ? String(format: NSLocalizedString("%1$@ mmol/mol", comment: "Trends GMI tile detail: the GMI in IFCC units. (1: value)"),
-                                             LoopFormat.number(stats.gmiMmolMol, decimals: 0))
-                                    : NSLocalizedString("Needs 10 days of CGM", comment: "Trends GMI tile detail when fewer than 10 days of CGM data are available"),
-                                  aim: ConsensusTarget.aim(ConsensusTarget.under(7))))
+                                  detail: String(format: NSLocalizedString("%1$@ mmol/mol", comment: "Trends GMI tile detail: the GMI in IFCC units. (1: value)"),
+                                                 LoopFormat.number(stats.gmiMmolMol, decimals: 0)),
+                                  aim: ConsensusTarget.aim(ConsensusTarget.under(7)),
+                                  caveat: LoopHistoryMath.gmiIsRepresentative(periodDays: s.totals.count, cgmActive: s.cgmActive) ? nil
+                                    : String(format: NSLocalizedString("Best over 14 days with %1$@ CGM data", comment: "Trends GMI tile caption when the period is shorter than 14 days or CGM readings cover less than 70% of it: the consensus for when GMI is representative. (1: share of CGM data, e.g. 70%)"),
+                                             ConsensusTarget.percent(70))))
         } else {
             tiles.append(StatTile(label: averageLabel, value: "–", unit: unit.unitName,
                                   detail: NSLocalizedString("No CGM data", comment: "Trends Average tile detail when the period has no glucose readings")))
@@ -208,13 +209,14 @@ final class TrendsModel: ObservableObject {
                                 : String(format: NSLocalizedString("%1$@ entries", comment: "Trends Carbs per day tile detail: average number of carb entries per day, a fractional value such as 2.5, so not pluralised. (1: number with one decimal)"),
                                          LoopFormat.number(Double(s.carbEntries) / s.days, decimals: 1))))
         tiles.append(StatTile(label: oneDay
-                                ? NSLocalizedString("Boluses", comment: "Trends summary tile for a one-day period: how many manual boluses were given that day")
-                                : NSLocalizedString("Boluses per day", comment: "Trends summary tile: average number of manual boluses per day"),
-                              value: LoopFormat.number(Double(s.manualBoluses) / s.days, decimals: countDecimals), unit: nil,
+                                ? NSLocalizedString("Boluses", comment: "Trends summary tile for a one-day period: how many boluses were given that day, other than Loop's automatic ones")
+                                : NSLocalizedString("Boluses per day", comment: "Trends summary tile: average number of boluses per day, other than Loop's automatic ones"),
+                              // Every bolus not known to be automatic, so one of unknown kind still counts.
+                              value: LoopFormat.number(Double(s.manualBoluses + s.unknownBoluses) / s.days, decimals: countDecimals), unit: nil,
                               detail: s.unknownBoluses > 0
-                                ? String(format: NSLocalizedString("+ %1$@ automatic, %2$@ unknown", comment: "Trends Boluses per day tile detail when some boluses don't say whether they were manual or automatic, such as another app's in Apple Health. (1: automatic boluses per day; 2: boluses of unknown kind per day; both fractional, such as 4.2)"),
-                                         LoopFormat.number(Double(s.automaticBoluses) / s.days, decimals: countDecimals),
-                                         LoopFormat.number(Double(s.unknownBoluses) / s.days, decimals: countDecimals))
+                                ? String(format: NSLocalizedString("%1$@ of unknown kind\n+ %2$@ automatic", comment: "Trends Boluses per day tile detail when some boluses don't say whether they were manual or automatic, such as another app's in Apple Health, on two lines: how many of the figure above are of unknown kind, then the automatic boluses on top. (1: boluses of unknown kind per day; 2: automatic boluses per day; both fractional, such as 4.2)"),
+                                         LoopFormat.number(Double(s.unknownBoluses) / s.days, decimals: countDecimals),
+                                         LoopFormat.number(Double(s.automaticBoluses) / s.days, decimals: countDecimals))
                                 : String(format: NSLocalizedString("+ %1$@ automatic", comment: "Trends Boluses per day tile detail: average number of automatic boluses per day on top of the manual ones, a fractional value such as 4.2. (1: number with one decimal)"),
                                          LoopFormat.number(Double(s.automaticBoluses) / s.days, decimals: countDecimals))))
         return tiles
@@ -296,7 +298,7 @@ struct TrendsView: View {
                 if s.glucose.isEmpty {
                     ChartPlaceholder(message: NSLocalizedString("No CGM data in this period", comment: "Trends chart placeholder when the period has no glucose readings"))
                 } else {
-                    TimeInRangeView(fractions: s.timeInRange, unit: s.unit)
+                    TimeInRangeView(fractions: s.timeInRange, hoursPerDay: s.cgmHoursPerDay, unit: s.unit)
                 }
             }
             if s.day == nil {
@@ -333,7 +335,9 @@ struct TrendsView: View {
                 }
             } else {
                 CardHeader(title: NSLocalizedString("Insulin per day", comment: "Trends tile and card title: average total insulin per day")) {
-                    if weekly {
+                    if weekly, let note = model.daysNote(s) {
+                        Text(String(format: NSLocalizedString("per day, weekly average · %1$@", comment: "Trends Insulin per day card subtitle when each bar is a week's average daily total and only some days of the period are averaged. (1: days averaged, e.g. 4 of 90 days)"), note))
+                    } else if weekly {
                         Text(NSLocalizedString("per day, weekly average", comment: "Trends Insulin per day card subtitle when each bar is a week's average daily total"))
                     } else if let note = model.daysNote(s) {
                         Text(String(format: NSLocalizedString("average of %1$@", comment: "Trends Insulin per day card subtitle when only some days of the period are averaged, such as a day still in progress. (1: days averaged, e.g. 13 of 14 days)"), note))
@@ -350,15 +354,13 @@ struct TrendsView: View {
                 let averaged = LoopHistoryMath.averagingDays(s.totals).count
                 InsulinSplitView(split: s.split, partial: s.splitIsPartial, scheduledBasal: s.scheduledBasal,
                                  scheduledNote: s.scheduledDays < averaged ? daysOf(s.scheduledDays, averaged) : nil,
-                                 classifiedSplit: s.classifiedSplit,
-                                 classifiedNote: s.classifiedSplit != nil ? daysOf(s.classifiedDays, averaged) : nil,
                                  usual: s.day != nil && s.splitIsPartial ? usualByNow(s) : nil, showsBar: s.day != nil,
                                  averageLine: s.day == nil)
                 if s.day == nil, let today = todaySoFar(s) {
                     Footnote(today)
                 }
                 // Days read from Apple Health have no schedule, and other apps' boluses there don't say which they were.
-                if s.interval.start < model.provider.localHistoryStart, s.scheduledBasal == nil || (s.split.bolus > 0 && !s.split.isClassified && s.classifiedSplit == nil) {
+                if s.readsHealthInsulin, s.scheduledBasal == nil || !s.split.isClassified {
                     Footnote(NSLocalizedString("Older days come from Apple Health, which doesn't record the basal schedule, or whether another app's bolus was manual or automatic.", comment: "Trends Insulin per day footnote when the period reaches back past Loop's own records, so scheduled basal or the manual and automatic split can't be shown"))
                 }
             } else {
