@@ -12,7 +12,6 @@
 //
 
 import Foundation
-import G7SensorKit
 import LoopCore
 import LoopKit
 import WatchKit
@@ -47,7 +46,7 @@ enum GlanceComplicationPublisher {
     /// When the watch's G7 link last came up: a background reload is free only while the app holds a
     /// Bluetooth connection, and not in its first moments (see GlanceReloadPolicy.linkSettle).
     @MainActor static func sensorLinkUp(_ delegate: ExtensionDelegate) -> Date? {
-        (delegate.stockLoopSession?.stack.loopManager.cgmManager as? G7CGMManager)?.lastConnect
+        watchCGMLastConnection(delegate.stockLoopSession?.stack.loopManager.cgmManager)
     }
 
     /// The watch holds the pod: the glance's own frame, with the reading in the display unit.
