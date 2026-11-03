@@ -1449,6 +1449,10 @@ extension DeviceDataManager: PumpManagerDeliveryDelegate {
         try await doseEnactor.enact(decisionId: decisionId, bolus: bolus, tempBasal: tempBasal, with: pumpManager)
     }
 
+    var isAutomaticDosingActive: Bool {
+        settingsManager.dosingEnabled && !isManualTempBasalRunning
+    }
+
     var isPumpInoperable: Bool {
         guard let basalDeliveryState else {
             return true
