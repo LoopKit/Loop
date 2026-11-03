@@ -189,7 +189,6 @@ struct LoopModeSpan: Equatable {
     let start: Date
     let end: Date
     let mode: Mode
-    let cause: String?
 
     var duration: TimeInterval { end.timeIntervalSince(start) }
 }

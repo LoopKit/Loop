@@ -299,19 +299,22 @@ enum LoopHistoryMath {
     struct LoopRun {
         let date: Date
         let succeeded: Bool
-        let error: String?
+        /// The run stopped because a manual temp basal was running, which Loop shows as open loop.
+        var manualTempBasal = false
     }
 
-    struct ModeChange: Codable, Equatable {
+    /// Closed loop switched on or off, from Loop's stored settings.
+    struct ModeChange: Equatable {
         let date: Date
         let closedLoop: Bool
     }
 
     /// Splits `interval` into closed, limited and open stretches.
     ///
-    /// Each 5-minute slot is open when closed loop was switched off (from `modeChanges`), closed when Loop completed a
-    /// run in the 15 minutes before the slot ends, and limited otherwise. Before the first mode change the setting is
-    /// unknown, so the result starts at the later of `coverageStart` and the first mode change.
+    /// Each 5-minute slot is open when closed loop was switched off (from `modeChanges`), or when Loop's latest run in
+    /// the 15 minutes before the slot ends stopped for a manual temp basal. Otherwise it is closed when Loop completed a
+    /// run in those 15 minutes, and limited when it didn't. Before the first mode change the setting is unknown, so the
+    /// result starts at the later of `coverageStart` and the first mode change.
     static func loopModeSpans(interval: DateInterval, runs: [LoopRun], modeChanges: [ModeChange], coverageStart: Date?,
                               recency: TimeInterval = 15 * 60, slot: TimeInterval = 5 * 60) -> [LoopModeSpan] {
         guard let coverageStart, let firstChange = modeChanges.map(\.date).min() else { return [] }
@@ -322,8 +325,8 @@ enum LoopHistoryMath {
         let changes = modeChanges.sorted { $0.date < $1.date }
         var spans: [LoopModeSpan] = []
         var runIndex = 0
+        var lastRun: LoopRun? = nil
         var lastSuccess: Date? = nil
-        var lastError: String? = nil
         var changeIndex = 0
         var closedSetting: Bool? = nil
 
@@ -332,11 +335,9 @@ enum LoopHistoryMath {
             let slotEnd = min(t.addingTimeInterval(slot), interval.end)
             while runIndex < sortedRuns.count && sortedRuns[runIndex].date <= slotEnd {
                 let run = sortedRuns[runIndex]
+                lastRun = run
                 if run.succeeded {
                     lastSuccess = run.date
-                    lastError = nil
-                } else {
-                    lastError = run.error ?? lastError
                 }
                 runIndex += 1
             }
@@ -346,22 +347,20 @@ enum LoopHistoryMath {
             }
 
             let mode: LoopModeSpan.Mode
-            let cause: String?
             if closedSetting == false {
                 mode = .open
-                cause = NSLocalizedString("Closed loop off", comment: "Reason shown for a stretch of time when Loop was in open loop because closed loop was turned off")
+            } else if let lastRun, lastRun.manualTempBasal, slotEnd.timeIntervalSince(lastRun.date) <= recency {
+                mode = .open
             } else if let lastSuccess, slotEnd.timeIntervalSince(lastSuccess) <= recency {
                 mode = .closed
-                cause = nil
             } else {
                 mode = .limited
-                cause = lastError ?? NSLocalizedString("Loop didn't run", comment: "Reason shown for a stretch of time when Loop did not complete a run and recorded no error")
             }
 
-            if let last = spans.last, last.mode == mode, last.cause == cause, last.end == t {
-                spans[spans.count - 1] = LoopModeSpan(start: last.start, end: slotEnd, mode: mode, cause: cause)
+            if let last = spans.last, last.mode == mode, last.end == t {
+                spans[spans.count - 1] = LoopModeSpan(start: last.start, end: slotEnd, mode: mode)
             } else {
-                spans.append(LoopModeSpan(start: t, end: slotEnd, mode: mode, cause: cause))
+                spans.append(LoopModeSpan(start: t, end: slotEnd, mode: mode))
             }
             t = slotEnd
         }
