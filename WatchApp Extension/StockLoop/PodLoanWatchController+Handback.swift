@@ -314,7 +314,7 @@ extension PodLoanWatchController {
         schedule(after: 15, label: "handback-resend", execute: work)
     }
 
-    /// Advances the cursor on every ack; only the final offer's ack releases the pod.
+    /// Advances the cursor on every ack; only an ack of a released offer releases the pod.
     func handleAck(_ ack: HandbackAck) {
         // A parked drain has no controller epoch; use the journal's.
         guard let current = epoch ?? journal.activeEpoch, ack.epoch == current else {
@@ -334,7 +334,8 @@ extension PodLoanWatchController {
         }
         guard phase == .handingBack || phase == .revoked || phase == .recoveredDrain else { return }
 
-        if phase == .handingBack && !finalOfferSent { return }
+        // Only the phone's answer to a released offer closes the loan.
+        guard ack.released, phase != .handingBack || finalOfferSent else { return }
 
         resendWorkItem?.cancel()
 

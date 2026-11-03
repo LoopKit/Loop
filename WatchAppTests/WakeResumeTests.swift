@@ -273,7 +273,7 @@ final class WakeResumeTests: XCTestCase {
         c.send = { _ in }
         c.beginHandback()
         await c.onMain { }
-        c.handleIncoming(userInfo: try LoanMessage.handbackAck(HandbackAck(epoch: 7, committedCursor: 0)).transportDictionary())
+        c.handleIncoming(userInfo: try LoanMessage.handbackAck(HandbackAck(epoch: 7, committedCursor: 0, released: false)).transportDictionary())
         await c.onMain { }
         await c.onMain { answerWait?.perform() }
         let snapshot4 = await c.fencedSnapshot()
@@ -694,7 +694,7 @@ final class WakeResumeTests: XCTestCase {
         c.send = { sent.append($0) }
         c.beginHandback()
         await c.onMain { }
-        c.handleIncoming(userInfo: try LoanMessage.handbackAck(HandbackAck(epoch: 7, committedCursor: 0)).transportDictionary())
+        c.handleIncoming(userInfo: try LoanMessage.handbackAck(HandbackAck(epoch: 7, committedCursor: 0, released: false)).transportDictionary())
         // The ack finalizes: dosing stops on the loop's lane, then the final offer goes out.
         await c.onMain { }; await c.loopManager.laneSettled(); await c.onMain { }; await c.onMain { }
         XCTAssertEqual(c.phase, .handingBack, "released: the final offer is out")
@@ -711,6 +711,38 @@ final class WakeResumeTests: XCTestCase {
         }
         XCTAssertEqual(offer.released, true)
         XCTAssertTrue(offer.recovered, "as a drain: it may be queued now — late, it is still true")
+    }
+
+    func testOnlyTheAnswerToTheReleasedOfferClosesTheLoan() async throws {
+        // An answer to an earlier offer, or to records, can arrive after the final offer went out. It is
+        // not the phone's word that it has the hand-back, so the loan stays open until that word comes.
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        c.isPhoneReachable = { true }
+        var sent: [[String: Any]] = []
+        c.send = { sent.append($0) }
+        let finalOfferOut = {
+            sent.contains { userInfo in
+                guard case .handbackOffer(let offer)? = try? LoanMessage.decode(fromTransport: userInfo) else { return false }
+                return offer.released == true
+            }
+        }
+        c.beginHandback()
+        await c.onMain { }
+        let earlier = try LoanMessage.handbackAck(HandbackAck(epoch: 7, committedCursor: 0, released: false)).transportDictionary()
+        c.handleIncoming(userInfo: earlier)
+        for _ in 0..<50 where !finalOfferOut() {
+            await c.onMain { }; await c.loopManager.laneSettled(); await c.onMain { }
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+        XCTAssertTrue(finalOfferOut(), "the final offer is out")
+
+        c.handleIncoming(userInfo: earlier)
+        await c.onMain { }
+        XCTAssertEqual(c.phase, .handingBack, "a late answer to an earlier offer leaves the loan open")
+
+        c.handleIncoming(userInfo: try LoanMessage.handbackAck(HandbackAck(epoch: 7, committedCursor: 0, released: true)).transportDictionary())
+        await c.onMain { }
+        XCTAssertEqual(c.phase, .idle, "the answer to the released offer closes it")
     }
 
     func testTeardownClearsSavedState() async {

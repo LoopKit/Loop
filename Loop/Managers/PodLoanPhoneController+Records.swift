@@ -339,14 +339,14 @@ extension PodLoanPhoneController {
                             }
                             self.noteRecordsCurrent(asOf: offer.handedBackAt)
                             // The ack, and only now that the store has it.
-                            self.sendMessage(.handbackAck(HandbackAck(epoch: self.epoch, committedCursor: self.committedCursor)))
+                            self.sendMessage(.handbackAck(HandbackAck(epoch: self.epoch, committedCursor: self.committedCursor, released: isFinal)))
                             self.handbackDiag(self.epoch, String(format: "records saved in %.0f ms; acknowledged up to %d", self.deps.now().timeIntervalSince(writeStart) * 1000, self.committedCursor))
                             if isFinal, self.state == .reconciling {
                                 self.finishLoanAfterCommit()
                             }
                         } else {
                             // Acked so the watch can let go; no dedup state moves.
-                            self.sendMessage(.handbackAck(HandbackAck(epoch: offer.epoch, committedCursor: newCursor, stale: true)))
+                            self.sendMessage(.handbackAck(HandbackAck(epoch: offer.epoch, committedCursor: newCursor, stale: true, released: isFinal)))
                         }
 
                         // Any back-dated insulin write invalidates the counteraction memo from its earliest dose.

@@ -1731,6 +1731,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertEqual(ack1.committedCursor, openTemp.seq, "open temp's seq IS acked so the watch can finalize (deadlock fix)")
         XCTAssertEqual(addedDoses.flatMap { $0 }.count, 0, "but the open temp is withheld from the store write")
         XCTAssertEqual(controller.state, .loaned, "an interim drain does not reclaim")
+        XCTAssertFalse(ack1.released, "an interim answer never lets the watch close the loan")
 
         // Phase 2 — FINAL offer (released:true): the watch acked everything, so it carries
         // no events; the phone re-drains the still-staged open temp and writes it.
@@ -1739,6 +1740,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
             epoch: grant.epoch, handedBackAt: now.addingTimeInterval(5), finalStatus: nil, odometer: nil,
             events: [], tombstones: [], recovered: false, released: true)).transportDictionary())
         wait(for: [finalAck], timeout: 5)
+        guard case .handbackAck(let ack2)? = lastSent() else { return XCTFail("expected final ack") }
+        XCTAssertTrue(ack2.released, "the answer to the released offer is what closes the loan")
 
         XCTAssertEqual(addedDoses.flatMap { $0 }.count, 1, "the withheld open temp is written on the final drain")
         waitForState(controller, .owner)

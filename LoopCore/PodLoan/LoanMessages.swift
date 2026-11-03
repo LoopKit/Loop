@@ -327,10 +327,15 @@ public struct HandbackAck: Codable, Equatable {
     public let committedCursor: Int
     public let stale: Bool
 
-    public init(epoch: Int, committedCursor: Int, stale: Bool = false) {
+    /// Answers a released offer: the phone has the hand-back. An answer to an interim offer or to
+    /// records, arriving late, never lets the watch close the loan.
+    public let released: Bool
+
+    public init(epoch: Int, committedCursor: Int, stale: Bool = false, released: Bool) {
         self.epoch = epoch
         self.committedCursor = committedCursor
         self.stale = stale
+        self.released = released
     }
 }
 
