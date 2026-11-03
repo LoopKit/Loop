@@ -147,7 +147,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         charts.updateEndDate(chartStartDate.addingTimeInterval(.hours(totalHours+1))) // When there is no data, this allows presenting current hour + 1
 
         let midnight = Calendar.current.startOfDay(for: Date())
-        let listStart = min(midnight, chartStartDate, Date(timeIntervalSinceNow: -LoopCoreConstants.maximumCarbAbsorptionTimeInterval))
+        let listStart = min(midnight - .hours(24), chartStartDate, Date(timeIntervalSinceNow: -LoopCoreConstants.maximumCarbAbsorptionTimeInterval))
         let listEnd = Date().addingTimeInterval(LoopConstants.maxCarbEntryFutureTime)
 
         let shouldUpdateGlucose = currentContext.contains(.glucose)
@@ -252,6 +252,14 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         return formatter
     }()
 
+    private lazy var relativeTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.doesRelativeDateFormatting = true
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
     override func numberOfSections(in tableView: UITableView) -> Int {
         return Section.count
     }
@@ -308,7 +316,14 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             }
 
             // Entry time
-            let startTime = timeFormatter.string(from: status.entry.startDate)
+            let startTime: String
+            // Indicate if an entry is from the previous day to avoid potential confusion
+            let midnight = Calendar.current.startOfDay(for: Date())
+            if status.entry.startDate < midnight {
+                startTime = relativeTimeFormatter.string(from: status.entry.startDate)
+            } else {
+                startTime = timeFormatter.string(from: status.entry.startDate)
+            }
             if  let absorptionTime = status.entry.absorptionTime,
                 let duration = absorptionFormatter.string(from: absorptionTime)
             {
