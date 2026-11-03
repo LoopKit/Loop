@@ -56,7 +56,9 @@ struct SetupComparison: Equatable {
     }
 
     private static func insulinPerDay(_ history: InsulinDeliveryHistory?, from start: Date, to end: Date) -> Double? {
-        guard let history, history.coverageStart <= start, end <= history.end else {
+        // The history is read up to its own "now", which can be a moment before the period's end.
+        let end = min(end, history?.end ?? end)
+        guard let history, history.coverageStart <= start, start < end else {
             return nil
         }
         return history.totals(from: start, to: end).total / (end.timeIntervalSince(start) / .days(1))

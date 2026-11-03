@@ -101,6 +101,20 @@ final class SetupComparisonTests: XCTestCase {
         XCTAssertEqual(comparison.after.insulinPerDay ?? 0, 26, accuracy: 0.001)
     }
 
+    func testInsulinPerDayWhenHistoryEndsJustBeforeNow() throws {
+        let now = changeDate.addingTimeInterval(.days(2))
+        let start = changeDate - .days(21)
+        let glucose = samples(from: start, to: now) { _ in 120 }
+        let history = InsulinDeliveryHistory(
+            doses: [],
+            scheduledBasal: [AbsoluteScheduleValue(startDate: start, endDate: now, value: 1.0)],
+            coverageStart: start,
+            end: now - 0.5)
+        let comparison = try XCTUnwrap(SetupComparison(change: change(), samples: glucose, insulinHistory: history, now: now))
+
+        XCTAssertEqual(comparison.after.insulinPerDay ?? 0, 24, accuracy: 0.001)
+    }
+
     func testNoInsulinWhenDosesDontCoverThePeriod() throws {
         let now = changeDate.addingTimeInterval(.days(2))
         let glucose = samples(from: changeDate - .days(21), to: now) { _ in 120 }
