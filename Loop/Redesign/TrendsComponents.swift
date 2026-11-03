@@ -105,6 +105,8 @@ struct StatTile: Identifiable {
     let unit: String?
     let detail: String?
     var valueColor: Color = LoopDesign.Palette.ink
+    /// The consensus target for the figure, e.g. "aim < 7%".
+    var aim: String? = nil
     var id: String { label }
 }
 
@@ -154,6 +156,11 @@ struct StatGridView: View {
                     .foregroundStyle(P.inkMuted)
                     .lineLimit(2)
             }
+            if let aim = tile.aim {
+                Text(aim)
+                    .font(LoopDesign.Typeface.footnote)
+                    .foregroundStyle(P.inkMuted)
+            }
         }
         .padding(LoopDesign.Space.s3)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -173,6 +180,18 @@ extension LoopHistoryMath.RangeBand {
         case .inRange: return NSLocalizedString("In range", comment: "Time in range band: glucose 70–180 mg/dL (3.9–10.0 mmol/L)")
         case .low: return NSLocalizedString("Low", comment: "Time in range band: glucose 54–69 mg/dL (3.0–3.8 mmol/L)")
         case .veryLow: return NSLocalizedString("Very low", comment: "Time in range band: glucose below 54 mg/dL (3.0 mmol/L)")
+        }
+    }
+
+    /// The consensus target for the band. High and low are aims for all time above or below range,
+    /// so they say so; the others are the band's own.
+    var localizedTarget: String {
+        switch self {
+        case .veryHigh: return ConsensusTarget.under(5)
+        case .high: return String(format: NSLocalizedString("%1$@ above range", comment: "Time in range High row: the consensus target for all time above range, high and very high together. (1: target, e.g. < 25%)"), ConsensusTarget.under(25))
+        case .inRange: return ConsensusTarget.over(70)
+        case .low: return String(format: NSLocalizedString("%1$@ below range", comment: "Time in range Low row: the consensus target for all time below range, low and very low together. (1: target, e.g. < 4%)"), ConsensusTarget.under(4))
+        case .veryLow: return ConsensusTarget.under(1)
         }
     }
 
@@ -198,6 +217,18 @@ extension LoopHistoryMath.RangeBand {
 /// "12%" in the user's language.
 private func percentText(_ value: Double, decimals: Int = 0) -> String {
     String(format: NSLocalizedString("%1$@%%", comment: "A percentage. (1: number)"), LoopFormat.number(value, decimals: decimals))
+}
+
+/// The international consensus targets for CGM metrics, written as "< 4%", "> 70%" or "≤ 36%".
+enum ConsensusTarget {
+    static func under(_ percent: Double) -> String { "< " + percentText(percent) }
+    static func over(_ percent: Double) -> String { "> " + percentText(percent) }
+    static func atMost(_ percent: Double) -> String { "≤ " + percentText(percent) }
+
+    /// "aim < 7%", under a figure.
+    static func aim(_ target: String) -> String {
+        String(format: NSLocalizedString("aim %1$@", comment: "Trends: the consensus target under a figure, in lower case. (1: target, e.g. < 7%)"), target)
+    }
 }
 
 struct TimeInRangeView: View {
@@ -273,10 +304,14 @@ struct TimeInRangeView: View {
                     thresholds
                 }
                 Spacer(minLength: LoopDesign.Space.s1)
-                Text(String(format: NSLocalizedString("%1$@ h", comment: "Time in range row: average hours a day spent in the band, abbreviated. (1: hours with one decimal)"),
-                            LoopFormat.number(hours, decimals: 1)))
-                    .font(LoopDesign.Typeface.footnote.monospacedDigit())
-                    .foregroundStyle(P.inkMuted)
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text(String(format: NSLocalizedString("%1$@ h", comment: "Time in range row: average hours a day spent in the band, abbreviated. (1: hours with one decimal)"),
+                                LoopFormat.number(hours, decimals: 1)))
+                        .font(LoopDesign.Typeface.footnote.monospacedDigit())
+                    Text(band.localizedTarget)
+                        .font(LoopDesign.Typeface.caption)
+                }
+                .foregroundStyle(P.inkMuted)
             }
             if typeSize.isAccessibilitySize {
                 thresholds
@@ -285,7 +320,8 @@ struct TimeInRangeView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(String(format: NSLocalizedString("%1$@, %2$@ %3$@: %4$@ percent, %5$@ hours a day", comment: "VoiceOver label for a Time in range row. (1: band name, e.g. In range, 2: glucose thresholds, e.g. 3.9–10.0, 3: glucose unit, 4: percentage number, 5: average hours a day with one decimal)"),
                                    band.localizedName, band.localizedThresholds(unit), unit.unitName,
-                                   LoopFormat.number(Double(percentages[band] ?? 0), decimals: 0), LoopFormat.number(hours, decimals: 1)))
+                                   LoopFormat.number(Double(percentages[band] ?? 0), decimals: 0), LoopFormat.number(hours, decimals: 1))
+                            + ", " + ConsensusTarget.aim(band.localizedTarget))
     }
 }
 
