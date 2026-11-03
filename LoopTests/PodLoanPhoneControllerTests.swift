@@ -1887,20 +1887,6 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertEqual(controller.state, .owner, "the phone keeps the pod")
     }
 
-    /// The watch can't compute slow retrospective correction yet: with it on, Start is refused with the
-    /// setting named, and the pod stays.
-    func testStartIsRefusedWhileSlowRetrospectiveCorrectionIsOn() throws {
-        UserDefaults.standard.slowRetrospectiveCorrectionEnabled = true
-        defer { UserDefaults.standard.slowRetrospectiveCorrectionEnabled = false }
-        let controller = makeController()
-        let sent = expectSend()
-        controller.handleIncoming(userInfo: try LoanMessage.request(LoanRequest(watchBuild: "t")).transportDictionary())
-        wait(for: [sent], timeout: 5)
-        guard case .denied(let refusal)? = lastSent() else { return XCTFail("expected a refusal") }
-        XCTAssertTrue(refusal.reason.contains("Slow Retrospective Correction"), "the watch shows this reason as-is, so it must name the setting")
-        XCTAssertEqual(controller.state, .owner, "the phone keeps the pod")
-    }
-
     /// With this phone's Bluetooth off, the final offer is not acked.
     func testFinalOfferIsNotAcceptedWhileThisPhonesBluetoothIsOff() throws {
         var off = true

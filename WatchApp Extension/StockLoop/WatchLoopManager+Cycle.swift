@@ -167,6 +167,9 @@ extension WatchLoopManager {
         if guardAndRunwayEnabled {
             experiments.insert(.guardAndRunway)
         }
+        if slowRetrospectiveCorrectionEnabled {
+            experiments.insert(.slowRetrospectiveCorrection)
+        }
         return experiments
     }
 

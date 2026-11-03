@@ -83,11 +83,6 @@ extension PodLoanPhoneController {
             deny("Sport Mode needs the watch to read the CGM. Turn on Read on Apple Watch in the CGM's settings on the iPhone.")
             return
         }
-        // The watch can't compute slow retrospective correction yet.
-        guard !UserDefaults.standard.slowRetrospectiveCorrectionEnabled else {
-            deny("Sport Mode doesn't support Slow Retrospective Correction yet. Turn it off in Algorithm Experiments on the iPhone.")
-            return
-        }
 
         // A grant supersedes an inferred loan; the radio comes back first.
         if yieldingToInferredLoan {
@@ -212,16 +207,23 @@ extension PodLoanPhoneController {
                                settings: LoopSettings,
                                completion: @escaping (LoanGrant?) -> Void) {
         // Past the insulin and carb durations.
-        let historyStart = referenceDate.addingTimeInterval(-.hours(16))
-
+        var doseStart = referenceDate.addingTimeInterval(-.hours(16))
+        var carbStart = doseStart
         // The algorithm's glucose window (`fetch` reads back to the carb window), so a loan without a
         // watch G7 sees the carb absorption the phone sees.
-        let glucoseStart = referenceDate.addingTimeInterval(LoopConstants.maxCarbEntryPastTime)
-        // The watch keeps 24 h of overrides and settings; the algorithm looks back about 18.
-        let dayStart = referenceDate.addingTimeInterval(-.hours(24))
-        deps.doseHistory(historyStart) { [weak self] history in
+        var glucoseStart = referenceDate.addingTimeInterval(LoopConstants.maxCarbEntryPastTime)
+        // Slow retrospective correction reads 72 h, as the phone's stores hold it; the watch's stores then
+        // hold the same.
+        let slowRetrospectiveCorrection = UserDefaults.standard.slowRetrospectiveCorrectionEnabled
+        if slowRetrospectiveCorrection {
+            (glucoseStart, doseStart, carbStart) = LoanGrant.slowRetrospectiveCorrectionWindows(referenceDate: referenceDate)
+        }
+        // The watch keeps 24 h of overrides and settings; the algorithm looks back about 18, and about 83
+        // with slow retrospective correction.
+        let dayStart = referenceDate.addingTimeInterval(slowRetrospectiveCorrection ? -.hours(84) : -.hours(24))
+        deps.doseHistory(doseStart) { [weak self] history in
             guard let self = self else { return }
-            self.deps.carbHistory(historyStart) { [weak self] carbs in
+            self.deps.carbHistory(carbStart) { [weak self] carbs in
                 guard let self = self else { return }
                 self.deps.glucoseHistory(glucoseStart) { [weak self] glucose in
                     guard let self = self else { return }
@@ -274,7 +276,7 @@ extension PodLoanPhoneController {
                             glucoseBasedApplicationFactorEnabled: UserDefaults.standard.glucoseBasedApplicationFactorEnabled,
                             guardAndRunwayEnabled: UserDefaults.standard.guardAndRunwayEnabled,
                             volatilityBaseline: self.deps.volatilityBaseline(),
-                            slowRetrospectiveCorrectionEnabled: UserDefaults.standard.slowRetrospectiveCorrectionEnabled,
+                            slowRetrospectiveCorrectionEnabled: slowRetrospectiveCorrection,
 
                             phoneClosedLoopEnabled: settings.dosingEnabled,
                             carbHistory: carbs,
