@@ -11,6 +11,7 @@ import HealthKit
 import LoopKit
 import SwiftCharts
 import UIKit
+import LoopCore
 
 struct ChartAxisGenerator {
     private static let yAxisStepSizeMGDLOverride: Double? = FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil

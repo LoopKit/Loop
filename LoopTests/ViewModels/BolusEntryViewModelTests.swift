@@ -8,7 +8,7 @@
 
 import HealthKit
 import LoopAlgorithm
-import LoopCore
+@testable import LoopCore
 import LoopKit
 import LoopKitUI
 import SwiftUI

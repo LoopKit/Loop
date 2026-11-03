@@ -9,6 +9,7 @@
 import os.log
 import Foundation
 import LoopKit
+import LoopCore
 import UIKit
 
 enum RemoteDataType: String, CaseIterable {

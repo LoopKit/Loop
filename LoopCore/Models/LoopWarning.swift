@@ -9,7 +9,7 @@
 import Foundation
 import LoopKit
 
-enum FetchDataWarningDetail {
+public enum FetchDataWarningDetail {
     case glucoseSamples(error: Error)
     case glucoseMomentumEffect(error: Error)
     case insulinEffect(error: Error)
@@ -21,7 +21,7 @@ enum FetchDataWarningDetail {
     case retrospectiveGlucoseEffect(error: Error)
 }
 
-extension FetchDataWarningDetail {
+public extension FetchDataWarningDetail {
     var issueId: String {
         switch self {
         case .glucoseSamples:
@@ -63,12 +63,12 @@ extension FetchDataWarningDetail {
     }
 }
 
-enum LoopWarning {
+public enum LoopWarning {
     case fetchDataWarning(FetchDataWarningDetail)
     case bolusInProgress
 }
 
-extension LoopWarning {
+public extension LoopWarning {
     var issue: StoredDosingDecision.Issue {
         return StoredDosingDecision.Issue(id: issueId, details: issueDetails)
     }
@@ -94,6 +94,6 @@ extension LoopWarning {
     }
 }
 
-extension Locked where T == [LoopWarning] {
+public extension Locked where T == [LoopWarning] {
     func append(_ loopWarning: LoopWarning) { mutate { $0.append(loopWarning) } }
 }

@@ -10,6 +10,7 @@ import XCTest
 import Foundation
 import LoopKit
 @testable import Loop
+@testable import LoopCore
 
 
 class LoopControlMock: LoopControl {
