@@ -20,9 +20,12 @@ enum LoopDesign {
         // Grounds
         static let surface = Color(uiColor: .systemGroupedBackground)
         static let surfaceRaised = Color(uiColor: .secondarySystemGroupedBackground)
-        static let surfaceSunken = Color(uiColor: .systemGray5)
+        /// A fill rather than a solid grey, so tiles still show on a card in a sheet, where dark mode's raised card is
+        /// the same grey as `systemGray5`.
+        static let surfaceSunken = Color(uiColor: .secondarySystemFill)
         static let separator = Color(uiColor: .opaqueSeparator)
-        static let grid = Color(uiColor: .systemGray5)
+        /// One step lighter than the card in dark mode, for the same reason.
+        static let grid = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? .systemGray4 : .systemGray5 })
 
         // Text
         static let ink = Color(uiColor: .label)
@@ -34,7 +37,8 @@ enum LoopDesign {
         static let agpOuter = glucose.opacity(0.16)
         static let agpInner = glucose.opacity(0.34)
         static let insulin = Color("insulin")
-        /// Bolus is insulin's colour; basal is the same colour faded, with a stronger edge along its top.
+        /// Bolus is insulin's colour; basal is the same colour faded, with a stronger edge along its top. One hue can't
+        /// give 3:1 between them, so charts keep a gap of the card's colour wherever basal and bolus meet.
         static let bolus = insulin
         static let basal = insulin.opacity(0.25)
         static let basalEdge = insulin.opacity(0.6)

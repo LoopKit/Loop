@@ -1300,6 +1300,149 @@
         }
       }
     },
+    "%1$@ of unknown kind\n+ %2$@ automatic" : {
+      "comment" : "Trends Boluses per day tile detail when some boluses don't say whether they were manual or automatic, such as another app's in Apple Health, on two lines: how many of the figure above are of unknown kind, then the automatic boluses on top. (1: boluses of unknown kind per day; 2: automatic boluses per day; both fractional, such as 4.2)",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ من نوع غير معروف\n+ %2$@ تلقائية"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ neznámého druhu\n+ %2$@ automatických"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ af ukendt type\n+ %2$@ automatiske"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ unbekannter Art\n+ %2$@ automatisch"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ de tipo desconocido\n+ %2$@ automáticos"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ tuntematonta tyyppiä\n+ %2$@ automaattista"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ de type inconnu\n+ %2$@ automatiques"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ מסוג לא ידוע\n+ %2$@ אוטומטיים"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ismeretlen típusú\n+ %2$@ automatikus"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ di tipo sconosciuto\n+ %2$@ automatici"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "種類不明 %1$@\n+ 自動 %2$@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ av ukjent type\n+ %2$@ automatiske"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ van onbekend type\n+ %2$@ automatisch"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ nieznanego rodzaju\n+ %2$@ automatycznych"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ de tipo desconhecido\n+ %2$@ automáticos"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ de tip necunoscut\n+ %2$@ automate"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ неизвестного типа\n+ %2$@ автоматических"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ neznámeho druhu\n+ %2$@ automatických"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ av okänd typ\n+ %2$@ automatiska"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ bilinmeyen türde\n+ %2$@ otomatik"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ невідомого типу\n+ %2$@ автоматичних"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ không rõ loại\n+ %2$@ tự động"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "类型未知 %1$@\n+ 自动 %2$@"
+          }
+        }
+      }
+    },
     "%1$@ U/h" : {
       "comment" : "Format string for an insulin rate in units per hour. (1: rate)",
       "localizations" : {
@@ -1439,6 +1582,149 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ U/小时"
+          }
+        }
+      }
+    },
+    "%1$@ unknown" : {
+      "comment" : "Basal and bolus: bolus whose record doesn't say whether it was manual or automatic, such as another app's in Apple Health, after the manual and automatic amounts. (1: units, e.g. 3.2 U)",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ غير معروف"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ neznámý"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ukendt"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ unbekannt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ desconocido"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ tuntematon"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ inconnu"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ לא ידוע"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ismeretlen"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ sconosciuto"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不明 %1$@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ukjent"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ onbekend"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ nieznany"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ desconhecido"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ necunoscut"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ неизвестно"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ neznámy"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ okänd"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ bilinmeyen"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ невідомо"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ không rõ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知 %1$@"
           }
         }
       }
@@ -3608,149 +3894,6 @@
         }
       }
     },
-    "+ %1$@ automatic, %2$@ unknown" : {
-      "comment" : "Trends Boluses per day tile detail when some boluses don't say whether they were manual or automatic, such as another app's in Apple Health. (1: automatic boluses per day; 2: boluses of unknown kind per day; both fractional, such as 4.2)",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ تلقائية، %2$@ غير معروفة"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automatických, %2$@ neznámých"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automatiske, %2$@ ukendte"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automatisch, %2$@ unbekannt"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automáticos, %2$@ desconocidos"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automaattista, %2$@ tuntematonta"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automatiques, %2$@ inconnus"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ אוטומטיים, %2$@ לא ידועים"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automatikus, %2$@ ismeretlen"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automatici, %2$@ sconosciuti"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ 自動 %1$@、不明 %2$@"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automatiske, %2$@ ukjente"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automatisch, %2$@ onbekend"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automatycznych, %2$@ nieznanych"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automáticos, %2$@ desconhecidos"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automate, %2$@ necunoscute"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ автоматических, %2$@ неизвестных"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automatických, %2$@ neznámych"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ automatiska, %2$@ okända"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ otomatik, %2$@ bilinmeyen"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ автоматичних, %2$@ невідомих"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ %1$@ tự động, %2$@ không rõ"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+ 自动 %1$@，未知 %2$@"
-          }
-        }
-      }
-    },
     "25–75%" : {
       "comment" : "Trends Daily pattern legend: band between the 25th and 75th percentiles of glucose",
       "localizations" : {
@@ -5467,6 +5610,149 @@
         }
       }
     },
+    "Best over 14 days with %1$@ CGM data" : {
+      "comment" : "Trends GMI tile caption when the period is shorter than 14 days or CGM readings cover less than 70% of it: the consensus for when GMI is representative. (1: share of CGM data, e.g. 70%)",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأفضل على مدى 14 يومًا مع %1$@ من بيانات CGM"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nejlépe za 14 dní s %1$@ dat CGM"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedst over 14 dage med %1$@ CGM-data"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Am besten über 14 Tage mit %1$@ CGM-Daten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejor en 14 días con %1$@ de datos de CGM"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paras 14 päivän ajalta, kun CGM-dataa on %1$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idéalement sur 14 jours avec %1$@ de données CGM"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מומלץ על פני 14 ימים עם %1$@ נתוני CGM"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legjobb 14 nap alatt, %1$@ CGM-adattal"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ideale su 14 giorni con il %1$@ di dati CGM"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "14日間・CGMデータ%1$@以上が目安"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Best over 14 dager med %1$@ CGM-data"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het best over 14 dagen met %1$@ CGM-gegevens"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najlepiej z 14 dni z %1$@ danych CGM"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ideal em 14 dias com %1$@ de dados de CGM"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ideal pe 14 zile cu %1$@ date CGM"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лучше за 14 дней с %1$@ данных CGM"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najlepšie za 14 dní s %1$@ údajov CGM"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bäst över 14 dagar med %1$@ CGM-data"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En iyisi %1$@ CGM verisiyle 14 gün"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Найкраще за 14 днів із %1$@ даних CGM"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tốt nhất trong 14 ngày với %1$@ dữ liệu CGM"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最好基于 14 天、%1$@ 的 CGM 数据"
+          }
+        }
+      }
+    },
     "Bolus %1$@, %2$@ percent" : {
       "comment" : "VoiceOver: bolus units and share. (1: units, 2: percentage number)",
       "localizations" : {
@@ -5611,7 +5897,7 @@
       }
     },
     "Boluses" : {
-      "comment" : "Trends summary tile for a one-day period: how many manual boluses were given that day",
+      "comment" : "Trends summary tile for a one-day period: how many boluses were given that day, other than Loop's automatic ones",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -5754,7 +6040,7 @@
       }
     },
     "Boluses per day" : {
-      "comment" : "Trends summary tile: average number of manual boluses per day",
+      "comment" : "Trends summary tile: average number of boluses per day, other than Loop's automatic ones",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -9191,149 +9477,6 @@
         }
       }
     },
-    "Needs 10 days of CGM" : {
-      "comment" : "Trends GMI tile detail when fewer than 10 days of CGM data are available",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يحتاج إلى 10 أيام من CGM"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vyžaduje 10 dní CGM"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kræver 10 dages CGM"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Benötigt 10 Tage CGM"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Requiere 10 días de CGM"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vaatii 10 päivää CGM-dataa"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nécessite 10 jours de CGM"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "נדרשים 10 ימי CGM"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "10 nap CGM-adat szükséges"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Servono 10 giorni di CGM"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CGMデータが10日分必要"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Krever 10 dager med CGM"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vereist 10 dagen CGM"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wymaga 10 dni CGM"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Requer 10 dias de CGM"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Necesită 10 zile de CGM"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нужно 10 дней CGM"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vyžaduje 10 dní CGM"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kräver 10 dagars CGM"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "10 günlük CGM gerekir"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Потрібно 10 днів CGM"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cần 10 ngày dữ liệu CGM"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "需要 10 天 CGM 数据"
-          }
-        }
-      }
-    },
     "Next period" : {
       "comment" : "VoiceOver label for the Trends button that moves forward one period",
       "localizations" : {
@@ -11332,6 +11475,149 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "每日，按周平均"
+          }
+        }
+      }
+    },
+    "per day, weekly average · %1$@" : {
+      "comment" : "Trends Insulin per day card subtitle when each bar is a week's average daily total and only some days of the period are averaged. (1: days averaged, e.g. 4 of 90 days)",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يوميًا، متوسط أسبوعي · %1$@"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "za den, týdenní průměr · %1$@"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pr. dag, ugegennemsnit · %1$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pro Tag, Wochendurchschnitt · %1$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "por día, promedio semanal · %1$@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "päivässä, viikkokeskiarvo · %1$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "par jour, moyenne hebdomadaire · %1$@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ליום, ממוצע שבועי · %1$@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "naponta, heti átlag · %1$@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "al giorno, media settimanale · %1$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1日あたり、週平均 · %1$@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per dag, ukesgjennomsnitt · %1$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per dag, weekgemiddelde · %1$@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dziennie, średnia tygodniowa · %1$@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "por dia, média semanal · %1$@"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pe zi, medie săptămânală · %1$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "в день, среднее за неделю · %1$@"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "za deň, týždenný priemer · %1$@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per dag, veckomedel · %1$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "günlük, haftalık ortalama · %1$@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "на день, середнє за тиждень · %1$@"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mỗi ngày, trung bình theo tuần · %1$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每日，按周平均 · %1$@"
           }
         }
       }

@@ -14,10 +14,11 @@ import os
 
 /// Reads glucose, insulin, carbs and loop runs for the redesigned screens.
 ///
-/// Loop keeps `LOOP_LOCAL_CACHE_DURATION_DAYS` (90 by default) days in its own stores. Inside that window everything
-/// comes from those stores, so manual and automatic doses, temp basals and the schedule are known. Older days come from
-/// Apple Health, which has glucose, carbs and insulin split into basal and bolus, and whether Loop gave a bolus
-/// automatically only for the doses Loop wrote, but not the basal schedule.
+/// Loop keeps `LOOP_LOCAL_CACHE_DURATION_DAYS` (90 by default) days in its own stores. From the start of that window,
+/// or from Loop's first record of a kind when that is later, everything comes from those stores, so manual and
+/// automatic doses, temp basals and the schedule are known. Earlier days come from Apple Health, which has glucose,
+/// carbs and insulin split into basal and bolus, and whether Loop gave a bolus automatically only for the doses Loop
+/// wrote, but not the basal schedule.
 final class LoopHistoryProvider {
 
     private let deviceManager: DeviceDataManager
@@ -30,7 +31,7 @@ final class LoopHistoryProvider {
     private let glucoseStore: GlucoseStore
     private let healthStore = HKHealthStore()
     private let log = OSLog(category: "LoopHistoryProvider")
-    private let recordsStartCache = OSAllocatedUnfairLock<(fetched: Date, value: Date)?>(initialState: nil)
+    private let recordStartsCache = OSAllocatedUnfairLock<(fetched: Date, starts: LocalRecordStarts)?>(initialState: nil)
 
     @MainActor
     init(deviceManager: DeviceDataManager, loopDataManager: LoopDataManager, settingsManager: SettingsManager, temporaryPresetsManager: TemporaryPresetsManager) {
@@ -87,37 +88,85 @@ final class LoopHistoryProvider {
 
     // MARK: - Days
 
-    /// Glucose, insulin and carbs in `window`.
+    /// Glucose, insulin and carbs in `window`. Each kind comes from Apple Health before Loop's own records of it
+    /// begin, and from Loop's stores after, so a Loop younger than its cache still shows what Health has for the
+    /// days before it.
     func dayHistory(_ window: DateInterval) async throws -> DayHistory {
         var history = DayHistory(window: window)
-        let boundary = localHistoryStart
+        let starts = try await localRecordStarts()
+        let now = Date(), localStart = localHistoryStart
+        let boundary = { LoopHistoryMath.healthBoundary(localHistoryStart: localStart, firstLocalRecord: $0, now: now) }
+        let glucoseBoundary = boundary(starts.glucose), insulinBoundary = boundary(starts.insulin), carbBoundary = boundary(starts.carbs)
+        let glucose = LoopHistoryMath.split(window, at: glucoseBoundary)
+        let insulin = LoopHistoryMath.split(window, at: insulinBoundary)
+        let carbs = LoopHistoryMath.split(window, at: carbBoundary)
 
-        if window.end > boundary {
-            let local = DateInterval(start: max(window.start, boundary), end: window.end)
-            async let glucose = localGlucose(local)
-            async let insulin = localInsulin(local)
-            async let carbs = localCarbs(local)
-            history.glucose = try await glucose
-            (history.boluses, history.basal, history.scheduledBasal) = try await insulin
-            history.carbs = try await carbs
-        }
+        async let localGlucose = localGlucose(glucose.local)
+        async let localInsulin = localInsulin(insulin.local, recordsStart: starts.insulin)
+        async let localCarbs = localCarbs(carbs.local)
+        async let healthGlucose = healthGlucose(glucose.health)
+        async let healthInsulin = healthInsulin(insulin.health)
+        async let healthCarbs = healthCarbs(carbs.health)
 
-        if window.start < boundary {
-            let older = DateInterval(start: window.start, end: min(window.end, boundary))
-            async let glucose = healthGlucose(older)
-            async let insulin = healthInsulin(older)
-            async let carbs = healthCarbs(older)
-            let (boluses, basal) = try await insulin
-            history.glucose = try await glucose + history.glucose
-            history.boluses = boluses + history.boluses
-            history.basal = basal + history.basal
-            history.carbs = try await carbs + history.carbs
-            if window.end <= boundary {
-                history.source = .health
-            }
+        let (localBoluses, localBasal, scheduled) = try await localInsulin
+        let (healthBoluses, healthBasal) = try await healthInsulin
+        history.glucose = try await healthGlucose + localGlucose
+        history.boluses = healthBoluses + localBoluses
+        history.basal = healthBasal + localBasal
+        history.scheduledBasal = scheduled
+        history.carbs = try await healthCarbs + localCarbs
+        history.localInsulinStart = insulinBoundary
+        if window.end <= min(glucoseBoundary, insulinBoundary, carbBoundary) {
+            history.source = .health
         }
         try Task.checkCancellation()
         return history
+    }
+
+    /// Where Loop's own records of each kind begin, inside its local history; nil for a kind it has none of.
+    struct LocalRecordStarts: Equatable {
+        var glucose: Date?
+        var insulin: Date?
+        var carbs: Date?
+    }
+
+    /// A found start is kept for a few minutes, so each period doesn't search again. A kind with no records yet is
+    /// searched every time, because its first record can arrive at any moment.
+    func localRecordStarts() async throws -> LocalRecordStarts {
+        let now = Date(), start = localHistoryStart
+        let cached = recordStartsCache.withLock { $0 }.flatMap { now.timeIntervalSince($0.fetched) < 300 ? $0 : nil }
+        var starts = cached?.starts ?? LocalRecordStarts()
+        let glucoseStore = self.glucoseStore, doseStore = self.doseStore
+        if starts.glucose == nil {
+            starts.glucose = try await Self.firstRecord(from: start, to: now) { chunk in
+                try await glucoseStore.getGlucoseSamples(start: chunk.start, end: chunk.end).filter { !$0.isDisplayOnly }.map(\.startDate)
+            }
+        }
+        if starts.insulin == nil {
+            starts.insulin = try await Self.firstRecord(from: start, to: now) { chunk in
+                try await doseStore.getNormalizedDoseEntries(start: chunk.start, end: chunk.end).map(\.startDate)
+            }
+        }
+        if starts.carbs == nil {
+            starts.carbs = try await carbStore.getCarbEntries(start: start, end: now, dateAscending: true, fetchLimit: 1).first?.startDate
+        }
+        let found = starts
+        recordStartsCache.withLock { $0 = (fetched: cached?.fetched ?? now, starts: found) }
+        return found
+    }
+
+    /// The earliest date `dates` gives from `start` to `end`, read a week at a time so that finding it doesn't load
+    /// all of the local history.
+    private static func firstRecord(from start: Date, to end: Date, _ dates: (DateInterval) async throws -> [Date]) async throws -> Date? {
+        var chunkStart = start
+        while chunkStart < end {
+            let chunk = DateInterval(start: chunkStart, end: min(end, chunkStart.addingTimeInterval(.days(7))))
+            if let first = try await dates(chunk).min() {
+                return first
+            }
+            chunkStart = chunk.end
+        }
+        return nil
     }
 
     // MARK: - Loop runs
@@ -187,9 +236,18 @@ final class LoopHistoryProvider {
         return changes
     }
 
+    /// When manual temp basals ran in `interval`, from Loop's dose records, ended where the pump ended or cancelled
+    /// them. Loop shows the loop as open while one runs.
+    func manualTempBasals(in interval: DateInterval) async throws -> [DateInterval] {
+        try await doseStore.getNormalizedDoseEntries(start: interval.start, end: interval.end)
+            .filter { $0.type == .tempBasal && $0.automatic == false && $0.endDate > $0.startDate }
+            .map { DateInterval(start: $0.startDate, end: $0.endDate) }
+    }
+
     // MARK: - Loop's stores
 
-    private func localGlucose(_ interval: DateInterval) async throws -> [GlucosePoint] {
+    private func localGlucose(_ interval: DateInterval?) async throws -> [GlucosePoint] {
+        guard let interval else { return [] }
         do {
             let samples = try await glucoseStore.getGlucoseSamples(start: interval.start, end: interval.end)
             return samples
@@ -201,34 +259,13 @@ final class LoopHistoryProvider {
         }
     }
 
-    /// Doses for `interval`, with the start of Loop's insulin records (its earliest local dose). A found start is kept
-    /// for a few minutes so day pages and periods don't each read the whole local history; when it isn't known,
-    /// one read from the start of the local history serves both. No dose before `interval.end` says nothing about
-    /// later days, so that isn't kept.
-    private func doses(for interval: DateInterval) async throws -> (doses: [DoseEntry], recordsStart: Date?) {
-        let localStart = localHistoryStart
-        if interval.start <= localStart {
-            let doses = try await doseStore.getNormalizedDoseEntries(start: interval.start, end: interval.end)
-            return (doses, doses.map(\.startDate).min())
-        }
-        if let cached = recordsStartCache.withLock({ $0 }), Date().timeIntervalSince(cached.fetched) < 300 {
-            return (try await doseStore.getNormalizedDoseEntries(start: interval.start, end: interval.end), cached.value)
-        }
-        let local = try await doseStore.getNormalizedDoseEntries(start: localStart, end: interval.end)
-        let recordsStart = local.map(\.startDate).min()
-        if let recordsStart {
-            recordsStartCache.withLock { $0 = (fetched: Date(), value: recordsStart) }
-        }
-        return (local.filter {
-            $0.startDate < interval.end && ($0.type == .bolus ? $0.startDate >= interval.start : $0.endDate > interval.start)
-        }, recordsStart)
-    }
-
-    private func localInsulin(_ interval: DateInterval) async throws -> ([BolusEvent], [BasalSegment], [ScheduledBasalPoint]) {
+    /// Doses, basal and the schedule for `interval`. `recordsStart` is Loop's earliest local dose: after it,
+    /// unrecorded time runs at the pump's programmed rate.
+    private func localInsulin(_ interval: DateInterval?, recordsStart: Date?) async throws -> ([BolusEvent], [BasalSegment], [ScheduledBasalPoint]) {
+        guard let interval else { return ([], [], []) }
         let doses: [DoseEntry]
-        let recordsStart: Date?
         do {
-            (doses, recordsStart) = try await self.doses(for: interval)
+            doses = try await doseStore.getNormalizedDoseEntries(start: interval.start, end: interval.end)
         } catch {
             os_log("Dose fetch failed: %{public}@", log: log, type: .error, String(describing: error))
             throw error
@@ -257,7 +294,8 @@ final class LoopHistoryProvider {
         return (boluses, basal, scheduled)
     }
 
-    private func localCarbs(_ interval: DateInterval) async throws -> [CarbEvent] {
+    private func localCarbs(_ interval: DateInterval?) async throws -> [CarbEvent] {
+        guard let interval else { return [] }
         do {
             let entries = try await carbStore.getCarbEntries(start: interval.start, end: interval.end)
             return entries.map { entry in
@@ -277,8 +315,8 @@ final class LoopHistoryProvider {
 
     // MARK: - Apple Health
 
-    private func healthSamples(_ type: HKQuantityType, _ interval: DateInterval, options: HKQueryOptions = .strictStartDate) async throws -> [HKQuantitySample] {
-        guard interval.duration > 0 else { return [] }
+    private func healthSamples(_ type: HKQuantityType, _ interval: DateInterval?, options: HKQueryOptions = .strictStartDate) async throws -> [HKQuantitySample] {
+        guard let interval, interval.duration > 0 else { return [] }
         let log = self.log
         return try await withCheckedThrowingContinuation { continuation in
             let predicate = HKQuery.predicateForSamples(withStart: interval.start, end: interval.end, options: options)
@@ -296,7 +334,7 @@ final class LoopHistoryProvider {
     }
 
     /// Several apps can write the same CGM reading to Health; keep one reading per 2½ minutes.
-    private func healthGlucose(_ interval: DateInterval) async throws -> [GlucosePoint] {
+    private func healthGlucose(_ interval: DateInterval?) async throws -> [GlucosePoint] {
         let samples = try await healthSamples(HKQuantityType(.bloodGlucose), interval)
         var points: [GlucosePoint] = []
         let own = HKSource.default().bundleIdentifier
@@ -309,7 +347,8 @@ final class LoopHistoryProvider {
         return points
     }
 
-    private func healthInsulin(_ interval: DateInterval) async throws -> ([BolusEvent], [BasalSegment]) {
+    private func healthInsulin(_ interval: DateInterval?) async throws -> ([BolusEvent], [BasalSegment]) {
+        guard let interval else { return ([], []) }
         let samples = try await healthSamples(HKQuantityType(.insulinDelivery), interval, options: [])
         var boluses: [BolusEvent] = []
         var basal: [BasalSegment] = []
@@ -331,7 +370,7 @@ final class LoopHistoryProvider {
         return (boluses, basal)
     }
 
-    private func healthCarbs(_ interval: DateInterval) async throws -> [CarbEvent] {
+    private func healthCarbs(_ interval: DateInterval?) async throws -> [CarbEvent] {
         let samples = try await healthSamples(HKQuantityType(.dietaryCarbohydrates), interval)
         let own = HKSource.default().bundleIdentifier
         return samples

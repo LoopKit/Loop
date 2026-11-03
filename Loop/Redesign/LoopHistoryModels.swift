@@ -109,6 +109,9 @@ struct DayHistory {
     var carbs: [CarbEvent] = []
     /// Where the data came from, so older days can say they are missing Loop's own detail.
     var source: HistorySource = .loop
+    /// Where Loop's own dose records take over from Apple Health: before it, insulin has no schedule, and only the
+    /// boluses Loop wrote say whether they were automatic.
+    var localInsulinStart = Date.distantPast
 
     var bolusUnits: Double { boluses.reduce(0) { $0 + $1.units } }
     var basalUnits: Double { basal.reduce(0) { $0 + $1.units } }
@@ -298,7 +301,9 @@ extension BolusEvent {
         guard dose.type == .bolus, dose.startDate >= interval.start, dose.startDate < interval.end else { return nil }
         self.init(id: dose.syncIdentifier ?? "\(dose.startDate.timeIntervalSince1970)", date: dose.startDate,
                   units: dose.unitsInDeliverableIncrements, automatic: dose.automatic ?? false,
-                  manuallyEntered: dose.manuallyEntered, dose: dose)
+                  manuallyEntered: dose.manuallyEntered, dose: dose,
+                  // A dose imported without Loop's automatic flag, or not yet reconciled, is of unknown kind.
+                  automaticKnown: dose.automatic != nil)
     }
 }
 
