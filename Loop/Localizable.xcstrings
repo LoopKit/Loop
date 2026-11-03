@@ -13,6 +13,292 @@
     " -" : {
 
     },
+    "%1$@ above range" : {
+      "comment" : "Time in range High row: the consensus target for all time above range, high and very high together. (1: target, e.g. < 25%)",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ فوق النطاق"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ nad rozsahem"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ over området"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ über dem Bereich"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ por encima"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ alueen yläpuolella"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ au-dessus"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ מעל הטווח"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ tartomány felett"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ sopra"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "範囲上 %1$@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ over området"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ boven bereik"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ powyżej zakresu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ acima do alvo"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ peste interval"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ выше диапазона"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ nad rozsahom"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ över målområdet"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aralık üstü %1$@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ вище діапазону"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ trên khoảng"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高于范围 %1$@"
+          }
+        }
+      }
+    },
+    "%1$@ below range" : {
+      "comment" : "Time in range Low row: the consensus target for all time below range, low and very low together. (1: target, e.g. < 4%)",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ تحت النطاق"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ pod rozsahem"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ under området"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ unter dem Bereich"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ por debajo"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ alueen alapuolella"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ en dessous"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ מתחת לטווח"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ tartomány alatt"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ sotto"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "範囲下 %1$@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ under området"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ onder bereik"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ poniżej zakresu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ abaixo do alvo"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ sub interval"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ниже диапазона"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ pod rozsahom"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ under målområdet"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aralık altı %1$@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ нижче діапазону"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ dưới khoảng"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "低于范围 %1$@"
+          }
+        }
+      }
+    },
     "%1$@ d" : {
       "comment" : "Trends period picker, short label for a period of several days, e.g. 7 d. (1: number of days)",
       "localizations" : {
@@ -3608,288 +3894,288 @@
         }
       }
     },
-    "Aim: average under %1$@ %2$@, GMI under 7%%, CV 36%% or less." : {
-      "comment" : "Trends Summary footnote: the consensus targets for average glucose, GMI and glucose variability (CV). (1: glucose value, 2: glucose unit)",
+    "aim %1$@" : {
+      "comment" : "Trends: the consensus target under a figure, in lower case. (1: target, e.g. < 7%)",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الهدف: متوسط أقل من %1$@ %2$@، وGMI أقل من 7%%، وCV ‏36%% أو أقل."
+            "value" : "الهدف %1$@"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cíl: průměr pod %1$@ %2$@, GMI pod 7%%, CV nejvýše 36%%."
+            "value" : "cíl %1$@"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mål: gennemsnit under %1$@ %2$@, GMI under 7 %%, CV højst 36 %%."
+            "value" : "mål %1$@"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ziel: Durchschnitt unter %1$@ %2$@, GMI unter 7 %%, VK höchstens 36 %%."
+            "value" : "Ziel %1$@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Objetivo: promedio por debajo de %1$@ %2$@, GMI por debajo del 7%%, CV del 36%% o menos."
+            "value" : "objetivo %1$@"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tavoite: keskiarvo alle %1$@ %2$@, GMI alle 7 %%, CV enintään 36 %%."
+            "value" : "tavoite %1$@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Objectif : moyenne sous %1$@ %2$@, GMI sous 7 %%, CV de 36 %% au plus."
+            "value" : "objectif %1$@"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "יעד: ממוצע מתחת ל-%1$@ %2$@, GMI מתחת ל-7%%, CV ‏36%% או פחות."
+            "value" : "יעד %1$@"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cél: átlag %1$@ %2$@ alatt, GMI 7%% alatt, CV legfeljebb 36%%."
+            "value" : "cél: %1$@"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obiettivo: media sotto %1$@ %2$@, GMI sotto il 7%%, CV al massimo 36%%."
+            "value" : "obiettivo %1$@"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "目標：平均%1$@ %2$@未満、GMI 7%%未満、CV 36%%以下。"
+            "value" : "目標 %1$@"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mål: gjennomsnitt under %1$@ %2$@, GMI under 7 %%, CV høyst 36 %%."
+            "value" : "mål %1$@"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Doel: gemiddelde onder %1$@ %2$@, GMI onder 7%%, CV hoogstens 36%%."
+            "value" : "doel %1$@"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cel: średnia poniżej %1$@ %2$@, GMI poniżej 7%%, CV najwyżej 36%%."
+            "value" : "cel %1$@"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meta: média abaixo de %1$@ %2$@, GMI abaixo de 7%%, CV de no máximo 36%%."
+            "value" : "meta %1$@"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Țintă: medie sub %1$@ %2$@, GMI sub 7%%, CV de cel mult 36%%."
+            "value" : "țintă %1$@"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Цель: среднее ниже %1$@ %2$@, GMI ниже 7%%, CV не более 36%%."
+            "value" : "цель %1$@"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cieľ: priemer pod %1$@ %2$@, GMI pod 7%%, CV najviac 36%%."
+            "value" : "cieľ %1$@"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mål: genomsnitt under %1$@ %2$@, GMI under 7 %%, CV högst 36 %%."
+            "value" : "mål %1$@"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hedef: ortalama %1$@ %2$@ altı, GMI %%7 altı, CV en fazla %%36."
+            "value" : "hedef %1$@"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Мета: середнє нижче %1$@ %2$@, GMI нижче 7%%, CV не більше 36%%."
+            "value" : "мета %1$@"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mục tiêu: trung bình dưới %1$@ %2$@, GMI dưới 7%%, CV từ 36%% trở xuống."
+            "value" : "mục tiêu %1$@"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "目标：平均值低于 %1$@ %2$@，GMI 低于 7%%，CV 不超过 36%%。"
+            "value" : "目标 %1$@"
           }
         }
       }
     },
-    "Aim: over 70%% in range; under 25%% above and 4%% below; under 5%% very high and 1%% very low; CGM active over 70%%." : {
-      "comment" : "Trends Time in range card footnote: the consensus targets for time in range, above and below range, very high, very low and CGM wear",
+    "aim %1$@, CV %2$@" : {
+      "comment" : "Trends Average tile: the consensus targets for average glucose and its coefficient of variation, in lower case. (1: glucose target, e.g. < 8.6; 2: CV target, e.g. ≤ 36%)",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الهدف: أكثر من 70%% ضمن النطاق؛ أقل من 25%% فوق و4%% تحت؛ أقل من 5%% مرتفع جدًا و1%% منخفض جدًا؛ وCGM نشط أكثر من 70%%."
+            "value" : "الهدف %1$@، CV %2$@"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cíl: přes 70%% v rozsahu; pod 25%% nad a 4%% pod; pod 5%% velmi vysoko a 1%% velmi nízko; CGM aktivní přes 70%%."
+            "value" : "cíl %1$@, CV %2$@"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mål: over 70 %% i området; under 25 %% over og 4 %% under; under 5 %% meget højt og 1 %% meget lavt; CGM aktiv over 70 %%."
+            "value" : "mål %1$@, CV %2$@"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ziel: über 70 %% im Zielbereich; unter 25 %% darüber und 4 %% darunter; unter 5 %% sehr hoch und 1 %% sehr niedrig; CGM über 70 %% aktiv."
+            "value" : "Ziel %1$@, VK %2$@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Objetivo: más del 70%% en rango; menos del 25%% por encima y del 4%% por debajo; menos del 5%% muy alto y del 1%% muy bajo; CGM activo más del 70%%."
+            "value" : "objetivo %1$@, CV %2$@"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tavoite: yli 70 %% tavoitealueella; alle 25 %% yläpuolella ja 4 %% alapuolella; alle 5 %% erittäin korkealla ja 1 %% erittäin matalalla; CGM aktiivinen yli 70 %%."
+            "value" : "tavoite %1$@, CV %2$@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Objectif : plus de 70 %% dans la cible ; moins de 25 %% au-dessus et 4 %% en dessous ; moins de 5 %% très haut et 1 %% très bas ; CGM actif plus de 70 %%."
+            "value" : "objectif %1$@, CV %2$@"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "יעד: מעל 70%% בטווח; מתחת ל-25%% מעל ו-4%% מתחת; מתחת ל-5%% גבוה מאוד ו-1%% נמוך מאוד; CGM פעיל מעל 70%%."
+            "value" : "יעד %1$@, CV %2$@"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cél: több mint 70%% tartományban; kevesebb mint 25%% felette és 4%% alatta; kevesebb mint 5%% nagyon magas és 1%% nagyon alacsony; CGM aktív több mint 70%%."
+            "value" : "cél: %1$@, CV %2$@"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obiettivo: oltre il 70%% nell'intervallo; meno del 25%% sopra e del 4%% sotto; meno del 5%% molto alta e dell'1%% molto bassa; CGM attivo oltre il 70%%."
+            "value" : "obiettivo %1$@, CV %2$@"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "目標：範囲内70%%超、範囲上25%%未満・範囲下4%%未満、非常に高い5%%未満・非常に低い1%%未満、CGM稼働70%%超。"
+            "value" : "目標 %1$@、CV %2$@"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mål: over 70 %% i målområdet; under 25 %% over og 4 %% under; under 5 %% svært høyt og 1 %% svært lavt; CGM aktiv over 70 %%."
+            "value" : "mål %1$@, CV %2$@"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Doel: meer dan 70%% binnen bereik; minder dan 25%% erboven en 4%% eronder; minder dan 5%% zeer hoog en 1%% zeer laag; CGM meer dan 70%% actief."
+            "value" : "doel %1$@, CV %2$@"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cel: ponad 70%% w zakresie; poniżej 25%% powyżej i 4%% poniżej; poniżej 5%% bardzo wysokich i 1%% bardzo niskich; CGM aktywny ponad 70%%."
+            "value" : "cel %1$@, CV %2$@"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meta: mais de 70%% no alvo; menos de 25%% acima e 4%% abaixo; menos de 5%% muito alto e 1%% muito baixo; CGM ativo mais de 70%%."
+            "value" : "meta %1$@, CV %2$@"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Țintă: peste 70%% în interval; sub 25%% peste și 4%% sub; sub 5%% foarte ridicat și 1%% foarte scăzut; CGM activ peste 70%%."
+            "value" : "țintă %1$@, CV %2$@"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Цель: в диапазоне более 70%%; выше — менее 25%%, ниже — менее 4%%; очень высокая — менее 5%%, очень низкая — менее 1%%; CGM активен более 70%%."
+            "value" : "цель %1$@, CV %2$@"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cieľ: nad 70%% v rozsahu; pod 25%% nad a 4%% pod; pod 5%% veľmi vysoko a 1%% veľmi nízko; CGM aktívny nad 70%%."
+            "value" : "cieľ %1$@, CV %2$@"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mål: över 70 %% inom målområdet; under 25 %% över och 4 %% under; under 5 %% mycket högt och 1 %% mycket lågt; CGM aktiv över 70 %%."
+            "value" : "mål %1$@, CV %2$@"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hedef: aralıkta %%70'in üzeri; üstünde %%25'in, altında %%4'ün altı; çok yüksekte %%5'in, çok düşükte %%1'in altı; CGM aktif %%70'in üzeri."
+            "value" : "hedef %1$@, CV %2$@"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Мета: у діапазоні понад 70%%; вище — менше 25%%, нижче — менше 4%%; дуже висока — менше 5%%, дуже низька — менше 1%%; CGM активний понад 70%%."
+            "value" : "мета %1$@, CV %2$@"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mục tiêu: trên 70%% trong khoảng; dưới 25%% trên khoảng và 4%% dưới khoảng; dưới 5%% rất cao và 1%% rất thấp; CGM hoạt động trên 70%%."
+            "value" : "mục tiêu %1$@, CV %2$@"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "目标：范围内超过70%%；高于范围低于25%%，低于范围低于4%%；极高低于5%%，极低低于1%%；CGM 在线超过70%%。"
+            "value" : "目标 %1$@，CV %2$@"
           }
         }
       }

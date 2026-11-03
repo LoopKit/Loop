@@ -170,13 +170,15 @@ final class TrendsModel: ObservableObject {
         if let stats = s.stats {
             tiles.append(StatTile(label: averageLabel, value: unit.format(stats.meanMgdl), unit: unit.unitName,
                                   detail: String(format: NSLocalizedString("SD %1$@ · CV %2$@%%", comment: "Trends Average tile detail: standard deviation and coefficient of variation of glucose. (1: standard deviation in the glucose unit, 2: coefficient of variation as a percentage number)"),
-                                                 unit.format(stats.sdMgdl), LoopFormat.number(stats.cv * 100, decimals: 0))))
+                                                 unit.format(stats.sdMgdl), LoopFormat.number(stats.cv * 100, decimals: 0)),
+                                  aim: averageAim(unit)))
             let enough = s.cgmActive * s.interval.duration / 86400 >= 10
             tiles.append(StatTile(label: gmiLabel, value: LoopFormat.number(stats.gmiPercent, decimals: 1), unit: "%",
                                   detail: enough
                                     ? String(format: NSLocalizedString("%1$@ mmol/mol", comment: "Trends GMI tile detail: the GMI in IFCC units. (1: value)"),
                                              LoopFormat.number(stats.gmiMmolMol, decimals: 0))
-                                    : NSLocalizedString("Needs 10 days of CGM", comment: "Trends GMI tile detail when fewer than 10 days of CGM data are available")))
+                                    : NSLocalizedString("Needs 10 days of CGM", comment: "Trends GMI tile detail when fewer than 10 days of CGM data are available"),
+                                  aim: ConsensusTarget.aim(ConsensusTarget.under(7))))
         } else {
             tiles.append(StatTile(label: averageLabel, value: "–", unit: unit.unitName,
                                   detail: NSLocalizedString("No CGM data", comment: "Trends Average tile detail when the period has no glucose readings")))
@@ -202,6 +204,12 @@ final class TrendsModel: ObservableObject {
                               detail: String(format: NSLocalizedString("+ %1$@ automatic", comment: "Trends Boluses per day tile detail: average number of automatic boluses per day on top of the manual ones, a fractional value such as 4.2. (1: number with one decimal)"),
                                              LoopFormat.number(Double(s.automaticBoluses) / s.days, decimals: countDecimals))))
         return tiles
+    }
+
+    /// "aim < 8.6, CV ≤ 36%": the consensus targets for mean glucose (154 mg/dL) and its variability.
+    private func averageAim(_ unit: GlucoseUnitStyle) -> String {
+        String(format: NSLocalizedString("aim %1$@, CV %2$@", comment: "Trends Average tile: the consensus targets for average glucose and its coefficient of variation, in lower case. (1: glucose target, e.g. < 8.6; 2: CV target, e.g. ≤ 36%)"),
+               "< " + (unit.isMmol ? LoopFormat.number(8.6, decimals: 1) : "154"), ConsensusTarget.atMost(36))
     }
 
     /// "5 of 14 days" when only part of the period is averaged: days without data, or today while it runs.
@@ -268,14 +276,14 @@ struct TrendsView: View {
             LoopCard {
                 CardHeader(title: NSLocalizedString("Time in range", comment: "Trends card title: share of glucose readings in each range")) {
                     Text(String(format: NSLocalizedString("%1$@%% CGM active", comment: "Trends Time in range card: share of the period with CGM readings. (1: percentage number)"),
-                                LoopFormat.number(s.cgmActive * 100, decimals: 0)))
+                                LoopFormat.number(s.cgmActive * 100, decimals: 0))
+                         + " · " + ConsensusTarget.aim(ConsensusTarget.over(70)))
                 }
                 if s.glucose.isEmpty {
                     ChartPlaceholder(message: NSLocalizedString("No CGM data in this period", comment: "Trends chart placeholder when the period has no glucose readings"))
                 } else {
                     TimeInRangeView(fractions: s.timeInRange, unit: s.unit)
                 }
-                Footnote(String(format: NSLocalizedString("Aim: over 70%% in range; under 25%% above and 4%% below; under 5%% very high and 1%% very low; CGM active over 70%%.", comment: "Trends Time in range card footnote: the consensus targets for time in range, above and below range, very high, very low and CGM wear")))
             }
             if s.day == nil {
                 patternCard(s)
@@ -365,10 +373,6 @@ struct TrendsView: View {
             }
             StatGridView(tiles: model.tiles(s))
                 .opacity(model.loading ? 0.5 : 1)
-            if s.stats != nil {
-                Footnote(String(format: NSLocalizedString("Aim: average under %1$@ %2$@, GMI under 7%%, CV 36%% or less.", comment: "Trends Summary footnote: the consensus targets for average glucose, GMI and glucose variability (CV). (1: glucose value, 2: glucose unit)"),
-                                s.unit.isMmol ? LoopFormat.number(8.6, decimals: 1) : "154", s.unit.unitName))
-            }
         }
     }
 
