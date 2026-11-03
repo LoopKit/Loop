@@ -1103,12 +1103,6 @@ extension LoopAppManager: ResetLoopManagerDelegate {
             }
         }
     }
-    
-    func presentCouldNotResetLoopAlert(error: Error) {
-        Task {
-            await alertManager.presentCouldNotResetLoopAlert(error: error)
-        }
-    }
 }
 
 // MARK: - ServicesManagerDosingDelegate
@@ -1157,6 +1151,8 @@ extension LoopAppManager: DiagnosticReportGenerator {
             "",
             await alertManager.generateDiagnosticReport(),
             await deviceDataManager.generateDiagnosticReport(),
+            "",
+            remoteDataServicesManager.generateDiagnosticReport(),
             "",
             String(reflecting: self.watchManager!),
             "",
