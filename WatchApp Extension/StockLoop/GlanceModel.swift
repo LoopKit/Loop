@@ -13,7 +13,6 @@ import WatchKit
 import HealthKit
 import LoopKit
 import LoopCore
-import G7SensorKit
 
 /// One frame of the glance. Every field is already decided — the view formats and lays out, and
 /// asks no questions of the app.
