@@ -144,7 +144,7 @@ extension ExtensionDelegate {
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
         if let stockLoopSession {
             if stockLoopSession.handleIncomingIfLoanMessage(message) { return }
-        } else if FeatureFlags.sportModeEnabled, message[LoanProtocol.userInfoKey] != nil {
+        } else if FeatureFlags.sportModeEnabled, LoanProtocol.isLoanTransport(message) {
             // Held for the stack, and the stack started.
             holdEarlyLoanMessage(message)
             startStockLoopSession()
@@ -159,7 +159,7 @@ extension ExtensionDelegate {
         if let session = stockLoopSession {
             return session.handleIncomingIfLoanMessage(userInfo)
         }
-        guard userInfo[LoanProtocol.userInfoKey] != nil else { return false }
+        guard LoanProtocol.isLoanTransport(userInfo) else { return false }
         holdEarlyLoanMessage(userInfo)
         podLoanNoteEarlyPayload()
         return true

@@ -17,6 +17,27 @@ public enum LoanProtocol {
 
     public static let userInfoKey = "podLoan"
 
+    /// A large message's envelope travels zlib-compressed under this key instead (`compressAbove`), so a
+    /// grant with slow retrospective correction's 72 h fits the urgent channel. Small ones stay plain JSON.
+    public static let compressedUserInfoKey = "podLoanZ"
+    static let compressAbove = 16 * 1024
+
+    /// Whether a payload on the channel is loan traffic, in either form.
+    public static func isLoanTransport(_ userInfo: [String: Any]) -> Bool {
+        userInfo[userInfoKey] != nil || userInfo[compressedUserInfoKey] != nil
+    }
+
+    /// The envelope's JSON, from either form; nil when the payload is not ours.
+    public static func envelopeData(fromTransport userInfo: [String: Any]) throws -> Data? {
+        if let data = userInfo[userInfoKey] as? Data { return data }
+        guard let compressed = userInfo[compressedUserInfoKey] as? Data else { return nil }
+        do {
+            return try (compressed as NSData).decompressed(using: .zlib) as Data
+        } catch {
+            throw LoanProtocolError.undecodable(seenVersion: nil)
+        }
+    }
+
     /// Dates as whole milliseconds since 1970.
     public static var encoder: JSONEncoder {
         let e = JSONEncoder()
@@ -131,7 +152,8 @@ public struct LoanEnvelope: Codable {
 extension LoanMessage {
     public func transportDictionary() throws -> [String: Any] {
         let data = try LoanProtocol.encoder.encode(LoanEnvelope(message: self))
-        return [LoanProtocol.userInfoKey: data]
+        guard data.count > LoanProtocol.compressAbove else { return [LoanProtocol.userInfoKey: data] }
+        return [LoanProtocol.compressedUserInfoKey: try (data as NSData).compressed(using: .zlib) as Data]
     }
 
     /// Urgent (`sendMessage`) for anything a person or a query is waiting through; bookkeeping stays
@@ -166,7 +188,7 @@ extension LoanMessage {
 
     /// The kind without decoding the body.
     public static func peekKind(transport userInfo: [String: Any]) -> String? {
-        guard let data = userInfo[LoanProtocol.userInfoKey] as? Data else { return nil }
+        guard let data = try? LoanProtocol.envelopeData(fromTransport: userInfo) else { return nil }
         struct Peek: Decodable { let kind: String }
         return (try? JSONDecoder().decode(Peek.self, from: data))?.kind
     }
@@ -174,7 +196,7 @@ extension LoanMessage {
     /// Also applies the size limit: above 60 KB goes queued, since the urgent channel silently
     /// refuses payloads near 65 KB.
     public static func isInteractiveHandshake(transport userInfo: [String: Any]) -> Bool {
-        if let data = userInfo[LoanProtocol.userInfoKey] as? Data, data.count > 60_000 {
+        if let data = (userInfo[LoanProtocol.userInfoKey] ?? userInfo[LoanProtocol.compressedUserInfoKey]) as? Data, data.count > 60_000 {
             return false
         }
 
@@ -184,7 +206,7 @@ extension LoanMessage {
 
     /// nil: not ours (the channel also carries stock traffic). Throws: ours but unreadable.
     public static func decode(fromTransport userInfo: [String: Any]) throws -> LoanMessage? {
-        guard let data = userInfo[LoanProtocol.userInfoKey] as? Data else { return nil }
+        guard let data = try LoanProtocol.envelopeData(fromTransport: userInfo) else { return nil }
         do {
             return try LoanProtocol.decoder.decode(LoanEnvelope.self, from: data).message
         } catch let error as LoanProtocolError {

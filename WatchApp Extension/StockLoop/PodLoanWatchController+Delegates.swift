@@ -106,8 +106,9 @@ extension PodLoanWatchController: PumpManagerDelegate {
         completion(LoopError.configurationError(.basalRateSchedule))
     }
 
-    func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
-        log.default("PumpManager will deactivate")
+    /// The phone owns the pump's lifecycle: the loan's pump manager is not removed on request here.
+    func pumpManagerWantsDeletion(_ pumpManager: PumpManager) async {
+        log.default("PumpManager wants deletion")
     }
 
     func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) {
