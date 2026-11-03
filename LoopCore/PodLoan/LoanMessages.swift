@@ -167,8 +167,8 @@ public struct LoanGrant: Codable, Equatable {
     /// The phone's volatility baseline for guard + runway (LoopAlgorithm's `volatilityBaseline`).
     public let volatilityBaseline: Double?
 
-    /// The phone runs slow retrospective correction. The watch can't compute it yet, so it doesn't start
-    /// from a copy that has it on.
+    /// The phone runs slow retrospective correction; the dose, carb and glucose histories then cover its
+    /// windows (`LoanGrant.slowRetrospectiveCorrectionWindows`).
     public let slowRetrospectiveCorrectionEnabled: Bool
 
     public let phoneClosedLoopEnabled: Bool?
@@ -177,7 +177,7 @@ public struct LoanGrant: Codable, Equatable {
 
     public let lastLoopCompleted: Date?
 
-    /// Recent glucose, so the first prediction has momentum.
+    /// The algorithm's glucose window, so the first prediction has momentum; 72 h with slow retrospective correction.
     public let glucoseHistory: [LoanGlucoseRecord]?
 
     public let activeOverrideRaw: Data?
@@ -188,10 +188,11 @@ public struct LoanGrant: Codable, Equatable {
     /// The phone's glucose alert settings (JSON), so the wrist sounds the same lows.
     public let glucoseAlertSettings: Data?
 
-    /// The phone's overrides of the last 24 h, ended ones included, as a binary plist of raw values.
+    /// The phone's overrides of the last 24 h (84 h with slow retrospective correction), ended ones
+    /// included, as a binary plist of raw values.
     public let overrideHistoryRaw: Data?
 
-    /// The phone's settings over the last 24 h, up to the grant.
+    /// The phone's settings over the last 24 h (84 h with slow retrospective correction), up to the grant.
     public let settingsHistory: LoanSettingsHistory?
 
     /// The phone's remote services that share their configuration (Nightscout), each a binary

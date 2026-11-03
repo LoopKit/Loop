@@ -19,8 +19,6 @@ protocol ResetLoopManagerDelegate: AnyObject {
         confirmAction: @escaping (_ pumpManager: PumpManager?, _ completion: @escaping () -> Void) -> Void,
         cancelAction: @escaping () -> Void
     )
-    
-    func presentCouldNotResetLoopAlert(error: Error)
 }
 
 class ResetLoopManager {
@@ -56,15 +54,11 @@ class ResetLoopManager {
                             return
                         }
 
-                        pumpManager.prepareForDeactivation() { [weak self] error in
-                            guard let error = error else {
-                                self?.resetLoop() {
-                                    completion()
-                                }
-                                return
+                        Task {
+                            await pumpManager.delete()
+                            self?.resetLoop {
+                                completion()
                             }
-
-                            self?.delegate?.presentCouldNotResetLoopAlert(error: error)
                         }
                     }, cancelAction: { [weak self] in
                         self?.resetAlertPresented = false

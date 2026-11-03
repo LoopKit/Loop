@@ -48,10 +48,11 @@ enum StockLoopStack {
         return (loop.doseStore, stores.glucoseStore, stores.carbStore, overrideHistory, loop.dosingDecisionStore, loop.alertStore, loop.deviceLog)
     }
 
-    /// Keeps ended overrides for the algorithm's lookback (about 18 h); the phone keeps 90 days.
-    /// The window is a LoopKit static that only the phone's `TemporaryPresetsManager` sets otherwise.
+    /// Keeps ended overrides for the algorithm's lookback (about 18 h, about 83 with slow retrospective
+    /// correction); the phone keeps 90 days. The window is a LoopKit static that only the phone's
+    /// `TemporaryPresetsManager` sets otherwise.
     static func makeOverrideHistory() -> TemporaryScheduleOverrideHistory {
-        TemporaryScheduleOverrideHistory.relevantTimeWindow = .hours(24)
+        TemporaryScheduleOverrideHistory.relevantTimeWindow = .hours(96)
         return TemporaryScheduleOverrideHistory()
     }
 }
