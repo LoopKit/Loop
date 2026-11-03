@@ -47,10 +47,7 @@ final class TrendsModel: ObservableObject {
         /// no insulin (today only when no complete day has any), never the period length.
         var dataDays = 0
         var days: Double { Double(max(1, dataDays)) }
-        var basalUnits: Double { LoopHistoryMath.averagingDays(totals).reduce(0) { $0 + $1.basal } }
-        var bolusUnits: Double { LoopHistoryMath.averagingDays(totals).reduce(0) { $0 + $1.bolus } }
         var insulinPerDay: Double { LoopHistoryMath.averageDailyInsulin(totals) }
-        var basalShare: Double { basalUnits + bolusUnits > 0 ? basalUnits / (basalUnits + bolusUnits) : 0 }
         /// Per day over the averaged days; a single day in progress when that is all there is.
         var split: InsulinSplit { InsulinSplit.average(LoopHistoryMath.averagingDays(totals).map(\.split)) }
         /// The split is today's total so far rather than an average of complete days.
@@ -170,7 +167,6 @@ final class TrendsModel: ObservableObject {
         var tiles: [StatTile] = []
         let averageLabel = NSLocalizedString("Average", comment: "Trends summary tile: mean glucose over the period")
         let gmiLabel = NSLocalizedString("GMI", comment: "Trends summary tile: abbreviation for Glucose Management Indicator, an estimate of HbA1c from CGM data")
-        let loopActiveLabel = NSLocalizedString("Loop active", comment: "Trends summary tile: share of the period Loop spent in closed loop")
         if let stats = s.stats {
             tiles.append(StatTile(label: averageLabel, value: unit.format(stats.meanMgdl), unit: unit.unitName,
                                   detail: String(format: NSLocalizedString("SD %1$@ · CV %2$@%%", comment: "Trends Average tile detail: standard deviation and coefficient of variation of glucose. (1: standard deviation in the glucose unit, 2: coefficient of variation as a percentage number)"),
@@ -186,24 +182,9 @@ final class TrendsModel: ObservableObject {
                                   detail: NSLocalizedString("No CGM data", comment: "Trends Average tile detail when the period has no glucose readings")))
             tiles.append(StatTile(label: gmiLabel, value: "–", unit: "%", detail: nil))
         }
-        let basalPercent = LoopFormat.number(s.basalShare * 100, decimals: 0)
-        let insulinDetail: String
-        if let note = daysNote(s) {
-            insulinDetail = String(format: NSLocalizedString("%1$@%% basal · %2$@", comment: "Trends Insulin per day tile detail when only some days are averaged. (1: basal share as a percentage number, 2: days averaged, e.g. 5 of 14 days)"),
-                                   basalPercent, note)
-        } else {
-            insulinDetail = String(format: NSLocalizedString("%1$@%% basal", comment: "Trends Insulin per day tile detail: share of insulin delivered as basal. (1: percentage number)"),
-                                   basalPercent)
-        }
         // One day's figures are that day's own, so its tiles drop "per day" and show whole counts.
         let oneDay = s.day != nil
         let countDecimals = oneDay ? 0 : 1
-        tiles.append(StatTile(label: oneDay
-                                ? NSLocalizedString("Insulin", comment: "Trends summary tile for a one-day period: the day's total insulin")
-                                : NSLocalizedString("Insulin per day", comment: "Trends tile and card title: average total insulin per day"),
-                              value: LoopFormat.number(s.insulinPerDay, decimals: 1),
-                              unit: NSLocalizedString("U", comment: "Abbreviation for insulin units"),
-                              detail: insulinDetail, valueColor: P.insulinInk))
         tiles.append(StatTile(label: oneDay
                                 ? NSLocalizedString("Carbs", comment: "Trends summary tile for a one-day period: the day's total carbohydrate")
                                 : NSLocalizedString("Carbs per day", comment: "Trends summary tile: average grams of carbohydrate entered per day"),
@@ -220,21 +201,11 @@ final class TrendsModel: ObservableObject {
                               value: LoopFormat.number(Double(s.manualBoluses) / s.days, decimals: countDecimals), unit: nil,
                               detail: String(format: NSLocalizedString("+ %1$@ automatic", comment: "Trends Boluses per day tile detail: average number of automatic boluses per day on top of the manual ones, a fractional value such as 4.2. (1: number with one decimal)"),
                                              LoopFormat.number(Double(s.automaticBoluses) / s.days, decimals: countDecimals))))
-        let covered = s.loopSpans.reduce(0) { $0 + $1.duration }
-        if covered > 0 {
-            let closed = LoopHistoryMath.duration(of: .closed, in: s.loopSpans)
-            tiles.append(StatTile(label: loopActiveLabel, value: LoopFormat.number(closed / covered * 100, decimals: 0), unit: "%",
-                                  detail: String(format: NSLocalizedString("%1$@ of %2$@", comment: "Trends Loop active tile detail: time in closed loop out of the time Loop status is known. (1: duration in closed loop, e.g. 6d 4h, 2: duration covered, e.g. 7d)"),
-                                                 LoopFormat.duration(closed), LoopFormat.duration(covered))))
-        } else {
-            tiles.append(StatTile(label: loopActiveLabel, value: "–", unit: "%",
-                                  detail: NSLocalizedString("No loop runs kept", comment: "Trends Loop active tile detail when no Loop run history is available for the period")))
-        }
         return tiles
     }
 
     /// "5 of 14 days" when only part of the period is averaged: days without data, or today while it runs.
-    private func daysNote(_ s: Summary) -> String? {
+    func daysNote(_ s: Summary) -> String? {
         let insulinDays = LoopHistoryMath.averagingDays(s.totals).count
         guard insulinDays < s.totals.count else { return nil }
         let total = String.localizedStringWithFormat(NSLocalizedString("%lld days", comment: "A number of days, e.g. a Trends period or how many days are averaged. (1: number of days)"), s.totals.count)
@@ -309,37 +280,7 @@ struct TrendsView: View {
             if s.day == nil {
                 patternCard(s)
             }
-            LoopCard {
-                CardHeader(title: NSLocalizedString("Basal and bolus", comment: "Trends card title: insulin split into basal and bolus")) {
-                    Text(s.splitIsPartial
-                         ? NSLocalizedString("today so far", comment: "Trends Basal and bolus card subtitle when the figures are today's total so far")
-                         : s.totals.count == 1
-                         ? NSLocalizedString("this day", comment: "Trends Basal and bolus card subtitle when the period is one complete day")
-                         : NSLocalizedString("average per day", comment: "Trends Basal and bolus card subtitle when the figures are averaged per day over the period"))
-                }
-                if s.split.total > 0 {
-                    InsulinSplitView(split: s.split, partial: s.splitIsPartial, scheduledBasal: s.scheduledBasal,
-                                     usual: s.splitIsPartial ? usualByNow(s) : nil)
-                } else {
-                    ChartPlaceholder(message: NSLocalizedString("No insulin recorded in this period", comment: "Trends Insulin per day chart placeholder when no insulin was delivered in the period"), height: 80)
-                }
-            }
-            // One day is one bar: the timeline and the Basal and bolus card already say it all.
-            if s.day == nil {
-                LoopCard {
-                    CardHeader(title: NSLocalizedString("Insulin per day", comment: "Trends tile and card title: average total insulin per day")) {
-                        Text(s.totals.count > 30
-                             ? NSLocalizedString("per day, weekly average", comment: "Trends Insulin per day card subtitle when each bar is a week's average daily total")
-                             : NSLocalizedString("basal and bolus", comment: "Trends Insulin per day card subtitle when each bar is one day's basal and bolus"))
-                    }
-                    InsulinDailyTotalsView(totals: s.totals.count > 30 ? LoopHistoryMath.weekly(s.totals) : s.totals,
-                                           weekly: s.totals.count > 30, average: s.insulinPerDay)
-                    ChartLegend(items: insulinLegend(s))
-                    if let today = todaySoFar(s) {
-                        Footnote(today)
-                    }
-                }
-            }
+            insulinCard(s)
             LoopCard {
                 CardHeader(title: NSLocalizedString("Loop status", comment: "Trends card title: how long Loop spent in closed loop, limited or open loop"))
                 LoopModeBarView(spans: s.loopSpans)
@@ -354,6 +295,45 @@ struct TrendsView: View {
             }
         } else {
             ProgressView().frame(maxWidth: .infinity, minHeight: 300)
+        }
+    }
+
+    /// Insulin per day with its basal and bolus split, or one day's insulin under its timeline.
+    private func insulinCard(_ s: TrendsModel.Summary) -> some View {
+        let weekly = s.totals.count > 30
+        return LoopCard {
+            if s.day != nil {
+                // One day is one bar, so the timeline above stands in for the chart.
+                CardHeader(title: NSLocalizedString("Insulin", comment: "Trends card title for a one-day period: the day's insulin, split into basal and bolus")) {
+                    Text(s.splitIsPartial
+                         ? NSLocalizedString("today so far", comment: "Trends Basal and bolus card subtitle when the figures are today's total so far")
+                         : NSLocalizedString("this day", comment: "Trends Basal and bolus card subtitle when the period is one complete day"))
+                }
+            } else {
+                CardHeader(title: NSLocalizedString("Insulin per day", comment: "Trends tile and card title: average total insulin per day")) {
+                    if weekly {
+                        Text(NSLocalizedString("per day, weekly average", comment: "Trends Insulin per day card subtitle when each bar is a week's average daily total"))
+                    } else if let note = model.daysNote(s) {
+                        Text(String(format: NSLocalizedString("average of %1$@", comment: "Trends Insulin per day card subtitle when only some days of the period are averaged, such as a day still in progress. (1: days averaged, e.g. 13 of 14 days)"), note))
+                    } else {
+                        Text(NSLocalizedString("average per day", comment: "Trends Basal and bolus card subtitle when the figures are averaged per day over the period"))
+                    }
+                }
+            }
+            if s.split.total > 0 {
+                if s.day == nil {
+                    InsulinDailyTotalsView(totals: weekly ? LoopHistoryMath.weekly(s.totals) : s.totals, weekly: weekly, average: s.insulinPerDay)
+                }
+                // Under the chart, the rows name its marks, so there is no separate legend.
+                InsulinSplitView(split: s.split, partial: s.splitIsPartial, scheduledBasal: s.scheduledBasal,
+                                 usual: s.day != nil && s.splitIsPartial ? usualByNow(s) : nil, showsBar: s.day != nil,
+                                 averageLine: s.day == nil)
+                if s.day == nil, let today = todaySoFar(s) {
+                    Footnote(today)
+                }
+            } else {
+                ChartPlaceholder(message: NSLocalizedString("No insulin recorded in this period", comment: "Trends Insulin per day chart placeholder when no insulin was delivered in the period"), height: 80)
+            }
         }
     }
 
@@ -410,18 +390,6 @@ struct TrendsView: View {
         guard let today = s.totals.last, !today.isComplete, today.total > 0, let usual = s.typicalByNow else { return nil }
         return String(format: NSLocalizedString("Today so far %1$@, usually %2$@ by %3$@.", comment: "Trends Insulin per day footnote: today's insulin so far against the median by this time of day over the last 14 days. (1: today's units, 2: usual units, 3: time of day)"),
                       LoopFormat.totalUnits(today.total), LoopFormat.totalUnits(usual.typical.median), LoopFormat.time(usual.at))
-    }
-
-    /// The figures are on the Basal and bolus card above, so the legend only names the marks.
-    private func insulinLegend(_ s: TrendsModel.Summary) -> [LegendItem] {
-        [
-            LegendItem(swatch: .basal, label: NSLocalizedString("Basal", comment: "Chart legend: the basal part of each day's insulin")),
-            LegendItem(swatch: .solid(P.bolus), label: NSLocalizedString("Bolus", comment: "Chart legend: solid bars are manual boluses")),
-            LegendItem(swatch: .hatch(P.bolus), label: NSLocalizedString("Automatic", comment: "Chart legend: hatched bars are automatic boluses given by Loop")),
-            LegendItem(swatch: .dash(P.ink),
-                       label: String(format: NSLocalizedString("Average %1$@ U", comment: "Trends Insulin per day legend: the dashed line showing average total insulin per day. (1: units)"),
-                                     LoopFormat.number(s.insulinPerDay, decimals: 1))),
-        ]
     }
 
     private func coverageNote(_ s: TrendsModel.Summary) -> String? {

@@ -455,7 +455,7 @@ struct InsulinSplitBar: View {
     }
 }
 
-/// The basal and bolus card body: the bar, units and shares, how the bolus divides, and the total.
+/// Basal and bolus in units and shares, how the bolus divides, and the total.
 struct InsulinSplitView: View {
     let split: InsulinSplit
     /// Today so far, rather than a whole day or a per-day average.
@@ -464,10 +464,16 @@ struct InsulinSplitView: View {
     var scheduledBasal: Double?
     /// Today against a usual day, e.g. "Usually 28.4 U by 19:46", under the total.
     var usual: String?
+    /// The split as one capsule, where no chart above already draws it.
+    var showsBar = true
+    /// The total is the dashed average line of the chart above, so it carries that line's swatch.
+    var averageLine = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: LoopDesign.Space.s3) {
-            InsulinSplitBar(split: split)
+            if showsBar {
+                InsulinSplitBar(split: split)
+            }
             VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
                 row(.basal, NSLocalizedString("Basal", comment: "Basal and bolus row: insulin delivered as basal"), split.basal, split.basalPercent)
                 if let scheduledBasal {
@@ -487,7 +493,10 @@ struct InsulinSplitView: View {
                     .padding(.leading, 10 + LoopDesign.Space.s2)
                 }
                 Divider().padding(.vertical, 2)
-                HStack(alignment: .firstTextBaseline) {
+                HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s2) {
+                    if averageLine {
+                        LegendSwatch(swatch: .dash(LoopDesign.Palette.ink)).alignmentGuide(.firstTextBaseline) { $0[.bottom] + 3 }
+                    }
                     Text(partial
                          ? NSLocalizedString("Total so far", comment: "Basal and bolus total row for today, which isn't over yet")
                          : NSLocalizedString("Total", comment: "Basal and bolus total row: basal plus bolus"))
@@ -609,14 +618,10 @@ struct InsulinDailyTotalsView: View {
                         .foregroundStyle(Hatch.paint(P.bolus, scheme: scheme))
                 }
             }
+            // The average's value is the Total row under the chart.
             RuleMark(y: .value("Average", average))
                 .foregroundStyle(P.ink)
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                .annotation(position: .top, alignment: .trailing, spacing: 2) {
-                    Text(LoopFormat.number(average, decimals: 1))
-                        .font(LoopDesign.Typeface.caption.weight(.semibold))
-                        .foregroundStyle(P.ink)
-                }
         }
         .chartYScale(domain: 0...yMax)
         .chartXAxis {
