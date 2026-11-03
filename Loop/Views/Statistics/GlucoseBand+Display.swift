@@ -25,16 +25,24 @@ private func bandEdge(mgdl: Double, mmol: Double, _ preference: DisplayGlucosePr
 }
 
 /// captūrAGP / IDC report palette for the glucose bands, matched to the standard
-/// Ambulatory Glucose Profile report colors.
+/// Ambulatory Glucose Profile report colors. In dark mode each band is lifted so it
+/// stays clear against a dark card, and very low becomes the brighter red.
 extension GlucoseBand {
     var agpColor: Color {
         switch self {
-        case .veryLow:  return Color(red: 0.60, green: 0.13, blue: 0.15)  // dark red
-        case .low:      return Color(red: 0.85, green: 0.26, blue: 0.24)  // red
-        case .target:   return Color(red: 0.36, green: 0.65, blue: 0.37)  // green
-        case .high:     return Color(red: 0.91, green: 0.77, blue: 0.26)  // gold / yellow
-        case .veryHigh: return Color(red: 0.85, green: 0.55, blue: 0.24)  // orange
+        case .veryLow:  return Self.color(light: (0.60, 0.13, 0.15), dark: (1.00, 0.27, 0.23))  // dark red
+        case .low:      return Self.color(light: (0.85, 0.26, 0.24), dark: (1.00, 0.62, 0.60))  // red
+        case .target:   return Self.color(light: (0.36, 0.65, 0.37), dark: (0.20, 0.84, 0.29))  // green
+        case .high:     return Self.color(light: (0.91, 0.77, 0.26), dark: (1.00, 0.84, 0.04))  // gold / yellow
+        case .veryHigh: return Self.color(light: (0.85, 0.55, 0.24), dark: (0.79, 0.54, 0.00))  // orange
         }
+    }
+
+    private static func color(light: (Double, Double, Double), dark: (Double, Double, Double)) -> Color {
+        Color(uiColor: UIColor { traits in
+            let (red, green, blue) = traits.userInterfaceStyle == .dark ? dark : light
+            return UIColor(red: red, green: green, blue: blue, alpha: 1)
+        })
     }
 
     /// The band's range, written in the unit the user reads glucose in.

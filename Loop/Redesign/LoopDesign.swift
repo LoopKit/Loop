@@ -8,14 +8,12 @@
 import SwiftUI
 import UIKit
 
-/// The tokens from the Loop design system (`design/project/tokens.json`).
+/// Colours, spacing and type for the Trends screen.
 ///
-/// Quantity colours reuse Loop's existing assets (`glucose`, `insulin`, `carbs`, `fresh`, `warning`, `accent`)
-/// so a DerivedAssetsOverride still recolours them. Grounds and text map onto the iOS system colours they
-/// were taken from; the rest are colour sets in DerivedAssetsBase.xcassets named after their token.
-///
-/// Insulin and carb amounts are set in `insulinInk` and `carbsInk` wherever they stand alone. Glucose, basal,
-/// counts and figures beside a legend swatch stay `ink`. Red is only for something that needs action now.
+/// Every colour is one Loop already has: the `glucose`, `insulin`, `carbs`, `fresh` and `warning` assets, so a
+/// DerivedAssetsOverride still recolours them, and the iOS system colours for grounds and text. Bands and fills are
+/// those colours at reduced opacity. Text is `label` or `secondaryLabel`; colour is for marks, not for numbers.
+/// Red is only for something that needs action now.
 enum LoopDesign {
 
     enum Palette {
@@ -23,40 +21,25 @@ enum LoopDesign {
         static let surface = Color(uiColor: .systemGroupedBackground)
         static let surfaceRaised = Color(uiColor: .secondarySystemGroupedBackground)
         static let surfaceSunken = Color(uiColor: .systemGray5)
-        static let controlThumb = Color("control-thumb")
         static let separator = Color(uiColor: .opaqueSeparator)
         static let grid = Color(uiColor: .systemGray5)
 
         // Text
         static let ink = Color(uiColor: .label)
-        static let inkMuted = Color("ink-muted")
-        static let accentInk = Color("accent-ink")
+        static let inkMuted = Color(uiColor: .secondaryLabel)
 
         // Quantities
         static let glucose = Color("glucose")
-        static let glucoseInk = Color("glucose-ink")
-        static let targetBand = Color("target-band")
-        static let agpOuter = Color("agp-outer")
-        static let agpInner = Color("agp-inner")
-        /// Insulin as a quantity and an action: the Bolus button and the active insulin curve.
+        static let targetBand = glucose.opacity(0.14)
+        static let agpOuter = glucose.opacity(0.16)
+        static let agpInner = glucose.opacity(0.34)
         static let insulin = Color("insulin")
-        /// Every insulin amount set as text, whether a bolus, a day's total or active insulin.
-        static let insulinInk = Color("insulin-ink")
-        static let basal = Color("basal")
-        static let basalEdge = Color("basal-edge")
-        /// Basal is a pale, quiet orange with a tan edge; bolus is insulin's orange made deep. Both stay orange,
-        /// and their lightness is far enough apart (3:1 even where they touch) to tell them apart at a glance.
-        static let bolus = Color("bolus")
+        /// Bolus is insulin's colour; basal is the same colour faded, with a stronger edge along its top.
+        static let bolus = insulin
+        static let basal = insulin.opacity(0.25)
+        static let basalEdge = insulin.opacity(0.6)
         static let basalScheduled = inkMuted
         static let carbs = Color("carbs")
-        static let carbsInk = Color("carbs-ink")
-
-        // Time in range ladder, top to bottom
-        static let rangeVeryHigh = Color("range-very-high")
-        static let rangeHigh = Color("range-high")
-        static let rangeIn = Color("range-in")
-        static let rangeLow = Color("range-low")
-        static let rangeVeryLow = Color("range-very-low")
 
         // Loop state
         static let statusAutomated = Color("fresh")
