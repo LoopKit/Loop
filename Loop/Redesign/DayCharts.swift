@@ -70,6 +70,43 @@ enum DayAxis {
     }
 }
 
+// MARK: - DayTimelineCard
+
+/// A day on one timeline, for a one-day period on Trends.
+struct DayTimelineCard: View {
+    let title: String
+    let history: DayHistory
+    let unit: GlucoseUnitStyle
+    let targetBands: [TargetBand]
+    var now: Date = Date()
+    var height: CGFloat = 230
+
+    static var todayTitle: String {
+        NSLocalizedString("Today so far", comment: "Title of the card on the Now screen showing today's insulin and carbs")
+    }
+
+    static let legend: [LegendItem] = [
+        LegendItem(swatch: .solid(P.bolus), label: NSLocalizedString("Bolus", comment: "Chart legend: solid bars are manual boluses")),
+        LegendItem(swatch: .hatch(P.bolus), label: NSLocalizedString("Automatic", comment: "Chart legend: hatched bars are automatic boluses given by Loop")),
+        LegendItem(swatch: .basal, label: NSLocalizedString("Basal given", comment: "Chart legend: filled area is basal insulin actually delivered")),
+        LegendItem(swatch: .dash(P.basalScheduled), label: NSLocalizedString("Scheduled", comment: "Chart legend: dashed line is the scheduled basal rate")),
+    ]
+
+    var body: some View {
+        LoopCard {
+            CardHeader(title: title) {
+                HStack(spacing: 4) {
+                    Text(LoopFormat.totalUnits(history.totalUnits)).foregroundStyle(P.insulinInk)
+                    Text(verbatim: "·")
+                    Text(LoopFormat.grams(history.carbGrams)).foregroundStyle(P.carbsInk)
+                }
+            }
+            InsulinTimelineView(history: history, unit: unit, targetBands: targetBands, now: now, height: height)
+            ChartLegend(items: Self.legend)
+        }
+    }
+}
+
 // MARK: - InsulinTimeline
 
 /// Carbs, glucose and insulin for one day on one shared time axis.
@@ -292,12 +329,6 @@ struct InsulinTimelineView: View {
         if let glucose = nearest(history.glucose.map { ($0.date, $0.mgdl) }, to: date, within: 10 * 60) {
             rows.append(.init(label: NSLocalizedString("Glucose", comment: "Chart callout label for the glucose reading at the touched time"), value: "\(unit.format(glucose)) \(unit.unitName)", color: P.glucoseInk))
         }
-        if let iob = nearest(history.iob.map { ($0.date, $0.value) }, to: date, within: 10 * 60) {
-            rows.append(.init(label: NSLocalizedString("IOB", comment: "Abbreviation for insulin on board (active insulin)"), value: LoopFormat.doseUnits(iob), color: P.insulinInk))
-        }
-        if let cob = nearest(history.cob.map { ($0.date, $0.value) }, to: date, within: 10 * 60) {
-            rows.append(.init(label: NSLocalizedString("COB", comment: "Abbreviation for carbs on board (active carbohydrate)"), value: LoopFormat.grams(cob), color: P.carbsInk))
-        }
         if let segment = LoopHistoryMath.basalRate(at: date, in: history.basal) {
             let value = segment.kind == .suspended
                 ? NSLocalizedString("Suspended", comment: "Chart callout value: insulin delivery was suspended at the touched time")
@@ -419,130 +450,5 @@ struct ScrubCallout: View {
         .padding(.vertical, LoopDesign.Space.s1)
         .background(P.surfaceRaised, in: RoundedRectangle(cornerRadius: LoopDesign.Radius.sm))
         .overlay(RoundedRectangle(cornerRadius: LoopDesign.Radius.sm).strokeBorder(P.separator))
-    }
-}
-
-/// Insulin and carbs on board over the same window, each against its own coloured axis.
-struct IOBCOBChartView: View {
-    let iob: [TimedValue]
-    let cob: [TimedValue]
-    let window: DateInterval
-    var now: Date = Date()
-    var height: CGFloat = 140
-
-    @State private var selection: Date?
-
-    private var iobMax: Double { max(1, (iob.map(\.value).max() ?? 0) * 1.1) }
-    private var iobMin: Double { min(0, (iob.map(\.value).min() ?? 0) * 1.1) }
-    private var cobMax: Double { max(10, (cob.map(\.value).max() ?? 0) * 1.1) }
-
-    /// COB drawn on the IOB scale.
-    private func scaled(cob value: Double) -> Double { value / cobMax * iobMax }
-
-    private var iobTicks: [Double] {
-        let step = Self.niceStep(iobMax / 2)
-        return stride(from: (iobMin / step).rounded(.down) * step, through: iobMax, by: step).map { $0 }
-    }
-
-    private var cobTicks: [Double] {
-        let step = Self.niceStep(cobMax / 2)
-        return stride(from: 0, through: cobMax, by: step).map { $0 }
-    }
-
-    static func niceStep(_ raw: Double) -> Double {
-        guard raw > 0 else { return 1 }
-        let magnitude = pow(10, floor(log10(raw)))
-        let normalized = raw / magnitude
-        let nice: Double = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10
-        return nice * magnitude
-    }
-
-    var body: some View {
-        Chart {
-            RuleMark(y: .value("Zero", 0))
-                .foregroundStyle(P.inkMuted)
-                .lineStyle(StrokeStyle(lineWidth: 1))
-
-            ForEach(Array(cob.enumerated()), id: \.offset) { _, value in
-                AreaMark(x: .value("Time", value.date), yStart: .value("Base", 0), yEnd: .value("COB", scaled(cob: value.value)), series: .value("Series", "cob-fill"))
-                    .foregroundStyle(P.carbs.opacity(0.14))
-                LineMark(x: .value("Time", value.date), y: .value("COB", scaled(cob: value.value)), series: .value("Series", value.date > now ? "cob-projected" : "cob"))
-                    .foregroundStyle(P.carbs)
-                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: value.date > now ? [4, 3] : []))
-            }
-            ForEach(Array(iob.enumerated()), id: \.offset) { _, value in
-                AreaMark(x: .value("Time", value.date), yStart: .value("Base", 0), yEnd: .value("IOB", value.value), series: .value("Series", "iob-fill"))
-                    .foregroundStyle(P.insulin.opacity(0.14))
-                LineMark(x: .value("Time", value.date), y: .value("IOB", value.value), series: .value("Series", value.date > now ? "iob-projected" : "iob"))
-                    .foregroundStyle(P.insulin)
-                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: value.date > now ? [4, 3] : []))
-            }
-            if window.contains(now) {
-                RuleMark(x: .value("Now", now))
-                    .foregroundStyle(P.inkMuted)
-                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [1, 3]))
-            }
-            if let selection {
-                RuleMark(x: .value("Selected", selection)).foregroundStyle(P.ink.opacity(0.6))
-            }
-        }
-        .frame(height: height)
-        .chartXScale(domain: window.start...window.end)
-        .chartYScale(domain: iobMin...iobMax)
-        .chartXAxis {
-            AxisMarks(values: DayAxis.quarterDayMarks(in: window)) { value in
-                AxisGridLine().foregroundStyle(P.grid)
-                AxisValueLabel {
-                    if let date = value.as(Date.self) { Text(DayAxis.hourLabel(date)) }
-                }
-                .font(LoopDesign.Typeface.caption)
-                .foregroundStyle(P.inkMuted)
-            }
-        }
-        .chartYAxis {
-            AxisMarks(position: .leading, values: iobTicks) { value in
-                AxisGridLine().foregroundStyle(P.grid)
-                AxisValueLabel {
-                    if let v = value.as(Double.self) { Text(v.formatted(.number.precision(.fractionLength(0...1)))) }
-                }
-                .font(LoopDesign.Typeface.caption)
-                .foregroundStyle(P.insulinInk)
-            }
-            AxisMarks(position: .trailing, values: cobTicks.map { scaled(cob: $0) }) { value in
-                AxisValueLabel {
-                    if let v = value.as(Double.self) { Text((v / iobMax * cobMax).formatted(.number.precision(.fractionLength(0)))) }
-                }
-                .font(LoopDesign.Typeface.caption)
-                .foregroundStyle(P.carbsInk)
-            }
-        }
-        .chartOverlay { proxy in
-            ScrubOverlay(proxy: proxy, selection: $selection, clampTo: window)
-        }
-        .overlay(alignment: .top) {
-            if let selection {
-                ScrubCallout(rows: scrubRows(at: selection)).allowsHitTesting(false)
-            }
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilitySummary)
-    }
-
-    private func scrubRows(at date: Date) -> [ScrubCallout.Row] {
-        var rows: [ScrubCallout.Row] = [.init(label: nil, value: LoopFormat.time(date), color: P.ink)]
-        if let value = nearest(iob.map { ($0.date, $0.value) }, to: date, within: 10 * 60) {
-            rows.append(.init(label: NSLocalizedString("IOB", comment: "Abbreviation for insulin on board (active insulin)"), value: LoopFormat.doseUnits(value), color: P.insulinInk))
-        }
-        if let value = nearest(cob.map { ($0.date, $0.value) }, to: date, within: 10 * 60) {
-            rows.append(.init(label: NSLocalizedString("COB", comment: "Abbreviation for carbs on board (active carbohydrate)"), value: LoopFormat.grams(value), color: P.carbsInk))
-        }
-        return rows
-    }
-
-    private var accessibilitySummary: String {
-        let iobNow = nearest(iob.map { ($0.date, $0.value) }, to: now, within: 10 * 60)
-        let cobNow = nearest(cob.map { ($0.date, $0.value) }, to: now, within: 10 * 60)
-        let unknown = NSLocalizedString("unknown", comment: "VoiceOver value when active insulin or carbs at the current time isn't known")
-        return String(format: NSLocalizedString("Active insulin %1$@, active carbs %2$@", comment: "VoiceOver summary of the active insulin and carbs chart. (1: insulin on board, e.g. 1.25 U, or unknown; 2: carbs on board, e.g. 20 g, or unknown)"), iobNow.map(LoopFormat.doseUnits) ?? unknown, cobNow.map(LoopFormat.grams) ?? unknown)
     }
 }

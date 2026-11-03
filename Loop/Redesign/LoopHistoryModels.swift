@@ -99,11 +99,6 @@ struct CarbEvent: Equatable, Identifiable {
     }
 }
 
-struct TimedValue: Equatable {
-    let date: Date
-    let value: Double
-}
-
 /// Everything known about one day or reporting period, for InsulinTimeline.
 struct DayHistory {
     var window: DateInterval
@@ -112,8 +107,6 @@ struct DayHistory {
     var basal: [BasalSegment] = []
     var scheduledBasal: [ScheduledBasalPoint] = []
     var carbs: [CarbEvent] = []
-    var iob: [TimedValue] = []
-    var cob: [TimedValue] = []
     /// Where the data came from, so older days can say they are missing Loop's own detail.
     var source: HistorySource = .loop
 
@@ -132,8 +125,6 @@ struct DayHistory {
         history.boluses = boluses.filter { inside($0.date) }
         history.basal = basal.compactMap { $0.clamped(to: interval) }
         history.carbs = carbs.filter { inside($0.date) }
-        history.iob = iob.filter { inside($0.date) }
-        history.cob = cob.filter { inside($0.date) }
         return history
     }
 }
