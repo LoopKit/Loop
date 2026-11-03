@@ -23,7 +23,8 @@ final class LoopHistoryProvider {
 
     private let deviceManager: DeviceDataManager
     private let loopDataManager: LoopDataManager
-    private let settingsManager: SettingsManager
+    /// Read once on the main actor, which owns `SettingsManager`; the store itself is safe to use from anywhere.
+    private let settingsStore: SettingsStore?
     private let temporaryPresetsManager: TemporaryPresetsManager
     private let dosingDecisionStore: DosingDecisionStoreProtocol
     private let doseStore: DoseStore
@@ -31,18 +32,40 @@ final class LoopHistoryProvider {
     private let glucoseStore: GlucoseStore
     private let healthStore = HKHealthStore()
     private let log = OSLog(category: "LoopHistoryProvider")
-    private let recordStartsCache = OSAllocatedUnfairLock<(fetched: Date, starts: LocalRecordStarts)?>(initialState: nil)
+    private let recordStartsCache = OSAllocatedUnfairLock(initialState: RecordStartsCache())
+    private var storeObservers: [NSObjectProtocol] = []
 
     @MainActor
     init(deviceManager: DeviceDataManager, loopDataManager: LoopDataManager, settingsManager: SettingsManager, temporaryPresetsManager: TemporaryPresetsManager) {
         self.deviceManager = deviceManager
         self.loopDataManager = loopDataManager
-        self.settingsManager = settingsManager
+        self.settingsStore = settingsManager.settingsStore
         self.temporaryPresetsManager = temporaryPresetsManager
         self.dosingDecisionStore = loopDataManager.dosingDecisionStore
         self.doseStore = deviceManager.doseStore
         self.carbStore = deviceManager.carbStore
         self.glucoseStore = deviceManager.glucoseStore
+
+        // A record added or edited earlier than a cached start would otherwise stay hidden until the cache expires,
+        // so any change to a store searches for that kind's start again.
+        let cache = recordStartsCache
+        func forget(_ name: Notification.Name, of store: AnyObject, _ clear: @escaping @Sendable (inout LocalRecordStarts) -> Void) -> NSObjectProtocol {
+            NotificationCenter.default.addObserver(forName: name, object: store, queue: nil) { _ in
+                cache.withLock { cached in
+                    clear(&cached.starts)
+                    cached.generation += 1
+                }
+            }
+        }
+        storeObservers = [
+            forget(GlucoseStore.glucoseSamplesDidChange, of: glucoseStore) { $0.glucose = nil },
+            forget(DoseStore.valuesDidChange, of: doseStore) { $0.insulin = nil },
+            forget(CarbStore.carbEntriesDidChange, of: carbStore) { $0.carbs = nil },
+        ]
+    }
+
+    deinit {
+        storeObservers.forEach(NotificationCenter.default.removeObserver)
     }
 
     @MainActor
@@ -75,7 +98,7 @@ final class LoopHistoryProvider {
 
     /// The targets that actually applied, including dated presets and changes to the stored profile.
     func glucoseTargetBands(in interval: DateInterval) async throws -> [TargetBand] {
-        if let store = settingsManager.settingsStore {
+        if let store = settingsStore {
             let previous = try await store.getStoredSettings(end: interval.start, limit: 1).first
             if previous?.glucoseTargetRangeSchedule == nil {
                 let changes = try await store.getStoredSettings(start: interval.start, end: interval.end)
@@ -130,12 +153,21 @@ final class LoopHistoryProvider {
         var carbs: Date?
     }
 
-    /// A found start is kept for a few minutes, so each period doesn't search again. A kind with no records yet is
-    /// searched every time, because its first record can arrive at any moment.
+    private struct RecordStartsCache {
+        var fetched: Date?
+        var starts = LocalRecordStarts()
+        /// Counts store changes, so a search that overlapped one doesn't save what it found.
+        var generation = 0
+    }
+
+    /// A found start is kept for a few minutes, so each period doesn't search again, and forgotten as soon as that
+    /// kind's store changes. A kind with no records yet is searched every time, because its first record can arrive at
+    /// any moment.
     func localRecordStarts() async throws -> LocalRecordStarts {
         let now = Date(), start = localHistoryStart
-        let cached = recordStartsCache.withLock { $0 }.flatMap { now.timeIntervalSince($0.fetched) < 300 ? $0 : nil }
-        var starts = cached?.starts ?? LocalRecordStarts()
+        let cached = recordStartsCache.withLock { $0 }
+        let fresh = cached.fetched.map { now.timeIntervalSince($0) < 300 } ?? false
+        var starts = fresh ? cached.starts : LocalRecordStarts()
         let glucoseStore = self.glucoseStore, doseStore = self.doseStore
         if starts.glucose == nil {
             starts.glucose = try await Self.firstRecord(from: start, to: now) { chunk in
@@ -144,14 +176,19 @@ final class LoopHistoryProvider {
         }
         if starts.insulin == nil {
             starts.insulin = try await Self.firstRecord(from: start, to: now) { chunk in
-                try await doseStore.getNormalizedDoseEntries(start: chunk.start, end: chunk.end).map(\.startDate)
+                let doses = try await doseStore.getNormalizedDoseEntries(start: chunk.start, end: chunk.end)
+                return LoopHistoryMath.firstRecord(in: chunk, of: doses.map { (start: $0.startDate, end: $0.endDate) }).map { [$0] } ?? []
             }
         }
         if starts.carbs == nil {
             starts.carbs = try await carbStore.getCarbEntries(start: start, end: now, dateAscending: true, fetchLimit: 1).first?.startDate
         }
         let found = starts
-        recordStartsCache.withLock { $0 = (fetched: cached?.fetched ?? now, starts: found) }
+        recordStartsCache.withLock { latest in
+            guard latest.generation == cached.generation else { return }
+            latest.fetched = fresh ? cached.fetched : now
+            latest.starts = found
+        }
         return found
     }
 
@@ -223,7 +260,7 @@ final class LoopHistoryProvider {
     /// When closed loop was switched on or off, from the settings Loop stores on every change: the setting in force at
     /// `interval.start`, then each change after it. Empty when Loop has no settings store.
     func loopModeChanges(in interval: DateInterval) async throws -> [LoopHistoryMath.ModeChange] {
-        guard let store = settingsManager.settingsStore else { return [] }
+        guard let store = settingsStore else { return [] }
         var changes: [LoopHistoryMath.ModeChange] = []
         if let previous = try await store.getStoredSettings(end: interval.start, limit: 1).first {
             changes.append(.init(date: interval.start, closedLoop: previous.dosingEnabled))
@@ -239,7 +276,9 @@ final class LoopHistoryProvider {
     /// When manual temp basals ran in `interval`, from Loop's dose records, ended where the pump ended or cancelled
     /// them. Loop shows the loop as open while one runs.
     func manualTempBasals(in interval: DateInterval) async throws -> [DateInterval] {
-        try await doseStore.getNormalizedDoseEntries(start: interval.start, end: interval.end)
+        // The last run before the period may have stopped for a temp basal that ended before the period too.
+        // Keep its record so the run-based fallback cannot reopen the loop after that recorded end.
+        try await doseStore.getNormalizedDoseEntries(start: interval.start.addingTimeInterval(-.minutes(15)), end: interval.end)
             .filter { $0.type == .tempBasal && $0.automatic == false && $0.endDate > $0.startDate }
             .map { DateInterval(start: $0.startDate, end: $0.endDate) }
     }
@@ -326,7 +365,12 @@ final class LoopHistoryProvider {
                     os_log("Health query for %{public}@ failed: %{public}@", log: log, type: .error, type.identifier, String(describing: error))
                     continuation.resume(throwing: error)
                 } else {
-                    continuation.resume(returning: (samples as? [HKQuantitySample]) ?? [])
+                    let quantities = (samples as? [HKQuantitySample]) ?? []
+                    // Match the local stores' half-open ranges, including at the Health/local boundary. Basal
+                    // queries use no strict start so segments crossing into the interval can still be clamped.
+                    continuation.resume(returning: options.contains(.strictStartDate)
+                        ? quantities.filter { $0.startDate >= interval.start && $0.startDate < interval.end }
+                        : quantities)
                 }
             }
             healthStore.execute(query)
@@ -357,14 +401,16 @@ final class LoopHistoryProvider {
             let units = sample.quantity.doubleValue(for: .internationalUnit())
             let reason = (sample.metadata?[HKMetadataKeyInsulinDeliveryReason] as? NSNumber)?.intValue
             let automaticFlag = (sample.metadata?["com.loopkit.InsulinKit.MetadataKeyAutomaticallyIssued"] as? NSNumber)?.boolValue
-            let automatic = automaticFlag ?? false
+            let manuallyEntered = (sample.metadata?["com.loopkit.InsulinKit.MetadataKeyManuallyEntered"] as? NSNumber)?.boolValue ?? false
+            let automatic = !manuallyEntered && (automaticFlag ?? false)
             if reason == HKInsulinDeliveryReason.basal.rawValue {
                 if let segment = BasalSegment(healthSample: sample, in: interval) {
                     basal.append(segment)
                 }
             } else if sample.startDate >= interval.start && sample.startDate < interval.end {
-                boluses.append(BolusEvent(id: sample.uuid.uuidString, date: sample.startDate, units: units, automatic: automatic, manuallyEntered: false,
-                                          automaticKnown: automaticFlag != nil))
+                boluses.append(BolusEvent(id: sample.uuid.uuidString, date: sample.startDate, units: units, automatic: automatic,
+                                          manuallyEntered: manuallyEntered,
+                                          automaticKnown: BolusEvent.kindKnown(automatic: automaticFlag, manuallyEntered: manuallyEntered)))
             }
         }
         return (boluses, basal)

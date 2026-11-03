@@ -163,6 +163,39 @@ class LoopHistoryMathTests: XCTestCase {
         XCTAssertEqual(LoopHistoryMath.healthBoundary(localHistoryStart: localStart, firstLocalRecord: nil, now: now), now)
     }
 
+    func testFirstRecordIgnoresRecordsOutsideTheChunk() {
+        let chunk = DateInterval(start: at(0), end: at(7 * 1440))
+        // A dose still in progress today comes back with an older week's query; it isn't that week's first record.
+        let inProgress = (start: at(30 * 1440), end: at(30 * 1440 + 30))
+        XCTAssertNil(LoopHistoryMath.firstRecord(in: chunk, of: [inProgress]))
+        // A basal crossing into the chunk keeps its real start, and a bolus counts by its start.
+        let crossing = (start: at(-60), end: at(60))
+        let bolus = (start: at(120), end: at(120))
+        XCTAssertEqual(LoopHistoryMath.firstRecord(in: chunk, of: [inProgress, bolus, crossing]), at(-60))
+        XCTAssertEqual(LoopHistoryMath.firstRecord(in: chunk, of: [inProgress, bolus]), at(120))
+        // A bolus before the chunk, or at its end, is outside it.
+        XCTAssertNil(LoopHistoryMath.firstRecord(in: chunk, of: [(start: at(-5), end: at(-5)), (start: chunk.end, end: chunk.end)]))
+    }
+
+    func testLoggedInjectionsAreManualAndMissingFlagsUnknown() {
+        let window = DateInterval(start: at(0), end: at(60))
+        for (automatic, entered, manual, auto, unknown) in [
+            (nil, true, 1.0, 0.0, 0.0),
+            (true, true, 1.0, 0.0, 0.0),
+            (false, false, 1.0, 0.0, 0.0),
+            (true, false, 0.0, 1.0, 0.0),
+            (nil, false, 0.0, 0.0, 1.0),
+        ] as [(Bool?, Bool, Double, Double, Double)] {
+            let dose = DoseEntry(type: .bolus, startDate: at(5), value: 1, unit: .units, decisionId: nil,
+                                 automatic: automatic, manuallyEntered: entered)
+            guard let event = BolusEvent(dose: dose, in: window) else { return XCTFail("Dose must be in the window") }
+            let split = InsulinSplit(basal: 0, boluses: [event])
+            XCTAssertEqual(split.manualBolus, manual)
+            XCTAssertEqual(split.automaticBolus, auto)
+            XCTAssertEqual(split.unclassifiedBolus, unknown)
+        }
+    }
+
     func testHealthAndLocalPartsMeetWithoutOverlap() {
         let window = DateInterval(start: at(0), end: at(1440))
         let straddling = LoopHistoryMath.split(window, at: at(600))
@@ -252,6 +285,31 @@ class LoopHistoryMathTests: XCTestCase {
         XCTAssertEqual(spans.map(\.mode), [.closed, .open, .closed])
         XCTAssertEqual(spans[1].start, at(20))
         XCTAssertEqual(spans[1].end, at(40), "Open for the whole manual temp basal, not just after the run it held")
+    }
+
+    func testRecordedCancellationEndsManualTempBasalBeforeTheRunFallback() {
+        let interval = DateInterval(start: at(0), end: at(30))
+        // A good run at 0; a manual temp basal from 3 holds the run at 5; it's cancelled at 12, and no runs follow.
+        let runs = [LoopHistoryMath.LoopRun(date: at(0), succeeded: true), .init(date: at(5), succeeded: false, manualTempBasal: true)]
+        let changes: [LoopHistoryMath.ModeChange] = [.init(date: at(0), closedLoop: true)]
+        let spans = LoopHistoryMath.loopModeSpans(interval: interval, runs: runs, modeChanges: changes,
+                                                  coverageStart: at(0), manualTempBasals: [DateInterval(start: at(3), end: at(12))])
+        XCTAssertEqual(spans.map(\.mode), [.closed, .open, .closed, .limited])
+        XCTAssertEqual(spans[1].start, at(5))
+        XCTAssertEqual(spans[1].end, at(10), "Open while the recorded temp basal runs, not for 15 minutes after the run it held")
+        XCTAssertEqual(spans[3].start, at(15), "Limited once the last good run is over 15 minutes old")
+
+        // A period starting after the cancellation still needs the preceding dose record. This can happen at
+        // midnight, while the last held run is recent enough for the fallback to apply.
+        let nextPeriod = LoopHistoryMath.loopModeSpans(interval: DateInterval(start: at(15), end: at(30)), runs: runs,
+                                                       modeChanges: changes, coverageStart: at(0),
+                                                       manualTempBasals: [DateInterval(start: at(3), end: at(12))])
+        XCTAssertEqual(nextPeriod.map(\.mode), [.limited])
+
+        // With no dose record, the held run alone keeps the loop open for 15 minutes.
+        let unrecorded = LoopHistoryMath.loopModeSpans(interval: interval, runs: runs, modeChanges: changes, coverageStart: at(0))
+        XCTAssertEqual(unrecorded.map(\.mode), [.open, .limited])
+        XCTAssertEqual(unrecorded[1].start, at(20))
     }
 
     // MARK: Calendar

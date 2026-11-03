@@ -139,10 +139,11 @@ struct StatGridView: View {
                 }
             }
             if let detail = tile.detail {
+                // Not capped: a detail can run to two lines of its own, which wrap again at large sizes.
                 Text(detail)
                     .font(LoopDesign.Typeface.footnote)
                     .foregroundStyle(P.inkMuted)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             if let aim = tile.aim {
                 Text(aim)
@@ -582,7 +583,7 @@ struct InsulinSplitView: View {
 
     /// "3.2 U unknown": bolus whose record doesn't say whether it was manual or automatic.
     private static func unknownText(_ units: Double) -> String {
-        String(format: NSLocalizedString("%1$@ unknown", comment: "Basal and bolus: bolus whose record doesn't say whether it was manual or automatic, such as another app's in Apple Health, after the manual and automatic amounts. (1: units, e.g. 3.2 U)"), LoopFormat.totalUnits(units))
+        String(format: NSLocalizedString("%1$@ unknown", comment: "Basal and bolus: bolus whose record doesn't say whether it was manual or automatic, such as some in Apple Health, after the manual and automatic amounts. (1: units, e.g. 3.2 U)"), LoopFormat.totalUnits(units))
     }
 
     /// "Scheduled 18.0 U", or "Scheduled 18.0 U · 20 of 90 days" when the schedule is known for only some days.

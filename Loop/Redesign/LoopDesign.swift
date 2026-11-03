@@ -10,9 +10,9 @@ import UIKit
 
 /// Colours, spacing and type for the Trends screen.
 ///
-/// Every colour is one Loop already has: the `glucose`, `insulin`, `carbs`, `fresh` and `warning` assets, so a
+/// Every colour but one is one Loop already has: the `glucose`, `insulin`, `carbs`, `fresh` and `warning` assets, so a
 /// DerivedAssetsOverride still recolours them, and the iOS system colours for grounds and text. Bands and fills are
-/// those colours at reduced opacity. Text is `label` or `secondaryLabel`; colour is for marks, not for numbers.
+/// those colours at reduced opacity. The one addition is `bolus`, a darker insulin for light mode. Text is `label` or `secondaryLabel`; colour is for marks, not for numbers.
 /// Red is only for something that needs action now.
 enum LoopDesign {
 
@@ -37,9 +37,11 @@ enum LoopDesign {
         static let agpOuter = glucose.opacity(0.16)
         static let agpInner = glucose.opacity(0.34)
         static let insulin = Color("insulin")
-        /// Bolus is insulin's colour; basal is the same colour faded, with a stronger edge along its top. One hue can't
-        /// give 3:1 between them, so charts keep a gap of the card's colour wherever basal and bolus meet.
-        static let bolus = insulin
+        /// Basal is insulin's colour faded, with a stronger edge along its top. Insulin's own orange is too light for
+        /// a bolus on it in light mode, where it is under 2:1 against faded basal, so bolus has its own asset: a deep
+        /// orange in light mode, insulin's light orange in dark. Charts also keep a gap of the card's colour wherever
+        /// basal and bolus meet.
+        static let bolus = Color("bolus")
         static let basal = insulin.opacity(0.25)
         static let basalEdge = insulin.opacity(0.6)
         static let basalScheduled = inkMuted

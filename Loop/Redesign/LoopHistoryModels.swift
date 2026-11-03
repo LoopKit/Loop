@@ -26,12 +26,18 @@ struct BolusEvent: Equatable, Identifiable {
     let units: Double
     /// Issued by Loop (automatic bolus) rather than by the person.
     let automatic: Bool
-    /// Logged in Loop by hand rather than delivered by the pump; these can be deleted.
+    /// Logged by hand, such as an injection, rather than delivered by the pump. Always a manual dose.
     let manuallyEntered: Bool
     /// Kept so a manually entered dose can be deleted from the dose store.
     var dose: DoseEntry? = nil
-    /// False when the record doesn't say whether Loop or the person gave it, such as another app's doses in Apple Health.
+    /// False when the record doesn't say whether it was automatic or given by the person, such as some doses in Apple Health.
     var automaticKnown = true
+
+    /// Whether a record says what kind of bolus it is: it carries the automatic flag, or it was logged by hand, which
+    /// makes it manual.
+    static func kindKnown(automatic: Bool?, manuallyEntered: Bool) -> Bool {
+        automatic != nil || manuallyEntered
+    }
 
     static func == (lhs: BolusEvent, rhs: BolusEvent) -> Bool {
         lhs.id == rhs.id && lhs.date == rhs.date && lhs.units == rhs.units && lhs.automatic == rhs.automatic
@@ -300,10 +306,11 @@ extension BolusEvent {
     init?(dose: DoseEntry, in interval: DateInterval) {
         guard dose.type == .bolus, dose.startDate >= interval.start, dose.startDate < interval.end else { return nil }
         self.init(id: dose.syncIdentifier ?? "\(dose.startDate.timeIntervalSince1970)", date: dose.startDate,
-                  units: dose.unitsInDeliverableIncrements, automatic: dose.automatic ?? false,
+                  units: dose.unitsInDeliverableIncrements, automatic: !dose.manuallyEntered && (dose.automatic ?? false),
                   manuallyEntered: dose.manuallyEntered, dose: dose,
-                  // A dose imported without Loop's automatic flag, or not yet reconciled, is of unknown kind.
-                  automaticKnown: dose.automatic != nil)
+                  // A dose imported without the automatic flag, or not yet reconciled, is of unknown kind; one logged
+                  // by hand is manual.
+                  automaticKnown: BolusEvent.kindKnown(automatic: dose.automatic, manuallyEntered: dose.manuallyEntered))
     }
 }
 

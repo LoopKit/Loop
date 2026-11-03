@@ -1301,7 +1301,7 @@
       }
     },
     "%1$@ of unknown kind\n+ %2$@ automatic" : {
-      "comment" : "Trends Boluses per day tile detail when some boluses don't say whether they were manual or automatic, such as another app's in Apple Health, on two lines: how many of the figure above are of unknown kind, then the automatic boluses on top. (1: boluses of unknown kind per day; 2: automatic boluses per day; both fractional, such as 4.2)",
+      "comment" : "Trends Boluses per day tile detail when some boluses don't say whether they were manual or automatic, such as some in Apple Health, on two lines: how many of the figure above are of unknown kind, then the automatic boluses on top. (1: boluses of unknown kind per day; 2: automatic boluses per day; both fractional, such as 4.2)",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1587,7 +1587,7 @@
       }
     },
     "%1$@ unknown" : {
-      "comment" : "Basal and bolus: bolus whose record doesn't say whether it was manual or automatic, such as another app's in Apple Health, after the manual and automatic amounts. (1: units, e.g. 3.2 U)",
+      "comment" : "Basal and bolus: bolus whose record doesn't say whether it was manual or automatic, such as some in Apple Health, after the manual and automatic amounts. (1: units, e.g. 3.2 U)",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -11050,145 +11050,145 @@
         }
       }
     },
-    "Older days come from Apple Health, which doesn't record the basal schedule, or whether another app's bolus was manual or automatic." : {
-      "comment" : "Trends Insulin per day footnote when the period reaches back past Loop's own records, so scheduled basal or the manual and automatic split can't be shown",
+    "Older days come from Apple Health, which doesn't record the basal schedule, and some boluses there don't say whether they were manual or automatic." : {
+      "comment" : "Trends Insulin per day footnote when the period reaches back past Loop's own records into Apple Health, so scheduled basal can't be shown, or some boluses there have no record of whether they were manual or automatic",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الأيام الأقدم مأخوذة من Apple Health، الذي لا يسجّل جدول القاعدي، ولا ما إذا كانت جرعة تطبيق آخر يدوية أم تلقائية."
+            "value" : "الأيام الأقدم مأخوذة من Apple Health، الذي لا يسجّل جدول القاعدي، وبعض الجرعات هناك لا تذكر ما إذا كانت يدوية أم تلقائية."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Starší dny pocházejí z Apple Health, který nezaznamenává plán bazálu ani to, zda byl bolus z jiné aplikace ruční, nebo automatický."
+            "value" : "Starší dny pocházejí z Apple Health, který nezaznamenává plán bazálu, a u některých bolusů tam není uvedeno, zda byly ruční, nebo automatické."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ældre dage kommer fra Apple Health, som ikke registrerer basalplanen, eller om en anden apps bolus var manuel eller automatisk."
+            "value" : "Ældre dage kommer fra Apple Health, som ikke registrerer basalplanen, og nogle boluser der angiver ikke, om de var manuelle eller automatiske."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ältere Tage stammen aus Apple Health. Dort sind weder das Basalprogramm noch die Angabe gespeichert, ob ein Bolus aus einer anderen App manuell oder automatisch war."
+            "value" : "Ältere Tage stammen aus Apple Health. Dort ist das Basalprogramm nicht gespeichert, und bei manchen Boli fehlt die Angabe, ob sie manuell oder automatisch waren."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los días anteriores provienen de Apple Health, que no registra el programa basal ni si un bolo de otra app fue manual o automático."
+            "value" : "Los días anteriores provienen de Apple Health, que no registra el programa basal, y algunos bolos allí no indican si fueron manuales o automáticos."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vanhemmat päivät tulevat Apple Healthista, joka ei tallenna basaaliohjelmaa eikä sitä, oliko toisen apin bolus manuaalinen vai automaattinen."
+            "value" : "Vanhemmat päivät tulevat Apple Healthista, joka ei tallenna basaaliohjelmaa, eikä osa sen boluksista kerro, olivatko ne manuaalisia vai automaattisia."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les jours plus anciens viennent d'Apple Santé, qui n'enregistre ni le programme basal, ni si un bolus d'une autre app était manuel ou automatique."
+            "value" : "Les jours plus anciens viennent d'Apple Santé, qui n'enregistre pas le programme basal, et certains bolus n'y indiquent pas s'ils étaient manuels ou automatiques."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ימים ישנים יותר מגיעים מ-Apple Health, שאינו שומר את תוכנית הבזאלי, או אם בולוס מאפליקציה אחרת היה ידני או אוטומטי."
+            "value" : "ימים ישנים יותר מגיעים מ-Apple Health, שאינו שומר את תוכנית הבזאלי, וחלק מהבולוסים שם אינם מציינים אם היו ידניים או אוטומטיים."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A régebbi napok az Apple Egészségből származnak, amely nem rögzíti a bázisprogramot, sem azt, hogy egy másik app bólusa kézi vagy automatikus volt-e."
+            "value" : "A régebbi napok az Apple Egészségből származnak, amely nem rögzíti a bázisprogramot, és ott egyes bólusoknál nincs feltüntetve, hogy kézi vagy automatikus volt-e."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "I giorni precedenti provengono da Apple Salute, che non registra il programma basale, né se un bolo di un'altra app era manuale o automatico."
+            "value" : "I giorni precedenti provengono da Apple Salute, che non registra il programma basale, e alcuni boli lì non indicano se erano manuali o automatici."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "それ以前の日はAppleヘルスケアのデータです。ベーサルのスケジュールや、他のAppのボーラスが手動か自動かは記録されません。"
+            "value" : "それ以前の日はAppleヘルスケアのデータです。ベーサルのスケジュールは記録されず、一部のボーラスは手動か自動かが記録されていません。"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eldre dager kommer fra Apple Helse, som ikke registrerer basalplanen, eller om en annen apps bolus var manuell eller automatisk."
+            "value" : "Eldre dager kommer fra Apple Helse, som ikke registrerer basalplanen, og noen boluser der oppgir ikke om de var manuelle eller automatiske."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oudere dagen komen uit Apple Gezondheid, dat het basaalschema niet vastlegt, en ook niet of een bolus van een andere app handmatig of automatisch was."
+            "value" : "Oudere dagen komen uit Apple Gezondheid, dat het basaalschema niet vastlegt, en bij sommige bolussen daar staat niet of ze handmatig of automatisch waren."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Starsze dni pochodzą z Apple Zdrowie, które nie zapisuje harmonogramu bazy ani tego, czy bolus z innej aplikacji był ręczny, czy automatyczny."
+            "value" : "Starsze dni pochodzą z Apple Zdrowie, które nie zapisuje harmonogramu bazy, a przy niektórych bolusach nie ma tam informacji, czy były ręczne, czy automatyczne."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Os dias mais antigos vêm do app Saúde, que não registra a programação basal nem se o bolus de outro app foi manual ou automático."
+            "value" : "Os dias mais antigos vêm do app Saúde, que não registra a programação basal, e alguns bolus ali não informam se foram manuais ou automáticos."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zilele mai vechi provin din Apple Sănătate, care nu înregistrează programul bazal sau dacă un bolus din altă aplicație a fost manual ori automat."
+            "value" : "Zilele mai vechi provin din Apple Sănătate, care nu înregistrează programul bazal, iar unele bolusuri de acolo nu arată dacă au fost manuale sau automate."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Более ранние дни взяты из Apple Здоровье, где не хранятся базальная программа и то, был ли болюс из другого приложения ручным или автоматическим."
+            "value" : "Более ранние дни взяты из Apple Здоровье, где не хранится базальная программа, а у некоторых болюсов не указано, были ли они ручными или автоматическими."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Staršie dni pochádzajú z Apple Zdravie, ktoré nezaznamenáva plán bazálu ani to, či bol bolus z inej aplikácie manuálny, alebo automatický."
+            "value" : "Staršie dni pochádzajú z Apple Zdravie, ktoré nezaznamenáva plán bazálu, a pri niektorých bolusoch tam nie je uvedené, či boli manuálne, alebo automatické."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Äldre dagar kommer från Apple Hälsa, som inte registrerar basalschemat, eller om en annan apps bolus var manuell eller automatisk."
+            "value" : "Äldre dagar kommer från Apple Hälsa, som inte registrerar basalschemat, och vissa bolusar där anger inte om de var manuella eller automatiska."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Daha eski günler Apple Sağlık'tan gelir; bazal programı veya başka bir uygulamanın bolusunun manuel mi otomatik mi olduğu orada kaydedilmez."
+            "value" : "Daha eski günler Apple Sağlık'tan gelir; bazal program orada kaydedilmez ve bazı bolusların manuel mi otomatik mi olduğu belirtilmez."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Давніші дні взято з Apple Здоровʼя, де не зберігаються базальна програма та те, чи був болюс з іншої програми ручним чи автоматичним."
+            "value" : "Давніші дні взято з Apple Здоровʼя, де не зберігається базальна програма, а для деяких болюсів не вказано, чи були вони ручними чи автоматичними."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Các ngày cũ hơn lấy từ Apple Sức khỏe, nơi không ghi lại lịch basal, hay liều bolus của ứng dụng khác là thủ công hay tự động."
+            "value" : "Các ngày cũ hơn lấy từ Apple Sức khỏe, nơi không ghi lại lịch basal, và một số liều bolus ở đó không cho biết là thủ công hay tự động."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "较早的日子来自 Apple“健康”，其中不记录基础率计划，也不记录其他 App 的大剂量是手动还是自动。"
+            "value" : "较早的日子来自 Apple“健康”，其中不记录基础率计划，部分大剂量也没有记录是手动还是自动。"
           }
         }
       }
@@ -44710,18 +44710,6 @@
           }
         },
         "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
-        "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"

@@ -35,7 +35,7 @@ final class TrendsModel: ObservableObject {
         var carbsByDay: [Date: Double] = [:]
         var manualBoluses = 0
         var automaticBoluses = 0
-        /// Boluses whose record doesn't say whether Loop or the person gave them, such as another app's in Apple Health.
+        /// Boluses whose record doesn't say whether they were automatic or given by the person, such as some in Apple Health.
         var unknownBoluses = 0
         var loopSpans: [LoopModeSpan] = []
         var targetRange: ClosedRange<Double>?
@@ -178,6 +178,9 @@ final class TrendsModel: ObservableObject {
         var tiles: [StatTile] = []
         let averageLabel = NSLocalizedString("Average", comment: "Trends summary tile: mean glucose over the period")
         let gmiLabel = NSLocalizedString("GMI", comment: "Trends summary tile: abbreviation for Glucose Management Indicator, an estimate of HbA1c from CGM data")
+        let gmiCaveat = LoopHistoryMath.gmiIsRepresentative(periodDays: s.totals.count, cgmActive: s.cgmActive) ? nil
+            : String(format: NSLocalizedString("Best over 14 days with %1$@ CGM data", comment: "Trends GMI tile caption when the period is shorter than 14 days or CGM readings cover less than 70% of it: the consensus for when GMI is representative. (1: share of CGM data, e.g. 70%)"),
+                     ConsensusTarget.percent(70))
         if let stats = s.stats {
             tiles.append(StatTile(label: averageLabel, value: unit.format(stats.meanMgdl), unit: unit.unitName,
                                   detail: String(format: NSLocalizedString("SD %1$@ · CV %2$@%%", comment: "Trends Average tile detail: standard deviation and coefficient of variation of glucose. (1: standard deviation in the glucose unit, 2: coefficient of variation as a percentage number)"),
@@ -188,13 +191,13 @@ final class TrendsModel: ObservableObject {
                                   detail: String(format: NSLocalizedString("%1$@ mmol/mol", comment: "Trends GMI tile detail: the GMI in IFCC units. (1: value)"),
                                                  LoopFormat.number(stats.gmiMmolMol, decimals: 0)),
                                   aim: ConsensusTarget.aim(ConsensusTarget.under(7)),
-                                  caveat: LoopHistoryMath.gmiIsRepresentative(periodDays: s.totals.count, cgmActive: s.cgmActive) ? nil
-                                    : String(format: NSLocalizedString("Best over 14 days with %1$@ CGM data", comment: "Trends GMI tile caption when the period is shorter than 14 days or CGM readings cover less than 70% of it: the consensus for when GMI is representative. (1: share of CGM data, e.g. 70%)"),
-                                             ConsensusTarget.percent(70))))
+                                  caveat: gmiCaveat))
         } else {
             tiles.append(StatTile(label: averageLabel, value: "–", unit: unit.unitName,
                                   detail: NSLocalizedString("No CGM data", comment: "Trends Average tile detail when the period has no glucose readings")))
-            tiles.append(StatTile(label: gmiLabel, value: "–", unit: "%", detail: nil))
+            tiles.append(StatTile(label: gmiLabel, value: "–", unit: "%",
+                                  detail: String(format: NSLocalizedString("%1$@ mmol/mol", comment: "Trends GMI tile detail: the GMI in IFCC units. (1: value)"), "–"),
+                                  caveat: gmiCaveat))
         }
         // One day's figures are that day's own, so its tiles drop "per day" and show whole counts.
         let oneDay = s.day != nil
@@ -214,7 +217,7 @@ final class TrendsModel: ObservableObject {
                               // Every bolus not known to be automatic, so one of unknown kind still counts.
                               value: LoopFormat.number(Double(s.manualBoluses + s.unknownBoluses) / s.days, decimals: countDecimals), unit: nil,
                               detail: s.unknownBoluses > 0
-                                ? String(format: NSLocalizedString("%1$@ of unknown kind\n+ %2$@ automatic", comment: "Trends Boluses per day tile detail when some boluses don't say whether they were manual or automatic, such as another app's in Apple Health, on two lines: how many of the figure above are of unknown kind, then the automatic boluses on top. (1: boluses of unknown kind per day; 2: automatic boluses per day; both fractional, such as 4.2)"),
+                                ? String(format: NSLocalizedString("%1$@ of unknown kind\n+ %2$@ automatic", comment: "Trends Boluses per day tile detail when some boluses don't say whether they were manual or automatic, such as some in Apple Health, on two lines: how many of the figure above are of unknown kind, then the automatic boluses on top. (1: boluses of unknown kind per day; 2: automatic boluses per day; both fractional, such as 4.2)"),
                                          LoopFormat.number(Double(s.unknownBoluses) / s.days, decimals: countDecimals),
                                          LoopFormat.number(Double(s.automaticBoluses) / s.days, decimals: countDecimals))
                                 : String(format: NSLocalizedString("+ %1$@ automatic", comment: "Trends Boluses per day tile detail: average number of automatic boluses per day on top of the manual ones, a fractional value such as 4.2. (1: number with one decimal)"),
@@ -359,9 +362,9 @@ struct TrendsView: View {
                 if s.day == nil, let today = todaySoFar(s) {
                     Footnote(today)
                 }
-                // Days read from Apple Health have no schedule, and other apps' boluses there don't say which they were.
+                // Days read from Apple Health have no schedule, and some boluses there don't say which kind they were.
                 if s.readsHealthInsulin, s.scheduledBasal == nil || !s.split.isClassified {
-                    Footnote(NSLocalizedString("Older days come from Apple Health, which doesn't record the basal schedule, or whether another app's bolus was manual or automatic.", comment: "Trends Insulin per day footnote when the period reaches back past Loop's own records, so scheduled basal or the manual and automatic split can't be shown"))
+                    Footnote(NSLocalizedString("Older days come from Apple Health, which doesn't record the basal schedule, and some boluses there don't say whether they were manual or automatic.", comment: "Trends Insulin per day footnote when the period reaches back past Loop's own records into Apple Health, so scheduled basal can't be shown, or some boluses there have no record of whether they were manual or automatic"))
                 }
             } else {
                 ChartPlaceholder(message: NSLocalizedString("No insulin recorded in this period", comment: "Trends Insulin per day chart placeholder when no insulin was delivered in the period"), height: 80)
