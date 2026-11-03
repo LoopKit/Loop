@@ -30,15 +30,19 @@ final class OverrideHistoryTests: XCTestCase {
     }
 
     /// Fresh stores on every call; the override history is whatever the caller passes.
-    private func makeManager(overrideHistory: TemporaryScheduleOverrideHistory = TemporaryScheduleOverrideHistory()) async -> WatchLoopManager {
+    /// `appCacheLengths`: the stores keep what the app's do (glucose 96 h, doses and carbs the cache duration).
+    private func makeManager(overrideHistory: TemporaryScheduleOverrideHistory = TemporaryScheduleOverrideHistory(),
+                             appCacheLengths: Bool = false) async -> WatchLoopManager {
         let cacheStore = PersistenceController(directoryURL: cacheDir.appendingPathComponent(UUID().uuidString))
-        let doseStore = await DoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+        let glucoseCacheLength: TimeInterval = appCacheLengths ? .hours(96) : .hours(4)
+        let historyCacheLength: TimeInterval = appCacheLengths ? Bundle.main.localCacheDuration : .hours(24)
+        let doseStore = await DoseStore(healthKitSampleStore: nil, cacheStore: cacheStore, cacheLength: historyCacheLength,
                                         longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
                                         provenanceIdentifier: "OverrideHistoryTests")
         let glucoseStore = await GlucoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
-                                              cacheLength: .hours(4), provenanceIdentifier: "OverrideHistoryTests")
+                                              cacheLength: glucoseCacheLength, provenanceIdentifier: "OverrideHistoryTests")
         let carbStore = CarbStore(healthKitSampleStore: nil, cacheStore: cacheStore,
-                                  cacheLength: .hours(24), provenanceIdentifier: "OverrideHistoryTests")
+                                  cacheLength: historyCacheLength, provenanceIdentifier: "OverrideHistoryTests")
 
         var settings = LoopSettings()
         settings.basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 1.0)])
@@ -62,8 +66,9 @@ final class OverrideHistoryTests: XCTestCase {
         return manager
     }
 
-    private func makeController(overrideHistory: TemporaryScheduleOverrideHistory) async -> PodLoanWatchController {
-        let manager = await makeManager(overrideHistory: overrideHistory)
+    private func makeController(overrideHistory: TemporaryScheduleOverrideHistory,
+                                appCacheLengths: Bool = false) async -> PodLoanWatchController {
+        let manager = await makeManager(overrideHistory: overrideHistory, appCacheLengths: appCacheLengths)
         return PodLoanWatchController(loopManager: manager, journal: LoanEventJournal(directory: cacheDir),
                                       stateDirectory: cacheDir)
     }
@@ -72,7 +77,10 @@ final class OverrideHistoryTests: XCTestCase {
     /// (and tears down) after the overrides are applied.
     private func grant(activeOverride: TemporaryScheduleOverride?, overrideHistory: [TemporaryScheduleOverride]? = nil,
                        settingsHistory: LoanSettingsHistory? = nil, glucoseBasedApplicationFactor: Bool? = nil,
-                       guardAndRunway: Bool? = nil, volatilityBaseline: Double? = nil) -> LoanGrant {
+                       guardAndRunway: Bool? = nil, volatilityBaseline: Double? = nil,
+                       doseHistory: [LoanDoseRecord] = [], carbHistory: [LoanCarbRecord]? = nil,
+                       glucoseHistory: [LoanGlucoseRecord]? = nil,
+                       slowRetrospectiveCorrection: Bool = false) -> LoanGrant {
         var settings = LoopSettings()
         settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(
             unit: .milligramsPerDeciliter,
@@ -89,8 +97,10 @@ final class OverrideHistoryTests: XCTestCase {
         func plist(_ value: Any) -> Data { try! PropertyListSerialization.data(fromPropertyList: value, format: .binary, options: 0) }
         return LoanGrant(epoch: 1, expiresAt: Date().addingTimeInterval(300), pumpConfiguration: Data([1, 2, 3]),
                          therapySettingsRaw: plist(settings.rawValue), settingsTimeZoneID: "GMT",
-                         doseHistory: [], glucoseBasedApplicationFactorEnabled: glucoseBasedApplicationFactor,
+                         doseHistory: doseHistory, glucoseBasedApplicationFactorEnabled: glucoseBasedApplicationFactor,
                          guardAndRunwayEnabled: guardAndRunway, volatilityBaseline: volatilityBaseline,
+                         slowRetrospectiveCorrectionEnabled: slowRetrospectiveCorrection,
+                         carbHistory: carbHistory, glucoseHistory: glucoseHistory,
                          activeOverrideRaw: activeOverride.map { plist($0.rawValue) },
                          therapySettingsSupplementRaw: plist(supplement),
                          overrideHistoryRaw: overrideHistory.flatMap(LoanGrant.overrideHistoryRaw),
@@ -387,5 +397,89 @@ final class OverrideHistoryTests: XCTestCase {
         let copy = grant(activeOverride: nil, settingsHistory: settingsHistory(changedAt: now.addingTimeInterval(-.hours(2)), now: now))
         XCTAssertNotNil(copy.settingsHistory)
         XCTAssertEqual(copy.withEpoch(9, leaseUntil: Date()).settingsHistory, copy.settingsHistory)
+    }
+
+    // MARK: - Slow retrospective correction
+
+    /// A grant at `now` with slow retrospective correction on, its histories over the experiment's windows as
+    /// the phone sends them: readings every 5 min back 72 h, half-hour temps back 79 h, carbs 30 h and 6 h back.
+    private func slowRetrospectiveCorrectionGrant(now: Date) -> LoanGrant {
+        let windows = LoanGrant.slowRetrospectiveCorrectionWindows(referenceDate: now)
+        let glucose = stride(from: 72.0 * 12, through: 0, by: -1).map { i in
+            LoanGlucoseRecord(syncIdentifier: "phone-\(i)", startDate: now.addingTimeInterval(-i * 300 - 90),
+                              valueMgdl: 110 + i.truncatingRemainder(dividingBy: 7), trendRateMgdlPerMin: nil,
+                              isDisplayOnly: false, wasUserEntered: false)
+        }.filter { $0.startDate >= windows.glucose }
+        let doses = stride(from: 79.0 * 2, through: 1, by: -1).compactMap { i in
+            LoanDoseRecord(storeDose: DoseEntry(type: .tempBasal, startDate: now.addingTimeInterval(-i * 1800),
+                                                endDate: now.addingTimeInterval(-(i - 1) * 1800), value: 1.2, unit: .unitsPerHour,
+                                                decisionId: nil, deliveredUnits: 0.6, syncIdentifier: "temp-\(i)",
+                                                insulinType: .novolog, automatic: true))
+        }.filter { $0.startDate >= windows.doses }
+        let carbs = [30.0, 6].map { hours in
+            LoanCarbRecord(syncIdentifier: "carb-\(hours)", provenanceIdentifier: "phone", syncVersion: 1,
+                           startDate: now.addingTimeInterval(-.hours(hours)), grams: 40, absorptionTime: .hours(3),
+                           foodType: nil, userCreatedDate: now.addingTimeInterval(-.hours(hours)), userUpdatedDate: nil)
+        }
+        return grant(activeOverride: nil, doseHistory: doses, carbHistory: carbs, glucoseHistory: glucose,
+                     slowRetrospectiveCorrection: true)
+    }
+
+    /// The grant's 72 h go into the watch's stores before the takeover, and the loop reads them there, as the
+    /// phone reads its own: every reading once, the old doses and the carb entry 30 h back included.
+    func testSlowRetrospectiveCorrectionReadsTheGrantsHistoryFromTheStores() async throws {
+        let now = Date()
+        let grant = slowRetrospectiveCorrectionGrant(now: now)
+        let c = await makeController(overrideHistory: StockLoopStack.makeOverrideHistory(), appCacheLengths: true)
+        await c.onMain { c.handleGrant(grant) }
+        await c.loopManager.laneSettled()
+        XCTAssertTrue(c.loopManager.slowRetrospectiveCorrectionEnabled)
+
+        let seeded = await c.ingestGrantHistory(grant)
+        XCTAssertTrue(seeded)
+        try await c.loopManager.recordPumpEvents([], lastReconciliation: Date(), replacePendingEvents: true)
+        let input = try await c.loopManager.fetchData(for: now)
+        XCTAssertTrue(input.experiments.contains(.slowRetrospectiveCorrection))
+
+        let dates = input.glucoseHistory.map(\.startDate)
+        XCTAssertEqual(Set(dates).count, dates.count, "no reading twice")
+        XCTAssertLessThan(dates.first!, now.addingTimeInterval(-.hours(71.9)))
+        XCTAssertEqual(dates.count, grant.glucoseHistory!.filter { $0.startDate >= now.addingTimeInterval(-.hours(72)) }.count)
+
+        XCTAssertLessThan(input.doses.map(\.startDate).min()!, now.addingTimeInterval(-.hours(77)))
+        XCTAssertTrue(input.carbEntries.contains { abs($0.startDate.timeIntervalSince(now.addingTimeInterval(-.hours(30)))) < 1 })
+    }
+
+    func testWithSlowRetrospectiveCorrectionOffTheExperimentStaysOff() async throws {
+        let input = try await input(afterGrant: grant(activeOverride: nil))
+        XCTAssertFalse(input.experiments.contains(.slowRetrospectiveCorrection))
+    }
+
+    /// The algorithm counts a glucose change only between readings of one identity. The watch records under the
+    /// phone app's, so readings by every route (the grant's seed, the watch's own sensor, the stock catch-up,
+    /// which keeps the phone's identity) form one series, as on the phone.
+    func testEveryRouteRecordsGlucoseUnderThePhoneAppsIdentity() async throws {
+        let phoneApp = try XCTUnwrap(Bundle.main.object(forInfoDictionaryKey: "WKCompanionAppBundleIdentifier") as? String)
+        XCTAssertEqual(LoopDataManager.glucoseProvenanceIdentifier, phoneApp)
+
+        let store = await GlucoseStore(healthKitSampleStore: nil,
+                                       cacheStore: PersistenceController(directoryURL: cacheDir.appendingPathComponent(UUID().uuidString)),
+                                       cacheLength: .hours(96), provenanceIdentifier: LoopDataManager.glucoseProvenanceIdentifier)
+        let now = Date()
+        func reading(_ minutesAgo: Double, _ id: String) -> NewGlucoseSample {
+            NewGlucoseSample(date: now.addingTimeInterval(-minutesAgo * 60),
+                             quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 120), condition: nil, trend: nil,
+                             trendRate: nil, isDisplayOnly: false, wasUserEntered: false, syncIdentifier: id)
+        }
+        _ = try await store.addGlucoseSamples([30, 25, 20].map { reading($0, "seed-\($0)") })
+        try await store.setSyncGlucoseSamples([15, 10].map {
+            StoredGlucoseSample(provenanceIdentifier: phoneApp, syncIdentifier: "catch-up-\($0)", startDate: now.addingTimeInterval(-$0 * 60),
+                                quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 120))
+        })
+        _ = try await store.addGlucoseSamples([5, 0].map { reading($0, "direct-\($0)") })
+
+        let samples = try await store.getGlucoseSamples(start: now.addingTimeInterval(-.hours(1)), end: nil)
+        XCTAssertEqual(samples.count, 7)
+        XCTAssertEqual(Set(samples.map(\.provenanceIdentifier)), [phoneApp])
     }
 }

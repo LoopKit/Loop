@@ -134,7 +134,7 @@ final class StockLoopSession {
 
     /// false: not loan traffic; the caller continues with stock handling. From the link's thread.
     nonisolated func handleIncomingIfLoanMessage(_ userInfo: [String: Any]) -> Bool {
-        guard userInfo[LoanProtocol.userInfoKey] != nil else { return false }
+        guard LoanProtocol.isLoanTransport(userInfo) else { return false }
         loanController.handleIncoming(userInfo: userInfo)
         return true
     }

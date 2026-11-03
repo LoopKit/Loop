@@ -147,6 +147,15 @@ class LoopDataManager {
 
     public let healthStore: HKHealthStore
 
+    /// The identity the watch records glucose under: the phone app's, which Apple's companion key names.
+    /// The algorithm counts a change only between readings of one identity, as one continuous measurement,
+    /// and Tidepool keys a reading by its identity. Stock gives the identity of the app that recorded the
+    /// reading, which stood for the sensor while one app recorded each sensor; with the watch reading the
+    /// sensor directly, two apps record it. One identity for both keeps them one stream. The sensor itself
+    /// would be the true key, but that is the algorithm's rule, shared with stock.
+    static let glucoseProvenanceIdentifier: String =
+        Bundle.main.object(forInfoDictionaryKey: "WKCompanionAppBundleIdentifier") as? String ?? HKSource.default().bundleIdentifier
+
     init() {
         healthStore = HKHealthStore()
         let cacheStore = PersistenceController.controllerInLocalDirectory()
@@ -184,13 +193,14 @@ class LoopDataManager {
         // Observers do not run in an initializer.
         displayContext = activeContext
 
-        // Glucose kept 24 hours: the loop reads 12 (the carb absorption window), the chart less.
+        // Glucose kept 96 hours: the loop reads 12 (the carb absorption window), the chart less; with slow
+        // retrospective correction it reads 72, which the grant seeds.
         storesOpened = Task {
             glucoseStore = await GlucoseStore(
                 healthKitSampleStore: nil,
                 cacheStore: glucoseCacheStore,
-                cacheLength: .hours(24),
-                provenanceIdentifier: provenanceIdentifier
+                cacheLength: .hours(96),
+                provenanceIdentifier: Self.glucoseProvenanceIdentifier
             )
             loopStores = await WatchLoopStores.open(cacheStore: cacheStore, cacheLength: localCacheDuration,
                                                     provenanceIdentifier: provenanceIdentifier)

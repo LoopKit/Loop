@@ -33,20 +33,23 @@ extension PodLoanWatchController {
         }
         SportLog.event("loan", "insulin history seeded from the grant: \(entries.count) finished dose(s), \(liveDoses.count) still delivering")
 
+        // Carbs and glucose are in the stores before the takeover, as the doses are, so the loan's first
+        // cycle reads the whole history (72 h with slow retrospective correction), not part of it.
+        await ingestGrantCarbs(grant)
+        await ingestGrantGlucose(grant)
+
         // The display run, so the glance shows the inherited insulin from takeover; its IOB is
         // also logged to compare with the phone's.
         loopManager.updateDisplayState { state in
             guard let iob = state.activeInsulin?.value else { return }
             SportLog.event("loan", String(format: "insulin on board at takeover %.2f U", iob))
         }
-        ingestGrantCarbs(grant)
-        ingestGrantGlucose(grant)
         return true
     }
 
     /// Replaces the carb store wholesale, so deleted or stale entries cannot keep dosing.
     /// Verified by reading identities back, not by comparing COB.
-    func ingestGrantCarbs(_ grant: LoanGrant) {
+    func ingestGrantCarbs(_ grant: LoanGrant) async {
         let carbs = grant.carbHistory ?? []
         // Each entry keeps the phone's authorship: Loop's own can be deleted here, another app's cannot.
         let objects: [SyncCarbObject] = carbs.map { c in
@@ -69,37 +72,37 @@ extension PodLoanWatchController {
         }
         let seededGrams = carbs.reduce(0.0) { $0 + $1.grams }
 
-        loopManager.carbStore.setSyncCarbObjects(objects) { [weak self] error in
-            if let error = error {
-                self?.log.error("Grant carb replace failed: %{public}@", String(describing: error))
-                return
-            }
+        let replaceError: Error? = await withCheckedContinuation { done in
+            loopManager.carbStore.setSyncCarbObjects(objects) { done.resume(returning: $0) }
+        }
+        if let replaceError {
+            log.error("Grant carb replace failed: %{public}@", String(describing: replaceError))
+            return
+        }
 
-            // Logs residual, missing and duplicate entries; the loan proceeds either way.
-            guard let self = self else { return }
-            let expectedIDs = Set(carbs.compactMap { $0.syncIdentifier })
-            let readFrom = (carbs.map(\.startDate).min() ?? self.now()).addingTimeInterval(-3600)
-            self.loopManager.carbStore.getCarbEntries(start: readFrom) { result in
-                switch result {
-                case .failure(let error):
-                    SportLog.event("cob-diff", "carbs replaced from the grant, but could not be read back: \(error)")
-                case .success(let stored):
-                    let storedIDs = Set(stored.compactMap { $0.syncIdentifier })
-                    let residual = storedIDs.subtracting(expectedIDs)
-                    let missing = expectedIDs.subtracting(storedIDs)
-                    let dupes = stored.count - storedIDs.count
-                    if residual.isEmpty && missing.isEmpty && dupes == 0 {
-                        SportLog.event("cob-diff", String(format: "carbs replaced from the grant: %d entries, %.0f g", expectedIDs.count, seededGrams))
-                    } else {
-                        SportLog.event("cob-diff", "carbs replaced from the grant, but \(residual.count) left over, \(missing.count) missing and \(dupes) duplicated")
-                    }
+        // Logs residual, missing and duplicate entries; the loan proceeds either way.
+        let expectedIDs = Set(carbs.compactMap { $0.syncIdentifier })
+        let readFrom = (carbs.map(\.startDate).min() ?? now()).addingTimeInterval(-3600)
+        loopManager.carbStore.getCarbEntries(start: readFrom) { result in
+            switch result {
+            case .failure(let error):
+                SportLog.event("cob-diff", "carbs replaced from the grant, but could not be read back: \(error)")
+            case .success(let stored):
+                let storedIDs = Set(stored.compactMap { $0.syncIdentifier })
+                let residual = storedIDs.subtracting(expectedIDs)
+                let missing = expectedIDs.subtracting(storedIDs)
+                let dupes = stored.count - storedIDs.count
+                if residual.isEmpty && missing.isEmpty && dupes == 0 {
+                    SportLog.event("cob-diff", String(format: "carbs replaced from the grant: %d entries, %.0f g", expectedIDs.count, seededGrams))
+                } else {
+                    SportLog.event("cob-diff", "carbs replaced from the grant, but \(residual.count) left over, \(missing.count) missing and \(dupes) duplicated")
                 }
             }
         }
     }
 
-    /// Seeds recent glucose so momentum and retrospective correction are warm on the first cycle.
-    func ingestGrantGlucose(_ grant: LoanGrant) {
+    /// Seeds the grant's glucose so momentum and retrospective correction are warm on the first cycle.
+    func ingestGrantGlucose(_ grant: LoanGrant) async {
         guard let records = grant.glucoseHistory, !records.isEmpty else { return }
         let mgdl = LoopUnit.milligramsPerDeciliter
         let mgdlPerMin = mgdl.unitDivided(by: .minute)
@@ -117,17 +120,13 @@ extension PodLoanWatchController {
 
         // These samples came from the phone, so stamp them as such.
         loopManager.noteGlucoseSource(directG7: false)
-        Task {
-            do {
-                let stored = try await loopManager.glucoseStore.addGlucoseSamples(samples)
-
-                SportLog.event("loan", "seeded \(stored.count) glucose sample(s) from the grant")
-                // Rerun the display now the phone's glucose is in: the takeover's first display
-                // run may have found none.
-                self.loopManager.updateDisplayState()
-            } catch {
-                self.log.error("Grant glucose ingest failed: %{public}@", String(describing: error))
-            }
+        let started = now()
+        do {
+            let stored = try await loopManager.glucoseStore.addGlucoseSamples(samples)
+            SportLog.event("loan", String(format: "seeded %d of the grant's %d glucose sample(s) in %.0f ms",
+                                          stored.count, samples.count, now().timeIntervalSince(started) * 1000))
+        } catch {
+            log.error("Grant glucose ingest failed: %{public}@", String(describing: error))
         }
     }
 
@@ -188,9 +187,7 @@ extension PodLoanWatchController {
 
             // Decided when the silence is known, with the copy as it is now: offer the offline start if this
             // watch holds a copy (its age is shown, not enforced), else say the phone did not answer.
-            // The watch can't compute slow retrospective correction yet: a copy with it on is not offered.
-            let stored = self.storedDormantGrant()
-            let dormant = stored?.grant.slowRetrospectiveCorrectionEnabled == true ? nil : stored
+            let dormant = self.storedDormantGrant()
             let situation = LoanControl.Situation(device: .watch, trigger: .startTapped, watchHasStoredCopy: dormant != nil,
                                                   watchReadsCGM: self.loopManager.cgmManager != nil)
             guard case .query(_, let onSilence) = LoanControl.decide(situation) else { return }
@@ -205,11 +202,6 @@ extension PodLoanWatchController {
             if case .tell(.noResponseFromPhoneAndNoCGM) = LoanControl.afterQuery(.silence, onSilence: onSilence) {
                 self.lastIdleNote = NSLocalizedString("No answer from iPhone. The watch isn't reading the CGM, so Sport Mode can't start without the iPhone.", comment: "Glance: loan request timed out and the watch has no CGM of its own")
                 SportLog.event("loan", "no answer from the phone in \(Int(timeout)) s and the watch reads no CGM; no offline start offered")
-                return
-            }
-            if stored != nil, dormant == nil {
-                self.lastIdleNote = NSLocalizedString("No answer from iPhone. Sport Mode can't start without it while Slow Retrospective Correction is on.", comment: "Glance: loan request timed out and the stored copy has slow retrospective correction on")
-                SportLog.event("loan", "no answer from the phone in \(Int(timeout)) s; the stored copy has slow retrospective correction on, so no offline start offered")
                 return
             }
             self.lastIdleNote = NSLocalizedString("No answer from iPhone. Open Loop on the iPhone and try again.", comment: "Glance: loan request timed out")
@@ -420,7 +412,8 @@ extension PodLoanWatchController {
         loopManager.setAlgorithmExperiments(integralRetrospectiveCorrection: grant.integralRetrospectiveCorrectionEnabled ?? false,
                                             glucoseBasedApplicationFactor: grant.glucoseBasedApplicationFactorEnabled ?? false,
                                             guardAndRunway: grant.guardAndRunwayEnabled ?? false,
-                                            volatilityBaseline: grant.volatilityBaseline)
+                                            volatilityBaseline: grant.volatilityBaseline,
+                                            slowRetrospectiveCorrection: grant.slowRetrospectiveCorrectionEnabled)
 
         // The loan inherits the phone's loop mode; an old phone defaults to open loop.
         loopManager.setClosedLoopEnabled(grant.phoneClosedLoopEnabled ?? false,
