@@ -23,7 +23,8 @@ watch on the wrist is woken by the sensor every five minutes, so it always comes
 stops its app; a watch silent for longer than a cycle is off the wrist, dead, or in a test.
 
 **Highly abnormal:** a pod on the body that answers neither device (a dead or faulted pod). Rows 24 and 25 cover it;
-in tests it is the pod emulator unplugged.
+in tests it is the pod emulator unplugged. A pod that faults during a loan still answers, and alarms until it is
+deactivated: rows 26 and 27.
 
 **One asymmetry that matters for coexistence.** The phone's pod driver holds the pod's connection open whenever the
 phone controls the pod and Loop is on screen; the watch connects for each cycle and lets go. So two devices that both
@@ -179,6 +180,8 @@ Each situation lists:
 | 23 | [Both dead](#23-both-dead) | nobody | accepted |
 | 24 | [Start, phone near, pod silent (highly abnormal)](#24-start-phone-near-pod-silent-highly-abnormal) | phone | not built |
 | 25 | [Start without the phone, pod silent (highly abnormal)](#25-start-without-the-phone-pod-silent-highly-abnormal) | phone, in name only: nobody loops | built |
+| 26 | [Pod faults, deactivated on the watch, phone near](#26-pod-faults-deactivated-on-the-watch-phone-near) | phone, with no pod | built |
+| 27 | [Pod faults, deactivated on the watch, phone away](#27-pod-faults-deactivated-on-the-watch-phone-away) | phone, with no pod, once it hears | built |
 
 ### 1. Start, phone near
 
@@ -484,6 +487,30 @@ itself has nothing to dose from, so it offers nothing and says so.
 - **Why:** **Highly abnormal.** The phone at home and a dead or faulted pod (watch Bluetooth off has its own warnings; a pocket that blocks radio is not realistic). In tests: the emulator unplugged with the phone's radios off. Nobody can loop, so the looper needs to learn that the pod is the problem.
 
 
+### 26. Pod faults, deactivated on the watch, phone near
+
+- **Control state:** pod held by watch (grant, or started alone and adopted) · loan: n · took over on silence at: none · looper's latest tap: Deactivate Pod on the watch, now
+- **Where:** phone near, alive · watch on wrist, alive
+- **What changed:** the pod faulted and alarms; the looper deactivated it from the watch's glance or the alarm's notification
+- **Phone sees:** believes the watch holds loan n · sensor: fresh · pod: released · heard from the watch: the hand-back offer, saying the pod is deactivated
+- **Watch sees:** believes it holds loan n · sensor: fresh · pod: deactivated and forgotten · heard from the phone: an acknowledgement
+- **Result:** query: the offer is the query (watch → phone) → answer: acknowledged → action: hand back (transfer H); the phone forgets the pod instead of reconnecting to it, checks the insulin on the watch's last reading of the pod, and opens no settle window
+- **Afterwards:** pod held by phone, with no pod: nobody loops until a new pod is paired · time without looping: until then, as in Loop without Sport Mode · looper sees: watch: "Pod deactivated. Ending Sport Mode…", then the phone's page; phone: "Pod Deactivated on the Watch. Pair a new pod to resume insulin delivery."
+- **Status:** built · **Code:** watch `+Handback`, phone `+Records`, `+Mirror`
+- **Why:** A faulted pod delivers nothing and alarms until it is deactivated, and only the device holding it can do that. Without the phone that device is the watch, so the watch offers the pod driver's own Deactivate Pod while the pod is faulted: on the glance in place of its frozen numbers, and on the alarm's notification, which fires once. A tap confirms it, not a crown turn, because ending a pod that cannot deliver cannot dose. With nothing left to loop, Sport Mode ends by itself. The watch books the pod's last delivery as the pod driver does at a deactivation; the phone books nothing and forgets the pod as after its own deactivation. Pairing stays on the phone.
+
+### 27. Pod faults, deactivated on the watch, phone away
+
+- **Control state:** pod held by watch (grant, or started alone) · loan: n · took over on silence at: none · looper's latest tap: Deactivate Pod on the watch
+- **Where:** phone away, or dead · watch on wrist, alive
+- **What changed:** as row 26, with the phone away
+- **Phone sees:** believes the watch holds loan n (or that it holds the pod, for a loan started alone), or dead · sensor: none, or dead · pod: out of reach · heard from the watch: nothing, then the watch's report (queued) that the pod is deactivated
+- **Watch sees:** believes it holds loan n · sensor: fresh · pod: deactivated and forgotten · heard from the phone: nothing
+- **Result:** query: the offer (queued) → answer: silence after 10 s → action: tell the looper; the watch's report goes to the phone queued. When the phone hears it, it takes the loan back as at a tap (row 9) without reaching for the pod, sends the stop, and forgets the pod. A pod paired on the phone since is not forgotten: only a pod the phone lent is.
+- **Afterwards:** pod held by phone, with no pod · time without looping: until a new pod is paired · looper sees: watch: "Pod deactivated. Your iPhone ends Sport Mode when it's back. Pair a new pod there."; phone, when it hears: "Pod Deactivated on the Watch"
+- **Status:** built · **Code:** watch `+Handback`, phone `+Hold`, `+Mirror`, `+Reclaim`
+- **Why:** Unlike row 8 there is no loop to keep, so silence ends nothing worth refusing: the looper is told what happens next. The phone's take-back needs no query because the Deactivate was the looper's latest decision. The watch's report is the only way the phone learns the pod is gone; without it the phone would reach for a dead pod and refuse.
+
 **Physically impossible (no behaviour, at most a log line):** the sensor away from the body; a device that can see
 the sensor but not the pod, or the pod but not the sensor.
 
@@ -606,7 +633,7 @@ Failures only a test can produce. They are logged when recognised; no warning is
   (`decideAndAct`) and carries out the decision (`carryOut`), including the query (`askWatch`). The decision points
   that call it: a pod reading (`+Ledger`), the watch's report overdue (`+Hold`), the watch's claims in status reports
   (`+Mirror`) and records (`+Records`), the Take Back tap.
-- **Watch**: the Start (`+Start`), the End (`+Handback`), the return from off (`+Resume`) and every word from the phone
+- **Watch**: the Start (`+Start`), the End and the Deactivate of a faulted pod (`+Handback`), the return from off (`+Resume`) and every word from the phone
   while no loan runs (row 3, `notePhoneHeard`) each call the function and carry out the result.
 - **Transfers** (section 6) decide inside their own code: the grant and its probe (`+Mirror`, `+Grant`), the
   hand-back (`+Handback`, `+Records`), the take-back (`+Reclaim`, `+Settle`). This is deliberate. A transfer is a

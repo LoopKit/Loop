@@ -134,6 +134,16 @@ final class LoanControlTests: XCTestCase {
                        "its records, which carry no start time, get the stop too")
     }
 
+    // Rows 26 and 27 · The looper deactivated the faulted pod on the watch, so Sport Mode ends. The offer is
+    // the query; with no answer the looper is told and the phone ends it when it hears, as at a tap.
+    func testRows26And27_ADeactivatedPodEndsSportMode() {
+        XCTAssertEqual(watch(.podDeactivated), .query(.onScreen, onSilence: .tell(.podDeactivatedPhoneAway)))
+        XCTAssertEqual(phone(.watchClaims(.init(loan: .current, podDeactivated: true)), role: .lending), .takeOnTap)
+        XCTAssertEqual(phone(.watchClaims(.init(loan: .newer, podDeactivated: true)), role: .standingAside), .takeOnTap)
+        XCTAssertEqual(phone(.watchClaims(.init(loan: .closed, podDeactivated: true))), .sendStop,
+                       "a closed loan's pod is already home")
+    }
+
     // Rows 22 and 23 · No device can act: no trigger reaches `decide`. Anything else is not a decision point.
     func testOtherPairingsDecideNothing() {
         XCTAssertEqual(phone(.startTapped), .nothing)

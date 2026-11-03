@@ -93,7 +93,10 @@ extension WatchLoopManager: AlertIssuer, PersistedAlertStore {
     /// The watch is the only device hearing the pump during a loan.
     func issueAlert(_ alert: LoopKit.Alert) {
         SportLog.event("alert", "alert \(alert.identifier.value) issued: \(alert.backgroundContent.title)")
-        WatchAlertPresenter.present(alert)
+        // The failed pod's own alerts offer to end it, the alarm with it.
+        let offersDeactivation = pumpManager.map { Self.isAlert(alert.identifier.managerIdentifier, ofPump: $0.pluginIdentifier) } == true
+            && (pumpManager as? ExclusiveDeviceControl)?.failedDeviceDeactivationTitle != nil
+        WatchAlertPresenter.present(alert, offeringDeactivation: offersDeactivation)
         guard pumpManager != nil else { return }
         recordAlert { await $0.recordIssued(alert: alert) }
     }

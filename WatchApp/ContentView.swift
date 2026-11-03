@@ -74,8 +74,12 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .podLoanPhaseDidChange).receive(on: RunLoop.main)) { _ in
             podLoanPhaseDidChange()
         }
-        // During a loan, finishing a carb or bolus flow returns to the glance, which shows the dose landing.
+        // During a loan, finishing a carb or bolus flow returns to the glance, which shows the dose landing;
+        // so does Deactivate Pod on a failed pod's alarm, for its confirmation.
         .onReceive(NotificationCenter.default.publisher(for: .carbAndBolusFlowDidComplete).receive(on: RunLoop.main)) { _ in
+            podLoanReturnToGlanceAfterFlow()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .podLoanDeactivateRequested).receive(on: RunLoop.main)) { _ in
             podLoanReturnToGlanceAfterFlow()
         }
         .task {

@@ -48,6 +48,8 @@ extension MockPumpManager {
     static var testPodBolusEndsAt: Date?
     /// The pod has faulted: its total is final and it answers no read.
     static var testPodFaulted = false
+    /// How many times the phone forgot a pod deactivated on the watch.
+    static var testForgotDeactivatedCount = 0
 }
 
 /// Test-only hand-off conformance so the full grant path runs against the test pump.
@@ -75,6 +77,8 @@ final class LendableMockPumpManager: MockPumpManager, ExclusiveDeviceControl, Pu
         guard Self.testPodFaulted else { return super.ensureCurrentPumpData(completion: completion) }
         completion?(Self.testOdometerAt)
     }
+    func deactivateFailedDevice() async throws {}
+    func forgetDeviceDeactivatedElsewhere() async { Self.testForgotDeactivatedCount += 1 }
 }
 
 @MainActor
@@ -155,6 +159,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         MockPumpManager.testForcedReadCount = 0
         MockPumpManager.testReadSettlesCommand = false
         MockPumpManager.testPodBolusEndsAt = nil
+        MockPumpManager.testForgotDeactivatedCount = 0
         PodLoanPhoneController.takeBackLinkLimit = 5
         backgroundTaskBegins = 0
         backgroundTaskEnds = 0
@@ -3364,10 +3369,88 @@ extension PodLoanPhoneControllerTests {
         waitUntil(timeout: 5, "asked") { self.statusQueries() == 1 }
     }
 
-    private func report(epoch: Int, holdsPod: Bool = true, podReachable: Bool? = nil, loanStartedAt: Date? = nil) throws -> [String: Any] {
+    private func report(epoch: Int, holdsPod: Bool = true, podReachable: Bool? = nil, loanStartedAt: Date? = nil,
+                        podDeactivated: Bool = false) throws -> [String: Any] {
         try LoanMessage.statusReport(StatusReport(epoch: epoch, lastDirectGlucoseAge: 60, lastEventSeq: 1,
                                                   podFault: nil, holdsPod: holdsPod, knowsGrant: true,
-                                                  podReachable: podReachable, loanStartedAt: loanStartedAt)).transportDictionary()
+                                                  podReachable: podReachable, loanStartedAt: loanStartedAt,
+                                                  podDeactivated: podDeactivated)).transportDictionary()
+    }
+
+    // MARK: - A faulted pod deactivated on the watch (rows 26 and 27)
+
+    /// Row 26: the watch deactivated the pod and handed back. The phone forgets the pod instead of
+    /// reconnecting, opens no settle window, and checks the insulin on the watch's last reading.
+    func testAPodDeactivatedOnTheWatchIsForgottenAtTheHandBack() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        connectionReady = false
+
+        let ackSent = expectSend()
+        let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil,
+                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10, deliveredLatest: 10),
+                                  events: [], tombstones: [], recovered: false, released: true, podDeactivated: true)
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
+        wait(for: [ackSent], timeout: 5)
+        waitForState(controller, .owner)
+        waitUntil(timeout: 5, "forgotten") { MockPumpManager.testForgotDeactivatedCount == 1 }
+
+        XCTAssertTrue(MockPumpManager.testConnectionReleased, "the phone does not reach for a pod that is gone")
+        XCTAssertNil(controller.reclaimProgress, "no settle window: there is no pod to reach")
+        XCTAssertNotNil(diagMatching("hand-back check on the watch's last reading"))
+        XCTAssertTrue(urgentNotices.contains("Pod Deactivated on the Watch"))
+        XCTAssertNil(controller.persisted.podDeactivatedOnWatch, "forgotten once")
+    }
+
+    /// Row 27: the phone was away when the watch deactivated the pod. Its report ends the loan as a
+    /// tap would, without waiting to reach the pod.
+    func testAPodDeactivatedOnTheWatchWhileThePhoneWasAwayIsTakenBackWithoutReachingForIt() throws {
+        PodLoanPhoneController.takeBackLinkLimit = 60
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        connectionReady = false
+
+        controller.handleIncoming(userInfo: try report(epoch: grant.epoch, podDeactivated: true))
+        waitForState(controller, .owner)
+        waitUntil(timeout: 5, "forgotten") { MockPumpManager.testForgotDeactivatedCount == 1 }
+
+        XCTAssertEqual(revokeCount(), 1, "the watch is told to stop")
+        XCTAssertFalse(notices.contains("Couldn't Reach the Pod"))
+        XCTAssertTrue(urgentNotices.contains("Pod Deactivated on the Watch"))
+    }
+
+    /// The watch's final offer, queued while the phone was away, can land after the phone took the loan back
+    /// on the watch's report. It must not mark the pod for forgetting again: the next pod paired here would
+    /// be forgotten at its own loan's End (rig, 2026-11-02).
+    func testAQueuedOfferAfterTheTakeBackDoesNotMarkTheNextPod() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        connectionReady = false
+        controller.handleIncoming(userInfo: try report(epoch: grant.epoch, podDeactivated: true))
+        waitForState(controller, .owner)
+        waitUntil(timeout: 5, "forgotten") { MockPumpManager.testForgotDeactivatedCount == 1 }
+
+        let late = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil, odometer: nil,
+                                 events: [], tombstones: [], recovered: false, released: true, podDeactivated: true)
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(late).transportDictionary())
+        drainMainQueue()
+
+        XCTAssertNil(controller.persisted.podDeactivatedOnWatch, "no mark is left for the next pod")
+    }
+
+    /// A pod paired on this phone since is not the watch's to end: only a released pod is forgotten.
+    func testADeactivationForAPodThisPhoneNoLongerLendsForgetsNothing() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        MockPumpManager.testConnectionReleased = false
+
+        controller.handleIncoming(userInfo: try report(epoch: grant.epoch, podDeactivated: true))
+        waitForState(controller, .owner)
+        drainMainQueue()
+
+        XCTAssertEqual(MockPumpManager.testForgotDeactivatedCount, 0)
+        XCTAssertNotNil(diagMatching("no longer holds released"))
+        XCTAssertFalse(urgentNotices.contains("Pod Deactivated on the Watch"))
     }
 
     /// A watch that answers it holds the loan but cannot reach the pod is answered like silence:

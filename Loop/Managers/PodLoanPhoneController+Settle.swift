@@ -23,6 +23,12 @@ extension PodLoanPhoneController {
 
     /// Called on every route back to `.owner`, before `.owner` is announced.
     func beginReclaimSettleWindow() {
+        // No pod to reach: it was deactivated on the watch and forgotten.
+        if reclaimForgotPod {
+            reclaimDisplayAnchor = nil
+            deps.endReclaimBackgroundTask()
+            return
+        }
         let started = deps.now()
         reclaimStartedAt = started
         reclaimVerifiedAt = nil
@@ -215,6 +221,25 @@ extension PodLoanPhoneController {
 
         // The watch's temp ends here, after the reading.
         cancelWatchTemp(epoch: pending.epoch)
+    }
+
+    /// The pod was deactivated on the watch, so the phone cannot read it: the watch's last reading,
+    /// which came with the hand-back, stands in. A take-back has none, and nothing is ruled.
+    func ruleOnWatchReading(_ pending: PendingHandbackAudit) {
+        defer {
+            pendingHandbackAudit = nil
+            loanStartedAt = nil
+        }
+        guard pending.flavor == .handback, let latest = pending.watchLatest else {
+            handbackDiag(pending.epoch, "no insulin check: the pod was deactivated on the watch and no reading of it came home")
+            return
+        }
+        let delivered = latest - pending.deliveredAtStart
+        let residual = ((delivered - pending.expected) * 1000).rounded() / 1000
+        handbackDiag(pending.epoch, String(format:
+            "hand-back check on the watch's last reading, the pod being deactivated: delivered %.3f U, expected %.3f U, residual %+.3f U over %.0f min",
+            delivered, pending.expected, residual, pending.loanMinutes))
+        applyReconciliationVerdict(residual: residual, epoch: pending.epoch)
     }
 
     /// On failure the watch's temp runs until the phone's next cycle.
