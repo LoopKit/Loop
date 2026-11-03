@@ -170,6 +170,17 @@ enum LoopHistoryMath {
         max(localHistoryStart, firstLocalRecord ?? now)
     }
 
+    /// The earliest record that lies in `chunk`, from records given as start and end. A store can return records
+    /// outside the range it was asked for, such as a pump's dose still in progress, so only those overlapping the
+    /// chunk count. A record crossing into the chunk keeps its real start; one with no duration, such as a bolus,
+    /// counts by its start.
+    static func firstRecord(in chunk: DateInterval, of records: [(start: Date, end: Date)]) -> Date? {
+        records
+            .filter { $0.start < chunk.end && ($0.end > chunk.start || ($0.end <= $0.start && $0.start >= chunk.start)) }
+            .map(\.start)
+            .min()
+    }
+
     /// `window` cut at `boundary`: the part before it is read from Apple Health, the part from it on from Loop's
     /// stores. Either is nil when the window has none of it; the two never overlap.
     static func split(_ window: DateInterval, at boundary: Date) -> (health: DateInterval?, local: DateInterval?) {
@@ -341,9 +352,10 @@ enum LoopHistoryMath {
 
     /// Splits `interval` into closed, limited and open stretches.
     ///
-    /// Each 5-minute slot is open when closed loop was switched off (from `modeChanges`), or when Loop's latest run in
-    /// the 15 minutes before the slot ends stopped for a manual temp basal. Otherwise it is closed when Loop completed a
-    /// run in those 15 minutes, and limited when it didn't. Before the first mode change the setting is unknown, so the
+    /// Each 5-minute slot is open when closed loop was switched off (from `modeChanges`), or while a manual temp basal
+    /// from `manualTempBasals` runs. A run that stopped for a manual temp basal with no dose record of it holds the
+    /// loop open for 15 minutes; where the record exists, its end or cancellation decides instead. Otherwise a slot is
+    /// closed when Loop completed a run in the 15 minutes before it ends, and limited when it didn't. Before the first mode change the setting is unknown, so the
     /// result starts at the later of `coverageStart` and the first mode change.
     static func loopModeSpans(interval: DateInterval, runs: [LoopRun], modeChanges: [ModeChange], coverageStart: Date?,
                               manualTempBasals: [DateInterval] = [],
@@ -357,11 +369,13 @@ enum LoopHistoryMath {
         var spans: [LoopModeSpan] = []
         var runIndex = 0
         var lastRun: LoopRun? = nil
+        var lastRunHasDoseRecord = false
         var lastSuccess: Date? = nil
         var changeIndex = 0
         var closedSetting: Bool? = nil
         let manualTemps = manualTempBasals.sorted { $0.start < $1.start }
         var manualIndex = 0
+        let recorded = { (date: Date) in manualTemps.contains { $0.start <= date && date <= $0.end } }
 
         var t = start
         while t < interval.end {
@@ -369,6 +383,7 @@ enum LoopHistoryMath {
             while runIndex < sortedRuns.count && sortedRuns[runIndex].date <= slotEnd {
                 let run = sortedRuns[runIndex]
                 lastRun = run
+                lastRunHasDoseRecord = run.manualTempBasal && recorded(run.date)
                 if run.succeeded {
                     lastSuccess = run.date
                 }
@@ -389,7 +404,7 @@ enum LoopHistoryMath {
             let mode: LoopModeSpan.Mode
             if closedSetting == false || inManualTemp {
                 mode = .open
-            } else if let lastRun, lastRun.manualTempBasal, slotEnd.timeIntervalSince(lastRun.date) <= recency {
+            } else if let lastRun, lastRun.manualTempBasal, !lastRunHasDoseRecord, slotEnd.timeIntervalSince(lastRun.date) <= recency {
                 mode = .open
             } else if let lastSuccess, slotEnd.timeIntervalSince(lastSuccess) <= recency {
                 mode = .closed
