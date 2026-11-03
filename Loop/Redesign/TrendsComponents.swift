@@ -55,29 +55,15 @@ struct RangeSelectorView: View {
 
     var body: some View {
         VStack(spacing: LoopDesign.Space.s3) {
-            HStack(spacing: 2) {
+            Picker(NSLocalizedString("Period", comment: "Trends: VoiceOver label of the picker that chooses how many days the screen covers"),
+                   selection: $period.animation(.snappy(duration: 0.2))) {
                 ForEach(TrendsPeriod.allCases) { option in
-                    Button {
-                        withAnimation(.snappy(duration: 0.2)) { period = option }
-                    } label: {
-                        Text(option.label)
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(P.ink)
-                            .frame(maxWidth: .infinity, minHeight: 30)
-                            .background {
-                                if option == period {
-                                    Capsule().fill(P.controlThumb).shadow(color: .black.opacity(0.12), radius: 3, y: 1)
-                                }
-                            }
-                            .contentShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(option.accessibilityName)
-                    .accessibilityAddTraits(option == period ? .isSelected : [])
+                    Text(option.label)
+                        .accessibilityLabel(option.accessibilityName)
+                        .tag(option)
                 }
             }
-            .padding(2)
-            .background(P.surfaceSunken, in: Capsule())
+            .pickerStyle(.segmented)
 
             HStack {
                 StepButton(systemName: "chevron.left", label: NSLocalizedString("Previous period", comment: "VoiceOver label for the Trends button that moves back one period")) { step(-1) }
@@ -242,11 +228,11 @@ struct TimeInRangeView: View {
 
     static func color(_ band: LoopHistoryMath.RangeBand) -> Color {
         switch band {
-        case .veryHigh: return P.rangeVeryHigh
-        case .high: return P.rangeHigh
-        case .inRange: return P.rangeIn
-        case .low: return P.rangeLow
-        case .veryLow: return P.rangeVeryLow
+        case .veryHigh: return GlucoseBand.veryHigh.agpColor
+        case .high: return GlucoseBand.high.agpColor
+        case .inRange: return GlucoseBand.target.agpColor
+        case .low: return GlucoseBand.low.agpColor
+        case .veryLow: return GlucoseBand.veryLow.agpColor
         }
     }
 
@@ -541,7 +527,7 @@ struct InsulinSplitView: View {
                     Spacer()
                     Text(LoopFormat.totalUnits(split.total))
                         .font(LoopDesign.Typeface.statValueSmall)
-                        .foregroundStyle(LoopDesign.Palette.insulinInk)
+                        .foregroundStyle(LoopDesign.Palette.ink)
                 }
                 if let usual {
                     Text(usual)

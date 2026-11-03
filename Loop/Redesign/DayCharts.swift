@@ -95,11 +95,7 @@ struct DayTimelineCard: View {
     var body: some View {
         LoopCard {
             CardHeader(title: title) {
-                HStack(spacing: 4) {
-                    Text(LoopFormat.totalUnits(history.totalUnits)).foregroundStyle(P.insulinInk)
-                    Text(verbatim: "·")
-                    Text(LoopFormat.grams(history.carbGrams)).foregroundStyle(P.carbsInk)
-                }
+                Text(verbatim: "\(LoopFormat.totalUnits(history.totalUnits)) · \(LoopFormat.grams(history.carbGrams))")
             }
             InsulinTimelineView(history: history, unit: unit, targetBands: targetBands, now: now, height: height)
             ChartLegend(items: Self.legend)
@@ -227,7 +223,7 @@ struct InsulinTimelineView: View {
                         if let grams = carbLabels[carb.id] {
                             Text(LoopFormat.grams(grams))
                                 .font(LoopDesign.Typeface.caption)
-                                .foregroundStyle(P.carbsInk)
+                                .foregroundStyle(P.ink)
                         }
                     }
             }
@@ -266,7 +262,7 @@ struct InsulinTimelineView: View {
                             if bolusLabels.contains(bolus.id) {
                                 Text(LoopFormat.number(bolus.units, decimals: 1))
                                     .font(LoopDesign.Typeface.caption)
-                                    .foregroundStyle(P.insulinInk)
+                                    .foregroundStyle(P.ink)
                             }
                         }
                 }
@@ -327,7 +323,7 @@ struct InsulinTimelineView: View {
     private func scrubRows(at date: Date) -> [ScrubCallout.Row] {
         var rows: [ScrubCallout.Row] = [.init(label: nil, value: LoopFormat.time(date), color: P.ink)]
         if let glucose = nearest(history.glucose.map { ($0.date, $0.mgdl) }, to: date, within: 10 * 60) {
-            rows.append(.init(label: NSLocalizedString("Glucose", comment: "Chart callout label for the glucose reading at the touched time"), value: "\(unit.format(glucose)) \(unit.unitName)", color: P.glucoseInk))
+            rows.append(.init(label: NSLocalizedString("Glucose", comment: "Chart callout label for the glucose reading at the touched time"), value: "\(unit.format(glucose)) \(unit.unitName)", color: P.ink))
         }
         if let segment = LoopHistoryMath.basalRate(at: date, in: history.basal) {
             let value = segment.kind == .suspended
@@ -340,7 +336,7 @@ struct InsulinTimelineView: View {
             rows.append(.init(label: bolus.automatic
                               ? NSLocalizedString("Automatic bolus", comment: "Chart callout label for a bolus Loop delivered automatically near the touched time")
                               : NSLocalizedString("Bolus", comment: "Chart callout label for a bolus near the touched time"),
-                              value: LoopFormat.doseUnits(bolus.units), color: P.insulinInk))
+                              value: LoopFormat.doseUnits(bolus.units), color: P.ink))
         }
         return rows
     }

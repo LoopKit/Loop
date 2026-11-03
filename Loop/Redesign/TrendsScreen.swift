@@ -195,8 +195,7 @@ final class TrendsModel: ObservableObject {
                               detail: oneDay
                                 ? String(format: NSLocalizedString("%lld entries", comment: "Trends Carbs tile detail for a one-day period: how many carb entries were made that day. (1: number)"), s.carbEntries)
                                 : String(format: NSLocalizedString("%1$@ entries", comment: "Trends Carbs per day tile detail: average number of carb entries per day, a fractional value such as 2.5, so not pluralised. (1: number with one decimal)"),
-                                         LoopFormat.number(Double(s.carbEntries) / s.days, decimals: 1)),
-                              valueColor: P.carbsInk))
+                                         LoopFormat.number(Double(s.carbEntries) / s.days, decimals: 1))))
         tiles.append(StatTile(label: oneDay
                                 ? NSLocalizedString("Boluses", comment: "Trends summary tile for a one-day period: how many manual boluses were given that day")
                                 : NSLocalizedString("Boluses per day", comment: "Trends summary tile: average number of manual boluses per day"),
@@ -299,7 +298,7 @@ struct TrendsView: View {
         } else if let error = model.loadError {
             LoopCard {
                 ChartPlaceholder(message: String(format: NSLocalizedString("Couldn't load Trends: %1$@", comment: "Trends error message when the history can't be read. (1: error description)"), error))
-                Button(NSLocalizedString("Retry", comment: "Button to try loading Trends again after an error")) { model.reload() }.foregroundStyle(P.accentInk)
+                Button(NSLocalizedString("Retry", comment: "Button to try loading Trends again after an error")) { model.reload() }
             }
         } else {
             ProgressView().frame(maxWidth: .infinity, minHeight: 300)
