@@ -292,6 +292,9 @@ final class PodLoanPhoneController {
     var persisted: PodLoanPhoneState
 
     var reclaimStartedAt: Date?
+    /// The last return forgot a pod deactivated on the watch: settle windows have nothing to reach until
+    /// the phone next takes a pod.
+    var reclaimForgotPod = false
     var reclaimSettleWork: DispatchWorkItem?
 
     /// Last verified pod round-trip; a new grant waits for it.

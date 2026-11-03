@@ -82,7 +82,8 @@ extension PodLoanWatchController {
             holdsPod: true,
             knowsGrant: true,
             podReachable: podReachedLately,
-            loanStartedAt: persisted.deliveredAtTakeoverAt)))
+            loanStartedAt: persisted.deliveredAtTakeoverAt,
+            podDeactivated: persisted.podDeactivatedEpoch == current)))
         SportLog.event("seize", "told the phone this watch holds the pod\(podReachedLately == false ? " but cannot reach it" : ""): \(reason)")
     }
 

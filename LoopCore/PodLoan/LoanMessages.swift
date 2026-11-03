@@ -321,12 +321,16 @@ public struct HandbackOffer: Codable, Equatable {
     /// the rest itself. Released offers only; nil from an older watch.
     public let uploadsConfirmed: [String: [String]]?
 
+    /// The looper deactivated the pod on the watch: the phone forgets it instead of taking it back.
+    public let podDeactivated: Bool
+
     public init(epoch: Int, handedBackAt: Date, finalStatus: LoanPodStatus?,
                 odometer: LoanOdometerSnapshot?, events: [LoanEvent], tombstones: [UUID],
                 recovered: Bool, released: Bool? = nil, watchClosedLoopEnabled: Bool? = nil,
                 seizeToken: UUID? = nil,
                 lastLoopCompleted: Date? = nil,
-                uploadsConfirmed: [String: [String]]? = nil) {
+                uploadsConfirmed: [String: [String]]? = nil,
+                podDeactivated: Bool = false) {
         self.epoch = epoch
         self.handedBackAt = handedBackAt
         self.finalStatus = finalStatus
@@ -339,6 +343,7 @@ public struct HandbackOffer: Codable, Equatable {
         self.seizeToken = seizeToken
         self.lastLoopCompleted = lastLoopCompleted
         self.uploadsConfirmed = uploadsConfirmed
+        self.podDeactivated = podDeactivated
     }
 
     /// The services whose `type` the watch confirmed it uploaded in full.
@@ -352,10 +357,15 @@ public struct HandbackAck: Codable, Equatable {
     public let committedCursor: Int
     public let stale: Bool
 
-    public init(epoch: Int, committedCursor: Int, stale: Bool = false) {
+    /// Answers a released offer: the phone has the hand-back. An answer to an interim offer or to
+    /// records, arriving late, never lets the watch close the loan.
+    public let released: Bool
+
+    public init(epoch: Int, committedCursor: Int, stale: Bool = false, released: Bool) {
         self.epoch = epoch
         self.committedCursor = committedCursor
         self.stale = stale
+        self.released = released
     }
 }
 
@@ -391,10 +401,12 @@ public struct StatusReport: Codable, Equatable {
     /// With `holdsPod`: when the watch's loan started, so a phone that took over on silence can tell a
     /// revived claim from a fresh Start. Absent from older watches.
     public let loanStartedAt: Date?
+    /// The looper deactivated the pod on the watch.
+    public let podDeactivated: Bool
 
     public init(epoch: Int, lastDirectGlucoseAge: TimeInterval?,
                 lastEventSeq: Int, podFault: String?, holdsPod: Bool, knowsGrant: Bool? = nil,
-                podReachable: Bool? = nil, loanStartedAt: Date? = nil) {
+                podReachable: Bool? = nil, loanStartedAt: Date? = nil, podDeactivated: Bool = false) {
         self.epoch = epoch
         self.lastDirectGlucoseAge = lastDirectGlucoseAge
         self.lastEventSeq = lastEventSeq
@@ -403,6 +415,7 @@ public struct StatusReport: Codable, Equatable {
         self.knowsGrant = knowsGrant
         self.podReachable = podReachable
         self.loanStartedAt = loanStartedAt
+        self.podDeactivated = podDeactivated
     }
 }
 

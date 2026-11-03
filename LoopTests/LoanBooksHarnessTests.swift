@@ -400,6 +400,35 @@ final class LoanBooksHarnessTests: XCTestCase {
     }
 
 
+    /// A faulted pod's suspend comes home open. The audit and the books stop the scheduled basal at the
+    /// fault; an interim drain keeps it back, and the final hand-back cuts it at the loan's end.
+    func testAnOpenSuspendStopsTheScheduleUntilTheLoansEnd() {
+        let now = Date()
+        let loanStart = now.addingTimeInterval(-.minutes(40))
+        let faultAt = loanStart.addingTimeInterval(.minutes(10))
+        let suspend = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                                record: LoanDoseRecord(kind: .suspend, startDate: faultAt, endDate: .distantFuture,
+                                                       unitsPerHour: 0, syncIdentifier: "loanv2-\(UUID().uuidString)"),
+                                loggedAt: faultAt)
+
+        let expected = LoanReconciler.expectedInsulin(events: [suspend], schedule: cancelTestSchedule, pulseUnits: 0.05,
+                                                      from: loanStart, to: now)
+        XCTAssertEqual(expected, 600.0 / 3600, accuracy: 0.001, "only the ten minutes of schedule before the fault")
+
+        let interim = LoanReconciler.reconcile(.init(events: [suspend], schedule: cancelTestSchedule, loanStart: loanStart,
+                                                     loanEnd: now, isFinalHandback: false))
+        XCTAssertEqual(interim.openEventIDs, [suspend.id], "still running: kept back")
+        XCTAssertTrue(interim.doses.isEmpty)
+
+        let final = LoanReconciler.reconcile(.init(events: [suspend], schedule: cancelTestSchedule, loanStart: loanStart,
+                                                   loanEnd: now, isFinalHandback: true))
+        XCTAssertEqual(final.doses.count, 1)
+        XCTAssertEqual(final.doses.first?.type, .tempBasal)
+        XCTAssertEqual(final.doses.first?.startDate, faultAt)
+        XCTAssertEqual(final.doses.first?.endDate, now, "cut at the loan's end")
+        XCTAssertEqual(final.doses.first?.unitsPerHour, 0)
+    }
+
     // MARK: - 1. The inherited running temp — both spans, both books
 
     // MARK: - 2. The bolus twin pair

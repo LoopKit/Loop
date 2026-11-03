@@ -220,4 +220,22 @@ final class LoanCancelRecordTests: XCTestCase {
         let cancel = PodLoanWatchController.recordsToJournal([shortened], journaled: journaled([running]))
         XCTAssertTrue(PodLoanWatchController.recordsToJournal([shortened], journaled: journaled([running] + cancel)).isEmpty)
     }
+
+    /// A faulted pod reports a suspend, an instant: it travels open, so the phone stops the scheduled
+    /// basal there; a resume ends it as a cancel does.
+    func testASuspendTravelsOpenAndAResumeEndsIt() {
+        let suspend = PodLoanWatchController.loanRecord(for: DoseEntry(suspendDate: start), raw: Data([0x0a]))
+        XCTAssertEqual(suspend?.kind, .suspend)
+        XCTAssertEqual(suspend?.startDate, start)
+        XCTAssertEqual(suspend?.endDate, .distantFuture)
+        XCTAssertEqual(suspend?.unitsPerHour, 0)
+        XCTAssertEqual(suspend?.syncIdentifier, "0a")
+
+        let resumeAt = start.addingTimeInterval(600)
+        let resume = PodLoanWatchController.loanRecord(for: DoseEntry(resumeDate: resumeAt), raw: Data([0x0b]))
+        XCTAssertEqual(resume?.kind, .tempBasal)
+        XCTAssertEqual(resume?.startDate, resumeAt)
+        XCTAssertEqual(resume?.endDate, resumeAt)
+        XCTAssertEqual(resume?.unitsPerHour, 0)
+    }
 }
