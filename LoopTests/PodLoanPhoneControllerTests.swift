@@ -3766,6 +3766,10 @@ extension PodLoanPhoneControllerTests {
     }
 
     func testBackWithThePodAfterAGapBooksWhatTheRecordsCannotExplain() throws {
+        try withShortAnswerWait { try backWithThePodAfterAGapBooksWhatTheRecordsCannotExplain() }
+    }
+
+    private func backWithThePodAfterAGapBooksWhatTheRecordsCannotExplain() throws {
         _ = seizeCredentialOutstanding()
         let controller = makeController()
         let back = Date()
@@ -3778,7 +3782,7 @@ extension PodLoanPhoneControllerTests {
         XCTAssertTrue(booked.first?.syncIdentifier?.hasPrefix("LOAN-AUDIT-GAP-e") ?? false)
         XCTAssertTrue(titles.contains("Insulin Estimated After Sport Mode"))
         XCTAssertTrue(bodies.contains { $0.contains("probably from Sport Mode started on the watch") })
-        XCTAssertFalse(controller.holdsAutomaticDosing, "looping continues")
+        waitUntil(timeout: 5, "no answer from the watch: looping continues") { !controller.holdsAutomaticDosing }
     }
 
     /// Past insulin's action time an estimate leaves the ledger when the next one is booked; its dose stays.
@@ -4013,3 +4017,40 @@ extension PodLoanPhoneControllerTests {
     }
 }
 
+
+// MARK: - Asking about unexplained insulin
+// Row 17 seen from the pod first: the phone back in range reads insulin it cannot explain and asks the
+// watch. Until the answer, the cycle that reading feeds must not dose: the watch may be looping the pod.
+extension PodLoanPhoneControllerTests {
+
+    func testThePhoneDosesNothingWhileItAsksAboutUnexplainedInsulin() throws {
+        _ = seizeCredentialOutstanding()
+        let controller = makeController()
+        let back = Date()
+        readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(30)))
+        MockPumpManager.testOdometer = 12.0
+        MockPumpManager.testOdometerAt = back
+        let completed = expectation(description: "report completed")
+        var heldWhenCompleted = false
+        controller.checkOwnPumpTotal {
+            heldWhenCompleted = controller.holdsAutomaticDosing
+            completed.fulfill()
+        }
+        wait(for: [completed], timeout: 5)
+        XCTAssertEqual(statusQueries(), 1, "the watch is asked")
+        XCTAssertTrue(heldWhenCompleted, "the cycle this reading feeds doses nothing until the watch answers")
+    }
+
+    func testSilenceAfterUnexplainedInsulinLetsThePhoneLoopAgain() throws {
+        try withShortAnswerWait {
+            _ = seizeCredentialOutstanding()
+            let controller = makeController()
+            let back = Date()
+            readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(30)))
+            readPod(controller, units: 12.0, at: back)
+            waitUntil(timeout: 5, "the watch is asked") { self.statusQueries() == 1 }
+            waitUntil(timeout: 5, "silence: looping resumes") { !controller.holdsAutomaticDosing }
+            XCTAssertNotNil(controller.persisted.tookOverOnSilenceAt, "row 18: the phone keeps the pod")
+        }
+    }
+}
