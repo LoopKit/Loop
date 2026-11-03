@@ -1647,10 +1647,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D96C7D3C9C4B414AAEAB3339 /* RileyLinkBLEKit.framework in Frameworks */,
-				D6A12EF6F5AD4B4CAABDD49B /* RileyLinkKit.framework in Frameworks */,
 				921B7FAE002E40EFAB3F50C6 /* G7SensorKit.framework in Frameworks */,
-				C58C1A2FC9604165AF3A144E /* OmnipodKit.framework in Frameworks */,
 				8B5CF0144D79477AACBE4A82 /* LoopKit.framework in Frameworks */,
 				C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */,
 				4344628220A7A37F00C4BE6F /* CoreBluetooth.framework in Frameworks */,
