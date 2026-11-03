@@ -224,8 +224,10 @@ extension PodLoanPhoneController {
         armForceReclaimAudit()
 
         reclaimPodConnection()
+        // Becoming owner opens the settle window; a phone already owner, standing aside, opens it here.
+        let wasOwner = state == .owner
         state = .owner
-        beginReclaimSettleWindow()
+        if wasOwner { beginReclaimSettleWindow() }
         // Clear staging only after the audit has read it.
         staged = [:]
         stagedTombstones = []
