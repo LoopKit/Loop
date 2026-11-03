@@ -343,6 +343,7 @@ struct TrendsAGPChart: View {
     let unit: GlucoseUnitStyle
     let targetRange: ClosedRange<Double>?
     var height: CGFloat = 180
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     private func v(_ mgdl: Double) -> Double {
         min(max(unit.value(mgdl), unit.agpDomain.lowerBound), unit.agpDomain.upperBound)
@@ -414,7 +415,7 @@ struct TrendsAGPChart: View {
         .chartXScale(domain: 0...1440)
         .chartYScale(domain: unit.agpDomain)
         .chartXAxis {
-            AxisMarks(values: Self.hourTicks) { value in
+            AxisMarks(values: typeSize.isAccessibilitySize ? [0, 720, 1440] : Self.hourTicks) { value in
                 AxisGridLine().foregroundStyle(P.grid)
                 AxisValueLabel {
                     if let minute = value.as(Int.self) { Text(Self.label(minute: minute)) }
@@ -424,7 +425,8 @@ struct TrendsAGPChart: View {
             }
         }
         .chartYAxis {
-            AxisMarks(position: .leading, values: unit.agpTicks) { _ in
+            AxisMarks(position: .leading, values: typeSize.isAccessibilitySize
+                      ? [unit.agpTicks[0], unit.agpTicks[2], unit.agpTicks[4]] : unit.agpTicks) { _ in
                 AxisGridLine().foregroundStyle(P.grid)
                 AxisValueLabel().font(LoopDesign.Typeface.caption).foregroundStyle(P.inkMuted)
             }
@@ -660,6 +662,7 @@ struct InsulinDailyTotalsView: View {
     let average: Double
     var height: CGFloat = 170
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     private var yMax: Double {
         let top = max(totals.map(\.total).max() ?? 0, average)
@@ -726,7 +729,8 @@ struct InsulinDailyTotalsView: View {
         .chartYScale(domain: 0...yMax)
         .chartXAxis {
             AxisMarks(values: axisDates) { value in
-                AxisValueLabel(centered: true) {
+                AxisValueLabel(centered: !typeSize.isAccessibilitySize,
+                               anchor: typeSize.isAccessibilitySize ? (value.index == 0 ? .topLeading : .topTrailing) : nil) {
                     if let date = value.as(Date.self) {
                         Text(axisLabel(date))
                             .multilineTextAlignment(.center)
@@ -737,9 +741,16 @@ struct InsulinDailyTotalsView: View {
             }
         }
         .chartYAxis {
-            AxisMarks(position: .leading) { _ in
-                AxisGridLine().foregroundStyle(P.grid)
-                AxisValueLabel().font(LoopDesign.Typeface.caption).foregroundStyle(P.inkMuted)
+            if typeSize.isAccessibilitySize {
+                AxisMarks(position: .leading, values: [0, yMax / 2, yMax]) { _ in
+                    AxisGridLine().foregroundStyle(P.grid)
+                    AxisValueLabel().font(LoopDesign.Typeface.caption).foregroundStyle(P.inkMuted)
+                }
+            } else {
+                AxisMarks(position: .leading) { _ in
+                    AxisGridLine().foregroundStyle(P.grid)
+                    AxisValueLabel().font(LoopDesign.Typeface.caption).foregroundStyle(P.inkMuted)
+                }
             }
         }
         .accessibilityElement(children: .ignore)
@@ -750,6 +761,10 @@ struct InsulinDailyTotalsView: View {
     }
 
     private var axisDates: [Date] {
+        // Full dates at the largest text sizes need the width between the two ends of the chart.
+        if typeSize.isAccessibilitySize, let first = totals.first?.day, let last = totals.last?.day {
+            return first == last ? [first] : [first, last]
+        }
         if weekly {
             let stride = max(1, Int(ceil(Double(totals.count) / 6)))
             return totals.enumerated().compactMap { index, total in index % stride == 0 ? total.day : nil }

@@ -118,6 +118,7 @@ struct InsulinTimelineView: View {
 
     @State private var selection: Date?
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     private static let insulinTop = 30.0
     private static let basalTop = 12.0
@@ -284,7 +285,9 @@ struct InsulinTimelineView: View {
         .chartXScale(domain: window.start...window.end)
         .chartYScale(domain: 0...104)
         .chartXAxis {
-            AxisMarks(values: DayAxis.quarterDayMarks(in: window)) { value in
+            AxisMarks(values: DayAxis.quarterDayMarks(in: window).filter {
+                !typeSize.isAccessibilitySize || Calendar.current.component(.hour, from: $0).isMultiple(of: 12)
+            }) { value in
                 AxisValueLabel {
                     if let date = value.as(Date.self) {
                         Text(DayAxis.hourLabel(date))
