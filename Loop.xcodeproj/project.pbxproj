@@ -341,7 +341,7 @@
 		4FDDD23720DC51DF00D04B16 /* LoopDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */; };
 		D7A3000100000000000A0002 /* WatchCGMHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A3000100000000000A0001 /* WatchCGMHost.swift */; };
 		D7A3000100000000000A0004 /* WatchDeviceManagers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A3000100000000000A0003 /* WatchDeviceManagers.swift */; };
-		921B7FAE002E40EFAB3F50C6 /* G7SensorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */; };
+		E4419E527A90825DF65EE417 /* WatchPluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9851EB2E0332D299034E1BE9 /* WatchPluginManager.swift */; };
 		8B5CF0144D79477AACBE4A82 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4344628320A7A3BE00C4BE6F /* LoopKit.framework */; };
 		4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
 		5E12EA02302D82A800A03F53 /* SeizeActivationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E12EA01302D82A800A03F53 /* SeizeActivationTests.swift */; };
@@ -469,6 +469,7 @@
 		9A7CE02F302D82A800A03F53 /* WatchdogArmingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7CE01B302D82A800A03F53 /* WatchdogArmingTests.swift */; };
 		18606676A16D24BF383CCCF8 /* WatchAlertPresenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */; };
 		DB66EB0397D54C94B49ADEF8 /* FirstContactNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */; };
+		27DC187682697C9A280C605E /* WatchPluginManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6D303483EDD367866FB21D7 /* WatchPluginManagerTests.swift */; };
 		12C61123C2943C92D0D4E44F /* PumpTeardownReleaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA796C9BB12BE239713AF507 /* PumpTeardownReleaseTests.swift */; };
 		73E0AA9C0C5503C0A38FDCA6 /* WristAlertAcknowledgementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */; };
 		8077722BF812D34BDD35AEE6 /* WristOverrideRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */; };
@@ -754,7 +755,6 @@
 		C1FAD5192E7E0C3400F7FAD9 /* ChartPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FAD5182E7E0C3100F7FAD9 /* ChartPageView.swift */; };
 		C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428B217806A300FAB378 /* StateColorPalette.swift */; };
 		C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
-		C58C1A2FC9604165AF3A144E /* OmnipodKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A60E55AC77554C50A4196482 /* OmnipodKit.framework */; };
 		C5A82FBEC2AE43769A416B01 /* PodLoanWatchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036B897A66F14CAA9CD5CAD0 /* PodLoanWatchController.swift */; };
 		8EADBFF2925E675CBA2E77C4 /* CarbAndBolusFlow+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7EDF8F4E611C98701399C6 /* CarbAndBolusFlow+PodLoan.swift */; };
 		5784CCC929DD5EED549010EE /* ContentView+PodLoan.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB6D8790872D927B336A1E3 /* ContentView+PodLoan.swift */; };
@@ -798,9 +798,7 @@
 		5E12EA750000000000000050 /* PodLoanPhoneController+Hold.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E12EA760000000000000050 /* PodLoanPhoneController+Hold.swift */; };
 		B6B80446C9117B34FEA7329E /* PodLoanPhoneController+Staging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF82B359AC5A6738CEBD729 /* PodLoanPhoneController+Staging.swift */; };
 		B18A390A68A8C03E20643F4C /* PodLoanPhoneController+State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0817A2A6F276A886CA6A15 /* PodLoanPhoneController+State.swift */; };
-		D6A12EF6F5AD4B4CAABDD49B /* RileyLinkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACC381BA270149C9B0DDCB01 /* RileyLinkKit.framework */; };
 		D6E28676C2C7751C77C7F2FB /* Loop/Resources/Sounds/spring.caf in Resources */ = {isa = PBXBuildFile; fileRef = 9471E156FC10D6D0FF219C77 /* Loop/Resources/Sounds/spring.caf */; };
-		D96C7D3C9C4B414AAEAB3339 /* RileyLinkBLEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C03823C4CE664226A1EDAF41 /* RileyLinkBLEKit.framework */; };
 		DD3DBD292A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3DBD282A33AFE9000F8B5B /* IntegralRetrospectiveCorrectionSelectionView.swift */; };
 		DDBD0001000000000000BD01 /* BuildDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = C110888C2A3913C600BA4898 /* BuildDetails.swift */; };
 		824F9EABE70A97638CA3B5DC /* BuildDetails+SportMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED4A237EFD018441E29D616 /* BuildDetails+SportMode.swift */; };
@@ -1276,6 +1274,7 @@
 		4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopDataManager.swift; sourceTree = "<group>"; };
 		D7A3000100000000000A0001 /* WatchCGMHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchCGMHost.swift; sourceTree = "<group>"; };
 		D7A3000100000000000A0003 /* WatchDeviceManagers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchDeviceManagers.swift; sourceTree = "<group>"; };
+		9851EB2E0332D299034E1BE9 /* WatchPluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchPluginManager.swift; sourceTree = "<group>"; };
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
 		5181B60CBF3CB2DA537F0475 /* Loop/Resources/Sounds/simple.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/simple.caf; sourceTree = SOURCE_ROOT; };
 		53F9B5F8846B4124B8986783 /* LoanEventJournal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanEventJournal.swift; path = "WatchApp Extension/StockLoop/LoanEventJournal.swift"; sourceTree = SOURCE_ROOT; };
@@ -1417,6 +1416,7 @@
 		9A7CE01B302D82A800A03F53 /* WatchdogArmingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchdogArmingTests.swift; sourceTree = "<group>"; };
 		29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAlertPresenterTests.swift; sourceTree = "<group>"; };
 		7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirstContactNoteTests.swift"; sourceTree = "<group>"; };
+		A6D303483EDD367866FB21D7 /* WatchPluginManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WatchPluginManagerTests.swift"; sourceTree = "<group>"; };
 		BA796C9BB12BE239713AF507 /* PumpTeardownReleaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PumpTeardownReleaseTests.swift"; sourceTree = "<group>"; };
 		98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WristAlertAcknowledgementTests.swift"; sourceTree = "<group>"; };
 		295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WristOverrideRecordTests.swift"; sourceTree = "<group>"; };
@@ -1870,10 +1870,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D96C7D3C9C4B414AAEAB3339 /* RileyLinkBLEKit.framework in Frameworks */,
-				D6A12EF6F5AD4B4CAABDD49B /* RileyLinkKit.framework in Frameworks */,
-				921B7FAE002E40EFAB3F50C6 /* G7SensorKit.framework in Frameworks */,
-				C58C1A2FC9604165AF3A144E /* OmnipodKit.framework in Frameworks */,
 				8B5CF0144D79477AACBE4A82 /* LoopKit.framework in Frameworks */,
 				C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */,
 				4344628220A7A37F00C4BE6F /* CoreBluetooth.framework in Frameworks */,
@@ -2657,6 +2653,7 @@
 				4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */,
 				D7A3000100000000000A0001 /* WatchCGMHost.swift */,
 				D7A3000100000000000A0003 /* WatchDeviceManagers.swift */,
+				9851EB2E0332D299034E1BE9 /* WatchPluginManager.swift */,
 				898ECA62218ABD21001E9D35 /* ComplicationChartManager.swift */,
 			);
 			path = Managers;
@@ -3182,6 +3179,7 @@
 				9A7CE01B302D82A800A03F53 /* WatchdogArmingTests.swift */,
 				29791F50B72A7F84FE807E1C /* WatchAlertPresenterTests.swift */,
 				7955741DD3188107326A4B55 /* FirstContactNoteTests.swift */,
+				A6D303483EDD367866FB21D7 /* WatchPluginManagerTests.swift */,
 				BA796C9BB12BE239713AF507 /* PumpTeardownReleaseTests.swift */,
 				98962EB1638EABD9EF9059B9 /* WristAlertAcknowledgementTests.swift */,
 				295EF2C11897B43381E650F9 /* WristOverrideRecordTests.swift */,
@@ -4472,6 +4470,7 @@
 				4FDDD23720DC51DF00D04B16 /* LoopDataManager.swift in Sources */,
 				D7A3000100000000000A0002 /* WatchCGMHost.swift in Sources */,
 				D7A3000100000000000A0004 /* WatchDeviceManagers.swift in Sources */,
+				E4419E527A90825DF65EE417 /* WatchPluginManager.swift in Sources */,
 				89E267FD2292456700A3F2AF /* FeatureFlags.swift in Sources */,
 				898ECA60218ABD17001E9D35 /* GlucoseChartScaler.swift in Sources */,
 				894F6DD9243C060600CCE676 /* ScalablePositionedText.swift in Sources */,
@@ -4787,6 +4786,7 @@
 				9A7CE02F302D82A800A03F53 /* WatchdogArmingTests.swift in Sources */,
 				18606676A16D24BF383CCCF8 /* WatchAlertPresenterTests.swift in Sources */,
 				DB66EB0397D54C94B49ADEF8 /* FirstContactNoteTests.swift in Sources */,
+				27DC187682697C9A280C605E /* WatchPluginManagerTests.swift in Sources */,
 				12C61123C2943C92D0D4E44F /* PumpTeardownReleaseTests.swift in Sources */,
 				73E0AA9C0C5503C0A38FDCA6 /* WristAlertAcknowledgementTests.swift in Sources */,
 				8077722BF812D34BDD35AEE6 /* WristOverrideRecordTests.swift in Sources */,
