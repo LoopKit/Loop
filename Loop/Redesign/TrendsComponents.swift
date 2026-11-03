@@ -274,33 +274,43 @@ struct TimeInRangeView: View {
     private func row(_ band: LoopHistoryMath.RangeBand) -> some View {
         let fraction = fractions[band] ?? 0
         let hours = fraction * 24
-        let thresholds = Text(band.localizedThresholds(unit))
-            .font(LoopDesign.Typeface.footnote)
-            .foregroundStyle(P.inkMuted)
-        return VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s2) {
-                Text(percentText(Double(percentages[band] ?? 0)))
-                    .font(LoopDesign.Typeface.statValueSmall)
-                    .foregroundStyle(P.ink)
-                    .frame(minWidth: typeSize.isAccessibilitySize ? nil : 52, alignment: .trailing)
-                Text(band.localizedName)
-                    .font(LoopDesign.Typeface.subhead)
-                    .foregroundStyle(P.ink)
-                if !typeSize.isAccessibilitySize {
-                    thresholds
-                }
-                Spacer(minLength: LoopDesign.Space.s1)
-                VStack(alignment: .trailing, spacing: 0) {
-                    Text(String(format: NSLocalizedString("%1$@ h", comment: "Time in range row: average hours a day spent in the band, abbreviated. (1: hours with one decimal)"),
-                                LoopFormat.number(hours, decimals: 1)))
-                        .font(LoopDesign.Typeface.footnote.monospacedDigit())
-                    Text(band.localizedTarget)
-                        .font(LoopDesign.Typeface.caption)
-                }
-                .foregroundStyle(P.inkMuted)
-            }
+        let hoursText = String(format: NSLocalizedString("%1$@ h", comment: "Time in range row: average hours a day spent in the band, abbreviated. (1: hours with one decimal)"),
+                               LoopFormat.number(hours, decimals: 1))
+        let percent = Text(percentText(Double(percentages[band] ?? 0)))
+            .font(LoopDesign.Typeface.statValueSmall)
+            .foregroundStyle(P.ink)
+        let name = Text(band.localizedName)
+            .font(LoopDesign.Typeface.subhead)
+            .foregroundStyle(P.ink)
+        return Group {
             if typeSize.isAccessibilitySize {
-                thresholds
+                // One figure per line, so nothing is squeezed into a column.
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s2) {
+                        percent
+                        name
+                    }
+                    Text(verbatim: "\(band.localizedThresholds(unit)) · \(hoursText) · \(band.localizedTarget)")
+                        .font(LoopDesign.Typeface.footnote)
+                        .foregroundStyle(P.inkMuted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } else {
+                HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s2) {
+                    percent.frame(minWidth: 52, alignment: .trailing)
+                    name
+                    Text(band.localizedThresholds(unit))
+                        .font(LoopDesign.Typeface.footnote)
+                        .foregroundStyle(P.inkMuted)
+                    Spacer(minLength: LoopDesign.Space.s1)
+                    VStack(alignment: .trailing, spacing: 0) {
+                        Text(hoursText)
+                            .font(LoopDesign.Typeface.footnote.monospacedDigit())
+                        Text(band.localizedTarget)
+                            .font(LoopDesign.Typeface.caption)
+                    }
+                    .foregroundStyle(P.inkMuted)
+                }
             }
         }
         .accessibilityElement(children: .ignore)
@@ -496,6 +506,7 @@ struct InsulinSplitView: View {
     var showsBar = true
     /// The total is the dashed average line of the chart above, so it carries that line's swatch.
     var averageLine = false
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: LoopDesign.Space.s3) {
@@ -563,19 +574,26 @@ struct InsulinSplitView: View {
     }
 
     private func row(_ swatch: LegendItem.Swatch, _ label: String, _ units: Double, _ percent: Int) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s2) {
-            LegendSwatch(swatch: swatch).alignmentGuide(.firstTextBaseline) { $0[.bottom] - 1 }
-            Text(label)
-                .font(LoopDesign.Typeface.subhead)
-                .foregroundStyle(LoopDesign.Palette.ink)
-            Spacer()
+        let amount = HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s2) {
             Text(LoopFormat.totalUnits(units))
                 .font(LoopDesign.Typeface.body.weight(.semibold).monospacedDigit())
                 .foregroundStyle(LoopDesign.Palette.ink)
             Text(verbatim: "\(percent)%")
                 .font(LoopDesign.Typeface.footnote.monospacedDigit())
                 .foregroundStyle(LoopDesign.Palette.inkMuted)
-                .frame(minWidth: 38, alignment: .trailing)
+                .frame(minWidth: typeSize.isAccessibilitySize ? nil : 38, alignment: .trailing)
+        }
+        return AdaptiveRow(spacing: typeSize.isAccessibilitySize ? 0 : LoopDesign.Space.s2) {
+            HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s2) {
+                LegendSwatch(swatch: swatch).alignmentGuide(.firstTextBaseline) { $0[.bottom] - 1 }
+                Text(label)
+                    .font(LoopDesign.Typeface.subhead)
+                    .foregroundStyle(LoopDesign.Palette.ink)
+            }
+            if !typeSize.isAccessibilitySize {
+                Spacer()
+            }
+            amount
         }
     }
 
@@ -724,6 +742,7 @@ struct InsulinDailyTotalsView: View {
 
 struct LoopModeBarView: View {
     let spans: [LoopModeSpan]
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     private var total: TimeInterval { spans.reduce(0) { $0 + $1.duration } }
 
@@ -783,18 +802,36 @@ struct LoopModeBarView: View {
 
     private func row(_ mode: LoopModeSpan.Mode) -> some View {
         let duration = LoopHistoryMath.duration(of: mode, in: spans)
-        return HStack(spacing: LoopDesign.Space.s2) {
+        let name = HStack(spacing: LoopDesign.Space.s2) {
             Circle().fill(Self.color(mode)).frame(width: 8, height: 8)
             Text(Self.name(mode))
                 .font(LoopDesign.Typeface.subhead)
                 .foregroundStyle(P.ink)
-            Text("· \(LoopFormat.duration(duration))")
-                .font(LoopDesign.Typeface.footnote)
-                .foregroundStyle(P.inkMuted)
-            Spacer()
-            Text(percentText(fraction(mode) * 100, decimals: 1))
-                .font(LoopDesign.Typeface.statValueSmall)
-                .foregroundStyle(P.ink)
+        }
+        let time = Text(verbatim: "· \(LoopFormat.duration(duration))")
+            .font(LoopDesign.Typeface.footnote)
+            .foregroundStyle(P.inkMuted)
+        let percent = Text(percentText(fraction(mode) * 100, decimals: 1))
+            .font(LoopDesign.Typeface.statValueSmall)
+            .foregroundStyle(P.ink)
+        return Group {
+            if typeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 0) {
+                    name
+                    HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s2) {
+                        percent
+                        time
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                HStack(spacing: LoopDesign.Space.s2) {
+                    name
+                    time
+                    Spacer()
+                    percent
+                }
+            }
         }
         .accessibilityElement(children: .combine)
     }
