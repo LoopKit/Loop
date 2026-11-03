@@ -97,6 +97,7 @@ final class TrendsModel: ObservableObject {
         let fetchWindow = oneDay ? DateInterval(start: interval.start, end: Calendar.current.date(byAdding: .day, value: 1, to: interval.start)!) : interval
         async let historyFetch = provider.dayHistory(fetchWindow)
         async let runsFetch = provider.loopRuns()
+        async let modeFetch = provider.loopModeChanges(in: interval)
         var history = try await historyFetch
         let (runs, coverageStart) = try await runsFetch
         if oneDay {
@@ -155,7 +156,7 @@ final class TrendsModel: ObservableObject {
             summary.typicalByNow = await provider.typicalInsulinByNow()
         }
 
-        summary.loopSpans = LoopHistoryMath.loopModeSpans(interval: interval, runs: runs, modeChanges: LoopModeHistory.shared.changes,
+        summary.loopSpans = LoopHistoryMath.loopModeSpans(interval: interval, runs: runs, modeChanges: try await modeFetch,
                                                           coverageStart: coverageStart)
         return summary
     }
@@ -395,13 +396,13 @@ struct TrendsView: View {
                       LoopFormat.totalUnits(today.total), LoopFormat.totalUnits(usual.typical.median), LoopFormat.time(usual.at))
     }
 
+    /// When Loop's records of its runs and settings start inside the period, say so, and how long it keeps them.
     private func coverageNote(_ s: TrendsModel.Summary) -> String? {
-        guard let start = s.loopSpans.first?.start else {
-            return NSLocalizedString("Loop status is recorded from when this version of Loop first ran.", comment: "Trends Loop status footnote when there is no Loop status history yet")
-        }
-        guard start > s.interval.start else { return nil }
-        return String(format: NSLocalizedString("Covers %1$@: Loop keeps 7 days of runs, and closed or open loop is recorded from when this version of Loop first ran.", comment: "Trends Loop status footnote when the status covers only part of the period. (1: date range covered)"),
-                      LoopFormat.range(start, s.interval.end))
+        guard let start = s.loopSpans.first?.start, start > s.interval.start else { return nil }
+        let kept = String.localizedStringWithFormat(NSLocalizedString("%lld days", comment: "A number of days, e.g. a Trends period or how many days are averaged. (1: number of days)"),
+                                                    model.provider.localHistoryDays)
+        return String(format: NSLocalizedString("Covers %1$@, from the start of Loop's records, which it keeps for %2$@.", comment: "Trends Loop status footnote when Loop's records of its runs and settings start partway through the period. (1: date range covered; 2: how long Loop keeps them, e.g. 90 days)"),
+                      LoopFormat.range(start, s.interval.end), kept)
     }
 }
 

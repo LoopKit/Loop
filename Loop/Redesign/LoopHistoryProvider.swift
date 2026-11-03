@@ -53,6 +53,11 @@ final class LoopHistoryProvider {
         Date().addingTimeInterval(-Bundle.main.localCacheDuration)
     }
 
+    /// How many days Loop keeps in its own stores (`LOOP_LOCAL_CACHE_DURATION_DAYS`).
+    var localHistoryDays: Int {
+        Int((Bundle.main.localCacheDuration / 86400).rounded())
+    }
+
     @MainActor
     var glucoseTargetRange: ClosedRange<Double>? {
         guard let range = temporaryPresetsManager.effectiveCorrectionRange() else { return nil }
@@ -130,16 +135,17 @@ final class LoopHistoryProvider {
             // Decode only the fields a run needs, and only Loop's local window.
             runs = try await store.getDosingDecisions(start: start, end: Date(), as: LoopRunRecord.self)
                 .filter { $0.reason == "loop" }
-                .map { record in
-                    LoopHistoryMath.LoopRun(date: record.date, succeeded: (record.errors ?? []).isEmpty,
-                                           error: record.errors?.first.map { Self.describe(issue: $0.id) })
-                }
+                .map { Self.run(date: $0.date, issues: ($0.errors ?? []).map(\.id)) }
         } else {
             runs = try await anchoredLoopRuns()
         }
         try Task.checkCancellation()
         runs = runs.filter { $0.date >= start }.sorted { $0.date < $1.date }
         return (runs, runs.first?.date)
+    }
+
+    private static func run(date: Date, issues: [String]) -> LoopHistoryMath.LoopRun {
+        LoopHistoryMath.LoopRun(date: date, succeeded: issues.isEmpty, manualTempBasal: issues.first == "manualTempBasalRunning")
     }
 
     private struct LoopRunRecord: Decodable {
@@ -164,43 +170,26 @@ final class LoopHistoryProvider {
             }
             try Task.checkCancellation()
             anchor = page.0
-            runs += page.1.filter { $0.reason == "loop" }.map { decision in
-                LoopHistoryMath.LoopRun(date: decision.date, succeeded: decision.errors.isEmpty,
-                                       error: decision.errors.first.map { Self.describe(issue: $0.id) })
-            }
+            runs += page.1.filter { $0.reason == "loop" }.map { Self.run(date: $0.date, issues: $0.errors.map(\.id)) }
             if page.1.count < 1000 { break }
         }
         return runs
     }
 
-    /// "glucoseTooOld" → "Glucose too old". Loop's own issue ids are localised; any other id falls back to the
-    /// id split into English words.
-    static func describe(issue id: String) -> String {
-        switch id {
-        case "configurationError": return NSLocalizedString("Configuration error", comment: "Reason Loop could not run: its settings are incomplete")
-        case "connectionError": return NSLocalizedString("Connection error", comment: "Reason Loop could not run: no connected devices, or a device connection failed")
-        case "missingDataError": return NSLocalizedString("Missing data error", comment: "Reason Loop could not run: data it needs was missing")
-        case "glucoseTooOld": return NSLocalizedString("Glucose too old", comment: "Reason Loop could not run: the latest glucose reading was too old")
-        case "invalidFutureGlucose": return NSLocalizedString("Invalid future glucose", comment: "Reason Loop could not run: a glucose reading had a timestamp in the future")
-        case "pumpDataTooOld": return NSLocalizedString("Pump data too old", comment: "Reason Loop could not run: the latest pump data was too old")
-        case "recommendationExpired": return NSLocalizedString("Recommendation expired", comment: "Reason Loop could not run: its dosing recommendation expired before it was used")
-        case "pumpSuspended": return NSLocalizedString("Pump suspended", comment: "Reason Loop could not run: insulin delivery on the pump was suspended")
-        case "pumpManagerError": return NSLocalizedString("Pump manager error", comment: "Reason Loop could not run: the pump reported an error")
-        case "unknownError": return NSLocalizedString("Unknown error", comment: "Reason Loop could not run: an unexpected error")
-        default: break
+    /// When closed loop was switched on or off, from the settings Loop stores on every change: the setting in force at
+    /// `interval.start`, then each change after it. Empty when Loop has no settings store.
+    func loopModeChanges(in interval: DateInterval) async throws -> [LoopHistoryMath.ModeChange] {
+        guard let store = settingsManager.settingsStore else { return [] }
+        var changes: [LoopHistoryMath.ModeChange] = []
+        if let previous = try await store.getStoredSettings(end: interval.start, limit: 1).first {
+            changes.append(.init(date: interval.start, closedLoop: previous.dosingEnabled))
         }
-        var words: [String] = []
-        var current = ""
-        for character in id {
-            if character.isUppercase, !current.isEmpty {
-                words.append(current)
-                current = ""
-            }
-            current.append(character)
+        // Newest first from the store; every settings save is a record, so keep only the ones that switch the mode.
+        for settings in try await store.getStoredSettings(start: interval.start, end: interval.end).reversed()
+            where changes.last?.closedLoop != settings.dosingEnabled {
+            changes.append(.init(date: settings.date, closedLoop: settings.dosingEnabled))
         }
-        words.append(current)
-        let sentence = words.joined(separator: " ").lowercased()
-        return sentence.prefix(1).uppercased() + sentence.dropFirst()
+        return changes
     }
 
     // MARK: - Loop's stores
@@ -357,44 +346,6 @@ final class LoopHistoryProvider {
                           absorptionHours: nil, foodType: sample.metadata?[HKMetadataKeyFoodType] as? String,
                           createdByLoop: sample.sourceRevision.source.bundleIdentifier == own)
             }
-    }
-}
-
-// MARK: - Loop mode history
-
-/// Records when closed loop is switched on and off, because Loop's stored runs don't say which mode they ran in.
-/// The Trends screen can only call time "open loop" from the first record on.
-final class LoopModeHistory {
-    static let shared = LoopModeHistory()
-
-    private let defaults: UserDefaults
-    private let key = "com.loopkit.Loop.redesign.loopModeChanges"
-    private let maximumAge: TimeInterval = .days(100)
-
-    init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
-    }
-
-    var changes: [LoopHistoryMath.ModeChange] {
-        guard let data = defaults.data(forKey: key),
-              let changes = try? JSONDecoder().decode([LoopHistoryMath.ModeChange].self, from: data) else {
-            return []
-        }
-        return changes
-    }
-
-    func record(closedLoop: Bool, at date: Date = Date()) {
-        var changes = self.changes
-        guard changes.last?.closedLoop != closedLoop else { return }
-        changes.append(.init(date: date, closedLoop: closedLoop))
-        // Keep the last change before the retention window: it establishes the mode at its start.
-        let cutoff = date.addingTimeInterval(-maximumAge)
-        if let anchor = changes.lastIndex(where: { $0.date < cutoff }), anchor > 0 {
-            changes.removeFirst(anchor)
-        }
-        if let data = try? JSONEncoder().encode(changes) {
-            defaults.set(data, forKey: key)
-        }
     }
 }
 

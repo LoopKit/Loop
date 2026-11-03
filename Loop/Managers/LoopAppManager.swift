@@ -518,14 +518,6 @@ class LoopAppManager: NSObject {
 
         analyticsServicesManager.application(didFinishLaunchingWithOptions: launchOptions)
 
-        // Loop's automation history only goes back 36 hours, so the Trends screen keeps its own longer record.
-        // The debounce keeps a quick off-and-on from being recorded as open loop.
-        ObservablePublishers.tracking(settingsManager, keyPath: \.dosingEnabled)
-            .debounce(for: .seconds(15), scheduler: RunLoop.main)
-            .removeDuplicates()
-            .sink { LoopModeHistory.shared.record(closedLoop: $0) }
-            .store(in: &cancellables)
-
         state = state.next
 
         await loopDataManager.updateDisplayState()

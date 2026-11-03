@@ -149,7 +149,7 @@ class LoopHistoryMathTests: XCTestCase {
 
     func testLoopModesStartAtFirstModeRecord() {
         let interval = DateInterval(start: at(0), end: at(60))
-        let runs = stride(from: 0.0, through: 60, by: 5).map { LoopHistoryMath.LoopRun(date: at($0), succeeded: true, error: nil) }
+        let runs = stride(from: 0.0, through: 60, by: 5).map { LoopHistoryMath.LoopRun(date: at($0), succeeded: true) }
         let spans = LoopHistoryMath.loopModeSpans(interval: interval, runs: runs,
                                                   modeChanges: [.init(date: at(30), closedLoop: true)], coverageStart: at(0))
         XCTAssertEqual(spans.first?.start, at(30), "Before the first record the mode is unknown and left out")
@@ -161,15 +161,27 @@ class LoopHistoryMathTests: XCTestCase {
     func testLoopModesClassifyOpenAndLimited() {
         let interval = DateInterval(start: at(0), end: at(90))
         // Runs succeed until 20 min, then fail with an error, then stop.
-        var runs = stride(from: 0.0, through: 20, by: 5).map { LoopHistoryMath.LoopRun(date: at($0), succeeded: true, error: nil) }
-        runs.append(.init(date: at(25), succeeded: false, error: "Glucose too old"))
+        var runs = stride(from: 0.0, through: 20, by: 5).map { LoopHistoryMath.LoopRun(date: at($0), succeeded: true) }
+        runs.append(.init(date: at(25), succeeded: false))
         let changes: [LoopHistoryMath.ModeChange] = [.init(date: at(0), closedLoop: true), .init(date: at(60), closedLoop: false)]
 
         let spans = LoopHistoryMath.loopModeSpans(interval: interval, runs: runs, modeChanges: changes, coverageStart: at(0))
         XCTAssertEqual(spans.map(\.mode), [.closed, .limited, .open])
-        XCTAssertEqual(spans[1].cause, "Glucose too old")
         XCTAssertEqual(spans[1].start, at(35), "Limited starts once the last good run is over 15 minutes old")
         XCTAssertEqual(spans[2].start, at(55), "The slot ending at the switch-off counts as open")
+    }
+
+    func testManualTempBasalCountsAsOpenLoop() {
+        let interval = DateInterval(start: at(0), end: at(60))
+        // Closed loop stays on; from 20 min a manual temp basal holds every run, until it ends at 40 min.
+        let runs = stride(from: 0.0, through: 60, by: 5).map { minute in
+            LoopHistoryMath.LoopRun(date: at(minute), succeeded: !(20...40).contains(minute), manualTempBasal: (20...40).contains(minute))
+        }
+        let spans = LoopHistoryMath.loopModeSpans(interval: interval, runs: runs, modeChanges: [.init(date: at(0), closedLoop: true)],
+                                                  coverageStart: at(0))
+        XCTAssertEqual(spans.map(\.mode), [.closed, .open, .closed])
+        XCTAssertEqual(spans[1].start, at(15), "The slot holding the first held run is open")
+        XCTAssertEqual(spans[2].start, at(40), "Closed again with the first good run after it")
     }
 
     // MARK: Calendar
@@ -289,27 +301,6 @@ class LoopHistoryMathTests: XCTestCase {
         XCTAssertEqual(LoopFormat.number(7.25, decimals: 1), 7.25.formatted(.number.precision(.fractionLength(1)).grouping(.never)))
         XCTAssertEqual(LoopFormat.signed(-0.4), "−0.40")
         XCTAssertEqual(LoopFormat.signed(0.0001), "+0.00")
-    }
-
-    func testModeHistoryRetainsTheModeBeforeTheRetentionWindow() throws {
-        let suite = "LoopHistoryMathTests-\(UUID().uuidString)"
-        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
-        defer { defaults.removePersistentDomain(forName: suite) }
-        let history = LoopModeHistory(defaults: defaults)
-        history.record(closedLoop: false, at: at(0))
-        history.record(closedLoop: true, at: at(60))
-        let switchDate = at(200 * 1440)
-        history.record(closedLoop: false, at: switchDate)
-        XCTAssertEqual(history.changes, [.init(date: at(60), closedLoop: true), .init(date: switchDate, closedLoop: false)])
-        let interval = DateInterval(start: switchDate.addingTimeInterval(-3600), end: switchDate)
-        let spans = LoopHistoryMath.loopModeSpans(interval: interval, runs: [], modeChanges: history.changes,
-                                                  coverageStart: interval.start)
-        XCTAssertEqual(spans.first?.start, interval.start, "Retaining the old mode must preserve recent coverage")
-    }
-
-    func testIssueDescriptions() {
-        XCTAssertEqual(LoopHistoryProvider.describe(issue: "glucoseTooOld"), "Glucose too old")
-        XCTAssertEqual(LoopHistoryProvider.describe(issue: "pumpDataTooOld"), "Pump data too old")
     }
 
     // MARK: Day history
