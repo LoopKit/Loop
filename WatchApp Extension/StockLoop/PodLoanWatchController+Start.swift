@@ -585,10 +585,10 @@ extension PodLoanWatchController {
                     self.sendMessage(.takeoverComplete(TakeoverComplete(epoch: grant.epoch, firstPodStatus: self.currentPodStatus())))
 
                     // The read's own report closed the ledger's window from the copy's reading and booked
-                    // what it could not explain, so the loop can have the pump now; a full `loop()` so
-                    // the first program is journaled.
+                    // what it could not explain, so the loop can have the pump now. No program crosses
+                    // the transfer: the phone's temp is cancelled, and the next reading starts a cycle.
                     self.loopManager.pumpManager = manager
-                    self.loopManager.loop()
+                    self.loopManager.cancelTempBasalAtTakeover()
                 } else {
                     let fireRetry: () -> Void = { [weak self] in
                         guard let self = self else { return }

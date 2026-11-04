@@ -537,6 +537,8 @@ it reports. The pod has one connection, so the device reading it cannot be raced
 cannot ask the phone and takes the pod whatever it is giving: the phone's records are trued up from the pod's
 delivered total when it is back with the pod.
 
+**No program crosses a transfer.** The device that takes the pod cancels any temp basal still running on it, then doses at its next loop cycle, which the next glucose reading starts. The phone does this when it takes the pod back; the watch does it at a Start. At an ordinary Start the phone has already cancelled its own temp before handing over, so the watch's cancel finds nothing; at an offline Start the phone's temp is still running, and the cancel is what stops it. Neither device doses on a reading the other has already acted on: with automatic boluses, a second cycle on the same reading gives an additional automatic bolus sooner than it would otherwise come. The cost is that if the phone was running a low temp, it is lost until the first cycle (up to one reading, about 5 minutes) and the pod runs the scheduled basal meanwhile, as at a hand-back. On balance, avoiding the extra automatic bolus is better.
+
 **Nor while a command to it is unconfirmed.** A command the pod has not confirmed (its answer lost, or still being
 sent) can be settled only by the device that sent it, and the copy of the pump's state handed over leaves it out.
 The pod driver keeps the pod while one is open: a Start or an End is refused with "The pod hasn't confirmed the last
