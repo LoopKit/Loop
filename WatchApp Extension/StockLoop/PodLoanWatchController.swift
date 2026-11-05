@@ -304,6 +304,9 @@ final class PodLoanWatchController {
     /// Saved pump state handed from `init` to `resumeIfNeeded`, which does the rebuild.
     var pendingResumeState: PumpManager.RawStateValue?
 
+    /// A resume waiting on the phone's word (`resumeCheckAtReading`).
+    var resumeCheck: ResumeCheck?
+
     /// The looper cancelled a Start at the offline offer; a grant for it starts nothing. Cleared by
     /// the next Start.
     var startCancelled = false

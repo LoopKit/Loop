@@ -30,6 +30,9 @@ final class StockLoopSession {
         stack.loopManager.onCycleLanded = { [weak loanController] in
             loanController?.renewHold()
         }
+        stack.loopManager.onReadingWithoutPod = { [weak loanController] in
+            loanController?.resumeCheckAtReading()
+        }
         stack.loopManager.onLoopOpened = { [weak loanController] in
             loanController?.endPreMealOverride(reason: "loop opened on the watch")
         }

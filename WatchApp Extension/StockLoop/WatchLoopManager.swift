@@ -122,6 +122,9 @@ final class WatchLoopManager {
     /// cycle that computed but could not reach the pod must not renew it.
     var onCycleLanded: (() -> Void)?
 
+    /// Fired when a reading would start a cycle but no pod is held: a resume's check is judged there.
+    var onReadingWithoutPod: (() -> Void)?
+
     /// Fired when the wrist opens the loop (closed to open), where stock ends a pre-meal preset.
     var onLoopOpened: (() -> Void)?
 
