@@ -191,7 +191,7 @@ extension PodLoanPhoneController {
                 return
             }
             self.sendMessage(.grant(grant))
-            self.armT1(for: grantEpoch)
+            self.awaitTakeover()
         }
     }
 
@@ -340,8 +340,10 @@ extension PodLoanPhoneController {
         return token
     }
 
-    /// Keeps the watch's standing copy current. `bookChanged`: insulin or carbs moved.
+    /// Keeps the watch's standing copy current. `bookChanged`: insulin or carbs moved. A change inside the
+    /// refresh floor is owed, and a later cycle sends it; no timer.
     func considerDormantRefresh(bookChanged: Bool = false) {
+        let bookChanged = bookChanged || dormantRefreshOwed
         // Only while this phone holds the pod, and only to a watch that said it can use this.
         guard state == .owner else { return }
         guard persisted.watchUsesSportMode else { return }
@@ -360,15 +362,11 @@ extension PodLoanPhoneController {
         if !periodicDue, !settingsChanged, let last = lastDormantRefreshAt {
             let wait = Self.bookRefreshFloor - deps.now().timeIntervalSince(last)
             if wait > 0 {
-                guard !trailingDormantRefreshPending else { return }
-                trailingDormantRefreshPending = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + wait) { [weak self] in
-                    self?.trailingDormantRefreshPending = false
-                    self?.considerDormantRefresh(bookChanged: true)
-                }
+                dormantRefreshOwed = true
                 return
             }
         }
+        dormantRefreshOwed = false
 
         let loanSettings = settings
         let issuedAt = deps.now()

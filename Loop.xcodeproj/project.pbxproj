@@ -860,6 +860,7 @@
 		FEEDB0000000000000000004 /* Statistics/TimeInRangeBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000004 /* Statistics/TimeInRangeBar.swift */; };
 		30E4A68B8C914C5E4B245555 /* InsulinDeliveryHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69CE2EE3714858772FE7A26 /* InsulinDeliveryHistoryTests.swift */; };
 		FEEDB0000000000000000005 /* GlucoseStatisticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */; };
+		B7C1A0F12E9D4A6B00C0FFEE /* BackgroundTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7C1A0F22E9D4A6B00C0FFEE /* BackgroundTaskTests.swift */; };
 		17EA66859884C0208DED47CF /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
 		1C99EE4A3BB181BB23DEF066 /* LoopAlgorithm in Frameworks */ = {isa = PBXBuildFile; productRef = C42F6B8A2B1B9E0142078BF9 /* LoopAlgorithm */; };
 		BD37CA2F10445DB600A35199 /* TemporaryScheduleOverrideAlgorithmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C372374D3D3D9C5F8E3AD93 /* TemporaryScheduleOverrideAlgorithmTests.swift */; };
@@ -1848,6 +1849,7 @@
 		F69CE2EE3714858772FE7A26 /* InsulinDeliveryHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryHistoryTests.swift; sourceTree = "<group>"; };
 		FEEDF0000000000000000005 /* GlucoseStatisticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseStatisticsTests.swift; sourceTree = "<group>"; };
 		FF6006BAC6EA4034BFD67C0E /* LoanBooksHarnessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoanBooksHarnessTests.swift; path = LoopTests/LoanBooksHarnessTests.swift; sourceTree = SOURCE_ROOT; };
+		B7C1A0F22E9D4A6B00C0FFEE /* BackgroundTaskTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BackgroundTaskTests.swift; path = WatchAppTests/BackgroundTaskTests.swift; sourceTree = SOURCE_ROOT; };
 		35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoopKitTypeAliases.swift; sourceTree = "<group>"; };
 		36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AlgorithmBridge.swift; sourceTree = "<group>"; };
 		6C372374D3D3D9C5F8E3AD93 /* TemporaryScheduleOverrideAlgorithmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryScheduleOverrideAlgorithmTests.swift; sourceTree = "<group>"; };
@@ -3186,6 +3188,7 @@
 				8564B298B7F91A5B62826D45 /* OverrideHistoryTests.swift */,
 				22969076523D145599EA2FBF /* WristCarbDeleteTests.swift */,
 				94E05C050AF4C0CC0B314040 /* WristGlucoseAlertTests.swift */,
+				B7C1A0F22E9D4A6B00C0FFEE /* BackgroundTaskTests.swift */,
 			);
 			path = WatchAppTests;
 			sourceTree = "<group>";
@@ -4793,6 +4796,7 @@
 				5CD53E8B45B61D0DF32D19BA /* OverrideHistoryTests.swift in Sources */,
 				7AF2FE0D12D46279AA80608B /* WristCarbDeleteTests.swift in Sources */,
 				5FDDEC8709A17CE196A2F202 /* WristGlucoseAlertTests.swift in Sources */,
+				B7C1A0F12E9D4A6B00C0FFEE /* BackgroundTaskTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

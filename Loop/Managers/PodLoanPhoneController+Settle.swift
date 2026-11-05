@@ -111,7 +111,8 @@ extension PodLoanPhoneController {
         }
 
         attemptReclaimVerificationNow(started: started)
-        // Always re-arm: the ceiling, not this loop, ends a settle.
+        // Always re-arm: the ceiling, not this loop, ends a settle. A timer is safe here: it runs inside
+        // the take-back's background time, and the ceiling is a wall-clock deadline checked on each run.
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
             self?.chaseReclaimVerification(started: started)
         }

@@ -2547,21 +2547,26 @@ extension PodLoanPhoneControllerTests {
         XCTAssertEqual(revokeCount(), 1)
     }
 
-    /// A take-over on silence finds the pod giving the watch's bolus: it waits for the pod to
-    /// finish rather than refusing, then takes the pod. The pod has one connection, so the watch
-    /// cannot start another bolus meanwhile.
-    func testATakeOverOnSilenceWaitsForTheWatchsBolusThenTakesThePod() throws {
+    /// A take-over on silence finds the pod giving the watch's bolus: no wait loop on a timer a pocketed
+    /// phone would sleep through. It lets go unchanged and says nothing; the first cycle after the bolus
+    /// ends tries again and takes the pod.
+    func testATakeOverOnSilenceThatMeetsTheWatchsBolusTriesAgainAtTheNextCycle() throws {
         let controller = makeController()
         establishLoan(controller)
         setPodGivingTheWatchsBolus(secondsLeft: 1)
 
         controller.reclaimNow(onSilence: true)
-        waitUntil(timeout: 5, "waiting") { self.diagMatching("waiting for the watch's bolus to finish") != nil }
-        XCTAssertEqual(controller.state, .reclaimPending, "held, not refused")
+        waitUntil(timeout: 5, "let go") { self.diagMatching("trying again at the first cycle after it") != nil }
+        waitForState(controller, .loaned)
         XCTAssertEqual(revokeCount(), 0)
         XCTAssertFalse(notices.contains("Wait for the Bolus"), "nothing to ask of the looper")
 
+        controller.considerOwedTakeBack()
+        XCTAssertEqual(controller.state, .loaned, "a cycle before the bolus ends tries nothing")
+
         MockPumpManager.testPodBolusEndsAt = nil   // the pod finished
+        spinMain(1.2)
+        controller.considerOwedTakeBack()
         waitForState(controller, .owner)
         XCTAssertEqual(revokeCount(), 1, "then the watch is told to stop, once")
         XCTAssertFalse(MockPumpManager.testConnectionReleased, "and the phone holds the pump")
@@ -3209,8 +3214,20 @@ extension PodLoanPhoneControllerTests {
 
 extension PodLoanPhoneControllerTests {
 
+    /// One phone cycle, as `podLoanConsiderRefresh` runs it.
     private func tick(_ controller: PodLoanPhoneController) {
+        controller.judgeOpenQuestion()
+        controller.considerUnconfirmedTakeover()
+        controller.considerOwedTakeBack()
+        controller.considerStuckHandback()
         controller.considerHoldLapse()
+        drainMainQueue()
+    }
+
+    /// A real-time test's next cycle, once the (shortened) answer wait has passed.
+    private func cycleAfterTheAnswerWait(_ controller: PodLoanPhoneController) {
+        spinMain(PodLoanPhoneController.answerWait + 0.1)
+        controller.judgeOpenQuestion()
         drainMainQueue()
     }
 
@@ -3229,7 +3246,7 @@ extension PodLoanPhoneControllerTests {
     }
 
     /// The watch's report overdue with this phone beside the body: the phone asks, and when nothing
-    /// answers it takes the pod back and says so.
+    /// answers by its next cycle it takes the pod back and says so. No timer: nothing happens between cycles.
     func testAnOverdueWatchIsAskedAndTakenFromWhenItDoesNotAnswer() throws {
         withShortAnswerWait {
             let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
@@ -3243,6 +3260,12 @@ extension PodLoanPhoneControllerTests {
             tick(controller)
             XCTAssertEqual(statusQueries(), 1, "overdue: the watch is asked")
 
+            spinMain(0.5)
+            drainMainQueue()
+            XCTAssertEqual(revokes(), 0, "no countdown: silence waits for the next cycle")
+
+            clock = clock.addingTimeInterval(.minutes(5))
+            tick(controller)
             waitUntil(timeout: 5, "taken back") { self.revokes() > 0 }
             lock.lock(); let titles = urgentNotices; lock.unlock()
             XCTAssertTrue(titles.contains("Watch Not Looping"))
@@ -3274,6 +3297,7 @@ extension PodLoanPhoneControllerTests {
         XCTAssertNotEqual(second.epoch, first.epoch)
 
         spinMain(3.5)
+        controller.judgeOpenQuestion()
         drainMainQueue()
         XCTAssertEqual(revokes(), 0, "the old question's silence takes nothing from the new loan")
         XCTAssertEqual(controller.state, .loaned)
@@ -3334,6 +3358,8 @@ extension PodLoanPhoneControllerTests {
             clock = clock.addingTimeInterval(.minutes(7))
             tick(controller)
             XCTAssertEqual(statusQueries(), 1, "silent: asked")
+            clock = clock.addingTimeInterval(.minutes(5))
+            tick(controller)
             waitUntil(timeout: 5, "taken back") { self.revokes() > 0 }
             waitUntil(timeout: 5, "no longer standing aside") { !controller.yieldingToInferredLoan }
         }
@@ -3538,20 +3564,34 @@ extension PodLoanPhoneControllerTests {
         XCTAssertFalse(controller.yieldingToInferredLoan, "and the phone keeps the pod")
     }
 
-    /// A grant the watch never confirms: asked at the probe, silence takes the pod back after the
-    /// answer wait, with one notice (control document, transfer G).
-    func testAnUnconfirmedGrantIsTakenBackOnSilence() throws {
-        PodLoanPhoneController.grantLostProbeDelay = 0.1
-        defer { PodLoanPhoneController.grantLostProbeDelay = 20 }
-        try withShortAnswerWait {
-            let controller = makeController()
-            controller.handleIncoming(userInfo: try LoanMessage.request(LoanRequest(watchBuild: "t")).transportDictionary())
-            waitForState(controller, .grantOffered)
-            waitUntil(timeout: 5, "asked") { self.statusQueries() == 1 }
-            waitForState(controller, .owner)
-            // The state changes first, then the notice goes out.
-            waitUntil(timeout: 5, "the notice") { self.lock.lock(); defer { self.lock.unlock() }; return self.notices.contains("The Watch Didn't Take the Pod") }
-        }
+    /// A grant the watch never confirms: no countdown and no question; the first cycle past the lease
+    /// takes the pod back, with one notice (control document, transfer G).
+    func testAnUnconfirmedGrantIsTakenBackAtTheFirstCycleAfterTheLease() throws {
+        let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
+        controller.handleIncoming(userInfo: try LoanMessage.request(LoanRequest(watchBuild: "t")).transportDictionary())
+        waitForState(controller, .grantOffered)
+
+        clock = clock.addingTimeInterval(LoanControl.takeoverLease - 5)
+        tick(controller)
+        XCTAssertEqual(controller.state, .grantOffered, "inside the lease the watch may still take the pod")
+
+        clock = clock.addingTimeInterval(10)
+        tick(controller)
+        waitForState(controller, .owner)
+        XCTAssertEqual(statusQueries(), 0, "nothing asked: the watch refuses a grant past its lease")
+        // The state changes first, then the notice goes out.
+        waitUntil(timeout: 5, "the notice") { self.lock.lock(); defer { self.lock.unlock() }; return self.notices.contains("The Watch Didn't Take the Pod") }
+    }
+
+    /// The takeover's confirmation acts when it arrives; a later cycle past the lease takes nothing.
+    func testAConfirmedGrantIsNotTakenBackAfterTheLease() throws {
+        let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
+        _ = establishLoan(controller)
+        XCTAssertEqual(controller.state, .loaned)
+        clock = clock.addingTimeInterval(LoanControl.takeoverLease + 60)
+        tick(controller)
+        XCTAssertEqual(controller.state, .loaned)
+        XCTAssertEqual(revokes(), 0)
     }
 
     /// An audit consumes its anchors.
@@ -3729,6 +3769,8 @@ extension PodLoanPhoneControllerTests {
         XCTAssertTrue(booked.first?.syncIdentifier?.hasPrefix("LOAN-AUDIT-GAP-e") ?? false)
         XCTAssertTrue(titles.contains("Insulin Estimated After Sport Mode"))
         XCTAssertTrue(bodies.contains { $0.contains("probably from Sport Mode started on the watch") })
+        waitUntil(timeout: 5, "the watch is asked") { self.statusQueries() == 1 }
+        cycleAfterTheAnswerWait(controller)
         waitUntil(timeout: 5, "no answer from the watch: looping continues") { !controller.holdsAutomaticDosing }
     }
 
@@ -3996,6 +4038,8 @@ extension PodLoanPhoneControllerTests {
             readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(30)))
             readPod(controller, units: 12.0, at: back)
             waitUntil(timeout: 5, "the watch is asked") { self.statusQueries() == 1 }
+            XCTAssertTrue(controller.holdsAutomaticDosing, "no countdown: dosing waits for the next cycle")
+            cycleAfterTheAnswerWait(controller)
             waitUntil(timeout: 5, "silence: looping resumes") { !controller.holdsAutomaticDosing }
             XCTAssertNotNil(controller.persisted.tookOverOnSilenceAt, "row 18: the phone keeps the pod")
         }
