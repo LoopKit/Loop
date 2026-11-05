@@ -11,6 +11,7 @@ import HealthKit
 import LoopKit
 import LoopAlgorithm
 import LoopCore
+import WatchConnectivity
 import WatchKit
 import os.log
 
@@ -89,20 +90,40 @@ extension PodLoanWatchController {
             whenLinkActivated { [weak self] in
                 guard let self = self, self.phase == .active, self.epoch == resumedEpoch, self.pumpManager == nil else { return }
                 self.sendHoldsPodStatusReport(reason: "back from off, asking before looping")
-                self.schedule(after: wait.seconds, label: "resume-ask") { [weak self] in
-                    guard let self = self else { return }
-                    // A phone that holds the pod answers with the stop, which stands this watch aside.
-                    guard self.phase == .active, self.epoch == resumedEpoch, self.pumpManager == nil else {
-                        SportLog.event("loan", "stood aside after the resume: the phone holds the pod")
-                        return
-                    }
-                    SportLog.event("loan", "the phone did not say it holds the pod after the resume")
-                    if case .carryOn = LoanControl.afterQuery(.silence, onSilence: onSilence) { self.buildAndHandPodToLoop(savedState) }
-                }
+                // No countdown: a relaunch runs in the background, where a timer sleeps. A phone that holds
+                // the pod answers with the stop, acted on when it arrives; silence is judged at the first
+                // sensor reading at least `wait` after asking (`resumeCheckAtReading`), whose Bluetooth wake
+                // runs the rebuild.
+                self.resumeCheck = ResumeCheck(askedAt: self.now(), wait: wait.seconds, onSilence: onSilence,
+                                               savedState: savedState, epoch: resumedEpoch)
             }
         default:
             buildAndHandPodToLoop(savedState)
         }
+    }
+
+    /// A resume's question to the phone, open until a stop arrives or a reading judges its silence.
+    struct ResumeCheck {
+        let askedAt: Date
+        let wait: TimeInterval
+        let onSilence: LoanControl.Decision
+        let savedState: PumpManager.RawStateValue
+        let epoch: Int?
+    }
+
+    /// A sensor reading with no pod on the watch: an open resume check whose wait has passed, with no
+    /// stop from the phone and nothing more on its way, carries on.
+    func resumeCheckAtReading() {
+        guard let check = resumeCheck else { return }
+        guard phase == .active, epoch == check.epoch, pumpManager == nil else {
+            resumeCheck = nil
+            SportLog.event("loan", "stood aside after the resume: the phone holds the pod")
+            return
+        }
+        guard now().timeIntervalSince(check.askedAt) >= check.wait, !WCSession.default.hasContentPending else { return }
+        resumeCheck = nil
+        SportLog.event("loan", "the phone did not say it holds the pod after the resume")
+        if case .carryOn = LoanControl.afterQuery(.silence, onSilence: check.onSilence) { buildAndHandPodToLoop(check.savedState) }
     }
 
     /// The pump manager is built only once the check has passed: built, it reaches the pod by itself,

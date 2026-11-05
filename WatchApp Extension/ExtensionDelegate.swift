@@ -144,7 +144,12 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             return
         }
         loopManager.requestGlucoseBackfillIfNecessary()
+        finish(Array(backgroundTasks))
+    }
 
+    /// Every task is finished, or held to be finished later: watchOS ends the app when one it handed
+    /// over is released unfinished, and one wake can hand over several (a refresh and a phone message).
+    func finish(_ backgroundTasks: [WKRefreshBackgroundTask]) {
         for task in backgroundTasks {
             switch task {
             case is WKApplicationRefreshBackgroundTask:
@@ -205,6 +210,8 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
         task.expirationHandler = { [weak self] in
             DispatchQueue.main.async { self?.completeBluetoothTask(task) }
         }
+        // A timer is safe here: it runs inside the Bluetooth task watchOS gave the app, which has its own
+        // expiration handler above, and only completes that task.
         DispatchQueue.main.asyncAfter(deadline: .now() + 25) { [weak self] in
             self?.completeBluetoothTask(task)
         }
