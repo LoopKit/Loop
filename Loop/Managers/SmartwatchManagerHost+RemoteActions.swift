@@ -145,7 +145,7 @@ extension SmartwatchManagerHost {
     func handleBolusRecommendationRequest(_ request: SmartwatchBolusRecommendationRequest, from manager: SmartwatchManager) async throws -> SmartwatchBolusRecommendation {
         let grams = request.grams
         let isCurrentWatch = deviceManager.smartwatchManager.map { ($0 as AnyObject) === (manager as AnyObject) } ?? false
-        logWatchRequest(manager, type: .receive, String(format: "Bolus recommendation request with %.0f g of carbs", grams))
+        logWatchRequest(manager, type: .receive, String(format: "Bolus recommendation request with %.0f g of %@ carbs", grams, (request.absorption ?? .medium).rawValue))
         let refusal: String? = if !isCurrentWatch {
             "the request isn't from the current watch"
         } else if !manager.effectiveCapabilities.contains(.remoteBolus) {
@@ -169,12 +169,13 @@ extension SmartwatchManagerHost {
             logWatchRequest(manager, type: .error, String(format: "Bolus recommendation refused: %.0f g isn't a valid carb entry (maximum %.0f g)", grams, maximumGrams))
             throw SmartwatchBolusError.invalidAmount
         }
+        let absorptionTime = Self.absorptionTime(request.absorption)
         let potentialCarbEntry = grams > 0 ? NewCarbEntry(
             syncIdentifier: UUID().uuidString,
             quantity: LoopQuantity(unit: .gram, doubleValue: grams),
             startDate: Date(),
             foodType: nil,
-            absorptionTime: LoopCoreConstants.defaultCarbAbsorptionTimes.medium
+            absorptionTime: absorptionTime
         ) : nil
         let recommendation: ManualBolusRecommendation?
         do {
@@ -223,7 +224,7 @@ extension SmartwatchManagerHost {
     func handleCarbEntryRequest(_ request: SmartwatchCarbEntryRequest, from manager: SmartwatchManager) async throws -> Double {
         let grams = request.grams
         let isCurrentWatch = deviceManager.smartwatchManager.map { ($0 as AnyObject) === (manager as AnyObject) } ?? false
-        logWatchRequest(manager, type: .receive, String(format: "Carb entry request: %.0f g, confirmed at %@", grams, String(describing: request.requestedAt)))
+        logWatchRequest(manager, type: .receive, String(format: "Carb entry request: %.0f g, %@ absorption, confirmed at %@", grams, (request.absorption ?? .medium).rawValue, String(describing: request.requestedAt)))
         let refusal: String? = if !isCurrentWatch {
             "the request isn't from the current watch"
         } else if !manager.effectiveCapabilities.contains(.remoteCarbs) {
@@ -248,7 +249,7 @@ extension SmartwatchManagerHost {
         // rate limited instead of adding the carbs a second time.
         UserDefaults.standard.lastWatchCarbEntry = Date()
         do {
-            try await deliverCarbs(grams, request.requestedAt)
+            try await deliverCarbs(grams, request.requestedAt, Self.absorptionTime(request.absorption))
         } catch {
             UserDefaults.standard.lastWatchCarbEntry = previousEntry
             logWatchRequest(manager, type: .error, "Watch carb entry failed: \(error)")
@@ -257,6 +258,16 @@ extension SmartwatchManagerHost {
         logWatchRequest(manager, type: .delegateResponse, String(format: "Watch carb entry of %.0f g added", grams))
         refresh()
         return grams
+    }
+
+    /// Loop's absorption time for the watch's choice: fast, medium or slow as
+    /// in carb entry; medium when the watch didn't say (older watches).
+    static func absorptionTime(_ absorption: SmartwatchCarbAbsorption?) -> TimeInterval {
+        switch absorption {
+        case .fast: LoopCoreConstants.defaultCarbAbsorptionTimes.fast
+        case .slow: LoopCoreConstants.defaultCarbAbsorptionTimes.slow
+        case .medium, nil: LoopCoreConstants.defaultCarbAbsorptionTimes.medium
+        }
     }
 
     private func logWatchRequest(_ manager: SmartwatchManager, type: DeviceLogEntryType, _ message: String) {

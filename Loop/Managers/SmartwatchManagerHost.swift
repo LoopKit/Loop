@@ -30,7 +30,7 @@ final class SmartwatchManagerHost {
     let deliverBolus: (Double) async throws -> Void
     let alertMuter: AlertMuter
     /// Adds grams of carbs dated when the user confirmed them on the watch.
-    let deliverCarbs: (Double, Date) async throws -> Void
+    let deliverCarbs: (Double, Date, TimeInterval) async throws -> Void
     let startOverride: (String) async throws -> Void
     let cancelOverride: () async throws -> Void
 
@@ -56,7 +56,7 @@ final class SmartwatchManagerHost {
         healthStore: HKHealthStore,
         alertMuter: AlertMuter,
         deliverBolus: @escaping (Double) async throws -> Void,
-        deliverCarbs: @escaping (Double, Date) async throws -> Void,
+        deliverCarbs: @escaping (Double, Date, TimeInterval) async throws -> Void,
         startOverride: @escaping (String) async throws -> Void,
         cancelOverride: @escaping () async throws -> Void
     ) {

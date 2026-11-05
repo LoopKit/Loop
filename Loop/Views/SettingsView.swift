@@ -1009,12 +1009,12 @@ private struct WatchPermissionsView: View {
                 Toggle(NSLocalizedString("Allow Presets from Watch", comment: "Toggle allowing a watch to start and end override presets"), isOn: $allowWatchOverrides)
             }
 
-            Section(footer: Text(String(format: NSLocalizedString("%1$@ adds the watch's carb entry like a remote carb entry, at most one every 15 minutes. In closed loop, %1$@ may dose for it.", comment: "Footer for Allow Carbs from Watch (1: app name)"), appName))) {
+            Section(footer: Text(String(format: NSLocalizedString("%1$@ adds the watch's carb entry like a remote carb entry, at most one every 5 minutes. In closed loop, %1$@ may dose for it.", comment: "Footer for Allow Carbs from Watch (1: app name)"), appName))) {
                 Toggle(NSLocalizedString("Allow Carbs from Watch", comment: "Toggle allowing carb entries requested from a watch plugin"), isOn: $allowWatchCarbs)
             }
 
             // SmartwatchBolusPolicy checks every request.
-            Section(footer: Text(String(format: NSLocalizedString("%1$@ delivers a bolus requested on the watch only within your maximum bolus and at most one every 15 minutes, and never more than the current recommendation unless the watch marks the request as forced.", comment: "Footer for Allow Boluses from Watch (1: app name)"), appName))) {
+            Section(footer: Text(String(format: NSLocalizedString("%1$@ delivers a bolus requested on the watch only within your maximum bolus and at most one every 5 minutes, and never more than the current recommendation unless the watch marks the request as forced.", comment: "Footer for Allow Boluses from Watch (1: app name)"), appName))) {
                 Toggle(NSLocalizedString("Allow Boluses from Watch", comment: "Toggle allowing boluses requested from a watch plugin"), isOn: $allowWatchBolus)
             }
         }

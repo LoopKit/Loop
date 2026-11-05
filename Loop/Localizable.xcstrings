@@ -1939,7 +1939,7 @@
         }
       }
     },
-    "%1$@ adds the watch's carb entry like a remote carb entry, at most one every 15 minutes. In closed loop, %1$@ may dose for it." : {
+    "%1$@ adds the watch's carb entry like a remote carb entry, at most one every 5 minutes. In closed loop, %1$@ may dose for it." : {
       "comment" : "Footer for Allow Carbs from Watch (1: app name)"
     },
     "%1$@ also reads insulin data from other apps in Apple Health. Apple Health does not report whether an app may read data, so read access can't be shown here." : {
@@ -1984,7 +1984,7 @@
     "%1$@ cannot turn your iPhone's volume up for you. Make sure your volume is turned up — especially overnight — or you may not hear urgent alarms. The Mute All App Sounds feature also silences these alarms while it is active." : {
       "comment" : "Critical alert audio fallback callout message (1: app name)"
     },
-    "%1$@ delivers a bolus requested on the watch only within your maximum bolus and at most one every 15 minutes, and never more than the current recommendation unless the watch marks the request as forced." : {
+    "%1$@ delivers a bolus requested on the watch only within your maximum bolus and at most one every 5 minutes, and never more than the current recommendation unless the watch marks the request as forced." : {
       "comment" : "Footer for Allow Boluses from Watch (1: app name)"
     },
     "%1$@ has been active for more than 24 hours. Make sure you still want it enabled, or turn it off in the app." : {
