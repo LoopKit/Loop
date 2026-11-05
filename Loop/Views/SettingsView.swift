@@ -1002,12 +1002,12 @@ private struct WatchPermissionsView: View {
     var body: some View {
         List {
             Section(header: SectionHeader(label: NSLocalizedString("What Non-Apple Watches Can Do", comment: "Header of the explanation at the top of the watch permissions screen"))) {
-                Text(String(format: NSLocalizedString("A watch set up in Settings → Devices, other than Apple Watch, works through a watch plugin. It shows what %1$@ sends it, such as your glucose and insulin on board. With the permissions below, it can also ask %1$@ to act: each is off until you turn it on, and %1$@ checks every request. Apple Watch uses %1$@'s own watch app and isn't affected by these settings.", comment: "Explanation at the top of the watch permissions screen (1: app name)"), appName))
+                Text(String(format: NSLocalizedString("Watches added in Settings → Devices (not Apple Watch) show your glucose and, if you allow it below, can ask %1$@ to act. %1$@ checks every request.", comment: "Explanation at the top of the watch permissions screen (1: app name)"), appName))
                     .font(.footnote)
                     .foregroundColor(.secondary)
             }
 
-            Section(header: SectionHeader(label: NSLocalizedString("Third-Party Smartwatch Permissions", comment: "Header above the watch permission toggles")), footer: Text(String(format: NSLocalizedString("Mutes all %1$@ sounds for as long as the watch asks, rounded up to one of the app's mute durations, the same as Mute All App Sounds, including critical alerts. The watch can also end the mute.", comment: "Footer for Allow Mute from Watch (1: app name)"), appName))) {
+            Section(header: SectionHeader(label: NSLocalizedString("Third-Party Smartwatch Permissions", comment: "Header above the watch permission toggles")), footer: Text(String(format: NSLocalizedString("Like Mute All App Sounds, critical alerts included, for the time picked on the watch. The watch can also end the mute.", comment: "Footer for Allow Mute from Watch (1: app name)"), appName))) {
                 Toggle(NSLocalizedString("Allow Mute from Watch", comment: "Toggle allowing a watch to mute the app's alerts"), isOn: $allowWatchMute)
             }
 
@@ -1020,7 +1020,7 @@ private struct WatchPermissionsView: View {
             }
 
             // SmartwatchBolusPolicy checks every request.
-            Section(footer: Text(String(format: NSLocalizedString("%1$@ delivers a bolus requested on the watch only within your maximum bolus and at most one every 5 minutes, and never more than the current recommendation unless the watch marks the request as forced.", comment: "Footer for Allow Boluses from Watch (1: app name)"), appName))) {
+            Section(footer: Text(String(format: NSLocalizedString("Up to %1$@'s recommendation and your maximum bolus. At most one every 5 minutes, and 3 maximum boluses a day. Needs glucose from the last 15 minutes.", comment: "Footer for Allow Boluses from Watch (1: app name)"), appName))) {
                 Toggle(NSLocalizedString("Allow Boluses from Watch", comment: "Toggle allowing boluses requested from a watch plugin"), isOn: $allowWatchBolus)
             }
         }
