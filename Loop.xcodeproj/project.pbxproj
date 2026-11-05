@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		101AA7370B0E499FBD88BB9F /* G7SensorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		921B7FAE002E40EFAB3F50C6 /* G7SensorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */; };
 		52CB9A826E3B3DFC4E483084 /* AlgorithmBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */; };
 		01F99A06F17502CC60E9535C /* AlgorithmBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */; };
 		527427E1C81FAB157FEEA18B /* BolusDosingDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */; };
@@ -855,6 +857,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				101AA7370B0E499FBD88BB9F /* G7SensorKit.framework in Embed Frameworks */,
 				43C05CB221EBD88A006FB252 /* LoopCore.framework in Embed Frameworks */,
 				C1275E1C2E82269A0013B99D /* LoopKit.framework in Embed Frameworks */,
 			);
@@ -887,6 +890,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = G7SensorKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		00A28F30399B460CABF4EDD2 /* SettingsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsProvider.swift; sourceTree = "<group>"; };
 		0FC34B523FE5A50C920506D5 /* Loop/Resources/Sounds/alarm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/alarm.caf; sourceTree = SOURCE_ROOT; };
 		142CB7582A60BF2E0075748A /* EditMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
@@ -1643,10 +1647,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D96C7D3C9C4B414AAEAB3339 /* RileyLinkBLEKit.framework in Frameworks */,
-				D6A12EF6F5AD4B4CAABDD49B /* RileyLinkKit.framework in Frameworks */,
 				921B7FAE002E40EFAB3F50C6 /* G7SensorKit.framework in Frameworks */,
-				C58C1A2FC9604165AF3A144E /* OmnipodKit.framework in Frameworks */,
 				8B5CF0144D79477AACBE4A82 /* LoopKit.framework in Frameworks */,
 				C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */,
 				4344628220A7A37F00C4BE6F /* CoreBluetooth.framework in Frameworks */,
@@ -2836,6 +2837,7 @@
 				43D9002C21EB225D00AF44BF /* HealthKit.framework */,
 				43F5C2C81B929C09003EB13D /* HealthKit.framework */,
 				4344628320A7A3BE00C4BE6F /* LoopKit.framework */,
+				F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */,
 				437AFEE6203688CF008C4892 /* LoopKitUI.framework */,
 				892A5D5A222F0D7C008961AB /* LoopTestingKit.framework */,
 				C1E2774722433D7A00354103 /* MKRingProgressView.framework */,
