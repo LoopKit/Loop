@@ -16,7 +16,8 @@ extension PodLoanPhoneController {
     /// the user a dead watch and a distant one look the same, and the pod is out of reach anyway.
     static let nearTheBodyWindow: TimeInterval = .minutes(11)
 
-    /// `LoanControl.Wait.inBackground`: every query this phone makes is in the background. Settable for tests.
+    /// `LoanControl.Wait.inBackground`: every query this phone makes is in the background. Silence is
+    /// judged no sooner than this after asking, at the next cycle. Settable for tests.
     static var answerWait: TimeInterval = LoanControl.Wait.inBackground.seconds
 
     /// When the watch last reported a cycle. Persisted, so a relaunch is not read as silence.
@@ -79,9 +80,7 @@ extension PodLoanPhoneController {
         case .nothing, .carryOn:
             break
         case .query(_, let onSilence):
-            askWatch(why: why) { [weak self] answer in
-                self?.carryOut(LoanControl.afterQuery(answer, onSilence: onSilence), why: why, claimEpoch: claimEpoch)
-            }
+            askWatch(why: why, onSilence: onSilence, claimEpoch: claimEpoch)
         case .keepPodOnSilence:
             updateState { $0.tookOverOnSilenceAt = deps.now() }
             handbackDiag(epoch, "this phone keeps the pod and keeps looping: no answer from the watch, or it cannot reach the pod; \(why)")
@@ -142,40 +141,68 @@ extension PodLoanPhoneController {
 
     // MARK: - The query
 
-    /// Asks the watch whether it holds the pod and hands back what came of it: an answer (any word from
-    /// the watch within the wait), "holds it but cannot reach it", or silence.
-    func askWatch(why: String, then: @escaping (LoanControl.Answer) -> Void) {
-        guard watchAskedAt == nil else { return }
-        let askedAt = deps.now()
-        let askedEpoch = epoch
-        let askedRole = controlRole
-        let heardBefore = watchLastHeard
-        let foreignBefore = newestForeignLoanEvidence?.at
-        watchAskedAt = askedAt
+    /// A question to the watch, open until its answer arrives or a later cycle judges its silence.
+    struct OpenQuestion {
+        let askedAt: Date
+        let epoch: Int
+        let role: LoanControl.PhoneRole
+        let heardBefore: Date?
+        let foreignBefore: Date?
+        let why: String
+        let onSilence: LoanControl.Decision
+        let claimEpoch: Int?
+    }
+
+    var watchAskedAt: Date? { openQuestion?.askedAt }
+
+    /// Asks the watch whether it holds the pod. No countdown: this phone is usually asleep, and a timer
+    /// would act minutes late on what it knew when it asked. The answer is acted on when it arrives
+    /// (`answerArrived`); silence is judged at the first cycle at least `answerWait` after asking
+    /// (`judgeOpenQuestion`), in practice the next sensor reading.
+    func askWatch(why: String, onSilence: LoanControl.Decision, claimEpoch: Int?) {
+        guard openQuestion == nil else { return }
+        openQuestion = OpenQuestion(askedAt: deps.now(), epoch: epoch, role: controlRole, heardBefore: watchLastHeard,
+                                    foreignBefore: newestForeignLoanEvidence?.at, why: why, onSilence: onSilence,
+                                    claimEpoch: claimEpoch)
         handbackDiag(epoch, "asking the watch whether it holds the pod: \(why)")
         sendMessage(.statusQuery(StatusQuery(epoch: epoch)))
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.answerWait) { [weak self] in
-            guard let self = self, self.watchAskedAt == askedAt else { return }
-            self.watchAskedAt = nil
-            // The question was about one situation, this loan and this phone's role; a verdict for
-            // another is moot (a hand-back and a new Start fit inside the wait).
-            guard self.epoch == askedEpoch, self.controlRole == askedRole else {
-                self.handbackDiag(askedEpoch, "question to the watch dropped: the loan or this phone's role changed while waiting")
-                return
-            }
-            let reported = self.lastWatchAnswerAt.map { $0 >= askedAt } == true
-            let answer: LoanControl.Answer
-            if reported && self.lastWatchAnswerCannotReachPod {
-                answer = .holdsPodButCannotReach
-            } else if reported && self.lastWatchAnswerHoldsNothing {
-                answer = .holdsNothing
-            } else if reported || self.watchLastHeard != heardBefore || self.newestForeignLoanEvidence?.at != foreignBefore {
-                answer = .answered
-            } else {
-                answer = .silence
-            }
-            if answer == .answered { self.handbackDiag(self.epoch, "the watch answered: nothing changes hands") }
-            then(answer)
+    }
+
+    /// A status report from the watch answers the open question now.
+    func answerArrived() {
+        settleOpenQuestion(silenceIsDue: false)
+    }
+
+    /// Each cycle: an open question still unanswered `answerWait` after it was asked is silence.
+    func judgeOpenQuestion() {
+        settleOpenQuestion(silenceIsDue: true)
+    }
+
+    /// An answer is any word from the watch since asking: a report (which may say it holds nothing, or
+    /// holds the pod but cannot reach it), its records, or its claims.
+    private func settleOpenQuestion(silenceIsDue: Bool) {
+        guard let question = openQuestion else { return }
+        // The question was about one situation, this loan and this phone's role; a verdict for
+        // another is moot.
+        guard epoch == question.epoch, controlRole == question.role else {
+            openQuestion = nil
+            handbackDiag(question.epoch, "question to the watch dropped: the loan or this phone's role changed while waiting")
+            return
         }
+        let reported = lastWatchAnswerAt.map { $0 >= question.askedAt } == true
+        let answer: LoanControl.Answer
+        if reported && lastWatchAnswerCannotReachPod {
+            answer = .holdsPodButCannotReach
+        } else if reported && lastWatchAnswerHoldsNothing {
+            answer = .holdsNothing
+        } else if reported || watchLastHeard != question.heardBefore || newestForeignLoanEvidence?.at != question.foreignBefore {
+            answer = .answered
+        } else {
+            guard silenceIsDue, deps.now().timeIntervalSince(question.askedAt) >= Self.answerWait else { return }
+            answer = .silence
+        }
+        openQuestion = nil
+        if answer == .answered { handbackDiag(epoch, "the watch answered: nothing changes hands") }
+        carryOut(LoanControl.afterQuery(answer, onSilence: question.onSilence), why: question.why, claimEpoch: question.claimEpoch)
     }
 }

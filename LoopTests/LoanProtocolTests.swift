@@ -608,6 +608,13 @@ final class LoanProtocolTests: XCTestCase {
         XCTAssertFalse(LoanMessage.handbackAck(HandbackAck(epoch: 1, committedCursor: 0, released: false)).ridesBothChannels)
     }
 
+    /// The takeover's confirmation is queued too: no question recovers a lost one any more, and the
+    /// phone would take back, after the lease, a pod the watch holds.
+    func testTheTakeoverConfirmationIsAlsoQueued() {
+        let status = LoanPodStatus(timestamp: Date(), deliveredUnits: 1, reservoirLevel: nil, isSuspended: false, faultCode: nil)
+        XCTAssertTrue(LoanMessage.takeoverComplete(TakeoverComplete(epoch: 1, firstPodStatus: status)).ridesBothChannels)
+    }
+
     // MARK: - Transport kind peek
 
     /// The peek names hand-back offers exactly and returns nil for anything else.

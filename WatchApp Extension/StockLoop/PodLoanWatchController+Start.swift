@@ -132,6 +132,7 @@ extension PodLoanWatchController {
 
     /// Every refusal and failed start lands here, so none can strand the controller in `.requested`.
     func returnToRestingPhase() {
+        TakeoverScreenAlert.disarm()
         if journal.hasUndrainedEvents {
             phase = .recoveredDrain
             sendHandbackOffer(recovered: true)
@@ -208,6 +209,8 @@ extension PodLoanWatchController {
             SportLog.event("loan", "no answer from the phone in \(Int(timeout)) s")
         }
         requestTimeoutWork = work
+        // A timer is safe here: it starts at the looper's tap, with Loop in front. If watchOS suspends Loop
+        // first it fires late, and a grant that arrives meanwhile withdraws the offer it raised.
         schedule(after: timeout, label: "request-timeout", execute: work)
     }
 
@@ -481,7 +484,11 @@ extension PodLoanWatchController {
         // Only a first contact needs the screen, so only it asks for the wrist and taps it.
         if discover {
             SportLog.event("loan", "first contact with this pod: the takeover needs the watch screen on")
-            for delay in [8.0, 30.0] {
+            TakeoverScreenAlert.arm()
+            // A timer is safe for the first tap: 8 s sits inside the ~10 s watchOS runs the app after the
+            // takeover's Bluetooth activity begins, and the tap re-checks the takeover when it fires. The
+            // second ask, at 30 s, is the system's (`TakeoverScreenAlert`).
+            for delay in [8.0] {
                 schedule(after: delay, label: "takeover-nudge") { [weak self] in
                     guard let self = self, self.phase == .takingOver, self.epoch == grant.epoch,
                           Self.shouldNudgeTakeover(podReached: self.takeoverPodReached, appActive: self.isWatchAppActive(),
@@ -512,6 +519,7 @@ extension PodLoanWatchController {
         // The pod has been reached: whatever is left of the takeover works with the wrist down.
         if !takeoverPodReached {
             takeoverPodReached = true
+            TakeoverScreenAlert.disarm()
             if takeoverFirstContact { notifyUI() }
         }
         guard let action = takeoverRetryAction else { return }
@@ -525,6 +533,7 @@ extension PodLoanWatchController {
     /// The takeover's one save: odometer, `.active` and a seized loan's reunion token together.
     /// The token is persisted only here: an aborted activation never touched the pod.
     func recordTakeoverActive(delivered: Double, at: Date?) {
+        TakeoverScreenAlert.disarm()
         let token = pendingSeizeToken
         pendingSeizeToken = nil
         updateState {
@@ -586,10 +595,10 @@ extension PodLoanWatchController {
                     if offlineStart { self.pushHoldsPodStatusReport() }
 
                     // The read's own report closed the ledger's window from the copy's reading and booked
-                    // what it could not explain, so the loop can have the pump now; a full `loop()` so
-                    // the first program is journaled.
+                    // what it could not explain, so the loop can have the pump now. No program crosses
+                    // the transfer: the phone's temp is cancelled, and the next reading starts a cycle.
                     self.loopManager.pumpManager = manager
-                    self.loopManager.loop()
+                    self.loopManager.cancelTempBasalAtTakeover()
                 } else {
                     let fireRetry: () -> Void = { [weak self] in
                         guard let self = self else { return }
@@ -605,6 +614,8 @@ extension PodLoanWatchController {
                     self.takeoverRetryAction = { fireRetry() }
                     let backstop = DispatchWorkItem { fireRetry() }
                     self.takeoverBackstop = backstop
+                    // A timer is safe here: the read just used Bluetooth, so 8 s sits inside the ~10 s watchOS
+                    // then runs the app, and a late firing only reads again, after re-checking the lease.
                     self.schedule(after: 8, label: "takeover-read", execute: backstop)
                 }
             }

@@ -263,10 +263,8 @@ final class PodLoanPhoneController {
         if podIsOnLoan {
             // Heal only transient states; a relaunch during a real loan is ordinary.
             if state == .reconciling {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 120) { [weak self] in
-                    guard let self = self, self.state == .reconciling else { return }
-                    self.forceReclaimToOwner(reason: "the app relaunched during a hand-back and none followed")
-                }
+                // Healed at a cycle (`considerStuckHandback`), not on a timer the relaunched app may sleep through.
+                reconcilingSinceLaunchAt = deps.now()
             } else if state == .reclaimPending {
                 // A take-back cut short by the relaunch: finish the attempt, which refuses if the pod is away.
                 DispatchQueue.main.async { [weak self] in
@@ -274,7 +272,8 @@ final class PodLoanPhoneController {
                     self.beginTakeBack(from: self.yieldingToInferredLoan ? .owner : .loaned)
                 }
             } else if state == .grantOffered {
-                armT1(for: epoch)
+                // The lease is counted from the relaunch: the grant's own send time was not kept.
+                awaitTakeover()
             }
         }
     }
@@ -320,21 +319,25 @@ final class PodLoanPhoneController {
     var stagedTombstones: Set<UUID> = []
     /// The last running-audit line; a wake delivers several batches with the same reading.
     var lastRunningAuditLine: String?
-    var t1WorkItem: DispatchWorkItem?
 
     /// A take-back attempt in progress, and the phase to restore if the pod does not answer.
     var takeBackStartedAt: Date?
     /// The attempt is a take-over on silence: a bolus in progress is waited out, not refused.
     var takeBackOnSilence = false
+    /// A relaunch found a hand-back being written; 2 minutes on with none following, the phone takes the pod.
+    var reconcilingSinceLaunchAt: Date?
+    /// A take-over on silence that met the watch's bolus, owed once the bolus ends.
+    var takeBackOwedAfter: Date?
     var takeBackFrom: State?
 
     var lastDormantRefreshAt: Date?
 
-    var trailingDormantRefreshPending = false
+    /// A book change the refresh floor held back; the next cycle past the floor sends it.
+    var dormantRefreshOwed = false
 
     var lastClosedSessionRevokeAt: Date?
     /// A question to the watch awaiting its answer (`askWatch`), and when the last status report came.
-    var watchAskedAt: Date?
+    var openQuestion: OpenQuestion?
     var lastWatchAnswerAt: Date?
     /// The last report said the watch holds the pod but cannot reach it.
     var lastWatchAnswerCannotReachPod = false

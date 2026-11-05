@@ -155,7 +155,7 @@ extension PodLoanPhoneController {
         guard oldValue != state else { return }
         // A question is about the situation it was asked in: a new state ends it, so the next loan
         // can be asked at once.
-        watchAskedAt = nil
+        openQuestion = nil
         if oldValue != .owner, state == .owner {
             // The return has forgotten or taken the pod; a mark never outlives its loan.
             if persisted.podDeactivatedOnWatch != nil { updateState { $0.podDeactivatedOnWatch = nil } }

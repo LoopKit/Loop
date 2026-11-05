@@ -45,6 +45,8 @@ extension PodLoanWatchController {
             self.handbackAckedAt = nil
             self.sendHandbackOffer(recovered: false)
             guard case .query(let wait, let onSilence) = LoanControl.decide(LoanControl.Situation(device: .watch, trigger: trigger)) else { return }
+            // A timer is safe here: it starts at the looper's End tap, with Loop in front, and a late
+            // firing re-checks whether the phone answered since the tap before refusing the End.
             self.schedule(after: wait.seconds, label: "handback-answer") { [weak self] in
                 guard let self = self, self.phase == .active, self.handbackRequested,
                       self.handbackAckedAt.map({ $0 >= tappedAt }) != true else { return }
@@ -330,6 +332,8 @@ extension PodLoanWatchController {
             }
         }
         resendWorkItem = work
+        // A timer is safe here: a late resend only sends again. The 2-minute budget is a deadline checked
+        // on each run, and the looper is told on time by the system-scheduled `HandbackStuckAlert`.
         schedule(after: 15, label: "handback-resend", execute: work)
     }
 
@@ -533,7 +537,27 @@ extension PodLoanWatchController {
             }
             return
         }
-        // The query names our own live loan, so it is answered in full.
+        // A holder that has not read the pod lately tries it before answering: "cannot reach" goes to the
+        // phone only after a real attempt, since the phone takes the pod back on it. The question's wake,
+        // then the pod's Bluetooth activity, keep the app running for the read.
+        if phase == .active, podReachedLately != true, let odometer = pumpOdometer {
+            SportLog.event("loan", "phone asked about loan \(current); reading the pod before answering")
+            Task { [weak self] in
+                // Twice: a first connect right after a wake can fail on a timeout that ran out while the
+                // app slept (seen 11-03), and the second then reaches the pod.
+                if await !odometer.refreshDeliveredUnits() { _ = await odometer.refreshDeliveredUnits() }
+                DispatchQueue.main.async {
+                    guard let self, self.epoch == current else { return }
+                    self.answerStatusQuery(epoch: current)
+                }
+            }
+            return
+        }
+        answerStatusQuery(epoch: current)
+    }
+
+    /// The query names our own live loan, so it is answered in full.
+    private func answerStatusQuery(epoch current: Int) {
         let report = StatusReport(
             epoch: current,
             lastDirectGlucoseAge: loopManager.latestGlucoseAge,

@@ -98,13 +98,20 @@ final class WakeResumeTests: XCTestCase {
         }
         if let savedState { savePumpState(savedState) }
         let c = await makeController()
-        // The ask before looping answers at once here (no phone); every other timer runs for real.
-        c.scheduler = { [weak c] delay, label, work in
-            if label == "resume-ask" { work.perform() } else { DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work) }
-        }
         c.resumeIfNeeded()   // what the session does once the hooks are wired
         await c.onMain { }     // the resume is built on main; wait for it
+        // The ask before looping goes unanswered here (no phone): the next reading carries on.
+        await readingAfterTheWait(c)
         return c
+    }
+
+    /// The first sensor reading once the resume's wait has passed, on a clock moved past it.
+    private func readingAfterTheWait(_ c: PodLoanWatchController) async {
+        let real = c.now
+        c.now = { real().addingTimeInterval(.minutes(5)) }
+        await c.onMain { c.resumeCheckAtReading() }
+        c.now = real
+        await c.onMain { }
     }
 
     /// The direct-reading clock is memory, seeded at launch from the sensor.
@@ -311,11 +318,15 @@ final class WakeResumeTests: XCTestCase {
             if let m = try? LoanMessage.decode(fromTransport: dict), case .statusReport(let r) = m { reports.append(r) }
         }
         c.handleIncoming(userInfo: try LoanMessage.statusQuery(StatusQuery(epoch: 7)).transportDictionary())
-        await c.onMain { }
+        // No recent reading of the pod: the watch tries it before answering, so the answer comes after the read.
+        for _ in 0..<100 where reports.isEmpty {
+            try await Task.sleep(nanoseconds: 50_000_000)
+            await c.onMain { }
+        }
         let report = try XCTUnwrap(reports.last)
         XCTAssertTrue(report.holdsPod)
         XCTAssertEqual(report.loanStartedAt?.timeIntervalSince1970 ?? 0, started.timeIntervalSince1970, accuracy: 1)
-        XCTAssertNotEqual(report.podReachable, true, "no recent reading of the pod: not reported as reachable")
+        XCTAssertNotEqual(report.podReachable, true, "the pod could not be read: not reported as reachable")
     }
 
     func testPhoneRefusalEndsTheHandbackAtOnceAndKeepsTheLoan() async throws {
@@ -381,11 +392,9 @@ final class WakeResumeTests: XCTestCase {
         let c = await makeController()
         var published: [TemporaryScheduleOverride??] = []
         c.publishOverride = { published.append($0) }
-        c.scheduler = { [weak c] delay, label, work in
-            if label == "resume-ask" { work.perform() } else { DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work) }
-        }
         c.resumeIfNeeded()
         await c.onMain { }
+        await readingAfterTheWait(c)
 
         guard case .some(let shown)? = published.last else { return XCTFail("nothing handed to the screens") }
         XCTAssertEqual(shown?.syncIdentifier, override.syncIdentifier, "the screens show the override the resumed loan doses with")
@@ -494,8 +503,6 @@ final class WakeResumeTests: XCTestCase {
         c.send = { dict in
             if let m = try? LoanMessage.decode(fromTransport: dict), case .statusReport(let r) = m, r.holdsPod { reports.append(r.epoch) }
         }
-        var ask: DispatchWorkItem?
-        c.scheduler = { _, label, work in if label == "resume-ask" { ask = work } }
         c.resumeIfNeeded()
         await c.onMain { }
         XCTAssertEqual(reports, [7], "the phone is asked at once")
@@ -506,7 +513,7 @@ final class WakeResumeTests: XCTestCase {
         c.handleIncoming(userInfo: try LoanMessage.revoke(Revoke(epoch: 7)).transportDictionary())
         await c.onMain { }
         XCTAssertFalse(c.isResuming, "the phone's stop ends the check")
-        await c.onMain { ask?.perform() }
+        await readingAfterTheWait(c)
         XCTAssertNil(c.loopManager.pumpManager, "the phone holds the pod: this watch stood aside, no cycle ran")
         XCTAssertNotEqual(c.phase, .active)
     }
@@ -524,18 +531,16 @@ final class WakeResumeTests: XCTestCase {
         }
         var linkUp = false
         c.isLinkActivated = { linkUp }
-        var asks = 0
-        c.scheduler = { _, label, _ in if label == "resume-ask" { asks += 1 } }
         c.resumeIfNeeded()
         await c.onMain { }
         XCTAssertEqual(reports, 0, "nothing sent before the link has started")
-        XCTAssertEqual(asks, 0, "and no wait for an answer started")
+        XCTAssertNil(c.resumeCheck, "and no wait for an answer started")
 
         linkUp = true
         c.linkDidActivate()
         await c.onMain { }
         XCTAssertEqual(reports, 1, "asked once the link is up")
-        XCTAssertEqual(asks, 1, "and the wait starts then")
+        XCTAssertNotNil(c.resumeCheck, "and the wait starts then")
         XCTAssertNil(c.loopManager.pumpManager)
     }
 
@@ -545,14 +550,16 @@ final class WakeResumeTests: XCTestCase {
         saveState { $0.phase = .active; $0.epoch = 7 }
         savePumpState(readablePumpState)
         let c = await makeController()
-        var ask: DispatchWorkItem?
-        c.scheduler = { _, label, work in if label == "resume-ask" { ask = work } }
         c.resumeIfNeeded()
         await c.onMain { }
         XCTAssertNil(c.loopManager.pumpManager)
         XCTAssertTrue(c.isResuming, "checking with the phone")
-        await c.onMain { ask?.perform() }
-        XCTAssertNotNil(c.loopManager.pumpManager, "silence: the loop has the pod")
+        // A reading inside the wait (the relaunch's own wake) is too soon to call it silence.
+        await c.onMain { c.resumeCheckAtReading() }
+        XCTAssertNil(c.loopManager.pumpManager, "a reading inside the wait carries on nothing")
+        XCTAssertTrue(c.isResuming)
+        await readingAfterTheWait(c)
+        XCTAssertNotNil(c.loopManager.pumpManager, "silence at the next reading: the loop has the pod")
         XCTAssertEqual(c.phase, .active)
         XCTAssertFalse(c.isResuming, "and the check is over")
     }
