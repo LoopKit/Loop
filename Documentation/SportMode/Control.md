@@ -95,10 +95,12 @@ the phone refuses as surely as if it knew the exact start time.
 
 ## 3. Vocabulary
 
-- **Query:** device to device, "do you hold the pod?". Answered by a message, or by silence after the wait:
-  **10 s** while the looper waits on screen (Start, End), **30 s** in the background (every other query), because
-  a background question and its answer may each travel queued, and a late answer there moves control wrongly
-  (`LoanControl.Wait`). A question and its answer go by the live path when the other device is reachable, and
+- **Query:** device to device, "do you hold the pod?". An answer is acted on when it arrives. Silence is judged
+  **10 s** after asking while the looper waits on screen (Start, End); in the background (every other query) at the
+  device's first loop cycle at least **30 s** after asking, in practice the next sensor reading, because a device in
+  the background cannot count time reliably, and a background question and its answer may each travel queued, so a
+  late answer there moves control wrongly (`LoanControl.Wait`). A watch asked whether it can reach the pod tries the
+  pod before it answers. A question and its answer go by the live path when the other device is reachable, and
   queued as well, so a live message lost when an app goes inactive cannot leave the other side unasked or
   unanswered: the stop rides both too. Silence is an answer. The looper never sees a query.
 - **Prompt:** device to looper, answered only by a tap. Silence is not an answer: nothing changes until the tap. The
@@ -301,8 +303,8 @@ itself has nothing to dose from, so it offers nothing and says so.
 - **What changed:** the watch dies
 - **Phone sees:** believes the watch holds loan n · sensor: fresh · pod: released · heard from the watch: nothing for more than a cycle
 - **Watch sees:** believes dead · sensor: dead · pod: dead · heard from the phone: dead
-- **Result:** query: phone → watch, once the report is overdue → answer: silence after 30 s → action: take; record the time as "took over on silence"
-- **Afterwards:** pod held by phone · time without looping: 6–11 min, then 30 s · looper sees: phone: notification "Watch Not Looping: this iPhone is taking the pod back; insulin the watch gave is counted"
+- **Result:** query: phone → watch, once the report is overdue → answer: silence at the next cycle → action: take; record the time as "took over on silence"
+- **Afterwards:** pod held by phone · time without looping: 6–11 min, then up to one more reading (about 5 min) · looper sees: phone: notification "Watch Not Looping: this iPhone is taking the pod back; insulin the watch gave is counted"
 - **Status:** built · **Code:** phone `+Hold`
 - **Why:** A live watch on the wrist, with the body in reach, answers within seconds. Silence means it is not looping, and looping conservatively is safer than not looping. The watch's first word would end a mistake. When it comes back: row 12.
 
@@ -338,7 +340,7 @@ itself has nothing to dose from, so it offers nothing and says so.
 - **Phone sees:** believes the watch holds loan n, or dead · sensor: — · pod: released, or out of reach · heard from the watch: "I hold loan n", or nothing
 - **Watch sees:** believes it holds loan n · sensor: fresh · pod: not touched · heard from the phone: nothing
 - **Result:** query: watch → phone → answer: silence (phone away), or nothing back (phone still lending) → action: carry on: the loop gets the pod; its first reading closes the window from the last reading before it died, booking what its records cannot explain
-- **Afterwards:** pod held by watch · time without looping: 30 s plus the first reading · looper sees: watch: "Checking with your iPhone…" for up to 30 s, then a note if anything was booked: "0.55 U the watch had no record of, counted as insulin on board"
+- **Afterwards:** pod held by watch · time without looping: until the first reading at least 30 s after asking (up to about 5 min) · looper sees: watch: "Checking with your iPhone…" until then, then a note if anything was booked: "0.55 U the watch had no record of, counted as insulin on board"
 - **Status:** built · **Code:** watch `+Resume`, `+Seize`
 - **Why:** The only device there carries on with what it was last told (rule 5). More than 6 hours off: no resume, records go home, "Sport Mode Ended" (rule 1).
 
@@ -349,8 +351,8 @@ itself has nothing to dose from, so it offers nothing and says so.
 - **What changed:** the watch goes on a charger out of the pod's reach
 - **Phone sees:** believes the watch holds loan n · sensor: fresh · pod: released · heard from the watch: nothing for more than a cycle (a cycle that cannot reach the pod sends no report)
 - **Watch sees:** believes it holds loan n · sensor: none · pod: unreachable · heard from the phone: the phone's query
-- **Result:** query: phone → watch → answer: "I hold loan n but cannot reach the pod" → action: take, as on silence; record the time
-- **Afterwards:** pod held by phone · time without looping: 6–11 min, then 30 s · looper sees: phone: notification "Watch Not Looping: this iPhone is taking the pod back…"; watch: on screen "Sport Mode ended. Your iPhone has the pod"
+- **Result:** query: phone → watch → answer: "I hold loan n but cannot reach the pod", after the watch has tried the pod → action: take at once, as on silence; record the time
+- **Afterwards:** pod held by phone · time without looping: 6–11 min, then seconds · looper sees: phone: notification "Watch Not Looping: this iPhone is taking the pod back…"; watch: on screen "Sport Mode ended. Your iPhone has the pod"
 - **Status:** built · **Code:** phone `+Hold`, watch `+Handback` (the answer)
 - **Why:** Rule 2 protects a device that is looping. This one holds the loan and cannot act on it. It is alive and answers, so silence cannot be the signal; the answer carries the fact, and "cannot reach" is acted on like silence. The watch could give up the pod by itself after a failed cycle, but it cannot tell whether the phone is there to take it, and giving up with nobody there gains nothing. The phone knows it is near and can loop, so the phone decides. Rare: a charger by the bed is within reach.
 
@@ -537,6 +539,8 @@ it reports. The pod has one connection, so the device reading it cannot be raced
 cannot ask the phone and takes the pod whatever it is giving: the phone's records are trued up from the pod's
 delivered total when it is back with the pod.
 
+**No program crosses a transfer.** The device that takes the pod cancels any temp basal still running on it, then doses at its next loop cycle, which the next glucose reading starts. The phone does this when it takes the pod back; the watch does it at a Start. At an ordinary Start the phone has already cancelled its own temp before handing over, so the watch's cancel finds nothing; at an offline Start the phone's temp is still running, and the cancel is what stops it. Neither device doses on a reading the other has already acted on: with automatic boluses, a second cycle on the same reading gives an additional automatic bolus sooner than it would otherwise come. The cost is that if the phone was running a low temp, it is lost until the first cycle (up to one reading, about 5 minutes) and the pod runs the scheduled basal meanwhile, as at a hand-back. On balance, avoiding the extra automatic bolus is better.
+
 **Nor while a command to it is unconfirmed.** A command the pod has not confirmed (its answer lost, or still being
 sent) can be settled only by the device that sent it, and the copy of the pump's state handed over leaves it out.
 The pod driver keeps the pod while one is open: a Start or an End is refused with "The pod hasn't confirmed the last
@@ -546,16 +550,14 @@ with the pod. Where the driver is not asked, §8 says what happens.
 | Transfer | Step that fails | Who notices | What it sees | What it does | Pod held by | Looper sees | Status |
 |---|---|---|---|---|---|---|---|
 | **G** grant (phone → watch) | the request is lost | watch | silence 10 s after the request | prompt "Start without it?" if it has a stored copy, else "No response from iPhone" | phone | watch: on screen | built |
-| G | the grant is lost or the takeover stalls | phone | no confirmation 20 s after the grant | query the watch | nobody (the phone has released; the watch has not taken) | — | built |
-| G | ″ | phone | answer "I know no such grant" | take back at once | phone | phone: notification "The watch didn't take the pod. This phone kept it." | built |
-| G | ″ | phone | silence 30 s after that query | take back | phone | ″ | built |
-| G | ″ | phone | answer "taking over" | wait until the grant's lease ends (60 s), then query once more and take back on silence | the watch if it lands | ″ if it does not | built |
+| G | the grant is lost or the takeover stalls | phone | no confirmation by its first cycle after the grant's 60 s lease | take back without asking: past the lease the watch refuses the grant | nobody until then (the phone has released; the watch has not taken) | phone: notification "The watch didn't take the pod. This phone kept it." | built |
+| G | ″ | phone | the watch says "I know no such grant" | take back at once | phone | ″ | built |
 | G | the phone's own bolus is still being given at the Start | phone | its pump's bolus state | deny the Start: "A bolus is still being given. Try again in N seconds." | phone | watch: on screen, the reason, with a haptic | built |
 | G | a command to the pod is unconfirmed at the Start | phone | its pod driver keeps the pod when asked to let it go | deny the Start: "The pod hasn't confirmed the last command yet. Try again in a minute."; the phone loops again | phone | watch: on screen, the reason, with a haptic | built |
 | G | the takeover fails on the watch | watch, then phone | the watch reports failure | the phone takes back at once | phone | watch: on screen, the reason | built |
 | G | the looper cancels at the offline offer, and the grant arrives after that | watch | a grant for a Start no longer wanted | answer "takeover failed": Sport Mode is entered only by a tap, and the cancel withdrew it; a new Start asks afresh | phone | phone: takes the pod back at once, as above | built |
 | G | the grant is numbered at or below a loan the watch already knows | watch | a stale grant | answer "takeover failed" | phone | — | built |
-| G | the confirmation is lost | phone | the query is answered "I hold loan n" | treat the takeover as complete | watch | — | built |
+| G | the confirmation is lost | phone | the watch's report "I hold loan n" | treat the takeover as complete | watch | — | built |
 | **S** offline start | the pod does not answer within the lease | watch | no pod reading | back to rest | phone (as before) | watch: "Sport Mode start expired before the pod answered" | built |
 | **H** hand-back (watch → phone) | the watch's bolus is still being given at End | watch | its pump's bolus state | refuse the End: "A bolus is still being given. Try again in N seconds."; the loan continues | watch | watch: on screen over the bolus progress, with a haptic | built |
 | H | a command to the pod is unconfirmed once dosing has stopped at End | watch | its pod driver keeps the pod when asked to let it go | refuse the End: "The pod hasn't confirmed the last command yet. Try again in a minute."; the watch loops again | watch | watch: on screen, with a haptic | built |
@@ -563,7 +565,7 @@ with the pod. Where the driver is not asked, §8 says what happens.
 | H | the phone acknowledged the first offer, later offers go unanswered | watch | no acknowledgement; resends every 15 s | keep resending, by every path, for the 2-min budget | watch, still looping | watch: "ending…" | built |
 | H | the final offer (sent after dosing stopped) is not acknowledged within the budget | watch | no acknowledgement | let the pod go and keep sending records; the phone takes the pod when they land, or when its overdue query is answered "I hold nothing" (counted as silence) | nobody until the phone takes it (seconds, or 6–11 min if every message was lost) | watch: notification "End Not Confirmed: the watch has stopped dosing… open Loop on the iPhone and tap the pod tile" | built. The transfer rule's second half: the watch cannot tell whether its final offer arrived, and resuming would dose beside a phone that may already be taking the pod, so the resting state it is |
 | **T** take-back (phone ← watch's pod) | the pod does not answer within 5 s | phone | no link | refuse; the loan is unchanged | watch | phone: "Couldn't Reach the Pod" | built |
-| T | the pod is giving the watch's bolus when the phone reaches it | phone | the pod's status, read before the stop | a tapped take-back is refused: "A bolus is still being given. Try again in N seconds."; a take-over on silence waits for the pod to finish, its link limit starting again after | watch, until the bolus ends | phone: notification "Wait for the Bolus" (tap); nothing (silence) | built |
+| T | the pod is giving the watch's bolus when the phone reaches it | phone | the pod's status, read before the stop | a tapped take-back is refused: "A bolus is still being given. Try again in N seconds."; a take-over on silence lets go, unchanged, and tries again at the first cycle after the bolus ends | watch, until the bolus ends | phone: notification "Wait for the Bolus" (tap); nothing (silence) | built |
 | T | the stop is lost (watch off) | watch, at return | its query is answered with a stop | stand aside (row 12) | phone | row 12 | built |
 | T | the pod is not reached within 12 s of a take-back | phone | link still down | the pod driver searches for the pod by its advertisement, until the pod answers or control is released; connects then go back to the phone's own handle | phone | — | built |
 | T | the pod cannot be read after the take-back | phone | the insulin check is owed | hold dosing until the pod answers, then check | phone, not dosing | — | built |

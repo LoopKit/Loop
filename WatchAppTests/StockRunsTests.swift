@@ -562,6 +562,43 @@ final class StockRunsTests: XCTestCase {
         XCTAssertEqual(enactor.decisionIds.first ?? nil, decision.id, "the cancel carries the decision's id")
     }
 
+    // MARK: - A takeover: the running temp cancelled, no cycle
+
+    /// At an offline Start the phone's temp runs on a pod whose copy does not know it: the cancel goes
+    /// to the pod anyway, and it is the only command.
+    func testATakeoverCancelsATempTheCopyDoesNotKnow() async throws {
+        let manager = await makeManager()
+        let enactor = RecordingDoseEnactor()
+        manager.pumpManager = try makePump()
+        manager.doseEnactor = enactor
+        manager.setClosedLoopEnabled(true, reason: "test")
+
+        manager.cancelTempBasalAtTakeover()
+        await manager.laneSettled()
+
+        XCTAssertEqual(enactor.calls.count, 1, "one command: the cancel")
+        XCTAssertEqual(enactor.calls.first?.tempBasal, .cancel)
+        XCTAssertNil(enactor.calls.first?.bolus ?? nil, "no bolus: the first cycle waits for the next reading")
+        let decisions = try await storedDecisions(manager)
+        let decision = try XCTUnwrap(decisions.first { $0.reason == "pumpControlTaken" })
+        XCTAssertEqual(enactor.decisionIds.first ?? nil, decision.id, "the cancel carries the decision's id")
+    }
+
+    func testATakeoverCancelsAnAutomaticTempAndRunsNoCycle() async throws {
+        let manager = await makeManager()
+        let enactor = RecordingDoseEnactor()
+        manager.pumpManager = try makePump(unfinalizedTemp: automaticTemp(2.0))
+        manager.doseEnactor = enactor
+        manager.setClosedLoopEnabled(true, reason: "test")
+
+        manager.cancelTempBasalAtTakeover()
+        await manager.laneSettled()
+
+        XCTAssertEqual(enactor.calls.count, 1, "one command: the cancel")
+        XCTAssertEqual(enactor.calls.first?.tempBasal, .cancel)
+        XCTAssertNil(manager.lastLoopCompleted, "no cycle ran")
+    }
+
     func testOpeningTheLoopWithNoAutomaticTempSendsNothing() async throws {
         let manager = await makeManager()
         let enactor = RecordingDoseEnactor()

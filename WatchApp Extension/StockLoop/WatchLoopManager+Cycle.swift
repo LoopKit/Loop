@@ -21,6 +21,7 @@ extension WatchLoopManager {
     /// before a takeover or resume finishes, there is nothing to decide).
     func checkPumpDataAndLoop() {
         guard let pumpManager = pumpManager else {
+            onReadingWithoutPod?()
             if !loggedIdleNoPump {
                 loggedIdleNoPump = true
                 SportLog.event("loop", "no pod on the watch; cycles paused until the next grant")
