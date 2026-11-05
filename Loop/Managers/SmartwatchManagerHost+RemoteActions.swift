@@ -137,6 +137,60 @@ extension SmartwatchManagerHost {
         return units
     }
 
+    /// What Loop would recommend with the carbs the user is about to add on the
+    /// watch, without adding them: like the Apple Watch's recommendation for a
+    /// potential carb entry, with the entry the watch's carbs become (medium
+    /// absorption, dated now). Only while the watch may request boluses and
+    /// glucose is recent; the bolus itself is checked again after the carbs.
+    func handleBolusRecommendationRequest(_ request: SmartwatchBolusRecommendationRequest, from manager: SmartwatchManager) async throws -> SmartwatchBolusRecommendation {
+        let grams = request.grams
+        let isCurrentWatch = deviceManager.smartwatchManager.map { ($0 as AnyObject) === (manager as AnyObject) } ?? false
+        logWatchRequest(manager, type: .receive, String(format: "Bolus recommendation request with %.0f g of carbs", grams))
+        let refusal: String? = if !isCurrentWatch {
+            "the request isn't from the current watch"
+        } else if !manager.effectiveCapabilities.contains(.remoteBolus) {
+            "this watch can't request boluses (remoteBolus not declared or not requested)"
+        } else if !UserDefaults.standard.allowWatchBolus {
+            "Allow Boluses from Watch is off"
+        } else {
+            nil
+        }
+        if let refusal {
+            logWatchRequest(manager, type: .error, "Bolus recommendation refused: \(refusal)")
+            throw SmartwatchBolusError.notAllowed
+        }
+        let maximumGlucoseAge = manager.remoteActionLimits.bolusPolicyLimits.maximumGlucoseAge
+        guard let latestGlucoseDate = glucoseStore.latestGlucose?.startDate, Date().timeIntervalSince(latestGlucoseDate) <= maximumGlucoseAge else {
+            logWatchRequest(manager, type: .error, "Bolus recommendation refused: no glucose in the last \(Int(maximumGlucoseAge / 60)) minutes")
+            throw SmartwatchBolusError.noRecentGlucose
+        }
+        let maximumGrams = LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram)
+        guard grams.isFinite, grams >= 0, grams <= maximumGrams else {
+            logWatchRequest(manager, type: .error, String(format: "Bolus recommendation refused: %.0f g isn't a valid carb entry (maximum %.0f g)", grams, maximumGrams))
+            throw SmartwatchBolusError.invalidAmount
+        }
+        let potentialCarbEntry = grams > 0 ? NewCarbEntry(
+            syncIdentifier: UUID().uuidString,
+            quantity: LoopQuantity(unit: .gram, doubleValue: grams),
+            startDate: Date(),
+            foodType: nil,
+            absorptionTime: LoopCoreConstants.defaultCarbAbsorptionTimes.medium
+        ) : nil
+        let recommendation: ManualBolusRecommendation?
+        do {
+            recommendation = try await loopDataManager.recommendManualBolus(carbEntryChange: potentialCarbEntry.map { .add($0) })
+        } catch {
+            logWatchRequest(manager, type: .error, "Bolus recommendation failed: \(error)")
+            throw SmartwatchBolusError.refusedByHost(String(describing: error))
+        }
+        // Rounded as the bolus check rounds the recommendation it caps at.
+        let recommended = max(0, recommendation?.amount ?? 0)
+        let units = deviceManager.pumpManager?.roundToSupportedBolusVolume(units: recommended) ?? recommended
+        let maximumBolus = settingsManager.loopSettings.maximumBolus
+        logWatchRequest(manager, type: .delegateResponse, String(format: "Bolus recommendation with %.0f g of carbs: %.2f U%@", grams, units, maximumBolus.map { String(format: " (maximum bolus %.2f U)", $0) } ?? ""))
+        return SmartwatchBolusRecommendation(units: units, grams: grams, maximumBolus: maximumBolus, issuedAt: Date())
+    }
+
     /// Mutes Loop's alerts for a request from the watch, like Mute All Alerts in
     /// Settings: the duration is one Loop offers (the shortest that covers the
     /// request), and the mute shows on the phone with its Unmute button. Only

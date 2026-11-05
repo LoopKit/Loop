@@ -1151,6 +1151,14 @@ extension DeviceDataManager: SmartwatchManagerDelegate {
     }
 
     nonisolated
+    func smartwatchManager(_ manager: SmartwatchManager, recommendBolusFor request: SmartwatchBolusRecommendationRequest) async throws -> SmartwatchBolusRecommendation {
+        guard let host = await smartwatchManagerHost else {
+            throw SmartwatchBolusError.notAllowed
+        }
+        return try await host.handleBolusRecommendationRequest(request, from: manager)
+    }
+
+    nonisolated
     func smartwatchManager(_ manager: SmartwatchManager, requestAlertMute request: SmartwatchAlertMuteRequest) async throws -> Date {
         guard let host = await smartwatchManagerHost else {
             throw SmartwatchAlertMuteError.notAllowed
