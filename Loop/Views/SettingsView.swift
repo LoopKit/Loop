@@ -524,7 +524,7 @@ extension SettingsView {
 
     /// Opens what the watch may ask Loop to do.
     private var watchPermissionsSection: some View {
-        Section {
+        Section(header: SectionHeader(label: NSLocalizedString("Third-Party Smartwatch", comment: "The title of the section in settings for what a watch other than Apple Watch may do"))) {
             NavigationLink(destination: WatchPermissionsView()) {
                 LargeButton(
                     action: {},
@@ -534,7 +534,7 @@ extension SettingsView {
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 30),
                     label: NSLocalizedString("Watch Permissions", comment: "Watch permissions button text"),
-                    descriptiveText: NSLocalizedString("What the watch may ask Loop to do", comment: "Watch permissions descriptive text")
+                    descriptiveText: NSLocalizedString("What a watch other than Apple Watch may ask Loop to do", comment: "Watch permissions descriptive text")
                 )
                 .accessibilityIdentifier("settingsViewWatchPermissions")
             }
@@ -1001,7 +1001,13 @@ private struct WatchPermissionsView: View {
 
     var body: some View {
         List {
-            Section(footer: Text(String(format: NSLocalizedString("Mutes all %1$@ sounds for as long as the watch asks, rounded up to one of the app's mute durations, the same as Mute All App Sounds, including critical alerts.", comment: "Footer for Allow Mute from Watch (1: app name)"), appName))) {
+            Section(header: SectionHeader(label: NSLocalizedString("What Non-Apple Watches Can Do", comment: "Header of the explanation at the top of the watch permissions screen"))) {
+                Text(String(format: NSLocalizedString("A watch set up in Settings → Devices, other than Apple Watch, works through a watch plugin. It shows what %1$@ sends it, such as your glucose and insulin on board. With the permissions below, it can also ask %1$@ to act: each is off until you turn it on, and %1$@ checks every request. Apple Watch uses %1$@'s own watch app and isn't affected by these settings.", comment: "Explanation at the top of the watch permissions screen (1: app name)"), appName))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+
+            Section(header: SectionHeader(label: NSLocalizedString("Third-Party Smartwatch Permissions", comment: "Header above the watch permission toggles")), footer: Text(String(format: NSLocalizedString("Mutes all %1$@ sounds for as long as the watch asks, rounded up to one of the app's mute durations, the same as Mute All App Sounds, including critical alerts. The watch can also end the mute.", comment: "Footer for Allow Mute from Watch (1: app name)"), appName))) {
                 Toggle(NSLocalizedString("Allow Mute from Watch", comment: "Toggle allowing a watch to mute the app's alerts"), isOn: $allowWatchMute)
             }
 

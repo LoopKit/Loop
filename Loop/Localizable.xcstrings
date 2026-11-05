@@ -4503,6 +4503,9 @@
         }
       }
     },
+    "A watch set up in Settings → Devices, other than Apple Watch, works through a watch plugin. It shows what %1$@ sends it, such as your glucose and insulin on board. With the permissions below, it can also ask %1$@ to act: each is off until you turn it on, and %1$@ checks every request. Apple Watch uses %1$@'s own watch app and isn't affected by these settings." : {
+      "comment" : "Explanation at the top of the watch permissions screen (1: app name)"
+    },
     "Above range (>180): %d%% · goal <25%%" : {
       "comment" : "TIR above-range summary"
     },
@@ -28750,7 +28753,7 @@
     "Muted until" : {
       "comment" : "Label for when mute alert will end"
     },
-    "Mutes all %1$@ sounds for as long as the watch asks, rounded up to one of the app's mute durations, the same as Mute All App Sounds, including critical alerts." : {
+    "Mutes all %1$@ sounds for as long as the watch asks, rounded up to one of the app's mute durations, the same as Mute All App Sounds, including critical alerts. The watch can also end the mute." : {
       "comment" : "Footer for Allow Mute from Watch (1: app name)"
     },
     "Name" : {
@@ -39821,6 +39824,12 @@
     "These recommendations should be used as a starting point. Checking your glucose during exercise will help you find the settings that work best for you." : {
 
     },
+    "Third-Party Smartwatch" : {
+      "comment" : "The title of the section in settings for what a watch other than Apple Watch may do"
+    },
+    "Third-Party Smartwatch Permissions" : {
+      "comment" : "Header above the watch permission toggles"
+    },
     "This device keeps %d days of glucose. Increase the cache duration and rebuild to review the full period." : {
       "comment" : "Notice when the local cache limits the statistics history"
     },
@@ -42849,6 +42858,9 @@
     "Watch Permissions" : {
       "comment" : "Watch permissions button text\nWatch permissions screen title"
     },
+    "What a watch other than Apple Watch may ask Loop to do" : {
+      "comment" : "Watch permissions descriptive text"
+    },
     "What are examples of Critical Alerts and Time Sensitive Notifications?" : {
 
     },
@@ -42920,8 +42932,8 @@
     "What if Critical Alerts aren't available in %1$@?" : {
       "comment" : "Title text for critical alerts unavailable fallback (1: app name)"
     },
-    "What the watch may ask Loop to do" : {
-      "comment" : "Watch permissions descriptive text"
+    "What Non-Apple Watches Can Do" : {
+      "comment" : "Header of the explanation at the top of the watch permissions screen"
     },
     "When current or forecasted glucose is below the glucose safety limit, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." : {
       "comment" : "Explanation of glucose safety limit",
