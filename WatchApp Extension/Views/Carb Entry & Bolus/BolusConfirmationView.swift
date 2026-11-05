@@ -39,8 +39,15 @@ struct BolusConfirmationView: View {
         )
     }
 
-    init(progress: Binding<Double>, onConfirmation completion: @escaping () -> Void) {
+    /// The gesture is identical for carbs and for a bolus; only the verb changes. Carried as a
+    /// parameter so there is ONE crown-hold implementation rather than a near-copy that drifts.
+    private let prompt: Text
+
+    init(progress: Binding<Double>,
+         prompt: Text = Text("Turn Digital Crown\nto bolus", comment: "Help text for bolus confirmation on Apple Watch"),
+         onConfirmation completion: @escaping () -> Void) {
         self._progressStorage = progress
+        self.prompt = prompt
         self.completion = completion
     }
 
@@ -66,7 +73,7 @@ struct BolusConfirmationView: View {
     private var isFinished: Bool { abs(progress.wrappedValue) >= 1.0 }
 
     private var helpText: some View {
-        Text("Turn Digital Crown\nto bolus", comment: "Help text for bolus confirmation on Apple Watch")
+        prompt
             .font(.footnote)
             .multilineTextAlignment(.center)
             .foregroundColor(Color(.lightGray))
