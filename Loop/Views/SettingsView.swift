@@ -1020,7 +1020,7 @@ private struct WatchPermissionsView: View {
             }
 
             // SmartwatchBolusPolicy checks every request.
-            Section(footer: Text(String(format: NSLocalizedString("Up to %1$@'s recommendation and your maximum bolus. At most one every 5 minutes, and 3 maximum boluses a day. Needs glucose from the last 15 minutes.", comment: "Footer for Allow Boluses from Watch (1: app name)"), appName))) {
+            Section(footer: Text(String(format: NSLocalizedString("Up to %1$@'s recommendation and your maximum bolus. At most one every 5 minutes, and no more than 3 times your maximum bolus in 24 hours. Needs glucose from the last 15 minutes.", comment: "Footer for Allow Boluses from Watch (1: app name)"), appName))) {
                 Toggle(NSLocalizedString("Allow Boluses from Watch", comment: "Toggle allowing boluses requested from a watch plugin"), isOn: $allowWatchBolus)
             }
         }

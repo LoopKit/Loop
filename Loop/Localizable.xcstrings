@@ -1984,7 +1984,7 @@
     "%1$@ cannot turn your iPhone's volume up for you. Make sure your volume is turned up — especially overnight — or you may not hear urgent alarms. The Mute All App Sounds feature also silences these alarms while it is active." : {
       "comment" : "Critical alert audio fallback callout message (1: app name)"
     },
-    "Up to %1$@'s recommendation and your maximum bolus. At most one every 5 minutes, and 3 maximum boluses a day. Needs glucose from the last 15 minutes." : {
+    "Up to %1$@'s recommendation and your maximum bolus. At most one every 5 minutes, and no more than 3 times your maximum bolus in 24 hours. Needs glucose from the last 15 minutes." : {
       "comment" : "Footer for Allow Boluses from Watch (1: app name)"
     },
     "%1$@ has been active for more than 24 hours. Make sure you still want it enabled, or turn it off in the app." : {
