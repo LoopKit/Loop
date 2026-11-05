@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 @testable import Loop
+@testable import LoopCore
 
 class MockDeliveryDelegate: DeliveryDelegate {
     var isSuspended: Bool = false

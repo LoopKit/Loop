@@ -9,7 +9,7 @@
 import Foundation
 import LoopKit
 
-enum ConfigurationErrorDetail: String, Codable {
+public enum ConfigurationErrorDetail: String, Codable {
     case pumpManager
     case basalRateSchedule
     case carbRatioSchedule
@@ -19,29 +19,29 @@ enum ConfigurationErrorDetail: String, Codable {
     case maximumBolus
     case suspendThreshold
 
-    func localized() -> String {
+    public func localized() -> String {
         switch self {
         case .pumpManager:
-            return NSLocalizedString("Pump Manager", comment: "Details for configuration error when pump manager is missing")
+            return LocalizedString("Pump Manager", comment: "Details for configuration error when pump manager is missing")
         case .basalRateSchedule:
-            return NSLocalizedString("Basal Rate Schedule", comment: "Details for configuration error when basal rate schedule is missing")
+            return LocalizedString("Basal Rate Schedule", comment: "Details for configuration error when basal rate schedule is missing")
         case .carbRatioSchedule:
-            return NSLocalizedString("Carb Ratio Schedule", comment: "Details for configuration error when carb ratio schedule is missing")
+            return LocalizedString("Carb Ratio Schedule", comment: "Details for configuration error when carb ratio schedule is missing")
         case .glucoseTargetRangeSchedule:
-            return NSLocalizedString("Glucose Target Range Schedule", comment: "Details for configuration error when glucose target range schedule is missing")
+            return LocalizedString("Glucose Target Range Schedule", comment: "Details for configuration error when glucose target range schedule is missing")
         case .insulinSensitivitySchedule:
-            return NSLocalizedString("Insulin Sensitivity Schedule", comment: "Details for configuration error when insulin sensitivity schedule is missing")
+            return LocalizedString("Insulin Sensitivity Schedule", comment: "Details for configuration error when insulin sensitivity schedule is missing")
         case .maximumBasalRatePerHour:
-            return NSLocalizedString("Maximum Basal Rate Per Hour", comment: "Details for configuration error when maximum basal rate per hour is missing")
+            return LocalizedString("Maximum Basal Rate Per Hour", comment: "Details for configuration error when maximum basal rate per hour is missing")
         case .maximumBolus:
-            return NSLocalizedString("Maximum Bolus", comment: "Details for configuration error when maximum bolus is missing")
+            return LocalizedString("Maximum Bolus", comment: "Details for configuration error when maximum bolus is missing")
         case .suspendThreshold:
-            return NSLocalizedString("Suspend Threshold", comment: "Details for configuration error when suspend threshold is missing")
+            return LocalizedString("Suspend Threshold", comment: "Details for configuration error when suspend threshold is missing")
         }
     }
 }
 
-enum MissingDataErrorDetail: String, Codable {
+public enum MissingDataErrorDetail: String, Codable {
     case glucose
     case momentumEffect
     case carbEffect
@@ -49,27 +49,27 @@ enum MissingDataErrorDetail: String, Codable {
     case activeInsulin
     case insulinEffectIncludingPendingInsulin
 
-    var localizedDetail: String {
+    public var localizedDetail: String {
         switch self {
         case .glucose:
-            return NSLocalizedString("Glucose data not available", comment: "Description of error when glucose data is missing")
+            return LocalizedString("Glucose data not available", comment: "Description of error when glucose data is missing")
         case .momentumEffect:
-            return NSLocalizedString("Momentum effects", comment: "Details for missing data error when momentum effects are missing")
+            return LocalizedString("Momentum effects", comment: "Details for missing data error when momentum effects are missing")
         case .carbEffect:
-            return NSLocalizedString("Carb effects", comment: "Details for missing data error when carb effects are missing")
+            return LocalizedString("Carb effects", comment: "Details for missing data error when carb effects are missing")
         case .insulinEffect:
-            return NSLocalizedString("Insulin effects", comment: "Details for missing data error when insulin effects are missing")
+            return LocalizedString("Insulin effects", comment: "Details for missing data error when insulin effects are missing")
         case .activeInsulin:
-            return NSLocalizedString("Active Insulin", comment: "Details for missing data error when active insulin amount is missing")
+            return LocalizedString("Active Insulin", comment: "Details for missing data error when active insulin amount is missing")
         case .insulinEffectIncludingPendingInsulin:
-            return NSLocalizedString("Insulin effects", comment: "Details for missing data error when insulin effects including pending insulin are missing")
+            return LocalizedString("Insulin effects", comment: "Details for missing data error when insulin effects including pending insulin are missing")
         }
     }
     
-    var localizedRecovery: String? {
+    public var localizedRecovery: String? {
         switch self {
         case .glucose:
-            return NSLocalizedString("Check your CGM data source", comment: "Recovery suggestion when glucose data is missing")
+            return LocalizedString("Check your CGM data source", comment: "Recovery suggestion when glucose data is missing")
         case .momentumEffect:
             return nil
         case .carbEffect:
@@ -80,7 +80,7 @@ enum MissingDataErrorDetail: String, Codable {
     }
 }
 
-enum LoopError: Error {
+public enum LoopError: Error {
     // Missing or unexpected configuration values
     case configurationError(ConfigurationErrorDetail)
 
@@ -121,7 +121,7 @@ enum LoopError: Error {
     case unknownError(Error)
 }
 
-extension LoopError {
+public extension LoopError {
     var issue: StoredDosingDecision.Issue {
         return StoredDosingDecision.Issue(id: issueId, details: issueDetails)
     }
@@ -201,35 +201,35 @@ extension LoopError: LocalizedError {
 
         switch self {
         case .configurationError(let details):
-            return String(format: NSLocalizedString("Configuration Error: %1$@", comment: "The error message displayed for configuration errors. (1: configuration error details)"), details.localized())
+            return String(format: LocalizedString("Configuration Error: %1$@", comment: "The error message displayed for configuration errors. (1: configuration error details)"), details.localized())
         case .connectionError:
-            return NSLocalizedString("No connected devices, or failure during device connection", comment: "The error message displayed for device connection errors.")
+            return LocalizedString("No connected devices, or failure during device connection", comment: "The error message displayed for device connection errors.")
         case .missingDataError(let details):
-            return String(format: NSLocalizedString("Missing data: %1$@", comment: "The error message for missing data. (1: missing data details)"), details.localizedDetail)
+            return String(format: LocalizedString("Missing data: %1$@", comment: "The error message for missing data. (1: missing data details)"), details.localizedDetail)
         case .glucoseTooOld(let date):
             let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
-            return String(format: NSLocalizedString("Glucose data is %1$@ old", comment: "The error message when glucose data is too old to be used. (1: glucose data age in minutes)"), minutes)
+            return String(format: LocalizedString("Glucose data is %1$@ old", comment: "The error message when glucose data is too old to be used. (1: glucose data age in minutes)"), minutes)
         case .invalidFutureGlucose(let date):
             let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
-            return String(format: NSLocalizedString("Invalid glucose reading with a timestamp that is %1$@ in the future", comment: "The error message when glucose data is in the future. (1: glucose data time in future in minutes)"), minutes)
+            return String(format: LocalizedString("Invalid glucose reading with a timestamp that is %1$@ in the future", comment: "The error message when glucose data is in the future. (1: glucose data time in future in minutes)"), minutes)
         case .pumpDataTooOld(let date):
             let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
-            return String(format: NSLocalizedString("Pump data is %1$@ old", comment: "The error message when pump data is too old to be used. (1: pump data age in minutes)"), minutes)
+            return String(format: LocalizedString("Pump data is %1$@ old", comment: "The error message when pump data is too old to be used. (1: pump data age in minutes)"), minutes)
         case .recommendationExpired(let date):
             let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
-            return String(format: NSLocalizedString("Recommendation expired: %1$@ old", comment: "The error message when a recommendation has expired. (1: age of recommendation in minutes)"), minutes)
+            return String(format: LocalizedString("Recommendation expired: %1$@ old", comment: "The error message when a recommendation has expired. (1: age of recommendation in minutes)"), minutes)
         case .pumpInoperable:
-            return NSLocalizedString("Pump Inoperable. Automatic dosing is disabled.", comment: "The error message displayed for LoopError.pumpInoperable errors.")
+            return LocalizedString("Pump Inoperable. Automatic dosing is disabled.", comment: "The error message displayed for LoopError.pumpInoperable errors.")
         case .pumpSuspended:
-            return NSLocalizedString("Pump Suspended. Automatic dosing is disabled.", comment: "The error message displayed for LoopError.pumpSuspended errors.")
+            return LocalizedString("Pump Suspended. Automatic dosing is disabled.", comment: "The error message displayed for LoopError.pumpSuspended errors.")
         case .manualTempBasalRunning:
-            return NSLocalizedString("Manual temporary basal in progress. Automatic dosing is disabled.", comment: "The error message displayed for LoopError.manualTempBasalRunning errors.")
+            return LocalizedString("Manual temporary basal in progress. Automatic dosing is disabled.", comment: "The error message displayed for LoopError.manualTempBasalRunning errors.")
         case .pumpManagerError(let pumpManagerError):
-            return String(format: NSLocalizedString("Pump Manager Error: %1$@", comment: "The error message displayed for pump manager errors. (1: pump manager error)"), pumpManagerError.errorDescription!)
+            return String(format: LocalizedString("Pump Manager Error: %1$@", comment: "The error message displayed for pump manager errors. (1: pump manager error)"), pumpManagerError.errorDescription!)
         case .loopInProgress:
-            return NSLocalizedString("Loop is already looping.", comment: "The error message displayed for LoopError.loopInProgress errors.")
+            return LocalizedString("Loop is already looping.", comment: "The error message displayed for LoopError.loopInProgress errors.")
         case .unknownError(let error):
-            return String(format: NSLocalizedString("Unknown Error: %1$@", comment: "The error message displayed for unknown LoopError errors. (1: unknown error)"), error.localizedDescription)
+            return String(format: LocalizedString("Unknown Error: %1$@", comment: "The error message displayed for unknown LoopError errors. (1: unknown error)"), error.localizedDescription)
         }
     }
 }

@@ -9,6 +9,7 @@
 import HealthKit
 import LoopKit
 @testable import Loop
+@testable import LoopCore
 
 class MockDoseStore: DoseStoreProtocol {
     func getNormalizedDoseEntries(start: Date, end: Date?) async throws -> [LoopKit.DoseEntry] {

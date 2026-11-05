@@ -9,7 +9,7 @@
 import Foundation
 import LoopKit
 
-extension StoredDosingDecision {
+public extension StoredDosingDecision {
     mutating func appendWarning(_ warning: LoopWarning) { warnings.append(warning.issue) }
     mutating func appendWarnings(_ warnings: [LoopWarning]) { warnings.forEach{ appendWarning($0) } }
 
@@ -17,8 +17,8 @@ extension StoredDosingDecision {
     mutating func appendErrors(_ errors: [LoopError]) { errors.forEach{ appendError($0) } }
 }
 
-enum StoredDosingDecisionIssue {
-    static func description(for error: Error?) -> String? {
+public enum StoredDosingDecisionIssue {
+    public static func description(for error: Error?) -> String? {
         guard let error = error else {
             return nil
         }
@@ -29,14 +29,14 @@ enum StoredDosingDecisionIssue {
         }
     }
 
-    static func description(for date: Date?) -> String? {
+    public static func description(for date: Date?) -> String? {
         guard let date = date else {
             return nil
         }
         return Self.dateFormatter.string(from: date)
     }
 
-    static var dateFormatter: ISO8601DateFormatter = {
+    public static var dateFormatter: ISO8601DateFormatter = {
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return dateFormatter

@@ -383,6 +383,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if oldValue != basalDeliveryState {
                 Task { @MainActor in
                     log.debug("New basalDeliveryState: %@", String(describing: basalDeliveryState))
+                    hudView?.loopCompletionHUD.loopIconClosed = deviceManager.isAutomaticDosingActive
                     refreshContext.update(with: .status)
                     await reloadData(animated: true)
                 }
@@ -1748,7 +1749,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
     private func automaticDosingStatusChanged(_ automaticDosingEnabled: Bool) {
         log.debug("automaticDosingStatusChanged -> %{public}@", String(describing: automaticDosingEnabled))
-        hudView?.loopCompletionHUD.loopIconClosed = automaticDosingEnabled
+        hudView?.loopCompletionHUD.loopIconClosed = deviceManager.isAutomaticDosingActive
         hudView?.loopCompletionHUD.closedLoopDisallowedLocalizedDescription = deviceManager.closedLoopDisallowedLocalizedDescription
         
         if automaticDosingEnabled {
@@ -1782,7 +1783,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
             // when HUD view is initialized, update loop completion HUD (e.g., icon and last loop completed)
             hudView.loopCompletionHUD.stateColors = .loopStatus
-            hudView.loopCompletionHUD.loopIconClosed = settingsManager.dosingEnabled
+            hudView.loopCompletionHUD.loopIconClosed = deviceManager.isAutomaticDosingActive
             hudView.loopCompletionHUD.lastLoopCompleted = loopManager.lastLoopCompleted
             hudView.loopCompletionHUD.mostRecentGlucoseDataDate = loopManager.mostRecentGlucoseDataDate
             hudView.loopCompletionHUD.mostRecentPumpDataDate = loopManager.mostRecentPumpDataDate

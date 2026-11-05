@@ -9,6 +9,7 @@ import XCTest
 import LoopAlgorithm
 import LoopKit
 @testable import Loop
+@testable import LoopCore
 
 final class InsulinDeliveryHistoryTests: XCTestCase {
     private var calendar: Calendar = {

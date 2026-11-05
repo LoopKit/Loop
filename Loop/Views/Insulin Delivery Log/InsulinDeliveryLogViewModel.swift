@@ -7,6 +7,7 @@
 //
 
 import LoopKit
+import LoopCore
 import os.log
 
 @MainActor

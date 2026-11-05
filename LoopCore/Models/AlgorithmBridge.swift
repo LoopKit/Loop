@@ -1,6 +1,8 @@
 //
 //  AlgorithmBridge.swift
-//  Loop
+//  LoopCore
+//
+//  In LoopCore so the phone and the watch (which runs the loop during Sport Mode) convert through one bridge.
 //
 //  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
@@ -8,7 +10,6 @@
 import Foundation
 import LoopKit
 import LoopAlgorithm
-import LoopKitUI
 
 // LoopKit's stored values, given to LoopAlgorithm in its fixed units.
 
@@ -25,44 +26,44 @@ extension StoredGlucoseSample: @retroactive LoopAlgorithm.GlucoseSampleValue {
 // These types conform to both modules' TimelineValue, so the protocols' shared helpers are
 // ambiguous on them; these concrete versions take precedence.
 extension Array where Element == StoredGlucoseSample {
-    func filterDateRange(_ startDate: Date?, _ endDate: Date?) -> [StoredGlucoseSample] {
+    public func filterDateRange(_ startDate: Date?, _ endDate: Date?) -> [StoredGlucoseSample] {
         filter { (startDate == nil || $0.endDate >= startDate!) && (endDate == nil || $0.startDate <= endDate!) }
     }
 }
 
 extension Array where Element == StoredCarbEntry {
-    func filterDateRange(_ startDate: Date?, _ endDate: Date?) -> [StoredCarbEntry] {
+    public func filterDateRange(_ startDate: Date?, _ endDate: Date?) -> [StoredCarbEntry] {
         filter { (startDate == nil || $0.endDate >= startDate!) && (endDate == nil || $0.startDate <= endDate!) }
     }
 }
 
-struct AlgorithmInsulinModel: LoopAlgorithm.InsulinModel {
-    let model: LoopKit.InsulinModel
+public struct AlgorithmInsulinModel: LoopAlgorithm.InsulinModel {
+    public let model: LoopKit.InsulinModel
 
-    init(_ model: LoopKit.InsulinModel) {
+    public init(_ model: LoopKit.InsulinModel) {
         self.model = model
     }
 
-    func percentEffectRemaining(at time: TimeInterval) -> Double {
+    public func percentEffectRemaining(at time: TimeInterval) -> Double {
         model.percentEffectRemaining(at: time)
     }
 
-    var effectDuration: TimeInterval { model.effectDuration }
+    public var effectDuration: TimeInterval { model.effectDuration }
 
-    var delay: TimeInterval { model.delay }
+    public var delay: TimeInterval { model.delay }
 }
 
 extension Array {
-    func algorithmSchedule<T>() -> [LoopAlgorithm.AbsoluteScheduleValue<T>] where Element == LoopKit.AbsoluteScheduleValue<T> {
+    public func algorithmSchedule<T>() -> [LoopAlgorithm.AbsoluteScheduleValue<T>] where Element == LoopKit.AbsoluteScheduleValue<T> {
         map { LoopAlgorithm.AbsoluteScheduleValue(startDate: $0.startDate, endDate: $0.endDate, value: $0.value) }
     }
 
     /// Glucose quantities (or sensitivities) in mg/dL
-    func algorithmMgdlSchedule() -> [LoopAlgorithm.AbsoluteScheduleValue<Double>] where Element == LoopKit.AbsoluteScheduleValue<LoopQuantity> {
+    public func algorithmMgdlSchedule() -> [LoopAlgorithm.AbsoluteScheduleValue<Double>] where Element == LoopKit.AbsoluteScheduleValue<LoopQuantity> {
         map { LoopAlgorithm.AbsoluteScheduleValue(startDate: $0.startDate, endDate: $0.endDate, value: $0.value.doubleValue(for: .milligramsPerDeciliter)) }
     }
 
-    func algorithmMgdlRanges() -> LoopAlgorithm.GlucoseRangeTimeline where Element == LoopKit.AbsoluteScheduleValue<ClosedRange<LoopQuantity>> {
+    public func algorithmMgdlRanges() -> LoopAlgorithm.GlucoseRangeTimeline where Element == LoopKit.AbsoluteScheduleValue<ClosedRange<LoopQuantity>> {
         map {
             LoopAlgorithm.AbsoluteScheduleValue(startDate: $0.startDate, endDate: $0.endDate,
                                                 value: $0.value.lowerBound.doubleValue(for: .milligramsPerDeciliter)...$0.value.upperBound.doubleValue(for: .milligramsPerDeciliter))
@@ -73,67 +74,56 @@ extension Array {
 // LoopAlgorithm's results, as LoopKit values for storage and charts.
 
 extension LoopAlgorithm.GlucoseEffect {
-    var loopKit: LoopKit.GlucoseEffect {
+    public var loopKit: LoopKit.GlucoseEffect {
         LoopKit.GlucoseEffect(startDate: startDate, quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl))
     }
 }
 
 extension LoopAlgorithm.PredictedGlucoseValue {
-    var loopKit: LoopKit.PredictedGlucoseValue {
+    public var loopKit: LoopKit.PredictedGlucoseValue {
         LoopKit.PredictedGlucoseValue(startDate: startDate, quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl))
     }
 }
 
 extension LoopAlgorithm.GlucoseEffectVelocity {
-    var loopKit: LoopKit.GlucoseEffectVelocity {
+    public var loopKit: LoopKit.GlucoseEffectVelocity {
         LoopKit.GlucoseEffectVelocity(startDate: startDate, endDate: endDate,
                                       quantity: LoopQuantity(unit: .milligramsPerDeciliterPerSecond, doubleValue: mgdlPerSecond))
     }
 }
 
 extension LoopAlgorithm.CarbValue {
-    var loopKit: LoopKit.CarbValue {
+    public var loopKit: LoopKit.CarbValue {
         LoopKit.CarbValue(startDate: startDate, endDate: endDate, value: value)
     }
 }
 
 extension LoopAlgorithm.InsulinValue {
-    var loopKit: LoopKit.InsulinValue {
+    public var loopKit: LoopKit.InsulinValue {
         LoopKit.InsulinValue(startDate: startDate, value: value)
     }
 }
 
-extension LoopAlgorithm.BasalRelativeDose {
-    var chartedDose: ChartedDose {
-        let type: ChartedDose.DoseType
-        switch self.type {
-        case .bolus: type = .bolus
-        case .basal: type = .basal
-        }
-        return ChartedDose(type: type, startDate: startDate, endDate: endDate, volume: volume, netBasalUnits: netBasalUnits)
-    }
-}
-
 extension LoopAlgorithm.GlucoseChange {
-    var loopKit: LoopKit.GlucoseChange {
+    public var loopKit: LoopKit.GlucoseChange {
         LoopKit.GlucoseChange(startDate: startDate, endDate: endDate, quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl))
     }
 }
 
 extension LoopAlgorithm.SimpleGlucoseValue {
-    var loopKit: LoopKit.SimpleGlucoseValue {
+    public var loopKit: LoopKit.SimpleGlucoseValue {
         LoopKit.SimpleGlucoseValue(startDate: startDate, endDate: endDate, quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: mgdl))
     }
 }
 
 extension LoopAlgorithm.TempBasalRecommendation {
-    var loopKit: LoopKit.TempBasalRecommendation {
+    public var loopKit: LoopKit.TempBasalRecommendation {
         LoopKit.TempBasalRecommendation(unitsPerHour: unitsPerHour, duration: duration)
     }
 }
 
 extension LoopAlgorithm.AutomaticDoseRecommendation.Direction {
-    var loopKit: LoopKit.AutomaticDoseRecommendation.Direction {
+    public var loopKit: LoopKit.AutomaticDoseRecommendation.Direction {
         switch self {
         case .decrease: .decrease
         case .neutral: .neutral
@@ -143,13 +133,13 @@ extension LoopAlgorithm.AutomaticDoseRecommendation.Direction {
 }
 
 extension LoopAlgorithm.AutomaticDoseRecommendation {
-    var loopKit: LoopKit.AutomaticDoseRecommendation {
+    public var loopKit: LoopKit.AutomaticDoseRecommendation {
         LoopKit.AutomaticDoseRecommendation(basalAdjustment: basalAdjustment.loopKit, direction: direction.loopKit, bolusUnits: bolusUnits)
     }
 }
 
 extension LoopAlgorithm.BolusRecommendationNotice {
-    var loopKit: LoopKit.BolusRecommendationNotice {
+    public var loopKit: LoopKit.BolusRecommendationNotice {
         switch self {
         case .glucoseBelowSuspendThreshold(let minGlucose):
             return .glucoseBelowSuspendThreshold(minGlucose: minGlucose.loopKit)
@@ -166,19 +156,19 @@ extension LoopAlgorithm.BolusRecommendationNotice {
 }
 
 extension LoopAlgorithm.ManualBolusRecommendation {
-    var loopKit: LoopKit.ManualBolusRecommendation {
+    public var loopKit: LoopKit.ManualBolusRecommendation {
         LoopKit.ManualBolusRecommendation(amount: amount, notice: notice?.loopKit)
     }
 }
 
 extension Array {
-    func loopKitSchedule<T>() -> [LoopKit.AbsoluteScheduleValue<T>] where Element == LoopAlgorithm.AbsoluteScheduleValue<T> {
+    public func loopKitSchedule<T>() -> [LoopKit.AbsoluteScheduleValue<T>] where Element == LoopAlgorithm.AbsoluteScheduleValue<T> {
         map { LoopKit.AbsoluteScheduleValue(startDate: $0.startDate, endDate: $0.endDate, value: $0.value) }
     }
 }
 
 extension LoopKit.TempBasalRecommendation {
-    var algorithm: LoopAlgorithm.TempBasalRecommendation {
+    public var algorithm: LoopAlgorithm.TempBasalRecommendation {
         LoopAlgorithm.TempBasalRecommendation(unitsPerHour: unitsPerHour, duration: duration)
     }
 }

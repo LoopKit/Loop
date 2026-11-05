@@ -8,7 +8,7 @@
 
 import XCTest
 import LoopAlgorithm
-import LoopCore
+@testable import LoopCore
 import LoopKit
 
 @testable import Loop
