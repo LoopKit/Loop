@@ -138,7 +138,9 @@ extension WatchCGMHost: CGMManagerDelegate {
                 scheduleAcquisitionBackstop()
             case .error(let error):
                 log.error("CGM reading error: %{public}@", String(describing: error))
-            case .noData, .unreliableData:
+            case .unreliableData:
+                LoopDataManager.shared.directGlucoseUnreliable()
+            case .noData:
                 break
             }
         }
