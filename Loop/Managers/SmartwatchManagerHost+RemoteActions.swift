@@ -211,6 +211,11 @@ extension SmartwatchManagerHost {
             logWatchRequest(manager, type: .error, String(format: "Mute request from the watch refused: expiredRequest (confirmed %.0f s ago)", Date().timeIntervalSince(request.requestedAt)))
             throw SmartwatchAlertMuteError.expiredRequest
         }
+        guard duration > 0 else {
+            alertMuter.unmuteAlerts()
+            logWatchRequest(manager, type: .receive, "Alerts unmuted from the watch")
+            return Date()
+        }
         let allowed = AlertMuter.allowedDurations
         let muteDuration = allowed.first { $0 >= duration } ?? allowed[allowed.count - 1]
         alertMuter.configuration = AlertMuter.Configuration(startTime: Date(), duration: muteDuration)
