@@ -374,7 +374,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 }
             }
             
-            cell.isEditable = allowEditing
+            cell.isEditable = canEdit(status.entry)
             return cell
         }
     }
@@ -462,8 +462,13 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         case .totals:
             return nil
         case .entries:
-            return (allowEditing && carbStatuses[indexPath.row].entry.createdByCurrentApp) ? indexPath : nil
+            return canEdit(carbStatuses[indexPath.row].entry) ? indexPath : nil
         }
+    }
+
+    // Entries older than the carb entry window are delete-only.
+    private func canEdit(_ entry: StoredCarbEntry) -> Bool {
+        allowEditing && entry.createdByCurrentApp && entry.startDate >= Date().addingTimeInterval(LoopConstants.maxCarbEntryPastTime)
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
