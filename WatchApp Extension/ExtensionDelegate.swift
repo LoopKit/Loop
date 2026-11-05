@@ -159,7 +159,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             case let task as WKSnapshotRefreshBackgroundTask:
                 log.default("Processing WKSnapshotRefreshBackgroundTask")
                 task.setTaskCompleted(restoredDefaultState: false, estimatedSnapshotExpiration: Date(timeIntervalSinceNow: TimeInterval(minutes: 5)), userInfo: nil)
-                return  // Don't call the standard setTaskCompleted handler
+                continue  // Don't call the standard setTaskCompleted handler
             case is WKURLSessionRefreshBackgroundTask:
                 break
             case let task as WKWatchConnectivityRefreshBackgroundTask:
@@ -172,7 +172,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
                 }
 
                 completePendingConnectivityTasksIfNeeded()
-                return // Defer calls to the setTaskCompleted handler
+                continue // Defer calls to the setTaskCompleted handler
             default:
                 break
             }
