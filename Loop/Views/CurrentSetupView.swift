@@ -75,6 +75,11 @@ struct CurrentSetupView: View {
                           before?.glucose.averageGlucose.map(glucose), after.glucose.averageGlucose.map(glucose))
             comparisonRow(NSLocalizedString("Insulin per Day", comment: "Setup comparison row for average daily insulin"),
                           before?.insulinPerDay.map(units), after.insulinPerDay.map(units))
+            if let insulinStart = before?.insulinStart {
+                Text(String(format: NSLocalizedString("Insulin before the change is from %@, when the dose records start.", comment: "Note under insulin per day when the dose records start partway into the 3 weeks before the change (1: date)"), insulinStart.formatted(date: .abbreviated, time: .omitted)))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
             if !after.glucose.agpProfile.isEmpty {
                 MedianComparisonChartView(before: before?.glucose.agpProfile ?? [], after: after.glucose.agpProfile, unit: displayGlucosePreference.unit)
                     .frame(height: 200)

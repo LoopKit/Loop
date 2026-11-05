@@ -28,6 +28,8 @@ final class CurrentSetupViewModel: ObservableObject {
 
     private var samples: [StoredGlucoseSample] = []
     private var insulin: InsulinDeliveryHistory?
+    /// Taken before the data loads, so the data covers up to it
+    private var loadedAt: Date?
 
     init(selected: SetupChange?,
          loadHistory: @escaping () async throws -> SetupHistory,
@@ -57,6 +59,7 @@ final class CurrentSetupViewModel: ObservableObject {
         self.history = history
         selected = history.latest
         let end = now()
+        loadedAt = end
         if let glucoseStore {
             samples = (try? await glucoseStore.getGlucoseSamples(start: end - cacheDuration, end: end))?
                 .filter { !$0.isDisplayOnly && !$0.wasUserEntered } ?? []
@@ -79,6 +82,6 @@ final class CurrentSetupViewModel: ObservableObject {
             comparison = nil
             return
         }
-        comparison = SetupComparison(change: selected, samples: samples, insulinHistory: insulin, now: now())
+        comparison = SetupComparison(change: selected, samples: samples, insulinHistory: insulin, now: loadedAt ?? now())
     }
 }
