@@ -34,6 +34,7 @@ extension DeviceDataManager {
         }
         let task = UIApplication.shared.beginBackgroundTask(withName: "LoanPush")
         controller.handlePush(push)
+        // A timer is safe here: it runs inside the background time just asked for, and only ends it.
         DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
             UIApplication.shared.endBackgroundTask(task)
         }
