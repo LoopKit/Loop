@@ -112,6 +112,32 @@ final class SetupComparisonTests: XCTestCase {
         XCTAssertNotNil(comparison.after.insulinPerDay)
     }
 
+    func testInsulinBeforeFromWhenTheDoseRecordsStart() throws {
+        let now = changeDate.addingTimeInterval(.days(2))
+        let glucose = samples(from: changeDate - .days(21), to: now) { _ in 120 }
+        let recordsStart = changeDate - .days(18)
+        let history = InsulinDeliveryHistory(
+            doses: [],
+            scheduledBasal: [AbsoluteScheduleValue(startDate: changeDate - .days(21), endDate: now, value: 1.0)],
+            coverageStart: recordsStart,
+            end: now)
+        let comparison = try XCTUnwrap(SetupComparison(change: change(), samples: glucose, insulinHistory: history, now: now))
+
+        XCTAssertEqual(comparison.before?.insulinPerDay ?? 0, 24, accuracy: 0.001)
+        XCTAssertEqual(comparison.before?.insulinStart, recordsStart)
+        XCTAssertNil(comparison.after.insulinStart)
+    }
+
+    func testNoInsulinBeforeWithLessThanTwoWeeksOfDoseRecords() throws {
+        let now = changeDate.addingTimeInterval(.days(2))
+        let glucose = samples(from: changeDate - .days(21), to: now) { _ in 120 }
+        let history = InsulinDeliveryHistory(doses: [], scheduledBasal: [], coverageStart: changeDate - .days(10), end: now)
+        let comparison = try XCTUnwrap(SetupComparison(change: change(), samples: glucose, insulinHistory: history, now: now))
+
+        XCTAssertNil(comparison.before?.insulinPerDay)
+        XCTAssertNil(comparison.before?.insulinStart)
+    }
+
     /// A clock that moves on with every reading, as the real one does.
     private final class Clock {
         var date: Date
