@@ -32,6 +32,7 @@ class StatusTableViewModel {
     let settingsViewModel: SettingsViewModel
 
     var pendingPreset: SelectablePreset?
+    var isPodLoanedToWatch = false
 
     init(alertPermissionsChecker: AlertPermissionsChecker, alertMuter: AlertMuter, deviceDataManager: DeviceDataManager, onboardingManager: OnboardingManager, supportManager: SupportManager, testingScenariosManager: TestingScenariosManager?, settingsManager: SettingsManager, temporaryPresetsManager: TemporaryPresetsManager, loopDataManager: LoopDataManager, diagnosticReportGenerator: DiagnosticReportGenerator, simulatedData: SimulatedData, analyticsServicesManager: AnalyticsServicesManager, servicesManager: ServicesManager, carbStore: CarbStore, doseStore: DoseStore, criticalEventLogExportManager: CriticalEventLogExportManager, bluetoothStateManager: BluetoothStateManager, settingsViewModel: SettingsViewModel) {
         self.alertPermissionsChecker = alertPermissionsChecker
