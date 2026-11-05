@@ -169,13 +169,14 @@ extension LoanMessage {
         }
     }
 
-    /// Sent by the immediate path, and queued as well: a grant, a query and its answers, the report and
-    /// the stop. An immediate message is lost if the sending app goes inactive before it is delivered: a
-    /// lost query reads as silence, and a lost stop leaves a watch looping beside the phone; the queued
-    /// copy survives that. Both sides drop the later duplicate.
+    /// Sent by the immediate path, and queued as well: a grant, its confirmation, a query and its answers,
+    /// the report and the stop. An immediate message is lost if the sending app goes inactive before it
+    /// is delivered: a lost query reads as silence, a lost stop leaves a watch looping beside the phone,
+    /// and a lost confirmation lets the phone take back, after the lease, a pod the watch holds; the
+    /// queued copy survives that. Both sides drop the later duplicate.
     public var ridesBothChannels: Bool {
         switch self {
-        case .grant, .statusQuery, .statusReport, .revoke:
+        case .grant, .takeoverComplete, .statusQuery, .statusReport, .revoke:
             return true
         default:
             return false

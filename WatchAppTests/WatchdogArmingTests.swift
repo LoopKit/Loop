@@ -52,6 +52,17 @@ final class WatchdogArmingTests: XCTestCase {
         XCTAssertEqual(interval(of: reqs[0]), 2 * 60, "this times a COMMIT acknowledgement, not presence — a 5 s budget split the pod")
     }
 
+    /// A new pod's takeover asks for the screen again at 30 s through the system, and only once.
+    func testTakeoverScreenAlertArmsOnceAtThirtySecondsAndDisarms() {
+        TakeoverScreenAlert.arm()
+        TakeoverScreenAlert.arm()
+        let reqs = pending()
+        XCTAssertEqual(reqs.count, 1, "re-arming replaces")
+        XCTAssertEqual(interval(of: reqs[0]), 30)
+        TakeoverScreenAlert.disarm()
+        XCTAssertTrue(pending().isEmpty, "the pod reached, or the takeover over: withdrawn")
+    }
+
     // MARK: - Replacement, which is the whole mechanism
 
     /// Stacking would fire the first alarm during a healthy loop.

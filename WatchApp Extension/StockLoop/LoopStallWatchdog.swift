@@ -75,6 +75,25 @@ enum NotHearingFromPhoneAlert {
 }
 
 /// Fires if a hand-back never completes.
+/// A new pod's takeover needs Loop on screen to search for it. The first tap, at 8 s, runs inside the
+/// takeover's Bluetooth run time; this asks again at 30 s through the system, which shows it even while
+/// Loop is asleep. Withdrawn once the pod is reached or the takeover ends.
+enum TakeoverScreenAlert {
+    static let interval: TimeInterval = 30
+
+    private static let identifier = "sportmode.takeoverScreen"
+
+    static func arm() {
+        WristAlerts.arm(identifier, after: interval,
+                        title: NSLocalizedString("Open Loop", comment: "New-pod takeover alert title: the search needs Loop on screen"),
+                        body: NSLocalizedString("Open Loop on the watch to finish starting Sport Mode with the new pod.", comment: "New-pod takeover alert body"))
+    }
+
+    static func disarm() {
+        WristAlerts.disarm([identifier])
+    }
+}
+
 enum HandbackStuckAlert {
     /// Covers two offers and a pod read; shorter would abandon a hand-back mid-commit.
     static let interval: TimeInterval = 2 * 60

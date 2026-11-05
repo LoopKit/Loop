@@ -79,7 +79,12 @@ extension WatchDataManager {
         guard FeatureFlags.sportModeEnabled else { return }
         // Every loop update pings the refresher; its gating is inside.
         podLoanController.considerDormantRefresh(bookChanged: updateContext == .insulin || updateContext == .carbs)
-        // The watch's hold on the pod lapses by itself when its renewals stop — same pulse.
+        // The watch's hold on the pod lapses by itself when its renewals stop — same pulse; so do the
+        // checks that would otherwise wait on a timer the phone sleeps through.
+        podLoanController.judgeOpenQuestion()
+        podLoanController.considerUnconfirmedTakeover()
+        podLoanController.considerOwedTakeBack()
+        podLoanController.considerStuckHandback()
         podLoanController.considerHoldLapse()
         podLoanController.considerOwedForceReclaimAudit()
     }
