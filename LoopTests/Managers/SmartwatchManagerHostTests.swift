@@ -19,6 +19,28 @@ final class SmartwatchManagerHostTests: XCTestCase {
         GlucoseAlarmKind.allCases.map(\.testAlertIdentifier)
     }
 
+    /// A watch bolus that reached the pump counts for the time between boluses,
+    /// delivered or not: a failure can be uncertain. Only a delivered one counts
+    /// toward the daily total.
+    func testABolusThatReachedThePumpCountsForTheTimeBetweenBoluses() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let token = UUID()
+        let context = SmartwatchBolusContext(token: token, issuedAt: now.addingTimeInterval(-60), recommendedBolus: 2, maximumBolus: 5, supportedBolusVolumes: [])
+        func evaluate(_ deliveries: [SmartwatchBolusPolicy.Delivery], at date: Date) -> Result<Double, SmartwatchBolusError> {
+            SmartwatchBolusPolicy(isAllowed: true, currentContext: context, latestGlucoseDate: date.addingTimeInterval(-60), recentDeliveries: deliveries, roundToSupportedVolume: { $0 })
+                .evaluate(SmartwatchBolusRequest(units: 1, contextToken: token, requestedAt: date), now: date)
+        }
+
+        let failed = SmartwatchManagerHost.bolusAttempted(at: now, in: [])
+        XCTAssertEqual(evaluate(failed, at: now.addingTimeInterval(60)), .failure(.rateLimited))
+        XCTAssertEqual(evaluate(failed, at: now.addingTimeInterval(5 * 60 + 1)), .success(1))
+        XCTAssertEqual(failed.reduce(0) { $0 + $1.units }, 0)
+
+        let delivered = SmartwatchManagerHost.bolusDelivered(1.5, attemptedAt: now, in: failed)
+        XCTAssertEqual(delivered, [SmartwatchBolusPolicy.Delivery(date: now, units: 1.5)])
+        XCTAssertEqual(evaluate(delivered, at: now.addingTimeInterval(60)), .failure(.rateLimited))
+    }
+
     /// A test alert counts as its alarm's, so the watch colours its ring and buzzes for it.
     func testTestAlertsHaveTheirAlarmsGlucoseType() {
         XCTAssertEqual(SmartwatchManagerHost.glucoseAlertType(of: identifier(GlucoseAlarmKind.urgentLow.testAlertIdentifier)), .urgentLow)

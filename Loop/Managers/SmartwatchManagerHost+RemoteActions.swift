@@ -124,6 +124,12 @@ extension SmartwatchManagerHost {
         bolusContextIssuer.beginDelivery(of: request)
         defer { bolusContextIssuer.endDelivery() }
         logWatchRequest(manager, type: .delegate, String(format: "Delivering watch bolus of %.3f U", units))
+        // Counted for the time between watch boluses from here, whether or not the
+        // pump reports it delivered: a failure can be uncertain (the pump lost
+        // contact mid-bolus), and a resend at once could give it twice. Only a
+        // delivered bolus counts toward the daily total.
+        let attemptedAt = Date()
+        UserDefaults.standard.watchBolusDeliveries = Self.bolusAttempted(at: attemptedAt, in: UserDefaults.standard.watchBolusDeliveries)
         do {
             try await deliverBolus(units)
         } catch {
@@ -131,7 +137,7 @@ extension SmartwatchManagerHost {
             refresh()
             throw SmartwatchBolusError.deliveryFailed(String(describing: error))
         }
-        UserDefaults.standard.watchBolusDeliveries += [SmartwatchBolusPolicy.Delivery(date: Date(), units: units)]
+        UserDefaults.standard.watchBolusDeliveries = Self.bolusDelivered(units, attemptedAt: attemptedAt, in: UserDefaults.standard.watchBolusDeliveries)
         logWatchRequest(manager, type: .delegateResponse, String(format: "Watch bolus of %.3f U delivered", units))
         refresh()
         return units
@@ -267,6 +273,18 @@ extension SmartwatchManagerHost {
 
     /// Loop's absorption time for the watch's choice: fast, medium or slow as
     /// in carb entry; medium when the watch didn't say (older watches).
+    /// The watch boluses `SmartwatchBolusPolicy` counts, with an attempt at `date`:
+    /// 0 U, so it counts for the time between boluses but not the daily total.
+    static func bolusAttempted(at date: Date, in deliveries: [SmartwatchBolusPolicy.Delivery]) -> [SmartwatchBolusPolicy.Delivery] {
+        deliveries + [SmartwatchBolusPolicy.Delivery(date: date, units: 0)]
+    }
+
+    /// The attempt at `attemptedAt` delivered `units`: they count toward the daily total too.
+    static func bolusDelivered(_ units: Double, attemptedAt: Date, in deliveries: [SmartwatchBolusPolicy.Delivery]) -> [SmartwatchBolusPolicy.Delivery] {
+        deliveries.filter { $0 != SmartwatchBolusPolicy.Delivery(date: attemptedAt, units: 0) }
+            + [SmartwatchBolusPolicy.Delivery(date: attemptedAt, units: units)]
+    }
+
     static func absorptionTime(_ absorption: SmartwatchCarbAbsorption?) -> TimeInterval {
         switch absorption {
         case .fast: LoopCoreConstants.defaultCarbAbsorptionTimes.fast
