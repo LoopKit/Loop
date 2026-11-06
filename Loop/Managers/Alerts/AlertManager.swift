@@ -21,6 +21,17 @@ public enum AlertUserNotificationUserInfoKey: String {
     case alert, alertTimestamp
 }
 
+/// A sink that renders Loop's alerts somewhere beyond the phone — such as a
+/// watch plugin that buzzes and shows them. Registered with `addAlertForwarder`
+/// and called from the same fan-out as the modal and notification schedulers, so
+/// it receives the `muted` determination Loop uses for notification sound. That
+/// determination covers critical alerts too: Loop's mute delivers them at volume 0.
+@MainActor
+protocol AlertForwarder: AnyObject {
+    func alertManager(_ manager: AlertManager, didIssueAlert alert: Alert, muted: Bool)
+    func alertManager(_ manager: AlertManager, didRetractAlertWithIdentifier identifier: Alert.Identifier)
+}
+
 /// Main (singleton-ish) class that is responsible for:
 /// - managing the different targets (handlers) that will post alerts
 /// - managing the different responders that might acknowledge the alert
@@ -37,6 +48,9 @@ public final class AlertManager {
 
     private var responders: [String: Weak<AlertResponder>] = [:]
     private var soundVendors: [String: Weak<AlertSoundVendor>] = [:]
+
+    private struct WeakAlertForwarder { weak var value: AlertForwarder? }
+    private var alertForwarders: [WeakAlertForwarder] = []
 
     // Defer issuance of new alerts until playback is done
     private var deferredAlerts: [Alert] = []
@@ -141,6 +155,11 @@ public final class AlertManager {
 
     public func removeAlertSoundVendor(managerIdentifier: String) {
         soundVendors.removeValue(forKey: managerIdentifier)
+    }
+
+    func addAlertForwarder(_ forwarder: AlertForwarder) {
+        alertForwarders.removeAll { $0.value == nil || $0.value === forwarder }
+        alertForwarders.append(WeakAlertForwarder(value: forwarder))
     }
 
     // MARK: - Bluetooth alerts
@@ -446,6 +465,9 @@ extension AlertManager: AlertIssuer {
             criticalAlertAudioPlayer.play(soundNamed: inAppSound, boostVolume: false)
         }
         playCriticalAlertAudioFallbackIfNeeded(for: alert, muted: muted, issuedDate: issuedDate)
+        for forwarder in alertForwarders.compactMap(\.value) {
+            forwarder.alertManager(self, didIssueAlert: alert, muted: muted)
+        }
     }
 
     private func inAppSoundThroughSilent(for alert: Alert) -> String? {
@@ -463,6 +485,9 @@ extension AlertManager: AlertIssuer {
         userNotificationAlertScheduler.unscheduleAlert(identifier: identifier)
         criticalAlertAlarmScheduler.cancelAlarm(for: identifier)
         criticalAlertAudioPlayer.stop()
+        for forwarder in alertForwarders.compactMap(\.value) {
+            forwarder.alertManager(self, didRetractAlertWithIdentifier: identifier)
+        }
     }
 
     /// When the system can't deliver a true Critical Alert (no

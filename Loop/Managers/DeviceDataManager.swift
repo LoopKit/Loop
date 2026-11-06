@@ -166,6 +166,23 @@ final class DeviceDataManager {
     @PersistedProperty(key: "PumpManagerState")
     var rawPumpManager: PumpManager.RawValue?
 
+    // MARK: - Watch
+
+    var smartwatchManager: SmartwatchManagerUI? {
+        didSet {
+            // Restoring at launch starts from nil, so this only fires on removal or replacement.
+            if let oldValue, smartwatchManager.map({ ($0 as AnyObject) !== (oldValue as AnyObject) }) ?? true {
+                UserDefaults.standard.resetWatchPermissions()
+            }
+            setupWatch()
+            NotificationCenter.default.post(name: .SmartwatchManagerChanged, object: self, userInfo: nil)
+            rawSmartwatchManager = smartwatchManager?.rawValue
+        }
+    }
+
+    @PersistedProperty(key: "SmartwatchManagerState")
+    var rawSmartwatchManager: SmartwatchManager.RawValue?
+
     
     var doseEnactor = DoseEnactor()
     
@@ -241,6 +258,9 @@ final class DeviceDataManager {
     private(set) var loopControl: LoopControl
 
     private weak var displayGlucoseUnitBroadcaster: DisplayGlucoseUnitBroadcaster?
+
+    /// Sends Loop's state to `smartwatchManager`.
+    weak var smartwatchManagerHost: SmartwatchManagerHost?
 
     init(pluginManager: PluginManager,
          deviceLog: PersistentDeviceLog,
@@ -351,6 +371,15 @@ final class DeviceDataManager {
                 // assign cgmManager = nil — that would delete the persisted CGMManagerState (same
                 // footgun as the pump path above). Preserve it for a future launch with the plugin.
                 log.error("Saved CGM manager plugin unavailable; preserving persisted CGMManagerState for a future launch")
+            }
+        }
+
+        if let smartwatchManagerRawValue = rawSmartwatchManager {
+            if let restoredSmartwatchManager = smartwatchManagerFromRawValue(smartwatchManagerRawValue) {
+                smartwatchManager = restoredSmartwatchManager
+            } else {
+                // As for the pump and CGM: keep the saved state for a build that includes the plugin.
+                log.error("Saved watch manager plugin unavailable; preserving persisted SmartwatchManagerState for a future launch")
             }
         }
     }
@@ -562,6 +591,37 @@ final class DeviceDataManager {
         return .success(result)
     }
 
+    var availableSmartwatchManagers: [SmartwatchManagerDescriptor] {
+        pluginManager.availableSmartwatchManagers
+    }
+
+    struct UnknownSmartwatchManagerIdentifierError: Error {}
+
+    func setupSmartwatchManager(withIdentifier identifier: String) -> Swift.Result<SetupUIResult<SmartwatchManagerViewController, SmartwatchManagerUI>, Error> {
+        guard let smartwatchManagerUIType = pluginManager.getSmartwatchManagerTypeByIdentifier(identifier) else {
+            return .failure(UnknownSmartwatchManagerIdentifierError())
+        }
+
+        let result = smartwatchManagerUIType.setupViewController(bluetoothProvider: bluetoothProvider, displayGlucosePreference: displayGlucosePreference, colorPalette: .default, allowDebugFeatures: FeatureFlags.allowDebugFeatures)
+        if case .createdAndOnboarded(let smartwatchManagerUI) = result {
+            smartwatchManagerOnboarding(didCreateSmartwatchManager: smartwatchManagerUI)
+            smartwatchManagerOnboarding(didOnboardSmartwatchManager: smartwatchManagerUI)
+        }
+
+        return .success(result)
+    }
+
+    func smartwatchManagerFromRawValue(_ rawValue: [String: Any]) -> SmartwatchManagerUI? {
+        guard let managerIdentifier = rawValue["managerIdentifier"] as? String,
+              let rawState = rawValue["state"] as? SmartwatchManager.RawStateValue,
+              let Manager = pluginManager.getSmartwatchManagerTypeByIdentifier(managerIdentifier)
+        else {
+            return nil
+        }
+
+        return Manager.init(rawState: rawState)
+    }
+
     public func cgmManagerTypeByIdentifier(_ identifier: String) -> CGMManagerUI.Type? {
         return pluginManager.getCGMManagerTypeByIdentifier(identifier) ?? staticCGMManagersByIdentifier[identifier] as? CGMManagerUI.Type
     }
@@ -704,6 +764,11 @@ private extension DeviceDataManager {
         }
     }
 
+    func setupWatch() {
+        smartwatchManager?.smartwatchManagerDelegate = self
+        reportPluginInitializationComplete()
+    }
+
     func setupPump() {
         dispatchPrecondition(condition: .onQueue(.main))
 
@@ -784,6 +849,12 @@ extension DeviceDataManager {
         if let pumpManager = pumpManager {
             if !allActivePlugins.contains(where: { $0.pluginIdentifier == pumpManager.pluginIdentifier }) {
                 allActivePlugins.append(pumpManager)
+            }
+        }
+
+        if let smartwatchManager = smartwatchManager {
+            if !allActivePlugins.contains(where: { $0.pluginIdentifier == smartwatchManager.pluginIdentifier }) {
+                allActivePlugins.append(smartwatchManager)
             }
         }
         
@@ -1005,6 +1076,115 @@ extension DeviceDataManager: CGMManagerDelegate {
             }
             self.glucoseStore.managedDataInterval = manager.managedDataInterval
         }
+    }
+}
+
+// MARK: - SmartwatchManagerDelegate
+extension DeviceDataManager: SmartwatchManagerDelegate {
+    nonisolated
+    func smartwatchManagerDidUpdateState(_ manager: SmartwatchManager) {
+        Task { @MainActor in
+            rawSmartwatchManager = manager.rawValue
+        }
+    }
+
+    nonisolated
+    func smartwatchManagerWantsDeletion(_ manager: SmartwatchManager) async {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.main.async {
+                self.log.default("Watch manager with identifier '%{public}@' wants deletion", manager.pluginIdentifier)
+                self.smartwatchManager = nil
+                continuation.resume()
+            }
+        }
+    }
+
+    nonisolated
+    func smartwatchManagerRequestsRefresh(_ manager: SmartwatchManager) {
+        Task { @MainActor in
+            // Requested capabilities may have changed, which shows or hides Watch Permissions.
+            NotificationCenter.default.post(name: .SmartwatchManagerCapabilitiesChanged, object: self, userInfo: nil)
+            smartwatchManagerHost?.refresh()
+        }
+    }
+
+    nonisolated
+    func smartwatchManager(_ manager: SmartwatchManager, didLogEvent event: SmartwatchDeviceLogEntry) {
+        Task { @MainActor in
+            deviceLog.log(managerIdentifier: manager.pluginIdentifier, deviceIdentifier: event.deviceIdentifier, type: DeviceLogEntryType(event.type), message: event.message, completion: nil)
+        }
+    }
+
+    /// Shows the plugin's alert about the watch as Loop's own alert from this
+    /// plugin. A plugin can't raise a critical alert: at most time-sensitive.
+    nonisolated
+    func smartwatchManager(_ manager: SmartwatchManager, issueDeviceAlert alert: SmartwatchDeviceAlert) {
+        let loopAlert = Alert(alert, from: manager, acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Alert acknowledgment OK button"))
+        Task { @MainActor in
+            deviceLog.log(managerIdentifier: manager.pluginIdentifier, deviceIdentifier: nil, type: .error, message: "Watch plugin alert: \(alert.title): \(alert.body)", completion: nil)
+            await alertManager?.issueAlert(loopAlert)
+        }
+    }
+
+    nonisolated
+    func smartwatchManager(_ manager: SmartwatchManager, retractDeviceAlert identifier: SmartwatchAlertIdentifier) {
+        let loopIdentifier = Alert.Identifier(identifier, from: manager)
+        Task { @MainActor in
+            await alertManager?.retractAlert(identifier: loopIdentifier)
+        }
+    }
+
+    nonisolated
+    func smartwatchManager(_ manager: SmartwatchManager, requestBolus request: SmartwatchBolusRequest) async throws -> Double {
+        guard let host = await smartwatchManagerHost else {
+            throw SmartwatchBolusError.notAllowed
+        }
+        return try await host.handleBolusRequest(request, from: manager)
+    }
+
+    nonisolated
+    func smartwatchManager(_ manager: SmartwatchManager, recommendBolusFor request: SmartwatchBolusRecommendationRequest) async throws -> SmartwatchBolusRecommendation {
+        guard let host = await smartwatchManagerHost else {
+            throw SmartwatchBolusError.notAllowed
+        }
+        return try await host.handleBolusRecommendationRequest(request, from: manager)
+    }
+
+    nonisolated
+    func smartwatchManager(_ manager: SmartwatchManager, requestAlertMute request: SmartwatchAlertMuteRequest) async throws -> Date {
+        guard let host = await smartwatchManagerHost else {
+            throw SmartwatchAlertMuteError.notAllowed
+        }
+        return try await host.handleAlertMuteRequest(request, from: manager)
+    }
+
+    nonisolated
+    func smartwatchManager(_ manager: SmartwatchManager, requestCarbEntry request: SmartwatchCarbEntryRequest) async throws -> Double {
+        guard let host = await smartwatchManagerHost else {
+            throw SmartwatchCarbEntryError.notAllowed
+        }
+        return try await host.handleCarbEntryRequest(request, from: manager)
+    }
+
+    nonisolated
+    func smartwatchManager(_ manager: SmartwatchManager, requestOverride request: SmartwatchOverrideRequest) async throws {
+        guard let host = await smartwatchManagerHost else {
+            throw SmartwatchPresetError.notAllowed
+        }
+        try await host.handleOverrideRequest(request, from: manager)
+    }
+}
+
+// MARK: - SmartwatchManagerOnboardingDelegate
+extension DeviceDataManager: SmartwatchManagerOnboardingDelegate {
+    func smartwatchManagerOnboarding(didCreateSmartwatchManager smartwatchManager: SmartwatchManagerUI) {
+        log.default("Watch manager with identifier '%{public}@' created", smartwatchManager.pluginIdentifier)
+        self.smartwatchManager = smartwatchManager
+    }
+
+    func smartwatchManagerOnboarding(didOnboardSmartwatchManager smartwatchManager: SmartwatchManagerUI) {
+        log.default("Watch manager with identifier '%{public}@' onboarded", smartwatchManager.pluginIdentifier)
+        smartwatchManagerHost?.refresh()
     }
 }
 
@@ -1335,6 +1515,8 @@ extension DeviceDataManager: BolusDurationEstimator {
 extension Notification.Name {
     static let PumpManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpManagerChanged")
     static let CGMManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.CGMManagerChanged")
+    static let SmartwatchManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.SmartwatchManagerChanged")
+    static let SmartwatchManagerCapabilitiesChanged = Notification.Name(rawValue:  "com.loopKit.notification.SmartwatchManagerCapabilitiesChanged")
     static let PumpEventsAdded = Notification.Name(rawValue:  "com.loopKit.notification.PumpEventsAdded")
 }
 
@@ -1435,6 +1617,8 @@ extension DeviceDataManager: DeviceSupportDelegate {
             self.cgmManager != nil ? String(reflecting: self.cgmManager!) : "cgmManager: nil",
             "",
             self.pumpManager != nil ? String(reflecting: self.pumpManager!) : "pumpManager: nil",
+            "",
+            self.smartwatchManager != nil ? String(reflecting: self.smartwatchManager!) : "smartwatchManager: nil",
             "",
             await deviceLog.generateDiagnosticReport()
             ]

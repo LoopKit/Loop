@@ -1939,6 +1939,9 @@
         }
       }
     },
+    "%1$@ adds the watch's carb entry like a remote carb entry, at most one every 5 minutes. In closed loop, %1$@ may dose for it." : {
+      "comment" : "Footer for Allow Carbs from Watch (1: app name)"
+    },
     "%1$@ also reads insulin data from other apps in Apple Health. Apple Health does not report whether an app may read data, so read access can't be shown here." : {
       "comment" : "Health access reading explanation (1: app name)"
     },
@@ -1980,6 +1983,9 @@
     },
     "%1$@ cannot turn your iPhone's volume up for you. Make sure your volume is turned up — especially overnight — or you may not hear urgent alarms. The Mute All App Sounds feature also silences these alarms while it is active." : {
       "comment" : "Critical alert audio fallback callout message (1: app name)"
+    },
+    "Up to %1$@'s recommendation and your maximum bolus. At most one every 5 minutes, and no more than 3 times your maximum bolus in 24 hours. Needs glucose from the last 15 minutes." : {
+      "comment" : "Footer for Allow Boluses from Watch (1: app name)"
     },
     "%1$@ has been active for more than 24 hours. Make sure you still want it enabled, or turn it off in the app." : {
       "comment" : "Active preset reminder alert background body. (1: preset name)"
@@ -2238,6 +2244,9 @@
           }
         }
       }
+    },
+    "%1$@ starts the preset picked on the watch, for the preset's own duration, or ends the running one, like a remote override." : {
+      "comment" : "Footer for Allow Presets from Watch (1: app name)"
     },
     "%1$@ Still Active" : {
       "comment" : "The format title for the preset still active alert. (1: preset name)"
@@ -4494,6 +4503,9 @@
         }
       }
     },
+    "Watches added in Settings → Devices (not Apple Watch) show your glucose and, if you allow it below, can ask %1$@ to act. %1$@ checks every request." : {
+      "comment" : "Explanation at the top of the watch permissions screen (1: app name)"
+    },
     "Above range (>180): %d%% · goal <25%%" : {
       "comment" : "TIR above-range summary"
     },
@@ -6105,6 +6117,9 @@
         }
       }
     },
+    "Add Watch" : {
+      "comment" : "The title of the watch chooser in settings\nTitle text for button to add a watch device"
+    },
     "Adjust Preset Duration" : {
 
     },
@@ -6892,6 +6907,18 @@
     },
     "All Presets" : {
 
+    },
+    "Allow Boluses from Watch" : {
+      "comment" : "Toggle allowing boluses requested from a watch plugin"
+    },
+    "Allow Carbs from Watch" : {
+      "comment" : "Toggle allowing carb entries requested from a watch plugin"
+    },
+    "Allow Mute from Watch" : {
+      "comment" : "Toggle allowing a watch to mute the app's alerts"
+    },
+    "Allow Presets from Watch" : {
+      "comment" : "Toggle allowing a watch to start and end override presets"
     },
     "Allowed" : {
       "comment" : "Health sharing status: authorized"
@@ -7931,6 +7958,9 @@
     },
     "Apple Health" : {
       "comment" : "Apple Health settings button text\nTitle of the Apple Health access screen"
+    },
+    "Apple Watch isn't added here. Loop's Apple Watch app is installed from the Watch app on your iPhone." : {
+      "comment" : "Footer of the watch chooser in settings: Apple Watch is not set up there"
     },
     "Are you sure you want to delete all history entries?" : {
       "comment" : "Action sheet confirmation message for pump history deletion",
@@ -14738,8 +14768,7 @@
       }
     },
     "Custom Preset" : {
-      "comment" : "The title of the cell indicating a generic custom preset is enabled",
-      "extractionState" : "stale",
+      "comment" : "Name of a custom preset sent to a watch",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -27131,6 +27160,9 @@
     "Muted until" : {
       "comment" : "Label for when mute alert will end"
     },
+    "Like Mute All App Sounds, critical alerts included, for the time picked on the watch. The watch can also end the mute." : {
+      "comment" : "Footer for Allow Mute from Watch (1: app name)"
+    },
     "Name" : {
       "comment" : "Label for name row on add favorite food screen\nPreset sorting option description for sorting by name",
       "localizations" : {
@@ -29747,6 +29779,9 @@
     },
     "Power lifting" : {
 
+    },
+    "Pre-Meal" : {
+      "comment" : "Name of the pre-meal preset sent to a watch"
     },
     "Pre-meal Preset" : {
       "comment" : "Status row title for premeal override enabled"
@@ -35704,6 +35739,9 @@
         }
       }
     },
+    "Tap here to set up a watch other than Apple Watch" : {
+      "comment" : "Descriptive text for button to add a watch device: Apple Watch uses Loop's own watch app"
+    },
     "Tap to Add" : {
       "comment" : "The subtitle of the cell displaying an action to add a manually measurement glucose value",
       "extractionState" : "stale",
@@ -37409,6 +37447,12 @@
     },
     "These recommendations should be used as a starting point. Checking your glucose during exercise will help you find the settings that work best for you." : {
 
+    },
+    "Third-Party Smartwatch" : {
+      "comment" : "The title of the section in settings for what a watch other than Apple Watch may do"
+    },
+    "Third-Party Smartwatch Permissions" : {
+      "comment" : "Header above the watch permission toggles"
     },
     "This device keeps %d days of glucose. Increase the cache duration and rebuild to review the full period." : {
       "comment" : "Notice when the local cache limits the statistics history"
@@ -40337,6 +40381,15 @@
         }
       }
     },
+    "Watch" : {
+      "comment" : "Descriptive text for a watch plugin in Settings → Devices"
+    },
+    "Watch Permissions" : {
+      "comment" : "Watch permissions button text\nWatch permissions screen title"
+    },
+    "What a watch other than Apple Watch may ask Loop to do" : {
+      "comment" : "Watch permissions descriptive text"
+    },
     "What are examples of Critical Alerts and Time Sensitive Notifications?" : {
 
     },
@@ -40407,6 +40460,9 @@
     },
     "What if Critical Alerts aren't available in %1$@?" : {
       "comment" : "Title text for critical alerts unavailable fallback (1: app name)"
+    },
+    "What Non-Apple Watches Can Do" : {
+      "comment" : "Header of the explanation at the top of the watch permissions screen"
     },
     "When current or forecasted glucose is below the glucose safety limit, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." : {
       "comment" : "Explanation of glucose safety limit",

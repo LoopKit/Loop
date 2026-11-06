@@ -93,6 +93,7 @@ class LoopAppManager: NSObject {
     private var mealDetectionManager: MealDetectionManager!
     private var statusExtensionManager: ExtensionDataManager!
     private var watchManager: WatchDataManager!
+    private var smartwatchManagerHost: SmartwatchManagerHost!
     private var crashRecoveryManager: CrashRecoveryManager!
     private var cgmEventStore: CgmEventStore!
     private var servicesManager: ServicesManager!
@@ -427,6 +428,45 @@ class LoopAppManager: NSObject {
             healthStore: healthStore
         )
 
+        smartwatchManagerHost = SmartwatchManagerHost(
+            deviceManager: deviceDataManager,
+            loopDataManager: loopDataManager,
+            settingsManager: settingsManager,
+            glucoseStore: glucoseStore,
+            healthStore: healthStore,
+            alertMuter: alertManager.alertMuter,
+            // The same path as remote boluses: maximum bolus check, notifications, upload.
+            deliverBolus: { [weak servicesManager] units in
+                guard let servicesManager else {
+                    throw SmartwatchBolusError.notAllowed
+                }
+                try await servicesManager.deliverRemoteBolus(amountInUnits: units, decisionId: nil)
+            },
+            // The same path as remote carbs: validation, notification, upload.
+            deliverCarbs: { [weak servicesManager] grams, date, absorptionTime in
+                guard let servicesManager else {
+                    throw SmartwatchCarbEntryError.notAllowed
+                }
+                try await servicesManager.deliverRemoteCarbs(amountInGrams: grams, absorptionTime: absorptionTime, foodType: nil, startDate: date)
+            },
+            // The same path as remote overrides: the preset's own duration, upload.
+            startOverride: { [weak servicesManager] name in
+                guard let servicesManager else {
+                    throw SmartwatchPresetError.notAllowed
+                }
+                try await servicesManager.enactRemoteOverride(name: name, durationTime: nil, remoteAddress: "Watch")
+            },
+            cancelOverride: { [weak servicesManager] in
+                guard let servicesManager else {
+                    throw SmartwatchPresetError.notAllowed
+                }
+                try await servicesManager.cancelRemoteOverride()
+            }
+        )
+        deviceDataManager.smartwatchManagerHost = smartwatchManagerHost
+        // Forward Loop's alerts to the watch plugin so it buzzes in step with the phone.
+        alertManager.addAlertForwarder(smartwatchManagerHost)
+
         self.mealDetectionManager = MealDetectionManager(
             algorithmStateProvider: loopDataManager,
             settingsProvider: temporaryPresetsManager,
@@ -607,6 +647,13 @@ class LoopAppManager: NSObject {
         )
         
         viewModel.favoriteFoodInsightsDelegate = loopDataManager
+        viewModel.smartwatchManagerSettingsViewModel = SmartwatchManagerViewModel(
+            image: {[weak self] in self?.deviceDataManager.smartwatchManager?.smallImage },
+            name: {[weak self] in self?.deviceDataManager.smartwatchManager?.localizedTitle ?? "" },
+            isSetUp: {[weak self] in self?.deviceDataManager.smartwatchManager?.isOnboarded == true },
+            availableDevices: deviceDataManager.availableSmartwatchManagers
+        )
+
         viewModel.insulinDeliveryHistory = { [weak loopDataManager] days in
             guard let loopDataManager else { throw CancellationError() }
             return try await loopDataManager.insulinDeliveryHistory(days: days)
@@ -753,7 +800,9 @@ class LoopAppManager: NSObject {
     
     func handle(_ url: URL) -> Bool {
         guard let deeplink = Deeplink(url: url) else {
-            return false
+            // Not one of Loop's own links: offer it to the watch plugin, for a
+            // companion app's callback such as a watch picker.
+            return deviceDataManager?.smartwatchManager?.watchHostDidReceiveURL(url) ?? false
         }
 
         analyticsServicesManager.didOpenFromLink()
