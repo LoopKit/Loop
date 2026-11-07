@@ -49,9 +49,9 @@ rule 4 says how.
 3. **Looping conservatively is safer than not looping.** If a device that is there can loop the body, it should.
 4. **When 2 and 3 conflict, the known facts decide; when they are unknown, a query does.** They conflict only when
    the other device is silent. The device that could loop queries it. An answer settles it in the other device's
-   favour; silence after a direct query counts as "not looping", and looping wins. This is the one place looping
-   overrides consent, and it may, because rule 1 makes a wrong guess conservative and the other device's first word
-   ends it.
+   favour. Silence does not settle it: a watch that missed its sensor readings sleeps, and watchOS may not wake it
+   for the question, so a silent watch may still be looping. The phone tells the looper and a tap decides. Looping
+   overrides consent only where the facts are known: a device that has let the pod go is not looping it.
 5. **A device that goes off is out of the conversation.** While it is out, the other device may take the pod, after
    querying (rule 4). When it comes back, it cannot know what was decided while it was out, so it queries before
    touching the pod. If the other device holds the pod, it stays out, and the looper starts again by hand. If nothing
@@ -166,11 +166,11 @@ Each situation lists:
 | 7 | [End, phone near](#7-end-phone-near) | phone | built |
 | 8 | [End, phone away](#8-end-phone-away) | watch | built |
 | 9 | [Take Back on the phone](#9-take-back-on-the-phone) | phone | built |
-| 10 | [Watch dies, phone near](#10-watch-dies-phone-near) | phone | built |
+| 10 | [Watch silent, phone near](#10-watch-silent-phone-near) | watch, until the looper takes it back on the phone | built |
 | 11 | [Watch dies, phone away](#11-watch-dies-phone-away) | nobody; the pod runs its schedule within 30 min | accepted |
 | 12 | [Watch back, phone holds the pod](#12-watch-back-phone-holds-the-pod) | phone | built |
 | 13 | [Watch back, nobody else holds the pod](#13-watch-back-nobody-else-holds-the-pod) | watch | built |
-| 14 | [Watch on a far charger, phone near](#14-watch-on-a-far-charger-phone-near) | phone | built |
+| 14 | [Watch on a far charger, phone near](#14-watch-on-a-far-charger-phone-near) | watch, until the looper takes it back on the phone | built |
 | 15 | [Watch out of reach, phone away](#15-watch-out-of-reach-phone-away) | nobody | accepted |
 | 16 | [Phone moves during a loan](#16-phone-moves-during-a-loan) | watch | built |
 | 17 | [Phone returns, watch started alone and alive](#17-phone-returns-watch-started-alone-and-alive) | watch | built |
@@ -296,17 +296,17 @@ itself has nothing to dose from, so it offers nothing and says so.
 - **Status:** built · **Code:** phone `+Reclaim`
 - **Why:** A tap is the looper's latest decision.
 
-### 10. Watch dies, phone near
+### 10. Watch silent, phone near
 
 - **Control state:** pod held by watch (grant) · loan: n · took over on silence at: none · looper's latest tap: Start on the watch, earlier
-- **Where:** phone near, alive · watch on wrist, dead
-- **What changed:** the watch dies
+- **Where:** phone near, alive · watch on wrist, dead, or asleep after missing its sensor readings
+- **What changed:** the watch stops reporting
 - **Phone sees:** believes the watch holds loan n · sensor: fresh · pod: released · heard from the watch: nothing for more than a cycle
-- **Watch sees:** believes dead · sensor: dead · pod: dead · heard from the phone: dead
-- **Result:** query: phone → watch, once the report is overdue → answer: silence at the next cycle → action: take; record the time as "took over on silence"
-- **Afterwards:** pod held by phone · time without looping: 6–11 min, then up to one more reading (about 5 min) · looper sees: phone: notification "Watch Not Looping: this iPhone is taking the pod back; insulin the watch gave is counted"
+- **Watch sees:** dead; or asleep: not woken by the sensor, and watchOS may not wake it for the phone's messages
+- **Result:** query: phone → watch, once the report is overdue → answer: silence at the next cycle → action: tell, once for the silent stretch; the loan stays. If the watch answers "I hold nothing", take; record the time as "took over on silence"
+- **Afterwards:** pod held by watch until the looper taps the pod on the phone and takes it back · time without looping: from the watch's last cycle until the tap, unless the watch wakes and loops · looper sees: phone: notification "Watch May Not Be Looping: usually it missed glucose readings. This iPhone can loop: open Loop and tap the pod to take it back."
 - **Status:** built · **Code:** phone `+Hold`
-- **Why:** A live watch on the wrist, with the body in reach, answers within seconds. Silence means it is not looping, and looping conservatively is safer than not looping. The watch's first word would end a mistake. When it comes back: row 12.
+- **Why:** Silence does not prove the watch has stopped. A watch that misses its sensor readings sleeps, and watchOS often declines to wake it for a message, so it can neither loop nor answer, and may loop again at its next reading. Taking the pod on that guess also met a pod driver that could send the watch's waiting command after the release (2026-11-07). The phone can loop, so it says so and leaves the choice to a tap (rule 2). A watch that answers "I hold nothing" has let the pod go, so nobody is looping it and the phone takes it. When a dead watch comes back after a take-back: row 12.
 
 ### 11. Watch dies, phone away
 
@@ -351,10 +351,10 @@ itself has nothing to dose from, so it offers nothing and says so.
 - **What changed:** the watch goes on a charger out of the pod's reach
 - **Phone sees:** believes the watch holds loan n · sensor: fresh · pod: released · heard from the watch: nothing for more than a cycle (a cycle that cannot reach the pod sends no report)
 - **Watch sees:** believes it holds loan n · sensor: none · pod: unreachable · heard from the phone: the phone's query
-- **Result:** query: phone → watch → answer: "I hold loan n but cannot reach the pod", after the watch has tried the pod → action: take at once, as on silence; record the time
-- **Afterwards:** pod held by phone · time without looping: 6–11 min, then seconds · looper sees: phone: notification "Watch Not Looping: this iPhone is taking the pod back…"; watch: on screen "Sport Mode ended. Your iPhone has the pod"
+- **Result:** query: phone → watch → answer: "I hold loan n but cannot reach the pod", after the watch has tried the pod → action: tell, as on silence (row 10)
+- **Afterwards:** pod held by watch until the looper taps the pod on the phone and takes it back · time without looping: until the tap · looper sees: phone: notification "Watch May Not Be Looping…"; after the tap, watch: on screen "Sport Mode ended. Your iPhone has the pod"
 - **Status:** built · **Code:** phone `+Hold`, watch `+Handback` (the answer)
-- **Why:** Rule 2 protects a device that is looping. This one holds the loan and cannot act on it. It is alive and answers, so silence cannot be the signal; the answer carries the fact, and "cannot reach" is acted on like silence. The watch could give up the pod by itself after a failed cycle, but it cannot tell whether the phone is there to take it, and giving up with nobody there gains nothing. The phone knows it is near and can loop, so the phone decides. Rare: a charger by the bed is within reach.
+- **Why:** Rule 2 protects a device that is looping. This one holds the loan and cannot act on it now, but it may reach the pod again. The answer carries the fact, and "cannot reach" is acted on like silence: the phone tells the looper, who decides with a tap. The watch could give up the pod by itself after a failed cycle, but it cannot tell whether the phone is there to take it, and giving up with nobody there gains nothing. Rare: a charger by the bed is within reach.
 
 ### 15. Watch out of reach, phone away
 
@@ -406,7 +406,7 @@ itself has nothing to dose from, so it offers nothing and says so.
 
 ### 19. Watch back after the phone took over
 
-- **Control state:** pod held by phone (took over on silence (row 18, or row 10/14)) · loan: n, started at T1 · took over on silence at: T2, after T1 · looper's latest tap: Start Anyway on the watch, at T1
+- **Control state:** pod held by phone (took over on silence (row 18, or row 10 when the watch held nothing)) · loan: n, started at T1 · took over on silence at: T2, after T1 · looper's latest tap: Start Anyway on the watch, at T1
 - **Where:** phone near, alive · watch on wrist, back from dead
 - **What changed:** the watch comes back
 - **Phone sees:** believes it holds the pod · sensor: fresh · pod: holding · heard from the watch: "I hold loan n, started at T1"
@@ -577,7 +577,7 @@ with the pod. Where the driver is not asked, §8 says what happens.
 Failures only a test can produce. They are logged when recognised; no warning is built for them.
 
 - **Pod emulator on a counter, devices carried away.** The watch gets no sensor or pod wakes, watchOS stops its app,
-  it goes silent, and a phone back near the counter takes the pod (row 10 by mistake).
+  it goes silent, and a phone back near the counter warns that the watch may not be looping (row 10).
 - **Pod emulator not delivering or not reachable** (as a real pod that answers no one: rows 24 and 25). The pod's total does not move while the records expect basal, so
   the hand-back check reports insulin overstated, and the phone's reconnect may need its escalation.
 - **Pod emulator needs a reboot** after some failed takeovers.
