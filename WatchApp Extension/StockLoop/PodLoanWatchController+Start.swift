@@ -165,7 +165,7 @@ extension PodLoanWatchController {
 
             // Rows 1 and 2: the request is the query; `LoanControl` decides the wait and what silence means.
             let situation = LoanControl.Situation(device: .watch, trigger: .startTapped)
-            guard case .query(let wait, _) = LoanControl.decide(situation) else { return }
+            guard case .query(let wait, _, _) = LoanControl.decide(situation) else { return }
             self.armRequestTimeout(wait.seconds)
         }
     }
@@ -191,7 +191,7 @@ extension PodLoanWatchController {
             let dormant = self.storedDormantGrant()
             let situation = LoanControl.Situation(device: .watch, trigger: .startTapped, watchHasStoredCopy: dormant != nil,
                                                   watchReadsCGM: self.loopManager.cgmManager != nil)
-            guard case .query(_, let onSilence) = LoanControl.decide(situation) else { return }
+            guard case .query(_, let onSilence, _) = LoanControl.decide(situation) else { return }
             if case .prompt(.startWithoutPhone) = LoanControl.afterQuery(.silence, onSilence: onSilence), let dormant {
                 self.seizeOffer = (issuedAt: dormant.issuedAt, token: dormant.seizeToken)
                 self.lastIdleNote = nil

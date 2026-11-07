@@ -345,7 +345,7 @@ final class PodLoanPhoneController {
     var lastWatchAnswerHoldsNothing = false
     /// Loans a revived watch claimed that this phone refused; its records for them get the stop again.
     var refusedRevivedEpochs: Set<Int> = []
-    /// The silence a "Watch Not Reporting" notice went out for, so it is said once.
+    /// The silence a "Watch May Not Be Looping" notice went out for, so it is said once.
     var silenceWarnedFor: Date?
     var lastDormantSettingsFingerprint: String?
     /// The phone's glucose alert settings as last seen; part of the standing copy's fingerprint.
