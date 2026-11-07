@@ -518,6 +518,8 @@
 		B66D1F3B2E6A5D6600471149 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B66D1F3A2E6A5D6600471149 /* Localizable.xcstrings */; };
 		B66D1F3C2E6A5D6600471149 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B66D1F3A2E6A5D6600471149 /* Localizable.xcstrings */; };
 		B66D1F3E2E6A5D6600471149 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B66D1F3D2E6A5D6600471149 /* Localizable.xcstrings */; };
+		1FFAA864239809141D8A2355 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B66D1F342E6A5D6600471149 /* Localizable.xcstrings */; };
+		AD69E5657D2C795B105A64F1 /* ckcomplication.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B66D1F362E6A5D6600471149 /* ckcomplication.xcstrings */; };
 		BAF043BF0BC70EC99AE79F71 /* HealthAccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4854073AAE5C2CB97167F63 /* HealthAccessView.swift */; };
 		C10509752D8B309400118A37 /* Environment+SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10509742D8B308E00118A37 /* Environment+SettingsManager.swift */; };
 		C10509772D8B591200118A37 /* StatusTableViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10509762D8B590D00118A37 /* StatusTableViewModel.swift */; };
@@ -3479,6 +3481,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD69E5657D2C795B105A64F1 /* ckcomplication.xcstrings in Resources */,
+				1FFAA864239809141D8A2355 /* Localizable.xcstrings in Resources */,
 				DDBD0002000000000000BD02 /* BuildDetails.plist in Resources */,
 				C1275E1F2E822CEE0013B99D /* DerivedAssets.xcassets in Resources */,
 				B66D1F232E6A5D6500471149 /* InfoPlist.xcstrings in Resources */,
