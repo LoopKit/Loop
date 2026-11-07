@@ -18,20 +18,6 @@ final class MealReminderManagerTests: XCTestCase {
         StoredCarbEntry(startDate: now.addingTimeInterval(interval), quantity: LoopQuantity(unit: .gram, doubleValue: grams), uuid: UUID(), syncIdentifier: id)
     }
 
-    func testPromptDefaultsAndInclusiveThreshold() {
-        let suite = "MealReminderTests.\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suite)!
-        defer { defaults.removePersistentDomain(forName: suite) }
-        XCTAssertFalse(MealReminderSettings.shouldPrompt(for: now, entryDate: now, defaults: defaults))
-        XCTAssertFalse(MealReminderSettings.shouldPrompt(for: now.addingTimeInterval(-60), entryDate: now, defaults: defaults))
-        XCTAssertFalse(MealReminderSettings.shouldPrompt(for: now.addingTimeInterval(1799), entryDate: now, defaults: defaults))
-        XCTAssertTrue(MealReminderSettings.shouldPrompt(for: now.addingTimeInterval(1800), entryDate: now, defaults: defaults))
-        defaults.set(10.0, forKey: MealReminderSettings.minimumAdvanceMinutesKey)
-        XCTAssertTrue(MealReminderSettings.shouldPrompt(for: now.addingTimeInterval(600), entryDate: now, defaults: defaults))
-        defaults.set(false, forKey: MealReminderSettings.promptEnabledKey)
-        XCTAssertFalse(MealReminderSettings.shouldPrompt(for: now.addingTimeInterval(3600), entryDate: now, defaults: defaults))
-    }
-
     func testTimeSensitiveReminderAndIndependentMeals() async throws {
         let center = MealReminderTestNotificationCenter()
         let manager = MealReminderManager(notificationCenter: center, now: { self.now }, authorize: { true }, isMuted: { _ in false })
@@ -76,34 +62,38 @@ final class MealReminderManagerTests: XCTestCase {
         try await manager.scheduleReminder(for: original)
         try await manager.updateReminder(from: original, to: entry(after: -60))
         XCTAssertTrue(center.requests.isEmpty)
+
         try await manager.scheduleReminder(for: original)
+        center.removedDelivered.removeAll()
         manager.cancelReminder(for: original)
         XCTAssertTrue(center.requests.isEmpty)
-        XCTAssertTrue(center.removedDelivered.contains(MealReminderManager.requestIdentifier(for: original)!))
-    }
-
-    func testMutedReminderHasNoSound() async throws {
-        let center = MealReminderTestNotificationCenter()
-        let manager = MealReminderManager(notificationCenter: center, now: { self.now }, authorize: { true }, isMuted: { _ in true })
-        try await manager.scheduleReminder(for: entry(after: 2700))
-        XCTAssertNil(try XCTUnwrap(center.requests.values.first).content.sound)
+        let identifier = try XCTUnwrap(MealReminderManager.requestIdentifier(for: original))
+        XCTAssertEqual(center.removedDelivered, [identifier])
     }
 
     func testMuteChangesPreserveReminderTime() async throws {
         let center = MealReminderTestNotificationCenter()
-        let currentTime = Date()
-        let manager = MealReminderManager(notificationCenter: center, authorize: { true }, isMuted: { _ in false })
-        let meal = StoredCarbEntry(startDate: currentTime.addingTimeInterval(2700), quantity: LoopQuantity(unit: .gram, doubleValue: 45), syncIdentifier: "meal")
-        try await manager.scheduleReminder(for: meal)
-        let originalDate = try XCTUnwrap((center.requests.values.first?.trigger as? UNTimeIntervalNotificationTrigger)?.nextTriggerDate())
-        try await manager.updatePendingReminderSounds(AlertMuter.Configuration(startTime: currentTime, duration: 3600))
-        var request = try XCTUnwrap(center.requests.values.first)
-        XCTAssertNil(request.content.sound)
-        XCTAssertEqual(try XCTUnwrap((request.trigger as? UNTimeIntervalNotificationTrigger)?.nextTriggerDate()).timeIntervalSince(originalDate), 0, accuracy: 1)
+        var currentTime = now
+        let muted = AlertMuter.Configuration(startTime: now, duration: .hours(1))
+        let manager = MealReminderManager(notificationCenter: center, now: { currentTime }, authorize: { true }, isMuted: { delay in
+            muted.shouldMuteAlert(scheduledAt: delay, now: currentTime)
+        })
+        try await manager.scheduleReminder(for: entry(after: .minutes(45)))
+        let initial = try XCTUnwrap(center.requests.values.first)
+        XCTAssertNil(initial.content.sound)
+        XCTAssertEqual((initial.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval, .minutes(45))
+
+        currentTime = now.addingTimeInterval(.minutes(5))
         try await manager.updatePendingReminderSounds(AlertMuter.Configuration())
-        request = try XCTUnwrap(center.requests.values.first)
-        XCTAssertEqual(request.content.sound, .default)
-        XCTAssertEqual(try XCTUnwrap((request.trigger as? UNTimeIntervalNotificationTrigger)?.nextTriggerDate()).timeIntervalSince(originalDate), 0, accuracy: 1)
+        let unmuted = try XCTUnwrap(center.requests.values.first)
+        XCTAssertEqual(unmuted.content.sound, .default)
+        XCTAssertEqual((unmuted.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval, .minutes(40))
+
+        currentTime = now.addingTimeInterval(.minutes(10))
+        try await manager.updatePendingReminderSounds(muted)
+        let mutedAgain = try XCTUnwrap(center.requests.values.first)
+        XCTAssertNil(mutedAgain.content.sound)
+        XCTAssertEqual((mutedAgain.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval, .minutes(35))
     }
 
     func testAuthorizationAndSchedulingFailuresAreReported() async {

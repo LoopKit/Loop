@@ -1631,7 +1631,7 @@
 		36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AlgorithmBridge.swift; sourceTree = "<group>"; };
 		6C372374D3D3D9C5F8E3AD93 /* TemporaryScheduleOverrideAlgorithmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryScheduleOverrideAlgorithmTests.swift; sourceTree = "<group>"; };
 		DB2650000000000000000002 /* MealReminderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealReminderManager.swift; sourceTree = "<group>"; };
-		DB2650000000000000000004 /* MealReminderManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/MealReminderManagerTests.swift; sourceTree = "<group>"; };
+		DB2650000000000000000004 /* MealReminderManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealReminderManagerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1828,6 +1828,7 @@
 				C188599A2AF15E1B0010F21F /* DeviceDataManagerTests.swift */,
 				C16B983F26B4898800256B05 /* DoseEnactorTests.swift */,
 				E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */,
+				DB2650000000000000000004 /* MealReminderManagerTests.swift */,
 				A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */,
 				A1B2C3D40000000000000011 /* AlarmSoundCatalogTests.swift */,
 				E9B3552C293592B40076AB04 /* MealDetectionManagerTests.swift */,
@@ -2328,7 +2329,6 @@
 		43F78D2C1C8FC58F002152D1 /* LoopTests */ = {
 			isa = PBXGroup;
 			children = (
-				DB2650000000000000000004 /* MealReminderManagerTests.swift */,
 				A9DF02CA24F72B9E00B7C988 /* CriticalEventLogTests.swift */,
 				A96DAC292838EF8A00D94E38 /* DiagnosticLogTests.swift */,
 				E9C58A7624DB510500487A17 /* Fixtures */,
