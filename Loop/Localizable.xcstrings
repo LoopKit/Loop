@@ -16,9 +16,6 @@
     "Apple Watch is controlling the pod. Tap to reclaim." : {
       "comment" : "The subtitle of the banner indicating the pod is controlled by the watch"
     },
-    "Last watch update %@" : {
-      "comment" : "Banner line during a loan: when the watch's records last arrived (1: time)"
-    },
     " - " : {
 
     },
@@ -2432,7 +2429,7 @@
         }
       }
     },
-    "%1$@ U is booked as a bolus at %2$@ — the pod's total, not real timing. If you remember the session, correct it in Insulin Delivery." : {
+    "%1$@ U is still booked as a bolus at %2$@. The watch's records replace it when it's back." : {
       "comment" : "Phone reminder body while an unexplained gap bolus stands (1: units, 2: time booked)"
     },
     "%1$@ U left" : {
@@ -2699,7 +2696,7 @@
         }
       }
     },
-    "%1$@ U was not delivered — the pod is on the watch. Bolus from the watch, or end Sport Mode first." : {
+    "%1$@ U wasn't delivered because the pod is on the watch. Bolus on the watch instead." : {
       "comment" : "Notification body when a bolus is refused because the pod is on loan (1: units)"
     },
     "%1$@ U/hour @ %2$@" : {
@@ -9035,9 +9032,6 @@
     "Automated insulin adjustments by %@ reduce a noticeable rise in glucose" : {
 
     },
-    "Automatic dosing is paused while Loop checks the pod's insulin total. This usually takes seconds." : {
-      "comment" : "Phone notice body after a force reclaim salvaged staged records"
-    },
     "Automation" : {
 
     },
@@ -10525,7 +10519,7 @@
       "comment" : "Focus modes section title (1: app name)"
     },
     "Cancel" : {
-      "comment" : "Button label for cancel\nButton text to cancel\nCancel button for reset loop alert\nCancel export button title\nThe title of the cancel action in an action sheet\nThe title of the cancel button in the plugin picker",
+      "comment" : "Button label for cancel\nButton text to cancel\nCancel export button title\nCancel the reclaim prompt\nThe title of the cancel action in an action sheet\nThe title of the cancel button in the plugin picker",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -12595,9 +12589,6 @@
         }
       }
     },
-    "Closed Loop Is Off" : {
-      "comment" : "Phone reminder title after an audit opened the loop"
-    },
     "Closed Loop OFF" : {
       "comment" : "Alert title for closed loop off informational modal",
       "localizations" : {
@@ -13981,6 +13972,9 @@
           }
         }
       }
+    },
+    "Couldn't Reach the Pod" : {
+      "comment" : "Phone notice title when a take-back found the pod out of reach"
     },
     "Create new presets" : {
 
@@ -20203,9 +20197,6 @@
     "For these activities, consider setting your insulin needs to **more than 100%**." : {
 
     },
-    "Forcing…" : {
-      "comment" : "Title text for the pump tile while the phone force-reclaims the pod"
-    },
     "Forecasted blood glucose may still be higher than target range." : {
       "localizations" : {
         "da" : {
@@ -22479,6 +22470,9 @@
         }
       }
     },
+    "Insulin and carbs as of %@" : {
+      "comment" : "Banner line during a loan: the phone has every insulin and carb record made by this time (1: time)"
+    },
     "Insulin Automation" : {
       "comment" : "Closed loop settings button descriptive text"
     },
@@ -22609,6 +22603,9 @@
     },
     "Insulin Delivery Log" : {
 
+    },
+    "Insulin delivery stopped. Change Pod now." : {
+      "comment" : "Phone notice body when the watch reports a pod fault during a loan (the pod's own alarm text)"
     },
     "Insulin Event" : {
 
@@ -23948,9 +23945,6 @@
     "iOS Permissions and Mute All App Sounds" : {
       "comment" : "Alert Permissions descriptive text"
     },
-    "iPhone Bluetooth is off — still running" : {
-      "comment" : "Hand-back refused: shown on the watch glance"
-    },
     "ISF" : {
 
     },
@@ -25114,14 +25108,8 @@
         }
       }
     },
-    "Loop can't read a message from the watch. The apps may be on different builds — check both are current." : {
+    "Loop can't read a message from the watch. The iPhone and watch apps may be on different versions." : {
       "comment" : "Phone notice body when a loan message cannot be decoded"
-    },
-    "Loop couldn't verify the watch session's insulin, so it stopped dosing. Turn Closed Loop back on when you're ready." : {
-      "comment" : "Phone reminder body after an audit opened the loop"
-    },
-    "Loop couldn't verify the watch's insulin delivery. Automatic dosing is off until you turn it back on." : {
-      "comment" : "Phone notice when a watch session's insulin could not be verified after reclaim"
     },
     "Loop Crashed" : {
       "comment" : "Title for crash recovery alert",
@@ -28341,9 +28329,6 @@
         }
       }
     },
-    "No watch reply…" : {
-      "comment" : "Title text for the pump tile when the watch has not answered within the drain promise"
-    },
     "No, edit amount" : {
       "comment" : "The title of the action used when rejecting the the amount of carbohydrates entered.",
       "localizations" : {
@@ -29260,7 +29245,7 @@
       }
     },
     "OK" : {
-      "comment" : "Alert acknowledgment OK button\nCritical Alert permissions disabled alert button\nDefault action for alert when alert acknowledgment fails\nDismiss the pod-settling notice\nLabel for acknowledging the preset has been active for 24 hours\nNotifications permissions disabled alert button\nText for ok action on notification of upcoming TestFlight expiration\nText for ok action on notification of upcoming profile expiration\nThe title of the notification action to acknowledge a device alert",
+      "comment" : "Acknowledge button on a glucose alert\nAcknowledge button on a test glucose alert\nAlert acknowledgment OK button\nCritical Alert permissions disabled alert button\nDefault action for alert when alert acknowledgment fails\nDismiss the pod-settling notice\nLabel for acknowledging the preset has been active for 24 hours\nNotifications permissions disabled alert button\nText for ok action on notification of upcoming TestFlight expiration\nText for ok action on notification of upcoming profile expiration\nThe title of the notification action to acknowledge a device alert",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29694,6 +29679,9 @@
     "Overview" : {
 
     },
+    "Pair a new pod to resume insulin delivery." : {
+      "comment" : "Phone notice body: the looper deactivated the faulted pod on the watch"
+    },
     "Paloma Porpoise sees her glucose is running higher than usual. She creates a preset to help manage her glucose while she is sick." : {
 
     },
@@ -29722,14 +29710,11 @@
     "Please go to the App Store now to update the app." : {
       "comment" : "Required update modal paragraph 3"
     },
-    "Pod Fault" : {
-      "comment" : "Phone notice title when the watch reports a pod fault during a loan"
+    "Pod Deactivated on the Watch" : {
+      "comment" : "Phone notice title: the looper deactivated the faulted pod on the watch"
     },
     "Pod Is on the Watch" : {
       "comment" : "Title of the reclaim prompt when tapping the pump tile during a loan"
-    },
-    "Pod Looks Controlled by the Watch" : {
-      "comment" : "Phone notice title when the phone yields to an inferred watch loan"
     },
     "Pod on Watch" : {
       "comment" : "Title text for the pump tile while the pod is loaned to the watch"
@@ -32267,13 +32252,16 @@
         }
       }
     },
+    "Reaching pod…" : {
+      "comment" : "Title text for the pump tile while a take-back waits for the pod's link"
+    },
     "Reading & Changing Access" : {
       "comment" : "Health access section header for reading and changing access"
     },
     "Reclaim Now" : {
       "comment" : "Button to reclaim the pod from the watch"
     },
-    "Reclaim the pod to this phone? The watch's Sport Mode session will end and its records will be collected." : {
+    "Reclaim the pod to this iPhone? Sport Mode on the watch will end." : {
       "comment" : "Message of the reclaim prompt"
     },
     "Reclaiming the pod…" : {
@@ -34941,7 +34929,10 @@
     "Sport Mode Active" : {
       "comment" : "The title of the banner indicating the pod is controlled by the watch\ntitle for when the watch is running the loop"
     },
-    "Sport Mode has ended and this phone is back in control, but it is still reconnecting to the pod. Try again in a moment." : {
+    "Sport Mode didn't start on the watch. This iPhone kept the pod and is looping." : {
+      "comment" : "Phone notice body: a grant the watch never confirmed"
+    },
+    "Sport Mode has ended. This iPhone is still reconnecting to the pod. Try again in a few seconds." : {
       "comment" : "Message shown while the phone is re-establishing the pod connection after a reclaim"
     },
     "Stable Glucose" : {
@@ -37393,14 +37384,17 @@
     "The sound played when this alarm fires." : {
 
     },
-    "The watch hasn't confirmed taking the pod. The phone will take it back." : {
-      "comment" : "Phone notification body: the watch never confirmed a takeover"
+    "The Watch Didn't Take the Pod" : {
+      "comment" : "Phone notice title: a grant the watch never confirmed"
     },
-    "The watch hasn't reported a loop for %1$.0f minutes. The pod is still assigned to it. If the watch is off or out of battery, tap the pod tile to bring the pod back to this phone." : {
-      "comment" : "Phone warning body: watch silent mid-session (1: minutes)"
+    "The watch has stopped looping (off or out of range). This iPhone is taking the pod back; insulin the watch gave is counted." : {
+      "comment" : "Phone notice body: the phone takes the pod back from a silent watch"
     },
-    "The watch reports a pod fault: %1$@. Insulin delivery has stopped — replace the pod." : {
-      "comment" : "Phone notice body when the watch reports a pod fault during a loan (1: the pump's own fault text)"
+    "The watch is still looping. To end, turn on iPhone Bluetooth and tap End again." : {
+      "comment" : "Hand-back refused: shown on the watch glance"
+    },
+    "The watch is still looping. Try again." : {
+      "comment" : "Phone notice body when a take-back found the pod out of reach"
     },
     "Therapy Settings" : {
       "comment" : "Title text for button to Therapy Settings",
@@ -37614,9 +37608,6 @@
           }
         }
       }
-    },
-    "This phone has paused automatic dosing because the pod appears to be in use by the watch. Tap the pod tile to take it back." : {
-      "comment" : "Phone notice body when the phone yields to an inferred watch loan"
     },
     "This range is usually higher than your correction range when you are not exercising." : {
 
@@ -38780,6 +38771,9 @@
           }
         }
       }
+    },
+    "Unexpected: the iPhone couldn't check the watch's insulin against the pod. Insulin the watch gave may be missing from insulin on board. Consider reporting it with a Loop Report." : {
+      "comment" : "Phone notice when a watch session's insulin could not be verified after reclaim"
     },
     "Unknown" : {
       "comment" : "Event title displayed when StoredPumpEvent.title is not set\nHealth sharing status: unknown\nThe default description to use when an entry has no dose description\nresult when time cannot be formatted",
@@ -40179,6 +40173,9 @@
         }
       }
     },
+    "Wait for the Bolus" : {
+      "comment" : "Phone notice title when a take-back found the watch's bolus still being given"
+    },
     "Walking" : {
 
     },
@@ -40433,17 +40430,11 @@
         }
       }
     },
-    "Watch Loan Not Confirmed" : {
-      "comment" : "Phone notification title: the watch never confirmed a takeover"
-    },
     "Watch Message Unreadable" : {
       "comment" : "Phone notice title when a loan message cannot be decoded"
     },
-    "Watch Not Reporting" : {
-      "comment" : "Phone warning title: the watch has stopped reporting loop cycles during a session"
-    },
-    "Watch Session Ended Without Hand-Back" : {
-      "comment" : "Phone notice title after a force reclaim salvaged staged records"
+    "Watch Not Looping" : {
+      "comment" : "Phone notice title: the watch did not answer, or cannot reach the pod, and the phone is taking the pod back"
     },
     "What are examples of Critical Alerts and Time Sensitive Notifications?" : {
 
