@@ -12,7 +12,7 @@ import UIKit
 ///
 /// Every colour is one Loop already has: the `glucose`, `insulin`, `carbs`, `fresh` and `warning` assets, so a
 /// DerivedAssetsOverride still recolours them, and the iOS system colours for grounds and text. Bands and fills are
-/// those colours at reduced opacity. Text is `label` or `secondaryLabel`; colour is for marks, not for numbers.
+/// those colours at reduced opacity. Text is `label`, or `inkMuted` beside it; colour is for marks, not for numbers.
 /// Red is only for something that needs action now.
 enum LoopDesign {
 
@@ -29,7 +29,11 @@ enum LoopDesign {
 
         // Text
         static let ink = Color(uiColor: .label)
-        static let inkMuted = Color(uiColor: .secondaryLabel)
+        /// Black or white at reduced opacity, to reach WCAG AAA's 7:1 on every ground. `secondaryLabel` reaches 3.2:1 in
+        /// light mode and 4.1:1 in dark on a tile. Dark mode needs more opacity because a tile's fill lifts its ground.
+        static let inkMuted = Color(uiColor: UIColor {
+            $0.userInterfaceStyle == .dark ? .white.withAlphaComponent(0.85) : .black.withAlphaComponent(0.7)
+        })
 
         // Quantities
         static let glucose = Color("glucose")
