@@ -4709,6 +4709,9 @@
     "Unknown" : {
 
     },
+    "Unsupported Notification Service: %1$@" : {
+      "comment" : "Error message when a service can't be found to handle a push notification. (1: Service Identifier)"
+    },
     "Urgent Low" : {
       "comment" : "Name of a glucose alarm sound\nName of the urgent low glucose alarm"
     },
