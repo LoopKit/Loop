@@ -88,7 +88,7 @@ extension PodLoanWatchController {
         // Rows 12, 13 and 19: `LoanControl` decides what a watch back from off does.
         let resumedEpoch = epoch
         switch LoanControl.decide(LoanControl.Situation(device: .watch, trigger: .backFromOff)) {
-        case .query(let wait, let onSilence):
+        case .query(let wait, let onSilence, _):
             // The wait for an answer starts when the question can actually go out: a message sent before
             // the link has started is lost, and the silence would be read as no phone.
             whenLinkActivated { [weak self] in
