@@ -3247,7 +3247,7 @@ extension PodLoanPhoneControllerTests {
 
     /// The watch's report overdue with this phone beside the body: the phone asks, and when nothing
     /// answers by its next cycle it takes the pod back and says so. No timer: nothing happens between cycles.
-    func testAnOverdueWatchIsAskedAndTakenFromWhenItDoesNotAnswer() throws {
+    func testAnOverdueWatchIsAskedAndTheLooperToldOnceWhenItDoesNotAnswer() throws {
         withShortAnswerWait {
             let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
             _ = establishLoan(controller)
@@ -3266,9 +3266,35 @@ extension PodLoanPhoneControllerTests {
 
             clock = clock.addingTimeInterval(.minutes(5))
             tick(controller)
+            spinMain(0.5)
+            drainMainQueue()
+            lock.lock(); var titles = urgentNotices; lock.unlock()
+            XCTAssertEqual(titles.filter { $0 == "Watch May Not Be Looping" }.count, 1, "the looper is told")
+            XCTAssertEqual(controller.state, .loaned, "the choice is the looper's: the loan stays")
+            XCTAssertEqual(revokes(), 0)
+
+            clock = clock.addingTimeInterval(.minutes(5))
+            tick(controller)
+            clock = clock.addingTimeInterval(.minutes(5))
+            tick(controller)
+            drainMainQueue()
+            lock.lock(); titles = urgentNotices; lock.unlock()
+            XCTAssertEqual(titles.filter { $0 == "Watch May Not Be Looping" }.count, 1, "once for the silent stretch")
+            XCTAssertEqual(controller.state, .loaned)
+        }
+    }
+
+    /// A watch that answers "I hold nothing" has let the pod go: the phone takes it at once.
+    func testAnOverdueWatchThatHoldsNothingHasThePodTaken() throws {
+        try withShortAnswerWait {
+            let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
+            let grant = establishLoan(controller)
+
+            clock = clock.addingTimeInterval(.minutes(7))
+            tick(controller)
+            XCTAssertEqual(statusQueries(), 1)
+            controller.handleIncoming(userInfo: try report(epoch: grant.epoch, holdsPod: false))
             waitUntil(timeout: 5, "taken back") { self.revokes() > 0 }
-            lock.lock(); let titles = urgentNotices; lock.unlock()
-            XCTAssertTrue(titles.contains("Watch Not Looping"))
         }
     }
 
@@ -3342,8 +3368,8 @@ extension PodLoanPhoneControllerTests {
     }
 
     /// A loan the watch ANNOUNCED (a seized pod) is anchored at this phone's own last pod read, and a
-    /// silent one is asked and taken back like any other.
-    func testALoanTheWatchAnnouncedIsAnchoredHereAndTakenBackWhenSilent() throws {
+    /// silent one is asked, and the looper told, like any other.
+    func testALoanTheWatchAnnouncedIsAnchoredHereAndTheLooperToldWhenSilent() throws {
         try withShortAnswerWait {
             _ = seizeCredentialOutstanding()
             let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
@@ -3360,8 +3386,12 @@ extension PodLoanPhoneControllerTests {
             XCTAssertEqual(statusQueries(), 1, "silent: asked")
             clock = clock.addingTimeInterval(.minutes(5))
             tick(controller)
-            waitUntil(timeout: 5, "taken back") { self.revokes() > 0 }
-            waitUntil(timeout: 5, "no longer standing aside") { !controller.yieldingToInferredLoan }
+            spinMain(0.5)
+            drainMainQueue()
+            lock.lock(); let titles = urgentNotices; lock.unlock()
+            XCTAssertTrue(titles.contains("Watch May Not Be Looping"))
+            XCTAssertEqual(revokes(), 0)
+            XCTAssertTrue(controller.yieldingToInferredLoan, "still standing aside until the looper taps")
         }
     }
 
@@ -3480,8 +3510,8 @@ extension PodLoanPhoneControllerTests {
     }
 
     /// A watch that answers it holds the loan but cannot reach the pod is answered like silence:
-    /// the phone takes the pod back (control document, row 14).
-    func testAWatchThatCannotReachThePodIsTakenFrom() throws {
+    /// the looper is told, and the take-back is a tap (control document, row 14).
+    func testAWatchThatCannotReachThePodIsReportedToTheLooper() throws {
         try withShortAnswerWait {
             let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
             let grant = establishLoan(controller)
@@ -3490,8 +3520,12 @@ extension PodLoanPhoneControllerTests {
             XCTAssertEqual(statusQueries(), 1)
             controller.handleIncoming(userInfo: try report(epoch: grant.epoch, podReachable: false))
             drainMainQueue()
-            waitUntil(timeout: 5, "taken back") { self.revokes() > 0 }
-            XCTAssertNotNil(controller.persisted.tookOverOnSilenceAt, "a takeover on silence, remembered")
+            spinMain(0.5)
+            drainMainQueue()
+            lock.lock(); let titles = urgentNotices; lock.unlock()
+            XCTAssertTrue(titles.contains("Watch May Not Be Looping"), "answered like silence: the looper is told")
+            XCTAssertEqual(revokes(), 0, "the take-back is the looper's tap")
+            XCTAssertNil(controller.persisted.tookOverOnSilenceAt)
         }
     }
 

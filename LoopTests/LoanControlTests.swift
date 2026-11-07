@@ -74,12 +74,14 @@ final class LoanControlTests: XCTestCase {
         XCTAssertEqual(phone(.takeBackTapped, role: .lending), .takeOnTap)
     }
 
-    // Row 10 · The watch dies with the phone beside the body: ask, take on silence.
-    func testRow10_ASilentWatchIsQueriedThenTakenFrom() {
+    // Row 10 · The watch goes silent with the phone beside the body: ask, and on silence tell the looper.
+    func testRow10_ASilentWatchIsQueriedThenTheLooperIsTold() {
         let decision = phone(.watchReportOverdue, role: .lending)
-        XCTAssertEqual(decision, .query(.inBackground, onSilence: .takeOnSilence(.watchNotResponding)))
-        XCTAssertEqual(C.afterQuery(.silence, onSilence: .takeOnSilence(.watchNotResponding)), .takeOnSilence(.watchNotResponding))
-        XCTAssertEqual(C.afterQuery(.answered, onSilence: .takeOnSilence(.watchNotResponding)), .nothing, "a live watch answers: nothing moves")
+        XCTAssertEqual(decision, .query(.inBackground, onSilence: .tell(.watchMayNotBeLooping),
+                                        onHoldsNothing: .takeOnSilence(.watchNotResponding)))
+        XCTAssertEqual(phone(.watchReportOverdue, role: .standingAside), decision, "the same for a loan the watch started")
+        XCTAssertEqual(C.afterQuery(.silence, onSilence: .tell(.watchMayNotBeLooping)), .tell(.watchMayNotBeLooping))
+        XCTAssertEqual(C.afterQuery(.answered, onSilence: .tell(.watchMayNotBeLooping)), .nothing, "a live watch answers: nothing moves")
     }
 
     // Rows 11 and 15 · The phone does not see the sensor: the body is elsewhere; nothing.
@@ -100,16 +102,20 @@ final class LoanControlTests: XCTestCase {
 
     // Rows 14 and 20 · A holder that answers but cannot reach the pod is answered like silence.
     func testRows14And20_CannotReachThePodCountsAsSilence() {
-        XCTAssertEqual(C.afterQuery(.holdsPodButCannotReach, onSilence: .takeOnSilence(.watchNotResponding)), .takeOnSilence(.watchNotResponding))
+        XCTAssertEqual(C.afterQuery(.holdsPodButCannotReach, onSilence: .tell(.watchMayNotBeLooping),
+                                    onHoldsNothing: .takeOnSilence(.watchNotResponding)), .tell(.watchMayNotBeLooping))
         XCTAssertEqual(C.afterQuery(.holdsPodButCannotReach, onSilence: .keepPodOnSilence), .keepPodOnSilence)
         XCTAssertEqual(phone(.watchClaims(.init(loan: .current, podReachable: false)), role: .lending), .nothing,
                        "and its report does not renew its hold")
     }
 
     // Transfer H (Q2) · A watch that let the pod go after an unacknowledged final offer answers "I hold
-    // nothing": counted as silence, so the phone takes the pod instead of leaving it with nobody.
-    func testAWatchThatHoldsNothingIsAnsweredLikeSilence() {
-        XCTAssertEqual(C.afterQuery(.holdsNothing, onSilence: .takeOnSilence(.watchNotResponding)), .takeOnSilence(.watchNotResponding))
+    // nothing": nobody loops the pod, so the phone takes it instead of leaving it with nobody.
+    func testAWatchThatHoldsNothingHasThePodTaken() {
+        XCTAssertEqual(C.afterQuery(.holdsNothing, onSilence: .tell(.watchMayNotBeLooping),
+                                    onHoldsNothing: .takeOnSilence(.watchNotResponding)), .takeOnSilence(.watchNotResponding))
+        XCTAssertEqual(C.afterQuery(.holdsNothing, onSilence: .keepPodOnSilence), .keepPodOnSilence,
+                       "with no separate choice, as on silence")
     }
 
     // Row 16 · The watch reporting on the live loan: its hold is renewed.
