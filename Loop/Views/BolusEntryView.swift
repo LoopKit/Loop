@@ -459,6 +459,11 @@ struct BolusEntryView: View {
                 title: Text("Unable to Save Carb Entry", comment: "Alert title for a carb entry persistence error"),
                 message: Text("An error occurred while trying to save your carb entry.", comment: "Alert message for a carb entry persistence error")
             )
+        case .mealReminderSchedulingFailure:
+            return SwiftUI.Alert(
+                title: Text("Unable to Set Meal Reminder", comment: "Alert title when scheduling a meal reminder fails"),
+                message: Text("Your carb entry was saved, but the reminder could not be set. The requested bolus was not delivered. Check notification permissions in Settings and try again, or go back and continue without a reminder.", comment: "Alert message when a meal reminder fails before bolus delivery")
+            )
         case .manualGlucoseEntryOutOfAcceptableRange:
             let acceptableLowerBound = displayGlucosePreference.format(LoopConstants.validManualGlucoseEntryRange.lowerBound)
             let acceptableUpperBound = displayGlucosePreference.format(LoopConstants.validManualGlucoseEntryRange.upperBound)

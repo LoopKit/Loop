@@ -28,6 +28,7 @@ final class CarbEntryViewModel: ObservableObject {
         
         case maxQuantityExceded
         case warningQuantityValidation
+        case mealReminder
     }
     
     enum Warning: Identifiable {
@@ -61,7 +62,7 @@ final class CarbEntryViewModel: ObservableObject {
     var warningCarbEntryQuantity = LoopConstants.warningCarbEntryQuantity
     
     @Published var time = Date()
-    private var date = Date()
+    private let date: Date
     var minimumDate: Date {
         get { date.addingTimeInterval(LoopConstants.maxCarbEntryPastTime) }
     }
@@ -110,11 +111,16 @@ final class CarbEntryViewModel: ObservableObject {
     private lazy var cancellables = Set<AnyCancellable>()
     
     /// Initalizer for when`CarbEntryView` is presented from the home screen
-    init(delegate: CarbEntryViewModelDelegate) {
+    init(delegate: CarbEntryViewModelDelegate, now: @escaping () -> Date = Date.init, reminderDefaults: UserDefaults = .standard) {
+        let date = now()
+        self.date = date
+        self.now = now
+        self.reminderDefaults = reminderDefaults
         self.delegate = delegate
         self.absorptionTime = delegate.defaultAbsorptionTimes.medium
         self.defaultAbsorptionTimes = delegate.defaultAbsorptionTimes
         self.shouldBeginEditingQuantity = true
+        self.time = date
         
         observeAbsorptionTimeChange()
         observeFavoriteFoodChange()
@@ -123,7 +129,10 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     /// Initalizer for when`CarbEntryView` has an entry to edit
-    init(delegate: CarbEntryViewModelDelegate, originalCarbEntry: StoredCarbEntry) {
+    init(delegate: CarbEntryViewModelDelegate, originalCarbEntry: StoredCarbEntry, now: @escaping () -> Date = Date.init, reminderDefaults: UserDefaults = .standard) {
+        self.date = now()
+        self.now = now
+        self.reminderDefaults = reminderDefaults
         self.delegate = delegate
         self.originalCarbEntry = originalCarbEntry
         self.defaultAbsorptionTimes = delegate.defaultAbsorptionTimes
@@ -147,6 +156,8 @@ final class CarbEntryViewModel: ObservableObject {
     
     var originalCarbEntry: StoredCarbEntry? = nil
     private let newEntrySyncIdentifier = UUID().uuidString
+    private let now: () -> Date
+    private let reminderDefaults: UserDefaults
 
     private var carbEntryChange: CarbEntryChange? {
         if let quantity = carbsQuantity, quantity != 0 {
@@ -224,16 +235,33 @@ final class CarbEntryViewModel: ObservableObject {
         }
         
         Task { @MainActor in
+            offerMealReminderOrContinue()
+        }
+    }
+
+    private func offerMealReminderOrContinue() {
+        // Use the same reference time as the date picker so its upper bound can qualify.
+        if time > now(), MealReminderSettings.shouldPrompt(for: time, entryDate: date, defaults: reminderDefaults) {
+            alert = .mealReminder
+        } else {
             setBolusViewModel()
         }
     }
+
+    func continueWithMealReminder(_ enabled: Bool) {
+        alert = nil
+        Task { @MainActor in
+            setBolusViewModel(mealReminderRequested: enabled)
+        }
+    }
         
-    @MainActor private func setBolusViewModel() {
+    @MainActor private func setBolusViewModel(mealReminderRequested: Bool? = nil) {
         let viewModel = BolusEntryViewModel(
             delegate: delegate,
             screenWidth: UIScreen.main.bounds.width,
             carbEntryChange: carbEntryChange,
-            selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji
+            selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji,
+            mealReminderRequested: mealReminderRequested
         )
         
         viewModel.analyticsServicesManager = analyticsServicesManager
@@ -250,7 +278,7 @@ final class CarbEntryViewModel: ObservableObject {
     func clearAlertAndContinueToBolus() {
         self.alert = nil
         Task { @MainActor in
-            setBolusViewModel()
+            offerMealReminderOrContinue()
         }
     }
     

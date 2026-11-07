@@ -213,6 +213,22 @@ extension CarbEntryView {
     
     private func alert(for alert: CarbEntryViewModel.Alert) -> SwiftUI.Alert {
         switch alert {
+        case .mealReminder:
+            let formatter = DateFormatter()
+            formatter.dateStyle = Calendar.current.isDateInToday(viewModel.time) ? .none : .medium
+            formatter.timeStyle = .short
+            formatter.doesRelativeDateFormatting = true
+            let time = formatter.string(from: viewModel.time)
+            return SwiftUI.Alert(
+                title: Text("Set a Meal Reminder?", comment: "Title of the optional meal reminder prompt"),
+                message: Text(String(format: NSLocalizedString("Loop will schedule a notification for %@ when you save this meal. Change when Loop asks in Settings → Alert Management.", comment: "Meal reminder prompt (1: scheduled meal time, including date if needed)"), time)),
+                primaryButton: .default(Text("Remind Me", comment: "Button to request a meal reminder")) {
+                    viewModel.continueWithMealReminder(true)
+                },
+                secondaryButton: .cancel(Text("Skip Reminder", comment: "Button to continue without a meal reminder")) {
+                    viewModel.continueWithMealReminder(false)
+                }
+            )
         case .maxQuantityExceded:
             let message = String(
                 format: NSLocalizedString("The maximum allowed amount is %@ grams.", comment: "Alert body displayed for quantity greater than max (1: maximum quantity in grams)"),

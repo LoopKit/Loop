@@ -33,6 +33,8 @@ struct AlertManagementView: View {
     @State private var sheet: Sheet?
     @State private var durationSelection: TimeInterval?
     @State private var durationWasSelection: Bool = false
+    @AppStorage(MealReminderSettings.promptEnabledKey) private var mealReminderPromptEnabled = true
+    @AppStorage(MealReminderSettings.minimumAdvanceMinutesKey) private var mealReminderMinimumAdvanceMinutes = MealReminderSettings.defaultMinimumAdvanceMinutes
 
     private var formatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
@@ -85,6 +87,7 @@ struct AlertManagementView: View {
             if FeatureFlags.missedMealNotifications {
                 missedMealAlertSection
             }
+            mealReminderSection
             if let alertStore {
                 historySection(alertStore: alertStore)
             }
@@ -220,6 +223,57 @@ struct AlertManagementView: View {
         }
     }
     
+    private var maximumCarbAdvanceMinutes: Double {
+        LoopConstants.maxCarbEntryFutureTime / 60
+    }
+
+    private var mealReminderAdvanceChoices: [Double] {
+        let choices: [Double] = [15, 30, 45, 60, 90, 120, 180, 240]
+        let availableChoices = choices.filter { $0 <= maximumCarbAdvanceMinutes }
+        if let savedMinutes = mealReminderThreshold.wrappedValue,
+           savedMinutes > 0, !availableChoices.contains(savedMinutes) {
+            // Keep an existing choice visible until the user selects a new one.
+            return (availableChoices + [savedMinutes]).sorted()
+        }
+        return availableChoices
+    }
+
+    private var mealReminderThreshold: Binding<Double?> {
+        Binding(
+            get: {
+                guard mealReminderPromptEnabled,
+                      mealReminderMinimumAdvanceMinutes <= maximumCarbAdvanceMinutes else { return nil }
+                return mealReminderMinimumAdvanceMinutes
+            },
+            set: { minutes in
+                if let minutes {
+                    mealReminderMinimumAdvanceMinutes = minutes
+                }
+                mealReminderPromptEnabled = minutes != nil
+            }
+        )
+    }
+
+    private var mealReminderSection: some View {
+        Section(
+            header: Text("Reminders to Eat", comment: "Section title for scheduled meal reminder preferences"),
+            footer: Text("Loop asks whether to remind you to eat when you enter a meal at least this far in advance.", comment: "Description of the meal reminder prompt setting")
+        ) {
+            Picker(selection: mealReminderThreshold) {
+                Text("Off", comment: "Meal reminder prompt is disabled")
+                    .tag(nil as Double?)
+                Text("Any Future Time", comment: "Meal reminder threshold option for all future meals")
+                    .tag(0.0 as Double?)
+                ForEach(mealReminderAdvanceChoices, id: \.self) { minutes in
+                    Text(formatter.string(from: .minutes(minutes)) ?? "")
+                        .tag(minutes as Double?)
+                }
+            } label: {
+                Text("Reminder Prompt", comment: "Label for when to offer a meal reminder")
+            }
+        }
+    }
+
     private var missedMealAlertSection: some View {
         Section(footer: DescriptiveText(label: NSLocalizedString("When enabled, Loop can notify you when it detects a meal that wasn't logged.", comment: "Description of missed meal notifications."))) {
             Toggle(NSLocalizedString("Missed Meal Notifications", comment: "Title for missed meal notifications toggle"), isOn: missedMealNotificationsEnabled)
