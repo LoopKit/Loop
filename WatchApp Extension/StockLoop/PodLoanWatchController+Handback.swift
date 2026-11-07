@@ -46,7 +46,7 @@ extension PodLoanWatchController {
             let tappedAt = self.now()
             self.handbackAckedAt = nil
             self.sendHandbackOffer(recovered: false)
-            guard case .query(let wait, let onSilence) = LoanControl.decide(LoanControl.Situation(device: .watch, trigger: trigger)) else { return }
+            guard case .query(let wait, let onSilence, _) = LoanControl.decide(LoanControl.Situation(device: .watch, trigger: trigger)) else { return }
             // A timer is safe here: it starts at the looper's End tap, with Loop in front, and a late
             // firing re-checks whether the phone answered since the tap before refusing the End.
             self.schedule(after: wait.seconds, label: "handback-answer") { [weak self] in

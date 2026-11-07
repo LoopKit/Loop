@@ -79,8 +79,8 @@ extension PodLoanPhoneController {
         switch decision {
         case .nothing, .carryOn:
             break
-        case .query(_, let onSilence):
-            askWatch(why: why, onSilence: onSilence, claimEpoch: claimEpoch)
+        case .query(_, let onSilence, let onHoldsNothing):
+            askWatch(why: why, onSilence: onSilence, onHoldsNothing: onHoldsNothing, claimEpoch: claimEpoch)
         case .keepPodOnSilence:
             updateState { $0.tookOverOnSilenceAt = deps.now() }
             handbackDiag(epoch, "this phone keeps the pod and keeps looping: no answer from the watch, or it cannot reach the pod; \(why)")
@@ -105,7 +105,13 @@ extension PodLoanPhoneController {
             resendRevokeForClosedSession(epoch: claimEpoch, evidence: why)
         case .renewHold:
             noteHoldRenewal(sentAt: deps.now())
-        case .refuse, .prompt, .tell, .tellIfSilent:
+        case .tell(let tell):
+            // Once for each silent stretch: the question is asked again every cycle while it lasts.
+            guard silenceWarnedFor != watchLastHeard else { return }
+            silenceWarnedFor = watchLastHeard
+            handbackDiag(epoch, "telling the looper the watch may not be looping: no answer from the watch, or it cannot reach the pod; \(why)")
+            tellLooper(tell)
+        case .refuse, .prompt, .tellIfSilent:
             // The watch's decisions; never returned for the phone.
             break
         }
@@ -117,6 +123,10 @@ extension PodLoanPhoneController {
             deps.issueUrgentNotice(
                 NSLocalizedString("Watch Not Looping", comment: "Phone notice title: the watch did not answer, or cannot reach the pod, and the phone is taking the pod back"),
                 NSLocalizedString("The watch has stopped looping (off or out of range). This iPhone is taking the pod back; insulin the watch gave is counted.", comment: "Phone notice body: the phone takes the pod back from a silent watch"))
+        case .watchMayNotBeLooping:
+            deps.issueUrgentNotice(
+                NSLocalizedString("Watch May Not Be Looping", comment: "Phone notice title: the watch has not reported and did not answer, and the phone could loop"),
+                NSLocalizedString("Usually it missed glucose readings. This iPhone can loop: open Loop and tap the pod to take it back.", comment: "Phone notice body: the watch may not be looping; the looper can take the pod back"))
         case .phoneAwayCannotHandBack, .noResponseFromPhone, .noResponseFromPhoneAndNoCGM, .notHearingFromPhone,
              .podDeactivatedPhoneAway:
             break
@@ -150,6 +160,7 @@ extension PodLoanPhoneController {
         let foreignBefore: Date?
         let why: String
         let onSilence: LoanControl.Decision
+        let onHoldsNothing: LoanControl.Decision?
         let claimEpoch: Int?
     }
 
@@ -159,11 +170,11 @@ extension PodLoanPhoneController {
     /// would act minutes late on what it knew when it asked. The answer is acted on when it arrives
     /// (`answerArrived`); silence is judged at the first cycle at least `answerWait` after asking
     /// (`judgeOpenQuestion`), in practice the next sensor reading.
-    func askWatch(why: String, onSilence: LoanControl.Decision, claimEpoch: Int?) {
+    func askWatch(why: String, onSilence: LoanControl.Decision, onHoldsNothing: LoanControl.Decision?, claimEpoch: Int?) {
         guard openQuestion == nil else { return }
         openQuestion = OpenQuestion(askedAt: deps.now(), epoch: epoch, role: controlRole, heardBefore: watchLastHeard,
                                     foreignBefore: newestForeignLoanEvidence?.at, why: why, onSilence: onSilence,
-                                    claimEpoch: claimEpoch)
+                                    onHoldsNothing: onHoldsNothing, claimEpoch: claimEpoch)
         handbackDiag(epoch, "asking the watch whether it holds the pod: \(why)")
         sendMessage(.statusQuery(StatusQuery(epoch: epoch)))
     }
@@ -203,6 +214,7 @@ extension PodLoanPhoneController {
         }
         openQuestion = nil
         if answer == .answered { handbackDiag(epoch, "the watch answered: nothing changes hands") }
-        carryOut(LoanControl.afterQuery(answer, onSilence: question.onSilence), why: question.why, claimEpoch: question.claimEpoch)
+        carryOut(LoanControl.afterQuery(answer, onSilence: question.onSilence, onHoldsNothing: question.onHoldsNothing),
+                 why: question.why, claimEpoch: question.claimEpoch)
     }
 }

@@ -143,6 +143,8 @@ public enum LoanControl {
     /// What the looper is told.
     public enum Tell: Equatable {
         case watchNotResponding
+        /// The watch has not reported and did not answer, or cannot reach the pod; the phone could loop.
+        case watchMayNotBeLooping
         case phoneAwayCannotHandBack
         case noResponseFromPhone
         /// No answer, and the watch has no CGM reading of its own to dose from.
@@ -159,8 +161,9 @@ public enum LoanControl {
     public indirect enum Decision: Equatable {
         case nothing
         /// Ask the other device whether it holds the pod. An answer that says it does is acted on where
-        /// it lands; silence, or "I hold it but cannot reach it", leads to `onSilence` (`afterQuery`).
-        case query(Wait, onSilence: Decision)
+        /// it lands; silence, or "I hold it but cannot reach it", leads to `onSilence` (`afterQuery`), and
+        /// so does "I hold nothing" unless `onHoldsNothing` says otherwise.
+        case query(Wait, onSilence: Decision, onHoldsNothing: Decision? = nil)
         /// Phone: it already holds the pod and keeps it; remember the takeover on silence.
         case keepPodOnSilence
         /// Phone: take the pod back after silence; remember the takeover; tell.
@@ -198,9 +201,10 @@ public enum LoanControl {
     /// cannot reach it" (rows 14, 20) and "I hold nothing" (a watch that let the pod go after a hand-back
     /// whose final offer went unacknowledged, transfer H: without this the phone would leave the pod
     /// with nobody).
-    public static func afterQuery(_ answer: Answer, onSilence: Decision) -> Decision {
+    public static func afterQuery(_ answer: Answer, onSilence: Decision, onHoldsNothing: Decision? = nil) -> Decision {
         switch answer {
-        case .silence, .holdsPodButCannotReach, .holdsNothing: return onSilence
+        case .silence, .holdsPodButCannotReach: return onSilence
+        case .holdsNothing: return onHoldsNothing ?? onSilence
         case .answered: return .nothing
         }
     }
@@ -296,13 +300,15 @@ public enum LoanControl {
             return .takeOnTap
 
         // Rows 10 and 14 · No report from the watch for longer than a cycle, with the phone beside the
-        // body. A live watch on the wrist answers within seconds; silence (or "cannot reach the pod")
-        // means it is not looping, and looping conservatively is safer than not looping. The watch's
-        // first word would end a mistake.
+        // body. Silence (or "cannot reach the pod") does not prove the watch is not looping: a watch that
+        // missed its readings sleeps, and watchOS may not wake it for the question. So the phone tells the
+        // looper and leaves the choice to a tap. A watch that holds nothing has let the pod go: nobody
+        // loops it, so the phone takes it.
         // Rows 11 and 15 · The phone does not see the sensor: the body is elsewhere, nothing to act on.
         case (.phone, .watchReportOverdue):
             guard s.sensorFresh, s.phoneRole == .lending || s.phoneRole == .standingAside else { return .nothing }
-            return .query(.inBackground, onSilence: .takeOnSilence(.watchNotResponding))
+            return .query(.inBackground, onSilence: .tell(.watchMayNotBeLooping),
+                          onHoldsNothing: .takeOnSilence(.watchNotResponding))
 
         // Rows 12, 13 and 19 · The watch back from off. It cannot know what was decided while it was out,
         // so it asks before touching the pod. A phone that holds the pod answers with the stop, acted on
