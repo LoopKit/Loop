@@ -88,7 +88,7 @@ struct DayTimelineCard: View {
     static let legend: [LegendItem] = [
         LegendItem(swatch: .solid(P.bolus), label: NSLocalizedString("Bolus", comment: "Chart legend: solid bars are manual boluses")),
         LegendItem(swatch: .hatch(P.bolus), label: NSLocalizedString("Automatic", comment: "Chart legend: hatched bars are automatic boluses given by Loop")),
-        LegendItem(swatch: .basal, label: NSLocalizedString("Basal given", comment: "Chart legend: filled area is basal insulin actually delivered")),
+        LegendItem(swatch: .solid(P.basalArea), label: NSLocalizedString("Basal given", comment: "Chart legend: filled area is basal insulin actually delivered")),
         LegendItem(swatch: .dash(P.basalScheduled), label: NSLocalizedString("Scheduled", comment: "Chart legend: dashed line is the scheduled basal rate")),
     ]
 
@@ -229,15 +229,12 @@ struct InsulinTimelineView: View {
                     }
             }
 
-            // Delivered basal, edged, then the schedule dashed over it
+            // Delivered basal, then the schedule dashed over it
             // Draw each recorded segment independently; a gap must not become an interpolated delivery area.
             ForEach(Array(history.basal.enumerated()), id: \.offset) { _, segment in
                 RectangleMark(xStart: .value("Start", segment.start), xEnd: .value("End", segment.end),
                               yStart: .value("Base", 0), yEnd: .value("Basal", y(basal: segment.rate)))
-                    .foregroundStyle(P.basal)
-                RuleMark(xStart: .value("Start", segment.start), xEnd: .value("End", segment.end), y: .value("Basal", y(basal: segment.rate)))
-                    .foregroundStyle(P.basalEdge)
-                    .lineStyle(StrokeStyle(lineWidth: 1.5))
+                    .foregroundStyle(P.basalArea)
             }
             ForEach(Array(history.scheduledBasal.enumerated()), id: \.offset) { _, value in
                 RuleMark(xStart: .value("Start", value.start), xEnd: .value("End", value.end), y: .value("Scheduled", y(basal: value.rate)))

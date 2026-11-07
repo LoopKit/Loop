@@ -10,9 +10,9 @@ import UIKit
 
 /// Colours, spacing and type for the Trends screen.
 ///
-/// Every colour but one is one Loop already has: the `glucose`, `insulin`, `carbs`, `fresh` and `warning` assets, so a
+/// Every colour is one Loop already has: the `glucose`, `insulin`, `carbs`, `fresh` and `warning` assets, so a
 /// DerivedAssetsOverride still recolours them, and the iOS system colours for grounds and text. Bands and fills are
-/// those colours at reduced opacity. The one addition is `bolus`, a darker insulin for light mode. Text is `label` or `secondaryLabel`; colour is for marks, not for numbers.
+/// those colours at reduced opacity. Text is `label` or `secondaryLabel`; colour is for marks, not for numbers.
 /// Red is only for something that needs action now.
 enum LoopDesign {
 
@@ -37,13 +37,14 @@ enum LoopDesign {
         static let agpOuter = glucose.opacity(0.16)
         static let agpInner = glucose.opacity(0.34)
         static let insulin = Color("insulin")
-        /// Basal is insulin's colour faded, with a stronger edge along its top. Insulin's own orange is too light for
-        /// a bolus on it in light mode, where it is under 2:1 against faded basal, so bolus has its own asset: a deep
-        /// orange in light mode, insulin's light orange in dark. Charts also keep a gap of the card's colour wherever
-        /// basal and bolus meet.
-        static let bolus = Color("bolus")
-        static let basal = insulin.opacity(0.25)
-        static let basalEdge = insulin.opacity(0.6)
+        /// Insulin is one colour, told apart by shape: bolus is solid, automatic bolus is hatched and basal is hollow.
+        /// No tint of insulin's orange reaches 3:1 against it on a white card, and faded orange turns brown on a dark
+        /// one. Charts also keep a gap of the card's colour wherever basal and bolus meet.
+        static let bolus = insulin
+        static let basal = insulin.opacity(0.1)
+        static let basalOutline = insulin
+        /// Basal over a day is a stepped area that an outline would break into pieces, so it's a plain fill.
+        static let basalArea = insulin.opacity(0.25)
         static let basalScheduled = inkMuted
         static let carbs = Color("carbs")
 
@@ -182,12 +183,9 @@ struct LegendSwatch: View {
         case .hatch(let color):
             RoundedRectangle(cornerRadius: 2).fill(Hatch.paint(color, scheme: scheme)).frame(width: 10, height: 10)
         case .basal:
-            VStack(spacing: 0) {
-                Rectangle().fill(LoopDesign.Palette.basalEdge).frame(height: 2)
-                Rectangle().fill(LoopDesign.Palette.basal)
-            }
-            .frame(width: 10, height: 10)
-            .clipShape(RoundedRectangle(cornerRadius: 2))
+            RoundedRectangle(cornerRadius: 2).fill(LoopDesign.Palette.basal)
+                .overlay(RoundedRectangle(cornerRadius: 2).strokeBorder(LoopDesign.Palette.basalOutline, lineWidth: 1.25))
+                .frame(width: 10, height: 10)
         }
     }
 }
