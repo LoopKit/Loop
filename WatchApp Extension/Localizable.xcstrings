@@ -841,11 +841,20 @@
         }
       }
     },
+    "Age" : {
+      "comment" : "Glance complication value: the reading's age"
+    },
     "Alarm" : {
       "comment" : "Name of a glucose alarm sound"
     },
     "Amy" : {
       "comment" : "Name of a spoken alarm voice"
+    },
+    "BG" : {
+      "comment" : "Glance complication value: glucose"
+    },
+    "Big BG" : {
+      "comment" : "Glance complication: the reading as large as the slot allows"
     },
     "Bloom" : {
       "comment" : "Name of a glucose alarm sound"
@@ -1230,6 +1239,9 @@
     },
     "Clear Chimes" : {
       "comment" : "Name of a glucose alarm sound"
+    },
+    "COB" : {
+      "comment" : "Glance complication value: carbs on board"
     },
     "Continue" : {
       "comment" : "Button text to continue from carb entry to bolus entry on Apple Watch",
@@ -1645,6 +1657,9 @@
     "ending…" : {
       "comment" : "Glance status during hand-back\nGlance status while a hand-back drains in the background"
     },
+    "Eventual" : {
+      "comment" : "Glance complication value: eventual glucose"
+    },
     "eventually " : {
 
     },
@@ -1793,6 +1808,9 @@
     "G7 typically within 10 min" : {
       "comment" : "Glance G7 prediction without a prior reading"
     },
+    "Glance" : {
+      "comment" : "Glance complication: every value of the glance"
+    },
     "Glass Bell" : {
       "comment" : "Name of a glucose alarm sound"
     },
@@ -1825,6 +1843,9 @@
     },
     "Honk" : {
       "comment" : "Name of a glucose alarm sound"
+    },
+    "IOB" : {
+      "comment" : "Glance complication value: insulin on board"
     },
     "iPhone" : {
 
@@ -4259,6 +4280,9 @@
     },
     "taking over pod…" : {
       "comment" : "Glance stage: pod takeover in progress"
+    },
+    "Temp" : {
+      "comment" : "Glance complication value: temp basal"
     },
     "The pod didn't answer in time. Your iPhone still has the pod. Tap Start to try again." : {
       "comment" : "Glance: grant lease expired mid-takeover"
