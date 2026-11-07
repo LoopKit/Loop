@@ -490,10 +490,12 @@ struct InsulinSplitBar: View {
     private func segment(_ part: Part) -> some View {
         switch part {
         case .basal:
-            Rectangle().fill(LoopDesign.Palette.basal)
-                .overlay(alignment: .trailing) {
-                    if !hairline { Rectangle().fill(LoopDesign.Palette.basalEdge).frame(width: 2) }
-                }
+            // Rounded where the capsule is, so the capsule's clip doesn't cut the outline. Basal is always first.
+            let radius: CGFloat = hairline ? 3 : 7
+            let trailing = units(.manual) + units(.automatic) > 0 ? 0 : radius
+            let shape = UnevenRoundedRectangle(topLeadingRadius: radius, bottomLeadingRadius: radius, bottomTrailingRadius: trailing, topTrailingRadius: trailing)
+            shape.fill(LoopDesign.Palette.basal)
+                .overlay(shape.strokeBorder(LoopDesign.Palette.basalOutline, lineWidth: hairline ? 1 : 1.25))
         case .manual:
             Rectangle().fill(LoopDesign.Palette.bolus)
         case .automatic:
@@ -709,13 +711,30 @@ struct InsulinDailyTotalsView: View {
 
     private var unitWidth: Calendar.Component { weekly ? .weekOfYear : .day }
 
+    /// A bar mark can't have a border, so the outline is four rules along the 0.7-wide bar's edges.
+    @ChartContentBuilder
+    private func basalOutline(_ day: LoopHistoryMath.DayTotal) -> some ChartContent {
+        if day.basal > 0, let unit = Calendar.current.dateInterval(of: unitWidth, for: day.day) {
+            let left = unit.start.addingTimeInterval(unit.duration * 0.15)
+            let right = unit.start.addingTimeInterval(unit.duration * 0.85)
+            let line = StrokeStyle(lineWidth: 1.25)
+            RuleMark(x: .value("Left", left), yStart: .value("Base", 0), yEnd: .value("Basal", day.basal))
+                .foregroundStyle(P.basalOutline).lineStyle(line)
+            RuleMark(x: .value("Right", right), yStart: .value("Base", 0), yEnd: .value("Basal", day.basal))
+                .foregroundStyle(P.basalOutline).lineStyle(line)
+            RuleMark(xStart: .value("Left", left), xEnd: .value("Right", right), y: .value("Basal", day.basal))
+                .foregroundStyle(P.basalOutline).lineStyle(line)
+            RuleMark(xStart: .value("Left", left), xEnd: .value("Right", right), y: .value("Base", 0))
+                .foregroundStyle(P.basalOutline).lineStyle(line)
+        }
+    }
+
     private var chart: some View {
         Chart {
             ForEach(totals) { day in
                 BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Base", 0), yEnd: .value("Basal", day.basal), width: .ratio(0.7))
                     .foregroundStyle(P.basal)
-                BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Basal", max(0, day.basal - yMax * 0.006)), yEnd: .value("Edge", day.basal), width: .ratio(0.7))
-                    .foregroundStyle(P.basalEdge)
+                basalOutline(day)
                 ForEach(Self.bolusParts(day, gap: yMax * 0.015), id: \.automatic) { part in
                     BarMark(x: .value("Day", day.day, unit: unitWidth), yStart: .value("Bolus start", part.start), yEnd: .value("Bolus end", part.end), width: .ratio(0.7))
                         .foregroundStyle(part.automatic ? AnyShapeStyle(Hatch.paint(P.bolus, scheme: scheme)) : AnyShapeStyle(P.bolus))
