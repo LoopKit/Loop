@@ -181,6 +181,10 @@ final class TrendsModel: ObservableObject {
         let gmiCaveat = LoopHistoryMath.gmiIsRepresentative(periodDays: s.totals.count, cgmActive: s.cgmActive) ? nil
             : String(format: NSLocalizedString("Best over 14 days with %1$@ CGM data", comment: "Trends GMI tile caption when the period is shorter than 14 days or CGM readings cover less than 70% of it: the consensus for when GMI is representative. (1: share of CGM data, e.g. 70%)"),
                      ConsensusTarget.percent(70))
+        // HbA1c in mmol/mol goes with glucose in mmol/L.
+        func gmiIFCC(_ value: String) -> String? {
+            unit.isMmol ? String(format: NSLocalizedString("%1$@ mmol/mol", comment: "Trends GMI tile detail: the GMI in IFCC units. (1: value)"), value) : nil
+        }
         if let stats = s.stats {
             tiles.append(StatTile(label: averageLabel, value: unit.format(stats.meanMgdl), unit: unit.unitName,
                                   detail: String(format: NSLocalizedString("SD %1$@ · CV %2$@%%", comment: "Trends Average tile detail: standard deviation and coefficient of variation of glucose. (1: standard deviation in the glucose unit, 2: coefficient of variation as a percentage number)"),
@@ -188,15 +192,14 @@ final class TrendsModel: ObservableObject {
                                   aim: averageAim(unit)))
             // Always shown, as Statistics did. The consensus says how representative it is: 14 days, 70% CGM data.
             tiles.append(StatTile(label: gmiLabel, value: LoopFormat.number(stats.gmiPercent, decimals: 1), unit: "%",
-                                  detail: String(format: NSLocalizedString("%1$@ mmol/mol", comment: "Trends GMI tile detail: the GMI in IFCC units. (1: value)"),
-                                                 LoopFormat.number(stats.gmiMmolMol, decimals: 0)),
+                                  detail: gmiIFCC(LoopFormat.number(stats.gmiMmolMol, decimals: 0)),
                                   aim: ConsensusTarget.aim(ConsensusTarget.under(7)),
                                   caveat: gmiCaveat))
         } else {
             tiles.append(StatTile(label: averageLabel, value: "–", unit: unit.unitName,
                                   detail: NSLocalizedString("No CGM data", comment: "Trends Average tile detail when the period has no glucose readings")))
             tiles.append(StatTile(label: gmiLabel, value: "–", unit: "%",
-                                  detail: String(format: NSLocalizedString("%1$@ mmol/mol", comment: "Trends GMI tile detail: the GMI in IFCC units. (1: value)"), "–"),
+                                  detail: gmiIFCC("–"),
                                   caveat: gmiCaveat))
         }
         // One day's figures are that day's own, so its tiles drop "per day" and show whole counts.
