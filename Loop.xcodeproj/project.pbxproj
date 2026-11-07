@@ -752,6 +752,8 @@
 		8DC1CE32F39301122B550325 /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
 		ABD9218EB98C9216FBB04382 /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
 		AF79DFAB0F55143D66022668 /* LoopKitTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */; };
+		DB2650000000000000000001 /* MealReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB2650000000000000000002 /* MealReminderManager.swift */; };
+		DB2650000000000000000003 /* MealReminderManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB2650000000000000000004 /* MealReminderManagerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1628,6 +1630,8 @@
 		35FAEFD820F50BFF211AC6D9 /* LoopKitTypeAliases.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoopKitTypeAliases.swift; sourceTree = "<group>"; };
 		36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AlgorithmBridge.swift; sourceTree = "<group>"; };
 		6C372374D3D3D9C5F8E3AD93 /* TemporaryScheduleOverrideAlgorithmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryScheduleOverrideAlgorithmTests.swift; sourceTree = "<group>"; };
+		DB2650000000000000000002 /* MealReminderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealReminderManager.swift; sourceTree = "<group>"; };
+		DB2650000000000000000004 /* MealReminderManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealReminderManagerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1824,6 +1828,7 @@
 				C188599A2AF15E1B0010F21F /* DeviceDataManagerTests.swift */,
 				C16B983F26B4898800256B05 /* DoseEnactorTests.swift */,
 				E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */,
+				DB2650000000000000000004 /* MealReminderManagerTests.swift */,
 				A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */,
 				A1B2C3D40000000000000011 /* AlarmSoundCatalogTests.swift */,
 				E9B3552C293592B40076AB04 /* MealDetectionManagerTests.swift */,
@@ -2295,6 +2300,7 @@
 				A9D5C5B525DC6C6A00534873 /* LoopAppManager.swift */,
 				43A567681C94880B00334FAC /* LoopDataManager.swift */,
 				E9B355232935906B0076AB04 /* Missed Meal Detection */,
+				DB2650000000000000000002 /* MealReminderManager.swift */,
 				43C094491CACCC73001F6403 /* NotificationManager.swift */,
 				A97F250725E056D500F0EE19 /* OnboardingManager.swift */,
 				432E73CA1D24B3D6009AD15D /* RemoteDataServicesManager.swift */,
@@ -3810,6 +3816,7 @@
 				C9A47B0180AAB1FC572D3EFE /* CriticalAlertAudioPlayer.swift in Sources */,
 				C1A1A00001000000000000A1 /* CriticalAlertAlarmScheduler.swift in Sources */,
 				C9A47B0280AAB1FC572D3EFF /* GlucoseAlertManager.swift in Sources */,
+				DB2650000000000000000001 /* MealReminderManager.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
 				149A28E42A8A63A700052EDF /* FavoriteFoodDetailView.swift in Sources */,
 				1DDE274024AEA4F200796622 /* NotificationsCriticalAlertPermissionsView.swift in Sources */,
@@ -4215,6 +4222,7 @@
 				E9B3552D293592B40076AB04 /* MealDetectionManagerTests.swift in Sources */,
 				C1DA43552B193BCB00CBD33F /* MockUploadEventListener.swift in Sources */,
 				C1DA43572B1A70BE00CBD33F /* SettingsManagerTests.swift in Sources */,
+				DB2650000000000000000003 /* MealReminderManagerTests.swift in Sources */,
 				1D8D55BC252274650044DBB6 /* BolusEntryViewModelTests.swift in Sources */,
 				C188599E2AF15FAB0010F21F /* AlertMocks.swift in Sources */,
 				A91E4C2124F867A700BE9213 /* StoredAlertTests.swift in Sources */,

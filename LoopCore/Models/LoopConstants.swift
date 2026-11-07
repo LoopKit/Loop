@@ -24,7 +24,7 @@ public enum LoopConstants {
     public static let maxCarbAbsorptionTime = TimeInterval(hours: 8)
     
     public static let maxCarbEntryPastTime = TimeInterval(hours: (-12))
-    public static let maxCarbEntryFutureTime = TimeInterval(hours: 1)
+    public static let maxCarbEntryFutureTime = TimeInterval(hours: 4)
 
     public static let maxOverrideDurationTime = TimeInterval(hours: 24)
     

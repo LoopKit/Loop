@@ -589,12 +589,21 @@ extension LoopDataManager {
     func replaceCarbEntry(_ oldEntry: StoredCarbEntry, with update: CarbEntryUpdate) async throws -> StoredCarbEntry {
         let storedCarbEntry = try await carbStore.replaceCarbEntry(oldEntry, withEntry: update)
         self.temporaryPresetsManager.endPreMealOverride()
+        do {
+            try await MealReminderManager.shared.updateReminder(from: oldEntry, to: storedCarbEntry)
+        } catch {
+            logger.error("Failed to update meal reminder: %{public}@", String(describing: error))
+        }
         return storedCarbEntry
     }
 
     @discardableResult
     func deleteCarbEntry(_ oldEntry: StoredCarbEntry) async throws -> Bool {
-        try await carbStore.deleteCarbEntry(oldEntry)
+        let deleted = try await carbStore.deleteCarbEntry(oldEntry)
+        if deleted {
+            MealReminderManager.shared.cancelReminder(for: oldEntry)
+        }
+        return deleted
     }
 
     /// Logs a new external bolus insulin dose in the DoseStore and HealthKit

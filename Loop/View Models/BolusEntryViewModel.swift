@@ -63,6 +63,7 @@ final class BolusEntryViewModel: ObservableObject {
         case noPumpManagerConfigured
         case noMaxBolusConfigured
         case carbEntryPersistenceFailure
+        case mealReminderSchedulingFailure
         case manualGlucoseEntryOutOfAcceptableRange
         case manualGlucoseEntryPersistenceFailure
         case forecastInfo
@@ -108,6 +109,8 @@ final class BolusEntryViewModel: ObservableObject {
 
     let carbEntryChange: CarbEntryChange?
     let selectedCarbAbsorptionTimeEmoji: String?
+    let mealReminderRequested: Bool?
+    private let mealReminderScheduler: MealReminderScheduling
 
     @Published var recommendedBolus: LoopQuantity?
     var recommendedBolusAmount: Double? {
@@ -167,7 +170,9 @@ final class BolusEntryViewModel: ObservableObject {
         timeZone: TimeZone? = nil,
         carbEntryChange: CarbEntryChange? = nil,
         selectedCarbAbsorptionTimeEmoji: String? = nil,
-        isManualGlucoseEntryEnabled: Bool = false
+        isManualGlucoseEntryEnabled: Bool = false,
+        mealReminderRequested: Bool? = nil,
+        mealReminderScheduler: MealReminderScheduling? = nil
     ) {
         self.delegate = delegate
         self.now = now
@@ -182,6 +187,8 @@ final class BolusEntryViewModel: ObservableObject {
         }
         
         self.carbEntryChange = carbEntryChange
+        self.mealReminderRequested = mealReminderRequested
+        self.mealReminderScheduler = mealReminderScheduler ?? MealReminderManager.shared
         self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
         
         self.isManualGlucoseEntryEnabled = isManualGlucoseEntryEnabled
@@ -389,6 +396,19 @@ final class BolusEntryViewModel: ObservableObject {
             if let storedCarbEntry = await saveCarbEntry(carbEntryChange) {
                 self.dosingDecision.carbEntry = storedCarbEntry
                 self.analyticsServicesManager?.didAddCarbs(source: "Phone", isFavoriteFood: storedCarbEntry.favoriteFoodID != nil)
+                if let mealReminderRequested {
+                    do {
+                        if mealReminderRequested {
+                            try await mealReminderScheduler.scheduleReminder(for: storedCarbEntry)
+                        } else {
+                            mealReminderScheduler.cancelReminder(for: storedCarbEntry)
+                        }
+                    } catch {
+                        log.error("Failed to schedule meal reminder: %{public}@", String(describing: error))
+                        presentAlert(.mealReminderSchedulingFailure)
+                        return false
+                    }
+                }
             } else {
                 self.presentAlert(.carbEntryPersistenceFailure)
                 return false
