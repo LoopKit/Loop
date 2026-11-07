@@ -40176,6 +40176,9 @@
         }
       }
     },
+    "Usually it missed glucose readings. This iPhone can loop: open Loop and tap the pod to take it back." : {
+      "comment" : "Phone notice body: the watch may not be looping; the looper can take the pod back"
+    },
     "Variability" : {
       "comment" : "Coefficient of variation metric title"
     },
@@ -40457,6 +40460,9 @@
           }
         }
       }
+    },
+    "Watch May Not Be Looping" : {
+      "comment" : "Phone notice title: the watch has not reported and did not answer, and the phone could loop"
     },
     "Watch Message Unreadable" : {
       "comment" : "Phone notice title when a loan message cannot be decoded"
