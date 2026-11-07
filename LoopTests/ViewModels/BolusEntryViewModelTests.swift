@@ -105,7 +105,12 @@ class BolusEntryViewModelTests: XCTestCase {
         }
     }
 
-    func setUpViewModel(carbEntryChange: CarbEntryChange? = nil, selectedCarbAbsorptionTimeEmoji: String? = nil) async {
+    func setUpViewModel(
+        carbEntryChange: CarbEntryChange? = nil,
+        selectedCarbAbsorptionTimeEmoji: String? = nil,
+        mealReminderRequested: Bool? = nil,
+        mealReminderScheduler: MealReminderScheduling? = nil
+    ) async {
         bolusEntryViewModel = BolusEntryViewModel(delegate: delegate,
                                                   now: { self.now },
                                                   screenWidth: 512,
@@ -113,7 +118,9 @@ class BolusEntryViewModelTests: XCTestCase {
                                                   uuidProvider: { self.mockUUID },
                                                   timeZone: TimeZone(abbreviation: "GMT")!,
                                                   carbEntryChange: carbEntryChange,
-                                                  selectedCarbAbsorptionTimeEmoji: selectedCarbAbsorptionTimeEmoji)
+                                                  selectedCarbAbsorptionTimeEmoji: selectedCarbAbsorptionTimeEmoji,
+                                                  mealReminderRequested: mealReminderRequested,
+                                                  mealReminderScheduler: mealReminderScheduler)
         bolusEntryViewModel.authenticationHandler = { _ in return true }
         
         bolusEntryViewModel.maximumBolus = LoopQuantity(unit: .internationalUnit, doubleValue: 10)
@@ -452,6 +459,43 @@ class BolusEntryViewModelTests: XCTestCase {
 
     // MARK: save data and bolus delivery
 
+    func testFailedCarbSaveDoesNotScheduleReminder() async {
+        let scheduler = MockMealReminderScheduler()
+        await setUpViewModel(carbEntryChange: .add(mockPotentialCarbEntry), mealReminderRequested: true, mealReminderScheduler: scheduler)
+        let success = await bolusEntryViewModel.saveAndDeliver()
+        XCTAssertFalse(success)
+        XCTAssertEqual(bolusEntryViewModel.activeAlert, .carbEntryPersistenceFailure)
+        XCTAssertTrue(scheduler.scheduledEntries.isEmpty)
+    }
+
+    func testReminderFailureStopsBolusAndRetryReusesCarbSyncIdentifier() async {
+        let scheduler = MockMealReminderScheduler()
+        scheduler.error = NSError(domain: "test", code: 1)
+        delegate.addCarbEntryResult = .success(mockFinalCarbEntry)
+        await setUpViewModel(carbEntryChange: .add(mockPotentialCarbEntry), mealReminderRequested: true, mealReminderScheduler: scheduler)
+        bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
+        let success = await bolusEntryViewModel.saveAndDeliver()
+        XCTAssertFalse(success)
+        XCTAssertEqual(bolusEntryViewModel.activeAlert, .mealReminderSchedulingFailure)
+        XCTAssertNil(delegate.enactedBolusUnits)
+        scheduler.error = nil
+        bolusEntryViewModel.activeAlert = nil
+        let retry = await bolusEntryViewModel.saveAndDeliver()
+        XCTAssertTrue(retry)
+        XCTAssertEqual(delegate.enactedBolusUnits, 1)
+        XCTAssertEqual(delegate.carbEntriesAdded.map(\.syncIdentifier), [mockPotentialCarbEntry.syncIdentifier, mockPotentialCarbEntry.syncIdentifier])
+    }
+
+    func testOptingOutCancelsReminderForSavedEntry() async {
+        let scheduler = MockMealReminderScheduler()
+        delegate.addCarbEntryResult = .success(mockFinalCarbEntry)
+        await setUpViewModel(carbEntryChange: mockCarbEntryEdit, mealReminderRequested: false, mealReminderScheduler: scheduler)
+        let success = await bolusEntryViewModel.saveAndDeliver()
+        XCTAssertTrue(success)
+        XCTAssertTrue(scheduler.scheduledEntries.isEmpty)
+        XCTAssertEqual(scheduler.cancelledEntries, [mockFinalCarbEntry])
+    }
+
     func testDeliverBolusOnlyRecommendationChanged() async throws {
         bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
 
@@ -631,7 +675,8 @@ class BolusEntryViewModelTests: XCTestCase {
     }
     
     func testSaveNewCarbEntryAndBolus() async throws {
-        await setUpViewModel(carbEntryChange: .add(mockPotentialCarbEntry))
+        let scheduler = MockMealReminderScheduler()
+        await setUpViewModel(carbEntryChange: .add(mockPotentialCarbEntry), mealReminderRequested: true, mealReminderScheduler: scheduler)
 
         delegate.addCarbEntryResult = .success(mockFinalCarbEntry)
 
@@ -641,6 +686,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(delegate.carbEntriesReplaced.isEmpty)
         XCTAssertNil(delegate.bolusDosingDecisionsAdded.first?.0.originalCarbEntry)
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0.carbEntry, mockFinalCarbEntry)
+        XCTAssertEqual(scheduler.scheduledEntries, [mockFinalCarbEntry])
         XCTAssertEqual(1.0, delegate.enactedBolusUnits)
         XCTAssertTrue(saveAndDeliverSuccess)
     }
@@ -849,6 +895,159 @@ class BolusEntryViewModelTests: XCTestCase {
 
 public enum BolusEntryViewTestError: Error {
     case responseUndefined
+}
+
+@MainActor
+final class CarbEntryMealReminderTests: XCTestCase {
+    private let now = Date(timeIntervalSince1970: 1_800_000_000)
+
+    func testToggleIsOnlyEnabledForStrictlyFutureEntries() {
+        let delegate = MockCarbEntryReminderDelegate()
+        let viewModel = CarbEntryViewModel(delegate: delegate, now: { self.now })
+        XCTAssertFalse(viewModel.canSetMealReminder())
+        XCTAssertFalse(viewModel.mealReminderRequested)
+        for interval in [-3600.0, -1, 0, 1, 60, 14400] {
+            viewModel.time = now.addingTimeInterval(interval)
+            XCTAssertEqual(viewModel.canSetMealReminder(), interval > 0, "Interval: \(interval)")
+        }
+        XCTAssertEqual(viewModel.maximumDate, now.addingTimeInterval(.hours(4)))
+    }
+
+    func testMovingTimeBackClearsReminderSelection() {
+        let delegate = MockCarbEntryReminderDelegate()
+        let viewModel = CarbEntryViewModel(delegate: delegate, now: { self.now })
+        for interval in [0.0, -60] {
+            viewModel.time = now.addingTimeInterval(60)
+            viewModel.mealReminderRequested = true
+            viewModel.time = now.addingTimeInterval(interval)
+            XCTAssertFalse(viewModel.canSetMealReminder())
+            XCTAssertFalse(viewModel.mealReminderRequested)
+            viewModel.time = now.addingTimeInterval(60)
+            XCTAssertTrue(viewModel.canSetMealReminder())
+            XCTAssertFalse(viewModel.mealReminderRequested)
+        }
+    }
+
+    func testBothToggleChoicesContinueDirectlyToBolus() async {
+        let delegate = MockCarbEntryReminderDelegate()
+        for enabled in [false, true] {
+            let viewModel = CarbEntryViewModel(delegate: delegate, now: { self.now })
+            viewModel.carbsQuantity = 20
+            viewModel.time = now.addingTimeInterval(60)
+            viewModel.mealReminderRequested = enabled
+            viewModel.continueToBolus()
+            await Task.yield()
+            XCTAssertNil(viewModel.alert)
+            XCTAssertEqual(viewModel.bolusViewModel?.mealReminderRequested, enabled)
+        }
+    }
+
+    func testEntryBecomingPresentDisablesToggleAndDoesNotRequestReminder() async {
+        var currentTime = now
+        let delegate = MockCarbEntryReminderDelegate()
+        let viewModel = CarbEntryViewModel(delegate: delegate, now: { currentTime })
+        viewModel.carbsQuantity = 20
+        viewModel.time = now.addingTimeInterval(60)
+        viewModel.mealReminderRequested = true
+        XCTAssertTrue(viewModel.canSetMealReminder(at: now))
+        currentTime = viewModel.time
+        XCTAssertFalse(viewModel.canSetMealReminder(at: currentTime))
+        viewModel.continueToBolus()
+        await Task.yield()
+        XCTAssertEqual(viewModel.bolusViewModel?.mealReminderRequested, false)
+
+        viewModel.time = currentTime.addingTimeInterval(60)
+        XCTAssertTrue(viewModel.canSetMealReminder())
+        XCTAssertFalse(viewModel.mealReminderRequested)
+    }
+
+    func testLargeMealConfirmationPreservesToggleChoice() async {
+        let delegate = MockCarbEntryReminderDelegate()
+        let viewModel = CarbEntryViewModel(delegate: delegate, now: { self.now })
+        viewModel.carbsQuantity = viewModel.warningCarbEntryQuantity.doubleValue(for: .gram) + 1
+        viewModel.time = now.addingTimeInterval(2700)
+        viewModel.mealReminderRequested = true
+        viewModel.continueToBolus()
+        XCTAssertEqual(viewModel.alert, .warningQuantityValidation)
+        viewModel.clearAlertAndContinueToBolus()
+        await Task.yield()
+        XCTAssertNil(viewModel.alert)
+        XCTAssertEqual(viewModel.bolusViewModel?.mealReminderRequested, true)
+    }
+
+    func testExistingReminderLoadsAndCanBeTurnedOffWithoutOtherEdits() async {
+        let delegate = MockCarbEntryReminderDelegate()
+        let scheduler = MockMealReminderScheduler()
+        scheduler.hasReminder = true
+        let original = StoredCarbEntry(startDate: now.addingTimeInterval(600), quantity: LoopQuantity(unit: .gram, doubleValue: 20), foodType: "Meal", absorptionTime: .hours(3))
+        let viewModel = CarbEntryViewModel(delegate: delegate, originalCarbEntry: original, now: { self.now }, mealReminderScheduler: scheduler)
+        await viewModel.loadMealReminder()
+        XCTAssertTrue(viewModel.mealReminderRequested)
+        XCTAssertTrue(viewModel.continueButtonDisabled)
+        viewModel.mealReminderRequested = false
+        XCTAssertFalse(viewModel.continueButtonDisabled)
+        viewModel.continueToBolus()
+        await Task.yield()
+        XCTAssertEqual(viewModel.bolusViewModel?.mealReminderRequested, false)
+    }
+
+    func testExistingEntryWithoutReminderCanOptInWithoutOtherEdits() async {
+        let delegate = MockCarbEntryReminderDelegate()
+        let scheduler = MockMealReminderScheduler()
+        let original = StoredCarbEntry(startDate: now.addingTimeInterval(600), quantity: LoopQuantity(unit: .gram, doubleValue: 20), foodType: "Meal", absorptionTime: .hours(3))
+        let viewModel = CarbEntryViewModel(delegate: delegate, originalCarbEntry: original, now: { self.now }, mealReminderScheduler: scheduler)
+        await viewModel.loadMealReminder()
+        XCTAssertFalse(viewModel.mealReminderRequested)
+        viewModel.mealReminderRequested = true
+        XCTAssertFalse(viewModel.continueButtonDisabled)
+        viewModel.continueToBolus()
+        await Task.yield()
+        XCTAssertEqual(viewModel.bolusViewModel?.mealReminderRequested, true)
+    }
+
+    func testReloadDoesNotOverwriteUsersChoice() async {
+        let delegate = MockCarbEntryReminderDelegate()
+        let scheduler = MockMealReminderScheduler()
+        scheduler.hasReminder = true
+        let original = StoredCarbEntry(startDate: now.addingTimeInterval(600), quantity: LoopQuantity(unit: .gram, doubleValue: 20))
+        let viewModel = CarbEntryViewModel(delegate: delegate, originalCarbEntry: original, now: { self.now }, mealReminderScheduler: scheduler)
+        await viewModel.loadMealReminder()
+        viewModel.mealReminderRequested = false
+        await viewModel.loadMealReminder()
+        XCTAssertFalse(viewModel.mealReminderRequested)
+    }
+}
+
+@MainActor
+private final class MockMealReminderScheduler: MealReminderScheduling {
+    var hasReminder = false
+
+    func hasPendingReminder(for entry: StoredCarbEntry) async -> Bool { hasReminder }
+
+    var scheduledEntries: [StoredCarbEntry] = []
+    var cancelledEntries: [StoredCarbEntry] = []
+    var error: Error?
+
+    func scheduleReminder(for entry: StoredCarbEntry) async throws {
+        if let error { throw error }
+        scheduledEntries.append(entry)
+    }
+
+    func cancelReminder(for entry: StoredCarbEntry) {
+        cancelledEntries.append(entry)
+    }
+}
+
+@MainActor
+private final class MockCarbEntryReminderDelegate: MockBolusEntryViewModelDelegate, CarbEntryViewModelDelegate {
+    let defaultAbsorptionTimes: DefaultAbsorptionTimes = (.hours(2), .hours(3), .hours(4))
+    func isScheduleOverrideActive(at date: Date) -> Bool { false }
+    func getGlucoseSamples(start: Date?, end: Date?) async throws -> [StoredGlucoseSample] { [] }
+    func selectedFavoriteFoodLastEaten(_ favoriteFood: StoredFavoriteFood) async throws -> Date? { nil }
+    func getFavoriteFoodCarbEntries(_ favoriteFood: StoredFavoriteFood) async throws -> [StoredCarbEntry] { [] }
+    func getHistoricalChartsData(start: Date, end: Date) async throws -> HistoricalChartsData {
+        HistoricalChartsData(glucoseValues: [], carbEntries: [], doses: [], iobValues: [], carbAbsorptionReview: nil)
+    }
 }
 
 fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {

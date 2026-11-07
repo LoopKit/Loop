@@ -952,6 +952,10 @@ extension LoopAppManager: @preconcurrency DeviceOrientationController {
 extension LoopAppManager: UNUserNotificationCenterDelegate {
 
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        if notification.request.content.categoryIdentifier == MealReminderManager.categoryIdentifier {
+            completionHandler([.sound, .list, .banner])
+            return
+        }
         switch notification.request.identifier {
         // TODO: Until these notifications are converted to use the new alert system, they shall still show in the foreground
         case LoopNotificationCategory.bolusFailure.rawValue,

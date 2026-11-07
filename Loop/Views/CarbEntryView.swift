@@ -104,6 +104,9 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                 .accessibility(hidden: true)
             }
         }
+        .task {
+            await viewModel.loadMealReminder()
+        }
         .alert(item: $viewModel.alert, content: alert(for:))
         .sheet(isPresented: $showAddFavoriteFood, onDismiss: clearExpandedRow) {
             FavoriteFoodAddEditView(carbsQuantity: $viewModel.carbsQuantity.wrappedValue, foodType: $viewModel.foodType.wrappedValue, absorptionTime: $viewModel.absorptionTime.wrappedValue, onSave: onFavoriteFoodSave(_:))
@@ -119,41 +122,54 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     }
     
     private var mainCard: some View {
-        VStack(spacing: 10) {
-            let amountConsumedFocused: Binding<Bool> = Binding(get: { expandedRow == .amountConsumed }, set: { expandedRow = $0 ? .amountConsumed : nil })
-            let timeFocused: Binding<Bool> = Binding(get: { expandedRow == .time }, set: { expandedRow = $0 ? .time : nil })
-            let foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
-            let absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
-            // Food type row shows an x button next to favorite food chip that clears favorite food by setting this binding to nil
-            let selectedFavoriteFoodBinding = Binding(
-                get: { viewModel.selectedFavoriteFood },
-                set: { food in
-                    guard food == nil else { return }
-                    viewModel.selectedFavoriteFoodIndex = -1
-                }
-            )
-            
-            CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: amountConsumedFocused, title: NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"), preferredCarbUnit: viewModel.preferredCarbUnit)
+        // Refresh at the meal time even if the user leaves the screen open.
+        TimelineView(.explicit([viewModel.time])) { _ in
+            VStack(spacing: 10) {
+                let amountConsumedFocused: Binding<Bool> = Binding(get: { expandedRow == .amountConsumed }, set: { expandedRow = $0 ? .amountConsumed : nil })
+                let timeFocused: Binding<Bool> = Binding(get: { expandedRow == .time }, set: { expandedRow = $0 ? .time : nil })
+                let foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
+                let absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
+                // Food type row shows an x button next to favorite food chip that clears favorite food by setting this binding to nil
+                let selectedFavoriteFoodBinding = Binding(
+                    get: { viewModel.selectedFavoriteFood },
+                    set: { food in
+                        guard food == nil else { return }
+                        viewModel.selectedFavoriteFoodIndex = -1
+                    }
+                )
 
-            CardSectionDivider()
-            
-            DatePickerRow(date: $viewModel.time, isFocused: timeFocused, minimumDate: viewModel.minimumDate, maximumDate: viewModel.maximumDate)
-            
-            CardSectionDivider()
-            
-            FoodTypeRow(selectedFavoriteFood: selectedFavoriteFoodBinding, foodType: $viewModel.foodType, absorptionTime: $viewModel.absorptionTime, selectedDefaultAbsorptionTimeEmoji: $viewModel.selectedDefaultAbsorptionTimeEmoji, usesCustomFoodType: $viewModel.usesCustomFoodType, absorptionTimeWasEdited: $viewModel.absorptionTimeWasEdited, isFocused: foodTypeFocused, showClearFavoriteFoodButton: !isNewEntry, defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes)
-            
-            CardSectionDivider()
-            
-            AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, validDurationRange: viewModel.absorptionRimesRange, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
-                .padding(.bottom, 2)
+                CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: amountConsumedFocused, title: NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"), preferredCarbUnit: viewModel.preferredCarbUnit)
+
+                CardSectionDivider()
+
+                DatePickerRow(date: $viewModel.time, isFocused: timeFocused, minimumDate: viewModel.minimumDate, maximumDate: viewModel.maximumDate)
+
+                CardSectionDivider()
+
+                let canSetMealReminder = viewModel.canSetMealReminder()
+                Toggle(isOn: canSetMealReminder ? $viewModel.mealReminderRequested : .constant(false)) {
+                    Text("⏰ Remind Me", comment: "Toggle to request a notification at the future carb entry time")
+                        .foregroundStyle(canSetMealReminder ? Color.primary : Color.secondary)
+                }
+                .disabled(!canSetMealReminder)
+                .accessibilityIdentifier("toggle_MealReminder")
+
+                CardSectionDivider()
+
+                FoodTypeRow(selectedFavoriteFood: selectedFavoriteFoodBinding, foodType: $viewModel.foodType, absorptionTime: $viewModel.absorptionTime, selectedDefaultAbsorptionTimeEmoji: $viewModel.selectedDefaultAbsorptionTimeEmoji, usesCustomFoodType: $viewModel.usesCustomFoodType, absorptionTimeWasEdited: $viewModel.absorptionTimeWasEdited, isFocused: foodTypeFocused, showClearFavoriteFoodButton: !isNewEntry, defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes)
+
+                CardSectionDivider()
+
+                AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, validDurationRange: viewModel.absorptionRimesRange, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
+                    .padding(.bottom, 2)
+            }
+            .padding(.vertical, 12)
+            .padding(.horizontal)
+            .background(CardBackground())
+            .padding(.horizontal)
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal)
-        .background(CardBackground())
-        .padding(.horizontal)
     }
-    
+
     @ViewBuilder
     private var bolusView: some View {
         if let viewModel = viewModel.bolusViewModel {
