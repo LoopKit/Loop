@@ -18,7 +18,7 @@
         <!--Loop-->
         <scene sceneID="gQv-2Z-iCt">
             <objects>
-                <controller identifier="ActionHUDController" title="Loop" contentMode="scaleAspectFit" spacing="7" id="rNf-Mh-tID" customClass="ActionHUDController" customModule="WatchApp_Extension">
+                <controller identifier="ActionHUDController" contentMode="scaleAspectFit" spacing="7" id="rNf-Mh-tID" customClass="ActionHUDController" customModule="WatchApp_Extension">
                     <items>
                         <group width="1" alignment="left" id="1wc-65-vel">
                             <items>
@@ -177,7 +177,7 @@
         <!--Loop-->
         <scene sceneID="3Z2-ZE-636">
             <objects>
-                <controller identifier="ChartHUDController" title="Loop" spacing="7" alwaysBounce="YES" id="v5b-sO-bb8" customClass="ChartHUDController" customModule="WatchApp_Extension">
+                <controller identifier="ChartHUDController" spacing="7" alwaysBounce="YES" id="v5b-sO-bb8" customClass="ChartHUDController" customModule="WatchApp_Extension">
                     <items>
                         <group width="1" alignment="left" id="z0r-4k-Z7h">
                             <items>
