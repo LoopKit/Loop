@@ -57,8 +57,7 @@ final class CarbEntryViewModel: ObservableObject {
     
     @Published var carbsQuantity: Double? = nil
     var preferredCarbUnit = LoopUnit.gram
-    var maxCarbEntryQuantity = LoopConstants.maxCarbEntryQuantity
-    var warningCarbEntryQuantity = LoopConstants.warningCarbEntryQuantity
+    var maxCarbEntryQuantity: LoopQuantity { UserDefaults.standard.carbEntryLimits.maximumQuantity }
     
     @Published var time = Date()
     private var date = Date()
@@ -207,18 +206,19 @@ final class CarbEntryViewModel: ObservableObject {
         validateInputAndContinue()
     }
     
-    private func validateInputAndContinue() {
+    private func validateInputAndContinue(confirmedLargeQuantity: Bool = false) {
         guard absorptionTime <= maxAbsorptionTime else {
             return
         }
         
         guard let carbsQuantity, carbsQuantity > 0 else { return }
         let quantity = LoopQuantity(unit: preferredCarbUnit, doubleValue: carbsQuantity)
-        if quantity.compare(maxCarbEntryQuantity) == .orderedDescending {
+        let limits = UserDefaults.standard.carbEntryLimits
+        if quantity > limits.maximumQuantity {
             self.alert = .maxQuantityExceded
             return
         }
-        else if quantity.compare(warningCarbEntryQuantity) == .orderedDescending, selectedFavoriteFoodIndex == -1 {
+        else if !confirmedLargeQuantity, quantity > limits.warningQuantity, selectedFavoriteFoodIndex == -1 {
             self.alert = .warningQuantityValidation
             return
         }
@@ -249,9 +249,7 @@ final class CarbEntryViewModel: ObservableObject {
     
     func clearAlertAndContinueToBolus() {
         self.alert = nil
-        Task { @MainActor in
-            setBolusViewModel()
-        }
+        validateInputAndContinue(confirmedLargeQuantity: true)
     }
     
     // MARK: - Favorite Foods

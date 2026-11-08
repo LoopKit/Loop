@@ -89,6 +89,7 @@ struct SettingsView: View {
                         therapySection
                     }
                     presetsSection
+                    carbEntryLimitsSection
                     deviceSettingsSection
                     healthAccessSection
                     if FeatureFlags.allowExperimentalFeatures {
@@ -486,6 +487,16 @@ extension SettingsView {
         }
     }
 
+    private var carbEntryLimitsSection: some View {
+        Section {
+            NavigationLink {
+                CarbEntryLimitsView()
+            } label: {
+                Text("Carb Entry Limits", comment: "Settings row for the carb entry warning and maximum")
+            }
+        }
+    }
+
     private var pluginMenuItems: [PluginMenuItem<some View>] {
         self.viewModel.availableSupports.flatMap { plugin in
             plugin.configurationMenuItems().enumerated().map { index, item in
@@ -866,6 +877,66 @@ public struct SettingsView_Previews: PreviewProvider {
                 .previewDisplayName("11 Pro dark")
                 .environmentObject(displayGlucosePreference)
         }
+    }
+}
+
+private struct CarbEntryLimitsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.locale) private var locale
+
+    @State private var warningGrams: String
+    @State private var maximumGrams: String
+
+    init() {
+        let limits = UserDefaults.standard.carbEntryLimits
+        _warningGrams = State(initialValue: limits.warningGrams.formatted(.number.grouping(.never)))
+        _maximumGrams = State(initialValue: limits.maximumGrams.formatted(.number.grouping(.never)))
+    }
+
+    private var limits: CarbEntryLimits? {
+        guard let warning = wholeGrams(from: warningGrams),
+              let maximum = wholeGrams(from: maximumGrams) else {
+            return nil
+        }
+        return CarbEntryLimits(warningGrams: warning, maximumGrams: maximum)
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                limitField("Warning Threshold (g)", text: $warningGrams)
+                limitField("Maximum Entry (g)", text: $maximumGrams)
+            } footer: {
+                Text("Enter whole grams from 1 to 999. The warning threshold must be below the maximum entry. Add Carb Entry asks for confirmation above the warning threshold and blocks entries above the maximum.")
+            }
+        }
+        .navigationTitle(Text("Carb Entry Limits", comment: "Title of the carb entry limits editor"))
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Save") {
+                    guard let limits else { return }
+                    UserDefaults.standard.carbEntryLimits = limits
+                    dismiss()
+                }
+                .disabled(limits == nil)
+            }
+        }
+    }
+
+    private func limitField(_ label: LocalizedStringKey, text: Binding<String>) -> some View {
+        LabeledContent {
+            TextField(label, text: text)
+                .labelsHidden()
+                .keyboardType(.numberPad)
+                .multilineTextAlignment(.trailing)
+        } label: {
+            Text(label)
+        }
+    }
+
+    private func wholeGrams(from text: String) -> Int? {
+        guard text.wholeMatch(of: #/\p{Nd}{1,3}/#) != nil else { return nil }
+        return try? IntegerFormatStyle<Int>.number.locale(locale).parseStrategy.parse(text)
     }
 }
 

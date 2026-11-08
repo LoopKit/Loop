@@ -6,8 +6,38 @@
 //
 
 import Foundation
+import LoopCore
 import LoopKit
 
+struct CarbEntryLimits {
+    // The carb entry form displays up to three integer digits.
+    static let supportedGrams = 1...999
+    static let defaults = CarbEntryLimits(
+        warningGrams: Int(LoopConstants.warningCarbEntryQuantity.doubleValue(for: .gram)),
+        maximumGrams: Int(LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram))
+    )!
+
+    let warningGrams: Int
+    let maximumGrams: Int
+
+    init?(warningGrams: Int, maximumGrams: Int) {
+        guard Self.supportedGrams.contains(warningGrams),
+              Self.supportedGrams.contains(maximumGrams),
+              warningGrams < maximumGrams else {
+            return nil
+        }
+        self.warningGrams = warningGrams
+        self.maximumGrams = maximumGrams
+    }
+
+    var warningQuantity: LoopQuantity {
+        LoopQuantity(unit: .gram, doubleValue: Double(warningGrams))
+    }
+
+    var maximumQuantity: LoopQuantity {
+        LoopQuantity(unit: .gram, doubleValue: Double(maximumGrams))
+    }
+}
 
 extension UserDefaults {
     private enum Key: String {
@@ -17,8 +47,25 @@ extension UserDefaults {
         case loopNotRunningNotifications = "com.loopkit.Loop.loopNotRunningNotifications"
         case inFlightAutomaticDose = "com.loopkit.Loop.inFlightAutomaticDose"
         case favoriteFoods = "com.loopkit.Loop.favoriteFoods"
+        case carbEntryLimits = "com.loopkit.Loop.carbEntryLimits"
         case automationHistory = "com.loopkit.Loop.automationHistory"
         case showsActivityPresets = "com.loopkit.Loop.showsActivityPresets"
+    }
+
+    var carbEntryLimits: CarbEntryLimits {
+        get {
+            guard let values = dictionary(forKey: Key.carbEntryLimits.rawValue),
+                  let warningGrams = values["warningGrams"] as? Int,
+                  let maximumGrams = values["maximumGrams"] as? Int,
+                  let limits = CarbEntryLimits(warningGrams: warningGrams, maximumGrams: maximumGrams) else {
+                return .defaults
+            }
+            return limits
+        }
+        set {
+            set(["warningGrams": newValue.warningGrams, "maximumGrams": newValue.maximumGrams],
+                forKey: Key.carbEntryLimits.rawValue)
+        }
     }
 
     var legacyPumpManagerRawValue: PumpManager.RawValue? {

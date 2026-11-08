@@ -107,16 +107,13 @@ class SimpleBolusViewModel: ObservableObject {
     }
     
     private func updateNotice() {
-
-        guard let maxBolus = delegate.maximumBolus, let suspendThreshold = delegate.suspendThreshold else {
+        if exceedsMaxCarbEntryQuantity {
+            activeNotice = .carbohydrateEntryTooLarge
             return
         }
 
-        if let carbs = self.carbQuantity {
-            guard carbs <= LoopConstants.maxCarbEntryQuantity else {
-                activeNotice = .carbohydrateEntryTooLarge
-                return
-            }
+        guard let maxBolus = delegate.maximumBolus, let suspendThreshold = delegate.suspendThreshold else {
+            return
         }
         
         if let bolus = bolus {
@@ -188,6 +185,12 @@ class SimpleBolusViewModel: ObservableObject {
     var didEditBolusAmount: Bool = false
     
     private var carbQuantity: LoopQuantity? = nil
+
+    var maxCarbEntryQuantity: LoopQuantity { UserDefaults.standard.carbEntryLimits.maximumQuantity }
+
+    private var exceedsMaxCarbEntryQuantity: Bool {
+        carbQuantity.map { !($0 <= maxCarbEntryQuantity) } ?? false
+    }
 
     private var manualGlucoseQuantity: LoopQuantity? = nil {
         didSet {
@@ -305,11 +308,9 @@ class SimpleBolusViewModel: ObservableObject {
     func updateRecommendation() {
         let recommendationDate = Date()
         
-        if let carbs = self.carbQuantity {
-            guard carbs <= LoopConstants.maxCarbEntryQuantity else {
-                recommendation = nil
-                return
-            }
+        guard !exceedsMaxCarbEntryQuantity else {
+            recommendation = nil
+            return
         }
         
         if let glucose = manualGlucoseQuantity {
@@ -342,6 +343,10 @@ class SimpleBolusViewModel: ObservableObject {
     }
     
     func saveAndDeliver() async -> Bool {
+        guard !exceedsMaxCarbEntryQuantity else {
+            activeNotice = .carbohydrateEntryTooLarge
+            return false
+        }
 
         let saveDate = Date()
 
