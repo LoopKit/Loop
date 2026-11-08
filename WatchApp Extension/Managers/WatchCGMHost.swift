@@ -38,6 +38,11 @@ final class WatchCGMHost {
     private(set) var sensorName: String?
     private(set) var statusNote: String?
     private(set) var lastConnection: Date?
+    private(set) var isSearchingForSensor = false
+
+    /// Told when the CGM starts or stops searching for its sensor.
+    @ObservationIgnored
+    var searchDidChange: ((Bool) -> Void)?
 
     /// A background refresh this long after each reading re-checks acquisition, in case watchOS froze
     /// the app before it lodged the next connect. Past the G7's 35 s tail clearance, so a connect it
@@ -49,9 +54,6 @@ final class WatchCGMHost {
             builtFrom = raw["builtFrom"] as? [String: Any]
             install(manager)
         }
-        NotificationCenter.default.addObserver(forName: watchCGMStatusDidChange, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.updateStatusNote() }
-        }
     }
 
     private func updateStatusNote() {
@@ -59,6 +61,11 @@ final class WatchCGMHost {
         sensorName = watchCGMSensorName(cgmManager)
         statusNote = watchCGMStatusNote(cgmManager)
         lastConnection = watchCGMLastConnection(cgmManager)
+        let searching = watchCGMIsSearching(cgmManager)
+        if searching != isSearchingForSensor {
+            isSearchingForSensor = searching
+            searchDidChange?(searching)
+        }
     }
 
     /// The phone's context arrived. Builds a manager when its export names a different sensor or code,
@@ -94,6 +101,7 @@ final class WatchCGMHost {
     private func install(_ manager: CGMManager) {
         manager.delegateQueue = .main
         manager.cgmManagerDelegate = self
+        manager.addStatusObserver(self, queue: .main)
         cgmManager = manager
         updateStatusNote()
     }
@@ -101,6 +109,7 @@ final class WatchCGMHost {
     private func remove() {
         guard let previous = cgmManager else { return }
         previous.cgmManagerDelegate = nil
+        previous.removeStatusObserver(self)
         Task { await previous.delete() }
         cgmManager = nil
         builtFrom = nil
@@ -123,6 +132,10 @@ final class WatchCGMHost {
         }
     }
 }
+
+/// Its `cgmManager(_:didUpdate:)`, below, serves as delegate and as status observer: the search and the note
+/// change without the manager's state changing, and reach only status observers.
+extension WatchCGMHost: CGMManagerStatusObserver {}
 
 extension WatchCGMHost: CGMManagerDelegate {
     nonisolated func startDateToFilterNewData(for manager: CGMManager) -> Date? {

@@ -71,9 +71,8 @@ extension ExtensionDelegate {
     /// Called from `applicationDidFinishLaunching()`. With the flag off, nothing of Sport Mode starts.
     func podLoanDidFinishLaunching() {
         guard FeatureFlags.sportModeEnabled else { return }
-        NotificationCenter.default.addObserver(forName: watchCGMStatusDidChange, object: nil, queue: .main) { note in
-            guard let manager = note.object as? CGMManager else { return }
-            if !watchCGMIsSearching(manager) {
+        WatchCGMHost.shared.searchDidChange = { searching in
+            if !searching {
                 SensorSearchAlert.disarm()
             } else if WKApplication.shared().applicationState != .active {
                 SensorSearchAlert.arm()

@@ -29,29 +29,27 @@ func watchCGMManager(rawValue: [String: Any]) -> CGMManager? {
 
 /// On a wake that is not the CGM's own, its acquisition re-checks itself.
 func watchCGMRecheckAcquisition(_ manager: CGMManager?) {
-    (manager as? DirectReadCGMManager)?.recheckAcquisition()
+    manager?.ensureConnectionActiveOrPending()
 }
 
-/// What the watch's CGM needs from the user (a code, or the app kept open while it searches), and the
-/// notification posted when that changes.
+/// What the watch's CGM needs from the user (a code, or the app kept open while it searches); changes
+/// reach the manager's status observers.
 func watchCGMStatusNote(_ manager: CGMManager?) -> String? {
-    (manager as? DirectReadCGMManager)?.directReadStatusNote
+    manager?.shortStatusNote
 }
 
-let watchCGMStatusDidChange = Notification.Name.directReadCGMStatusDidChange
-
-/// Whether the watch's CGM is searching for its sensor, which needs the app kept open.
+/// Whether the watch's CGM is searching for its sensor, which on the watch needs the app kept open.
 func watchCGMIsSearching(_ manager: CGMManager?) -> Bool {
-    (manager as? DirectReadCGMManager)?.isSearchingForSensor == true
+    manager?.isSearchingForSensor == true
 }
 
 func watchCGMSensorName(_ manager: CGMManager?) -> String? {
-    (manager as? DirectReadCGMManager)?.sensorName
+    manager?.cgmManagerStatus.device?.name
 }
 
-/// When the watch last had a link to the sensor, readings or not (none during warmup).
+/// When the watch last had a link to the sensor, readings or not.
 func watchCGMLastConnection(_ manager: CGMManager?) -> Date? {
-    (manager as? DirectReadCGMManager)?.lastConnect ?? manager?.cgmManagerStatus.lastCommunicationDate
+    manager?.cgmManagerStatus.lastCommunicationDate
 }
 
 extension DeviceManager {
