@@ -74,12 +74,16 @@ final class LoanControlTests: XCTestCase {
         XCTAssertEqual(phone(.takeBackTapped, role: .lending), .takeOnTap)
     }
 
-    // Row 10 · The watch goes silent with the phone beside the body: ask, and on silence tell the looper.
+    // Row 10 · The watch goes silent with the phone beside the body: ask; tell the looper only once the
+    // silence has lasted `watchSilenceWarning`.
     func testRow10_ASilentWatchIsQueriedThenTheLooperIsTold() {
-        let decision = phone(.watchReportOverdue, role: .lending)
+        let decision = phone(.watchSilentLong, role: .lending)
         XCTAssertEqual(decision, .query(.inBackground, onSilence: .tell(.watchMayNotBeLooping),
                                         onHoldsNothing: .takeOnSilence(.watchNotResponding)))
-        XCTAssertEqual(phone(.watchReportOverdue, role: .standingAside), decision, "the same for a loan the watch started")
+        XCTAssertEqual(phone(.watchSilentLong, role: .standingAside), decision, "the same for a loan the watch started")
+        XCTAssertEqual(phone(.watchReportOverdue, role: .lending),
+                       .query(.inBackground, onSilence: .nothing, onHoldsNothing: .takeOnSilence(.watchNotResponding)),
+                       "a reading or two missed: asked, nobody told, a watch that holds nothing taken")
         XCTAssertEqual(C.afterQuery(.silence, onSilence: .tell(.watchMayNotBeLooping)), .tell(.watchMayNotBeLooping))
         XCTAssertEqual(C.afterQuery(.answered, onSilence: .tell(.watchMayNotBeLooping)), .nothing, "a live watch answers: nothing moves")
     }
@@ -87,6 +91,7 @@ final class LoanControlTests: XCTestCase {
     // Rows 11 and 15 · The phone does not see the sensor: the body is elsewhere; nothing.
     func testRows11And15_AwayFromTheBodyThePhoneDoesNothing() {
         XCTAssertEqual(phone(.watchReportOverdue, role: .lending, sensorFresh: false), .nothing)
+        XCTAssertEqual(phone(.watchSilentLong, role: .lending, sensorFresh: false), .nothing)
     }
 
     // Rows 12, 13 and 19, the watch's side · Back from off: ask first, carry on only on silence.
@@ -160,5 +165,6 @@ final class LoanControlTests: XCTestCase {
         XCTAssertEqual(C.Wait.onScreen.seconds, 10)
         XCTAssertEqual(C.Wait.inBackground.seconds, 30)
         XCTAssertEqual(C.watchReportOverdue, 6 * 60)
+        XCTAssertEqual(C.watchSilenceWarning, 20 * 60)
     }
 }
