@@ -95,7 +95,12 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                     .padding(.top, 8)
                 }
                 
-                let isBolusViewActive = Binding(get: { viewModel.bolusViewModel != nil }, set: { _, _ in viewModel.bolusViewModel = nil })
+                let isBolusViewActive = Binding(
+                    get: { viewModel.bolusViewModel != nil },
+                    set: { isActive in
+                        if !isActive { viewModel.returnFromBolus() }
+                    }
+                )
                 NavigationLink(destination: bolusView, isActive: isBolusViewActive) {
                     EmptyView()
                 }
@@ -147,7 +152,11 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                 CardSectionDivider()
 
                 let canSetMealReminder = viewModel.canSetMealReminder()
-                Toggle(isOn: canSetMealReminder ? $viewModel.mealReminderRequested : .constant(false)) {
+                let reminderSelection = Binding(
+                    get: { canSetMealReminder && viewModel.mealReminderRequested },
+                    set: viewModel.setMealReminderRequested
+                )
+                Toggle(isOn: reminderSelection) {
                     Text("⏰ Remind Me", comment: "Toggle to request a notification at the future carb entry time")
                         .foregroundStyle(canSetMealReminder ? Color.primary : Color.secondary)
                 }

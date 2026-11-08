@@ -589,11 +589,6 @@ extension LoopDataManager {
     func replaceCarbEntry(_ oldEntry: StoredCarbEntry, with update: CarbEntryUpdate) async throws -> StoredCarbEntry {
         let storedCarbEntry = try await carbStore.replaceCarbEntry(oldEntry, withEntry: update)
         self.temporaryPresetsManager.endPreMealOverride()
-        do {
-            try await MealReminderManager.shared.updateReminder(from: oldEntry, to: storedCarbEntry)
-        } catch {
-            logger.error("Failed to update meal reminder: %{public}@", String(describing: error))
-        }
         return storedCarbEntry
     }
 

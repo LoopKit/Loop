@@ -19,13 +19,13 @@ final class MealReminderManagerTests: XCTestCase {
     }
 
     func testTimeSensitiveReminderAndIndependentMeals() async throws {
-        let center = MealReminderTestNotificationCenter()
+        let center = MockUserNotificationCenter()
         let manager = MealReminderManager(notificationCenter: center, now: { self.now }, authorize: { true }, isMuted: { _ in false })
         let first = entry(after: 2700)
         try await manager.scheduleReminder(for: first)
         try await manager.scheduleReminder(for: entry(after: 3000, id: "another-meal"))
-        XCTAssertEqual(center.requests.count, 2)
-        let request = try XCTUnwrap(center.requests[MealReminderManager.requestIdentifier(for: first)!])
+        XCTAssertEqual(center.pendingRequests.count, 2)
+        let request = try XCTUnwrap(center.pendingRequests.first { $0.identifier == MealReminderManager.requestIdentifier(for: first) })
         XCTAssertEqual(request.content.interruptionLevel, .timeSensitive)
         XCTAssertEqual(request.content.sound, .default)
         XCTAssertEqual(request.content.categoryIdentifier, MealReminderManager.categoryIdentifier)
@@ -35,69 +35,71 @@ final class MealReminderManagerTests: XCTestCase {
     }
 
     func testEditMovesExistingReminderAndUpdatesQuantity() async throws {
-        let center = MealReminderTestNotificationCenter()
+        let center = MockUserNotificationCenter()
         let manager = MealReminderManager(notificationCenter: center, now: { self.now }, authorize: { true }, isMuted: { _ in false })
         let original = entry(after: 2700)
         let updated = entry(after: 3300, grams: 60)
         XCTAssertNotEqual(original.uuid, updated.uuid)
         try await manager.scheduleReminder(for: original)
-        try await manager.updateReminder(from: original, to: updated)
-        XCTAssertEqual(center.requests.count, 1)
-        let request = try XCTUnwrap(center.requests.values.first)
+        try await manager.scheduleReminder(for: updated, replacing: original)
+        XCTAssertEqual(center.pendingRequests.count, 1)
+        let request = try XCTUnwrap(center.pendingRequests.first)
         XCTAssertEqual((request.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval, 3300)
         XCTAssertTrue(request.content.body.contains("60"))
     }
 
-    func testEditsDoNotCreateUnrequestedReminders() async throws {
-        let center = MealReminderTestNotificationCenter()
+    func testReplacingEntryWithDifferentIdentifierRemovesOldRequest() async throws {
+        let center = MockUserNotificationCenter()
         let manager = MealReminderManager(notificationCenter: center, now: { self.now }, authorize: { true })
-        try await manager.updateReminder(from: entry(after: 2700), to: entry(after: 3300))
-        XCTAssertTrue(center.requests.isEmpty)
+        let original = entry(after: 2700)
+        let updated = entry(after: 3300, id: "updated-meal")
+        try await manager.scheduleReminder(for: original)
+        try await manager.scheduleReminder(for: updated, replacing: original)
+        XCTAssertEqual(center.pendingRequests.map(\.identifier), [MealReminderManager.requestIdentifier(for: updated)!])
     }
 
     func testCancelAndMovingMealToPastRemoveReminder() async throws {
-        let center = MealReminderTestNotificationCenter()
+        let center = MockUserNotificationCenter()
         let manager = MealReminderManager(notificationCenter: center, now: { self.now }, authorize: { true })
         let original = entry(after: 2700)
         try await manager.scheduleReminder(for: original)
-        try await manager.updateReminder(from: original, to: entry(after: -60))
-        XCTAssertTrue(center.requests.isEmpty)
+        try await manager.scheduleReminder(for: entry(after: -60), replacing: original)
+        XCTAssertTrue(center.pendingRequests.isEmpty)
 
         try await manager.scheduleReminder(for: original)
-        center.removedDelivered.removeAll()
+        center.deliverAll()
+        XCTAssertEqual(center.deliveredRequests.count, 1)
         manager.cancelReminder(for: original)
-        XCTAssertTrue(center.requests.isEmpty)
-        let identifier = try XCTUnwrap(MealReminderManager.requestIdentifier(for: original))
-        XCTAssertEqual(center.removedDelivered, [identifier])
+        XCTAssertTrue(center.deliveredRequests.isEmpty)
     }
 
     func testMuteChangesPreserveReminderTime() async throws {
-        let center = MealReminderTestNotificationCenter()
+        let center = MockUserNotificationCenter()
         var currentTime = now
         let muted = AlertMuter.Configuration(startTime: now, duration: .hours(1))
         let manager = MealReminderManager(notificationCenter: center, now: { currentTime }, authorize: { true }, isMuted: { delay in
             muted.shouldMuteAlert(scheduledAt: delay, now: currentTime)
         })
         try await manager.scheduleReminder(for: entry(after: .minutes(45)))
-        let initial = try XCTUnwrap(center.requests.values.first)
+        let initial = try XCTUnwrap(center.pendingRequests.first)
         XCTAssertNil(initial.content.sound)
         XCTAssertEqual((initial.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval, .minutes(45))
 
         currentTime = now.addingTimeInterval(.minutes(5))
         try await manager.updatePendingReminderSounds(AlertMuter.Configuration())
-        let unmuted = try XCTUnwrap(center.requests.values.first)
+        let unmuted = try XCTUnwrap(center.pendingRequests.first)
         XCTAssertEqual(unmuted.content.sound, .default)
         XCTAssertEqual((unmuted.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval, .minutes(40))
 
         currentTime = now.addingTimeInterval(.minutes(10))
         try await manager.updatePendingReminderSounds(muted)
-        let mutedAgain = try XCTUnwrap(center.requests.values.first)
+        let mutedAgain = try XCTUnwrap(center.pendingRequests.first)
         XCTAssertNil(mutedAgain.content.sound)
         XCTAssertEqual((mutedAgain.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval, .minutes(35))
     }
 
     func testAuthorizationAndSchedulingFailuresAreReported() async {
-        let center = MealReminderTestNotificationCenter()
+        let center = MockUserNotificationCenter()
         let denied = MealReminderManager(notificationCenter: center, now: { self.now }, authorize: { false })
         do {
             try await denied.scheduleReminder(for: entry(after: 2700))
@@ -105,7 +107,7 @@ final class MealReminderManagerTests: XCTestCase {
         } catch {
             XCTAssertTrue(error is MealReminderManager.SchedulingError)
         }
-        XCTAssertTrue(center.requests.isEmpty)
+        XCTAssertTrue(center.pendingRequests.isEmpty)
         center.addError = NSError(domain: "test", code: 1)
         let manager = MealReminderManager(notificationCenter: center, now: { self.now }, authorize: { true })
         do {
@@ -117,40 +119,13 @@ final class MealReminderManagerTests: XCTestCase {
     }
 
     func testMealTimePassingDuringAuthorizationDoesNotSendLateReminder() async throws {
-        let center = MealReminderTestNotificationCenter()
+        let center = MockUserNotificationCenter()
         var currentTime = now
         let manager = MealReminderManager(notificationCenter: center, now: { currentTime }, authorize: {
             currentTime = currentTime.addingTimeInterval(3000)
             return true
         })
         try await manager.scheduleReminder(for: entry(after: 2700))
-        XCTAssertTrue(center.requests.isEmpty)
-    }
-}
-
-private final class MealReminderTestNotificationCenter: UserNotificationCenter {
-    var requests: [String: UNNotificationRequest] = [:]
-    var removedDelivered: [String] = []
-    var addError: Error?
-
-    func add(_ request: UNNotificationRequest, withCompletionHandler completionHandler: ((Error?) -> Void)?) {
-        if addError == nil { requests[request.identifier] = request }
-        completionHandler?(addError)
-    }
-
-    func removePendingNotificationRequests(withIdentifiers identifiers: [String]) {
-        for identifier in identifiers { requests.removeValue(forKey: identifier) }
-    }
-
-    func removeDeliveredNotifications(withIdentifiers identifiers: [String]) {
-        removedDelivered.append(contentsOf: identifiers)
-    }
-
-    func getPendingNotificationRequests(completionHandler: @escaping ([UNNotificationRequest]) -> Void) {
-        completionHandler(Array(requests.values))
-    }
-
-    func getDeliveredNotifications(completionHandler: @escaping ([UNNotification]) -> Void) {
-        completionHandler([])
+        XCTAssertTrue(center.pendingRequests.isEmpty)
     }
 }

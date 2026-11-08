@@ -9,10 +9,16 @@ import Foundation
 import LoopKit
 import UserNotifications
 
+enum MealReminderAction: Equatable {
+    case keep
+    case set
+    case clear
+}
+
 @MainActor
 protocol MealReminderScheduling {
     func hasPendingReminder(for entry: StoredCarbEntry) async -> Bool
-    func scheduleReminder(for entry: StoredCarbEntry) async throws
+    func scheduleReminder(for entry: StoredCarbEntry, replacing original: StoredCarbEntry?) async throws
     func cancelReminder(for entry: StoredCarbEntry)
 }
 
@@ -63,15 +69,13 @@ final class MealReminderManager: MealReminderScheduling {
 
     func hasPendingReminder(for entry: StoredCarbEntry) async -> Bool {
         guard let identifier = Self.requestIdentifier(for: entry) else { return false }
-        let requests = await withCheckedContinuation { continuation in
-            notificationCenter.getPendingNotificationRequests { continuation.resume(returning: $0) }
-        }
+        let requests = await notificationCenter.pendingNotificationRequests()
         return requests.contains { $0.identifier == identifier }
     }
 
-    func scheduleReminder(for entry: StoredCarbEntry) async throws {
+    func scheduleReminder(for entry: StoredCarbEntry, replacing original: StoredCarbEntry? = nil) async throws {
         guard entry.startDate > now() else {
-            cancelReminder(for: entry)
+            cancelReminder(for: original ?? entry)
             return
         }
         guard let identifier = Self.requestIdentifier(for: entry) else {
@@ -82,7 +86,7 @@ final class MealReminderManager: MealReminderScheduling {
         // Authorization may have taken long enough for the meal time to pass.
         let delay = entry.startDate.timeIntervalSince(now())
         guard delay > 0 else {
-            cancelReminder(for: entry)
+            cancelReminder(for: original ?? entry)
             return
         }
 
@@ -101,14 +105,9 @@ final class MealReminderManager: MealReminderScheduling {
             content: content,
             trigger: UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)
         )
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            notificationCenter.add(request) { error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume()
-                }
-            }
+        try await notificationCenter.addNotificationRequest(request)
+        if let original, Self.requestIdentifier(for: original) != identifier {
+            cancelReminder(for: original)
         }
         notificationCenter.removeDeliveredNotifications(withIdentifiers: [identifier])
     }
@@ -120,9 +119,7 @@ final class MealReminderManager: MealReminderScheduling {
     }
 
     func updatePendingReminderSounds(_ configuration: AlertMuter.Configuration) async throws {
-        let requests = await withCheckedContinuation { continuation in
-            notificationCenter.getPendingNotificationRequests { continuation.resume(returning: $0) }
-        }
+        let requests = await notificationCenter.pendingNotificationRequests()
         for request in requests where request.content.categoryIdentifier == Self.categoryIdentifier {
             guard let timestamp = request.content.userInfo[Self.mealTimeKey] as? TimeInterval,
                   let content = request.content.mutableCopy() as? UNMutableNotificationContent else { continue }
@@ -133,23 +130,7 @@ final class MealReminderManager: MealReminderScheduling {
             content.sound = configuration.shouldMuteAlert(scheduledAt: delay, now: currentTime) ? nil : .default
             // Reusing the original interval trigger would postpone the reminder.
             let updated = UNNotificationRequest(identifier: request.identifier, content: content, trigger: UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false))
-            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-                notificationCenter.add(updated) { error in
-                    if let error {
-                        continuation.resume(throwing: error)
-                    } else {
-                        continuation.resume()
-                    }
-                }
-            }
+            try await notificationCenter.addNotificationRequest(updated)
         }
-    }
-
-    /// Only carry forward a reminder the user already requested. Editing a carb
-    /// entry must never silently opt someone into a new reminder.
-    func updateReminder(from original: StoredCarbEntry, to updated: StoredCarbEntry) async throws {
-        guard await hasPendingReminder(for: original) else { return }
-        cancelReminder(for: original)
-        try await scheduleReminder(for: updated)
     }
 }
