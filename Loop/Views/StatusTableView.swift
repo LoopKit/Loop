@@ -205,11 +205,6 @@ struct ActionTabBar: UIViewRepresentable {
         }
         bar.standardAppearance = appearance
         bar.scrollEdgeAppearance = appearance
-        bar.registerForTraitChanges(UITraitCollection.systemTraitsAffectingColorAppearance) { [weak coordinator = context.coordinator] (bar: UITabBar, _: UITraitCollection) in
-            for (barItem, tab) in zip(bar.items ?? [], coordinator?.tabs ?? []) {
-                barItem.image = Self.image(for: tab, compatibleWith: bar.traitCollection)
-            }
-        }
         return bar
     }
 
@@ -219,16 +214,10 @@ struct ActionTabBar: UIViewRepresentable {
         uiView.items = items.enumerated().map { idx, item in
             UITabBarItem(
                 title: item.title,
-                image: Self.image(for: item, compatibleWith: uiView.traitCollection),
+                image: UIImage(named: item.icon)?.scaledToFit(height: ActionTabBarMetrics.iconHeight).withTintColor(item.tintColor, renderingMode: .alwaysOriginal),
                 tag: idx
             )
         }
-    }
-
-    private static func image(for tab: ActionTab, compatibleWith traits: UITraitCollection) -> UIImage? {
-        UIImage(named: tab.icon, in: .main, compatibleWith: traits)?
-            .scaledToFit(height: ActionTabBarMetrics.iconHeight)
-            .withTintColor(tab.tintColor.resolvedColor(with: traits), renderingMode: .alwaysOriginal)
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
