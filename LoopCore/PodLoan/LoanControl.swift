@@ -86,6 +86,8 @@ public enum LoanControl {
         case podReading(differenceBeyondBand: Bool)
         /// No report from the watch for longer than a cycle.
         case watchReportOverdue
+        /// No report from the watch for `watchSilenceWarning`.
+        case watchSilentLong
         case watchClaims(Claim)
         case takeBackTapped
     }
@@ -212,6 +214,10 @@ public enum LoanControl {
     /// The watch's report is overdue after this long without one: one loop cycle and a margin.
     public static let watchReportOverdue: TimeInterval = 6 * 60
 
+    /// The looper is told of a silent watch after this long. A watch that misses a reading or two is
+    /// usually back at the next.
+    public static let watchSilenceWarning: TimeInterval = 20 * 60
+
     /// How long a takeover has to reach the pod, for a grant and for an offline start alike. Every
     /// takeover seen reached the pod within 25 s, most within 4; a pod not reached in a minute was
     /// not reached in five either, and the looper waited that long to be told.
@@ -302,12 +308,13 @@ public enum LoanControl {
         // Rows 10 and 14 · No report from the watch for longer than a cycle, with the phone beside the
         // body. Silence (or "cannot reach the pod") does not prove the watch is not looping: a watch that
         // missed its readings sleeps, and watchOS may not wake it for the question. So the phone tells the
-        // looper and leaves the choice to a tap. A watch that holds nothing has let the pod go: nobody
-        // loops it, so the phone takes it.
+        // looper, once the silence has lasted `watchSilenceWarning`, and leaves the choice to a tap. A
+        // watch that holds nothing has let the pod go: nobody loops it, so the phone takes it, at the
+        // first question.
         // Rows 11 and 15 · The phone does not see the sensor: the body is elsewhere, nothing to act on.
-        case (.phone, .watchReportOverdue):
+        case (.phone, .watchReportOverdue), (.phone, .watchSilentLong):
             guard s.sensorFresh, s.phoneRole == .lending || s.phoneRole == .standingAside else { return .nothing }
-            return .query(.inBackground, onSilence: .tell(.watchMayNotBeLooping),
+            return .query(.inBackground, onSilence: s.trigger == .watchSilentLong ? .tell(.watchMayNotBeLooping) : .nothing,
                           onHoldsNothing: .takeOnSilence(.watchNotResponding))
 
         // Rows 12, 13 and 19 · The watch back from off. It cannot know what was decided while it was out,
