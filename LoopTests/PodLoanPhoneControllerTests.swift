@@ -3245,8 +3245,9 @@ extension PodLoanPhoneControllerTests {
         try body()
     }
 
-    /// The watch's report overdue with this phone beside the body: the phone asks, and when nothing
-    /// answers by its next cycle it takes the pod back and says so. No timer: nothing happens between cycles.
+    /// The watch's report overdue with this phone beside the body: the phone asks at each cycle; once the
+    /// silence has lasted `watchSilenceWarning` and nothing answers, it tells the looper, once, and keeps
+    /// the loan. No timer: nothing happens between cycles.
     func testAnOverdueWatchIsAskedAndTheLooperToldOnceWhenItDoesNotAnswer() throws {
         withShortAnswerWait {
             let controller = makeController(now: { [weak self] in self?.clock ?? Date() })
@@ -3269,7 +3270,16 @@ extension PodLoanPhoneControllerTests {
             spinMain(0.5)
             drainMainQueue()
             lock.lock(); var titles = urgentNotices; lock.unlock()
-            XCTAssertEqual(titles.filter { $0 == "Watch May Not Be Looping" }.count, 1, "the looper is told")
+            XCTAssertFalse(titles.contains("Watch May Not Be Looping"), "12 minutes: a reading or two missed, nobody told")
+
+            for _ in 0..<3 {
+                clock = clock.addingTimeInterval(.minutes(5))
+                tick(controller)
+                spinMain(0.5)
+                drainMainQueue()
+            }
+            lock.lock(); titles = urgentNotices; lock.unlock()
+            XCTAssertEqual(titles.filter { $0 == "Watch May Not Be Looping" }.count, 1, "past 20 minutes: the looper is told")
             XCTAssertEqual(controller.state, .loaned, "the choice is the looper's: the loan stays")
             XCTAssertEqual(revokes(), 0)
 
@@ -3384,12 +3394,14 @@ extension PodLoanPhoneControllerTests {
             clock = clock.addingTimeInterval(.minutes(7))
             tick(controller)
             XCTAssertEqual(statusQueries(), 1, "silent: asked")
-            clock = clock.addingTimeInterval(.minutes(5))
-            tick(controller)
-            spinMain(0.5)
-            drainMainQueue()
+            for _ in 0..<4 {
+                clock = clock.addingTimeInterval(.minutes(5))
+                tick(controller)
+                spinMain(0.5)
+                drainMainQueue()
+            }
             lock.lock(); let titles = urgentNotices; lock.unlock()
-            XCTAssertTrue(titles.contains("Watch May Not Be Looping"))
+            XCTAssertTrue(titles.contains("Watch May Not Be Looping"), "past 20 minutes: the looper is told")
             XCTAssertEqual(revokes(), 0)
             XCTAssertTrue(controller.yieldingToInferredLoan, "still standing aside until the looper taps")
         }
@@ -3522,7 +3534,17 @@ extension PodLoanPhoneControllerTests {
             drainMainQueue()
             spinMain(0.5)
             drainMainQueue()
-            lock.lock(); let titles = urgentNotices; lock.unlock()
+            lock.lock(); var titles = urgentNotices; lock.unlock()
+            XCTAssertFalse(titles.contains("Watch May Not Be Looping"), "7 minutes: nobody told yet")
+
+            // Its report moved the clock of the silence; 20 minutes on, the question again, the same answer.
+            clock = clock.addingTimeInterval(.minutes(21))
+            tick(controller)
+            controller.handleIncoming(userInfo: try report(epoch: grant.epoch, podReachable: false))
+            drainMainQueue()
+            spinMain(0.5)
+            drainMainQueue()
+            lock.lock(); titles = urgentNotices; lock.unlock()
             XCTAssertTrue(titles.contains("Watch May Not Be Looping"), "answered like silence: the looper is told")
             XCTAssertEqual(revokes(), 0, "the take-back is the looper's tap")
             XCTAssertNil(controller.persisted.tookOverOnSilenceAt)
