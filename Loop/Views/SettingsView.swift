@@ -63,6 +63,7 @@ struct SettingsView: View {
     @State private var sheet: Destination.Sheet?
     @State private var pluginSelection: (() -> Void)?
     @State private var setupChange: SetupChange?
+    @State private var carbEntryLimits = UserDefaults.standard.carbEntryLimits
     
     var localizedAppNameAndVersion: String
 
@@ -89,7 +90,6 @@ struct SettingsView: View {
                         therapySection
                     }
                     presetsSection
-                    carbEntryLimitsSection
                     deviceSettingsSection
                     healthAccessSection
                     if FeatureFlags.allowExperimentalFeatures {
@@ -442,7 +442,8 @@ extension SettingsView {
             viewModel: TherapySettingsViewModel(
                 therapySettings: viewModel.therapySettings(),
                 delegate: viewModel.therapySettingsViewModelDelegate
-            )
+            ),
+            additionalSettingsCards: [carbEntryLimitsCard]
         )
         .environmentObject(displayGlucosePreference)
         .environment(\.dismissAction, self.dismiss)
@@ -487,14 +488,38 @@ extension SettingsView {
         }
     }
 
-    private var carbEntryLimitsSection: some View {
-        Section {
-            NavigationLink {
-                CarbEntryLimitsView()
-            } label: {
-                Text("Carb Entry Limits", comment: "Settings row for the carb entry warning and maximum")
+    private var carbEntryLimitsCard: Card {
+        Card {
+            SectionWithTapToEdit(
+                isEnabled: true,
+                title: NSLocalizedString("Carb Entry Limits", comment: "Carb entry limits card title"),
+                descriptiveText: NSLocalizedString("Set when Loop asks you to confirm a large meal and how many grams you can enter at once.", comment: "Carb entry limits card description"),
+                destination: { dismiss in
+                    CarbEntryLimitsEditor(initialValue: carbEntryLimits) { limits in
+                        UserDefaults.standard.carbEntryLimits = limits
+                        carbEntryLimits = limits
+                        dismiss()
+                    }
+                    .environment(\.dismissAction, dismiss)
+                }
+            ) {
+                VStack {
+                    Divider().padding(.trailing, -16)
+                    carbEntryLimitSummary(Text("Large Meal Warning"), grams: carbEntryLimits.warningGrams)
+                    Divider().padding(.trailing, -8)
+                    carbEntryLimitSummary(Text("Maximum Carb Entry"), grams: carbEntryLimits.maximumGrams)
+                }
             }
         }
+    }
+
+    private func carbEntryLimitSummary(_ title: Text, grams: Int) -> some View {
+        HStack {
+            title
+            Spacer()
+            Text("\(grams) g", comment: "Carb entry limit in whole grams")
+        }
+        .accessibilityElement(children: .combine)
     }
 
     private var pluginMenuItems: [PluginMenuItem<some View>] {
@@ -880,63 +905,112 @@ public struct SettingsView_Previews: PreviewProvider {
     }
 }
 
-private struct CarbEntryLimitsView: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.locale) private var locale
-
-    @State private var warningGrams: String
-    @State private var maximumGrams: String
-
-    init() {
-        let limits = UserDefaults.standard.carbEntryLimits
-        _warningGrams = State(initialValue: limits.warningGrams.formatted(.number.grouping(.never)))
-        _maximumGrams = State(initialValue: limits.maximumGrams.formatted(.number.grouping(.never)))
+private struct CarbEntryLimitsEditor: View {
+    private enum Limit {
+        case warning
+        case maximum
     }
 
-    private var limits: CarbEntryLimits? {
-        guard let warning = wholeGrams(from: warningGrams),
-              let maximum = wholeGrams(from: maximumGrams) else {
-            return nil
-        }
-        return CarbEntryLimits(warningGrams: warning, maximumGrams: maximum)
+    @Environment(\.dismissAction) private var dismiss
+    @Environment(\.authenticate) private var authenticate
+    @State private var warningGrams: Int
+    @State private var maximumGrams: Int
+    @State private var editingLimit: Limit?
+
+    private let initialValue: CarbEntryLimits
+    private let onSave: (CarbEntryLimits) -> Void
+
+    init(initialValue: CarbEntryLimits, onSave: @escaping (CarbEntryLimits) -> Void) {
+        self.initialValue = initialValue
+        self.onSave = onSave
+        _warningGrams = State(initialValue: initialValue.warningGrams)
+        _maximumGrams = State(initialValue: initialValue.maximumGrams)
+    }
+
+    private var value: CarbEntryLimits? {
+        CarbEntryLimits(warningGrams: warningGrams, maximumGrams: maximumGrams)
+    }
+
+    private var hasChanges: Bool {
+        value != initialValue
     }
 
     var body: some View {
-        Form {
-            Section {
-                limitField("Warning Threshold (g)", text: $warningGrams)
-                limitField("Maximum Entry (g)", text: $maximumGrams)
-            } footer: {
-                Text("Enter whole grams from 1 to 999. The warning threshold must be below the maximum entry. Add Carb Entry asks for confirmation above the warning threshold and blocks entries above the maximum.")
-            }
-        }
-        .navigationTitle(Text("Carb Entry Limits", comment: "Title of the carb entry limits editor"))
+        ConfigurationPage(
+            title: Text("Carb Entry Limits", comment: "Carb entry limits editor title"),
+            saveButtonState: hasChanges && value != nil ? .enabled : .disabled,
+            cards: {
+                limitCard(
+                    .warning,
+                    title: Text("Large Meal Warning"),
+                    description: Text("Loop asks you to confirm carb entries above this amount."),
+                    grams: $warningGrams,
+                    selectableGrams: CarbEntryLimits.supportedGrams.lowerBound...(maximumGrams - 1)
+                )
+                limitCard(
+                    .maximum,
+                    title: Text("Maximum Carb Entry"),
+                    description: Text("Loop blocks carb entries above this amount."),
+                    grams: $maximumGrams,
+                    selectableGrams: (warningGrams + 1)...CarbEntryLimits.supportedGrams.upperBound
+                )
+            },
+            actionAreaContent: EmptyView.init,
+            onSave: save
+        )
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(hasChanges)
         .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Save") {
-                    guard let limits else { return }
-                    UserDefaults.standard.carbEntryLimits = limits
-                    dismiss()
+            ToolbarItem(placement: .navigationBarLeading) {
+                if hasChanges {
+                    Button("Cancel", action: dismiss)
                 }
-                .disabled(limits == nil)
             }
         }
     }
 
-    private func limitField(_ label: LocalizedStringKey, text: Binding<String>) -> some View {
-        LabeledContent {
-            TextField(label, text: text)
-                .labelsHidden()
-                .keyboardType(.numberPad)
-                .multilineTextAlignment(.trailing)
-        } label: {
-            Text(label)
+    private func limitCard(
+        _ limit: Limit,
+        title: Text,
+        description: Text,
+        grams: Binding<Int>,
+        selectableGrams: ClosedRange<Int>
+    ) -> Card {
+        Card {
+            description
+                .font(.callout)
+                .foregroundColor(.secondary)
+            ExpandableSetting(
+                isEditing: Binding(
+                    get: { editingLimit == limit },
+                    set: { editingLimit = $0 ? limit : nil }
+                ),
+                leadingValueContent: { title },
+                trailingValueContent: {
+                    Text("\(grams.wrappedValue) g", comment: "Carb entry limit in whole grams")
+                        .foregroundColor(editingLimit == limit ? .accentColor : .primary)
+                },
+                expandedContent: {
+                    QuantityPicker(
+                        value: Binding(
+                            get: { LoopQuantity(unit: .gram, doubleValue: Double(grams.wrappedValue)) },
+                            set: { grams.wrappedValue = Int($0.doubleValue(for: .gram)) }
+                        ),
+                        unit: .gram,
+                        selectableValues: selectableGrams.map(Double.init)
+                    )
+                }
+            )
         }
     }
 
-    private func wholeGrams(from text: String) -> Int? {
-        guard text.wholeMatch(of: #/\p{Nd}{1,3}/#) != nil else { return nil }
-        return try? IntegerFormatStyle<Int>.number.locale(locale).parseStrategy.parse(text)
+    private func save() {
+        guard let value else { return }
+        authenticate(NSLocalizedString("Authenticate to save carb entry limits", comment: "Authentication prompt when saving carb entry limits")) { result in
+            if case .success = result {
+                onSave(value)
+            }
+        }
     }
 }
 

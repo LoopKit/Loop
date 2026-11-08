@@ -9,7 +9,7 @@ import Foundation
 import LoopCore
 import LoopKit
 
-struct CarbEntryLimits {
+struct CarbEntryLimits: Equatable {
     // The carb entry form displays up to three integer digits.
     static let supportedGrams = 1...999
     static let defaults = CarbEntryLimits(
