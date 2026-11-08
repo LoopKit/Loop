@@ -214,6 +214,7 @@ struct ChartPageView: View {
                 .padding(.horizontal)
             }
         }
+        .usingUnusedTopSafeArea()
         .font(.system(size: 14, weight: .light))
         .toolbar(.hidden, for: .navigationBar)
         .environment(\.glucoseDisplayUnit, loopManager.displayGlucoseUnit)
@@ -236,6 +237,18 @@ struct ChartPageView: View {
             let chartData = await loopManager.generateChartData()
             loopManager.glucoseChartScene.data = chartData
             loopManager.glucoseChartScene.setNeedsUpdate()
+        }
+    }
+}
+
+extension View {
+    /// The top safe area leaves room for the time plus a title row. With the navigation bar hidden
+    /// only the time is there, so start the content just below it instead of below the whole area.
+    func usingUnusedTopSafeArea(reclaiming unusedHeight: CGFloat = 14) -> some View {
+        GeometryReader { geometry in
+            self
+                .contentMargins(.top, max(0, geometry.safeAreaInsets.top - unusedHeight), for: .scrollContent)
+                .ignoresSafeArea(edges: .top)
         }
     }
 }
