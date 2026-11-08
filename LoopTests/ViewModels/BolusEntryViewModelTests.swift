@@ -512,6 +512,26 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertEqual(delegate.enactedBoluses, [1])
     }
 
+    func testSkippingFailedReminderRequiresAnotherBolusConfirmation() async {
+        let scheduler = MockMealReminderScheduler()
+        scheduler.error = NSError(domain: "test", code: 1)
+        delegate.addCarbEntryResult = .success(mockFinalCarbEntry)
+        await setUpViewModel(carbEntryChange: .add(mockPotentialCarbEntry), mealReminderAction: .set, mealReminderScheduler: scheduler)
+        bolusEntryViewModel.enteredBolus = Self.exampleBolusQuantity
+
+        let success = await bolusEntryViewModel.didPressActionButton()
+        XCTAssertFalse(success)
+        bolusEntryViewModel.skipMealReminder()
+        XCTAssertTrue(delegate.enactedBoluses.isEmpty)
+
+        bolusEntryViewModel.activeAlert = nil
+        let confirmed = await bolusEntryViewModel.didPressActionButton()
+        XCTAssertTrue(confirmed)
+        XCTAssertEqual(delegate.enactedBoluses, [1])
+        XCTAssertEqual(delegate.carbEntriesAdded, [mockPotentialCarbEntry])
+        XCTAssertEqual(scheduler.cancelledEntries, [mockFinalCarbEntry])
+    }
+
     func testEditingCarbsKeepsReminderOffWhenNoneWasRequested() async {
         let scheduler = MockMealReminderScheduler()
         delegate.addCarbEntryResult = .success(mockFinalCarbEntry)
@@ -1009,30 +1029,28 @@ final class CarbEntryMealReminderTests: XCTestCase {
         XCTAssertEqual(viewModel.bolusViewModel?.mealReminderAction, .set)
     }
 
-    func testExistingReminderLoadsAndCanBeTurnedOffWithoutSavingCarbs() async throws {
+    func testExistingReminderCanBeTurnedOffWithoutSavingCarbsOrOpeningBolus() async {
         let delegate = MockCarbEntryReminderDelegate()
         let scheduler = MockMealReminderScheduler()
         scheduler.hasReminder = true
         let original = StoredCarbEntry(startDate: now.addingTimeInterval(600), quantity: LoopQuantity(unit: .gram, doubleValue: 20), foodType: "Meal", absorptionTime: .hours(3))
         let viewModel = CarbEntryViewModel(delegate: delegate, originalCarbEntry: original, now: { self.now }, mealReminderScheduler: scheduler)
-        let deliveryDelegate = MockDeliveryDelegate()
-        viewModel.deliveryDelegate = deliveryDelegate
         await viewModel.loadMealReminder()
         XCTAssertTrue(viewModel.mealReminderRequested)
         XCTAssertTrue(viewModel.continueButtonDisabled)
         viewModel.setMealReminderRequested(false)
         XCTAssertFalse(viewModel.continueButtonDisabled)
+        XCTAssertTrue(viewModel.isReminderOnlyChange)
         viewModel.continueToBolus()
-        let bolusViewModel = try XCTUnwrap(viewModel.bolusViewModel)
-        XCTAssertEqual(bolusViewModel.actionButtonAction, .saveWithoutBolusing)
-        XCTAssertEqual(bolusViewModel.carbEntryAmountAndEmojiString, "20 g Meal")
-        let saved = await bolusViewModel.saveAndDeliver()
+        XCTAssertNil(viewModel.bolusViewModel)
+        let saved = await viewModel.saveReminderOnly()
         XCTAssertTrue(saved)
+        XCTAssertTrue(viewModel.continueButtonDisabled)
         XCTAssertEqual(scheduler.cancelledEntries, [original])
         XCTAssertTrue(delegate.carbEntriesReplaced.isEmpty)
     }
 
-    func testExistingEntryWithoutReminderCanOptInWithoutSavingCarbs() async throws {
+    func testReminderOnlySchedulingCanBeRetriedWithoutSavingCarbsOrOpeningBolus() async {
         let delegate = MockCarbEntryReminderDelegate()
         let scheduler = MockMealReminderScheduler()
         let original = StoredCarbEntry(
@@ -1041,17 +1059,20 @@ final class CarbEntryMealReminderTests: XCTestCase {
             favoriteFoodID: UUID().uuidString
         )
         let viewModel = CarbEntryViewModel(delegate: delegate, originalCarbEntry: original, now: { self.now }, mealReminderScheduler: scheduler)
-        let deliveryDelegate = MockDeliveryDelegate()
-        viewModel.deliveryDelegate = deliveryDelegate
         await viewModel.loadMealReminder()
         XCTAssertTrue(viewModel.continueButtonDisabled)
         XCTAssertFalse(viewModel.mealReminderRequested)
         viewModel.setMealReminderRequested(true)
         XCTAssertFalse(viewModel.continueButtonDisabled)
-        viewModel.continueToBolus()
-        let bolusViewModel = try XCTUnwrap(viewModel.bolusViewModel)
-        let saved = await bolusViewModel.saveAndDeliver()
+        scheduler.error = NSError(domain: "test", code: 1)
+        let failed = await viewModel.saveReminderOnly()
+        XCTAssertFalse(failed)
+        XCTAssertEqual(viewModel.alert, .mealReminderSchedulingFailure)
+        viewModel.clearAlert()
+        scheduler.error = nil
+        let saved = await viewModel.saveReminderOnly()
         XCTAssertTrue(saved)
+        XCTAssertNil(viewModel.bolusViewModel)
         XCTAssertEqual(scheduler.scheduledEntries, [original])
         XCTAssertTrue(delegate.carbEntriesReplaced.isEmpty)
     }
@@ -1078,10 +1099,9 @@ final class CarbEntryMealReminderTests: XCTestCase {
 
         viewModel.returnFromBolus()
         viewModel.setMealReminderRequested(false)
-        viewModel.continueToBolus()
-        let secondBolusViewModel = try XCTUnwrap(viewModel.bolusViewModel)
-        let secondSave = await secondBolusViewModel.saveAndDeliver()
+        let secondSave = await viewModel.saveReminderOnly()
         XCTAssertTrue(secondSave)
+        XCTAssertNil(viewModel.bolusViewModel)
         XCTAssertEqual(delegate.carbEntriesReplaced.map { $0.0 }, [original])
         XCTAssertEqual(scheduler.cancelledEntries, [original, updated])
     }

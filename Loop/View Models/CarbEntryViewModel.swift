@@ -28,6 +28,7 @@ final class CarbEntryViewModel: ObservableObject {
         
         case maxQuantityExceded
         case warningQuantityValidation
+        case mealReminderSchedulingFailure
     }
     
     enum Warning: Identifiable {
@@ -69,6 +70,7 @@ final class CarbEntryViewModel: ObservableObject {
         }
     }
     @Published private(set) var mealReminderRequested = false
+    @Published private(set) var isSavingReminder = false
     private var mealReminderWasEdited = false
     private var hasLoadedMealReminder = false
     private let date: Date
@@ -229,9 +231,31 @@ final class CarbEntryViewModel: ObservableObject {
     }
 
     private var reminderOnlyEntry: StoredCarbEntry? {
-        guard mealReminderWasEdited, let originalCarbEntry,
+        guard mealReminderWasEdited, carbEntryChange == nil, let originalCarbEntry,
               carbsQuantity == originalCarbEntry.quantity.doubleValue(for: preferredCarbUnit) else { return nil }
         return originalCarbEntry
+    }
+
+    var isReminderOnlyChange: Bool { reminderOnlyEntry != nil }
+
+    func saveReminderOnly() async -> Bool {
+        guard !isSavingReminder, let entry = reminderOnlyEntry else { return false }
+        isSavingReminder = true
+        defer { isSavingReminder = false }
+
+        do {
+            if mealReminderAction == .set {
+                try await mealReminderScheduler.scheduleReminder(for: entry, replacing: nil)
+            } else {
+                mealReminderScheduler.cancelReminder(for: entry)
+            }
+            mealReminderWasEdited = false
+            return true
+        } catch {
+            log.error("Failed to schedule meal reminder: %{public}@", String(describing: error))
+            alert = .mealReminderSchedulingFailure
+            return false
+        }
     }
     
     var saveFavoriteFoodButtonDisabled: Bool {
@@ -244,16 +268,13 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     var continueButtonDisabled: Bool {
-        carbEntryChange == nil && reminderOnlyEntry == nil
+        isSavingReminder || (carbEntryChange == nil && !isReminderOnlyChange)
     }
     
     // MARK: - Continue to Bolus and Carb Quantity Warnings
     func continueToBolus() {
-        if carbEntryChange != nil {
-            validateInputAndContinue()
-        } else if reminderOnlyEntry != nil {
-            setBolusViewModel()
-        }
+        guard !isSavingReminder, carbEntryChange != nil else { return }
+        validateInputAndContinue()
     }
     
     private func validateInputAndContinue() {
@@ -282,14 +303,12 @@ final class CarbEntryViewModel: ObservableObject {
     }
 
     private func setBolusViewModel() {
-        let change = carbEntryChange
         let viewModel = BolusEntryViewModel(
             delegate: delegate,
             screenWidth: UIScreen.main.bounds.width,
-            carbEntryChange: change,
+            carbEntryChange: carbEntryChange,
             selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji,
             mealReminderAction: mealReminderAction,
-            reminderOnlyEntry: change == nil ? reminderOnlyEntry : nil,
             mealReminderScheduler: mealReminderScheduler
         )
         
@@ -303,8 +322,8 @@ final class CarbEntryViewModel: ObservableObject {
     func returnFromBolus() {
         if let bolusViewModel, let savedEntry = bolusViewModel.savedCarbEntry {
             originalCarbEntry = savedEntry
-            if bolusViewModel.mealReminderAction == .set {
-                setMealReminderRequested(canSetMealReminder())
+            if bolusViewModel.mealReminderAction != .keep {
+                setMealReminderRequested(bolusViewModel.mealReminderAction == .set && canSetMealReminder())
                 mealReminderWasEdited = true
             }
         }

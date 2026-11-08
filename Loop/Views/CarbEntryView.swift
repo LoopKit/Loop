@@ -109,6 +109,7 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                 .accessibility(hidden: true)
             }
         }
+        .disabled(viewModel.isSavingReminder)
         .task {
             await viewModel.loadMealReminder()
         }
@@ -260,6 +261,11 @@ extension CarbEntryView {
                 primaryButton: .default(Text("No, edit amount", comment: "The title of the action used when rejecting the the amount of carbohydrates entered."), action: viewModel.clearAlert),
                 secondaryButton: .cancel(Text("Yes", comment: "The title of the action used when confirming entered amount of carbohydrates."), action: viewModel.clearAlertAndContinueToBolus)
             )
+        case .mealReminderSchedulingFailure:
+            return SwiftUI.Alert(
+                title: Text("Unable to Set Meal Reminder", comment: "Alert title when scheduling a meal reminder fails"),
+                message: Text("Check notification permissions in Settings and try saving the reminder again.", comment: "Alert message when saving only a reminder fails")
+            )
         }
     }
 }
@@ -365,19 +371,34 @@ extension CarbEntryView {
     }
     
     private var continueButton: some View {
-        Button(action: viewModel.continueToBolus) {
-            Text("Continue", comment: "Button label for continue")
-        }
+        Button(action: submit) { submitLabel }
         .disabled(viewModel.continueButtonDisabled)
     }
     
     private var continueActionButton: some View {
-        Button(action: viewModel.continueToBolus) {
-            Text("Continue", comment: "Button label for continue")
-        }
+        Button(action: submit) { submitLabel }
         .buttonStyle(ActionButtonStyle())
         .padding()
         .disabled(viewModel.continueButtonDisabled)
+    }
+
+    private var submitLabel: Text {
+        if viewModel.isReminderOnlyChange {
+            return Text("Save Reminder", comment: "Button label for saving only a meal reminder change")
+        }
+        return Text("Continue", comment: "Button label for continue")
+    }
+
+    private func submit() {
+        if viewModel.isReminderOnlyChange {
+            Task {
+                if await viewModel.saveReminderOnly() {
+                    dismiss()
+                }
+            }
+        } else {
+            viewModel.continueToBolus()
+        }
     }
     
 }

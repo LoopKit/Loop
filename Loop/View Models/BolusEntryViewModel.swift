@@ -110,12 +110,9 @@ final class BolusEntryViewModel: ObservableObject {
     let carbEntryChange: CarbEntryChange?
     let selectedCarbAbsorptionTimeEmoji: String?
     private(set) var mealReminderAction: MealReminderAction
-    private let reminderOnlyEntry: StoredCarbEntry?
     private let mealReminderScheduler: MealReminderScheduling
 
     var savedCarbEntry: StoredCarbEntry? { dosingDecision.carbEntry }
-    var isSavingReminderOnly: Bool { reminderOnlyEntry != nil }
-    var hasMealEntry: Bool { carbEntryChange != nil || isSavingReminderOnly }
 
     private var pendingCarbEntryChange: CarbEntryChange? {
         savedCarbEntry == nil ? carbEntryChange : nil
@@ -181,7 +178,6 @@ final class BolusEntryViewModel: ObservableObject {
         selectedCarbAbsorptionTimeEmoji: String? = nil,
         isManualGlucoseEntryEnabled: Bool = false,
         mealReminderAction: MealReminderAction = .keep,
-        reminderOnlyEntry: StoredCarbEntry? = nil,
         mealReminderScheduler: MealReminderScheduling? = nil
     ) {
         self.delegate = delegate
@@ -198,7 +194,6 @@ final class BolusEntryViewModel: ObservableObject {
         
         self.carbEntryChange = carbEntryChange
         self.mealReminderAction = mealReminderAction
-        self.reminderOnlyEntry = reminderOnlyEntry
         self.mealReminderScheduler = mealReminderScheduler ?? MealReminderManager.shared
         self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
         
@@ -415,7 +410,7 @@ final class BolusEntryViewModel: ObservableObject {
             analyticsServicesManager?.didAddCarbs(source: "Phone", isFavoriteFood: storedCarbEntry.favoriteFoodID != nil)
         }
 
-        if let entry = savedCarbEntry ?? reminderOnlyEntry {
+        if let entry = savedCarbEntry {
             do {
                 try await saveMealReminder(for: entry)
             } catch {
@@ -461,6 +456,10 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
+    func skipMealReminder() {
+        mealReminderAction = .clear
+    }
+
     private func presentAlert(_ alert: Alert) {
         // As of iOS 13.6 / Xcode 11.6, swapping out an alert while one is active crashes SwiftUI.
         guard activeAlert == nil else {
@@ -499,13 +498,13 @@ final class BolusEntryViewModel: ObservableObject {
 
     var carbEntryAmountAndEmojiString: String? {
         guard
-            let quantity = carbEntryChange?.quantity ?? reminderOnlyEntry?.quantity,
-            let carbAmountString = QuantityFormatter(for: .gram).string(from: quantity)
+            let carbEntryChange,
+            let carbAmountString = QuantityFormatter(for: .gram).string(from: carbEntryChange.quantity)
         else {
             return nil
         }
 
-        if let emoji = carbEntryChange?.foodType ?? reminderOnlyEntry?.foodType ?? selectedCarbAbsorptionTimeEmoji {
+        if let emoji = carbEntryChange.foodType ?? selectedCarbAbsorptionTimeEmoji {
             return String(format: NSLocalizedString("%1$@ %2$@", comment: "Format string combining carb entry quantity and absorption time emoji"), carbAmountString, emoji)
         } else {
             return carbAmountString
@@ -513,14 +512,13 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     var carbEntryDateAndAbsorptionTimeString: String? {
-        guard let startDate = carbEntryChange?.startDate ?? reminderOnlyEntry?.startDate else {
+        guard let carbEntryChange else {
             return nil
         }
 
-        let entryTimeString = carbEntryDateFormatter.string(from: startDate)
+        let entryTimeString = carbEntryDateFormatter.string(from: carbEntryChange.startDate)
 
-        if let absorptionTime = carbEntryChange?.absorptionTime ?? reminderOnlyEntry?.absorptionTime,
-           let absorptionTimeString = absorptionTimeFormatter.string(from: absorptionTime) {
+        if let absorptionTime = carbEntryChange.absorptionTime, let absorptionTimeString = absorptionTimeFormatter.string(from: absorptionTime) {
             return String(format: NSLocalizedString("%1$@ + %2$@", comment: "Format string combining carb entry time and absorption time"), entryTimeString, absorptionTimeString)
         } else {
             return entryTimeString
@@ -814,7 +812,7 @@ extension BolusEntryViewModel {
     }
 
     private var hasDataToSave: Bool {
-        manualGlucoseQuantity != nil || hasMealEntry
+        manualGlucoseQuantity != nil || carbEntryChange != nil
     }
 
     enum ButtonChoice { case manualGlucoseEntry, actionButton }

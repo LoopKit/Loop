@@ -76,7 +76,7 @@ struct BolusEntryView: View {
     }
 
     private var title: Text {
-        if !viewModel.hasMealEntry {
+        if viewModel.carbEntryChange == nil {
             return Text("Bolus", comment: "Title for bolus entry screen")
         }
         return Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
@@ -208,7 +208,7 @@ struct BolusEntryView: View {
 
                 if viewModel.isManualGlucoseEntryEnabled {
                     ManualGlucoseEntryRow(quantity: $viewModel.manualGlucoseQuantity)
-                } else if viewModel.hasMealEntry {
+                } else if viewModel.carbEntryChange != nil {
                     potentialCarbEntryRow
                 } else {
                     recommendedBolusRow
@@ -216,11 +216,11 @@ struct BolusEntryView: View {
             }
             .padding(.top, 8)
 
-            if viewModel.isManualGlucoseEntryEnabled && viewModel.hasMealEntry {
+            if viewModel.isManualGlucoseEntryEnabled && viewModel.carbEntryChange != nil {
                 potentialCarbEntryRow
             }
 
-            if viewModel.isManualGlucoseEntryEnabled || viewModel.hasMealEntry {
+            if viewModel.isManualGlucoseEntryEnabled || viewModel.carbEntryChange != nil {
                 recommendedBolusRow
             }
 
@@ -410,9 +410,6 @@ struct BolusEntryView: View {
                 case .saveWithoutBolusing:
                     return Text("Save without Bolusing", comment: "Button text to save carbs and/or manual glucose entry without a bolus")
                 case .saveAndDeliver:
-                    if viewModel.isSavingReminderOnly {
-                        return Text("Save Reminder & Deliver", comment: "Button text to save a meal reminder change and deliver a bolus")
-                    }
                     return Text("Save Carbs & Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
                 case .enterBolus:
                     return Text("Enter Bolus", comment: "Button text to begin entering a bolus")
@@ -463,12 +460,11 @@ struct BolusEntryView: View {
                 message: Text("An error occurred while trying to save your carb entry.", comment: "Alert message for a carb entry persistence error")
             )
         case .mealReminderSchedulingFailure:
-            let message = viewModel.isSavingReminderOnly
-                ? Text("The reminder could not be set. The requested bolus was not delivered. Check notification permissions in Settings and try again, or go back and continue without a reminder.", comment: "Alert message when a reminder-only change fails before bolus delivery")
-                : Text("Your carb entry was saved, but the reminder could not be set. The requested bolus was not delivered. Check notification permissions in Settings and try again, or go back and continue without a reminder.", comment: "Alert message when a meal reminder fails before bolus delivery")
             return SwiftUI.Alert(
                 title: Text("Unable to Set Meal Reminder", comment: "Alert title when scheduling a meal reminder fails"),
-                message: message
+                message: Text("Your carb entry was saved, but the reminder could not be set. The requested bolus was not delivered. Check notification permissions and try again, or skip the reminder and confirm your bolus again.", comment: "Alert message when a meal reminder fails before bolus delivery"),
+                primaryButton: .default(Text("Skip Reminder", comment: "Button to skip a meal reminder after scheduling fails"), action: viewModel.skipMealReminder),
+                secondaryButton: .cancel()
             )
         case .manualGlucoseEntryOutOfAcceptableRange:
             let acceptableLowerBound = displayGlucosePreference.format(LoopConstants.validManualGlucoseEntryRange.lowerBound)
