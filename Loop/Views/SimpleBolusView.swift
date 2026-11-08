@@ -347,7 +347,9 @@ struct SimpleBolusView: View {
                 title: Text("Recommended Bolus Exceeds Maximum Bolus", comment: "Title for bolus screen warning when recommended bolus exceeds max bolus"),
                 caption: Text(String(format: NSLocalizedString("Your recommended bolus exceeds your maximum bolus amount of %1$@.", comment: "Warning for simple bolus when recommended bolus exceeds max bolus. (1: maximum bolus)"), viewModel.maximumBolusAmountString )))
         case .carbohydrateEntryTooLarge:
-            let maximumCarbohydrateString = QuantityFormatter(for: .gram).string(from: viewModel.maxCarbEntryQuantity)!
+            let formatter = QuantityFormatter(for: .gram)
+            formatter.numberFormatter.maximumFractionDigits = 1
+            let maximumCarbohydrateString = formatter.string(from: viewModel.maxCarbEntryQuantity)!
             return WarningView(
                 title: Text("Carbohydrate Entry Too Large", comment: "Title for bolus screen warning when carbohydrate entry is too large"),
                 caption: Text(String(format: NSLocalizedString("The maximum amount allowed is %1$@.", comment: "Warning for simple bolus when carbohydrate entry is too large. (1: maximum carbohydrate entry)"), maximumCarbohydrateString)))

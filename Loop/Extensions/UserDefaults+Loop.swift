@@ -10,19 +10,21 @@ import LoopCore
 import LoopKit
 
 struct CarbEntryLimits: Equatable {
-    // The carb entry form displays up to three integer digits.
-    static let supportedGrams = 1...999
+    // Match the precision and width of the meal carb entry field.
+    private static let supportedGrams = 0.1...999.9
     static let defaults = CarbEntryLimits(
-        warningGrams: Int(LoopConstants.warningCarbEntryQuantity.doubleValue(for: .gram)),
-        maximumGrams: Int(LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram))
+        warningGrams: LoopConstants.warningCarbEntryQuantity.doubleValue(for: .gram),
+        maximumGrams: LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram)
     )!
 
-    let warningGrams: Int
-    let maximumGrams: Int
+    let warningGrams: Double
+    let maximumGrams: Double
 
-    init?(warningGrams: Int, maximumGrams: Int) {
+    init?(warningGrams: Double, maximumGrams: Double) {
         guard Self.supportedGrams.contains(warningGrams),
               Self.supportedGrams.contains(maximumGrams),
+              LoopUnit.gram.round(value: warningGrams, fractionDigits: 1) == warningGrams,
+              LoopUnit.gram.round(value: maximumGrams, fractionDigits: 1) == maximumGrams,
               warningGrams < maximumGrams else {
             return nil
         }
@@ -31,11 +33,11 @@ struct CarbEntryLimits: Equatable {
     }
 
     var warningQuantity: LoopQuantity {
-        LoopQuantity(unit: .gram, doubleValue: Double(warningGrams))
+        LoopQuantity(unit: .gram, doubleValue: warningGrams)
     }
 
     var maximumQuantity: LoopQuantity {
-        LoopQuantity(unit: .gram, doubleValue: Double(maximumGrams))
+        LoopQuantity(unit: .gram, doubleValue: maximumGrams)
     }
 }
 
@@ -55,8 +57,8 @@ extension UserDefaults {
     var carbEntryLimits: CarbEntryLimits {
         get {
             guard let values = dictionary(forKey: Key.carbEntryLimits.rawValue),
-                  let warningGrams = values["warningGrams"] as? Int,
-                  let maximumGrams = values["maximumGrams"] as? Int,
+                  let warningGrams = values["warningGrams"] as? Double,
+                  let maximumGrams = values["maximumGrams"] as? Double,
                   let limits = CarbEntryLimits(warningGrams: warningGrams, maximumGrams: maximumGrams) else {
                 return .defaults
             }

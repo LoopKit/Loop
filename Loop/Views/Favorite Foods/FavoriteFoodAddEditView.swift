@@ -119,7 +119,7 @@ struct FavoriteFoodAddEditView: View {
         case .maxQuantityExceded:
             let message = String(
                 format: NSLocalizedString("The maximum allowed amount is %@ grams.", comment: "Alert body displayed for quantity greater than max (1: maximum quantity in grams)"),
-                NumberFormatter.localizedString(from: NSNumber(value: viewModel.maxCarbEntryQuantity.doubleValue(for: viewModel.preferredCarbUnit)), number: .none)
+                viewModel.maxCarbEntryQuantity.doubleValue(for: viewModel.preferredCarbUnit).formatted(.number.precision(.fractionLength(0...1)))
             )
             let okMessage = NSLocalizedString("com.loudnate.LoopKit.errorAlertActionTitle", value: "OK", comment: "The title of the action used to dismiss an error alert")
             return SwiftUI.Alert(
