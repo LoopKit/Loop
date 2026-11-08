@@ -303,10 +303,10 @@ itself has nothing to dose from, so it offers nothing and says so.
 - **What changed:** the watch stops reporting
 - **Phone sees:** believes the watch holds loan n · sensor: fresh · pod: released · heard from the watch: nothing for more than a cycle
 - **Watch sees:** dead; or asleep: not woken by the sensor, and watchOS may not wake it for the phone's messages
-- **Result:** query: phone → watch, once the report is overdue → answer: silence at the next cycle → action: tell, once for the silent stretch; the loan stays. If the watch answers "I hold nothing", take; record the time as "took over on silence"
+- **Result:** query: phone → watch, at each cycle once the report is overdue → answer: silence → action: none until the watch has been silent 20 minutes, then tell, once for the silent stretch; the loan stays. If the watch answers "I hold nothing", take at once; record the time as "took over on silence"
 - **Afterwards:** pod held by watch until the looper taps the pod on the phone and takes it back · time without looping: from the watch's last cycle until the tap, unless the watch wakes and loops · looper sees: phone: notification "Watch May Not Be Looping: usually it missed glucose readings. This iPhone can loop: open Loop and tap the pod to take it back."
 - **Status:** built · **Code:** phone `+Hold`
-- **Why:** Silence does not prove the watch has stopped. A watch that misses its sensor readings sleeps, and watchOS often declines to wake it for a message, so it can neither loop nor answer, and may loop again at its next reading. Taking the pod on that guess also met a pod driver that could send the watch's waiting command after the release (2026-11-07). The phone can loop, so it says so and leaves the choice to a tap (rule 2). A watch that answers "I hold nothing" has let the pod go, so nobody is looping it and the phone takes it. When a dead watch comes back after a take-back: row 12.
+- **Why:** Silence does not prove the watch has stopped. A watch that misses its sensor readings sleeps, and watchOS often declines to wake it for a message, so it can neither loop nor answer, and may loop again at its next reading. A reading or two missed is common, so the looper is told only after 20 minutes. Taking the pod on that guess also met a pod driver that could send the watch's waiting command after the release (2026-11-07). The phone can loop, so it says so and leaves the choice to a tap (rule 2). A watch that answers "I hold nothing" has let the pod go, so nobody is looping it and the phone takes it. When a dead watch comes back after a take-back: row 12.
 
 ### 11. Watch dies, phone away
 
@@ -351,7 +351,7 @@ itself has nothing to dose from, so it offers nothing and says so.
 - **What changed:** the watch goes on a charger out of the pod's reach
 - **Phone sees:** believes the watch holds loan n · sensor: fresh · pod: released · heard from the watch: nothing for more than a cycle (a cycle that cannot reach the pod sends no report)
 - **Watch sees:** believes it holds loan n · sensor: none · pod: unreachable · heard from the phone: the phone's query
-- **Result:** query: phone → watch → answer: "I hold loan n but cannot reach the pod", after the watch has tried the pod → action: tell, as on silence (row 10)
+- **Result:** query: phone → watch → answer: "I hold loan n but cannot reach the pod", after the watch has tried the pod → action: as on silence (row 10): told once the watch has been silent 20 minutes
 - **Afterwards:** pod held by watch until the looper taps the pod on the phone and takes it back · time without looping: until the tap · looper sees: phone: notification "Watch May Not Be Looping…"; after the tap, watch: on screen "Sport Mode ended. Your iPhone has the pod"
 - **Status:** built · **Code:** phone `+Hold`, watch `+Handback` (the answer)
 - **Why:** Rule 2 protects a device that is looping. This one holds the loan and cannot act on it now, but it may reach the pod again. The answer carries the fact, and "cannot reach" is acted on like silence: the phone tells the looper, who decides with a tap. The watch could give up the pod by itself after a failed cycle, but it cannot tell whether the phone is there to take it, and giving up with nobody there gains nothing. Rare: a charger by the bed is within reach.
