@@ -141,7 +141,8 @@ extension PodLoanPhoneController {
               let heard = watchLastHeard else { return }
         let silence = deps.now().timeIntervalSince(heard)
         guard silence > LoanControl.watchReportOverdue else { return }
-        decideAndAct(.watchReportOverdue, why: String(format: "no report from the watch for %.0f min", silence / 60))
+        decideAndAct(silence >= LoanControl.watchSilenceWarning ? .watchSilentLong : .watchReportOverdue,
+                     why: String(format: "no report from the watch for %.0f min", silence / 60))
     }
 
     /// The Take Back tap: row 9.
