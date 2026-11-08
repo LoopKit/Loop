@@ -176,6 +176,10 @@ struct ChartPageView: View {
                 chartView
                 
                 VStack(spacing: 8) {
+                    LabelValueRow("Active Insulin") {
+                        Text(activeInsulin ?? "-")
+                    }
+                    Divider()
                     if let lastSyncString {
                         LabelValueRow("Last Loop") {
                             // ⚠️ arrow.triangle.2.circlepath is deprecated -- replace with "arrow.trianglehead.2.clockwise.rotate.90" once watchOS 10 is dropped as a supported platform.
@@ -184,10 +188,6 @@ struct ChartPageView: View {
                         }
                         Divider()
                     }
-                    LabelValueRow("Active Insulin") {
-                        Text(activeInsulin ?? "-")
-                    }
-                    Divider()
                     LabelValueRow("Active Carbs") {
                         Text(activeCarbohydrates ?? "-")
                     }
