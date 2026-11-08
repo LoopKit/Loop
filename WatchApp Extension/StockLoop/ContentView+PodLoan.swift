@@ -48,5 +48,22 @@ extension ContentView {
     func podLoanSyncGateOnLaunch() {
         // Also right on a cold launch into a live loan, which posts no phase change.
         loanIsLive = glanceModel.loanInProgress
+        if loanIsLive { selectedPage = Self.sportPage }
+    }
+
+    /// Called from `body`'s `.onChange(of: scenePhase)`. Back from the background (the clock face, or a
+    /// reopen), the app opens where a launch would: the glance during a loan, otherwise stock's main page.
+    /// A wrist raise while the app is still in front (Return to Clock) leaves the page as it was.
+    func podLoanScenePhaseDidChange(_ phase: ScenePhase) {
+        guard FeatureFlags.sportModeEnabled else { return }
+        switch phase {
+        case .background:
+            wasInBackground = true
+        case .active where wasInBackground:
+            wasInBackground = false
+            selectedPage = glanceModel.loanInProgress ? Self.sportPage : (UserDefaults.standard.startOnChartPage ? 1 : 0)
+        default:
+            break
+        }
     }
 }
