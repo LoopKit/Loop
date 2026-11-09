@@ -390,7 +390,7 @@ extension AlertManager: AlertManagerResponder {
         userNotificationAlertScheduler.alertWasAcknowledged(identifier: identifier)
         await modalAlertScheduler.removePresentedAlert(identifier: identifier)
         criticalAlertAlarmScheduler.cancelAlarm(for: identifier)
-        criticalAlertAudioPlayer.stop()
+        criticalAlertAudioPlayer.stop(for: identifier)
         try await alertStore.recordAcknowledgement(of: identifier)
     }
 
@@ -462,7 +462,7 @@ extension AlertManager: AlertIssuer {
         userNotificationAlertScheduler.scheduleAlert(alert, muted: muted || inAppSound != nil)
         if let inAppSound {
             log.default("Playing %{public}@ through silent mode for %{public}@", inAppSound, String(describing: alert.identifier))
-            criticalAlertAudioPlayer.play(soundNamed: inAppSound, boostVolume: false)
+            criticalAlertAudioPlayer.play(soundNamed: inAppSound, boostVolume: false, for: alert.identifier)
         }
         playCriticalAlertAudioFallbackIfNeeded(for: alert, muted: muted, issuedDate: issuedDate)
         for forwarder in alertForwarders.compactMap(\.value) {
@@ -484,7 +484,7 @@ extension AlertManager: AlertIssuer {
         await modalAlertScheduler.unscheduleAlert(identifier: identifier)
         userNotificationAlertScheduler.unscheduleAlert(identifier: identifier)
         criticalAlertAlarmScheduler.cancelAlarm(for: identifier)
-        criticalAlertAudioPlayer.stop()
+        criticalAlertAudioPlayer.stop(for: identifier)
         for forwarder in alertForwarders.compactMap(\.value) {
             forwarder.alertManager(self, didRetractAlertWithIdentifier: identifier)
         }
@@ -519,13 +519,13 @@ extension AlertManager: AlertIssuer {
         let soundName = alert.sound?.filename ?? "critical.caf"
         if criticalAlertAlarmScheduler.scheduleAlarm(for: alert, onScheduleFailure: { [weak self] in
             self?.log.default("AlarmKit scheduling failed for %@; playing audio fallback", String(describing: alert.identifier))
-            self?.criticalAlertAudioPlayer.play(soundNamed: soundName)
+            self?.criticalAlertAudioPlayer.play(soundNamed: soundName, for: alert.identifier)
         }) {
             log.default("Scheduled AlarmKit alarm for critical alert %@ (no entitlement or user-disabled)", String(describing: alert.identifier))
             return
         }
         log.default("Playing audio fallback for critical alert %@ with sound %@ (no entitlement or user-disabled)", String(describing: alert.identifier), soundName)
-        criticalAlertAudioPlayer.play(soundNamed: soundName)
+        criticalAlertAudioPlayer.play(soundNamed: soundName, for: alert.identifier)
     }
 
     private func rescheduleAlertWithSchedulers(_ alert: Alert, issuedDate: Date) async {

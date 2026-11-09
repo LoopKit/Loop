@@ -78,6 +78,9 @@ final class CriticalAlertAudioPlayer {
     /// True if we're currently looping audio for a critical alert.
     var isPlaying: Bool { player?.isPlaying ?? false }
 
+    /// The alert whose sound is playing.
+    private(set) var playingAlert: Alert.Identifier?
+
     /// Start (or restart) looping playback of a bundled critical alert
     /// sound. Safe to call repeatedly — replaces any current playback.
     /// `soundnamed` is a bundled `.caf` filename (the alarm's configured
@@ -87,8 +90,9 @@ final class CriticalAlertAudioPlayer {
     /// Falls back to `critical.caf` if the named file is missing.
     /// With `boostVolume` false the sound plays once at the current volume, for
     /// non-critical alerts that only need to get past the silent switch.
-    func play(soundNamed soundName: String = "critical.caf", boostVolume: Bool = true) {
+    func play(soundNamed soundName: String = "critical.caf", boostVolume: Bool = true, for alert: Alert.Identifier) {
         stop()
+        playingAlert = alert
 
         // Vibration is volume-independent, so it's our primary "you missed
         // it" channel when the ringer is down. Start it up front and bound
@@ -169,7 +173,13 @@ final class CriticalAlertAudioPlayer {
     }
 
     /// Stop playback if any. Safe to call when not playing.
+    func stop(for alert: Alert.Identifier) {
+        guard alert == playingAlert else { return }
+        stop()
+    }
+
     func stop() {
+        playingAlert = nil
         guard player != nil || stopTimer != nil || vibrationTimer != nil else { return }
         player?.stop()
         player = nil
