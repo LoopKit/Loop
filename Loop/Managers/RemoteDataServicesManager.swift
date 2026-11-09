@@ -8,6 +8,7 @@
 
 import os.log
 import Foundation
+import HealthKit
 import LoopKit
 import LoopCore
 import UIKit
@@ -22,6 +23,8 @@ enum RemoteDataType: String, CaseIterable {
     case cgmEvent = "CgmEvent"
     case settings = "Settings"
     case overrides = "Overrides"
+    case exercise = "Exercise"
+    case healthSamples = "HealthSamples"
 
     var debugDescription: String {
         return self.rawValue
@@ -192,6 +195,8 @@ final class RemoteDataServicesManager {
 
     private let automationHistoryProvider: AutomationHistoryProvider
 
+    private let exerciseStore: ExerciseStore
+
 
     init(
         alertStore: AlertStore,
@@ -204,8 +209,10 @@ final class RemoteDataServicesManager {
         overrideHistory: TemporaryScheduleOverrideHistory,
         insulinDeliveryStore: InsulinDeliveryStore,
         deviceLog: PersistentDeviceLog,
-        automationHistoryProvider: AutomationHistoryProvider
+        automationHistoryProvider: AutomationHistoryProvider,
+        exerciseStore: ExerciseStore
     ) {
+        self.exerciseStore = exerciseStore
         self.alertStore = alertStore
         self.carbStore = carbStore
         self.doseStore = doseStore
@@ -228,6 +235,8 @@ final class RemoteDataServicesManager {
         uploadGlucoseData(to: remoteDataService)
         uploadPumpEventData(to: remoteDataService)
         uploadSettingsData(to: remoteDataService)
+        uploadExerciseData(to: remoteDataService)
+        uploadHealthSamples(to: remoteDataService)
     }
 
     private func clearQueryAnchors(for remoteDataService: RemoteDataService) {
@@ -277,6 +286,10 @@ final class RemoteDataServicesManager {
                 remoteDataServices.forEach { self.uploadSettingsData(to: $0) }
             case .overrides:
                 remoteDataServices.forEach { self.uploadTemporaryOverrideData(to: $0) }
+            case .exercise:
+                remoteDataServices.forEach { self.uploadExerciseData(to: $0) }
+            case .healthSamples:
+                remoteDataServices.forEach { self.uploadHealthSamples(to: $0) }
             }
         }
     }
@@ -625,6 +638,92 @@ extension RemoteDataServicesManager {
             semaphore.wait()
             self.uploadFinished(key)
             self.uploadGroup.leave()
+        }
+    }
+}
+
+extension RemoteDataServicesManager {
+    private func uploadExerciseData(to remoteDataService: RemoteDataService) {
+        guard UserDefaults.standard.sharesExerciseData else {
+            return
+        }
+
+        uploadGroup.enter()
+
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .exercise)
+
+        dispatchQueue(key).async {
+            let semaphore = DispatchSemaphore(value: 0)
+            let previousQueryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .exercise) ?? ExerciseStore.QueryAnchor()
+            var continueUpload = false
+
+            Task {
+                do {
+                    let (queryAnchor, added, deleted) = try await self.exerciseStore.executeWorkoutQuery(fromQueryAnchor: previousQueryAnchor, limit: remoteDataService.exerciseDataLimit ?? HKObjectQueryNoLimit)
+                    try await remoteDataService.uploadExerciseData(added: added, deleted: deleted)
+                    UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .exercise, queryAnchor)
+                    continueUpload = queryAnchor != previousQueryAnchor
+                    await self.uploadSucceeded(key)
+                } catch {
+                    self.log.error("Error synchronizing exercise data: %{public}@", String(describing: error))
+                    await self.uploadFailed(key, error: error)
+                }
+                semaphore.signal()
+            }
+
+            semaphore.wait()
+            self.uploadGroup.leave()
+
+            if continueUpload {
+                Task { @MainActor in
+                    self.uploadExerciseData(to: remoteDataService)
+                }
+            }
+        }
+    }
+
+    private func uploadHealthSamples(to remoteDataService: RemoteDataService) {
+        guard UserDefaults.standard.sharesExerciseData else {
+            return
+        }
+
+        uploadGroup.enter()
+
+        let key = UploadTaskKey(serviceIdentifier: remoteDataService.pluginIdentifier, remoteDataType: .healthSamples)
+
+        dispatchQueue(key).async {
+            let semaphore = DispatchSemaphore(value: 0)
+            var queryAnchor = UserDefaults.appGroup?.getQueryAnchor(for: remoteDataService, withRemoteDataType: .healthSamples) ?? ExerciseStore.HealthSampleQueryAnchor()
+            var continueUpload = false
+
+            Task {
+                do {
+                    for kind in StoredHealthSample.Kind.allCases {
+                        let previous = queryAnchor.anchors[kind] ?? ExerciseStore.QueryAnchor()
+                        let (anchor, added, deleted) = try await self.exerciseStore.executeSampleQuery(kind: kind, fromQueryAnchor: previous, limit: remoteDataService.healthSampleDataLimit ?? HKObjectQueryNoLimit)
+                        if !added.isEmpty || !deleted.isEmpty {
+                            try await remoteDataService.uploadHealthSamples(kind: kind, added: added, deleted: deleted)
+                        }
+                        queryAnchor.anchors[kind] = anchor
+                        UserDefaults.appGroup?.setQueryAnchor(for: remoteDataService, withRemoteDataType: .healthSamples, queryAnchor)
+                        continueUpload = continueUpload || anchor != previous
+                    }
+                    await self.uploadSucceeded(key)
+                } catch {
+                    self.log.error("Error synchronizing health samples: %{public}@", String(describing: error))
+                    await self.uploadFailed(key, error: error)
+                }
+                semaphore.signal()
+            }
+
+            semaphore.wait()
+            self.uploadGroup.leave()
+
+            if continueUpload {
+                Task { @MainActor in
+                    self.uploadHealthSamples(to: remoteDataService)
+                }
+            }
         }
     }
 }

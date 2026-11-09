@@ -201,6 +201,7 @@
 		4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0341CFC0AE100E199AA /* WatchDataManager.swift */; };
 		432CF87520D8AC950066B889 /* NSUserDefaults+WatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0231CFBE2C500E199AA /* NSUserDefaults+WatchApp.swift */; };
 		432E73CB1D24B3D6009AD15D /* RemoteDataServicesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 432E73CA1D24B3D6009AD15D /* RemoteDataServicesManager.swift */; };
+		EE0E5C012F0A000000000102 /* ExerciseDataSharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0E5C012F0A000000000101 /* ExerciseDataSharing.swift */; };
 		4344628220A7A37F00C4BE6F /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4344628120A7A37E00C4BE6F /* CoreBluetooth.framework */; };
 		4344629220A7C19800C4BE6F /* ButtonGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4344629120A7C19800C4BE6F /* ButtonGroup.swift */; };
 		4344629820A8B2D700C4BE6F /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4374B5EE209D84BE00D17AA8 /* OSLog.swift */; };
@@ -992,6 +993,7 @@
 		4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WatchContext+LoopKit.swift"; sourceTree = "<group>"; };
 		4328E0341CFC0AE100E199AA /* WatchDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = WatchDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		432E73CA1D24B3D6009AD15D /* RemoteDataServicesManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteDataServicesManager.swift; sourceTree = "<group>"; };
+		EE0E5C012F0A000000000101 /* ExerciseDataSharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseDataSharing.swift; sourceTree = "<group>"; };
 		4337615E1D52F487004A3647 /* GlucoseHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseHUDView.swift; sourceTree = "<group>"; };
 		4344628120A7A37E00C4BE6F /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/CoreBluetooth.framework; sourceTree = DEVELOPER_DIR; };
 		4344628320A7A3BE00C4BE6F /* LoopKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2300,6 +2302,7 @@
 				43C094491CACCC73001F6403 /* NotificationManager.swift */,
 				A97F250725E056D500F0EE19 /* OnboardingManager.swift */,
 				432E73CA1D24B3D6009AD15D /* RemoteDataServicesManager.swift */,
+				EE0E5C012F0A000000000101 /* ExerciseDataSharing.swift */,
 				7E69CFFB2A16A77E00203CBD /* ResetLoopManager.swift */,
 				A9C62D852331703000535612 /* Service.swift */,
 				A9C62D872331703000535612 /* ServicesManager.swift */,
@@ -3968,6 +3971,7 @@
 				1452F4A92A851C9400F8B9E4 /* FavoriteFoodAddEditViewModel.swift in Sources */,
 				438D42FB1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift in Sources */,
 				432E73CB1D24B3D6009AD15D /* RemoteDataServicesManager.swift in Sources */,
+				EE0E5C012F0A000000000102 /* ExerciseDataSharing.swift in Sources */,
 				7E69CFFC2A16A77E00203CBD /* ResetLoopManager.swift in Sources */,
 				B40D07C7251A89D500C1C6D7 /* GlucoseDisplay.swift in Sources */,
 				43C2FAE11EB656A500364AFF /* GlucoseEffectVelocity.swift in Sources */,
