@@ -131,12 +131,16 @@ class LoopAppManager: NSObject {
 
     func registerBackgroundTasks() {
         let taskIdentifier = CriticalEventLogExportManager.historicalExportBackgroundTaskIdentifier
-        let registered = BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { task in
-            guard let criticalEventLogExportManager = self.criticalEventLogExportManager else {
-                self.log.error("Critical event log export launch handler called before initialization complete!")
+        let registered = BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: .main) { task in
+            guard let criticalEventLogExportManager = self.criticalEventLogExportManager,
+                  let processingTask = task as? BGProcessingTask else {
+                self.log.error("Cannot start critical event log export: export manager or processing task unavailable")
+                task.setTaskCompleted(success: false)
                 return
             }
-            criticalEventLogExportManager.handleCriticalEventLogHistoricalExportBackgroundTask(task as! BGProcessingTask)
+            DispatchQueue.global(qos: .background).async {
+                criticalEventLogExportManager.handleCriticalEventLogHistoricalExportBackgroundTask(processingTask)
+            }
         }
         if registered {
             log.debug("Critical event log export background task registered")
@@ -149,8 +153,6 @@ class LoopAppManager: NSObject {
         precondition(isLaunchPending)
 
         UNUserNotificationCenter.current().delegate = self
-
-        registerBackgroundTasks()
 
         Task {
             await resumeLaunch()
