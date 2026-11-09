@@ -14,6 +14,7 @@ struct ContentView: View {
     static let sensorPage = 10
 
     @Environment(LoopDataManager.self) var loopManager
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var presetToConfirm: SelectablePreset? = nil
     @State var selectedPage = UserDefaults.standard.startOnChartPage ? 1 : 0
@@ -21,6 +22,7 @@ struct ContentView: View {
 
     /// Mirrored so the root view does not subscribe to the timer-driven glance model.
     @State var loanIsLive = false   // ContentView+PodLoan.swift maintains it
+    @State var wasInBackground = false   // ContentView+PodLoan.swift maintains it
 
     var body: some View {
         VStack {
@@ -65,6 +67,9 @@ struct ContentView: View {
         }
         .sheet(item: $presetToConfirm) { preset in
             PresetConfirmationView(preset: preset)
+        }
+        .onChange(of: scenePhase) { _, newValue in
+            podLoanScenePhaseDidChange(newValue)
         }
         .onChange(of: selectedPage, { oldValue, newValue in
             podLoanRememberPage(newValue)
