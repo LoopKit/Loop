@@ -34,7 +34,7 @@ protocol BolusEntryViewModelDelegate: AnyObject {
     func replaceCarbEntry(_ oldEntry: StoredCarbEntry, with update: CarbEntryUpdate) async throws -> StoredCarbEntry
     func saveGlucose(sample: NewGlucoseSample) async throws -> StoredGlucoseSample
     func storeManualBolusDosingDecision(_ bolusDosingDecision: BolusDosingDecision, withDate date: Date) async
-    func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws
+    func enactBolus(units: Double, metadata: DoseMetadata, activationType: BolusActivationType) async throws
 
     func insulinModel(for type: InsulinType?) -> InsulinModel
 
@@ -403,7 +403,7 @@ final class BolusEntryViewModel: ObservableObject {
         if amountToDeliver > 0 {
             savedPreMealOverride = nil
             do {
-                try await delegate.enactBolus(units: amountToDeliver, decisionId: dosingDecision.id, activationType: activationType)
+                try await delegate.enactBolus(units: amountToDeliver, metadata: DoseMetadata(origin: .user, device: .phone, decisionId: dosingDecision.id), activationType: activationType)
             } catch {
                 log.error("Failed to enact bolus: %{public}@", String(describing: error))
             }
