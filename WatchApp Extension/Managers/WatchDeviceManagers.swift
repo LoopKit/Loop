@@ -27,11 +27,6 @@ func watchCGMManager(rawValue: [String: Any]) -> CGMManager? {
     return watchCGMManagerType(identifier)?.init(rawState: rawState)
 }
 
-/// On a wake that is not the CGM's own, its acquisition re-checks itself.
-func watchCGMRecheckAcquisition(_ manager: CGMManager?) {
-    manager?.ensureConnectionActiveOrPending()
-}
-
 /// What the watch's CGM needs from the user (a code, or the app kept open while it searches); changes
 /// reach the manager's status observers.
 func watchCGMStatusNote(_ manager: CGMManager?) -> String? {

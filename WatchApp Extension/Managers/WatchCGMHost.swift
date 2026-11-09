@@ -44,11 +44,6 @@ final class WatchCGMHost {
     @ObservationIgnored
     var searchDidChange: ((Bool) -> Void)?
 
-    /// A background refresh this long after each reading re-checks acquisition, in case watchOS froze
-    /// the app before it lodged the next connect. Past the G7's 35 s tail clearance, so a connect it
-    /// lodges never lands in the sensor's advertising tail.
-    static let acquisitionBackstopDelay: TimeInterval = 60
-
     private init() {
         if let raw = rawManager, let manager = watchCGMManager(rawValue: raw) {
             builtFrom = raw["builtFrom"] as? [String: Any]
@@ -69,7 +64,7 @@ final class WatchCGMHost {
     }
 
     /// The phone's context arrived. Builds a manager when its export names a different sensor or code,
-    /// lets go of the sensor when the phone stopped sharing, and otherwise treats it as a wake.
+    /// and lets go of the sensor when the phone stopped sharing.
     func update(from context: WatchContext) {
         guard let raw = context.cgmConfiguration, let configuration = SharedDeviceConfiguration(rawValue: raw) else {
             if cgmManager != nil {
@@ -79,7 +74,6 @@ final class WatchCGMHost {
             return
         }
         if cgmManager != nil, let builtFrom, (builtFrom as NSDictionary).isEqual(to: configuration.state) {
-            recheckAcquisition()
             return
         }
         guard let manager = watchCGMManager(adopting: configuration, localState: nil) else {
@@ -91,11 +85,6 @@ final class WatchCGMHost {
         builtFrom = configuration.state
         install(manager)
         save(manager)
-    }
-
-    /// Any wake that is not the sensor's own.
-    func recheckAcquisition() {
-        watchCGMRecheckAcquisition(cgmManager)
     }
 
     private func install(_ manager: CGMManager) {
@@ -123,14 +112,6 @@ final class WatchCGMHost {
         raw["builtFrom"] = builtFrom
         rawManager = raw
     }
-
-    private func scheduleAcquisitionBackstop() {
-        WKApplication.shared().scheduleBackgroundRefresh(withPreferredDate: Date(timeIntervalSinceNow: Self.acquisitionBackstopDelay), userInfo: nil) { error in
-            if let error {
-                self.log.error("Could not schedule the acquisition backstop: %{public}@", String(describing: error))
-            }
-        }
-    }
 }
 
 /// Its `cgmManager(_:didUpdate:)`, below, serves as delegate and as status observer: the search and the note
@@ -148,7 +129,6 @@ extension WatchCGMHost: CGMManagerDelegate {
             case .newData(let samples):
                 log.default("Direct reading: %d sample(s)", samples.count)
                 LoopDataManager.shared.addDirectGlucose(samples)
-                scheduleAcquisitionBackstop()
             case .error(let error):
                 log.error("CGM reading error: %{public}@", String(describing: error))
             case .unreliableData:

@@ -41,13 +41,10 @@ extension LoopDataManager {
     }
 
     /// Stock's CGM follows the phone's sharing in each context, except while the wrist owns the alarms:
-    /// it keeps reading the sensor it doses from, and the context is only a wake for its acquisition.
+    /// it keeps reading the sensor it doses from.
     func podLoanUpdateWatchCGM(from context: WatchContext) {
-        if ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController.wristOwnsAlarms == true {
-            WatchCGMHost.shared.recheckAcquisition()
-        } else {
-            WatchCGMHost.shared.update(from: context)
-        }
+        guard ExtensionDelegate.sharedIfAvailable()?.stockLoopSession?.loanController.wristOwnsAlarms != true else { return }
+        WatchCGMHost.shared.update(from: context)
     }
 
     /// From a loan's takeover until its records are home the carb store holds carbs the phone does not
