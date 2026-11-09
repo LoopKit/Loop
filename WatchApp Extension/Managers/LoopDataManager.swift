@@ -79,6 +79,9 @@ class LoopDataManager {
         return s
     }()
 
+    /// The chart's view draws frames only while its scene has something to draw (GlucoseChartScene).
+    var glucoseChartIsDrawing = true
+
     // When set, user will be navigated to carbs/bolus flow
     var bolusViewModel: CarbAndBolusFlowViewModel?
 
