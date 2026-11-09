@@ -865,6 +865,13 @@ extension DeviceDataManager {
 // MARK: - Client API
 extension DeviceDataManager {
     func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws {
+        try await enactBolus(units: units, decisionId: decisionId, activationType: activationType, throwingPumpErrors: false)
+    }
+
+    /// With `throwingPumpErrors`, the pump's error (uncertain delivery included) is
+    /// thrown after its notification, for callers that report the outcome elsewhere,
+    /// such as a smartwatch, and must not report a failed bolus as delivered.
+    func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType, throwingPumpErrors: Bool) async throws {
         guard let pumpManager = pumpManager else {
             throw LoopError.configurationError(.pumpManager)
         }
@@ -882,6 +889,9 @@ extension DeviceDataManager {
             try await pumpManager.enactBolus(decisionId: decisionId, units: units, activationType: activationType)
         } catch PumpManagerError.uncertainDelivery {
             // Do not generate notification on uncertain delivery error
+            if throwingPumpErrors {
+                throw PumpManagerError.uncertainDelivery
+            }
         } catch {
             if !activationType.isAutomatic, let error = error as? PumpManagerError {
                 do {
@@ -889,6 +899,9 @@ extension DeviceDataManager {
                 } catch {
                     log.error("Error sending bolus failure notification %{public}@", String(describing: error))
                 }
+            }
+            if throwingPumpErrors {
+                throw error
             }
         }
     }

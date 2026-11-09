@@ -22,6 +22,7 @@ class MockPumpManager: PumpManager {
     var enactTempBasalCalled: ((Double, TimeInterval) -> Void)?
 
     var enactTempBasalError: PumpManagerError?
+    var enactBolusError: PumpManagerError?
 
     init() {
 
@@ -84,7 +85,7 @@ class MockPumpManager: PumpManager {
 
     func enactBolus(decisionId: UUID?, units: Double, activationType: BolusActivationType, completion: @escaping (PumpManagerError?) -> Void) {
         enactBolusCalled?(units, activationType)
-        completion(nil)
+        completion(enactBolusError)
     }
 
     func cancelBolus(completion: @escaping (PumpManagerResult<DoseEntry?>) -> Void) {

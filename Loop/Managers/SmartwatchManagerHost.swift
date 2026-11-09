@@ -116,17 +116,25 @@ final class SmartwatchManagerHost {
         logUndeclaredRequest(smartwatchManager)
 
         Task {
-            let snapshot: SmartwatchStatusSnapshot
+            var snapshot: SmartwatchStatusSnapshot
+            let bolusInputs: SmartwatchBolusContextIssuer.Inputs?
             do {
-                snapshot = try await makeSnapshot(capabilities: capabilities)
+                (snapshot, bolusInputs) = try await makeSnapshot(capabilities: capabilities)
             } catch {
                 log.error("Unable to read glucose for the watch: %{public}@", String(describing: error))
                 return
             }
             guard generation == updateGeneration,
-                  let current = deviceManager.smartwatchManager, (current as AnyObject) === (smartwatchManager as AnyObject),
-                  snapshot != lastSentSnapshot
+                  let current = deviceManager.smartwatchManager, (current as AnyObject) === (smartwatchManager as AnyObject)
             else {
+                return
+            }
+            // Issued only for the snapshot that goes out, so a slower, dropped one
+            // can't replace the context the watch was sent.
+            if let bolusInputs {
+                snapshot.bolusContext = bolusContextIssuer.context(for: bolusInputs, now: Date())
+            }
+            guard snapshot != lastSentSnapshot else {
                 return
             }
             lastSentSnapshot = snapshot
@@ -150,7 +158,8 @@ final class SmartwatchManagerHost {
         return deviceManager.displayGlucosePreference.unit
     }
 
-    private func makeSnapshot(capabilities: SmartwatchCapabilities) async throws -> SmartwatchStatusSnapshot {
+    /// The snapshot without its bolus context, and what that context is to be issued from.
+    private func makeSnapshot(capabilities: SmartwatchCapabilities) async throws -> (SmartwatchStatusSnapshot, SmartwatchBolusContextIssuer.Inputs?) {
         let historyStart = Date().addingTimeInterval(-SmartwatchStatusSnapshot.historyInterval)
         let samples = try await glucoseStore.getGlucoseSamples(start: historyStart)
 
@@ -174,8 +183,9 @@ final class SmartwatchManagerHost {
         if capabilities.contains(.therapy) {
             snapshot.therapy = currentTherapyContext()
         }
+        var bolusInputs: SmartwatchBolusContextIssuer.Inputs?
         if capabilities.contains(.remoteBolus) {
-            snapshot.bolusContext = await currentBolusContext(latestGlucoseDate: samples.last?.startDate)
+            bolusInputs = await bolusContextInputs(latestGlucoseDate: samples.last?.startDate)
         }
         if capabilities.contains(.remoteOverride) {
             snapshot.overridePresets = currentOverridePresets()
@@ -187,7 +197,7 @@ final class SmartwatchManagerHost {
         if capabilities.contains(.remoteBolus) {
             snapshot.bolusIncrement = SmartwatchStatusSnapshot.bolusIncrement(of: deviceManager.pumpManager?.supportedBolusVolumes ?? [])
         }
-        return snapshot
+        return (snapshot, bolusInputs)
     }
 
     /// What the algorithm is working with now, in mg/dL, with any active preset

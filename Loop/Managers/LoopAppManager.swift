@@ -436,11 +436,12 @@ class LoopAppManager: NSObject {
             healthStore: healthStore,
             alertMuter: alertManager.alertMuter,
             // The same path as remote boluses: maximum bolus check, notifications, upload.
+            // A pump error is thrown, so the watch isn't told a failed bolus was delivered.
             deliverBolus: { [weak servicesManager] units in
                 guard let servicesManager else {
                     throw SmartwatchBolusError.notAllowed
                 }
-                try await servicesManager.deliverRemoteBolus(amountInUnits: units, decisionId: nil)
+                try await servicesManager.deliverRemoteBolus(amountInUnits: units, decisionId: nil, throwingPumpErrors: true)
             },
             // The same path as remote carbs: validation, notification, upload.
             deliverCarbs: { [weak servicesManager] grams, date, absorptionTime in
@@ -1140,8 +1141,8 @@ extension LoopAppManager: ResetLoopManagerDelegate {
 // MARK: - ServicesManagerDosingDelegate
 
 extension LoopAppManager: ServicesManagerDosingDelegate {
-    func deliverBolus(amountInUnits: Double, decisionId: UUID?) async throws {
-        try await deviceDataManager.enactBolus(units: amountInUnits, decisionId: decisionId, activationType: .manualNoRecommendation)
+    func deliverBolus(amountInUnits: Double, decisionId: UUID?, throwingPumpErrors: Bool) async throws {
+        try await deviceDataManager.enactBolus(units: amountInUnits, decisionId: decisionId, activationType: .manualNoRecommendation, throwingPumpErrors: throwingPumpErrors)
     }
 }
 

@@ -53,6 +53,12 @@ extension SmartwatchManagerHost {
                     logWatchRequest(manager, type: .error, "Preset request rejected: unknownPreset")
                     throw SmartwatchPresetError.unknownPreset
                 }
+                // Loop starts a preset by name; with another one of the same name it
+                // could start that one instead of the one the watch chose.
+                guard settingsManager.settings.overridePresets.filter({ $0.name == preset.name }).count == 1 else {
+                    logWatchRequest(manager, type: .error, "Preset request rejected: another preset is also named \"\(preset.name)\"")
+                    throw SmartwatchPresetError.failed("another preset has the same name")
+                }
                 try await startOverride(preset.name)
                 logWatchRequest(manager, type: .delegateResponse, "Preset \"\(preset.name)\" started from the watch")
             case .cancel:
@@ -70,15 +76,14 @@ extension SmartwatchManagerHost {
 
     // MARK: - Watch bolus
 
-    func currentBolusContext(latestGlucoseDate: Date?) async -> SmartwatchBolusContext {
+    func bolusContextInputs(latestGlucoseDate: Date?) async -> SmartwatchBolusContextIssuer.Inputs {
         let recommendation = try? await loopDataManager.recommendManualBolus()
-        let inputs = SmartwatchBolusContextIssuer.Inputs(
+        return SmartwatchBolusContextIssuer.Inputs(
             recommendedBolus: recommendation?.amount,
             maximumBolus: settingsManager.loopSettings.maximumBolus,
             supportedBolusVolumes: deviceManager.pumpManager?.supportedBolusVolumes ?? [],
             latestGlucoseDate: latestGlucoseDate
         )
-        return bolusContextIssuer.context(for: inputs, now: Date())
     }
 
     /// Delivers a bolus the plugin authenticated, if `SmartwatchBolusPolicy` allows it.

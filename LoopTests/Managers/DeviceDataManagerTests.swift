@@ -150,6 +150,35 @@ final class DeviceDataManagerTests: XCTestCase {
         XCTAssertEqual(limits.maximumBasalRate, newLimits.maximumBasalRate)
     }
 
+    func testAPumpErrorIsThrownForCallersThatReportTheOutcome() async {
+        pumpManager.enactBolusError = .communication(nil)
+        do {
+            try await deviceDataManager.enactBolus(units: 1, decisionId: nil, activationType: .manualNoRecommendation, throwingPumpErrors: true)
+            XCTFail("A failed bolus must not be reported as delivered")
+        } catch PumpManagerError.communication {
+        } catch {
+            XCTFail("Unexpected error \(error)")
+        }
+    }
+
+    func testAnUncertainDeliveryIsThrownForCallersThatReportTheOutcome() async {
+        pumpManager.enactBolusError = .uncertainDelivery
+        do {
+            try await deviceDataManager.enactBolus(units: 1, decisionId: nil, activationType: .manualNoRecommendation, throwingPumpErrors: true)
+            XCTFail("An uncertain bolus must not be reported as delivered")
+        } catch PumpManagerError.uncertainDelivery {
+        } catch {
+            XCTFail("Unexpected error \(error)")
+        }
+    }
+
+    func testPumpErrorsAreNotThrownByDefault() async throws {
+        pumpManager.enactBolusError = .communication(nil)
+        try await deviceDataManager.enactBolus(units: 1, decisionId: nil, activationType: .manualNoRecommendation)
+        pumpManager.enactBolusError = .uncertainDelivery
+        try await deviceDataManager.enactBolus(units: 1, decisionId: nil, activationType: .manualNoRecommendation)
+    }
+
     func testReceivedUnreliableCGMReadingCancelsTempBasal() {
         let dose = DoseEntry(
             type: .tempBasal,
