@@ -56,7 +56,10 @@ struct ChartPageView: View {
     }
 
     var chartView: some View {
-        SpriteView(scene: loopManager.glucoseChartScene)
+        // Frames only while the scene has something to draw; otherwise one a second at most.
+        SpriteView(scene: loopManager.glucoseChartScene,
+                   isPaused: !loopManager.glucoseChartIsDrawing,
+                   preferredFramesPerSecond: loopManager.glucoseChartIsDrawing ? 60 : 1)
             .frame(height: chartHeight)
             .ignoresSafeArea()
             .gesture(
@@ -218,6 +221,11 @@ struct ChartPageView: View {
         .toolbar(.hidden, for: .navigationBar)
         .environment(\.glucoseDisplayUnit, loopManager.displayGlucoseUnit)
         .onAppear() {
+            loopManager.glucoseChartScene.onDrawingChange = { [loopManager] drawing in
+                MainActor.assumeIsolated {
+                    if loopManager.glucoseChartIsDrawing != drawing { loopManager.glucoseChartIsDrawing = drawing }
+                }
+            }
             updateGlucoseChart()
         }
         .onChange(of: loopManager.displayContext?.predictedGlucose) { oldValue, newValue in
