@@ -841,7 +841,7 @@ extension LoopDataManager: ServicesManagerDelegate {
             throw CarbActionError.invalidCarbs
         }
         
-        guard amountInGrams <= LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram) else {
+        guard amountInGrams <= UserDefaults.standard.carbEntryLimits.maximumGrams else {
             throw CarbActionError.exceedsMaxCarbs
         }
         
