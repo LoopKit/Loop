@@ -14,12 +14,9 @@ extension SmartwatchManagerHost: AlertForwarder {
     /// with the phone. Delayed/repeating alerts are left to the phone's notification
     /// schedule. Muted alerts are not sent: Loop's mute covers critical alerts too
     /// (they are delivered at volume 0), so the watch follows the mute for every
-    /// alert. Each alert that isn't sent is logged with the reason. Only plugins
-    /// that declare and request `.alerts` are fed.
+    /// alert. Each alert that isn't sent is logged with the reason.
     func alertManager(_ manager: AlertManager, didIssueAlert alert: Alert, muted: Bool) {
-        guard let smartwatchManager = deviceManager.smartwatchManager,
-              smartwatchManager.effectiveCapabilities.contains(.alerts)
-        else {
+        guard let smartwatchManager = deviceManager.smartwatchManager else {
             return
         }
         let content = alert.foregroundContent ?? alert.backgroundContent
@@ -44,16 +41,7 @@ extension SmartwatchManagerHost: AlertForwarder {
             logAlert(smartwatchManager, "\(content.title) not sent to the watch: Loop's alerts are muted")
             return
         }
-        smartwatchManager.watchAlertDidIssue(
-            SmartwatchAlert(
-                identifier: SmartwatchAlertIdentifier(alert.identifier.value),
-                level: alert.interruptionLevel.smartwatchAlertLevel,
-                title: content.title,
-                body: content.body,
-                issuedAt: Date(),
-                glucoseAlertType: Self.glucoseAlertType(of: alert.identifier)
-            )
-        )
+        smartwatchManager.watchAlertDidIssue(alert, glucoseAlertType: Self.glucoseAlertType(of: alert.identifier), issuedAt: Date())
         // Loop never retracts a test alert: clear it on the watch once it has shown.
         if Self.isTestAlert(alert.identifier) {
             lastWatchTestAlertAt = Date()
@@ -64,7 +52,7 @@ extension SmartwatchManagerHost: AlertForwarder {
             }
         }
         // Queued after the plugin's own "issued" line, which also hops to the main
-        // actor. Uses the same unit as the watch snapshots (HealthKit's stored one).
+        // actor. Uses the unit the watch reads (HealthKit's stored one).
         let firedAt = Date()
         Task { @MainActor in
             let unit = await self.preferredGlucoseUnit()
@@ -128,25 +116,14 @@ extension SmartwatchManagerHost: AlertForwarder {
         return minutes % 60 == 0 ? "\(minutes / 60) h" : "\(minutes / 60) h \(minutes % 60) min"
     }
 
-    /// Retractions go to every plugin that declares `.alerts`, even one that has
-    /// stopped requesting it, so an alert it was given doesn't stay active there.
+    /// Retractions of glucose alerts, the only ones forwarded, so an alert the
+    /// watch was given doesn't stay active there.
     func alertManager(_ manager: AlertManager, didRetractAlertWithIdentifier identifier: Alert.Identifier) {
         guard let smartwatchManager = deviceManager.smartwatchManager,
-              type(of: smartwatchManager).capabilities.contains(.alerts),
               identifier.managerIdentifier == GlucoseAlertManager.managerIdentifier
         else {
             return
         }
-        smartwatchManager.watchAlertDidRetract(SmartwatchAlertIdentifier(identifier.value))
-    }
-}
-
-private extension Alert.InterruptionLevel {
-    var smartwatchAlertLevel: SmartwatchAlertLevel {
-        switch self {
-        case .active: return .informational
-        case .timeSensitive: return .warning
-        case .critical: return .critical
-        }
+        smartwatchManager.watchAlertDidRetract(identifier)
     }
 }

@@ -5,21 +5,22 @@
 //  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
 
+import Combine
 import Foundation
 import HealthKit
 import LoopAlgorithm
 import LoopCore
 import LoopKit
 
-/// Sends Loop's state to the watch plugin in Settings → Devices.
+/// The watch plugin's host in Settings → Devices: its `SmartwatchManagerDelegate`.
 ///
-/// A new glucose reading is sent as soon as the glucose store saves it, before
-/// the loop runs; the snapshot is sent again when the loop's output changes.
-/// Unchanged snapshots are not resent.
+/// The plugin reads Loop's state from here after `hostDataDidChange`, which says
+/// what changed. A new glucose reading is signalled as soon as the glucose store
+/// saves it, before the loop runs; the loop's output when it changes.
 ///
-/// For plugins that declare `.remoteBolus`, it also issues the bolus context and
-/// decides on bolus requests with `SmartwatchBolusPolicy`. Watch boluses stay off
-/// unless the user allows them in Watch Permissions.
+/// The plugin's log lines go to the device log, and its alerts to Loop's alert
+/// manager, at most time-sensitive. Its remote actions get the checks Loop applies
+/// to any request of that kind (`SmartwatchManagerHost+RemoteActions.swift`).
 @MainActor
 final class SmartwatchManagerHost {
     unowned let deviceManager: DeviceDataManager
@@ -36,12 +37,13 @@ final class SmartwatchManagerHost {
 
     let log = DiagnosticLog(category: "SmartwatchManagerHost")
 
-    private var lastSentSnapshot: SmartwatchStatusSnapshot?
-    /// Hands out the bolus context and tracks the watch bolus being delivered.
-    var bolusContextIssuer = SmartwatchBolusContextIssuer()
-    /// Incremented per update so a slower glucose fetch cannot overwrite a newer snapshot.
-    private var updateGeneration = 0
+    /// Whether a watch bolus is being delivered, so a second one waits for its result.
+    var isDeliveringWatchBolus = false
+    /// What changed since the watch manager was last told, sent on the next main
+    /// run loop turn so changes that arrive together go out as one call.
+    private var pendingChanges: SmartwatchHostDataChange = []
     private var notificationObservers: [Any] = []
+    private var cancellables: Set<AnyCancellable> = []
     /// When a test alert last went to the watch. Loop never retracts test alerts,
     /// so the host clears them once they have shown for `watchTestAlertDuration`.
     var lastWatchTestAlertAt: Date?
@@ -75,71 +77,73 @@ final class SmartwatchManagerHost {
             // Posted as soon as new samples are saved, before LoopDataManager
             // recomputes its display state for them.
             NotificationCenter.default.addObserver(forName: GlucoseStore.glucoseSamplesDidChange, object: glucoseStore, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.update() }
+                MainActor.assumeIsolated { self?.signal(.glucose) }
             },
-            NotificationCenter.default.addObserver(forName: .LoopDataUpdated, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.update() }
+            NotificationCenter.default.addObserver(forName: .LoopDataUpdated, object: nil, queue: .main) { [weak self] note in
+                let context = (note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopUpdateContext.RawValue).flatMap(LoopUpdateContext.init(rawValue:))
+                MainActor.assumeIsolated {
+                    // Preferences cover settings, presets and the active override,
+                    // and closed loop, which the loop state reports.
+                    self?.signal(context == .preferences ? [.loop, .presets, .settings] : .loop)
+                }
             },
             NotificationCenter.default.addObserver(forName: .HealthStorePreferredGlucoseUnitDidChange, object: healthStore, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.update() }
+                MainActor.assumeIsolated { self?.signal(.settings) }
             },
             NotificationCenter.default.addObserver(forName: .LoopCycleCompleted, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.update() }
+                MainActor.assumeIsolated { self?.signal(.loop) }
             },
-            NotificationCenter.default.addObserver(forName: .SmartwatchManagerChanged, object: deviceManager, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.refresh() }
-            },
-            NotificationCenter.default.addObserver(forName: .WatchPermissionsChanged, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.update() }
+            // The pump's bolus volumes.
+            NotificationCenter.default.addObserver(forName: .PumpManagerChanged, object: deviceManager, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.signal(.settings) }
             },
         ]
+
+        alertMuter.$configuration
+            .dropFirst()
+            .removeDuplicates()
+            .sink { [weak self] _ in self?.signal(.alertMute) }
+            .store(in: &cancellables)
     }
 
-    /// Sends the current snapshot even if unchanged, for a new watch manager or
-    /// one that reconnected.
+    /// Tells the watch manager that everything changed: for a new watch manager,
+    /// right after its delegate is set, or one that finished onboarding.
     func refresh() {
-        lastSentSnapshot = nil
-        loggedUndeclaredRequest = []
-        update()
-    }
-
-    private func update() {
+        pendingChanges = []
         guard let smartwatchManager = deviceManager.smartwatchManager else {
             return
         }
         retractWatchAlertsNoLongerShown(smartwatchManager)
-        updateGeneration += 1
-        let generation = updateGeneration
-        // Fill only what the watch asks for now (the user may have turned a display
-        // element off), within what the plugin declares.
-        let capabilities = smartwatchManager.effectiveCapabilities
-        logUndeclaredRequest(smartwatchManager)
+        smartwatchManager.hostDataDidChange(.all)
+    }
 
-        Task {
-            var snapshot: SmartwatchStatusSnapshot
-            let bolusInputs: SmartwatchBolusContextIssuer.Inputs?
-            do {
-                (snapshot, bolusInputs) = try await makeSnapshot(capabilities: capabilities)
-            } catch {
-                log.error("Unable to read glucose for the watch: %{public}@", String(describing: error))
-                return
-            }
-            guard generation == updateGeneration,
-                  let current = deviceManager.smartwatchManager, (current as AnyObject) === (smartwatchManager as AnyObject)
-            else {
-                return
-            }
-            // Issued only for the snapshot that goes out, so a slower, dropped one
-            // can't replace the context the watch was sent.
-            if let bolusInputs {
-                snapshot.bolusContext = bolusContextIssuer.context(for: bolusInputs, now: Date())
-            }
-            guard snapshot != lastSentSnapshot else {
-                return
-            }
-            lastSentSnapshot = snapshot
-            current.watchDataDidUpdate(snapshot)
+    /// Tells the watch manager what changed, on the next main run loop turn
+    /// together with whatever else changes until then.
+    func signal(_ changes: SmartwatchHostDataChange) {
+        let isScheduled = !pendingChanges.isEmpty
+        pendingChanges.formUnion(changes)
+        guard !isScheduled else {
+            return
         }
+        DispatchQueue.main.async { [weak self] in
+            MainActor.assumeIsolated { self?.sendPendingChanges() }
+        }
+    }
+
+    private func sendPendingChanges() {
+        let changes = pendingChanges
+        pendingChanges = []
+        guard !changes.isEmpty, let smartwatchManager = deviceManager.smartwatchManager else {
+            return
+        }
+        retractWatchAlertsNoLongerShown(smartwatchManager)
+        smartwatchManager.hostDataDidChange(changes)
+    }
+
+    /// Whether `manager` is the watch manager in Settings → Devices. Only its
+    /// requests are acted on; a removed one may still hold this host.
+    func isCurrentWatch(_ manager: SmartwatchManager) -> Bool {
+        deviceManager.smartwatchManager.map { ($0 as AnyObject) === (manager as AnyObject) } ?? false
     }
 
     /// The glucose unit from HealthKit's stored preference, which is what Loop's own
@@ -147,10 +151,6 @@ final class SmartwatchManagerHost {
     /// HealthKit's first answer arrives, so reading it at launch briefly sent mg/dL
     /// to the watch of a mmol/L user. Falls back to it when HealthKit can't answer,
     /// for example while protected data is unavailable.
-    private func displayUnit() async -> SmartwatchGlucoseUnit {
-        await preferredGlucoseUnit() == .millimolesPerLiter ? .millimolesPerLiter : .milligramsPerDeciliter
-    }
-
     func preferredGlucoseUnit() async -> LoopUnit {
         if let hkUnit = await healthStore.cachedPreferredUnits(for: .bloodGlucose) {
             return LoopUnit(from: hkUnit)
@@ -158,98 +158,25 @@ final class SmartwatchManagerHost {
         return deviceManager.displayGlucosePreference.unit
     }
 
-    /// The snapshot without its bolus context, and what that context is to be issued from.
-    private func makeSnapshot(capabilities: SmartwatchCapabilities) async throws -> (SmartwatchStatusSnapshot, SmartwatchBolusContextIssuer.Inputs?) {
-        let historyStart = Date().addingTimeInterval(-SmartwatchStatusSnapshot.historyInterval)
-        let samples = try await glucoseStore.getGlucoseSamples(start: historyStart)
-
-        let readings = samples.map(SmartwatchGlucoseReading.init)
-        var snapshot = SmartwatchStatusSnapshot(
-            displayUnit: await displayUnit(),
-            glucose: readings.last,
-            glucoseHistory: capabilities.contains(.history) ? readings : []
-        )
-        if capabilities.contains(.prediction) {
-            snapshot.predictedGlucose = loopDataManager.predictedGlucose?.map {
-                SmartwatchPredictedGlucose(date: $0.startDate, milligramsPerDeciliter: $0.quantity.doubleValue(for: .milligramsPerDeciliter))
-            }
-        }
-        if capabilities.contains(.loopStatus) {
-            snapshot.insulinOnBoard = loopDataManager.activeInsulin?.value
-            snapshot.carbsOnBoard = loopDataManager.activeCarbs?.quantity.doubleValue(for: .gram)
-            snapshot.lastLoopCompleted = loopDataManager.lastLoopCompleted
-            snapshot.isClosedLoop = settingsManager.loopSettings.dosingEnabled
-        }
-        if capabilities.contains(.therapy) {
-            snapshot.therapy = currentTherapyContext()
-        }
-        var bolusInputs: SmartwatchBolusContextIssuer.Inputs?
-        if capabilities.contains(.remoteBolus) {
-            bolusInputs = await bolusContextInputs(latestGlucoseDate: samples.last?.startDate)
-        }
-        if capabilities.contains(.remoteOverride) {
-            snapshot.overridePresets = currentOverridePresets()
-        }
-        snapshot.permittedActions = UserDefaults.standard.permittedWatchActions(within: capabilities)
-        if capabilities.contains(.remoteCarbs) {
-            snapshot.maximumCarbEntry = LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram)
-        }
-        if capabilities.contains(.remoteBolus) {
-            snapshot.bolusIncrement = SmartwatchStatusSnapshot.bolusIncrement(of: deviceManager.pumpManager?.supportedBolusVolumes ?? [])
-        }
-        return (snapshot, bolusInputs)
-    }
-
-    /// What the algorithm is working with now, in mg/dL, with any active preset
-    /// applied. Loop has no sensitivity ratio (an oref/autosens value), so that
-    /// stays nil.
-    private func currentTherapyContext(now: Date = Date()) -> SmartwatchTherapyContext {
-        let presets = loopDataManager.temporaryPresetsManager
-        var tempBasalRate: Double?
-        if case .tempBasal(let dose) = deviceManager.pumpManager?.status.basalDeliveryState {
-            tempBasalRate = dose.unitsPerHour
-        }
-        let range = presets.effectiveCorrectionRangeSchedule()?.quantityRange(at: now)
-        let override = presets.scheduleOverride.flatMap { $0.isActive(at: now) ? $0 : nil }
-        let presetName: String? = switch override?.context {
-        case .preMeal: NSLocalizedString("Pre-Meal", comment: "Name of the pre-meal preset sent to a watch")
-        case .preset(let preset): preset.name
-        case .activity(let activity): activity.activityType.name
-        case .custom: NSLocalizedString("Custom Preset", comment: "Name of a custom preset sent to a watch")
-        case nil: nil
-        }
-        return SmartwatchTherapyContext(
-            tempBasalRate: tempBasalRate,
-            scheduledBasalRate: presets.basalRateScheduleApplyingOverrideHistory?.value(at: now),
-            insulinSensitivity: presets.insulinSensitivityScheduleApplyingOverrideHistory?.quantity(at: now).doubleValue(for: .milligramsPerDeciliter),
-            eventualGlucose: loopDataManager.predictedGlucose?.last?.quantity.doubleValue(for: .milligramsPerDeciliter),
-            correctionRange: range.map { $0.lowerBound.doubleValue(for: .milligramsPerDeciliter)...$0.upperBound.doubleValue(for: .milligramsPerDeciliter) },
-            activePresetName: presetName,
-            activePresetEnd: override?.scheduledEndDate
+    /// A watch plugin's alert as Loop issues it: from the plugin, whatever manager
+    /// it names, so it can't retract or impersonate another device's alert, and at
+    /// most time-sensitive. A watch plugin's alerts are about the watch (a missing
+    /// companion app); they never break through Focus or the silent switch.
+    static func watchPluginAlert(_ alert: Alert, from pluginIdentifier: String) -> Alert {
+        Alert(
+            identifier: watchPluginAlertIdentifier(alert.identifier, from: pluginIdentifier),
+            foregroundContent: alert.foregroundContent,
+            backgroundContent: alert.backgroundContent,
+            trigger: alert.trigger,
+            interruptionLevel: alert.interruptionLevel == .critical ? .timeSensitive : alert.interruptionLevel,
+            sound: alert.sound,
+            metadata: alert.metadata,
+            categoryIdentifier: alert.categoryIdentifier
         )
     }
 
-    /// Loop's presets, with the running one marked.
-    private func currentOverridePresets(now: Date = Date()) -> [SmartwatchPreset] {
-        let running = loopDataManager.temporaryPresetsManager.scheduleOverride.flatMap { $0.isActive(at: now) ? $0 : nil }
-        let runningID: String? = if case .preset(let preset) = running?.context { preset.id } else { nil }
-        return settingsManager.settings.overridePresets.map { preset in
-            let duration: TimeInterval? = if case .finite(let interval) = preset.duration { interval } else { nil }
-            return SmartwatchPreset(id: preset.id, name: preset.name, isActive: preset.id == runningID, duration: duration)
-        }
-    }
-
-    /// The undeclared capabilities a plugin last requested, so each set is logged once.
-    private var loggedUndeclaredRequest: SmartwatchCapabilities = []
-
-    /// A plugin can't obtain a capability it doesn't declare: hosts act only on
-    /// `effectiveCapabilities`. Log when it asks for more, once per distinct set.
-    private func logUndeclaredRequest(_ manager: SmartwatchManager) {
-        let undeclared = manager.undeclaredRequestedCapabilities
-        guard undeclared != loggedUndeclaredRequest else { return }
-        loggedUndeclaredRequest = undeclared
-        guard !undeclared.isEmpty else { return }
-        deviceManager.deviceLog.log(managerIdentifier: manager.pluginIdentifier, deviceIdentifier: nil, type: .error, message: "The watch plugin requested capabilities it doesn't declare (\(undeclared)); they are ignored", completion: nil)
+    static func watchPluginAlertIdentifier(_ identifier: Alert.Identifier, from pluginIdentifier: String) -> Alert.Identifier {
+        Alert.Identifier(managerIdentifier: pluginIdentifier, alertIdentifier: identifier.alertIdentifier)
     }
 
     /// Which glucose alert this is, so plugins needn't know Loop's alert identifiers.
@@ -295,11 +222,11 @@ final class SmartwatchManagerHost {
         }
     }
 
-    /// Retracts what `watchAlertsToRetract` lists, on every update (each reading,
-    /// loop cycle and reconnect). The plugin ignores alerts it doesn't have, so the
-    /// host keeps no record of what it sent, and this also works after a relaunch.
+    /// Retracts what `watchAlertsToRetract` lists, on every change signal (each
+    /// reading, loop cycle and new manager). The plugin ignores alerts it doesn't
+    /// have, so the host keeps no record of what it sent, and this also works after
+    /// a relaunch.
     func retractWatchAlertsNoLongerShown(_ smartwatchManager: SmartwatchManager, now: Date = Date()) {
-        guard type(of: smartwatchManager).capabilities.contains(.alerts) else { return }
         let alertManager = deviceManager.glucoseAlertManager
         let identifiers = Self.watchAlertsToRetract(
             configuration: alertManager.activeConfiguration(at: now),
@@ -308,8 +235,7 @@ final class SmartwatchManagerHost {
             now: now
         )
         for identifier in identifiers {
-            let alertIdentifier = Alert.Identifier(managerIdentifier: GlucoseAlertManager.managerIdentifier, alertIdentifier: identifier)
-            smartwatchManager.watchAlertDidRetract(SmartwatchAlertIdentifier(alertIdentifier.value))
+            smartwatchManager.watchAlertDidRetract(Alert.Identifier(managerIdentifier: GlucoseAlertManager.managerIdentifier, alertIdentifier: identifier))
         }
     }
 
@@ -323,15 +249,171 @@ final class SmartwatchManagerHost {
     }
 }
 
-extension SmartwatchGlucoseReading {
-    init(_ sample: StoredGlucoseSample) {
-        self.init(
-            date: sample.startDate,
-            milligramsPerDeciliter: sample.quantity.doubleValue(for: .milligramsPerDeciliter),
-            trend: sample.trend.flatMap { SmartwatchGlucoseTrend(rawValue: $0.rawValue) },
-            trendRate: sample.trendRate?.doubleValue(for: .milligramsPerDeciliterPerMinute),
-            wasUserEntered: sample.wasUserEntered,
-            isDisplayOnly: sample.isDisplayOnly
+// MARK: - SmartwatchManagerDelegate: state and reads
+
+extension SmartwatchManagerHost: SmartwatchManagerDelegate {
+    nonisolated
+    func smartwatchManagerDidUpdateState(_ manager: SmartwatchManager) {
+        Task { @MainActor in
+            // A removed manager must not bring its saved state back.
+            guard isCurrentWatch(manager) else { return }
+            deviceManager.rawSmartwatchManager = manager.rawValue
+        }
+    }
+
+    func smartwatchManagerWantsDeletion(_ manager: SmartwatchManager) async {
+        log.default("Watch manager with identifier '%{public}@' wants deletion", manager.pluginIdentifier)
+        guard isCurrentWatch(manager) else { return }
+        deviceManager.smartwatchManager = nil
+    }
+
+    func smartwatchManagerGlucoseDisplayUnit(_ manager: SmartwatchManager) async -> LoopUnit {
+        await preferredGlucoseUnit()
+    }
+
+    func smartwatchManager(_ manager: SmartwatchManager, glucoseSamplesSince date: Date) async throws -> [StoredGlucoseSample] {
+        try await glucoseStore.getGlucoseSamples(start: date)
+    }
+
+    /// Read together from LoopDataManager's display state, so they come from one
+    /// loop run. Loop has no sensitivity ratio (an oref/autosens value), so that
+    /// stays nil; eventual glucose is the end of the forecast.
+    func smartwatchManagerLoopState(_ manager: SmartwatchManager) async -> SmartwatchLoopState {
+        let predictedGlucose = loopDataManager.predictedGlucose ?? []
+        return SmartwatchLoopState(
+            lastLoopCompleted: loopDataManager.lastLoopCompleted,
+            isClosedLoop: settingsManager.loopSettings.dosingEnabled,
+            insulinOnBoard: loopDataManager.activeInsulin,
+            carbsOnBoard: loopDataManager.activeCarbs,
+            predictedGlucose: predictedGlucose,
+            eventualGlucose: predictedGlucose.last?.quantity
         )
+    }
+
+    func smartwatchManagerScheduledBasalRate(_ manager: SmartwatchManager) async -> LoopQuantity? {
+        guard let schedule = loopDataManager.temporaryPresetsManager.basalRateScheduleApplyingOverrideHistory else {
+            return nil
+        }
+        return LoopQuantity(unit: .internationalUnitsPerHour, doubleValue: schedule.value(at: Date()))
+    }
+
+    func smartwatchManagerTempBasal(_ manager: SmartwatchManager) async -> DoseEntry? {
+        guard case .tempBasal(let dose) = deviceManager.pumpManager?.status.basalDeliveryState else {
+            return nil
+        }
+        return dose
+    }
+
+    func smartwatchManagerInsulinSensitivity(_ manager: SmartwatchManager) async -> LoopQuantity? {
+        loopDataManager.temporaryPresetsManager.insulinSensitivityScheduleApplyingOverrideHistory?.quantity(at: Date())
+    }
+
+    func smartwatchManagerCorrectionRange(_ manager: SmartwatchManager) async -> ClosedRange<LoopQuantity>? {
+        loopDataManager.temporaryPresetsManager.effectiveCorrectionRangeSchedule()?.quantityRange(at: Date())
+    }
+
+    func smartwatchManagerOverridePresets(_ manager: SmartwatchManager) async -> [TemporaryPreset] {
+        settingsManager.settings.overridePresets
+    }
+
+    /// Any running override: a preset, pre-meal, an activity or a custom one.
+    func smartwatchManagerActiveOverride(_ manager: SmartwatchManager) async -> TemporaryScheduleOverride? {
+        loopDataManager.temporaryPresetsManager.activeOverride
+    }
+
+    func smartwatchManagerAlertMuteEnd(_ manager: SmartwatchManager) async -> Date? {
+        alertMuter.configuration.shouldMute ? alertMuter.configuration.mutingEndTime : nil
+    }
+
+    func smartwatchManagerMaximumBolus(_ manager: SmartwatchManager) async -> Double? {
+        settingsManager.loopSettings.maximumBolus
+    }
+
+    func smartwatchManagerMaximumCarbEntry(_ manager: SmartwatchManager) async -> Double? {
+        LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram)
+    }
+
+    func smartwatchManagerSupportedBolusVolumes(_ manager: SmartwatchManager) async -> [Double] {
+        deviceManager.pumpManager?.supportedBolusVolumes ?? []
+    }
+
+    /// Loop's fast, medium and slow, as in carb entry.
+    func smartwatchManagerDefaultCarbAbsorptionTimes(_ manager: SmartwatchManager) async -> (fast: TimeInterval, medium: TimeInterval, slow: TimeInterval)? {
+        LoopCoreConstants.defaultCarbAbsorptionTimes
+    }
+}
+
+// MARK: - DeviceManagerDelegate: the plugin's log and alerts
+
+extension SmartwatchManagerHost {
+    nonisolated
+    func deviceManager(_ manager: DeviceManager, logEventForDeviceIdentifier deviceIdentifier: String?, type: DeviceLogEntryType, message: String, completion: ((Error?) -> Void)?) {
+        Task { @MainActor in
+            deviceManager.deviceLog.log(managerIdentifier: manager.pluginIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
+        }
+    }
+
+    nonisolated
+    func deviceManager(_ manager: DeviceManager, recordAnalyticsEvent name: String, properties: [AnyHashable: Any]?) {
+        Task { @MainActor in
+            deviceManager.deviceManager(manager, recordAnalyticsEvent: name, properties: properties)
+        }
+    }
+
+    /// Issues the plugin's alert about the watch as Loop's own alert from this
+    /// plugin, capped by `watchPluginAlert`.
+    func issueAlert(_ alert: Alert) async {
+        guard let manager = deviceManager.smartwatchManager else {
+            return
+        }
+        let watchAlert = Self.watchPluginAlert(alert, from: manager.pluginIdentifier)
+        let content = watchAlert.foregroundContent ?? watchAlert.backgroundContent
+        var note = "Watch plugin alert: \(content.title): \(content.body)"
+        if alert.interruptionLevel != watchAlert.interruptionLevel {
+            note += " (critical lowered to time-sensitive)"
+        }
+        if alert.identifier != watchAlert.identifier {
+            note += " (issued as \(watchAlert.identifier.value), not \(alert.identifier.value))"
+        }
+        deviceManager.deviceLog.log(managerIdentifier: manager.pluginIdentifier, deviceIdentifier: nil, type: .error, message: note, completion: nil)
+        await deviceManager.alertManager?.issueAlert(watchAlert)
+    }
+
+    func retractAlert(identifier: Alert.Identifier) async {
+        guard let manager = deviceManager.smartwatchManager else {
+            return
+        }
+        await deviceManager.alertManager?.retractAlert(identifier: Self.watchPluginAlertIdentifier(identifier, from: manager.pluginIdentifier))
+    }
+
+    // The lookups find the plugin's alerts where `issueAlert` stored them: under
+    // the plugin's identifier, whatever manager the plugin names.
+
+    func doesIssuedAlertExist(identifier: Alert.Identifier) async throws -> Bool {
+        guard let manager = deviceManager.smartwatchManager else {
+            return false
+        }
+        return try await deviceManager.doesIssuedAlertExist(identifier: Self.watchPluginAlertIdentifier(identifier, from: manager.pluginIdentifier))
+    }
+
+    func lookupAllUnretracted(managerIdentifier: String) async throws -> [PersistedAlert] {
+        guard let manager = deviceManager.smartwatchManager else {
+            return []
+        }
+        return try await deviceManager.lookupAllUnretracted(managerIdentifier: manager.pluginIdentifier)
+    }
+
+    func lookupAllUnacknowledgedUnretracted(managerIdentifier: String) async throws -> [PersistedAlert] {
+        guard let manager = deviceManager.smartwatchManager else {
+            return []
+        }
+        return try await deviceManager.lookupAllUnacknowledgedUnretracted(managerIdentifier: manager.pluginIdentifier)
+    }
+
+    func recordRetractedAlert(_ alert: Alert, at date: Date) async throws {
+        guard let manager = deviceManager.smartwatchManager else {
+            return
+        }
+        try await deviceManager.recordRetractedAlert(Self.watchPluginAlert(alert, from: manager.pluginIdentifier), at: date)
     }
 }

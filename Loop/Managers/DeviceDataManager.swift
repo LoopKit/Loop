@@ -172,7 +172,7 @@ final class DeviceDataManager {
         didSet {
             // Restoring at launch starts from nil, so this only fires on removal or replacement.
             if let oldValue, smartwatchManager.map({ ($0 as AnyObject) !== (oldValue as AnyObject) }) ?? true {
-                UserDefaults.standard.resetWatchPermissions()
+                tearDownWatch(oldValue)
             }
             setupWatch()
             NotificationCenter.default.post(name: .SmartwatchManagerChanged, object: self, userInfo: nil)
@@ -259,8 +259,14 @@ final class DeviceDataManager {
 
     private weak var displayGlucoseUnitBroadcaster: DisplayGlucoseUnitBroadcaster?
 
-    /// Sends Loop's state to `smartwatchManager`.
-    weak var smartwatchManagerHost: SmartwatchManagerHost?
+    /// `smartwatchManager`'s delegate. Created after a watch manager may have been
+    /// restored at launch, so the manager is handed to it once it's set.
+    weak var smartwatchManagerHost: SmartwatchManagerHost? {
+        didSet {
+            smartwatchManager?.smartwatchManagerDelegate = smartwatchManagerHost
+            smartwatchManagerHost?.refresh()
+        }
+    }
 
     init(pluginManager: PluginManager,
          deviceLog: PersistentDeviceLog,
@@ -765,8 +771,22 @@ private extension DeviceDataManager {
     }
 
     func setupWatch() {
-        smartwatchManager?.smartwatchManagerDelegate = self
+        smartwatchManager?.smartwatchManagerDelegate = smartwatchManagerHost
+        if let smartwatchManager {
+            alertManager?.addAlertResponder(managerIdentifier: smartwatchManager.pluginIdentifier,
+                                            alertResponder: smartwatchManager)
+            alertManager?.addAlertSoundVendor(managerIdentifier: smartwatchManager.pluginIdentifier,
+                                              soundVendor: smartwatchManager)
+        }
         reportPluginInitializationComplete()
+        smartwatchManagerHost?.refresh()
+    }
+
+    /// A removed or replaced watch manager hears nothing more from Loop.
+    func tearDownWatch(_ smartwatchManager: SmartwatchManagerUI) {
+        smartwatchManager.smartwatchManagerDelegate = nil
+        alertManager?.removeAlertResponder(managerIdentifier: smartwatchManager.pluginIdentifier)
+        alertManager?.removeAlertSoundVendor(managerIdentifier: smartwatchManager.pluginIdentifier)
     }
 
     func setupPump() {
@@ -1089,102 +1109,6 @@ extension DeviceDataManager: CGMManagerDelegate {
             }
             self.glucoseStore.managedDataInterval = manager.managedDataInterval
         }
-    }
-}
-
-// MARK: - SmartwatchManagerDelegate
-extension DeviceDataManager: SmartwatchManagerDelegate {
-    nonisolated
-    func smartwatchManagerDidUpdateState(_ manager: SmartwatchManager) {
-        Task { @MainActor in
-            rawSmartwatchManager = manager.rawValue
-        }
-    }
-
-    nonisolated
-    func smartwatchManagerWantsDeletion(_ manager: SmartwatchManager) async {
-        await withCheckedContinuation { continuation in
-            DispatchQueue.main.async {
-                self.log.default("Watch manager with identifier '%{public}@' wants deletion", manager.pluginIdentifier)
-                self.smartwatchManager = nil
-                continuation.resume()
-            }
-        }
-    }
-
-    nonisolated
-    func smartwatchManagerRequestsRefresh(_ manager: SmartwatchManager) {
-        Task { @MainActor in
-            // Requested capabilities may have changed, which shows or hides Watch Permissions.
-            NotificationCenter.default.post(name: .SmartwatchManagerCapabilitiesChanged, object: self, userInfo: nil)
-            smartwatchManagerHost?.refresh()
-        }
-    }
-
-    nonisolated
-    func smartwatchManager(_ manager: SmartwatchManager, didLogEvent event: SmartwatchDeviceLogEntry) {
-        Task { @MainActor in
-            deviceLog.log(managerIdentifier: manager.pluginIdentifier, deviceIdentifier: event.deviceIdentifier, type: DeviceLogEntryType(event.type), message: event.message, completion: nil)
-        }
-    }
-
-    /// Shows the plugin's alert about the watch as Loop's own alert from this
-    /// plugin. A plugin can't raise a critical alert: at most time-sensitive.
-    nonisolated
-    func smartwatchManager(_ manager: SmartwatchManager, issueDeviceAlert alert: SmartwatchDeviceAlert) {
-        let loopAlert = Alert(alert, from: manager, acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Alert acknowledgment OK button"))
-        Task { @MainActor in
-            deviceLog.log(managerIdentifier: manager.pluginIdentifier, deviceIdentifier: nil, type: .error, message: "Watch plugin alert: \(alert.title): \(alert.body)", completion: nil)
-            await alertManager?.issueAlert(loopAlert)
-        }
-    }
-
-    nonisolated
-    func smartwatchManager(_ manager: SmartwatchManager, retractDeviceAlert identifier: SmartwatchAlertIdentifier) {
-        let loopIdentifier = Alert.Identifier(identifier, from: manager)
-        Task { @MainActor in
-            await alertManager?.retractAlert(identifier: loopIdentifier)
-        }
-    }
-
-    nonisolated
-    func smartwatchManager(_ manager: SmartwatchManager, requestBolus request: SmartwatchBolusRequest) async throws -> Double {
-        guard let host = await smartwatchManagerHost else {
-            throw SmartwatchBolusError.notAllowed
-        }
-        return try await host.handleBolusRequest(request, from: manager)
-    }
-
-    nonisolated
-    func smartwatchManager(_ manager: SmartwatchManager, recommendBolusFor request: SmartwatchBolusRecommendationRequest) async throws -> SmartwatchBolusRecommendation {
-        guard let host = await smartwatchManagerHost else {
-            throw SmartwatchBolusError.notAllowed
-        }
-        return try await host.handleBolusRecommendationRequest(request, from: manager)
-    }
-
-    nonisolated
-    func smartwatchManager(_ manager: SmartwatchManager, requestAlertMute request: SmartwatchAlertMuteRequest) async throws -> Date {
-        guard let host = await smartwatchManagerHost else {
-            throw SmartwatchAlertMuteError.notAllowed
-        }
-        return try await host.handleAlertMuteRequest(request, from: manager)
-    }
-
-    nonisolated
-    func smartwatchManager(_ manager: SmartwatchManager, requestCarbEntry request: SmartwatchCarbEntryRequest) async throws -> Double {
-        guard let host = await smartwatchManagerHost else {
-            throw SmartwatchCarbEntryError.notAllowed
-        }
-        return try await host.handleCarbEntryRequest(request, from: manager)
-    }
-
-    nonisolated
-    func smartwatchManager(_ manager: SmartwatchManager, requestOverride request: SmartwatchOverrideRequest) async throws {
-        guard let host = await smartwatchManagerHost else {
-            throw SmartwatchPresetError.notAllowed
-        }
-        try await host.handleOverrideRequest(request, from: manager)
     }
 }
 
@@ -1529,7 +1453,6 @@ extension Notification.Name {
     static let PumpManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpManagerChanged")
     static let CGMManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.CGMManagerChanged")
     static let SmartwatchManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.SmartwatchManagerChanged")
-    static let SmartwatchManagerCapabilitiesChanged = Notification.Name(rawValue:  "com.loopKit.notification.SmartwatchManagerCapabilitiesChanged")
     static let PumpEventsAdded = Notification.Name(rawValue:  "com.loopKit.notification.PumpEventsAdded")
 }
 
