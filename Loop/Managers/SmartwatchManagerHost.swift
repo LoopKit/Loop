@@ -107,6 +107,13 @@ final class SmartwatchManagerHost {
             .removeDuplicates()
             .sink { [weak self] _ in self?.signal(.alertMute) }
             .store(in: &cancellables)
+
+        // A manual temp basal turns automatic dosing off, and its end turns it back on.
+        deviceManager.$pumpIsAllowingAutomation
+            .dropFirst()
+            .removeDuplicates()
+            .sink { [weak self] _ in self?.signal(.loop) }
+            .store(in: &cancellables)
     }
 
     /// Tells the watch manager that everything changed: for a new watch manager,
@@ -285,7 +292,9 @@ extension SmartwatchManagerHost: SmartwatchManagerDelegate {
         let predictedGlucose = loopDataManager.predictedGlucose ?? []
         return SmartwatchLoopState(
             lastLoopCompleted: loopDataManager.lastLoopCompleted,
-            isClosedLoop: settingsManager.loopSettings.dosingEnabled,
+            // As Loop's loop icon, Apple Watch app and widget show it: closed only while
+            // Loop doses automatically, so not during a manual temp basal.
+            isClosedLoop: deviceManager.isAutomaticDosingActive,
             insulinOnBoard: loopDataManager.activeInsulin,
             carbsOnBoard: loopDataManager.activeCarbs,
             predictedGlucose: predictedGlucose,

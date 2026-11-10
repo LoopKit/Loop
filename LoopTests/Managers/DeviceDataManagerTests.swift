@@ -206,6 +206,46 @@ final class DeviceDataManagerTests: XCTestCase {
         XCTAssertEqual(loopControlMock.lastCancelActiveTempBasalReason, .unreliableCGMData)
     }
 
+    private func manualTempBasal(automatic: Bool?, endDate: Date) -> DoseEntry {
+        DoseEntry(type: .tempBasal, startDate: Date().addingTimeInterval(-.minutes(10)), endDate: endDate, value: 2.0, unit: .unitsPerHour, decisionId: nil, automatic: automatic)
+    }
+
+    /// What the watch plugin's loop state reports as closed loop (the host forwards
+    /// `isAutomaticDosingActive`): closed with Closed Loop on and no manual temp
+    /// basal, open during a manual temp basal, as Loop's loop icon shows it.
+    func testAutomaticDosingIsActiveOnlyWithClosedLoopOnAndNoManualTempBasal() {
+        settingsManager.dosingEnabled = true
+        pumpManager.status.basalDeliveryState = .active(Date())
+        XCTAssertTrue(deviceDataManager.isAutomaticDosingActive)
+
+        pumpManager.status.basalDeliveryState = .tempBasal(manualTempBasal(automatic: true, endDate: Date().addingTimeInterval(.minutes(20))))
+        XCTAssertTrue(deviceDataManager.isAutomaticDosingActive)
+
+        pumpManager.status.basalDeliveryState = .tempBasal(manualTempBasal(automatic: false, endDate: Date().addingTimeInterval(.minutes(20))))
+        XCTAssertFalse(deviceDataManager.isAutomaticDosingActive)
+
+        // A manual temp basal that has ended no longer holds the loop open.
+        pumpManager.status.basalDeliveryState = .tempBasal(manualTempBasal(automatic: false, endDate: Date().addingTimeInterval(-.minutes(1))))
+        XCTAssertTrue(deviceDataManager.isAutomaticDosingActive)
+
+        settingsManager.dosingEnabled = false
+        pumpManager.status.basalDeliveryState = .active(Date())
+        XCTAssertFalse(deviceDataManager.isAutomaticDosingActive)
+    }
+
+    /// The watch host signals a loop change when this flips: off for a manual temp
+    /// basal, back on when it ends.
+    func testPumpIsAllowingAutomationFollowsAManualTempBasal() {
+        var status = pumpManager.status
+        status.basalDeliveryState = .tempBasal(manualTempBasal(automatic: false, endDate: Date().addingTimeInterval(.minutes(20))))
+        deviceDataManager.updatePumpIsAllowingAutomation(status: status)
+        XCTAssertFalse(deviceDataManager.pumpIsAllowingAutomation)
+
+        status.basalDeliveryState = .active(Date())
+        deviceDataManager.updatePumpIsAllowingAutomation(status: status)
+        XCTAssertTrue(deviceDataManager.pumpIsAllowingAutomation)
+    }
+
     func testUploadEventListener() {
         let alertStore = AlertStore()
         deviceDataManager.alertStoreHasUpdatedAlertData(alertStore)
