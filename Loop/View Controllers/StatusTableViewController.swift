@@ -1789,6 +1789,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let cgmStatusTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(cgmStatusTapped(_:)))
             hudView.cgmStatusHUD.addGestureRecognizer(cgmStatusTapGestureRecognizer)
 
+            for hud in [hudView.loopCompletionHUD, hudView.pumpStatusHUD, hudView.cgmStatusHUD] as [UIView] {
+                hud.accessibilityTraits.insert(.button)
+            }
+
             configurePumpManagerHUDViews()
             configureCGMManagerHUDViews()
 

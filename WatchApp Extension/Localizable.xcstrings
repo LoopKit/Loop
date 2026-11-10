@@ -1,6 +1,30 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "\n" : {
+
+    },
+    " " : {
+
+    },
+    " %@" : {
+
+    },
+    " %@ ago" : {
+      "comment" : "Format string describing the time interval since the last completion date, last cgm or last pump communication. (1: The localized date components"
+    },
+    " • " : {
+
+    },
+    " >%@ ago" : {
+      "comment" : "Format string describing the time interval since the last completion date, last cgm or last pump communication. (1: The localized date components"
+    },
+    " at %@" : {
+
+    },
+    "-" : {
+
+    },
     "" : {
 
     },
@@ -89,6 +113,7 @@
     },
     "– – –" : {
       "comment" : "No glucose value representation (3 dashes for mg/dL)",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -218,6 +243,9 @@
         }
       }
     },
+    "—" : {
+
+    },
     "." : {
       "comment" : "Full stop character"
     },
@@ -328,6 +356,7 @@
     },
     "%1$@ – %2$@ %3$@" : {
       "comment" : "Format string for glucose range (1: lower bound)(2: upper bound)(3: unit)",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1356,6 +1385,9 @@
         }
       }
     },
+    "Current Delivery" : {
+
+    },
     "Couldn't build the pod driver from the iPhone's details. Try again." : {
       "comment" : "Glance: pump snapshot rejected"
     },
@@ -1496,6 +1528,9 @@
         }
       }
     },
+    "Decreased" : {
+      "comment" : "Title for increased insulin delivery state"
+    },
     "Deactivate" : {
       "comment" : "Glance confirmation: deactivate the faulted pod"
     },
@@ -1630,6 +1665,9 @@
         }
       }
     },
+    "Ending Preset..." : {
+
+    },
     "Don't bolus again until Loop confirms it." : {
       "comment" : "Watch notification body when a loan-time bolus delivery is unconfirmed"
     },
@@ -1649,7 +1687,7 @@
 
     },
     "g" : {
-      "comment" : "Short unit label for gram measurement\nThe short unit display string for grams",
+      "comment" : "Short unit label for gram measurement",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1773,6 +1811,27 @@
         }
       }
     },
+    "HIGH" : {
+      "comment" : "String displayed instead of a glucose value above the CGM range"
+    },
+    "Increased" : {
+      "comment" : "Title for increased insulin delivery state state"
+    },
+    "Last Bolus" : {
+
+    },
+    "Last Connection" : {
+
+    },
+    "Last Loop" : {
+
+    },
+    "Last Reading" : {
+
+    },
+    "LOW" : {
+      "comment" : "String displayed instead of a glucose value below the CGM range"
+    },
     "G7 direct · %dm" : {
       "comment" : "Glance provenance line for a fresh direct reading (1: minutes ago)"
     },
@@ -1858,6 +1917,7 @@
     },
     "Make sure your iPhone is nearby and try again" : {
       "comment" : "The recovery message displayed after a glucose range override send attempt fails",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2072,6 +2132,7 @@
     },
     "mg/dL" : {
       "comment" : "The short unit display string for milligrams of glucose per decilter",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2203,6 +2264,7 @@
     },
     "mmol/L" : {
       "comment" : "The short unit display string for millimoles of glucose per liter",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2334,6 +2396,7 @@
     },
     "Net Basal Rate" : {
       "comment" : "HUD row title for Net Basal Rate",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2451,6 +2514,12 @@
         }
       }
     },
+    "Next Reading" : {
+
+    },
+    "No Delivery" : {
+      "comment" : "Title for increased insulin delivery state state"
+    },
     "New pod — keep your wrist up after Start" : {
       "comment" : "Glance note above Start when this watch has never connected to the current pod"
     },
@@ -2471,6 +2540,7 @@
     },
     "Off" : {
       "comment" : "Label for off button",
+      "extractionState" : "stale",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
@@ -2709,6 +2779,7 @@
     },
     "On" : {
       "comment" : "Label for on button",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2837,6 +2908,18 @@
           }
         }
       }
+    },
+    "on until %@" : {
+      "comment" : "The format for the description of a finite custom preset end date"
+    },
+    "on until carbs added" : {
+      "comment" : "The format for the description of a premeal preset end date"
+    },
+    "on until turned off" : {
+      "comment" : "The format for the description of an indefinite custom preset end date"
+    },
+    "One-time use override has ended." : {
+
     },
     "Open Can" : {
       "comment" : "Name of a glucose alarm sound"
@@ -2979,6 +3062,9 @@
         }
       }
     },
+    "Please complete onboarding to use the %1$@ Watch app" : {
+      "comment" : "Watch app onboarding prompt (1: app name)"
+    },
     "phone loop active" : {
       "comment" : "Glance status when the phone runs the loop"
     },
@@ -3082,6 +3168,7 @@
     },
     "Pre-Meal" : {
       "comment" : "Title for sheet to enable/disable pre-meal on watch",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3207,6 +3294,7 @@
     },
     "Preset" : {
       "comment" : "The text for the Watch button for enabling a custom preset",
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -3293,6 +3381,9 @@
           }
         }
       }
+    },
+    "Preset Delivery" : {
+      "comment" : "Title for neutral delivery state state with preset adjusting basal"
     },
     "Pump Inoperable" : {
       "comment" : "Fault text for a pump whose kit gives none"
@@ -4075,11 +4166,18 @@
         }
       }
     },
+    "Scheduled" : {
+      "comment" : "Title for neutral delivery state"
+    },
+    "Select Preset" : {
+
+    },
     "Saw Wave" : {
       "comment" : "Name of a glucose alarm sound"
     },
     "Send Failed" : {
       "comment" : "The title of the alert controller displayed after a glucose range override send attempt fails",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4196,6 +4294,24 @@
           }
         }
       }
+    },
+    "Sensor" : {
+      "comment" : "Title of the watch's sensor page when the sensor has no name yet"
+    },
+    "Start Preset" : {
+      "comment" : "Button text to confirm starting preset before using digital crown"
+    },
+    "starting at %@" : {
+      "comment" : "The format for the description of a custom preset start date"
+    },
+    "Starting Preset..." : {
+
+    },
+    "Suspended" : {
+      "comment" : "Title for increased insulin delivery state state"
+    },
+    "Total Carbs" : {
+
     },
     "Sensor Not Found" : {
       "comment" : "Watch sensor-search alert title"
@@ -4366,6 +4482,12 @@
           }
         }
       }
+    },
+    "Turn Digital Crown to End" : {
+
+    },
+    "Turn Digital Crown to Start" : {
+
     },
     "Turn Digital Crown\nto close the loop" : {
       "comment" : "Loop-close crown-confirmation help text"
@@ -4735,6 +4857,7 @@
     },
     "Workout" : {
       "comment" : "The text for the Watch button for enabling workout mode\nTitle for sheet to enable/disable workout mode on watch",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
