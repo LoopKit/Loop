@@ -40,6 +40,8 @@ struct FeatureFlagConfiguration: Decodable {
     let allowAlgorithmExperiments: Bool
     let isInvestigationalDevice: Bool
     let devBranchWarningEnabled: Bool
+    let sportModeEnabled: Bool
+    let sportModePushEnabled: Bool
 
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
@@ -239,6 +241,19 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.devBranchWarningEnabled = true
         #endif
+
+        #if SPORT_MODE_ENABLED
+        self.sportModeEnabled = true
+        #else
+        self.sportModeEnabled = false
+        #endif
+
+        // Needs Sport Mode, and a push key the user sets up on the phone.
+        #if SPORT_MODE_ENABLED && SPORT_MODE_PUSH_ENABLED
+        self.sportModePushEnabled = true
+        #else
+        self.sportModePushEnabled = false
+        #endif
     }
 }
 
@@ -260,6 +275,8 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* observeHealthKitGlucoseSamplesFromOtherApps: \(observeHealthKitGlucoseSamplesFromOtherApps)",
             "* predictedGlucoseChartClampEnabled: \(predictedGlucoseChartClampEnabled)",
             "* remoteCommandsEnabled: \(remoteCommandsEnabled)",
+            "* sportModeEnabled: \(sportModeEnabled)",
+            "* sportModePushEnabled: \(sportModePushEnabled)",
             "* scenariosEnabled: \(scenariosEnabled)",
             "* showEventualBloodGlucoseOnWatchEnabled: \(showEventualBloodGlucoseOnWatchEnabled)",
             "* simulatedCoreDataEnabled: \(simulatedCoreDataEnabled)",

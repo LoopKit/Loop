@@ -108,6 +108,7 @@ public enum CancelActiveTempBasalReason: String {
     case maximumBasalRateChanged
     case pumpControlReturned
     case pumpControlReleased
+    case pumpControlTaken
 }
 
 /// What a loop cycle needs from the device running it.

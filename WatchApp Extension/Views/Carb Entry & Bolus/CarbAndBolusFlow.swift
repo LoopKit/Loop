@@ -228,7 +228,8 @@ extension CarbAndBolusFlow {
             title: saveButtonText,
             color: bolusAmount > 0 || configuration == .manualBolus ? .insulin : .blue
         ) {
-            if self.bolusAmount > 0 {
+            // During a loan carbs also need confirmation: the wrist doses against COB.
+            if self.bolusAmount > 0 || loanIsActive {
                 withAnimation {
                     self.flowState = .bolusConfirmation
                 }
@@ -270,10 +271,18 @@ extension CarbAndBolusFlow {
     }
 
     private var bolusConfirmationView: some View {
-        BolusConfirmationView(progress: $bolusConfirmationProgress, onConfirmation: {
+        BolusConfirmationView(
+            progress: $bolusConfirmationProgress,
+            prompt: bolusAmount > 0
+                ? Text("Turn Digital Crown\nto bolus", comment: "Help text for bolus confirmation on Apple Watch")
+                : Text("Turn Digital Crown\nto save carbs", comment: "Help text for carb-only confirmation on Apple Watch"),
+            onConfirmation: {
             Task {
                 do {
+                    // addCarbsAndDeliverBolus with 0 delivers no insulin — it files the carb entry
+                    // and nothing else — so one call covers both paths.
                     try await self.viewModel.addCarbsAndDeliverBolus(self.bolusAmount)
+                    NotificationCenter.default.post(name: .carbAndBolusFlowDidComplete, object: nil)
                     dismiss()
                 } catch {
                     viewModel.error = .bolusMessageSendFailure
