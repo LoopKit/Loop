@@ -161,11 +161,8 @@ extension SmartwatchManagerHost {
         let recommended = max(0, recommendation?.amount ?? 0)
         let units = deviceManager.pumpManager?.roundToSupportedBolusVolume(units: recommended) ?? recommended
         let maximumBolus = settingsManager.loopSettings.maximumBolus
-        if isContextRead {
-            guard units != lastContextRecommendation else {
-                return units
-            }
-            lastContextRecommendation = units
+        if isContextRead, !Self.isNewContextRecommendation(units, last: &lastContextRecommendation) {
+            return units
         }
         logWatchRequest(manager, type: .delegateResponse, String(format: "Bolus recommendation with %.0f g of carbs: %.2f U%@", grams, units, maximumBolus.map { String(format: " (maximum bolus %.2f U)", $0) } ?? ""))
         return units
@@ -219,6 +216,16 @@ extension SmartwatchManagerHost {
         logWatchRequest(manager, type: .delegateResponse, String(format: "Watch carb entry of %.0f g added", grams))
         signal(.loop)
         return grams
+    }
+
+    /// Whether the plugin's 0 g context read answered differently from last time,
+    /// so it is logged; records the answer in `last` when it did.
+    static func isNewContextRecommendation(_ units: Double, last: inout Double?) -> Bool {
+        guard units != last else {
+            return false
+        }
+        last = units
+        return true
     }
 
     private func logWatchRequest(_ manager: SmartwatchManager, type: DeviceLogEntryType, _ message: String) {

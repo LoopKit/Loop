@@ -48,6 +48,49 @@ final class SmartwatchManagerHostTests: XCTestCase {
         XCTAssertEqual(SmartwatchManagerHost.watchPluginAlertIdentifier(pumpAlert, from: "Watch"), issued.identifier)
     }
 
+    /// The host's lookups find the plugin's alert where it issued it: under the
+    /// plugin's identifier, whatever manager the plugin named. Issued, looked up and
+    /// retracted through Loop's alert store with the identifiers the host uses.
+    func testAWatchPluginAlertIsLookedUpUnderThePluginsIdentifier() async throws {
+        let alertStore = AlertStore()
+        let named = Alert.Identifier(managerIdentifier: "Omnipod", alertIdentifier: "appMissing")
+        await alertStore.recordIssued(alert: SmartwatchManagerHost.watchPluginAlert(alert(named, level: .timeSensitive), from: "Watch"))
+
+        // doesIssuedAlertExist and retractAlert
+        let lookedUp = SmartwatchManagerHost.watchPluginAlertIdentifier(named, from: "Watch")
+        let matching = try await alertStore.lookupAllMatching(identifier: lookedUp)
+        XCTAssertEqual(matching.map(\.identifier), [lookedUp])
+        let underTheNamedManager = try await alertStore.lookupAllMatching(identifier: named)
+        XCTAssertTrue(underTheNamedManager.isEmpty)
+
+        // lookupAllUnretracted and lookupAllUnacknowledgedUnretracted
+        let unretracted = try await alertStore.lookupAllUnretracted(managerIdentifier: "Watch")
+        XCTAssertEqual(unretracted.map(\.identifier), [lookedUp])
+        let unacknowledged = try await alertStore.lookupAllUnacknowledgedUnretracted(managerIdentifier: "Watch")
+        XCTAssertEqual(unacknowledged.map(\.identifier), [lookedUp])
+        let unretractedForTheNamedManager = try await alertStore.lookupAllUnretracted(managerIdentifier: "Omnipod")
+        XCTAssertTrue(unretractedForTheNamedManager.isEmpty)
+
+        try await alertStore.recordRetraction(of: lookedUp)
+        let unretractedAfterRetraction = try await alertStore.lookupAllUnretracted(managerIdentifier: "Watch")
+        XCTAssertTrue(unretractedAfterRetraction.isEmpty)
+    }
+
+    /// The plugin's 0 g recommendation read, made after every change, is logged
+    /// only when its answer changes.
+    func testTheContextRecommendationIsLoggedOnlyWhenItChanges() {
+        var last: Double?
+        XCTAssertTrue(SmartwatchManagerHost.isNewContextRecommendation(0, last: &last))
+        XCTAssertEqual(last, 0)
+        XCTAssertFalse(SmartwatchManagerHost.isNewContextRecommendation(0, last: &last))
+        XCTAssertFalse(SmartwatchManagerHost.isNewContextRecommendation(0, last: &last))
+        XCTAssertTrue(SmartwatchManagerHost.isNewContextRecommendation(1.25, last: &last))
+        XCTAssertEqual(last, 1.25)
+        XCTAssertFalse(SmartwatchManagerHost.isNewContextRecommendation(1.25, last: &last))
+        XCTAssertTrue(SmartwatchManagerHost.isNewContextRecommendation(0, last: &last))
+        XCTAssertEqual(last, 0)
+    }
+
     /// A test alert counts as its alarm's, so the watch colours its ring and buzzes for it.
     func testTestAlertsHaveTheirAlarmsGlucoseType() {
         XCTAssertEqual(SmartwatchManagerHost.glucoseAlertType(of: identifier(GlucoseAlarmKind.urgentLow.testAlertIdentifier)), .urgentLow)
