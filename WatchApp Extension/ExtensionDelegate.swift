@@ -19,7 +19,16 @@ import ClockKit
 
 class ExtensionDelegate: NSObject, WKApplicationDelegate {
 
-    private let log = OSLog(category: "ExtensionDelegate")
+    let log = OSLog(category: "ExtensionDelegate")
+
+    /// The Sport Mode stack — built and used by ExtensionDelegate+PodLoan.swift.
+    var stockLoopSession: StockLoopSession?
+    /// Guards a second build while the first is in flight — ExtensionDelegate+PodLoan.swift.
+    var stockLoopSessionStarting = false
+    /// Loan messages that arrived before the stack was ready, replayed once it is —
+    /// ExtensionDelegate+PodLoan.swift.
+    var earlyLoanMessages: [[String: Any]] = []
+    let earlyLoanMessagesLock = NSLock()
 
     private var observers: [NSKeyValueObservation] = []
     private var notifications: [NSObjectProtocol] = []
@@ -45,6 +54,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
         super.init()
 
         Self.instance = self
+        podLoanRegisterSharedInstance()
 
         let session = WCSession.default
         session.delegate = self
@@ -80,6 +90,15 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
         // At launch, so a relaunch for the CGM's Bluetooth link finds its central.
         _ = WatchCGMHost.shared
 
+        // During a loan the glance complication shows the WATCH's loop: the glance's data is
+        // republished at every landed cycle.
+        notifications.append(NotificationCenter.default.addObserver(forName: WatchLoopManager.glanceDataDidUpdate, object: nil, queue: nil) { [weak self] (_) in
+            DispatchQueue.main.async {
+                guard let self, self.stockLoopSession?.loanController.isLoanActive == true else { return }
+                GlanceComplicationPublisher.publish(from: self)
+            }
+        })
+
         session.activate()
     }
 
@@ -90,6 +109,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
     }
 
     func applicationDidFinishLaunching() {
+        podLoanDidFinishLaunching()
         UNUserNotificationCenter.current().delegate = self
         if #available(watchOSApplicationExtension 5.0, *) {
             INRelevantShortcutStore.default.registerShortcuts()
@@ -111,10 +131,13 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
         loopManager.requestContextUpdate()
         loopManager.requestGlucoseBackfillIfNecessary()
         WatchCGMHost.shared.recheckAcquisition()
+
+        podLoanDidBecomeActive()
     }
 
     func applicationWillResignActive() {
         usageRecorder.willResignActive()
+        podLoanWillResignActive()
     }
 
     func handleUserActivity(_ userInfo: [AnyHashable: Any]?) {
@@ -130,7 +153,12 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             return
         }
         loopManager.requestGlucoseBackfillIfNecessary()
+        finish(Array(backgroundTasks))
+    }
 
+    /// Every task is finished, or held to be finished later: watchOS ends the app when one it handed
+    /// over is released unfinished, and one wake can hand over several (a refresh and a phone message).
+    func finish(_ backgroundTasks: [WKRefreshBackgroundTask]) {
         for task in backgroundTasks {
             switch task {
             case is WKApplicationRefreshBackgroundTask:
@@ -191,6 +219,8 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
         task.expirationHandler = { [weak self] in
             DispatchQueue.main.async { self?.completeBluetoothTask(task) }
         }
+        // A timer is safe here: it runs inside the Bluetooth task watchOS gave the app, which has its own
+        // expiration handler above, and only completes that task.
         DispatchQueue.main.asyncAfter(deadline: .now() + 25) { [weak self] in
             self?.completeBluetoothTask(task)
         }
@@ -238,6 +268,7 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             log.error("Could not decode WatchContext: %{public}@", data)
             return
         }
+        stockLoopSession?.loanController.notePhoneHeard()
 
         if context.displayGlucoseUnit == nil {
             let type = HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!
@@ -279,6 +310,8 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             log.default("Reloading complication timeline")
             server.reloadTimeline(for: complication)
         }
+        ComplicationPublisher.publish(from: loopManager)
+        GlanceComplicationPublisher.publish(from: self)
     }
 }
 
@@ -295,6 +328,7 @@ extension ExtensionDelegate: WCSessionDelegate {
             Task { @MainActor in
                 self.usageRecorder.sendCompletedDays()
             }
+            podLoanSessionDidActivate()
             Task {
                 await loopManager.requestSettingsUpdate()
             }
@@ -308,6 +342,8 @@ extension ExtensionDelegate: WCSessionDelegate {
 
     // This method is called on a background thread of your app
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
+        if podLoanRoutesUserInfo(userInfo) { return }
+
         let name = userInfo["name"] as? String ?? "WatchContext"
 
         log.default("didReceiveUserInfo: %{public}@", name)
@@ -341,6 +377,7 @@ extension ExtensionDelegate: WCSessionDelegate {
 
 extension ExtensionDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        if await podLoanHandleAlertResponse(response) { return }
 
         log.default("UNNotificationResponse rootInterfaceController = %{public}@", String(describing: WKApplication.shared().rootInterfaceController))
         log.default("UNNotificationResponse visibleInterfaceController = %{public}@", String(describing: WKApplication.shared().visibleInterfaceController))

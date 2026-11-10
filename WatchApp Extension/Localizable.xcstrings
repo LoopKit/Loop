@@ -25,6 +25,9 @@
     "-" : {
 
     },
+    "" : {
+
+    },
     "---" : {
       "comment" : "No glucose value representation (3 dashes for mg/dL; no spaces as this will get truncated in the watch complication)",
       "localizations" : {
@@ -243,6 +246,12 @@
     "—" : {
 
     },
+    "." : {
+      "comment" : "Full stop character"
+    },
+    "%.2f U the watch had no record of — counted as insulin on board" : {
+      "comment" : "Glance: unexplained insulin booked (1: units)"
+    },
     "%@" : {
       "localizations" : {
         "da" : {
@@ -321,6 +330,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@"
+          }
+        }
+      }
+    },
+    "%@ g saved. Don't bolus again until Loop confirms it." : {
+      "comment" : "Watch notification body when carbs were saved but bolus delivery is unconfirmed (1: grams)"
+    },
+    "%@: insulin stopped" : {
+      "comment" : "Glance line for a faulted pod (1: the pod's fault, in the pod driver's words)"
+    },
+    "%@?" : {
+
+    },
+    "%1@%2@" : {
+      "comment" : "Adds a full-stop to a statement (1: statement, 2: full stop character)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$1@%2$2@"
           }
         }
       }
@@ -450,6 +479,21 @@
           }
         }
       }
+    },
+    "%1$@ · %2$@" : {
+      "comment" : "An alarm sound's set name and the chosen variant (1: set name, 2: variant name)"
+    },
+    "%1$@ Alert Test" : {
+      "comment" : "Title of a test glucose alert (1: alarm name)"
+    },
+    "%1$@ v%2$@" : {
+      "comment" : "The format string for the app name and version number. (1: bundle name)(2: bundle version)"
+    },
+    "%d min ago — no direct G7" : {
+      "comment" : "Glance stale-glucose age line"
+    },
+    "Acoustic" : {
+      "comment" : "Name of the acoustic themed alarm sound set"
     },
     "Active Carbs" : {
       "comment" : "HUD row title for COB",
@@ -826,6 +870,27 @@
         }
       }
     },
+    "Age" : {
+      "comment" : "Glance complication value: the reading's age"
+    },
+    "Alarm" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Amy" : {
+      "comment" : "Name of a spoken alarm voice"
+    },
+    "BG" : {
+      "comment" : "Glance complication value: glucose"
+    },
+    "Big BG" : {
+      "comment" : "Glance complication: the reading as large as the slot allows"
+    },
+    "Bloom" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Bloop" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
     "Bolus" : {
       "comment" : "Button text to confirm manual bolus on Apple Watch",
       "localizations" : {
@@ -1070,6 +1135,12 @@
         }
       }
     },
+    "Bolus Issue" : {
+      "comment" : "The notification title for a bolus issue"
+    },
+    "Bolus Not Sent" : {
+      "comment" : "Watch notification title: a bolus refused while an End is waiting"
+    },
     "Bolus Recommendation Updated" : {
       "comment" : "Alert title for updated bolus recommendation on Apple Watch",
       "localizations" : {
@@ -1164,6 +1235,42 @@
           }
         }
       }
+    },
+    "Bolus Unconfirmed: %@ U" : {
+      "comment" : "Watch notification title for a loan-time bolus whose delivery could not be confirmed (1: units)"
+    },
+    "bolusing %1$@ of %2$@ U" : {
+      "comment" : "Glance status while a manual bolus is being delivered (1: units delivered so far, 2: total units)"
+    },
+    "Bright Alarm" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Bryce" : {
+      "comment" : "Name of a spoken alarm voice"
+    },
+    "Can't reach iPhone. The watch is still looping." : {
+      "comment" : "Glance note when an interim hand-back is blocked by an unreachable phone"
+    },
+    "Can't reach iPhone. Waiting for it to take the pod." : {
+      "comment" : "Glance note while a hand-back waits for an UNREACHABLE phone"
+    },
+    "Can't start: %@ didn't arrive from the phone. Check therapy settings and try again." : {
+      "comment" : "Glance: grant refused for incomplete settings (1: missing field)"
+    },
+    "Cancel" : {
+      "comment" : "Glance confirmation: keep the faulted pod for now\nGlance top-right: abort a pending hand-back"
+    },
+    "Checking with your iPhone…" : {
+      "comment" : "Glance: a watch back from off asks the phone before resuming Sport Mode"
+    },
+    "Chime" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Clear Chimes" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "COB" : {
+      "comment" : "Glance complication value: carbs on board"
     },
     "Continue" : {
       "comment" : "Button text to continue from carb entry to bolus entry on Apple Watch",
@@ -1293,6 +1400,21 @@
     "Current Delivery" : {
 
     },
+    "Couldn't build the pod driver from the iPhone's details. Try again." : {
+      "comment" : "Glance: pump snapshot rejected"
+    },
+    "Couldn't delete" : {
+      "comment" : "Watch carb list error when a delete fails"
+    },
+    "Couldn't End Sport Mode" : {
+      "comment" : "Hand-back-stuck alert title"
+    },
+    "Couldn't load the insulin history from the iPhone. Try again." : {
+      "comment" : "Glance: insulin book seed failed"
+    },
+    "Crying" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
     "dB" : {
       "comment" : "The short unit display string for decibles",
       "localizations" : {
@@ -1421,6 +1543,21 @@
     "Decreased" : {
       "comment" : "Title for increased insulin delivery state"
     },
+    "Deactivate" : {
+      "comment" : "Glance confirmation: deactivate the faulted pod"
+    },
+    "Deactivate Pod" : {
+      "comment" : "Watch notification action on a faulted pod's alarm: opens the app to confirm deactivating it"
+    },
+    "Deactivating…" : {
+      "comment" : "Glance button while the faulted pod is being deactivated"
+    },
+    "Delete" : {
+      "comment" : "Watch carb list swipe action"
+    },
+    "Dings" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
     "Dismiss" : {
       "comment" : "The action button title to dismiss an error message",
       "localizations" : {
@@ -1541,6 +1678,27 @@
       }
     },
     "Ending Preset..." : {
+
+    },
+    "Don't bolus again until Loop confirms it." : {
+      "comment" : "Watch notification body when a loan-time bolus delivery is unconfirmed"
+    },
+    "Electronic" : {
+      "comment" : "Name of the electronic themed alarm sound set"
+    },
+    "End" : {
+      "comment" : "Glance top-right: end Sport Mode / hand the pod back"
+    },
+    "End Not Confirmed" : {
+      "comment" : "Watch alert title: the phone has not confirmed a hand-back"
+    },
+    "ending…" : {
+      "comment" : "Glance status during hand-back\nGlance status while a hand-back drains in the background"
+    },
+    "Eventual" : {
+      "comment" : "Glance complication value: eventual glucose"
+    },
+    "eventually " : {
 
     },
     "g" : {
@@ -1688,6 +1846,95 @@
     },
     "LOW" : {
       "comment" : "String displayed instead of a glucose value below the CGM range"
+    },
+    "G7 direct · %dm" : {
+      "comment" : "Glance provenance line for a fresh direct reading (1: minutes ago)"
+    },
+    "G7 due about now" : {
+      "comment" : "Glance G7 prediction when the next reading is imminent"
+    },
+    "G7 in ~%d:%02d" : {
+      "comment" : "Glance countdown to the next expected G7 reading (min, sec)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "G7 in ~%1$d:%2$02d"
+          }
+        }
+      }
+    },
+    "G7 typically within 10 min" : {
+      "comment" : "Glance G7 prediction without a prior reading"
+    },
+    "Glance" : {
+      "comment" : "Glance complication: every value of the glance"
+    },
+    "Glass Bell" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Glucose is above %1$@ (current: %2$@)" : {
+      "comment" : "Body of the high glucose alert (1: threshold with unit, 2: current glucose)"
+    },
+    "Glucose is below %1$@ (current: %2$@)" : {
+      "comment" : "Body of the low glucose alert (1: threshold with unit, 2: current glucose)"
+    },
+    "Glucose is below %1$@ (current: %2$@). Treat now." : {
+      "comment" : "Body of the urgent low glucose alert (1: threshold with unit, 2: current glucose)"
+    },
+    "Hard Saw Wave" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Harp" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Harsh" : {
+      "comment" : "Urgency level of a themed alarm sound"
+    },
+    "High" : {
+      "comment" : "Name of the high glucose alarm"
+    },
+    "High Chimes" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "High Glucose" : {
+      "comment" : "Title of the high glucose alert"
+    },
+    "Honk" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "IOB" : {
+      "comment" : "Glance complication value: insulin on board"
+    },
+    "iPhone" : {
+
+    },
+    "iPhone didn't answer" : {
+
+    },
+    "iPhone didn't answer, so the watch is still looping. To stop automatic dosing, open the loop on the watch." : {
+      "comment" : "Glance message: End refused, the phone did not answer"
+    },
+    "iPhone didn't confirm. Reopen Loop on the watch to see where things stand." : {
+      "comment" : "Hand-back-stuck alert body"
+    },
+    "iPhone didn't respond. The watch is still looping." : {
+      "comment" : "Glance transient: End failed, no ack"
+    },
+    "Keep your wrist up until the pod is found." : {
+      "comment" : "Glance: first takeover of a pod"
+    },
+    "Loop has not completed successfully in %@" : {
+      "comment" : "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"
+    },
+    "Loop predicts glucose below %1$@ within %2$d min." : {
+      "comment" : "Body of the predicted low glucose alert (1: threshold with unit, 2: minutes of the prediction horizon)"
+    },
+    "Low" : {
+      "comment" : "Name of the low glucose alarm"
+    },
+    "Low Glucose" : {
+      "comment" : "Title of the low glucose alert"
     },
     "Make sure your iPhone is nearby and try again" : {
       "comment" : "The recovery message displayed after a glucose range override send attempt fails",
@@ -1898,6 +2145,12 @@
         }
       }
     },
+    "Medium" : {
+      "comment" : "Urgency level of a themed alarm sound"
+    },
+    "Meow" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
     "mg/dL" : {
       "comment" : "The short unit display string for milligrams of glucose per decilter",
       "extractionState" : "stale",
@@ -2023,6 +2276,12 @@
           }
         }
       }
+    },
+    "Mild" : {
+      "comment" : "Urgency level of a themed alarm sound"
+    },
+    "Minimal" : {
+      "comment" : "Name of a glucose alarm sound"
     },
     "mmol/L" : {
       "comment" : "The short unit display string for millimoles of glucose per liter",
@@ -2150,6 +2409,12 @@
         }
       }
     },
+    "Mood Synth" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Neither device is looping. Reclaim the pod on the iPhone." : {
+      "comment" : "Watch alert body: released but unconfirmed hand-back"
+    },
     "Net Basal Rate" : {
       "comment" : "HUD row title for Net Basal Rate",
       "extractionState" : "stale",
@@ -2276,6 +2541,24 @@
     "No Delivery" : {
       "comment" : "Title for increased insulin delivery state state"
     },
+    "New pod — keep your wrist up after Start" : {
+      "comment" : "Glance note above Start when this watch has never connected to the current pod"
+    },
+    "No answer from iPhone. Open Loop on the iPhone and try again." : {
+      "comment" : "Glance: loan request timed out"
+    },
+    "No answer from iPhone. The watch isn't reading the CGM, so Sport Mode can't start without the iPhone." : {
+      "comment" : "Glance: loan request timed out and the watch has no CGM of its own"
+    },
+    "no direct G7 reading yet" : {
+      "comment" : "Glance line before the first direct reading"
+    },
+    "Not hearing from iPhone" : {
+      "comment" : "Glance: no loan, and no word from the phone for the warning's interval"
+    },
+    "Not Hearing From iPhone" : {
+      "comment" : "Watch alert title: no word from the phone and no loan running"
+    },
     "Off" : {
       "comment" : "Label for off button",
       "extractionState" : "stale",
@@ -2385,6 +2668,7 @@
       }
     },
     "OK" : {
+      "comment" : "Acknowledge button on a glucose alert\nAcknowledge button on a test glucose alert\nThe title of the notification action to acknowledge a device alert",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2658,6 +2942,21 @@
     "One-time use override has ended." : {
 
     },
+    "Open Can" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Open Loop" : {
+      "comment" : "New-pod takeover alert title: the search needs Loop on screen"
+    },
+    "Open Loop on the watch and keep it open until it connects." : {
+      "comment" : "Watch sensor-search alert body"
+    },
+    "Open Loop on the watch to finish starting Sport Mode with the new pod." : {
+      "comment" : "New-pod takeover alert body"
+    },
+    "Open Wrapper" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
     "Override" : {
       "comment" : "The text for the Watch button for enabling a temporary override",
       "extractionState" : "manual",
@@ -2787,6 +3086,9 @@
     "Please complete onboarding to use the %1$@ Watch app" : {
       "comment" : "Watch app onboarding prompt (1: app name)"
     },
+    "phone loop active" : {
+      "comment" : "Glance status when the phone runs the loop"
+    },
     "Please reconfirm the bolus amount." : {
       "comment" : "Alert message for updated bolus recommendation on Apple Watch",
       "localizations" : {
@@ -2875,6 +3177,15 @@
           }
         }
       }
+    },
+    "Pod deactivated. Ending Sport Mode…" : {
+      "comment" : "Glance note after the faulted pod was deactivated on the watch, phone in reach"
+    },
+    "Pod deactivated. Your iPhone ends Sport Mode when it's back. Pair a new pod there." : {
+      "comment" : "Glance note after the faulted pod was deactivated on the watch, phone away"
+    },
+    "Pod found — you can lower your wrist." : {
+      "comment" : "Glance: takeover reached the pod"
     },
     "Pre-Meal" : {
       "comment" : "Title for sheet to enable/disable pre-meal on watch",
@@ -2996,6 +3307,12 @@
         }
       }
     },
+    "Predicted Low" : {
+      "comment" : "Name of the predicted low glucose alarm"
+    },
+    "Predicted Low Glucose" : {
+      "comment" : "Title of the predicted low glucose alert"
+    },
     "Preset" : {
       "comment" : "The text for the Watch button for enabling a custom preset",
       "extractionState" : "stale",
@@ -3088,6 +3405,9 @@
     },
     "Preset Delivery" : {
       "comment" : "Title for neutral delivery state state with preset adjusting basal"
+    },
+    "Pump Inoperable" : {
+      "comment" : "Fault text for a pump whose kit gives none"
     },
     "QUANTITY_VALUE_AND_UNIT" : {
       "comment" : "Format string for combining localized numeric value and unit. (1: numeric value)(2: unit)",
@@ -3214,6 +3534,12 @@
           }
         }
       }
+    },
+    "Raise your wrist to finish connecting." : {
+      "comment" : "Glance: first takeover stuck with the screen off"
+    },
+    "reaching iPhone…" : {
+      "comment" : "Glance stage: waiting for the loan grant"
     },
     "Rec: %@ U" : {
       "comment" : "The label and value showing the recommended bolus",
@@ -3519,6 +3845,12 @@
         }
       }
     },
+    "Records from the last session are waiting for your iPhone. You can still start." : {
+      "comment" : "Glance note while resting on a parked drain"
+    },
+    "Records syncing to iPhone…" : {
+      "comment" : "Glance note while a hand-back drains"
+    },
     "Reservoir Volume" : {
       "comment" : "HUD row title for remaining reservoir volume",
       "localizations" : {
@@ -3637,6 +3969,9 @@
           }
         }
       }
+    },
+    "returning records…" : {
+      "comment" : "Glance status while draining records"
     },
     "Save" : {
       "comment" : "Button text to confirm carb entry without bolusing on Apple Watch",
@@ -3858,6 +4193,9 @@
     "Select Preset" : {
 
     },
+    "Saw Wave" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
     "Send Failed" : {
       "comment" : "The title of the alert controller displayed after a glucose range override send attempt fails",
       "extractionState" : "stale",
@@ -3996,6 +4334,90 @@
     "Total Carbs" : {
 
     },
+    "Sensor Not Found" : {
+      "comment" : "Watch sensor-search alert title"
+    },
+    "Sharp Alarm" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Simple" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Sine Wave" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Sport Mode Ended" : {
+      "comment" : "Watch alert title on relaunch after the app died mid-loan"
+    },
+    "Sport Mode ended. Your iPhone has the pod." : {
+      "comment" : "Glance note after the phone took the pod back"
+    },
+    "Sport Mode is ending. Bolus on the iPhone once it has the pod." : {
+      "comment" : "Watch: a bolus refused while an End is waiting for the phone"
+    },
+    "Sport Mode resumes if it doesn't answer." : {
+      "comment" : "Glance: what happens if the phone does not answer the watch back from off"
+    },
+    "Sport Mode start was interrupted. Your iPhone still has the pod. Tap Start to try again." : {
+      "comment" : "Glance: start interrupted by relaunch"
+    },
+    "Spring" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "Start Anyway" : {
+
+    },
+    "Start Sport Mode" : {
+
+    },
+    "Start without it?\nLast synced %@ ago — settings and history from then." : {
+
+    },
+    "starting %@ U…" : {
+      "comment" : "Glance status while a manual bolus is being sent to the pod (1: units)"
+    },
+    "starting bolus…" : {
+      "comment" : "Glance status while a manual bolus is being sent, amount unknown"
+    },
+    "starting…" : {
+      "comment" : "Glance stage fallback while starting\nGlance status while starting Sport Mode"
+    },
+    "Synth" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
+    "taking longer than usual — still sending %@ U" : {
+      "comment" : "Glance status when a manual bolus is slow to reach the pod (1: units)"
+    },
+    "taking longer than usual — still sending the bolus" : {
+      "comment" : "Glance status when a slow manual bolus has no known amount"
+    },
+    "taking longer than usual…" : {
+      "comment" : "Glance note when the pod takeover overruns the expected ~10s"
+    },
+    "taking over pod…" : {
+      "comment" : "Glance stage: pod takeover in progress"
+    },
+    "Temp" : {
+      "comment" : "Glance complication value: temp basal"
+    },
+    "The pod didn't answer in time. Your iPhone still has the pod. Tap Start to try again." : {
+      "comment" : "Glance: grant lease expired mid-takeover"
+    },
+    "The pod didn't answer, so Sport Mode didn't start. Neither device is looping." : {
+      "comment" : "Glance: a start without the phone got no answer from the pod"
+    },
+    "The pod stops for good and its alarm ends. Pair a new pod on your iPhone." : {
+      "comment" : "Glance confirmation body for deactivating a faulted pod"
+    },
+    "The watch app restarted and couldn't resume looping. Nothing is looping until your iPhone gets the watch's records and takes over." : {
+      "comment" : "Watch alert body on relaunch after the app died mid-loan"
+    },
+    "This is a test of this alarm's sound and delivery. Your glucose has not crossed the level." : {
+      "comment" : "Body of a test glucose alert"
+    },
+    "Trill" : {
+      "comment" : "Name of a glucose alarm sound"
+    },
     "Turn Digital Crown\nto bolus" : {
       "comment" : "Help text for bolus confirmation on Apple Watch",
       "localizations" : {
@@ -4090,6 +4512,12 @@
     },
     "Turn Digital Crown to Start" : {
 
+    },
+    "Turn Digital Crown\nto close the loop" : {
+      "comment" : "Loop-close crown-confirmation help text"
+    },
+    "Turn Digital Crown\nto save carbs" : {
+      "comment" : "Help text for carb-only confirmation on Apple Watch"
     },
     "U" : {
       "comment" : "The short unit display string for international units of insulin",
@@ -4424,6 +4852,30 @@
         }
       }
     },
+    "Unknown" : {
+
+    },
+    "Urgent Low" : {
+      "comment" : "Name of a glucose alarm sound\nName of the urgent low glucose alarm"
+    },
+    "Urgent Low Glucose" : {
+      "comment" : "Title of the urgent low glucose alert"
+    },
+    "via iPhone" : {
+
+    },
+    "via iPhone · %dm" : {
+      "comment" : "Glance provenance line when the phone is relaying in a direct-G7 gap (1: minutes ago)"
+    },
+    "Voice" : {
+      "comment" : "Name of the spoken alarm sound set"
+    },
+    "Waiting for iPhone to take the pod. Bolus unavailable until then." : {
+      "comment" : "Glance note while a hand-back waits for the phone"
+    },
+    "Watch Loop Failure" : {
+      "comment" : "The notification title for a loop failure on the watch during Sport Mode"
+    },
     "Workout" : {
       "comment" : "The text for the Watch button for enabling workout mode\nTitle for sheet to enable/disable workout mode on watch",
       "extractionState" : "stale",
@@ -4543,6 +4995,9 @@
           }
         }
       }
+    },
+    "Your iPhone is probably not looping (off or out of range). Sport Mode on the watch is available to take over." : {
+      "comment" : "Watch alert body: no word from the phone and no loan running"
     }
   },
   "version" : "1.0"
