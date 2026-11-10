@@ -39,6 +39,9 @@ final class SmartwatchManagerHost {
 
     /// Whether a watch bolus is being delivered, so a second one waits for its result.
     var isDeliveringWatchBolus = false
+    /// The last answer to the plugin's 0 g recommendation read, which it makes
+    /// after every change for its bolus context: logged only when it changes.
+    var lastContextRecommendation: Double?
     /// What changed since the watch manager was last told, sent on the next main
     /// run loop turn so changes that arrive together go out as one call.
     private var pendingChanges: SmartwatchHostDataChange = []
