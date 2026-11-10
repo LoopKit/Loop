@@ -126,6 +126,12 @@
         }
       }
     },
+    "A bolus is still being given. Try again in %.0f seconds." : {
+      "comment" : "Start, End or Take Back refused while a bolus is being given (1: seconds left)"
+    },
+    "A bolus is still being given. Try again when it has finished." : {
+      "comment" : "Start, End or Take Back refused while a bolus is being sent to the pod"
+    },
     "Active Carbohydrates" : {
       "comment" : "Description of a bottom row configuration option for active carbohydrates.",
       "extractionState" : "stale",
@@ -3721,6 +3727,9 @@
           }
         }
       }
+    },
+    "The pod hasn't confirmed the last command yet. Try again in a minute." : {
+      "comment" : "Start or End refused: the pod driver keeps the pod while a command to it is unconfirmed"
     },
     "Unknown Error: %1$@" : {
       "comment" : "The error message displayed for unknown LoopError errors. (1: unknown error)",

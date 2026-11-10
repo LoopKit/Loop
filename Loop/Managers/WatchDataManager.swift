@@ -21,14 +21,19 @@ enum WatchDataManagerError: Error {
 @MainActor
 final class WatchDataManager: NSObject {
 
-    private unowned let deviceManager: DeviceDataManager
-    private unowned let settingsManager: SettingsManager
-    private unowned let loopDataManager: LoopDataManager
+    unowned let deviceManager: DeviceDataManager   // read by the pod-loan wiring extension
+    unowned let settingsManager: SettingsManager   // read by the pod-loan wiring extension
+    unowned let loopDataManager: LoopDataManager   // read by the pod-loan wiring extension
     private unowned let carbStore: CarbStore
     private unowned let glucoseStore: GlucoseStore
     private unowned let analyticsServicesManager: AnalyticsServicesManager?
-    private unowned let temporaryPresetsManager: TemporaryPresetsManager
+    unowned let temporaryPresetsManager: TemporaryPresetsManager   // read by the pod-loan wiring extension
     private unowned let alertManager: AlertManager
+
+    // MARK: - Pod loan (stored state only — the behaviour is in WatchDataManager+PodLoan.swift)
+
+    var reclaimBackgroundTask: UIBackgroundTaskIdentifier = .invalid   // held across a pod-loan take-back and its settle
+    private(set) lazy var podLoanController: PodLoanPhoneController = makePodLoanController()   // pod-loan dependency wiring in PodLoanPhoneController+Wiring.swift
 
     init(
         deviceManager: DeviceDataManager,
@@ -58,8 +63,11 @@ final class WatchDataManager: NSObject {
         NotificationCenter.default.addObserver(self, selector: #selector(updateWatch(_:)), name: .LoopDataUpdated, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(sendSupportedBolusVolumesIfNeeded), name: .PumpManagerChanged, object: deviceManager)
 
+        wireLoopFailureSuppressionGate()
         watchSession?.delegate = self
         watchSession?.activate()
+
+        podLoanStartup()
     }
 
     let log = DiagnosticLog(category: "WatchDataManager")
@@ -136,6 +144,8 @@ final class WatchDataManager: NSObject {
         else {
             return
         }
+
+        podLoanConsiderRefresh(for: updateContext)
 
         // Any update context should trigger a watch update
         sendWatchContextIfNeeded()
@@ -413,6 +423,8 @@ final class WatchDataManager: NSObject {
             throw WatchDataManagerError.expiredBolusRecommendation
         }
 
+        let deliveryRefusedForLoan = podLoanRefusesWatchBolus(bolus)
+
         var dosingDecision: BolusDosingDecision
         if let contextDate = bolus.contextDate, let contextDosingDecision = contextDosingDecisions[contextDate] {
             dosingDecision = contextDosingDecision
@@ -430,6 +442,9 @@ final class WatchDataManager: NSObject {
 
         dosingDecision.manualBolusRequested = bolus.value
         await loopDataManager.storeManualBolusDosingDecision(dosingDecision, withDate: bolus.startDate)
+
+        // Loan-time refusal: the decision and any carbs are stored above; delivery is not attempted.
+        guard !deliveryRefusedForLoan else { return }
 
         guard bolus.value > 0 else {
             return
@@ -539,6 +554,7 @@ extension WatchDataManager: WCSessionDelegate {
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         Task { @MainActor in
             self.log.default("Received message: %{public}@", message)
+            if podLoanHandlesMessage(message, replyHandler: replyHandler) { return }
             do {
                 replyHandler(try await handleWatchMessage(message))
             } catch {
@@ -549,10 +565,8 @@ extension WatchDataManager: WCSessionDelegate {
 
     nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
         guard let summary = WatchUsageSummaryUserInfo(rawValue: userInfo)?.summary else {
-            let name = String(describing: userInfo["name"])
-            Task { @MainActor in
-                self.log.error("Unexpected userInfo from watch: %{public}@", name)
-            }
+            // Anything else is loan traffic, or logged there.
+            podLoanHandleReceivedUserInfo(userInfo)
             return
         }
         Task { @MainActor in
