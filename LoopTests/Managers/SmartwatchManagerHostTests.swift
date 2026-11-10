@@ -19,26 +19,33 @@ final class SmartwatchManagerHostTests: XCTestCase {
         GlucoseAlarmKind.allCases.map(\.testAlertIdentifier)
     }
 
-    /// A watch bolus that reached the pump counts for the time between boluses,
-    /// delivered or not: a failure can be uncertain. Only a delivered one counts
-    /// toward the daily total.
-    func testABolusThatReachedThePumpCountsForTheTimeBetweenBoluses() {
-        let now = Date(timeIntervalSince1970: 1_800_000_000)
-        let token = UUID()
-        let context = SmartwatchBolusContext(token: token, issuedAt: now.addingTimeInterval(-60), recommendedBolus: 2, maximumBolus: 5, supportedBolusVolumes: [])
-        func evaluate(_ deliveries: [SmartwatchBolusPolicy.Delivery], at date: Date) -> Result<Double, SmartwatchBolusError> {
-            SmartwatchBolusPolicy(isAllowed: true, currentContext: context, latestGlucoseDate: date.addingTimeInterval(-60), recentDeliveries: deliveries, roundToSupportedVolume: { $0 })
-                .evaluate(SmartwatchBolusRequest(units: 1, contextToken: token, requestedAt: date), now: date)
-        }
+    private func alert(_ identifier: Alert.Identifier, level: Alert.InterruptionLevel) -> Alert {
+        let content = Alert.Content(title: "Title", body: "Body", acknowledgeActionButtonLabel: "OK")
+        return Alert(identifier: identifier, foregroundContent: content, backgroundContent: content, trigger: .immediate, interruptionLevel: level, sound: .vibrate)
+    }
 
-        let failed = SmartwatchManagerHost.bolusAttempted(at: now, in: [])
-        XCTAssertEqual(evaluate(failed, at: now.addingTimeInterval(60)), .failure(.rateLimited))
-        XCTAssertEqual(evaluate(failed, at: now.addingTimeInterval(5 * 60 + 1)), .success(1))
-        XCTAssertEqual(failed.reduce(0) { $0 + $1.units }, 0)
+    /// A watch plugin can't raise a critical alert: Loop issues it time-sensitive.
+    /// Lower levels and everything else about the alert are kept.
+    func testAWatchPluginAlertIsAtMostTimeSensitive() {
+        let identifier = Alert.Identifier(managerIdentifier: "Watch", alertIdentifier: "appMissing")
+        let critical = SmartwatchManagerHost.watchPluginAlert(alert(identifier, level: .critical), from: "Watch")
+        XCTAssertEqual(critical.interruptionLevel, .timeSensitive)
+        XCTAssertEqual(critical.identifier, identifier)
+        XCTAssertEqual(critical.foregroundContent, alert(identifier, level: .critical).foregroundContent)
+        XCTAssertEqual(critical.trigger, .immediate)
+        XCTAssertEqual(critical.sound, .vibrate)
 
-        let delivered = SmartwatchManagerHost.bolusDelivered(1.5, attemptedAt: now, in: failed)
-        XCTAssertEqual(delivered, [SmartwatchBolusPolicy.Delivery(date: now, units: 1.5)])
-        XCTAssertEqual(evaluate(delivered, at: now.addingTimeInterval(60)), .failure(.rateLimited))
+        XCTAssertEqual(SmartwatchManagerHost.watchPluginAlert(alert(identifier, level: .timeSensitive), from: "Watch").interruptionLevel, .timeSensitive)
+        XCTAssertEqual(SmartwatchManagerHost.watchPluginAlert(alert(identifier, level: .active), from: "Watch").interruptionLevel, .active)
+    }
+
+    /// A watch plugin's alert is issued, and retracted, as the plugin's own, so it
+    /// can't stand in for or retract another device's alert.
+    func testAWatchPluginAlertIsThePluginsOwn() {
+        let pumpAlert = Alert.Identifier(managerIdentifier: "Omnipod", alertIdentifier: "lowReservoir")
+        let issued = SmartwatchManagerHost.watchPluginAlert(alert(pumpAlert, level: .timeSensitive), from: "Watch")
+        XCTAssertEqual(issued.identifier, Alert.Identifier(managerIdentifier: "Watch", alertIdentifier: "lowReservoir"))
+        XCTAssertEqual(SmartwatchManagerHost.watchPluginAlertIdentifier(pumpAlert, from: "Watch"), issued.identifier)
     }
 
     /// A test alert counts as its alarm's, so the watch colours its ring and buzzes for it.
