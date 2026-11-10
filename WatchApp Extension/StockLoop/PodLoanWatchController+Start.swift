@@ -603,7 +603,9 @@ extension PodLoanWatchController {
                     // what it could not explain, so the loop can have the pump now. No program crosses
                     // the transfer: the phone's temp is cancelled, and the next reading starts a cycle.
                     self.loopManager.pumpManager = manager
-                    self.loopManager.cancelTempBasalAtTakeover()
+                    self.loopManager.cancelTempBasalAtTakeover { [weak self] at in
+                        DispatchQueue.main.async { self?.journalTakeoverCancel(at: at, epoch: grant.epoch) }
+                    }
                 } else {
                     let fireRetry: () -> Void = { [weak self] in
                         guard let self = self else { return }

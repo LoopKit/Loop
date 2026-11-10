@@ -533,8 +533,9 @@ looper tries again after it. A bolus counts from the moment it is sent until it 
 the watch checks again when it would release the pod. The mirror holds too: nobody starts a bolus while the pod is
 being handed back; with an End waiting, a bolus asked for on the watch is refused, and the looper boluses from the
 iPhone once it has the pod. The
-phone stores a watch bolus still being given at once, as a bolus in progress (mutable, as Loop's own drivers report
-one), and the finished record replaces it. A take-over on silence, where nobody can retry, waits for the pod to finish the bolus
+phone stores the watch's doses only once they have finished: a bolus still being given, or a temp basal still running,
+is held and stored at the watch's next check-in or at the end of the loan, so with the phone in reach its insulin on
+board lags the watch's by a running dose. A take-over on silence, where nobody can retry, waits for the pod to finish the bolus
 it reports. The pod has one connection, so the device reading it cannot be raced by a new bolus. An offline Start
 cannot ask the phone and takes the pod whatever it is giving: the phone's records are trued up from the pod's
 delivered total when it is back with the pod.

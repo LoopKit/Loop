@@ -8,7 +8,8 @@
 
 import XCTest
 import HealthKit
-import LoopKit
+// @testable for `PersistenceController.onReady`, so no test uses a store before it attaches.
+@testable import LoopKit
 import LoopAlgorithm
 import LoopCore
 import MockKit
@@ -130,6 +131,18 @@ final class PodLoanPhoneControllerTests: XCTestCase {
     /// Parks `addPumpEvents` completions, holding the commit open to observe `.reconciling`.
     var holdPumpEventWrites = false
     var heldPumpEventWrite: ((Error?) -> Void)?
+    /// When set, saving the watch's records fails with it.
+    var pumpEventWriteError: Error?
+    /// The "history is complete up to here" time passed with each save.
+    var completeUpToTimes: [Date] = []
+    /// Doses the real store wrote to its dose cache directly.
+    var amendedDoses: [DoseEntry] = []
+    var healthSamples: [HKQuantitySample] = []
+    /// When set, the controller's two store closures write to this real dose store as
+    /// `PodLoanPhoneController+Wiring.swift` wires them in the app, besides recording the call.
+    var realDoseStore: DoseStore?
+    /// Retained because `DoseStore.delegate` is weak.
+    var realDoseStoreDelegate: LoanBooksDoseStoreDelegate?
     private let lock = NSLock()
     /// Called for every send, before it is recorded: lets a test inspect disk at send time.
     var onSend: ((LoanMessage) -> Void)?
@@ -196,6 +209,12 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         clock = Date()
         holdPumpEventWrites = false
         heldPumpEventWrite = nil
+        pumpEventWriteError = nil
+        completeUpToTimes = []
+        amendedDoses = []
+        healthSamples = []
+        realDoseStore = nil
+        realDoseStoreDelegate = nil
         pump = LendableMockPumpManager()
         MockPumpManager.testConnectionReleased = false
         MockPumpManager.testKeepsControl = false
@@ -248,14 +267,31 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                 self.lock.unlock()
                 pending.forEach { $0.fulfill() }
             },
-            addPumpEvents: { [weak self] events, _, completion in
+            addPumpEvents: { [weak self] events, completeUpTo, loanEndsNow, completion in
                 guard let self = self else { completion(nil); return }
                 // Capture the doses inside the pump events so existing count assertions hold.
                 self.lock.lock()
                 self.addedDoses.append(events.compactMap { $0.dose })
+                self.completeUpToTimes.append(completeUpTo)
                 let hold = self.holdPumpEventWrites
                 if hold { self.heldPumpEventWrite = completion }
+                let failure = self.pumpEventWriteError
+                let store = self.realDoseStore
                 self.lock.unlock()
+                if let failure, !hold { completion(failure); return }
+                if let store, !hold {
+                    // As the app wires it.
+                    Task {
+                        do {
+                            let amended = try await store.saveLoanRecords(events, completeUpTo: completeUpTo,
+                                                                         phoneHasReleasedThePod: MockPumpManager.testConnectionReleased,
+                                                                         loanEndsNow: loanEndsNow)
+                            self.lock.lock(); self.amendedDoses.append(contentsOf: amended); self.lock.unlock()
+                            completion(nil)
+                        } catch { completion(error) }
+                    }
+                    return
+                }
                 if !hold { completion(nil) }
             },
             addCarb: { [weak self] entry, completion in
@@ -1657,10 +1693,10 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertGreaterThan(addedDoses.flatMap { $0 }.filter { $0.type == .tempBasal }.count, 0, "written once finished")
     }
 
-    /// A bolus still being given is stored at once, mutable, as stock's pump drivers report one; the
-    /// watch's next check-in after it has finished stores it final, though the check-in carries no new
-    /// records.
-    func testABolusBeingGivenIsStoredMutableThenFinalAtTheNextCheckIn() throws {
+    /// A bolus still being given is not stored: the phone is not dosing, and only a finished record is
+    /// one the phone's dose history can keep. The watch's next check-in after it has finished stores it,
+    /// though the check-in carries no new records.
+    func testABolusBeingGivenIsHeldBackThenStoredFinishedAtTheNextCheckIn() throws {
         let controller = makeController(now: { self.clock })
         let grant = establishLoan(controller)
         let start = clock
@@ -1672,17 +1708,17 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         controller.handleIncoming(userInfo: try LoanMessage.doseRecordBatch(
             DoseRecordBatch(epoch: grant.epoch, events: [bolus], tombstones: [], sentAt: start)).transportDictionary())
         wait(for: [firstAck], timeout: 5)
-        let whileGiven = addedDoses.flatMap { $0 }.filter { $0.type == .bolus }
-        XCTAssertEqual(whileGiven.count, 1, "stored while it is being given, with the carbs that came with it")
-        XCTAssertEqual(whileGiven.first?.isMutable, true, "mutable: insulin on board counts it at once")
+        XCTAssertEqual(addedDoses.flatMap { $0 }.filter { $0.type == .bolus }.count, 0, "not stored while it is being given")
 
         clock = start.addingTimeInterval(.minutes(4))
         let secondAck = expectSend()
         controller.handleIncoming(userInfo: try LoanMessage.doseRecordBatch(
             DoseRecordBatch(epoch: grant.epoch, events: [], tombstones: [], sentAt: clock)).transportDictionary())
         wait(for: [secondAck], timeout: 5)
-        XCTAssertEqual(addedDoses.last?.filter { $0.type == .bolus }.map(\.isMutable), [false],
-                       "stored final at the check-in after it finished, replacing the mutable one")
+        let stored = addedDoses.flatMap { $0 }.filter { $0.type == .bolus }
+        XCTAssertEqual(stored.map(\.isMutable), [false], "stored once, finished, at the check-in after it finished")
+        XCTAssertEqual(stored.first?.endDate.timeIntervalSince(start) ?? 0, .minutes(2), accuracy: 1)
+        XCTAssertEqual(stored.first?.programmedUnits, 2.8)
     }
 
     /// A batch with no records is the watch checking in: nothing is written or acknowledged.
@@ -1814,10 +1850,9 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         waitForState(controller, .owner)
     }
 
-    /// While an End waits, an interim offer can carry a watch bolus still being given. It is acked and
-    /// written mutable, as stock's pump drivers report one (Loop's dose store stops a debug build only on
-    /// an immutable bolus that ends in the future). The next offer after it has finished writes it final.
-    func testInterimDrainAcksABolusStillBeingGivenAndWritesItFinalOnceFinished() throws {
+    /// While an End waits, an interim offer can carry a watch bolus still being given. It is acked, so the
+    /// End can go on, and not written. The next offer after it has finished writes it.
+    func testInterimDrainAcksABolusStillBeingGivenAndWritesItOnceFinished() throws {
         let controller = makeController()
         let grant = establishLoan(controller)
         let now = Date()
@@ -1833,8 +1868,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         wait(for: [duringAck], timeout: 5)
         guard case .handbackAck(let ack)? = lastSent() else { return XCTFail("expected an ack") }
         XCTAssertEqual(ack.committedCursor, bolus.seq, "acked, so the End can reach its release check")
-        XCTAssertEqual(addedDoses.flatMap { $0 }.filter { $0.type == .bolus }.map(\.isMutable), [true],
-                       "written mutable while it is being given")
+        XCTAssertEqual(addedDoses.flatMap { $0 }.filter { $0.type == .bolus }.count, 0, "not written while it is being given")
 
         let afterAck = expectSend()
         controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(HandbackOffer(
@@ -1842,7 +1876,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
             events: [], tombstones: [], recovered: false, released: false)).transportDictionary())
         wait(for: [afterAck], timeout: 5)
         drainMainQueue()
-        XCTAssertEqual(addedDoses.flatMap { $0 }.filter { $0.type == .bolus && !$0.isMutable }.count, 1, "written once, finished")
+        XCTAssertEqual(addedDoses.flatMap { $0 }.filter { $0.type == .bolus }.map(\.isMutable), [false], "written once, finished")
         XCTAssertEqual(controller.state, .loaned)
     }
 
@@ -4152,5 +4186,369 @@ extension PodLoanPhoneControllerTests {
             waitUntil(timeout: 5, "silence: looping resumes") { !controller.holdsAutomaticDosing }
             XCTAssertNotNil(controller.persisted.tookOverOnSilenceAt, "row 18: the phone keeps the pod")
         }
+    }
+}
+
+// MARK: - The watch's records in a real dose store
+//
+// The tests above check what the controller hands to the store. These write to a real dose store as
+// the app does, with a stand-in for Apple Health, and read back what dosing, Event History and Apple
+// Health are filled from.
+extension PodLoanPhoneControllerTests {
+
+    /// A real dose store on its own folder, saving to a stand-in for Apple Health; from here on the
+    /// controller's store closures write to it. Scheduled basal is 1 U/h.
+    private func useRealDoseStore() -> DoseStore {
+        let cache = PersistenceController(directoryURL: stateDir.appendingPathComponent("doses"))
+        let ready = expectation(description: "persistent store attached")
+        cache.onReady { error in
+            XCTAssertNil(error, "store failed to come up")
+            ready.fulfill()
+        }
+        wait(for: [ready], timeout: 10)
+
+        let health = HKHealthStoreMock()
+        health.setSaveHandler { [weak self] objects, _, _ in
+            guard let self = self else { return }
+            self.lock.lock(); self.healthSamples += objects.compactMap { $0 as? HKQuantitySample }; self.lock.unlock()
+        }
+        let samples = HealthKitSampleStore(healthStore: health, observeHealthKitSamplesFromCurrentApp: false,
+                                           observeHealthKitSamplesFromOtherApps: false,
+                                           type: HealthKitSampleStore.insulinQuantityType, observationEnabled: false)
+        var built: DoseStore?
+        let done = expectation(description: "dose store built")
+        Task {
+            built = await DoseStore(healthKitSampleStore: samples, cacheStore: cache,
+                                    longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
+                                    provenanceIdentifier: "PodLoanPhoneControllerTests")
+            done.fulfill()
+        }
+        wait(for: [done], timeout: 10)
+        guard let store = built else { fatalError("dose store must build") }
+        let delegate = LoanBooksDoseStoreDelegate(rate: 1.0)
+        store.delegate = delegate
+        realDoseStoreDelegate = delegate
+        realDoseStore = store
+        return store
+    }
+
+    private func read<T>(_ what: String, _ body: @escaping () async throws -> T) -> T? {
+        var out: T?
+        let done = expectation(description: what)
+        Task {
+            do { out = try await body() } catch { XCTFail("\(what) threw: \(error)") }
+            done.fulfill()
+        }
+        wait(for: [done], timeout: 10)
+        return out
+    }
+
+    /// What dosing counts: what `LoopDataManager` reads for insulin on board.
+    private func dosesDosingCounts(in store: DoseStore, since start: Date, _ type: DoseType) -> [DoseEntry] {
+        (read("doses") { try await store.getNormalizedDoseEntries(start: start.addingTimeInterval(-60), end: nil) } ?? [])
+            .filter { $0.type == type }.sorted { $0.startDate < $1.startDate }
+    }
+
+    /// The pump events: what Event History shows, and what Apple Health is filled from once finished.
+    private func pumpEvents(in store: DoseStore, since start: Date, _ type: DoseType) -> [DoseEntry] {
+        (read("pump events") { try await store.getPumpEventValues(since: start.addingTimeInterval(-60)) } ?? [])
+            .compactMap(\.dose).filter { $0.type == type }.sorted { $0.startDate < $1.startDate }
+    }
+
+    /// Units saved to Apple Health as boluses, or as temp basals (scheduled basal left out).
+    private func unitsInHealth(bolus: Bool) -> [Double] {
+        lock.lock(); let samples = healthSamples; lock.unlock()
+        return samples.filter { sample in
+            let reason = (sample.metadata?[HKMetadataKeyInsulinDeliveryReason] as? NSNumber)?.intValue
+            let scheduled = (sample.metadata?[HKMetadataKeySyncIdentifier] as? String)?.hasPrefix("BasalRateSchedule") ?? false
+            return bolus ? reason == HKInsulinDeliveryReason.bolus.rawValue
+                         : reason == HKInsulinDeliveryReason.basal.rawValue && !scheduled
+        }
+        .sorted { $0.startDate < $1.startDate }
+        .map { ($0.quantity.doubleValue(for: .internationalUnit()) * 1000).rounded() / 1000 }
+    }
+
+    private func pumpEvent(_ type: DoseType, _ raw: String, from start: Date, to end: Date, _ value: Double,
+                           pending: Bool = false) -> NewPumpEvent {
+        let unit: DoseUnit = type == .bolus ? .units : .unitsPerHour
+        let identifier: String = Data(raw.utf8).map { String(format: "%02x", $0) }.joined()
+        let dose = DoseEntry(type: type, startDate: start, endDate: end, value: value, unit: unit, decisionId: nil,
+                             syncIdentifier: identifier, isMutable: pending)
+        return NewPumpEvent(date: start, dose: dose, raw: Data(raw.utf8), title: raw)
+    }
+
+    /// The phone's pod driver reporting, as stock's pump drivers report.
+    private func phoneReports(_ events: [NewPumpEvent], to store: DoseStore, completeUpTo: Date) {
+        _ = read("the phone's own report") {
+            try await store.addPumpEvents(events, lastReconciliation: completeUpTo, replacePendingEvents: true)
+        }
+    }
+
+    /// The phone's pod driver once it has the pod back: its own temp basal, still running, replacing
+    /// the pending events.
+    private func phoneReportsItsOwnPumpEvents(to store: DoseStore) {
+        let now = Date()
+        phoneReports([pumpEvent(.tempBasal, "phone temp \(now)", from: now, to: now.addingTimeInterval(.minutes(30)), 0.5, pending: true)],
+                     to: store, completeUpTo: now)
+    }
+
+    private func saveLoanRecords(_ events: [NewPumpEvent], in store: DoseStore, completeUpTo: Date,
+                                 phoneHasReleasedThePod: Bool = true, loanEndsNow: Bool = false) -> [DoseEntry] {
+        read("the watch's records saved") {
+            try await store.saveLoanRecords(events, completeUpTo: completeUpTo, phoneHasReleasedThePod: phoneHasReleasedThePod,
+                                            loanEndsNow: loanEndsNow)
+        } ?? []
+    }
+
+    /// The watch gives `units` now and relays the record while the pod is still giving it.
+    private func relayABolusBeingGiven(_ controller: PodLoanPhoneController, epoch: Int, units: Double,
+                                       lasting seconds: TimeInterval) throws -> Date {
+        let start = Date()
+        let bolus = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                              record: LoanDoseRecord(kind: .bolus, startDate: start, endDate: start.addingTimeInterval(seconds),
+                                                     amount: units),
+                              loggedAt: start)
+        let ack = expectSend()
+        controller.handleIncoming(userInfo: try LoanMessage.doseRecordBatch(
+            DoseRecordBatch(epoch: epoch, events: [bolus], tombstones: [], sentAt: start)).transportDictionary())
+        wait(for: [ack], timeout: 5)
+        waitUntil(timeout: 5, "the records are saved") { !controller.commitInFlight }
+        return start
+    }
+
+    /// The watch gives a bolus and relays its record while the pod is still giving it: nothing is
+    /// stored yet. Before the watch checks in again the looper takes the pod back. Dosing, Event
+    /// History and Apple Health must have the bolus, finished, and keep it after the phone's pod
+    /// driver's first own report (which deletes pending records).
+    func testAWatchBolusBeingGivenAtATakeBackIsSavedFinishedEverywhere() throws {
+        let store = useRealDoseStore()
+        let controller = makeController()
+        let grant = establishLoan(controller)                      // the pod's total at the start is 10 U
+
+        let start = try relayABolusBeingGiven(controller, epoch: grant.epoch, units: 0.1, lasting: 3)
+        XCTAssertEqual(pumpEvents(in: store, since: start, .bolus).count, 0, "nothing is stored while it is being given")
+
+        spinMain(3.5)                                              // the pod finishes the bolus
+        MockPumpManager.testOdometer = 10.1                        // and its total shows it
+        controller.reclaimNow()
+        waitForState(controller, .owner)
+        waitUntil(timeout: 8, "the take-back has saved the watch's records") {
+            !controller.holdsUnsavedWatchRecords && !controller.commitInFlight
+        }
+        phoneReportsItsOwnPumpEvents(to: store)
+
+        let counted = dosesDosingCounts(in: store, since: start, .bolus)
+        XCTAssertEqual(counted.map(\.programmedUnits), [0.1], "dosing counts the bolus")
+        XCTAssertEqual(counted.map(\.isMutable), [false], "as finished")
+        XCTAssertEqual(pumpEvents(in: store, since: start, .bolus).map(\.isMutable), [false], "Event History has it")
+        XCTAssertEqual(unitsInHealth(bolus: true), [0.1], "Apple Health has it")
+    }
+
+    /// With the phone in reach the watch checks in every cycle: a bolus relayed while being given is
+    /// saved at the first check-in after it finished, and stays after the phone's own first report.
+    func testAWatchBolusBeingGivenIsSavedFinishedAtTheNextCheckIn() throws {
+        let store = useRealDoseStore()
+        let controller = makeController()
+        let grant = establishLoan(controller)
+
+        let start = try relayABolusBeingGiven(controller, epoch: grant.epoch, units: 0.1, lasting: 3)
+        spinMain(3.5)                                              // the pod finishes the bolus
+        let ack = expectSend()
+        controller.handleIncoming(userInfo: try LoanMessage.doseRecordBatch(
+            DoseRecordBatch(epoch: grant.epoch, events: [], tombstones: [], sentAt: Date())).transportDictionary())
+        wait(for: [ack], timeout: 5)
+        waitUntil(timeout: 5, "the records are saved") { !controller.commitInFlight }
+
+        XCTAssertEqual(pumpEvents(in: store, since: start, .bolus).map(\.isMutable), [false], "a finished pump event")
+        XCTAssertEqual(unitsInHealth(bolus: true), [0.1], "in Apple Health")
+
+        phoneReportsItsOwnPumpEvents(to: store)
+        XCTAssertEqual(pumpEvents(in: store, since: start, .bolus).map(\.programmedUnits), [0.1], "still a pump event")
+        XCTAssertEqual(dosesDosingCounts(in: store, since: start, .bolus).map(\.programmedUnits), [0.1], "still counted")
+    }
+
+    /// The take-back's save fails. The phone holds automatic dosing and refuses a new Start until its
+    /// retry has saved the records.
+    func testATakeBackWhoseSaveFailsHoldsDosingUntilTheRetrySaves() throws {
+        let store = useRealDoseStore()
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        let start = try relayABolusBeingGiven(controller, epoch: grant.epoch, units: 0.1, lasting: 3)
+        spinMain(3.5)
+        MockPumpManager.testOdometer = 10.1
+        lock.lock(); pumpEventWriteError = NSError(domain: "test", code: 1); lock.unlock()
+
+        controller.reclaimNow()
+        waitForState(controller, .owner)
+        waitUntil(timeout: 8, "the failed save has returned") { !controller.commitInFlight }
+        XCTAssertTrue(controller.holdsUnsavedWatchRecords, "the records are still to be saved")
+        XCTAssertTrue(controller.holdsAutomaticDosing, "no automatic dosing on an incomplete history")
+        XCTAssertEqual(dosesDosingCounts(in: store, since: start, .bolus).count, 0)
+
+        controller.handleIncoming(userInfo: try LoanMessage.request(LoanRequest(watchBuild: "t")).transportDictionary())
+        waitUntil(timeout: 5, "the Start is refused") { if case .denied? = self.lastSent() { return true }; return false }
+        guard case .denied(let denied)? = lastSent() else { return XCTFail("no refusal") }
+        XCTAssertTrue(denied.reason.contains("Tap Start again"), denied.reason)
+
+        // The refused Start retried the save itself; that attempt fails too.
+        waitUntil(timeout: 8, "the refused Start's retry has returned") { !controller.commitInFlight }
+        lock.lock(); pumpEventWriteError = nil; lock.unlock()
+        controller.saveUnsavedRecords()
+        waitUntil(timeout: 8, "the retry has saved") { !controller.holdsUnsavedWatchRecords && !controller.commitInFlight }
+        XCTAssertFalse(controller.holdsAutomaticDosing)
+        XCTAssertEqual(dosesDosingCounts(in: store, since: start, .bolus).map(\.isMutable), [false], "counted, finished")
+        XCTAssertEqual(unitsInHealth(bolus: true), [0.1])
+    }
+
+    /// Records arriving in order (the phone has not reported past them): everything is derived by
+    /// stock from the pump events, Apple Health included, and nothing is written to the cache directly.
+    func testRecordsArrivingInOrderReachHealthThroughThePumpEvents() {
+        let store = useRealDoseStore()
+        let now = Date(timeIntervalSince1970: Date().timeIntervalSince1970.rounded(.down))
+        phoneReports([], to: store, completeUpTo: now.addingTimeInterval(.minutes(-40)))
+
+        let amended = saveLoanRecords([
+            pumpEvent(.tempBasal, "A", from: now.addingTimeInterval(.minutes(-30)), to: now.addingTimeInterval(.minutes(-10)), 3.0),
+            pumpEvent(.bolus, "B", from: now.addingTimeInterval(.minutes(-20)), to: now.addingTimeInterval(.minutes(-19)), 0.5),
+        ], in: store, completeUpTo: now.addingTimeInterval(.minutes(-5)))
+
+        XCTAssertEqual(amended.count, 0, "nothing written to the cache directly")
+        XCTAssertEqual(unitsInHealth(bolus: true), [0.5])
+        XCTAssertEqual(unitsInHealth(bolus: false), [1.0], "the temp basal: 3 U/h for 20 min")
+        XCTAssertEqual(dosesDosingCounts(in: store, since: now.addingTimeInterval(.minutes(-40)), .tempBasal).count, 1)
+    }
+
+    /// Records arriving after the phone has reported past them (a take-back on silence; a loan started
+    /// without the phone). Stock has filled the stretch with scheduled basal and does not derive older
+    /// doses, so the cache is made to agree: insulin on board counts the temp basal and the bolus, and
+    /// the reported time does not move back.
+    func testRecordsArrivingLateStillCountForDosing() {
+        let store = useRealDoseStore()
+        let now = Date(timeIntervalSince1970: Date().timeIntervalSince1970.rounded(.down))
+        // The phone's own finished temp basal, then history complete up to five minutes ago.
+        phoneReports([pumpEvent(.tempBasal, "P", from: now.addingTimeInterval(.minutes(-8)), to: now.addingTimeInterval(.minutes(-5)), 0.5)],
+                     to: store, completeUpTo: now.addingTimeInterval(.minutes(-5)))
+
+        let amended = saveLoanRecords([
+            pumpEvent(.tempBasal, "A", from: now.addingTimeInterval(.minutes(-30)), to: now.addingTimeInterval(.minutes(-10)), 3.0),
+            pumpEvent(.bolus, "B", from: now.addingTimeInterval(.minutes(-20)), to: now.addingTimeInterval(.minutes(-19)), 0.5),
+        ], in: store, completeUpTo: now.addingTimeInterval(.minutes(-10)))
+
+        XCTAssertEqual(amended.filter { $0.type == .tempBasal }.count, 1, "the late temp basal is written to the cache")
+        let since = now.addingTimeInterval(.minutes(-40))
+        XCTAssertEqual(dosesDosingCounts(in: store, since: since, .bolus).map(\.programmedUnits), [0.5])
+        XCTAssertEqual(dosesDosingCounts(in: store, since: since, .tempBasal).map(\.unitsPerHour), [3.0, 0.5])
+        XCTAssertEqual(store.lastPumpEventsReconciliation, now.addingTimeInterval(.minutes(-5)), "the reported time does not move back")
+    }
+
+    /// A loan started without the phone: the phone's own temp basal and bolus were running when its
+    /// driver released the pod, and are pending in its history. The watch reports the temp basal
+    /// finished and never reports the bolus. Both must be stored finished, and still count after the
+    /// phone's driver's next report deletes pending records.
+    func testThePhonesOwnPendingDosesAreFinishedWhileTheWatchHasThePod() {
+        let store = useRealDoseStore()
+        let now = Date(timeIntervalSince1970: Date().timeIntervalSince1970.rounded(.down))
+        let tempStart = now.addingTimeInterval(.minutes(-20)), bolusStart = now.addingTimeInterval(.minutes(-18))
+        phoneReports([
+            pumpEvent(.tempBasal, "T", from: tempStart, to: tempStart.addingTimeInterval(.minutes(30)), 3.0, pending: true),
+            pumpEvent(.bolus, "B", from: bolusStart, to: bolusStart.addingTimeInterval(60), 1.0, pending: true),
+        ], to: store, completeUpTo: now.addingTimeInterval(.minutes(-17)))
+
+        // With the pod still this phone's, pending doses are its driver's to finish: nothing changes.
+        _ = saveLoanRecords([], in: store, completeUpTo: now.addingTimeInterval(.minutes(-5)), phoneHasReleasedThePod: false)
+        XCTAssertEqual(pumpEvents(in: store, since: tempStart, .bolus).map(\.isMutable), [true])
+
+        // The watch took over 15 minutes ago and reports the phone's temp basal as it ended.
+        _ = saveLoanRecords([pumpEvent(.tempBasal, "T", from: tempStart, to: now.addingTimeInterval(.minutes(-15)), 3.0)],
+                            in: store, completeUpTo: now.addingTimeInterval(.minutes(-5)))
+        phoneReportsItsOwnPumpEvents(to: store)
+
+        let temps = pumpEvents(in: store, since: tempStart, .tempBasal).filter { $0.startDate == tempStart }
+        XCTAssertEqual(temps.map(\.isMutable), [false], "the temp basal is stored finished")
+        XCTAssertEqual(temps.first?.endDate, now.addingTimeInterval(.minutes(-15)), "as the watch reported it")
+        let boluses = dosesDosingCounts(in: store, since: tempStart, .bolus)
+        XCTAssertEqual(boluses.map(\.programmedUnits), [1.0], "the bolus the watch never reported still counts, in full")
+        XCTAssertEqual(boluses.map(\.isMutable), [false])
+        XCTAssertEqual(dosesDosingCounts(in: store, since: tempStart, .tempBasal).filter { $0.startDate == tempStart }.map(\.unitsPerHour), [3.0],
+                       "and so does the temp basal")
+        XCTAssertEqual(unitsInHealth(bolus: true), [1.0], "Apple Health has the bolus")
+    }
+
+    /// A loan started without the phone while the phone's bolus and temp basal were running, and
+    /// ended before either's programmed end. The save that ends the loan stores both finished, ending
+    /// there, the bolus in full, so the phone's driver's next report does not delete them.
+    func testThePhonesOwnDosesStillRunningWhenTheLoanEndsAreStoredFinished() {
+        let store = useRealDoseStore()
+        let now = Date(timeIntervalSince1970: Date().timeIntervalSince1970.rounded(.down))
+        let tempStart = now.addingTimeInterval(.minutes(-10)), bolusStart = now.addingTimeInterval(-30)
+        phoneReports([
+            pumpEvent(.tempBasal, "T", from: tempStart, to: tempStart.addingTimeInterval(.minutes(30)), 3.0, pending: true),
+            pumpEvent(.bolus, "B", from: bolusStart, to: bolusStart.addingTimeInterval(120), 3.0, pending: true),
+        ], to: store, completeUpTo: bolusStart)
+
+        // A check-in during the loan leaves both: they are still running.
+        _ = saveLoanRecords([], in: store, completeUpTo: now)
+        XCTAssertEqual(pumpEvents(in: store, since: tempStart, .bolus).map(\.isMutable), [true])
+
+        // The take-back: the driver already has the pod again.
+        _ = saveLoanRecords([], in: store, completeUpTo: now, phoneHasReleasedThePod: false, loanEndsNow: true)
+        phoneReportsItsOwnPumpEvents(to: store)
+
+        let boluses = dosesDosingCounts(in: store, since: tempStart, .bolus)
+        XCTAssertEqual(boluses.map(\.programmedUnits), [3.0], "the bolus counts in full")
+        XCTAssertEqual(boluses.map(\.isMutable), [false])
+        XCTAssertEqual(boluses.first?.endDate, now, "ending at the take-back")
+        let temps = pumpEvents(in: store, since: tempStart, .tempBasal).filter { $0.startDate == tempStart }
+        XCTAssertEqual(temps.map(\.isMutable), [false], "the temp basal is stored finished")
+        XCTAssertEqual(temps.first?.endDate, now, "cut at the take-back")
+        XCTAssertEqual(unitsInHealth(bolus: true), [3.0], "Apple Health has the bolus")
+    }
+
+    /// A loan started without the phone: the watch cancels a temp basal it does not know and records the
+    /// cancel as a zero-length rate record. The phone's own temp basal ends there.
+    func testTheWatchsTakeoverCancelEndsThePhonesOwnTempBasal() {
+        let store = useRealDoseStore()
+        let now = Date(timeIntervalSince1970: Date().timeIntervalSince1970.rounded(.down))
+        let tempStart = now.addingTimeInterval(.minutes(-20)), takeover = now.addingTimeInterval(.minutes(-15))
+        phoneReports([pumpEvent(.tempBasal, "T", from: tempStart, to: tempStart.addingTimeInterval(.minutes(30)), 3.0, pending: true)],
+                     to: store, completeUpTo: tempStart)
+
+        _ = saveLoanRecords([pumpEvent(.tempBasal, "takeover-cancel-7", from: takeover, to: takeover, 0)],
+                            in: store, completeUpTo: now.addingTimeInterval(.minutes(-5)))
+        phoneReportsItsOwnPumpEvents(to: store)
+
+        let temps = pumpEvents(in: store, since: tempStart, .tempBasal).filter { $0.startDate == tempStart }
+        XCTAssertEqual(temps.map(\.isMutable), [false])
+        XCTAssertEqual(temps.first?.endDate, takeover, "the phone's temp basal ends at the watch's takeover")
+        XCTAssertEqual(dosesDosingCounts(in: store, since: tempStart, .tempBasal).filter { $0.startDate == tempStart }.map(\.endDate), [takeover],
+                       "for dosing too")
+    }
+
+    /// The take-back saves even when it holds no watch records, telling the store the loan has ended.
+    func testATakeBackWithNoWatchRecordsStillFinishesThePhonesOwnPendingBolus() {
+        let store = useRealDoseStore()
+        let bolusStart = Date(timeIntervalSince1970: Date().timeIntervalSince1970.rounded(.down))
+        phoneReports([pumpEvent(.bolus, "B", from: bolusStart, to: bolusStart.addingTimeInterval(.minutes(5)), 3.0, pending: true)],
+                     to: store, completeUpTo: bolusStart)
+        let controller = makeController()
+        _ = establishLoan(controller)
+
+        controller.reclaimNow()
+        waitForState(controller, .owner)
+        waitUntil(timeout: 8, "the take-back's save has returned") { !controller.commitInFlight }
+        phoneReportsItsOwnPumpEvents(to: store)
+
+        let boluses = dosesDosingCounts(in: store, since: bolusStart, .bolus)
+        XCTAssertEqual(boluses.map(\.programmedUnits), [3.0], "the phone's bolus still counts, in full")
+        XCTAssertEqual(boluses.map(\.isMutable), [false])
+    }
+
+    /// An empty save with an earlier time leaves "history complete up to here" where it was.
+    func testAnEarlierTimeNeverMovesTheReportedTimeBack() {
+        let store = useRealDoseStore()
+        let now = Date(timeIntervalSince1970: Date().timeIntervalSince1970.rounded(.down))
+        phoneReports([], to: store, completeUpTo: now)
+        _ = saveLoanRecords([], in: store, completeUpTo: now.addingTimeInterval(.minutes(-30)))
+        XCTAssertEqual(store.lastPumpEventsReconciliation, now)
     }
 }

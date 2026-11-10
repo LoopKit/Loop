@@ -591,9 +591,11 @@ final class StockRunsTests: XCTestCase {
         manager.doseEnactor = enactor
         manager.setClosedLoopEnabled(true, reason: "test")
 
-        manager.cancelTempBasalAtTakeover()
+        var cancelledAt: [Date] = []
+        manager.cancelTempBasalAtTakeover { cancelledAt.append($0) }
         await manager.laneSettled()
 
+        XCTAssertEqual(cancelledAt.count, 1, "the cancel is reported once the pod has taken it")
         XCTAssertEqual(enactor.calls.count, 1, "one command: the cancel")
         XCTAssertEqual(enactor.calls.first?.tempBasal, .cancel)
         XCTAssertNil(manager.lastLoopCompleted, "no cycle ran")
