@@ -21,7 +21,15 @@ public class InsulinSuspendedTableViewCell: UITableViewCell {
         paddedView.layer.masksToBounds = true
         paddedView.layer.cornerRadius = 10
         paddedView.layer.borderWidth = 1
-        paddedView.layer.borderColor = UIColor.systemGray5.cgColor
+
+        updateBorderColor()
+        registerForTraitChanges(UITraitCollection.systemTraitsAffectingColorAppearance) { (cell: Self, _: UITraitCollection) in
+            cell.updateBorderColor()
+        }
+    }
+
+    private func updateBorderColor() {
+        paddedView.layer.borderColor = UIColor.systemGray5.resolvedColor(with: traitCollection).cgColor
     }
 }
 
