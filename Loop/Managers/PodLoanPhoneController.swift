@@ -57,8 +57,9 @@ final class PodLoanPhoneController {
         var send: ([String: Any]) -> Void
 
         /// Saves the watch's finished records in the dose history (`DoseStore.saveLoanRecords`), which is
-        /// then complete up to the given time.
-        var addPumpEvents: ([NewPumpEvent], _ completeUpTo: Date, @escaping (Error?) -> Void) -> Void
+        /// then complete up to the given time. `loanEndsNow`: this save is the end of a loan (a hand-back
+        /// or a take-back), so this phone's own doses still pending from before the loan are finished too.
+        var addPumpEvents: ([NewPumpEvent], _ completeUpTo: Date, _ loanEndsNow: Bool, @escaping (Error?) -> Void) -> Void
 
         var addCarb: (NewCarbEntry, @escaping (Error?) -> Void) -> Void
 

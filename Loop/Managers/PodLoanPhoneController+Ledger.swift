@@ -423,13 +423,13 @@ extension DoseStore {
     /// board is computed from, is then made to agree with the pump events over the stretch the batch
     /// covers: a temp basal ends where the next rate record starts, and every finished bolus and temp
     /// basal is there. Returns the doses written that way; none when the records arrive in order.
-    func saveLoanRecords(_ events: [NewPumpEvent], completeUpTo: Date, phoneHasReleasedThePod: Bool) async throws -> [DoseEntry] {
+    func saveLoanRecords(_ events: [NewPumpEvent], completeUpTo: Date, phoneHasReleasedThePod: Bool, loanEndsNow: Bool = false) async throws -> [DoseEntry] {
         // "History is complete up to here" never moves back: an older loan's records, and records that
         // arrive after a take-back, carry an earlier time than this phone has already reported.
         let reconciliation = Swift.max(completeUpTo, lastPumpEventsReconciliation ?? .distantPast)
         var events = events
-        if phoneHasReleasedThePod {
-            events += try await finishOwnPendingDoses(reportedIn: events, upTo: reconciliation)
+        if phoneHasReleasedThePod || loanEndsNow {
+            events += try await finishOwnPendingDoses(reportedIn: events, upTo: reconciliation, loanEndsNow: loanEndsNow)
         }
         try await addPumpEvents(events, lastReconciliation: reconciliation, replacePendingEvents: false)
 
@@ -472,9 +472,10 @@ extension DoseStore {
     /// stock deletes pending records at the driver's next report. While the driver has released the
     /// pod nothing else finishes them, so they are finished here: one the watch reports is removed, so
     /// the watch's finished record is stored in its place; any other that has ended is stored final, a
-    /// temp basal ending where the next rate record starts and a bolus in full. Returns the final
-    /// copies to store; one still running is left for the next save.
-    private func finishOwnPendingDoses(reportedIn events: [NewPumpEvent], upTo reconciliation: Date) async throws -> [NewPumpEvent] {
+    /// temp basal ending where the next rate record starts and a bolus in full. One still running is
+    /// left for the next save, until the loan ends: the driver then takes the pod back and would drop
+    /// it, so it is stored final ending there, a bolus still in full. Returns the final copies to store.
+    private func finishOwnPendingDoses(reportedIn events: [NewPumpEvent], upTo reconciliation: Date, loanEndsNow: Bool) async throws -> [NewPumpEvent] {
         let stored = try await getPumpEventValues(since: reconciliation.addingTimeInterval(-.hours(24)))
         let reported = Set(events.map(\.raw))
         let rateStarts = (stored.compactMap(\.dose) + events.compactMap(\.dose))
@@ -490,8 +491,12 @@ extension DoseStore {
                 if dose.type == .tempBasal, let next = rateStarts.filter({ $0 > dose.startDate }).min() {
                     end = Swift.min(end, next)
                 }
-                guard end <= reconciliation else { continue }
+                if end > reconciliation {
+                    guard loanEndsNow else { continue }
+                    end = reconciliation
+                }
                 final = dose.type == .tempBasal ? dose.trimmed(to: end, syncIdentifier: dose.syncIdentifier) : dose
+                final?.endDate = Swift.max(dose.startDate, Swift.min(dose.endDate, end))
                 final?.isMutable = false
             }
             let failure: DoseStoreError? = await withCheckedContinuation { continuation in

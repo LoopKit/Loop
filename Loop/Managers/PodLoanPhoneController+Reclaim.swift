@@ -222,7 +222,7 @@ extension PodLoanPhoneController {
         state = .owner
         if wasOwner { beginReclaimSettleWindow() }
 
-        saveUnsavedRecords()
+        saveUnsavedRecords(atTakeBack: true)
     }
 
     /// Arms the owed verdict over the window from the ledger's last reading: the watch's takeover

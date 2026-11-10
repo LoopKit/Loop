@@ -60,7 +60,7 @@ extension PodLoanPhoneController {
         let records = HandbackOffer(epoch: batch.epoch, handedBackAt: sentAt, finalStatus: nil,
                                     odometer: batch.odometer, events: batch.events, tombstones: batch.tombstones,
                                     recovered: false, released: false)
-        commitStaged(records, isFinal: false, isStale: false, auditThisOffer: false)
+        commitStaged(records, isFinal: false, isStale: false, auditThisOffer: false, loanEndsNow: false)
     }
 
     /// Whether a record kept back while it ran (staged, not yet committed) has finished by `date`.
@@ -201,13 +201,14 @@ extension PodLoanPhoneController {
             logRunningAudit(snap, context: "interim hand-back")
         }
 
-        commitStaged(offer, isFinal: isFinal, isStale: isStale, auditThisOffer: auditThisOffer)
+        commitStaged(offer, isFinal: isFinal, isStale: isStale, auditThisOffer: auditThisOffer, loanEndsNow: auditThisOffer)
     }
 
     /// Writes the staged records not yet committed to the stores, then acknowledges them. On an
     /// interim drain a rate record still running, or a bolus still being given, is acknowledged but
     /// kept back: each is written once, finished. One write at a time (`commitInFlight`).
-    func commitStaged(_ offer: HandbackOffer, isFinal: Bool, isStale: Bool, auditThisOffer: Bool) {
+    /// `loanEndsNow`: the save that ends the loan, a hand-back's or a take-back's.
+    func commitStaged(_ offer: HandbackOffer, isFinal: Bool, isStale: Bool, auditThisOffer: Bool, loanEndsNow: Bool) {
         // A stale offer speaks only for its own events.
         let ownEventIDs = isStale ? Set(offer.events.map(\.id)) : nil
         // Staged minus retracted minus already committed.
@@ -285,7 +286,7 @@ extension PodLoanPhoneController {
         // No ack on failure: the watch's resend is the retry, and after a take-back this phone's own
         // (`saveUnsavedRecords`).
         commitInFlight = true
-        deps.addPumpEvents(newPumpEvents(from: sane), completeUpTo) { [weak self] error in
+        deps.addPumpEvents(newPumpEvents(from: sane), completeUpTo, loanEndsNow) { [weak self] error in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 // Release the latch first on every exit.
@@ -365,13 +366,14 @@ extension PodLoanPhoneController {
     }
 
     /// With the pod back, saves the watch records this phone still holds, as a final hand-back stamped
-    /// now: at a take-back, and on every cycle after it until the save lands.
-    func saveUnsavedRecords() {
-        guard holdsUnsavedWatchRecords, !commitInFlight else { return }
+    /// now: at a take-back, and on every cycle after it until the save lands. The take-back's own save
+    /// runs with nothing held too: it also finishes this phone's doses still pending from before the loan.
+    func saveUnsavedRecords(atTakeBack: Bool = false) {
+        guard atTakeBack || holdsUnsavedWatchRecords, !commitInFlight else { return }
         handbackDiag(epoch, "saving the watch's records this phone still holds, as a final hand-back at now")
         let records = HandbackOffer(epoch: epoch, handedBackAt: deps.now(), finalStatus: nil, odometer: nil,
                                     events: [], tombstones: [], recovered: false, released: true)
-        commitStaged(records, isFinal: true, isStale: false, auditThisOffer: false)
+        commitStaged(records, isFinal: true, isStale: false, auditThisOffer: false, loanEndsNow: atTakeBack)
     }
 
     /// What the watch recorded in stock's stores for a loan (its dosing decisions, alerts and
