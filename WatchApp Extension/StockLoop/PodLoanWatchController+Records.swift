@@ -65,6 +65,21 @@ extension PodLoanWatchController {
         if minted > 0 { streamRecords() }
     }
 
+    /// The takeover's cancel, as a zero-length rate record. A temp basal this watch's copy does not know
+    /// (a start without the phone) is cancelled with no pump report, so without this record the phone would
+    /// count its own temp to the programmed end.
+    func journalTakeoverCancel(at: Date, epoch: Int) {
+        guard phase == .active, self.epoch == epoch else { return }
+        let record = LoanDoseRecord(kind: .tempBasal, startDate: at, endDate: at, unitsPerHour: 0,
+                                    syncIdentifier: "takeover-cancel-\(epoch)", insulinType: nil)
+        guard (try? journal.mintEvent(record: record, provenance: .confirmed)) != nil else {
+            SportLog.event("loan", "could not record the takeover's temp basal cancel for the phone")
+            return
+        }
+        SportLog.event("loan", "temp basal cancel at takeover recorded for the phone")
+        streamRecords()
+    }
+
     /// What a pump report adds to the loan's records: each dose not yet journaled, and a cancel back to the
     /// schedule. The pump manager reports that cancel only by re-reporting the running temp, shortened, under
     /// its own identity; a temp change reports the same shortened temp beside the new one, which ends it anyway.
