@@ -167,8 +167,8 @@ final class DeviceDataManagerTests: XCTestCase {
         loopControlMock.cancelExpectation = expectation(description: "Temp basal cancel")
 
         if let deviceManager = self.deviceDataManager {
-            cgmManager.delegateQueue.async {
-                deviceManager.cgmManager(self.cgmManager, hasNew: .unreliableData)
+            Task.detached {
+                await deviceManager.cgmManager(self.cgmManager, hasNew: .unreliableData)
             }
         }
 
