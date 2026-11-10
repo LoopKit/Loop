@@ -56,7 +56,9 @@ final class PodLoanPhoneController {
 
         var send: ([String: Any]) -> Void
 
-        var addPumpEvents: ([NewPumpEvent], _ lastReconciliation: Date?, @escaping (Error?) -> Void) -> Void
+        /// Saves the watch's finished records in the dose history (`DoseStore.saveLoanRecords`), which is
+        /// then complete up to the given time.
+        var addPumpEvents: ([NewPumpEvent], _ completeUpTo: Date, @escaping (Error?) -> Void) -> Void
 
         var addCarb: (NewCarbEntry, @escaping (Error?) -> Void) -> Void
 
@@ -113,8 +115,6 @@ final class PodLoanPhoneController {
         var bookGapDose: (_ entry: DoseEntry, _ completion: @escaping (Bool) -> Void) -> Void = { _, done in done(false) }
 
         var deleteGapDose: (_ syncIdentifier: String, _ completion: @escaping (Bool) -> Void) -> Void = { _, done in done(false) }
-
-        var backfillDoses: (_ doses: [DoseEntry], _ completion: @escaping (Error?) -> Void) -> Void = { _, done in done(nil) }
 
         /// The watch's dosing decisions into this phone's store, skipping any already there; the
         /// result is how many were added.
@@ -220,6 +220,12 @@ final class PodLoanPhoneController {
     func stage(events: [LoanEvent], tombstones: [UUID]) {
         for event in events { staged[event.id] = event }
         stagedTombstones.formUnion(tombstones)
+        persistStaged()
+    }
+
+    /// Drops records from staging once nothing more will be done with them.
+    func unstage(_ ids: Set<UUID>) {
+        staged = staged.filter { !ids.contains($0.key) }
         persistStaged()
     }
 

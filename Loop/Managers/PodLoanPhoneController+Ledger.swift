@@ -6,7 +6,7 @@
 //  store. A reading at a change of custody ends one window and starts the next; the device that held
 //  the pod in a window explains it with its records and the schedule; what it cannot explain is
 //  booked once, named by the window, and retired by that window's own late records. Automatic
-//  dosing continues either way. Also the helpers that turn the watch's records into the phone's writes.
+//  dosing continues either way. Also the one function that saves the watch's records in the phone's dose history.
 //
 
 import Foundation
@@ -30,64 +30,6 @@ extension PodLoanPhoneController {
         }
     }
 
-    /// Cuts each rate record at the next one's start, as the store's reconciliation would; the
-    /// upsert path skips that reconciliation.
-    func truncatingOverlaps(_ doses: [DoseEntry]) -> [DoseEntry] {
-        var out: [DoseEntry] = []
-        var lastRate: DoseEntry?
-        for dose in doses.sorted(by: { $0.startDate < $1.startDate }) {
-            guard dose.type != .bolus else {
-                out.append(dose)
-                continue
-            }
-            if let last = lastRate {
-                let end = Swift.min(last.endDate, dose.startDate)
-                if end > last.startDate {
-                    if let trimmed = last.trimmed(from: nil, to: end, syncIdentifier: last.syncIdentifier) {
-                        out.append(trimmed)
-                    }
-                }
-            }
-            lastRate = dose
-        }
-
-        if let last = lastRate, last.endDate > last.startDate { out.append(last) }
-        return out
-    }
-
-    /// A still-running dose has no delivered answer yet.
-    private static func resolvedDeliveredUnits(for dose: DoseEntry) -> Double? {
-        guard !dose.isMutable else { return nil }
-        switch dose.type {
-        case .bolus:     return dose.programmedUnits
-        case .tempBasal: return dose.unitsInDeliverableIncrements
-        default:         return nil
-        }
-    }
-
-    /// Doses in the dose store's identity, for the upsert path; the pump-event path cannot land
-    /// basal doses behind the immutable boundary.
-    func storeIdentifiedDoses(from doses: [DoseEntry]) -> [DoseEntry] {
-        doses.compactMap { dose in
-            guard let syncID = dose.syncIdentifier else { return nil }
-            return DoseEntry(type: dose.type,
-                             startDate: dose.startDate,
-                             endDate: dose.endDate,
-                             value: dose.unit == .unitsPerHour ? dose.unitsPerHour : dose.programmedUnits,
-                             unit: dose.unit,
-                             decisionId: dose.decisionId,
-                             deliveredUnits: dose.deliveredUnits ?? Self.resolvedDeliveredUnits(for: dose),
-                             description: dose.description,
-                             syncIdentifier: LoanSeedIdentity.raw(forSyncIdentifier: syncID).hexadecimalString,
-                             scheduledBasalRate: dose.scheduledBasalRate,
-                             insulinType: dose.insulinType,
-                             automatic: dose.automatic,
-                             manuallyEntered: dose.manuallyEntered,
-                             isMutable: dose.isMutable,
-                             wasProgrammedByPumpUI: dose.wasProgrammedByPumpUI)
-        }
-    }
-
     static func pumpEventTitle(for type: DoseType) -> String {
         switch type {
         case .bolus:     return "Bolus"
@@ -103,15 +45,22 @@ extension PodLoanPhoneController {
     }
 
     /// The phone loop's dosing gate: a grant is under way, the pod is lent out, a take-back is
-    /// reaching for it, a take-back's audit has not ruled, or this phone is asking the watch about
-    /// insulin it cannot explain.
+    /// reaching for it, a take-back's audit has not ruled, this phone holds watch records it has not
+    /// saved, or it is asking the watch about insulin it cannot explain.
     var holdsAutomaticDosing: Bool {
         let saved = persisted
         return grantInFlight
             || (deps.pumpManager() as? ExclusiveDeviceControl)?.isControlReleased == true
             || saved.phase == .reclaimPending || saved.pendingForceAudit != nil
             || Self.watchLoopsThePod(saved)
+            || holdsUnsavedWatchRecords
             || askingAboutUnexplainedInsulin
+    }
+
+    /// With the pod back, this phone still holds watch records its dose history does not: a take-back's
+    /// save has not landed, or records came after it. Insulin on board is short by them until it does.
+    var holdsUnsavedWatchRecords: Bool {
+        state == .owner && staged.values.contains { !stagedTombstones.contains($0.id) && !committedIDs.contains($0.id) }
     }
 
     /// Holding the pod, this phone asks the watch only after a reading shows insulin its records cannot
@@ -460,5 +409,99 @@ extension PodLoanPhoneController {
                 }
             }
         }
+    }
+}
+
+extension DoseStore {
+    /// The one way the watch's records enter this phone's dose history. They are saved as a pump
+    /// driver's finished events are, so stock derives the dose cache, Apple Health and the uploads from
+    /// them.
+    ///
+    /// Sport Mode's one difference from a pump driver: the watch's records can arrive after this phone
+    /// has already reported past them (a take-back, or a loan started without the phone). Stock does
+    /// not derive doses older than what it has already filled, so the dose cache, which insulin on
+    /// board is computed from, is then made to agree with the pump events over the stretch the batch
+    /// covers: a temp basal ends where the next rate record starts, and every finished bolus and temp
+    /// basal is there. Returns the doses written that way; none when the records arrive in order.
+    func saveLoanRecords(_ events: [NewPumpEvent], completeUpTo: Date, phoneHasReleasedThePod: Bool) async throws -> [DoseEntry] {
+        // "History is complete up to here" never moves back: an older loan's records, and records that
+        // arrive after a take-back, carry an earlier time than this phone has already reported.
+        let reconciliation = Swift.max(completeUpTo, lastPumpEventsReconciliation ?? .distantPast)
+        var events = events
+        if phoneHasReleasedThePod {
+            events += try await finishOwnPendingDoses(reportedIn: events, upTo: reconciliation)
+        }
+        try await addPumpEvents(events, lastReconciliation: reconciliation, replacePendingEvents: false)
+
+        let batch = events.compactMap(\.dose)
+        guard let earliest = batch.map(\.startDate).min(), let latest = batch.map(\.endDate).max() else { return [] }
+
+        // What the pump events say was delivered: each temp basal runs until the next rate record
+        // starts, as stock reads them. A zero-length record sorts first among equal starts: it ends
+        // what ran before it, not what starts with it.
+        let recorded = try await getPumpEventValues(since: earliest.addingTimeInterval(-.hours(24))).compactMap(\.dose)
+        let rates = recorded
+            .filter { $0.type == .tempBasal || $0.type == .basal || $0.type == .suspend }
+            .sorted { ($0.startDate, $0.endDate) < ($1.startDate, $1.endDate) }
+        var finished = recorded.filter { $0.type == .bolus && !$0.isMutable }
+        for (index, dose) in rates.enumerated() where dose.type == .tempBasal && !dose.isMutable {
+            let end = index + 1 < rates.count ? Swift.min(dose.endDate, rates[index + 1].startDate) : dose.endDate
+            if let cut = dose.trimmed(to: end, syncIdentifier: dose.syncIdentifier), cut.endDate > cut.startDate {
+                finished.append(cut)
+            }
+        }
+
+        let cached = try await insulinDeliveryStore.getDoseEntries(start: earliest.addingTimeInterval(-.hours(24)),
+                                                                   end: latest.addingTimeInterval(1))
+        let amended = finished.filter { dose in
+            guard dose.startDate <= latest, dose.endDate >= earliest, let identifier = dose.syncIdentifier else { return false }
+            // By prefix: a stored dose cut in pieces keeps its identifier as the start of each piece's.
+            let rows = cached.filter { $0.syncIdentifier?.hasPrefix(identifier) ?? false }
+            guard let row = rows.first else { return true }
+            guard dose.type == .tempBasal, rows.count == 1, row.syncIdentifier == identifier else { return false }
+            return abs(row.endDate.timeIntervalSince(dose.endDate)) > 1
+        }
+        if !amended.isEmpty {
+            try await syncDoseEntries(amended)
+        }
+        return amended
+    }
+
+    /// A loan started without this phone leaves the phone's own temp basal or bolus pending in its
+    /// history: its pump driver released the pod while they ran and never reports them finished, and
+    /// stock deletes pending records at the driver's next report. While the driver has released the
+    /// pod nothing else finishes them, so they are finished here: one the watch reports is removed, so
+    /// the watch's finished record is stored in its place; any other that has ended is stored final, a
+    /// temp basal ending where the next rate record starts and a bolus in full. Returns the final
+    /// copies to store; one still running is left for the next save.
+    private func finishOwnPendingDoses(reportedIn events: [NewPumpEvent], upTo reconciliation: Date) async throws -> [NewPumpEvent] {
+        let stored = try await getPumpEventValues(since: reconciliation.addingTimeInterval(-.hours(24)))
+        let reported = Set(events.map(\.raw))
+        let rateStarts = (stored.compactMap(\.dose) + events.compactMap(\.dose))
+            .filter { $0.type == .tempBasal || $0.type == .basal || $0.type == .suspend }
+            .map(\.startDate)
+        var finals: [NewPumpEvent] = []
+        for event in stored {
+            guard let dose = event.dose, dose.isMutable, dose.type == .bolus || dose.type == .tempBasal,
+                  let raw = event.raw else { continue }
+            var final: DoseEntry?
+            if !reported.contains(raw) {
+                var end = dose.endDate
+                if dose.type == .tempBasal, let next = rateStarts.filter({ $0 > dose.startDate }).min() {
+                    end = Swift.min(end, next)
+                }
+                guard end <= reconciliation else { continue }
+                final = dose.type == .tempBasal ? dose.trimmed(to: end, syncIdentifier: dose.syncIdentifier) : dose
+                final?.isMutable = false
+            }
+            let failure: DoseStoreError? = await withCheckedContinuation { continuation in
+                deletePumpEvent(event) { continuation.resume(returning: $0) }
+            }
+            if let failure { throw failure }
+            if let final {
+                finals.append(NewPumpEvent(date: final.startDate, dose: final, raw: raw, title: event.title ?? ""))
+            }
+        }
+        return finals
     }
 }

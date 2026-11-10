@@ -199,12 +199,13 @@ extension PodLoanPhoneController {
         takeBackFrom = nil
     }
 
-    /// Take the pod without waiting for the watch: commit what it streamed, arm an audit, take the
-    /// link, open the settle, clear staging last. The armed audit holds automatic dosing until it rules.
+    /// Take the pod without waiting for the watch: arm an audit over what it streamed, take the link,
+    /// open the settle, then save its records as a final hand-back stamped now. The armed audit, and
+    /// records not yet saved, hold automatic dosing.
     func forceReclaimToOwner(reason: String) {
         log.default("taking the pod back without a hand-back: %{public}@", reason)
 
-        // Defer behind a write in flight, so the salvage does not re-commit what it is writing.
+        // Defer behind a write in flight, so this save does not re-commit what it is writing.
         if commitInFlight {
             handbackDiag(epoch, "take-back waits for the hand-back being saved")
             pendingForceReclaimReason = reason
@@ -213,47 +214,6 @@ extension PodLoanPhoneController {
         cancelTakeBackAttempt()
         cancelNotification(id: NotificationID.paused)
 
-        // Salvage everything uncommitted, as a final hand-back stamped now.
-        let events = staged.values
-            .filter { !stagedTombstones.contains($0.id) && !committedIDs.contains($0.id) }
-            .sorted { $0.seq < $1.seq }
-        if !events.isEmpty {
-            let input = LoanReconciler.Input(
-                events: events, schedule: deps.settings().basalRateSchedule,
-                loanStart: loanStartedAt ?? deps.now().addingTimeInterval(-.hours(2)),
-                loanEnd: deps.now())
-            let outcome = LoanReconciler.reconcile(input)
-
-            let boluses = outcome.doses.filter { $0.type == .bolus }
-            let bolusUnits = boluses.reduce(0.0) { $0 + ($1.deliveredUnits ?? $1.programmedUnits) }
-            let rateGross = outcome.doses.filter { $0.type != .bolus }.reduce(0.0) { $0 + $1.programmedUnits }
-            handbackDiag(epoch, String(format:
-                "take-back: saving %d staged records as %d doses, %.3f U of bolus and %d rate records programming %.3f U, %d carbs, %d carb deletes",
-                events.count, outcome.doses.count, bolusUnits, outcome.doses.count - boluses.count,
-                rateGross, outcome.carbs.count, outcome.deletedCarbs.count))
-            deps.addPumpEvents(newPumpEvents(from: outcome.doses), deps.now()) { _ in }
-
-            if let earliest = outcome.doses.map(\.startDate).min() {
-                deps.insulinHistoryRewritten(earliest)
-            }
-            for carb in outcome.carbs { deps.addCarb(carb) { _ in } }
-            for gone in outcome.deletedCarbs {
-                deps.deleteCarb(gone) { error in
-                    self.handbackDiag(self.epoch, error == nil
-                        ? String(format: "carb delete from the watch applied: %.0f g", gone.grams)
-                        : String(format: "carb delete from the watch failed: %.0f g at %@: %@",
-                                 gone.grams, String(describing: gone.startDate), String(describing: error!)))
-                }
-            }
-
-            // Advance the cursor too, or the watch never closes its loan.
-            let newCursor = events.map(\.seq).max()
-            updateState {
-                $0.committedIDs.formUnion(events.map(\.id))
-                if let newCursor { $0.committedCursor = max($0.committedCursor, newCursor) }
-            }
-        }
-
         armForceReclaimAudit()
 
         reclaimPodConnection()
@@ -261,10 +221,8 @@ extension PodLoanPhoneController {
         let wasOwner = state == .owner
         state = .owner
         if wasOwner { beginReclaimSettleWindow() }
-        // Clear staging only after the audit has read it.
-        staged = [:]
-        stagedTombstones = []
-        persistStaged()
+
+        saveUnsavedRecords()
     }
 
     /// Arms the owed verdict over the window from the ledger's last reading: the watch's takeover
