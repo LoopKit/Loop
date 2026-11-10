@@ -24,7 +24,7 @@ enum LoanReconciler {
         /// The hand-back stamp; a final drain cuts running rate records here.
         let loanEnd: Date
 
-        /// False for an interim drain, whose newest rate record is still open.
+        /// False for an interim drain: records still running at the stamp are held back.
         var isFinalHandback: Bool = true
     }
 
@@ -47,10 +47,9 @@ enum LoanReconciler {
         /// The caller drops any record whose end precedes its start.
         var doses: [DoseEntry] = []
 
-        /// On an interim drain, the records not finished yet: the still-running rate record and any
-        /// bolus still being given. Acked but not committed, so each lands finished later. A bolus
-        /// still being given is in `doses` too, marked mutable, as stock's pump drivers report one:
-        /// insulin on board counts it at once, and the finished record replaces it.
+        /// On an interim drain, the records not finished yet: a rate record still running and any
+        /// bolus still being given. Acked but not committed, and absent from `doses`: each is written
+        /// once, finished, by a later drain. A final drain leaves none.
         var openEventIDs: Set<UUID> = []
 
         /// Each under its journal event's ID as its sync identifier, the identity the watch stored it under.
@@ -70,54 +69,65 @@ enum LoanReconciler {
         case cleared(at: Date)
     }
 
-    /// Events are processed in the order given; carbs and overrides depend on it.
+    /// Events are processed in the order given; carbs and overrides depend on it. Every dose
+    /// written is finished and immutable: the phone's stores never hold a loan dose that a later
+    /// record must replace.
     static func reconcile(_ input: Input) -> Outcome {
         var outcome = Outcome()
-        var events = input.events
+        let events = input.events
 
-        // The open records: the latest temp or suspend running past the stamp, and every bolus
-        // still being given at it.
-        var openEventIDs: Set<UUID> = []
-        if !input.isFinalHandback {
-            let openRate = events
-                .filter { e in
-                    switch e.record.kind {
-                    case .tempBasal, .suspend:
-                        return (e.record.endDate ?? e.record.startDate) > input.loanEnd
-                    default:
-                        return false
-                    }
+        // A rate record runs until the next one starts, as `expectedInsulin` reads them: a zero-length
+        // record is a cancel or a resume, and ends what was running.
+        let rates = events
+            .filter { e in
+                switch e.record.kind {
+                case .tempBasal, .suspend: return e.record.unitsPerHour != nil && e.record.endDate != nil
+                default: return false
                 }
-                .max(by: { $0.record.startDate < $1.record.startDate })?.id
-            openEventIDs = Set(events.filter { $0.record.kind == .bolus && ($0.record.endDate ?? $0.record.startDate) > input.loanEnd }.map(\.id))
-            if let openRate { openEventIDs.insert(openRate) }
+            }
+            .sorted { ($0.record.startDate, $0.seq) < ($1.record.startDate, $1.seq) }
+        var rateEnd: [UUID: Date] = [:]
+        for (index, event) in rates.enumerated() {
+            var end = event.record.endDate ?? event.record.startDate
+            if index + 1 < rates.count { end = Swift.min(end, rates[index + 1].record.startDate) }
+            rateEnd[event.id] = end
         }
-        outcome.openEventIDs = openEventIDs
+
+        // Not finished at the stamp: held back on an interim drain; cut at the stamp on a final one.
+        func isRunning(_ event: LoanEvent) -> Bool {
+            switch event.record.kind {
+            case .bolus: return (event.record.endDate ?? event.record.startDate) > input.loanEnd
+            case .tempBasal, .suspend: return rateEnd[event.id].map { $0 > input.loanEnd } ?? false
+            default: return false
+            }
+        }
+        if !input.isFinalHandback {
+            outcome.openEventIDs = Set(events.filter(isRunning).map(\.id))
+        }
 
         for event in events {
+            if outcome.openEventIDs.contains(event.id) { continue }
             switch event.record.kind {
             case .bolus:
                 if let units = event.record.amount {
+                    // A bolus still being given when the loan ends counts whole, ending at the stamp.
+                    let end = Swift.max(event.record.startDate,
+                                        Swift.min(event.record.endDate ?? event.record.startDate, input.loanEnd))
                     outcome.doses.append(DoseEntry(
                         type: .bolus,
                         startDate: event.record.startDate,
-                        endDate: event.record.endDate ?? event.record.startDate,
+                        endDate: end,
                         value: units, unit: .units,
                         decisionId: event.record.decisionId,
                         syncIdentifier: syncIdentifier(for: event),
-                        automatic: event.record.automatic,
-                        isMutable: openEventIDs.contains(event.id)))
+                        automatic: event.record.automatic))
                 }
             case .tempBasal, .suspend:
-
-                if openEventIDs.contains(event.id) { continue }
-                if let rate = event.record.unitsPerHour, let end = event.record.endDate {
-                    // A final drain cuts anything still running at the hand-back.
-                    let clampedEnd = input.isFinalHandback ? Swift.min(end, input.loanEnd) : end
+                if let rate = event.record.unitsPerHour, let end = rateEnd[event.id] {
                     outcome.doses.append(DoseEntry(
                         type: .tempBasal,
                         startDate: event.record.startDate,
-                        endDate: clampedEnd,
+                        endDate: Swift.min(end, input.loanEnd),
                         value: rate, unit: .unitsPerHour,
                         decisionId: event.record.decisionId,
                         syncIdentifier: syncIdentifier(for: event)))

@@ -164,7 +164,7 @@ extension WatchLoopManager {
     /// back (`cancelTempBasalAfterPodReturn`). Not guarded on the cached delivery state: at an offline
     /// Start the phone's temp runs on a pod whose copy does not know it. No cycle runs here; the next
     /// glucose reading starts the first, so the watch never doses on a reading the phone acted on.
-    func cancelTempBasalAtTakeover() {
+    func cancelTempBasalAtTakeover(cancelled: @escaping (Date) -> Void = { _ in }) {
         onLane {
             let recommendation = AutomaticDoseRecommendation(basalAdjustment: .cancel, direction: .decrease)
             var dosingDecision = StoredDosingDecision(date: self.now(), reason: CancelActiveTempBasalReason.pumpControlTaken.rawValue)
@@ -172,6 +172,7 @@ extension WatchLoopManager {
             dosingDecision.automaticDoseRecommendation = recommendation
             do {
                 try await self.enact(bolus: nil, tempBasal: recommendation.basalAdjustment, decisionId: dosingDecision.id)
+                cancelled(self.now())
                 SportLog.event("loop", "temp basal cancelled at takeover; the first cycle comes with the next glucose reading")
             } catch {
                 dosingDecision.appendError(error as? LoopError ?? .unknownError(error))

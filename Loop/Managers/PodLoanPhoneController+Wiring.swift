@@ -75,13 +75,16 @@ extension WatchDataManager {
                 }
             },
             cgmUploadsGlucose: { [weak self] in self?.deviceManager.cgmManager?.shouldSyncToRemoteService ?? true },
-            addPumpEvents: { [weak self] events, lastReconciliation, completion in
+            addPumpEvents: { [weak self] events, completeUpTo, loanEndsNow, completion in
                 guard let self = self else { completion(nil); return }
 
-                // No replacement: loan doses are immutable here, and replacing would purge the phone's own temp.
                 Task {
                     do {
-                        try await self.deviceManager.doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: false)
+                        let released = (self.deviceManager.pumpManager as? ExclusiveDeviceControl)?.isControlReleased == true
+                        let amended = try await self.deviceManager.doseStore.saveLoanRecords(events, completeUpTo: completeUpTo, phoneHasReleasedThePod: released, loanEndsNow: loanEndsNow)
+                        if !amended.isEmpty {
+                            PhoneLog.event("loan", "\(amended.count) of the watch's rate records are older than the scheduled basal already recorded; written to the dose store directly")
+                        }
                         completion(nil)
                     } catch {
                         completion(error)
@@ -298,20 +301,6 @@ extension WatchDataManager {
                     completion(error == nil)
                 }
             },
-            // Identified upsert: lands rate records behind the immutable boundary. Caller pre-truncates.
-            backfillDoses: { [weak self] doses, completion in
-
-                guard let self = self else { completion(nil); return }
-                Task {
-                    do {
-                        try await self.deviceManager.doseStore.syncDoseEntries(doses)
-                        completion(nil)
-                    } catch {
-                        completion(error)
-                    }
-                }
-            },
-
             addDosingDecisions: { [weak self] decisions, uploadedBy, completion in
                 guard let self, let store = self.loopDataManager.dosingDecisionStore as? DosingDecisionStore else {
                     return completion(.success(0))

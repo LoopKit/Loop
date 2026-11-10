@@ -60,7 +60,7 @@ extension PodLoanPhoneController {
         let records = HandbackOffer(epoch: batch.epoch, handedBackAt: sentAt, finalStatus: nil,
                                     odometer: batch.odometer, events: batch.events, tombstones: batch.tombstones,
                                     recovered: false, released: false)
-        commitStaged(records, isFinal: false, isStale: false, auditThisOffer: false)
+        commitStaged(records, isFinal: false, isStale: false, auditThisOffer: false, loanEndsNow: false)
     }
 
     /// Whether a record kept back while it ran (staged, not yet committed) has finished by `date`.
@@ -208,13 +208,14 @@ extension PodLoanPhoneController {
             logRunningAudit(snap, context: "interim hand-back")
         }
 
-        commitStaged(offer, isFinal: isFinal, isStale: isStale, auditThisOffer: auditThisOffer)
+        commitStaged(offer, isFinal: isFinal, isStale: isStale, auditThisOffer: auditThisOffer, loanEndsNow: auditThisOffer)
     }
 
-    /// Writes the staged records not yet committed to the stores, then acknowledges them. A rate
-    /// record still running, or a bolus still being given, is acknowledged but kept back: each lands
-    /// finished later. One write at a time (`commitInFlight`).
-    private func commitStaged(_ offer: HandbackOffer, isFinal: Bool, isStale: Bool, auditThisOffer: Bool) {
+    /// Writes the staged records not yet committed to the stores, then acknowledges them. On an
+    /// interim drain a rate record still running, or a bolus still being given, is acknowledged but
+    /// kept back: each is written once, finished. One write at a time (`commitInFlight`).
+    /// `loanEndsNow`: the save that ends the loan, a hand-back's or a take-back's.
+    func commitStaged(_ offer: HandbackOffer, isFinal: Bool, isStale: Bool, auditThisOffer: Bool, loanEndsNow: Bool) {
         // A stale offer speaks only for its own events.
         let ownEventIDs = isStale ? Set(offer.events.map(\.id)) : nil
         // Staged minus retracted minus already committed.
@@ -223,7 +224,7 @@ extension PodLoanPhoneController {
             .filter { ownEventIDs?.contains($0.id) ?? true }
             .sorted { $0.seq < $1.seq }
 
-        // The whole loan, for the expectation and the backfill.
+        // The whole loan, for the expectation.
         let allStagedEvents = staged.values
             .filter { !stagedTombstones.contains($0.id) }
             .sorted { $0.seq < $1.seq }
@@ -235,8 +236,8 @@ extension PodLoanPhoneController {
             schedule: deps.settings().basalRateSchedule,
             loanStart: loanStart,
             loanEnd: offer.handedBackAt,
-
-            isFinalHandback: isFinal)
+            // Nothing of an older loan still runs.
+            isFinalHandback: isFinal || isStale)
         let outcome = LoanReconciler.reconcile(input)
 
         if auditThisOffer, let pulseUnits = pumpPulseUnits {
@@ -270,8 +271,15 @@ extension PodLoanPhoneController {
         let doses = outcome.doses
 
         // The interim's open records (a rate record still running, a bolus still being given) are
-        // acked but not committed; each lands finished later. The bolus is stored meanwhile, mutable.
+        // acked but not committed; each is written once, finished.
         let committable = events.filter { !outcome.openEventIDs.contains($0.id) }
+
+        // This phone's history is complete up to the stamp, or only up to the start of a rate record
+        // still running: stock fills scheduled basal up to that time, and must not fill over the record.
+        let completeUpTo = events
+            .filter { outcome.openEventIDs.contains($0.id) && $0.record.kind != .bolus }
+            .map(\.record.startDate)
+            .reduce(offer.handedBackAt) { Swift.min($0, $1) }
 
         // Drop impossible doses individually, by name.
         let sane = doses.filter { $0.endDate >= $0.startDate }
@@ -282,13 +290,18 @@ extension PodLoanPhoneController {
 
         let writeStart = deps.now()
 
-        // No ack on failure: the watch's resend is the retry.
+        // No ack on failure: the watch's resend is the retry, and after a take-back this phone's own
+        // (`saveUnsavedRecords`).
         commitInFlight = true
-        deps.addPumpEvents(newPumpEvents(from: sane), offer.handedBackAt) { [weak self] error in
+        deps.addPumpEvents(newPumpEvents(from: sane), completeUpTo, loanEndsNow) { [weak self] error in
             guard let self = self else { return }
             DispatchQueue.main.async {
+                // Release the latch first on every exit.
+                self.commitInFlight = false
+                // An older loan's records leave staging either way: saved, or the watch resends them.
+                if isStale { self.unstage(Set(events.map(\.id))) }
+
                 if let error = error {
-                    self.commitInFlight = false
                     self.handbackDiag(offer.epoch, "saving the watch's records failed; the watch will resend: \(String(describing: error))")
 
                     if let reason = self.pendingForceReclaimReason {
@@ -298,99 +311,76 @@ extension PodLoanPhoneController {
                     return
                 }
 
-                var backfillEarliestStart: Date? = nil
+                if !isStale {
+                    for carb in outcome.carbs {
+                        self.deps.addCarb(carb) { _ in }
+                    }
 
-                let finishCommit: (Error?) -> Void = { [weak self] backfillError in
-                    guard let self = self else { return }
-                    DispatchQueue.main.async {
-                        // Release the latch first on every exit.
-                        self.commitInFlight = false
-                        if let backfillError = backfillError {
-                            self.handbackDiag(offer.epoch, "saving the loan's doses in the dose store failed: \(String(describing: backfillError))")
-
-                            if let reason = self.pendingForceReclaimReason {
-                                self.pendingForceReclaimReason = nil
-                                self.forceReclaimToOwner(reason: reason)
-                            }
-                            return
+                    for gone in outcome.deletedCarbs {
+                        self.deps.deleteCarb(gone) { error in
+                            self.handbackDiag(offer.epoch, error == nil
+                                ? String(format: "carb delete from the watch applied: %.0f g", gone.grams)
+                                : String(format: "carb delete from the watch failed: %.0f g at %@: %@",
+                                         gone.grams, String(describing: gone.startDate), String(describing: error!)))
                         }
+                    }
+                } else if !outcome.carbs.isEmpty {
+                    // A newer loan has started: an older loan's records add no carbs.
+                    self.handbackDiag(offer.epoch, "\(outcome.carbs.count) carbs from an older loan not added")
+                }
 
-                        if !isStale {
-                            for carb in outcome.carbs {
-                                self.deps.addCarb(carb) { _ in }
-                            }
-
-                            for gone in outcome.deletedCarbs {
-                                self.deps.deleteCarb(gone) { error in
-                                    self.handbackDiag(offer.epoch, error == nil
-                                        ? String(format: "carb delete from the watch applied: %.0f g", gone.grams)
-                                        : String(format: "carb delete from the watch failed: %.0f g at %@: %@",
-                                                 gone.grams, String(describing: gone.startDate), String(describing: error!)))
-                                }
-                            }
-                        } else if !outcome.carbs.isEmpty {
-                            // A newer loan has started: an older loan's records add no carbs.
-                            self.handbackDiag(offer.epoch, "\(outcome.carbs.count) carbs from an older loan not added")
-                        }
-
-                        // Overrides follow the pod home on interim drains too, each in turn.
-                        if !isStale {
-                            for change in outcome.overrideChanges {
-                                self.applyWatchOverride(change, epoch: offer.epoch)
-                            }
-                        }
-
-                        let newCursor = events.map(\.seq).max() ?? self.committedCursor
-                        if !isStale {
-                            // Saved before the ack, so a relaunch does not re-commit.
-                            self.updateState {
-                                $0.committedCursor = max($0.committedCursor, newCursor)
-                                $0.committedIDs.formUnion(committable.map(\.id))
-                            }
-                            self.noteRecordsCurrent(asOf: offer.handedBackAt)
-                            // The ack, and only now that the store has it.
-                            self.sendMessage(.handbackAck(HandbackAck(epoch: self.epoch, committedCursor: self.committedCursor, released: isFinal)))
-                            self.handbackDiag(self.epoch, String(format: "records saved in %.0f ms; acknowledged up to %d", self.deps.now().timeIntervalSince(writeStart) * 1000, self.committedCursor))
-                            if isFinal, self.state == .reconciling {
-                                self.finishLoanAfterCommit()
-                            }
-                        } else {
-                            // Acked so the watch can let go; no dedup state moves.
-                            self.sendMessage(.handbackAck(HandbackAck(epoch: offer.epoch, committedCursor: newCursor, stale: true, released: isFinal)))
-                        }
-
-                        // Any back-dated insulin write invalidates the counteraction memo from its earliest dose.
-                        if let earliest = (sane.map(\.startDate) + (backfillEarliestStart.map { [$0] } ?? [])).min() {
-                            self.deps.insulinHistoryRewritten(earliest)
-                        }
-
-                        self.retireEstimates(coveredBy: sane, carbs: isStale ? 0 : outcome.carbs.count, epoch: offer.epoch)
-                        self.drainAfterCommit()
+                // Overrides follow the pod home on interim drains too, each in turn.
+                if !isStale {
+                    for change in outcome.overrideChanges {
+                        self.applyWatchOverride(change, epoch: offer.epoch)
                     }
                 }
 
-                // The identified upsert re-writes the loan window, pre-truncated. Skipped for stale offers.
-                let backfillOutcome = LoanReconciler.reconcile(LoanReconciler.Input(
-                    events: allStagedEvents,
-                    schedule: self.deps.settings().basalRateSchedule,
-                    loanStart: loanStart,
-                    loanEnd: offer.handedBackAt,
-                    isFinalHandback: isFinal))
-                // A bolus still being given is the pump-event path's alone, until it has finished.
-                let backfill = self.storeIdentifiedDoses(from: self.truncatingOverlaps(
-                    backfillOutcome.doses.filter { $0.endDate >= $0.startDate && !$0.isMutable }))
-                if isStale || backfill.isEmpty {
-                    if isStale {
-                        self.handbackDiag(offer.epoch, "hand-back from an older loan: only its own records are saved")
+                let newCursor = events.map(\.seq).max() ?? self.committedCursor
+                if !isStale {
+                    // Saved before the ack, so a relaunch does not re-commit.
+                    self.updateState {
+                        $0.committedCursor = max($0.committedCursor, newCursor)
+                        $0.committedIDs.formUnion(committable.map(\.id))
                     }
-                    finishCommit(nil)
+                    self.noteRecordsCurrent(asOf: offer.handedBackAt)
+                    // The ack, and only now that the store has it.
+                    self.sendMessage(.handbackAck(HandbackAck(epoch: self.epoch, committedCursor: self.committedCursor, released: isFinal)))
+                    self.handbackDiag(self.epoch, String(format: "records saved in %.0f ms; acknowledged up to %d", self.deps.now().timeIntervalSince(writeStart) * 1000, self.committedCursor))
+                    if isFinal, self.state == .reconciling {
+                        self.finishLoanAfterCommit()
+                    } else if isFinal, self.state == .owner {
+                        // A take-back's save, or records that came after it: nothing stays staged.
+                        self.staged = [:]
+                        self.stagedTombstones = []
+                        self.persistStaged()
+                    }
                 } else {
-                    self.handbackDiag(offer.epoch, "saving \(backfill.count) of the loan's doses in the dose store")
-                    backfillEarliestStart = backfill.map(\.startDate).min()
-                    self.deps.backfillDoses(backfill, finishCommit)
+                    // Acked so the watch can let go; no dedup state moves.
+                    self.handbackDiag(offer.epoch, "hand-back from an older loan: only its own records are saved")
+                    self.sendMessage(.handbackAck(HandbackAck(epoch: offer.epoch, committedCursor: newCursor, stale: true, released: isFinal)))
                 }
+
+                // Any back-dated insulin write invalidates the counteraction memo from its earliest dose.
+                if let earliest = sane.map(\.startDate).min() {
+                    self.deps.insulinHistoryRewritten(earliest)
+                }
+
+                self.retireEstimates(coveredBy: sane, carbs: isStale ? 0 : outcome.carbs.count, epoch: offer.epoch)
+                self.drainAfterCommit()
             }
         }
+    }
+
+    /// With the pod back, saves the watch records this phone still holds, as a final hand-back stamped
+    /// now: at a take-back, and on every cycle after it until the save lands. The take-back's own save
+    /// runs with nothing held too: it also finishes this phone's doses still pending from before the loan.
+    func saveUnsavedRecords(atTakeBack: Bool = false) {
+        guard atTakeBack || holdsUnsavedWatchRecords, !commitInFlight else { return }
+        handbackDiag(epoch, "saving the watch's records this phone still holds, as a final hand-back at now")
+        let records = HandbackOffer(epoch: epoch, handedBackAt: deps.now(), finalStatus: nil, odometer: nil,
+                                    events: [], tombstones: [], recovered: false, released: true)
+        commitStaged(records, isFinal: true, isStale: false, auditThisOffer: false, loanEndsNow: atTakeBack)
     }
 
     /// What the watch recorded in stock's stores for a loan (its dosing decisions, alerts and
