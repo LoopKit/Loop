@@ -362,7 +362,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
     ) -> some View {
         Circle()
             .trim(from: context.state.isCloseLoop ? 0 : 0.2, to: 1)
-            .stroke(getLoopColor(context.state.lastCompleted), lineWidth: size/4.5)
+            .stroke(getLoopColor(context.state.isCloseLoop ? context.state.lastCompleted : context.state.date), lineWidth: size/4.5)
             .rotationEffect(Angle(degrees: -126))
             .frame(width: size, height: size)
     }
