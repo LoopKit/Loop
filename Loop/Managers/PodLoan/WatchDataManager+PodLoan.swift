@@ -87,6 +87,7 @@ extension WatchDataManager {
         podLoanController.considerStuckHandback()
         podLoanController.considerHoldLapse()
         podLoanController.considerOwedForceReclaimAudit()
+        podLoanController.saveUnsavedRecords()
     }
 
     // MARK: - Watch bolus
