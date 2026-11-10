@@ -1377,7 +1377,7 @@ private final class PhoneOverrideHarness {
             settings: { settings },
             pumpControlChanged: { _ in },
             send: { _ in },
-            addPumpEvents: { _, _, completion in completion(nil) },
+            addPumpEvents: { _, _, _, completion in completion(nil) },
             addCarb: { _, completion in completion(nil) },
             // Read by the controller's "already applied?" check.
             scheduleOverride: { [weak self] in self?.phoneOverride },

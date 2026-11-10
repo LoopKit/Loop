@@ -84,6 +84,14 @@ extension PodLoanPhoneController {
             return
         }
 
+        // The next loan's seed is this phone's dose history, and starting clears staging: the last
+        // loan's records are saved first.
+        guard !holdsUnsavedWatchRecords else {
+            deny("Ending the previous Sport Mode session. Tap Start again in a few seconds.")
+            saveUnsavedRecords()
+            return
+        }
+
         // A grant supersedes an inferred loan; the radio comes back first.
         if yieldingToInferredLoan {
             clearInferredLoanYield(reason: "a new Start request replaces it")

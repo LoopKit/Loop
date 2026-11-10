@@ -424,6 +424,28 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertEqual(snap.phase, .recoveredDrain, "and the watch rests back on its drain")
     }
 
+    /// The takeover's temp basal cancel goes home as a zero-length rate record: at a start without the
+    /// phone the cancel ends a temp basal only the phone has a record of.
+    func testTheTakeoverCancelIsRecordedForThePhone() async throws {
+        let controller = await makeController()
+        try controller.journal.begin(epoch: 7)
+        await controller.onMain {
+            controller.updateState { $0.epoch = 7 }
+            controller.phase = .active
+        }
+        let at = Date()
+        await controller.onMain {
+            controller.journalTakeoverCancel(at: at, epoch: 6)     // an older loan's: ignored
+            controller.journalTakeoverCancel(at: at, epoch: 7)
+        }
+        let records = controller.journal.unackedEvents().map(\.record)
+        XCTAssertEqual(records.count, 1)
+        XCTAssertEqual(records.first?.kind, .tempBasal)
+        XCTAssertEqual(records.first?.startDate, at)
+        XCTAssertEqual(records.first?.endDate, at, "zero length: it ends what ran before it")
+        XCTAssertEqual(records.first?.syncIdentifier, "takeover-cancel-7")
+    }
+
     /// Stale status queries, revokes and grants during a live loan answer with what the watch holds.
     func testStaleTrafficWhileActiveAnswersHoldsPod() async throws {
         let controller = await makeController()
