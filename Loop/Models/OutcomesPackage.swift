@@ -272,7 +272,7 @@ extension SetupChange.Item {
     /// Stable, unlocalized name for the shared manifest.
     var identifier: String {
         switch self {
-        case .therapySetting(let setting):
+        case .therapySetting(let setting, _):
             switch setting {
             case .glucoseTargetRange: return "glucoseTargetRange"
             case .preMealCorrectionRangeOverride: return "preMealCorrectionRange"
@@ -283,6 +283,8 @@ extension SetupChange.Item {
             case .insulinSensitivity: return "insulinSensitivity"
             case .none: return "none"
             }
+        case .profileSwitch:
+            return "profileSwitch"
         case .insulinType:
             return "insulinType"
         case .insulinModel:

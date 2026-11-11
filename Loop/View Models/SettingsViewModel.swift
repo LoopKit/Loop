@@ -76,6 +76,7 @@ class SettingsViewModel {
     let therapySettings: () -> TherapySettings
     var isOnboardingComplete: Bool
     let therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?
+    weak var therapyProfileDelegate: TherapyProfileDelegate?
     let presetHistory: TemporaryScheduleOverrideHistory
 
     private(set) var automaticDosingEnabled: Bool {
@@ -157,6 +158,7 @@ class SettingsViewModel {
                 availableSupports: [SupportUI],
                 isOnboardingComplete: Bool,
                 therapySettingsViewModelDelegate: TherapySettingsViewModelDelegate?,
+                therapyProfileDelegate: TherapyProfileDelegate?,
                 presetHistory: TemporaryScheduleOverrideHistory,
                 deliveryDelegate: DeliveryDelegate?,
                 deviceManager: DeviceDataManager?,
@@ -176,6 +178,7 @@ class SettingsViewModel {
         self.availableSupports = availableSupports
         self.isOnboardingComplete = isOnboardingComplete
         self.therapySettingsViewModelDelegate = therapySettingsViewModelDelegate
+        self.therapyProfileDelegate = therapyProfileDelegate
         self.presetHistory = presetHistory
         self.deliveryDelegate = deliveryDelegate
         self.deviceManager = deviceManager
@@ -256,6 +259,7 @@ extension SettingsViewModel {
                                  availableSupports: [],
                                  isOnboardingComplete: false,
                                  therapySettingsViewModelDelegate: nil,
+                                 therapyProfileDelegate: nil,
                                  presetHistory: TemporaryScheduleOverrideHistory(),
                                  deliveryDelegate: nil,
                                  deviceManager: nil

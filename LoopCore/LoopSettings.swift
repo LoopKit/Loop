@@ -43,7 +43,22 @@ public struct LoopSettings: Equatable {
     public var automaticDosingStrategy: AutomaticDosingStrategy = .tempBasalOnly
 
     public var defaultRapidActingModel: ExponentialInsulinModelPreset?
-    
+
+    /// Every profile with Default first, or empty when Default is the only one.
+    public var therapyProfiles: [TherapyProfile] = []
+
+    /// The profile the live schedules belong to; nil means Default.
+    public var activeProfileName: String?
+
+    /// The weekly profile starts.
+    public var scheduledSwitches: [ScheduledProfileSwitch] = []
+
+    /// Scheduled starts up to this instant are settled: run, superseded or skipped.
+    public var scheduledSwitchesSettledAt: Date?
+
+    /// What made the active profile change last.
+    public var activeProfileSwitchTrigger: TherapyProfileSwitchTrigger?
+
     public var glucoseUnit: LoopUnit? {
         return glucoseTargetRangeSchedule?.unit
     }
@@ -60,7 +75,12 @@ public struct LoopSettings: Equatable {
         maximumBolus: Double? = nil,
         suspendThreshold: GlucoseThreshold? = nil,
         automaticDosingStrategy: AutomaticDosingStrategy = .tempBasalOnly,
-        defaultRapidActingModel: ExponentialInsulinModelPreset? = nil
+        defaultRapidActingModel: ExponentialInsulinModelPreset? = nil,
+        therapyProfiles: [TherapyProfile] = [],
+        activeProfileName: String? = nil,
+        scheduledSwitches: [ScheduledProfileSwitch] = [],
+        scheduledSwitchesSettledAt: Date? = nil,
+        activeProfileSwitchTrigger: TherapyProfileSwitchTrigger? = nil
     ) {
         self.dosingEnabled = dosingEnabled
         self.glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
@@ -74,6 +94,58 @@ public struct LoopSettings: Equatable {
         self.suspendThreshold = suspendThreshold
         self.automaticDosingStrategy = automaticDosingStrategy
         self.defaultRapidActingModel = defaultRapidActingModel
+        self.therapyProfiles = therapyProfiles
+        self.activeProfileName = activeProfileName
+        self.scheduledSwitches = scheduledSwitches
+        self.scheduledSwitchesSettledAt = scheduledSwitchesSettledAt
+        self.activeProfileSwitchTrigger = activeProfileSwitchTrigger
+    }
+
+    /// The live schedules as a profile named after the active profile, or nil when any schedule is missing.
+    public var liveTherapyProfile: TherapyProfile? {
+        TherapyProfile(name: TherapyProfiles.activeName(activeProfileName),
+                       glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
+                       carbRatioSchedule: carbRatioSchedule,
+                       basalRateSchedule: basalRateSchedule,
+                       insulinSensitivitySchedule: insulinSensitivitySchedule)
+    }
+
+    /// Every profile with Default first. Before any other profile exists this is Default alone.
+    public var resolvedTherapyProfiles: [TherapyProfile] {
+        TherapyProfiles.resolved(therapyProfiles, live: TherapyProfiles.activeName(activeProfileName) == TherapyProfile.defaultName ? liveTherapyProfile : nil)
+    }
+
+    /// Writes the live schedules to the active profile, stores Default as nil and drops a list holding Default alone,
+    /// so the stored profiles always agree with the schedules Loop doses with. An active name that is not stored is
+    /// treated as Default and returned.
+    @discardableResult
+    public mutating func synchronizeTherapyProfiles() -> String? {
+        var unknownName: String?
+        if let name = activeProfileName, name != TherapyProfile.defaultName, !therapyProfiles.contains(where: { $0.name == name }) {
+            unknownName = name
+            activeProfileName = nil
+        }
+        if activeProfileName == TherapyProfile.defaultName {
+            activeProfileName = nil
+        }
+        var profiles = TherapyProfiles.synchronizingActive(therapyProfiles, activeProfileName: activeProfileName, live: liveTherapyProfile)
+        if profiles.count == 1, profiles[0].isDefault, activeProfileName == nil {
+            profiles = []
+        }
+        therapyProfiles = profiles
+        return unknownName
+    }
+
+    /// Sets the live schedules to `profile`'s values, keeping the live glucose unit and time zone.
+    public mutating func applyTherapyProfileSchedules(_ profile: TherapyProfile) {
+        var applied = profile.withGlucoseUnit(glucoseTargetRangeSchedule?.unit ?? profile.glucoseTargetRangeSchedule.unit)
+        if let timeZone = basalRateSchedule?.timeZone {
+            applied = applied.withTimeZone(timeZone)
+        }
+        glucoseTargetRangeSchedule = applied.glucoseTargetRangeSchedule
+        carbRatioSchedule = applied.carbRatioSchedule
+        basalRateSchedule = applied.basalRateSchedule
+        insulinSensitivitySchedule = applied.insulinSensitivitySchedule
     }
 }
 

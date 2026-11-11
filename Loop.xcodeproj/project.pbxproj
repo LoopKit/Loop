@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FC8D0BDACEFE2E545E2605E1 /* DeviceDataManagerTherapyProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB490099D0931F6B695C39E /* DeviceDataManagerTherapyProfileTests.swift */; };
+		2E3F5FD7B369167E41E59667 /* DeviceDataManagerScheduledProfileSwitchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFF676119621CDFDD638367 /* DeviceDataManagerScheduledProfileSwitchTests.swift */; };
 		101AA7370B0E499FBD88BB9F /* G7SensorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		921B7FAE002E40EFAB3F50C6 /* G7SensorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */; };
 		52CB9A826E3B3DFC4E483084 /* AlgorithmBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36421A4B9676EF68CDDC4ECD /* AlgorithmBridge.swift */; };
@@ -892,6 +894,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		ACB490099D0931F6B695C39E /* DeviceDataManagerTherapyProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDataManagerTherapyProfileTests.swift; sourceTree = "<group>"; };
+		0AFF676119621CDFDD638367 /* DeviceDataManagerScheduledProfileSwitchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDataManagerScheduledProfileSwitchTests.swift; sourceTree = "<group>"; };
 		F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = G7SensorKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		00A28F30399B460CABF4EDD2 /* SettingsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsProvider.swift; sourceTree = "<group>"; };
 		0FC34B523FE5A50C920506D5 /* Loop/Resources/Sounds/alarm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/alarm.caf; sourceTree = SOURCE_ROOT; };
@@ -1824,6 +1828,8 @@
 				C16575722538AFF6004AE16E /* CGMStalenessMonitorTests.swift */,
 				A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */,
 				C188599A2AF15E1B0010F21F /* DeviceDataManagerTests.swift */,
+				ACB490099D0931F6B695C39E /* DeviceDataManagerTherapyProfileTests.swift */,
+				0AFF676119621CDFDD638367 /* DeviceDataManagerScheduledProfileSwitchTests.swift */,
 				C16B983F26B4898800256B05 /* DoseEnactorTests.swift */,
 				E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */,
 				A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */,
@@ -4192,6 +4198,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC8D0BDACEFE2E545E2605E1 /* DeviceDataManagerTherapyProfileTests.swift in Sources */,
+				2E3F5FD7B369167E41E59667 /* DeviceDataManagerScheduledProfileSwitchTests.swift in Sources */,
 				A9DF02CB24F72B9E00B7C988 /* CriticalEventLogTests.swift in Sources */,
 				1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */,
 				C1777A6625A125F100595963 /* ManualEntryDoseViewModelTests.swift in Sources */,

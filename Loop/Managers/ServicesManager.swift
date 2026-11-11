@@ -30,6 +30,7 @@ class ServicesManager {
     weak var servicesManagerDelegate: ServicesManagerDelegate?
     weak var servicesManagerDosingDelegate: ServicesManagerDosingDelegate?
     weak var supportManager: SupportManager?
+    weak var therapyProfileDelegate: TherapyProfileDelegate?
     
     private var services = [Service]()
 
@@ -361,6 +362,83 @@ extension ServicesManager: ServiceDelegate {
         }
     }
     
+    func switchRemoteTherapyProfile(name: String, expectedFingerprint: String) async throws {
+        do {
+            try await availableTherapyProfileDelegate().activateTherapyProfile(named: name, expectedFingerprint: expectedFingerprint, trigger: .remote)
+            NotificationManager.sendRemoteTherapyProfileNotification(message: String(format: NSLocalizedString("Profile '%1$@' activated", comment: "Remote profile switch notification (1: profile name)"), name), category: .remoteProfile)
+        } catch {
+            NotificationManager.sendRemoteTherapyProfileNotification(message: String(format: NSLocalizedString("Profile '%1$@' not activated: %2$@", comment: "Remote profile switch failure notification (1: profile name, 2: reason)"), name, error.localizedDescription), category: .remoteProfileFailure)
+            throw error
+        }
+        await remoteDataServicesManager.performUpload(for: .settings)
+    }
+
+    func saveRemoteTherapyProfile(_ profile: TherapyProfile, originalName: String?, expectedFingerprint: String?) async throws {
+        do {
+            try await availableTherapyProfileDelegate().saveTherapyProfile(profile, originalName: originalName, expectedFingerprint: expectedFingerprint)
+            NotificationManager.sendRemoteTherapyProfileNotification(message: String(format: NSLocalizedString("Profile '%1$@' saved", comment: "Remote profile save notification (1: profile name)"), profile.name), category: .remoteProfile)
+        } catch {
+            NotificationManager.sendRemoteTherapyProfileNotification(message: String(format: NSLocalizedString("Profile '%1$@' not saved: %2$@", comment: "Remote profile save failure notification (1: profile name, 2: reason)"), profile.name, error.localizedDescription), category: .remoteProfileFailure)
+            throw error
+        }
+        await remoteDataServicesManager.performUpload(for: .settings)
+    }
+
+    func deleteRemoteTherapyProfile(name: String, expectedFingerprint: String) async throws {
+        do {
+            let delegate = try availableTherapyProfileDelegate()
+            let removedSwitches = delegate.scheduledProfileSwitches.filter { $0.profileName == name }.count
+            try await delegate.deleteTherapyProfile(named: name, expectedFingerprint: expectedFingerprint)
+            var message = String(format: NSLocalizedString("Profile '%1$@' deleted", comment: "Remote profile delete notification (1: profile name)"), name)
+            if removedSwitches > 0 {
+                message += ", " + String(format: NSLocalizedString("%1$d scheduled switches removed", comment: "Remote profile delete notification: scheduled switches to the deleted profile were removed (1: number of scheduled switches)"), removedSwitches)
+            }
+            NotificationManager.sendRemoteTherapyProfileNotification(message: message, category: .remoteProfile)
+        } catch {
+            NotificationManager.sendRemoteTherapyProfileNotification(message: String(format: NSLocalizedString("Profile '%1$@' not deleted: %2$@", comment: "Remote profile delete failure notification (1: profile name, 2: reason)"), name, error.localizedDescription), category: .remoteProfileFailure)
+            throw error
+        }
+        await remoteDataServicesManager.performUpload(for: .settings)
+    }
+
+    func saveRemoteScheduledProfileSwitches(_ entries: [ScheduledProfileSwitch], expectedFingerprint: String) async throws {
+        do {
+            try await availableTherapyProfileDelegate().saveScheduledProfileSwitches(entries, expectedFingerprint: expectedFingerprint)
+            let descriptions = ScheduledProfileSwitches.sortedAsWeek(entries).map { entry in
+                entry.paused
+                    ? String(format: NSLocalizedString("%1$@ (paused)", comment: "A paused scheduled switch in a notification (1: scheduled switch)"), entry.localizedDescription)
+                    : entry.localizedDescription
+            }
+            let message = descriptions.isEmpty
+                ? NSLocalizedString("All scheduled switches were removed remotely", comment: "Remote scheduled switches notification when the list was cleared")
+                : String(format: NSLocalizedString("Scheduled switches changed remotely: %1$@", comment: "Remote scheduled switches notification (1: the scheduled switches)"), descriptions.joined(separator: ", "))
+            NotificationManager.sendRemoteTherapyProfileNotification(message: message, category: .remoteProfile)
+        } catch {
+            NotificationManager.sendRemoteTherapyProfileNotification(message: String(format: NSLocalizedString("Scheduled switches not saved: %1$@", comment: "Remote scheduled switches failure notification (1: reason)"), error.localizedDescription), category: .remoteProfileFailure)
+            throw error
+        }
+        await remoteDataServicesManager.performUpload(for: .settings)
+    }
+
+    private func availableTherapyProfileDelegate() throws -> TherapyProfileDelegate {
+        guard let therapyProfileDelegate else {
+            throw TherapyProfileActionError.unavailable
+        }
+        return therapyProfileDelegate
+    }
+
+    enum TherapyProfileActionError: LocalizedError {
+
+        case unavailable
+
+        var errorDescription: String? {
+            switch self {
+            case .unavailable:
+                return NSLocalizedString("Profiles are not available", comment: "Therapy profile action error description: no profile handler.")
+            }
+        }
+    }
+
     enum BolusActionError: LocalizedError {
         
         case invalidBolus

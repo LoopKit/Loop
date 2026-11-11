@@ -248,8 +248,12 @@ extension SetupChange {
 extension SetupChange.Item {
     var title: String {
         switch self {
-        case .therapySetting(let setting):
+        case .therapySetting(let setting, nil):
             return setting.title
+        case .therapySetting(let setting, let profile?):
+            return String(format: NSLocalizedString("%1$@ of profile %2$@", comment: "Setup change item for a therapy setting of a therapy profile (1: setting name, 2: profile name)"), setting.title, profile)
+        case .profileSwitch(let profile, let previousProfile):
+            return String(format: NSLocalizedString("Switched to profile %1$@ (from %2$@)", comment: "Setup change item for a switch of therapy profile (1: profile switched to, 2: profile switched from)"), profile, previousProfile)
         case .insulinType:
             return NSLocalizedString("Insulin Type", comment: "Setup change item for the insulin type")
         case .insulinModel:

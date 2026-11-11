@@ -12,7 +12,10 @@ import LoopAlgorithm
 /// A change to the settings that shape dosing, used to tell how long a setup ran.
 struct SetupChange: Equatable {
     enum Item: Equatable {
-        case therapySetting(TherapySetting)
+        /// A therapy setting changed; `profile` names the active profile when profiles other than Default exist.
+        case therapySetting(TherapySetting, profile: String? = nil)
+        /// Another profile became active.
+        case profileSwitch(to: String, from: String)
         case insulinType
         case insulinModel
         case dosingStrategy
@@ -95,18 +98,32 @@ struct SetupChange: Equatable {
 
     static func differences(from a: StoredSettings, to b: StoredSettings) -> [Item] {
         var items: [Item] = []
-        if a.basalRateSchedule?.items != b.basalRateSchedule?.items {
-            items.append(.therapySetting(.basalRate))
-        }
-        if !sameSchedule(a.insulinSensitivitySchedule, b.insulinSensitivitySchedule) {
-            items.append(.therapySetting(.insulinSensitivity))
-        }
-        if !sameSchedule(a.carbRatioSchedule, b.carbRatioSchedule) {
-            items.append(.therapySetting(.carbRatio))
-        }
-        if !sameRanges(a.glucoseTargetRangeSchedule?.quantityRanges.map(\.value), b.glucoseTargetRangeSchedule?.quantityRanges.map(\.value))
-            || a.glucoseTargetRangeSchedule?.quantityRanges.map(\.startTime) != b.glucoseTargetRangeSchedule?.quantityRanges.map(\.startTime) {
-            items.append(.therapySetting(.glucoseTargetRange))
+        let previousProfile = TherapyProfiles.activeName(a.activeProfileName)
+        let profile = TherapyProfiles.activeName(b.activeProfileName)
+        // The active profile cannot be deleted, so a previous profile missing from the new settings was renamed
+        if previousProfile != profile, b.resolvedTherapyProfiles.contains(where: { $0.name == previousProfile }) {
+            // The schedules changed with the switch, to the values of the profile switched to. A scheduled switch
+            // between two stored profiles repeats a setup that is already in place.
+            let isScheduledSwitchBetweenStoredProfiles = b.activeProfileSwitchTrigger == .scheduled
+                && a.resolvedTherapyProfiles.contains(where: { $0.name == profile })
+            if !isScheduledSwitchBetweenStoredProfiles {
+                items.append(.profileSwitch(to: profile, from: previousProfile))
+            }
+        } else {
+            let editedProfile = b.therapyProfiles.isEmpty ? nil : profile
+            if a.basalRateSchedule?.items != b.basalRateSchedule?.items {
+                items.append(.therapySetting(.basalRate, profile: editedProfile))
+            }
+            if !sameSchedule(a.insulinSensitivitySchedule, b.insulinSensitivitySchedule) {
+                items.append(.therapySetting(.insulinSensitivity, profile: editedProfile))
+            }
+            if !sameSchedule(a.carbRatioSchedule, b.carbRatioSchedule) {
+                items.append(.therapySetting(.carbRatio, profile: editedProfile))
+            }
+            if !sameRanges(a.glucoseTargetRangeSchedule?.quantityRanges.map(\.value), b.glucoseTargetRangeSchedule?.quantityRanges.map(\.value))
+                || a.glucoseTargetRangeSchedule?.quantityRanges.map(\.startTime) != b.glucoseTargetRangeSchedule?.quantityRanges.map(\.startTime) {
+                items.append(.therapySetting(.glucoseTargetRange, profile: editedProfile))
+            }
         }
         if !sameRanges(a.preMealTargetRange.map { [$0] }, b.preMealTargetRange.map { [$0] }) {
             items.append(.therapySetting(.preMealCorrectionRangeOverride))

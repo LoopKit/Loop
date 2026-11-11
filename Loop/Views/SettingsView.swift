@@ -55,6 +55,7 @@ struct SettingsView: View {
             
             case favoriteFoods
             case presets
+            case profiles
         }
     }
     
@@ -156,6 +157,10 @@ struct SettingsView: View {
                         }
                     case .favoriteFoods:
                         FavoriteFoodsView(insightsDelegate: viewModel.favoriteFoodInsightsDelegate)
+                    case .profiles:
+                        TherapyProfilesView(viewModel: TherapyProfilesViewModel(profileDelegate: viewModel.therapyProfileDelegate,
+                                                                therapySettingsDelegate: viewModel.therapySettingsViewModelDelegate,
+                                                                therapySettings: viewModel.therapySettings))
                     }
                 }
                 .environmentObject(displayGlucosePreference)
@@ -463,6 +468,13 @@ extension SettingsView {
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
                 .accessibilityIdentifier("button_TherapySettings")
             }
+
+            LargeButton(action: { sheet = .profiles },
+                        includeArrow: true,
+                        imageView: Image(systemName: "person.2.crop.square.stack").font(.system(size: 28, weight: .semibold)).foregroundColor(.accentColor),
+                        label: NSLocalizedString("Profiles", comment: "Title text for button to Profiles"),
+                        descriptiveText: String(format: NSLocalizedString("Active: %1$@", comment: "Descriptive text for Profiles (1: active profile name)"), TherapyProfiles.activeName(viewModel.therapySettings().activeProfileName)))
+                .accessibilityIdentifier("button_Profiles")
 
             ForEach(pluginMenuItems.filter {$0.section == .configuration}) { item in
                 item.view

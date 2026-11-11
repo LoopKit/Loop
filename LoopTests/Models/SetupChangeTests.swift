@@ -160,4 +160,81 @@ final class SetupChangeTests: XCTestCase {
         let history = history([settings(at: 5)], [experiments(at: 1, nil), experiments(at: 3, [])])
         XCTAssertEqual(history.start, start.addingTimeInterval(.hours(3)))
     }
+
+    // MARK: Therapy profiles
+
+    private func therapyProfile(_ name: String, basal: Double, isf: Double = 50) -> TherapyProfile {
+        let timeZone = TimeZone(identifier: "America/Chicago")!
+        return TherapyProfile(name: name,
+                              glucoseTargetRangeSchedule: GlucoseRangeSchedule(unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: DoubleRange(minValue: 100, maxValue: 110))], timeZone: timeZone)!,
+                              carbRatioSchedule: CarbRatioSchedule(unit: .gram, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 10)], timeZone: timeZone)!,
+                              basalRateSchedule: BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: basal)], timeZone: timeZone)!,
+                              insulinSensitivitySchedule: InsulinSensitivitySchedule(unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: isf)], timeZone: timeZone)!)
+    }
+
+    /// Settings whose live schedules are those of the active profile in `profiles`.
+    private func settings(at hours: Double, active: String?, profiles: [TherapyProfile]) -> StoredSettings {
+        let live = profiles.first { $0.name == TherapyProfiles.activeName(active) }!
+        var settings = settings(at: hours, basal: live.basalRateSchedule.items[0].value, isf: live.insulinSensitivitySchedule.items[0].value)
+        settings.glucoseTargetRangeSchedule = live.glucoseTargetRangeSchedule
+        settings.carbRatioSchedule = live.carbRatioSchedule
+        settings.therapyProfiles = profiles
+        settings.activeProfileName = active
+        return settings
+    }
+
+    func testProfileSwitchIsOneChange() {
+        let profiles = [therapyProfile("Default", basal: 1.0), therapyProfile("Weekend", basal: 0.7, isf: 60)]
+        let changes = SetupChange.changes(in: [settings(at: 0, active: nil, profiles: profiles), settings(at: 10, active: "Weekend", profiles: profiles)])
+        XCTAssertEqual(changes.map(\.items), [[.profileSwitch(to: "Weekend", from: "Default")]])
+    }
+
+    func testScheduledSwitchBetweenStoredProfilesIsNoSetupChange() {
+        let profiles = [therapyProfile("Default", basal: 1.0), therapyProfile("Weekend", basal: 0.7, isf: 60)]
+        var scheduled = settings(at: 10, active: "Weekend", profiles: profiles)
+        scheduled.activeProfileSwitchTrigger = .scheduled
+        var back = settings(at: 20, active: nil, profiles: profiles)
+        back.activeProfileSwitchTrigger = .local
+        let changes = SetupChange.changes(in: [settings(at: 0, active: nil, profiles: profiles), scheduled, back])
+        XCTAssertEqual(changes.map(\.items), [[.profileSwitch(to: "Default", from: "Weekend")]])
+    }
+
+    func testEditOfActiveProfileNamesTheProfile() {
+        let before = [therapyProfile("Default", basal: 1.0), therapyProfile("Weekend", basal: 0.7)]
+        let after = [therapyProfile("Default", basal: 1.0), therapyProfile("Weekend", basal: 0.8)]
+        let changes = SetupChange.changes(in: [settings(at: 0, active: "Weekend", profiles: before), settings(at: 10, active: "Weekend", profiles: after)])
+        XCTAssertEqual(changes.map(\.items), [[.therapySetting(.basalRate, profile: "Weekend")]])
+    }
+
+    func testEditWithoutProfilesNamesNoProfile() {
+        let changes = SetupChange.changes(in: [settings(at: 0), settings(at: 10, basal: 1.2)])
+        XCTAssertEqual(changes.map(\.items), [[.therapySetting(.basalRate)]])
+    }
+
+    func testProfilesThatAreNotActiveAreNoSetupChange() {
+        let defaultProfile = therapyProfile("Default", basal: 1.0)
+        let history = [
+            settings(at: 0, active: nil, profiles: [defaultProfile]),
+            // Weekend is added, then renamed, edited and deleted
+            settings(at: 10, active: nil, profiles: [defaultProfile, therapyProfile("Weekend", basal: 0.7)]),
+            settings(at: 20, active: nil, profiles: [defaultProfile, therapyProfile("Saturday", basal: 0.7)]),
+            settings(at: 30, active: nil, profiles: [defaultProfile, therapyProfile("Saturday", basal: 0.6)]),
+            settings(at: 40, active: nil, profiles: [defaultProfile]),
+        ]
+        XCTAssertEqual(SetupChange.changes(in: history), [])
+    }
+
+    func testRenamingTheActiveProfileIsNoSetupChange() {
+        let before = [therapyProfile("Default", basal: 1.0), therapyProfile("Weekend", basal: 0.7)]
+        let after = [therapyProfile("Default", basal: 1.0), therapyProfile("Saturday", basal: 0.7)]
+        let changes = SetupChange.changes(in: [settings(at: 0, active: "Weekend", profiles: before), settings(at: 10, active: "Saturday", profiles: after)])
+        XCTAssertEqual(changes, [])
+    }
+
+    func testProfileSwitchItemTitleAndIdentifier() {
+        let item = SetupChange.Item.profileSwitch(to: "Weekend", from: "Default")
+        XCTAssertEqual(item.title, "Switched to profile Weekend (from Default)")
+        XCTAssertEqual(item.identifier, "profileSwitch")
+        XCTAssertEqual(SetupChange.Item.therapySetting(.basalRate, profile: "Weekend").identifier, "basalRate")
+    }
 }
