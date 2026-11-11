@@ -28,6 +28,7 @@ final class CarbEntryViewModel: ObservableObject {
         
         case maxQuantityExceded
         case warningQuantityValidation
+        case mealReminderSchedulingFailure
     }
     
     enum Warning: Identifiable {
@@ -60,8 +61,19 @@ final class CarbEntryViewModel: ObservableObject {
     var maxCarbEntryQuantity = LoopConstants.maxCarbEntryQuantity
     var warningCarbEntryQuantity = LoopConstants.warningCarbEntryQuantity
     
-    @Published var time = Date()
-    private var date = Date()
+    @Published var time: Date {
+        didSet {
+            let currentTime = now()
+            if mealReminderRequested, oldValue <= currentTime || time <= currentTime {
+                setMealReminderRequested(false)
+            }
+        }
+    }
+    @Published private(set) var mealReminderRequested = false
+    @Published private(set) var isSavingReminder = false
+    private var mealReminderWasEdited = false
+    private var hasLoadedMealReminder = false
+    private let date: Date
     var minimumDate: Date {
         get { date.addingTimeInterval(LoopConstants.maxCarbEntryPastTime) }
     }
@@ -110,11 +122,16 @@ final class CarbEntryViewModel: ObservableObject {
     private lazy var cancellables = Set<AnyCancellable>()
     
     /// Initalizer for when`CarbEntryView` is presented from the home screen
-    init(delegate: CarbEntryViewModelDelegate) {
+    init(delegate: CarbEntryViewModelDelegate, now: @escaping () -> Date = Date.init, mealReminderScheduler: MealReminderScheduling? = nil) {
+        let date = now()
+        self.date = date
+        self.now = now
+        self.mealReminderScheduler = mealReminderScheduler ?? MealReminderManager.shared
         self.delegate = delegate
         self.absorptionTime = delegate.defaultAbsorptionTimes.medium
         self.defaultAbsorptionTimes = delegate.defaultAbsorptionTimes
         self.shouldBeginEditingQuantity = true
+        self.time = date
         
         observeAbsorptionTimeChange()
         observeFavoriteFoodChange()
@@ -123,7 +140,10 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     /// Initalizer for when`CarbEntryView` has an entry to edit
-    init(delegate: CarbEntryViewModelDelegate, originalCarbEntry: StoredCarbEntry) {
+    init(delegate: CarbEntryViewModelDelegate, originalCarbEntry: StoredCarbEntry, now: @escaping () -> Date = Date.init, mealReminderScheduler: MealReminderScheduling? = nil) {
+        self.date = now()
+        self.now = now
+        self.mealReminderScheduler = mealReminderScheduler ?? MealReminderManager.shared
         self.delegate = delegate
         self.originalCarbEntry = originalCarbEntry
         self.defaultAbsorptionTimes = delegate.defaultAbsorptionTimes
@@ -147,15 +167,31 @@ final class CarbEntryViewModel: ObservableObject {
     
     var originalCarbEntry: StoredCarbEntry? = nil
     private let newEntrySyncIdentifier = UUID().uuidString
+    private let now: () -> Date
+    private let mealReminderScheduler: MealReminderScheduling
+
+    func canSetMealReminder(at date: Date? = nil) -> Bool {
+        time > (date ?? now())
+    }
+
+    func setMealReminderRequested(_ requested: Bool) {
+        guard mealReminderRequested != requested else { return }
+        mealReminderWasEdited = true
+        mealReminderRequested = requested
+    }
+
+    func loadMealReminder() async {
+        guard let originalCarbEntry, !hasLoadedMealReminder else { return }
+        hasLoadedMealReminder = true
+        let hasReminder = await mealReminderScheduler.hasPendingReminder(for: originalCarbEntry)
+        // A lookup must not overwrite a choice made while it was in flight.
+        guard !mealReminderWasEdited else { return }
+        mealReminderRequested = hasReminder && canSetMealReminder()
+    }
 
     private var carbEntryChange: CarbEntryChange? {
         if let quantity = carbsQuantity, quantity != 0 {
-            let favoriteFoodID = selectedFavoriteFoodIndex == -1 ? nil : favoriteFoods[selectedFavoriteFoodIndex].id
-
-            if let o = originalCarbEntry, o.quantity.doubleValue(for: preferredCarbUnit) == quantity && o.startDate == time && o.foodType == foodType && o.absorptionTime == absorptionTime, o.favoriteFoodID == favoriteFoodID {
-                return nil  // No changes were made
-            }
-
+            let favoriteFoodID = selectedFavoriteFood?.id
             let carbsQuantity = LoopQuantity(unit: preferredCarbUnit, doubleValue: quantity)
             let entryFoodType = usesCustomFoodType ? foodType : selectedDefaultAbsorptionTimeEmoji
 
@@ -171,6 +207,15 @@ final class CarbEntryViewModel: ObservableObject {
                 ))
             }
 
+            let originalFavoriteFoodID = favoriteFoods.first { $0.id == originalCarbEntry.favoriteFoodID }?.id
+            if originalCarbEntry.quantity.doubleValue(for: preferredCarbUnit) == quantity,
+               originalCarbEntry.startDate == time,
+               (originalCarbEntry.foodType ?? "") == entryFoodType,
+               (originalCarbEntry.absorptionTime ?? .hours(3)) == absorptionTime,
+               originalFavoriteFoodID == favoriteFoodID {
+                return nil
+            }
+
             return .edit(originalCarbEntry, CarbEntryUpdate(
                 date: date,
                 quantity: carbsQuantity,
@@ -184,6 +229,34 @@ final class CarbEntryViewModel: ObservableObject {
             return nil
         }
     }
+
+    private var reminderOnlyEntry: StoredCarbEntry? {
+        guard mealReminderWasEdited, carbEntryChange == nil, let originalCarbEntry,
+              carbsQuantity == originalCarbEntry.quantity.doubleValue(for: preferredCarbUnit) else { return nil }
+        return originalCarbEntry
+    }
+
+    var isReminderOnlyChange: Bool { reminderOnlyEntry != nil }
+
+    func saveReminderOnly() async -> Bool {
+        guard !isSavingReminder, let entry = reminderOnlyEntry else { return false }
+        isSavingReminder = true
+        defer { isSavingReminder = false }
+
+        do {
+            if mealReminderAction == .set {
+                try await mealReminderScheduler.scheduleReminder(for: entry, replacing: nil)
+            } else {
+                mealReminderScheduler.cancelReminder(for: entry)
+            }
+            mealReminderWasEdited = false
+            return true
+        } catch {
+            log.error("Failed to schedule meal reminder: %{public}@", String(describing: error))
+            alert = .mealReminderSchedulingFailure
+            return false
+        }
+    }
     
     var saveFavoriteFoodButtonDisabled: Bool {
         get {
@@ -195,15 +268,12 @@ final class CarbEntryViewModel: ObservableObject {
     }
     
     var continueButtonDisabled: Bool {
-        get { carbEntryChange == nil }
+        isSavingReminder || (carbEntryChange == nil && !isReminderOnlyChange)
     }
     
     // MARK: - Continue to Bolus and Carb Quantity Warnings
     func continueToBolus() {
-        guard carbEntryChange != nil else {
-            return
-        }
-        
+        guard !isSavingReminder, carbEntryChange != nil else { return }
         validateInputAndContinue()
     }
     
@@ -223,17 +293,23 @@ final class CarbEntryViewModel: ObservableObject {
             return
         }
         
-        Task { @MainActor in
-            setBolusViewModel()
-        }
+        setBolusViewModel()
     }
         
-    @MainActor private func setBolusViewModel() {
+    private var mealReminderAction: MealReminderAction {
+        guard canSetMealReminder() else { return originalCarbEntry == nil ? .keep : .clear }
+        guard mealReminderWasEdited else { return .keep }
+        return mealReminderRequested ? .set : .clear
+    }
+
+    private func setBolusViewModel() {
         let viewModel = BolusEntryViewModel(
             delegate: delegate,
             screenWidth: UIScreen.main.bounds.width,
             carbEntryChange: carbEntryChange,
-            selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji
+            selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji,
+            mealReminderAction: mealReminderAction,
+            mealReminderScheduler: mealReminderScheduler
         )
         
         viewModel.analyticsServicesManager = analyticsServicesManager
@@ -242,6 +318,17 @@ final class CarbEntryViewModel: ObservableObject {
         
         analyticsServicesManager?.didDisplayBolusScreen()
     }
+
+    func returnFromBolus() {
+        if let bolusViewModel, let savedEntry = bolusViewModel.savedCarbEntry {
+            originalCarbEntry = savedEntry
+            if bolusViewModel.mealReminderAction != .keep {
+                setMealReminderRequested(bolusViewModel.mealReminderAction == .set && canSetMealReminder())
+                mealReminderWasEdited = true
+            }
+        }
+        bolusViewModel = nil
+    }
     
     func clearAlert() {
         self.alert = nil
@@ -249,9 +336,7 @@ final class CarbEntryViewModel: ObservableObject {
     
     func clearAlertAndContinueToBolus() {
         self.alert = nil
-        Task { @MainActor in
-            setBolusViewModel()
-        }
+        setBolusViewModel()
     }
     
     // MARK: - Favorite Foods
