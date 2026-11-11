@@ -47,6 +47,8 @@ final class SmartwatchManagerHost {
     private var pendingChanges: SmartwatchHostDataChange = []
     private var notificationObservers: [Any] = []
     private var cancellables: Set<AnyCancellable> = []
+    /// The Closed Loop setting the watch was last told about.
+    private var observedDosingEnabled = false
     /// When a test alert last went to the watch. Loop never retracts test alerts,
     /// so the host clears them once they have shown for `watchTestAlertDuration`.
     var lastWatchTestAlertAt: Date?
@@ -114,6 +116,37 @@ final class SmartwatchManagerHost {
             .removeDuplicates()
             .sink { [weak self] _ in self?.signal(.loop) }
             .store(in: &cancellables)
+
+        // The Closed Loop switch sets the setting directly and posts no
+        // LoopDataUpdated, so it is observed here, as Loop's status screen does.
+        observedDosingEnabled = settingsManager.dosingEnabled
+        withObservationTracking(of: settingsManager.dosingEnabled) { [weak self] enabled in
+            Task { @MainActor in
+                guard let self, Self.isNewDosingEnabled(enabled, last: &self.observedDosingEnabled) else {
+                    return
+                }
+                self.signal(.loop)
+            }
+        }
+
+        // The glucose display limits: a changed alert profile, or another one active.
+        let glucoseAlertManager = deviceManager.glucoseAlertManager
+        glucoseAlertManager.$profiles
+            .dropFirst()
+            .map { _ in () }
+            .merge(with: glucoseAlertManager.$activeProfileID.dropFirst().removeDuplicates().map { _ in () })
+            .sink { [weak self] in self?.signal(.settings) }
+            .store(in: &cancellables)
+    }
+
+    /// Whether the Closed Loop setting differs from the one the watch was last
+    /// told about; records it when it does.
+    static func isNewDosingEnabled(_ enabled: Bool, last: inout Bool) -> Bool {
+        guard enabled != last else {
+            return false
+        }
+        last = enabled
+        return true
     }
 
     /// Tells the watch manager that everything changed: for a new watch manager,
@@ -322,6 +355,19 @@ extension SmartwatchManagerHost: SmartwatchManagerDelegate {
 
     func smartwatchManagerCorrectionRange(_ manager: SmartwatchManager) async -> ClosedRange<LoopQuantity>? {
         loopDataManager.temporaryPresetsManager.effectiveCorrectionRangeSchedule()?.quantityRange(at: Date())
+    }
+
+    /// Loop has no display limits of its own: the low and high of the active
+    /// glucose alert profile, whether or not those alerts are on.
+    func smartwatchManagerGlucoseDisplayLimits(_ manager: SmartwatchManager) async -> SmartwatchGlucoseDisplayLimits? {
+        Self.displayLimits(from: deviceManager.glucoseAlertManager.activeConfiguration())
+    }
+
+    static func displayLimits(from configuration: GlucoseAlertConfiguration) -> SmartwatchGlucoseDisplayLimits? {
+        SmartwatchGlucoseDisplayLimits(
+            low: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: configuration.lowThresholdMgDL),
+            high: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: configuration.highThresholdMgDL)
+        )
     }
 
     func smartwatchManagerOverridePresets(_ manager: SmartwatchManager) async -> [TemporaryPreset] {
