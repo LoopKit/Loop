@@ -3940,7 +3940,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rotiți coroana digitală pentru bolus"
+            "value" : "Rotiți coroana digitală \npentru bolus"
           }
         },
         "ru" : {

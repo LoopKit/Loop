@@ -17646,7 +17646,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activați"
+            "value" : "Activează"
           }
         },
         "ru" : {
@@ -25633,7 +25633,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loop 检测到一次可能遗漏的进食，并估算了碳水量。请根据实际摄入情况修改碳水数值。"
+            "value" : "Loop 检测到你可能吃了东西却忘记记录，并估算了碳水化合物的摄入量。请根据实际吃下的食物，调整碳水克数。"
           }
         }
       }
@@ -26950,7 +26950,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "错过用餐通知"
+            "value" : "漏记餐食提醒"
           }
         }
       }
@@ -30308,7 +30308,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可能未进餐"
+            "value" : "可能漏记了餐食"
           }
         }
       }
