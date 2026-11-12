@@ -1560,8 +1560,9 @@ extension DeviceDataManager: TherapyProfileDelegate {
     }
 
     /// Saves `profile`; for the active profile the basal schedule goes to the pump first. Values that are already
-    /// stored (a rename or a copy) are not validated again.
+    /// stored (a rename or a copy) are not validated again, and glucose values sent back unchanged keep their stored value.
     private func performSaveTherapyProfile(_ profile: TherapyProfile, originalName: String?, expectedFingerprint: String?) async throws {
+        var profile = profile
         try beginTherapyProfileChange()
         defer { therapyProfileChangeInProgress = false }
 
@@ -1573,6 +1574,7 @@ extension DeviceDataManager: TherapyProfileDelegate {
             }
             try checkFingerprint(of: stored, expected: expectedFingerprint)
             original = stored
+            profile = profile.keepingStoredGlucoseValues(of: stored)
         }
         var validated: TherapyProfile
         let holdsStoredValues = original.map { profile.hasSameValues(as: $0) } ?? therapyProfiles.contains { profile.hasSameValues(as: $0) }
