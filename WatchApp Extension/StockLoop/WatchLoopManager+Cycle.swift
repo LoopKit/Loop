@@ -42,7 +42,9 @@ extension WatchLoopManager {
     /// run. The cycle doses only with the watch's loop closed, and its decision is kept only while the
     /// pod is held.
     func loop() {
+        cyclesWaiting += 1
         onLane {
+            self.cyclesWaiting -= 1
             self.log.default("Loop running")
             self.lastLoopError = nil
             self.lastRecommendation = nil
@@ -122,14 +124,32 @@ extension WatchLoopManager {
                 self.updatePredictionBreakdown()
             }
 
-            // Both arms, as stock's `loop()` ends: the display run, its forced
-            // "updateRemoteRecommendation" decision, then the stock pages' context.
-            await self.updateDisplayStateOnLane(forceStoreRemoteRecommendation: true)
-
-            // Stock's predicted-low alert reads `LoopDataManager.predictedGlucose`, the display
-            // run's forecast, on both arms.
-            self.evaluatePredictedLowAlert(self.displayState.output?.predictedGlucose.map(\.loopKit))
+            // The open carb screen's recommendation goes ahead of the display run: it is asked for here,
+            // after the decision and its dose are booked, and the rest of the cycle takes its turn behind it.
+            // Counted as a cycle waiting, so a store change's display run in between is left to it.
+            if let recompute = self.recommendAfterDecision, recompute() {
+                self.cyclesWaiting += 1
+                self.onLane {
+                    self.cyclesWaiting -= 1
+                    // A loan that ended meanwhile has nothing left to display or warn about.
+                    guard self.pumpManager != nil else { return }
+                    await self.finishCycleOnLane()
+                }
+            } else {
+                await self.finishCycleOnLane()
+            }
         }
+    }
+
+    /// How a cycle ends, after its decision. Lane work.
+    func finishCycleOnLane() async {
+        // Both arms, as stock's `loop()` ends: the display run, its forced
+        // "updateRemoteRecommendation" decision, then the stock pages' context.
+        await updateDisplayStateOnLane(forceStoreRemoteRecommendation: true)
+
+        // Stock's predicted-low alert reads `LoopDataManager.predictedGlucose`, the display
+        // run's forecast, on both arms.
+        evaluatePredictedLowAlert(displayState.output?.predictedGlucose.map(\.loopKit))
     }
 
     /// The cycle's fetch, as stock's `LoopDataManager.fetchData`, with the watch's sources (`LoopCycleHost`).
@@ -185,22 +205,35 @@ extension WatchLoopManager {
         }
     }
 
-    /// Stock's other triggers for the display run: a change in the carb, glucose or dose store, an
-    /// override set or cleared, and the loop mode. No debounce, as stock. Only while a pod is held:
+    /// Stock's other triggers for the display run: a change in the carb or dose store, an override
+    /// set or cleared, the loop mode, and a new reading that runs no cycle. Unlike stock, at most one
+    /// waits: a display run on the watch takes seconds, and each one waiting delays the cycle behind
+    /// it. A request made while one waits is covered by it, and one whose turn comes with a cycle
+    /// waiting is left to that cycle, which ends with the display run. Only while a pod is held:
     /// between loans the display run is not refreshed, as before. The run writes to none of the
     /// stores observed (only to the dosing decision store), so it cannot retrigger itself.
     func updateDisplayStateForChange() {
+        if displayRunWanted { return }
+        displayRunWanted = true
         onLane {
-            guard self.pumpManager != nil else { return }
+            // Still wanted: any display run since, a cycle's included, has covered it.
+            guard self.displayRunWanted else { return }
+            guard self.pumpManager != nil, self.cyclesWaiting == 0 else {
+                self.displayRunWanted = false
+                return
+            }
             await self.updateDisplayStateOnLane()
         }
     }
 
     /// Lane work.
     func updateDisplayStateOnLane(forceStoreRemoteRecommendation: Bool = false) async {
+        // Cleared before the run reads the stores, so a change during it asks for another.
+        displayRunWanted = false
+        noteDisplayRunStarted()
         displayState = await cycle.displayState()
 
-        await publishHUDContext()
+        publishHUDContext()
         refreshGlanceData()
 
         await updateRemoteRecommendation(force: forceStoreRemoteRecommendation)

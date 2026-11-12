@@ -92,30 +92,71 @@ extension CarbAndBolusFlowViewModel {
 
     /// During a loan the watch computes the recommendation: the phone's books are frozen, and it
     /// may be off. A failure is announced, not left as a 0 dial.
-    func recommendLoanBolus(with entry: NewCarbEntry?, session: StockLoopSession) async {
-        isComputingRecommendedBolus = true
-        defer { isComputingRecommendedBolus = false }
+    ///
+    /// One at a time: the watch's display updates ask again every few seconds after a reading (the
+    /// cycle's display run, then each store change its dose makes), and each run takes a second or
+    /// more. A request made while one is out is remembered and run once when it returns, so the number
+    /// shown at rest was always computed after the last request. "Calculating" shows only while the
+    /// number on screen is not for the entry considered; a recompute of the same entry keeps its number
+    /// until the new one replaces it (stock's flow then leaves the confirmation, as for any change).
+    func recommendLoanBolus(with entry: NewCarbEntry?, session: StockLoopSession) {
+        if !(loanRecommendationIsForEntry && recommendedBolusAmount != nil) {
+            isComputingRecommendedBolus = true
+        }
+        if loanRecommendationInFlight {
+            loanRecommendationStale = true
+            return
+        }
+        loanRecommendationInFlight = true
+        session.stack.loopManager.recommendManualBolus(potentialCarbEntry: entry) { [weak self] result in
+            Task { @MainActor in self?.loanRecommendationArrived(result, for: entry, session: session) }
+        }
+    }
 
-        let result: Swift.Result<ManualBolusRecommendation?, Swift.Error> = await withCheckedContinuation { continuation in
-            session.stack.loopManager.recommendManualBolus(potentialCarbEntry: entry) { result in
-                continuation.resume(returning: result)
+    private func loanRecommendationArrived(_ result: Swift.Result<ManualBolusRecommendation?, Swift.Error>,
+                                           for entry: NewCarbEntry?, session: StockLoopSession) {
+        loanRecommendationInFlight = false
+        let askedAgain = loanRecommendationStale
+        loanRecommendationStale = false
+
+        // Superseded otherwise: the carbs under consideration changed.
+        if entry == carbEntryUnderConsideration {
+            switch result {
+            case .success(let recommendation):
+                SportLog.event("bolus-ui", String(format: "bolus recommended for %.0f g carbs: %.2f U",
+                                                  entry?.quantity.doubleValue(for: .gram) ?? 0,
+                                                  recommendation?.amount ?? 0))
+                if recommendedBolusAmount != recommendation?.amount {
+                    recommendedBolusAmount = recommendation?.amount
+                }
+                loanRecommendationIsForEntry = true
+            case .failure(let error):
+                SportLog.event("bolus-ui", "bolus recommendation failed: \(error)")
+                recommendedBolusAmount = nil
+                loanRecommendationIsForEntry = false
             }
         }
+        isComputingRecommendedBolus = false
 
-        // Superseded: the carbs under consideration changed.
-        guard entry == carbEntryUnderConsideration else { return }
+        // Asked again meanwhile (a change of entry asks too): once more, for the entry considered now. A carb
+        // screen with no entry (sent, or back at the carb dial) has nothing to recommend for.
+        let current = carbEntryUnderConsideration
+        if askedAgain, configuration == .manualBolus || current != nil,
+           session.loanController.isLoanActive {
+            recommendLoanBolus(with: current, session: session)
+        }
+    }
 
-        switch result {
-        case .success(let recommendation):
-            SportLog.event("bolus-ui", String(format: "bolus recommended for %.0f g carbs: %.2f U",
-                                              entry?.quantity.doubleValue(for: .gram) ?? 0,
-                                              recommendation?.amount ?? 0))
-            if recommendedBolusAmount != recommendation?.amount {
-                recommendedBolusAmount = recommendation?.amount
-            }
-        case .failure(let error):
-            SportLog.event("bolus-ui", "bolus recommendation failed: \(error)")
-            recommendedBolusAmount = nil
+    /// The watch's cycle asks at each decision, so the recommendation is recomputed ahead of the
+    /// cycle's display run and does not wait for the display update that follows it.
+    func observeLoanDecisions() {
+        podLoanSession?.stack.loopManager.recommendAfterDecision = { [weak self] in
+            guard let self, let session = self.loanSessionIfActive else { return false }
+            // A carb screen with no entry has nothing to recommend for; the bolus screen always has.
+            let entry = self.carbEntryUnderConsideration
+            guard self.configuration == .manualBolus || entry != nil else { return false }
+            self.recommendLoanBolus(with: entry, session: session)
+            return true
         }
     }
 

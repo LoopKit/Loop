@@ -31,11 +31,12 @@ extension LoopDataManager {
     }
 
     /// While the wrist owns the alarms (taking over, live, handing back, draining, resuming), a reading
-    /// the phone relayed and the store took is offered to the wrist's loop and alarms. The phone's copy
-    /// of a reading often lands before the watch's own, which then stores nothing new, so this is
-    /// what runs the cycle for it.
-    func podLoanNoteRelayedGlucose(_ sample: NewGlucoseSample, storedNew: Bool) {
-        guard storedNew, let session = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession,
+    /// from the phone that the store took, in its regular update or in its answer to a request for
+    /// missed readings, is offered to the wrist's loop and alarms. The phone's copy of a reading often
+    /// lands before the watch's own, which then stores nothing new, so this is what runs the cycle
+    /// for it.
+    func podLoanNoteRelayedGlucose(_ sample: NewGlucoseSample) {
+        guard let session = ExtensionDelegate.sharedIfAvailable()?.stockLoopSession,
               session.loanController.wristOwnsAlarms else { return }
         session.stack.loopManager.didStorePhoneGlucose(sample)
     }

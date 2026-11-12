@@ -255,6 +255,24 @@ struct WatchLoopStores {
     }
 }
 
+extension NewGlucoseSample {
+    /// A reading from the phone's answer to a request for missed readings, in the form the store
+    /// takes from every other source.
+    init(phoneSample sample: StoredGlucoseSample) {
+        self.init(date: sample.startDate,
+                  quantity: sample.quantity,
+                  condition: sample.condition,
+                  trend: sample.trend,
+                  trendRate: sample.trendRate,
+                  isDisplayOnly: sample.isDisplayOnly,
+                  wasUserEntered: sample.wasUserEntered,
+                  syncIdentifier: sample.syncIdentifier ?? sample.uuid?.uuidString ?? "\(sample.startDate.timeIntervalSince1970)",
+                  syncVersion: sample.syncVersion ?? 1,
+                  device: sample.device,
+                  isBackfill: sample.isBackfill)
+    }
+}
+
 extension LoopDataManager {
     static let didUpdateContextNotification = Notification.Name(rawValue: "com.loopkit.notification.ContextUpdated")
 }
@@ -266,13 +284,32 @@ extension LoopDataManager {
         if activeContext == nil || context.shouldReplace(activeContext!) {
             if let newGlucoseSample = context.newGlucoseSample {
                 Task {
-                    let stored = (try? await self.glucoseStore?.addGlucoseSamples([newGlucoseSample])) ?? []
-                    self.podLoanNoteRelayedGlucose(newGlucoseSample, storedNew: !stored.isEmpty)
+                    await self.addPhoneGlucose([newGlucoseSample])
                 }
             }
             activeContext = context
         }
         podLoanUpdateWatchCGM(from: context)
+    }
+
+    /// Readings from the phone, by either route: the one in its regular update, or its answer to a
+    /// request for the readings the watch missed. The store drops what it already has. With Sport
+    /// Mode, the loop reacts to the newest reading the store took.
+    private func addPhoneGlucose(_ samples: [NewGlucoseSample]) async {
+        guard let glucoseStore else { return }
+        do {
+            if let newest = try await Self.addGlucose(samples, to: glucoseStore) {
+                podLoanNoteRelayedGlucose(newest)
+            }
+        } catch {
+            log.error("Failure adding the phone's glucose samples: %{public}@", String(describing: error))
+        }
+    }
+
+    /// Adds the readings to the store. Returns the newest one the store took, nil if it had them all.
+    nonisolated static func addGlucose(_ samples: [NewGlucoseSample], to store: GlucoseStore) async throws -> NewGlucoseSample? {
+        let stored = Set(try await store.addGlucoseSamples(samples).compactMap(\.syncIdentifier))
+        return samples.filter { stored.contains($0.syncIdentifier) }.max(by: { $0.date < $1.date })
     }
 
     /// Readings from the watch's own connection to the CGM. Stored beside the phone's (the same
@@ -405,11 +442,7 @@ extension LoopDataManager {
             switch result {
             case .success(let context):
                 Task {
-                    do {
-                        try await self.glucoseStore?.setSyncGlucoseSamples(context.samples)
-                    } catch {
-                        self.log.error("Failure setting sync glucose samples: %{public}@", String(describing: error))
-                    }
+                    await self.addPhoneGlucose(context.samples.map(NewGlucoseSample.init(phoneSample:)))
                 }
             case .failure:
                 // Already logged

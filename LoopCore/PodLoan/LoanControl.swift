@@ -133,11 +133,20 @@ public enum LoanControl {
         /// delivery seen was 15 s and a round trip took 15.5 s. A late answer here moves control wrongly,
         /// so the wait covers twice the slowest delivery.
         case inBackground
+        /// A Start waits for the phone to say it has the request. On the bench that took
+        /// 0.1 to 2.9 s over 11 Starts (2026-11-11); the wait is twice the slowest.
+        case startRequest
+        /// The phone has said it has the Start request. What remains is the phone's own
+        /// work (its pod read, building the grant) and the grant's delivery: 3 to 10 s over 16 Starts
+        /// (2026-11-11); the wait is twice the slowest.
+        case requestReceived
 
         public var seconds: TimeInterval {
             switch self {
             case .onScreen: return 10
             case .inBackground: return 30
+            case .startRequest: return 6
+            case .requestReceived: return 20
             }
         }
     }
@@ -240,8 +249,8 @@ public enum LoanControl {
         // nearest thing to the refused Start. The watch doses from its own CGM reading, so without one
         // there is nothing to offer.
         case (.watch, .startTapped):
-            guard s.watchReadsCGM else { return .query(.onScreen, onSilence: .tell(.noResponseFromPhoneAndNoCGM)) }
-            return .query(.onScreen, onSilence: s.watchHasStoredCopy ? .prompt(.startWithoutPhone) : .tell(.noResponseFromPhone))
+            guard s.watchReadsCGM else { return .query(.startRequest, onSilence: .tell(.noResponseFromPhoneAndNoCGM)) }
+            return .query(.startRequest, onSilence: s.watchHasStoredCopy ? .prompt(.startWithoutPhone) : .tell(.noResponseFromPhone))
 
         // Row 3 · The phone is dead or away and no loan runs. Deliberate exception: looping is safer,
         // but taking the pod would enter Sport Mode without a tap, and the watch cannot tell a dead phone

@@ -404,6 +404,14 @@ public struct ProtocolNack: Codable, Equatable {
     }
 }
 
+/// The phone's first answer to a Start request, sent before the pod read and the grant
+/// that follow. With it the watch knows the phone is there and waits for the grant; without it the
+/// watch offers a start without the phone.
+public struct RequestReceived: Codable, Equatable {
+    public let requestID: String?
+    public init(requestID: String?) { self.requestID = requestID }
+}
+
 public struct LoanDenied: Codable, Equatable {
     public let reason: String
     public init(reason: String) { self.reason = reason }

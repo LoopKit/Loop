@@ -34,6 +34,13 @@ extension PodLoanPhoneController {
             lastRequestAt = deps.now()
         }
 
+        // Tell the watch at once that its request is here, before the pod read and the grant.
+        // Testing: how long the request took to arrive.
+        if let sentAt = request.sentAt {
+            PhoneLog.event("loan", String(format: "Start request arrived %.1f s after the watch sent it", deps.now().timeIntervalSince(sentAt)))
+        }
+        sendMessage(.requestReceived(RequestReceived(requestID: request.requestID)))
+
         if !persisted.watchUsesSportMode {
             updateState { $0.watchUsesSportMode = true }
         }
