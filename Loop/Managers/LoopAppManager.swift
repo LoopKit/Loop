@@ -1092,8 +1092,8 @@ extension LoopAppManager: ResetLoopManagerDelegate {
 // MARK: - ServicesManagerDosingDelegate
 
 extension LoopAppManager: ServicesManagerDosingDelegate {
-    func deliverBolus(amountInUnits: Double, decisionId: UUID?) async throws {
-        try await deviceDataManager.enactBolus(units: amountInUnits, metadata: DoseMetadata(origin: .remote, decisionId: decisionId), activationType: .manualNoRecommendation)
+    func deliverBolus(amountInUnits: Double, decisionId: UUID?, request: DoseMetadata.RemoteRequest?) async throws {
+        try await deviceDataManager.enactBolus(units: amountInUnits, metadata: DoseMetadata(origin: .remote, decisionId: decisionId, remoteRequest: request), activationType: .manualNoRecommendation)
     }
 }
 
