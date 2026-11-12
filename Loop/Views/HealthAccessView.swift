@@ -26,6 +26,7 @@ struct HealthAccessView: View {
     let glucoseSharingStatus: () -> HKAuthorizationStatus
     let insulinSharingStatus: () -> HKAuthorizationStatus
     let carbSharingStatus: () -> HKAuthorizationStatus
+    var exerciseDataSharing: ExerciseDataSharing?
 
     @State private var glucoseStatus: HKAuthorizationStatus = .notDetermined
     @State private var insulinStatus: HKAuthorizationStatus = .notDetermined
@@ -54,6 +55,10 @@ struct HealthAccessView: View {
             } header: {
                 Text("Reading & Changing Access", comment: "Health access section header for reading and changing access")
             }
+
+            if let exerciseDataSharing {
+                exerciseSection(exerciseDataSharing)
+            }
         }
         .listStyle(.insetGrouped)
         .navigationTitle(Text("Apple Health", comment: "Title of the Apple Health access screen"))
@@ -64,6 +69,19 @@ struct HealthAccessView: View {
         glucoseStatus = glucoseSharingStatus()
         insulinStatus = insulinSharingStatus()
         carbStatus = carbSharingStatus()
+    }
+
+    private func exerciseSection(_ sharing: ExerciseDataSharing) -> some View {
+        Section {
+            Toggle(
+                NSLocalizedString("Share Exercise Data", comment: "Health access toggle for sharing workouts with services"),
+                isOn: Binding(get: { sharing.isEnabled }, set: { newValue in Task { await sharing.setEnabled(newValue) } })
+            )
+        } header: {
+            Text("Exercise", comment: "Health access section header for exercise data")
+        } footer: {
+            Text(String(format: NSLocalizedString("When on, %1$@ reads your workouts from Apple Health, along with heart rate throughout the day, resting heart rate, heart rate variability, VO2 max, steps, active energy, physical effort and weight, and uploads them to your connected services. Tidepool currently receives workouts only. If you donate your Tidepool data to research, these workouts are included. Exercise data does not change dosing.", comment: "Health access exercise sharing footer (1: app name)"), appName))
+        }
     }
 
     private func statusRow(label: String, status: HKAuthorizationStatus) -> some View {

@@ -417,7 +417,8 @@ extension SettingsView {
             NavigationLink(destination: HealthAccessView(
                 glucoseSharingStatus: { healthKitSharingStatus(for: HealthKitSampleStore.glucoseType) },
                 insulinSharingStatus: { healthKitSharingStatus(for: HealthKitSampleStore.insulinQuantityType) },
-                carbSharingStatus: { healthKitSharingStatus(for: HealthKitSampleStore.carbType) }
+                carbSharingStatus: { healthKitSharingStatus(for: HealthKitSampleStore.carbType) },
+                exerciseDataSharing: viewModel.exerciseDataSharing
             )) {
                 LargeButton(
                     action: {},
