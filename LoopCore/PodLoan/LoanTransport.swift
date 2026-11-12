@@ -77,6 +77,8 @@ public enum LoanMessage: Equatable {
     case statusReport(StatusReport)
     case nack(ProtocolNack)
     case denied(LoanDenied)
+    // The phone has the Start request and is working on it.
+    case requestReceived(RequestReceived)
 
     /// The watch's standing copy, outside any session.
     case dormantGrant(DormantGrant)
@@ -98,6 +100,7 @@ public struct LoanEnvelope: Codable {
         case request, grant, takeoverComplete, takeoverFailed, doseRecordBatch
         case handbackOffer, handbackAck, revoke, statusQuery, statusReport, nack, denied
         case dormantGrant
+        case requestReceived
     }
 
     public init(from decoder: Decoder) throws {
@@ -125,6 +128,7 @@ public struct LoanEnvelope: Codable {
         case .nack: self.message = .nack(try c.decode(ProtocolNack.self, forKey: .body))
         case .denied: self.message = .denied(try c.decode(LoanDenied.self, forKey: .body))
         case .dormantGrant: self.message = .dormantGrant(try c.decode(DormantGrant.self, forKey: .body))
+        case .requestReceived: self.message = .requestReceived(try c.decode(RequestReceived.self, forKey: .body))
         }
     }
 
@@ -145,6 +149,7 @@ public struct LoanEnvelope: Codable {
         case .nack(let m): try c.encode(Kind.nack, forKey: .kind); try c.encode(m, forKey: .body)
         case .denied(let m): try c.encode(Kind.denied, forKey: .kind); try c.encode(m, forKey: .body)
         case .dormantGrant(let m): try c.encode(Kind.dormantGrant, forKey: .kind); try c.encode(m, forKey: .body)
+        case .requestReceived(let m): try c.encode(Kind.requestReceived, forKey: .kind); try c.encode(m, forKey: .body)
         }
     }
 }
@@ -162,7 +167,7 @@ extension LoanMessage {
     public var isInteractiveHandshake: Bool {
         switch self {
         case .request, .grant, .denied, .nack, .revoke, .handbackOffer, .handbackAck,
-             .takeoverComplete, .statusQuery, .statusReport:
+             .takeoverComplete, .statusQuery, .statusReport, .requestReceived:
             return true
         case .takeoverFailed, .doseRecordBatch, .dormantGrant:
             return false

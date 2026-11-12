@@ -87,6 +87,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
 
     var sent: [LoanMessage] = []
     var sentExpectations: [XCTestExpectation] = []
+    var requestReceipts: [RequestReceived] = []
     var addedDoses: [[DoseEntry]] = []
     /// Every NewCarbEntry the controller committed, for round-trip assertions.
     var addedCarbs: [NewCarbEntry] = []
@@ -257,6 +258,12 @@ final class PodLoanPhoneControllerTests: XCTestCase {
             },
             send: { [weak self] dictionary in
                 guard let self = self else { return }
+                // The "request received" answer is counted apart, so the tests that wait
+                // for the next message after a Start still see the grant or the refusal.
+                if case .requestReceived(let receipt)? = try? LoanMessage.decode(fromTransport: dictionary) {
+                    self.lock.lock(); self.requestReceipts.append(receipt); self.lock.unlock()
+                    return
+                }
                 if let message = try? LoanMessage.decode(fromTransport: dictionary) { self.onSend?(message) }
                 self.lock.lock()
                 if let message = try? LoanMessage.decode(fromTransport: dictionary) {
@@ -4365,6 +4372,22 @@ extension PodLoanPhoneControllerTests {
         phoneReportsItsOwnPumpEvents(to: store)
         XCTAssertEqual(pumpEvents(in: store, since: start, .bolus).map(\.programmedUnits), [0.1], "still a pump event")
         XCTAssertEqual(dosesDosingCounts(in: store, since: start, .bolus).map(\.programmedUnits), [0.1], "still counted")
+    }
+
+    /// A Start request is answered at once with "request received", before the grant.
+    func testAStartRequestIsAnsweredWithReceivedBeforeTheGrant() throws {
+        let controller = makeController()
+        var receiptsAtGrant: Int?
+        onSend = { message in
+            if case .grant = message, receiptsAtGrant == nil {
+                self.lock.lock(); receiptsAtGrant = self.requestReceipts.count; self.lock.unlock()
+            }
+        }
+        controller.handleIncoming(userInfo: try LoanMessage.request(LoanRequest(watchBuild: "t", requestID: "r9", sentAt: Date())).transportDictionary())
+        waitUntil(timeout: 5, "the grant is sent") { if case .grant? = self.lastSent() { return true }; return false }
+        lock.lock(); let receipts = requestReceipts; lock.unlock()
+        XCTAssertEqual(receipts, [RequestReceived(requestID: "r9")])
+        XCTAssertEqual(receiptsAtGrant, 1, "the receipt went out before the grant")
     }
 
     /// The take-back's save fails. The phone holds automatic dosing and refuses a new Start until its
