@@ -115,6 +115,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
     var bookedGapDoses: [DoseEntry] = []
     /// Every batch of the watch's dosing decisions the controller handed to the store.
     var addedDosingDecisions: [[StoredDosingDecision]] = []
+    var addedDoseMetadata: [[UUID: DoseMetadata]] = []
     /// Every batch of the watch's alert records the controller handed to the store.
     var addedAlerts: [[SyncAlertObject]] = []
     /// Every batch of the watch's device log lines the controller handed to the log.
@@ -182,6 +183,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         addedNotifications = []
         bookedGapDoses = []
         addedDosingDecisions = []
+        addedDoseMetadata = []
         addedAlerts = []
         addedDeviceLog = []
         deletedGapSyncs = []
@@ -363,6 +365,11 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                 guard let self = self else { return completion(.success(0)) }
                 self.lock.lock(); self.addedDosingDecisions.append(decisions); self.lock.unlock()
                 completion(.success(decisions.count))
+            },
+            addDoseMetadata: { [weak self] metadata, completion in
+                guard let self = self else { return completion(.success(0)) }
+                self.lock.lock(); self.addedDoseMetadata.append(metadata); self.lock.unlock()
+                completion(.success(metadata.count))
             },
             addAlerts: { [weak self] alerts, completion in
                 guard let self = self else { return completion(.success(0)) }
@@ -855,19 +862,19 @@ final class PodLoanPhoneControllerTests: XCTestCase {
 
     // MARK: - Dosing decisions from the watch
 
-    /// The decision ids the watch's doses carry reach the phone's dose entries, through the
+    /// The dose ids the watch's doses carry reach the phone's dose entries, through the
     /// hand-back's write.
-    func testWatchDoseDecisionIdsReachThePhonesDoseEntries() throws {
+    func testWatchDoseIdsReachThePhonesDoseEntries() throws {
         let controller = makeController()
         let grant = establishLoan(controller)
         let at = Date().addingTimeInterval(-.minutes(10))
-        let bolusDecision = UUID(), tempDecision = UUID()
+        let bolusDose = UUID(), tempDose = UUID()
         let bolus = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
-                              record: LoanDoseRecord(kind: .bolus, startDate: at, amount: 1.5, decisionId: bolusDecision),
+                              record: LoanDoseRecord(kind: .bolus, startDate: at, amount: 1.5, doseId: bolusDose),
                               loggedAt: at)
         let temp = LoanEvent(id: UUID(), seq: 2, provenance: .confirmed,
                              record: LoanDoseRecord(kind: .tempBasal, startDate: at, endDate: at.addingTimeInterval(.minutes(5)),
-                                                    unitsPerHour: 2.0, decisionId: tempDecision),
+                                                    unitsPerHour: 2.0, doseId: tempDose),
                              loggedAt: at)
 
         let acked = expectSend()
@@ -878,8 +885,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         waitForState(controller, .owner)
 
         let doses = addedDoses.flatMap { $0 }
-        XCTAssertEqual(doses.first { $0.type == .bolus }?.decisionId, bolusDecision)
-        XCTAssertEqual(doses.first { $0.type == .tempBasal }?.decisionId, tempDecision)
+        XCTAssertEqual(doses.first { $0.type == .bolus }?.doseId, bolusDose)
+        XCTAssertEqual(doses.first { $0.type == .tempBasal }?.doseId, tempDose)
     }
 
     /// The watch's decisions for a loan this phone granted go to the store; a loan it never
@@ -2497,10 +2504,36 @@ extension PodLoanPhoneControllerTests {
     // MARK: - Nobody takes the pod while it is giving a bolus
 
     /// This phone's own bolus, `secondsLeft` from its end, as its pump's bolus state shows it.
+    /// The watch's metadata for each dose goes to this phone's metadata store as its record arrives,
+    /// under the dose's id; a record without metadata adds nothing.
+    func testWatchDoseMetadataIsStoredUnderEachDoseIdAsTheRecordsArrive() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        let at = Date().addingTimeInterval(-.minutes(10))
+        let doseId = UUID(), decisionId = UUID()
+        let metadata = DoseMetadata(origin: .automatic, device: .watch, decisionId: decisionId, activationType: .automatic)
+        let bolus = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed,
+                              record: LoanDoseRecord(kind: .bolus, startDate: at, amount: 0.5, doseId: doseId, doseMetadata: metadata),
+                              loggedAt: at)
+        let bare = LoanEvent(id: UUID(), seq: 2, provenance: .confirmed,
+                             record: LoanDoseRecord(kind: .tempBasal, startDate: at, endDate: at.addingTimeInterval(.minutes(5)),
+                                                    unitsPerHour: 1.0, doseId: UUID()),
+                             loggedAt: at)
+
+        let acked = expectSend()
+        let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil, odometer: nil,
+                                  events: [bolus, bare], tombstones: [], recovered: false)
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
+        wait(for: [acked], timeout: 5)
+
+        lock.lock(); let stored = addedDoseMetadata; lock.unlock()
+        XCTAssertEqual(stored, [[doseId: metadata]])
+    }
+
     private func setBolusInProgress(secondsLeft: TimeInterval) {
         let now = Date()
         pump.status.bolusState = .inProgress(DoseEntry(type: .bolus, startDate: now.addingTimeInterval(-10),
-                                                       endDate: now.addingTimeInterval(secondsLeft), value: 2, unit: .units, decisionId: nil))
+                                                       endDate: now.addingTimeInterval(secondsLeft), value: 2, unit: .units, doseId: nil))
     }
 
     /// The watch's bolus, as only the pod's status shows it: this phone's bolus state says none.
@@ -3907,7 +3940,7 @@ extension PodLoanPhoneControllerTests {
         let controller = makeController()
         let back = Date()
         let estimate = DoseEntry(type: .bolus, startDate: back.addingTimeInterval(-.minutes(11)), endDate: back.addingTimeInterval(-.minutes(11)),
-                                 value: 2.0, unit: .units, decisionId: nil, deliveredUnits: 2.0, syncIdentifier: "LOAN-AUDIT-GAP-e3-7", manuallyEntered: true)
+                                 value: 2.0, unit: .units, doseId: nil, deliveredUnits: 2.0, syncIdentifier: "LOAN-AUDIT-GAP-e3-7", manuallyEntered: true)
         lock.lock(); phoneDoseHistory = [estimate]; lock.unlock()
         readPod(controller, units: 10.0, at: back.addingTimeInterval(-.minutes(12)))
         readPod(controller, units: 10.2, at: back)   // the schedule explains the 0.2 U
@@ -4226,7 +4259,7 @@ extension PodLoanPhoneControllerTests {
                            pending: Bool = false) -> NewPumpEvent {
         let unit: DoseUnit = type == .bolus ? .units : .unitsPerHour
         let identifier: String = Data(raw.utf8).map { String(format: "%02x", $0) }.joined()
-        let dose = DoseEntry(type: type, startDate: start, endDate: end, value: value, unit: unit, decisionId: nil,
+        let dose = DoseEntry(type: type, startDate: start, endDate: end, value: value, unit: unit, doseId: nil,
                              syncIdentifier: identifier, isMutable: pending)
         return NewPumpEvent(date: start, dose: dose, raw: Data(raw.utf8), title: raw)
     }
