@@ -295,7 +295,7 @@ extension WatchDataManager {
                 guard let self = self else { return completion(false) }
 
                 let stub = DoseEntry(type: .bolus, startDate: Date(), endDate: Date(),
-                                     value: 0, unit: .units, decisionId: nil, syncIdentifier: syncIdentifier,
+                                     value: 0, unit: .units, doseId: nil, syncIdentifier: syncIdentifier,
                                      manuallyEntered: true)
                 self.deviceManager.doseStore.deleteDose(stub) { error in
                     completion(error == nil)
@@ -312,6 +312,23 @@ extension WatchDataManager {
                             decisions, to: store, skipUploads: uploadedBy.isEmpty ? nil : { ids in
                                 await deviceManager.skipLoanDosingDecisionUploads(ids, in: store, services: uploadedBy)
                             })))
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
+            },
+
+            addDoseMetadata: { [weak self] metadata, completion in
+                guard let store = self?.deviceManager.doseMetadataStore else { return completion(.success(0)) }
+                Task {
+                    do {
+                        let present = try await store.metadata(for: Array(metadata.keys))
+                        var added = 0
+                        for (doseId, doseMetadata) in metadata where present[doseId] == nil {
+                            try await store.storeMetadata(doseMetadata, for: doseId)
+                            added += 1
+                        }
+                        completion(.success(added))
                     } catch {
                         completion(.failure(error))
                     }

@@ -118,7 +118,7 @@ enum LoanReconciler {
                         startDate: event.record.startDate,
                         endDate: end,
                         value: units, unit: .units,
-                        decisionId: event.record.decisionId,
+                        doseId: event.record.doseId,
                         syncIdentifier: syncIdentifier(for: event),
                         automatic: event.record.automatic))
                 }
@@ -129,7 +129,7 @@ enum LoanReconciler {
                         startDate: event.record.startDate,
                         endDate: Swift.min(end, input.loanEnd),
                         value: rate, unit: .unitsPerHour,
-                        decisionId: event.record.decisionId,
+                        doseId: event.record.doseId,
                         syncIdentifier: syncIdentifier(for: event)))
                 }
             case .carb:

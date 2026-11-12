@@ -610,7 +610,7 @@ extension LoopDataManager {
     ///   - insulinModel: The type of insulin model that should be used for the dose.
     func addManuallyEnteredDose(startDate: Date, units: Double, insulinType: InsulinType? = nil) async {
         let syncIdentifier = Data(UUID().uuidString.utf8).hexadecimalString
-        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, decisionId: nil, syncIdentifier: syncIdentifier, insulinType: insulinType, manuallyEntered: true)
+        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, doseId: nil, syncIdentifier: syncIdentifier, insulinType: insulinType, manuallyEntered: true)
 
         do {
             try await doseStore.addDoses([dose], from: nil)
@@ -914,9 +914,9 @@ extension LoopDataManager: SimpleBolusViewModelDelegate {
         settingsProvider.settings.suspendThreshold?.quantity
     }
     
-    func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws {
+    func enactBolus(units: Double, metadata: DoseMetadata, activationType: BolusActivationType) async throws {
         let startDate = now
-        try await deliveryDelegate?.enactBolus(units: units, decisionId: decisionId, activationType: activationType)
+        try await deliveryDelegate?.enactBolus(units: units, metadata: metadata, activationType: activationType)
         lastManualBolus = LastManualBolus(amount: units, startDate: startDate)
     }
     

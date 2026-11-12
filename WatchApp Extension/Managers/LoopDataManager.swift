@@ -220,6 +220,9 @@ typealias DiagnosticLog = OSLog
 struct WatchLoopStores {
     let doseStore: DoseStore
     let dosingDecisionStore: DosingDecisionStore
+    /// What the watch knows about each dose it sends, under the dose id the pod reports back, as the
+    /// phone's `DeviceDataManager.doseMetadataStore`.
+    let doseMetadataStore: DoseMetadataStore
     let alertStore: AlertStore
     let deviceLog: PersistentDeviceLog
 
@@ -236,6 +239,7 @@ struct WatchLoopStores {
             provenanceIdentifier: provenanceIdentifier
         )
         let dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: cacheLength)
+        let doseMetadataStore = DoseMetadataStore(store: cacheStore, expireAfter: cacheLength)
 
         let alertStoreDirectory = documents.appendingPathComponent("AlertStore")
         try? FileManager.default.createDirectory(at: alertStoreDirectory, withIntermediateDirectories: true,
@@ -251,7 +255,8 @@ struct WatchLoopStores {
         let deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"),
                                             maxEntryAge: cacheLength)
 
-        return WatchLoopStores(doseStore: doseStore, dosingDecisionStore: dosingDecisionStore, alertStore: alertStore, deviceLog: deviceLog)
+        return WatchLoopStores(doseStore: doseStore, dosingDecisionStore: dosingDecisionStore, doseMetadataStore: doseMetadataStore,
+                               alertStore: alertStore, deviceLog: deviceLog)
     }
 }
 

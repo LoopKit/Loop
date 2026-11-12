@@ -1425,14 +1425,17 @@ final class StatusTableViewController: LoopChartsTableViewController {
                         rootView: InsulinDeliveryLog(
                             viewModel: InsulinDeliveryLogViewModel(
                                 loopDataManager: loopManager,
-                                pumpManager: pumpManager
+                                pumpManager: pumpManager,
+                                doseMetadataStore: deviceManager.doseMetadataStore
                             ),
                             onTapGesture: { [weak navigationController] doseEntry in
                                 Task {
                                     var dosingDecision: StoredDosingDecision?
-                                    if let decisionId = doseEntry.decisionId {
+                                    if let doseId = doseEntry.doseId {
                                         do {
-                                            dosingDecision = try await self.loopManager.dosingDecisionStore.findDosingDecisionsById(decisionId)
+                                            if let decisionId = try await self.deviceManager.doseMetadataStore.decisionIds(for: [doseId])[doseId] {
+                                                dosingDecision = try await self.loopManager.dosingDecisionStore.findDosingDecisionsById(decisionId)
+                                            }
                                         } catch {
                                             self.log.error("Error finding dosing decision: %{public}@", String(describing: error))
                                         }
