@@ -133,11 +133,15 @@ public enum LoanControl {
         /// delivery seen was 15 s and a round trip took 15.5 s. A late answer here moves control wrongly,
         /// so the wait covers twice the slowest delivery.
         case inBackground
+        /// The phone has said it has the Start request. What remains is the phone's own
+        /// work (its pod read, building the grant) and the grant's delivery.
+        case requestReceived
 
         public var seconds: TimeInterval {
             switch self {
             case .onScreen: return 10
             case .inBackground: return 30
+            case .requestReceived: return 30
             }
         }
     }

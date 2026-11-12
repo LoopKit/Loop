@@ -352,6 +352,8 @@ final class PodLoanWatchController {
         case .nack:
 
             SportLog.event("loan", "phone could not read our message: the builds do not match, so the loan will not start")
+        case .requestReceived:
+            phoneHasRequest()
         case .denied(let denied):
             // A refusal during a hand-back fails the hand-back, not the loan.
             if (phase == .active && handbackRequested) || phase == .handingBack {
