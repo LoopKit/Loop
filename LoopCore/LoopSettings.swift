@@ -117,15 +117,15 @@ public struct LoopSettings: Equatable {
 
     /// Writes the live schedules to the active profile, stores Default as nil and drops a list holding Default alone,
     /// so the stored profiles always agree with the schedules Loop doses with. An active name that is not stored, for
-    /// example a profile whose stored values could not be read, is recreated from the live schedules and returned;
-    /// Default keeps its own values; Default is taken from the live schedules only when it is not stored either. Without
-    /// live schedules nothing changes.
+    /// example a profile whose stored values could not be read, is recreated from the live schedules and returned.
+    /// Default keeps its own values, and is taken from the live schedules only when it is not stored either. Without
+    /// live schedules nothing changes and nil is returned.
     @discardableResult
     public mutating func synchronizeTherapyProfiles() -> String? {
         var unknownName: String?
         if let name = activeProfileName, name != TherapyProfile.defaultName, !therapyProfiles.contains(where: { $0.name == name }) {
             guard let live = liveTherapyProfile else {
-                return name
+                return nil
             }
             if !therapyProfiles.contains(where: \.isDefault) {
                 var defaultProfile = live

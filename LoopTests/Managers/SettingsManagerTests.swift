@@ -100,7 +100,7 @@ final class SettingsManagerTests: XCTestCase {
         settings.therapyProfiles = [defaultProfile]
         settings.activeProfileName = "Sport"
 
-        XCTAssertEqual(settings.synchronizeTherapyProfiles(), "Sport")
+        XCTAssertNil(settings.synchronizeTherapyProfiles())
 
         XCTAssertEqual(settings.activeProfileName, "Sport")
         XCTAssertEqual(settings.therapyProfiles, [defaultProfile])
