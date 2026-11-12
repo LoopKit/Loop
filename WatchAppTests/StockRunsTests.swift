@@ -22,11 +22,14 @@ import HealthKit
 /// Records what the loop asks the pod for, and sends nothing.
 final class RecordingDoseEnactor: DoseEnactor {
     private(set) var calls: [(bolus: Double?, tempBasal: TempBasalRecommendation?)] = []
-    private(set) var decisionIds: [UUID?] = []
+    /// The dose id of each command, as the caller made it; its metadata names the decision.
+    private(set) var doseIds: [UUID] = []
 
-    override func enact(decisionId: UUID?, bolus: Double?, tempBasal: TempBasalRecommendation?, with pumpManager: PumpManager) async throws {
+    override func enact(bolus: Double?, tempBasal: TempBasalRecommendation?, with pumpManager: PumpManager,
+                        newDoseId: (BolusActivationType?) async -> UUID) async throws {
         calls.append((bolus, tempBasal))
-        decisionIds.append(decisionId)
+        if tempBasal != nil { doseIds.append(await newDoseId(nil)) }
+        if let bolus, bolus > 0 { doseIds.append(await newDoseId(.automatic)) }
     }
 }
 
@@ -35,7 +38,8 @@ final class GatedDoseEnactor: DoseEnactor {
     @MainActor private(set) var temps: [TempBasalRecommendation?] = []
     @MainActor private var gate: CheckedContinuation<Void, Never>?
 
-    override func enact(decisionId: UUID?, bolus: Double?, tempBasal: TempBasalRecommendation?, with pumpManager: PumpManager) async throws {
+    override func enact(bolus: Double?, tempBasal: TempBasalRecommendation?, with pumpManager: PumpManager,
+                        newDoseId: (BolusActivationType?) async -> UUID) async throws {
         await record(tempBasal)
     }
 
@@ -89,6 +93,7 @@ final class StockRunsTests: XCTestCase {
         let carbStore = CarbStore(healthKitSampleStore: nil, cacheStore: cacheStore,
                                   cacheLength: TimeInterval(24 * 3600), provenanceIdentifier: "StockRunsTests")
         let dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: TimeInterval(24 * 3600))
+        let doseMetadataStore = DoseMetadataStore(store: cacheStore, expireAfter: TimeInterval(24 * 3600))
 
         var settings = LoopSettings()
         settings.basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 0.7)])
@@ -104,7 +109,7 @@ final class StockRunsTests: XCTestCase {
 
         let defaults = UserDefaults(suiteName: "StockRunsTests-\(UUID().uuidString)")!
         return WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
-                                dosingDecisionStore: dosingDecisionStore,
+                                dosingDecisionStore: dosingDecisionStore, doseMetadataStore: doseMetadataStore,
                                 settings: settings, defaults: defaults,
                                 stateDirectory: dir.appendingPathComponent(UUID().uuidString, isDirectory: true))
     }
@@ -140,14 +145,14 @@ final class StockRunsTests: XCTestCase {
 
     private func bolus(_ units: Double, start: Date, end: Date, mutable: Bool = false) -> DoseEntry {
         DoseEntry(type: .bolus, startDate: start, endDate: end, value: units, unit: .units,
-                  decisionId: nil, syncIdentifier: UUID().uuidString, insulinType: .novolog, isMutable: mutable)
+                  doseId: nil, syncIdentifier: UUID().uuidString, insulinType: .novolog, isMutable: mutable)
     }
 
     /// A temp accepted 5 minutes ago with 25 minutes still to run.
     private func runningTemp(_ rate: Double = 2.0, now: Date = Date()) -> DoseEntry {
         let start = now.addingTimeInterval(-.minutes(5))
         return DoseEntry(type: .tempBasal, startDate: start, endDate: start.addingTimeInterval(.minutes(30)),
-                         value: rate, unit: .unitsPerHour, decisionId: nil,
+                         value: rate, unit: .unitsPerHour, doseId: nil,
                          syncIdentifier: UUID().uuidString, insulinType: .novolog, automatic: true, isMutable: true)
     }
 
@@ -457,7 +462,7 @@ final class StockRunsTests: XCTestCase {
 
     func testAManualTempIsLeftRunning() async throws {
         let manager = await makeManager()
-        let manual = UnfinalizedDose(decisionId: nil, tempBasalRate: 0.5, startTime: Date().addingTimeInterval(-.minutes(5)),
+        let manual = UnfinalizedDose(doseId: nil, tempBasalRate: 0.5, startTime: Date().addingTimeInterval(-.minutes(5)),
                                      duration: .minutes(60), isHighTemp: false, automatic: false,
                                      scheduledCertainty: .certain, insulinType: .novolog)
         let pump = try makePump(unfinalizedTemp: manual)
@@ -479,7 +484,7 @@ final class StockRunsTests: XCTestCase {
     /// As stock's `loop()`, the refusals run on a cycle with nothing to send, so it is not an OK cycle.
     func testTheRefusalsRunWithNothingToSend() async throws {
         let manager = await makeManager()
-        let manual = UnfinalizedDose(decisionId: nil, tempBasalRate: 0.5, startTime: Date().addingTimeInterval(-.minutes(5)),
+        let manual = UnfinalizedDose(doseId: nil, tempBasalRate: 0.5, startTime: Date().addingTimeInterval(-.minutes(5)),
                                      duration: .minutes(60), isHighTemp: false, automatic: false,
                                      scheduledCertainty: .certain, insulinType: .novolog)
         manager.pumpManager = try makePump(unfinalizedTemp: manual)
@@ -510,7 +515,7 @@ final class StockRunsTests: XCTestCase {
     // MARK: - Unreliable sensor data, as stock `DeviceDataManager`
 
     private func automaticTemp(_ rate: Double) -> UnfinalizedDose {
-        UnfinalizedDose(decisionId: nil, tempBasalRate: rate, startTime: Date().addingTimeInterval(-.minutes(5)),
+        UnfinalizedDose(doseId: nil, tempBasalRate: rate, startTime: Date().addingTimeInterval(-.minutes(5)),
                         duration: .minutes(30), isHighTemp: rate > 0.7, automatic: true,
                         scheduledCertainty: .certain, insulinType: .novolog)
     }
@@ -544,7 +549,7 @@ final class StockRunsTests: XCTestCase {
 
     func testOpeningTheLoopCancelsAnAutomaticTempAndStoresTheDecision() async throws {
         let manager = await makeManager()
-        let automatic = UnfinalizedDose(decisionId: nil, tempBasalRate: 2.0, startTime: Date().addingTimeInterval(-.minutes(5)),
+        let automatic = UnfinalizedDose(doseId: nil, tempBasalRate: 2.0, startTime: Date().addingTimeInterval(-.minutes(5)),
                                         duration: .minutes(30), isHighTemp: true, automatic: true,
                                         scheduledCertainty: .certain, insulinType: .novolog)
         let enactor = RecordingDoseEnactor()
@@ -559,7 +564,8 @@ final class StockRunsTests: XCTestCase {
         XCTAssertEqual(enactor.calls.first?.tempBasal, .cancel)
         let decisions = try await storedDecisions(manager)
         let decision = try XCTUnwrap(decisions.first { $0.reason == "automaticDosingDisabled" })
-        XCTAssertEqual(enactor.decisionIds.first ?? nil, decision.id, "the cancel carries the decision's id")
+        let named = try await decisionIds(manager, enactor.doseIds)
+        XCTAssertEqual(named.first, decision.id, "the cancel's dose names the decision")
     }
 
     // MARK: - A takeover: the running temp cancelled, no cycle
@@ -581,7 +587,8 @@ final class StockRunsTests: XCTestCase {
         XCTAssertNil(enactor.calls.first?.bolus ?? nil, "no bolus: the first cycle waits for the next reading")
         let decisions = try await storedDecisions(manager)
         let decision = try XCTUnwrap(decisions.first { $0.reason == "pumpControlTaken" })
-        XCTAssertEqual(enactor.decisionIds.first ?? nil, decision.id, "the cancel carries the decision's id")
+        let named = try await decisionIds(manager, enactor.doseIds)
+        XCTAssertEqual(named.first, decision.id, "the cancel's dose names the decision")
     }
 
     func testATakeoverCancelsAnAutomaticTempAndRunsNoCycle() async throws {
@@ -618,7 +625,7 @@ final class StockRunsTests: XCTestCase {
     /// still on its way to the pod goes out after it, not beside it.
     func testATempCancelAskedForMidCycleGoesOutAfterTheCyclesDose() async throws {
         let manager = await makeManager()
-        let automatic = UnfinalizedDose(decisionId: nil, tempBasalRate: 2.0, startTime: Date().addingTimeInterval(-.minutes(5)),
+        let automatic = UnfinalizedDose(doseId: nil, tempBasalRate: 2.0, startTime: Date().addingTimeInterval(-.minutes(5)),
                                         duration: .minutes(30), isHighTemp: true, automatic: true,
                                         scheduledCertainty: .certain, insulinType: .novolog)
         let enactor = GatedDoseEnactor()
@@ -755,6 +762,12 @@ final class StockRunsTests: XCTestCase {
     // MARK: - Stock's dosing decisions
 
     /// Everything the watch's decision store holds, in the order stored.
+    /// The decision each dose id names, in the order given; a dose without metadata is left out.
+    private func decisionIds(_ manager: WatchLoopManager, _ doseIds: [UUID]) async throws -> [UUID] {
+        let byDose = try await XCTUnwrap(manager.doseMetadataStore).decisionIds(for: doseIds)
+        return doseIds.compactMap { byDose[$0] }
+    }
+
     private func storedDecisions(_ manager: WatchLoopManager) async throws -> [StoredDosingDecision] {
         let store = try XCTUnwrap(manager.dosingDecisionStore)
         return try await withCheckedThrowingContinuation { continuation in
@@ -783,8 +796,9 @@ final class StockRunsTests: XCTestCase {
         let loops = try await storedDecisions(manager).filter { $0.reason == "loop" }
         XCTAssertEqual(loops.count, 1, "one per cycle")
         let decision = try XCTUnwrap(loops.first)
-        XCTAssertEqual(enactor.decisionIds.count, 1, "one command")
-        XCTAssertEqual(enactor.decisionIds.first ?? nil, decision.id, "the dose carries the decision's id")
+        XCTAssertEqual(enactor.doseIds.count, 1, "one command")
+        let named = try await decisionIds(manager, enactor.doseIds)
+        XCTAssertEqual(named.first, decision.id, "the dose names the decision")
         XCTAssertTrue(decision.errors.isEmpty)
         XCTAssertNotNil(decision.automaticDoseRecommendation, "updateFrom: the recommendation")
         XCTAssertEqual(decision.enactedTempBasal, enactor.calls.first?.tempBasal, "what went to the pod")
@@ -875,9 +889,9 @@ final class StockRunsTests: XCTestCase {
         await seedGlucose(manager)
         await report(manager)
         manager.pumpManager = try makePump()
-        var commanded: (id: UUID?, units: Double)?
-        manager.enactBolusCommand = { _, decisionId, units, _, completion in
-            commanded = (decisionId, units)
+        var commanded: (id: UUID, units: Double)?
+        manager.enactBolusCommand = { _, doseId, units, _, completion in
+            commanded = (doseId, units)
             completion(nil)
         }
         await runDisplay(manager)
@@ -899,7 +913,9 @@ final class StockRunsTests: XCTestCase {
         let bolusDecisions = try await storedDecisions(manager).filter { $0.reason == "watchBolus" }
         XCTAssertEqual(bolusDecisions.count, 1)
         let decision = try XCTUnwrap(bolusDecisions.first)
-        XCTAssertEqual(try XCTUnwrap(commanded).id, decision.id, "the bolus carries the decision's id")
+        let metadata = try await XCTUnwrap(manager.doseMetadataStore).metadata(for: try XCTUnwrap(commanded).id)
+        XCTAssertEqual(metadata, DoseMetadata(origin: .user, device: .watch, decisionId: decision.id,
+                                              activationType: .manualNoRecommendation), "the bolus's dose names the decision")
         XCTAssertEqual(decision.manualBolusRequested, 1.0)
         XCTAssertEqual(decision.carbEntry?.quantity.doubleValue(for: .gram) ?? 0, 30, accuracy: 0.001)
         XCTAssertEqual(decision.carbEntry?.syncIdentifier, mealSyncId, "the entry as stored, as stock records it")
@@ -1094,7 +1110,7 @@ final class StockRunsTests: XCTestCase {
     /// progress is left alone.
     func testAManualBolusCancelsAnAutomaticBolusInProgressFirst() async throws {
         func inProgress(automatic: Bool) -> UnfinalizedDose {
-            UnfinalizedDose(decisionId: nil, bolusAmount: 2.0, startTime: Date().addingTimeInterval(-10),
+            UnfinalizedDose(doseId: nil, bolusAmount: 2.0, startTime: Date().addingTimeInterval(-10),
                             scheduledCertainty: .certain, insulinType: .novolog, automatic: automatic)
         }
         for automatic in [true, false] {

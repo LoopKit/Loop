@@ -101,7 +101,8 @@ extension WatchLoopManager {
 
             SportLog.event("loan", String(format: "enacting manual bolus %.2f U", rounded))
             // The driver answers on its own queue.
-            self.enactBolusCommand(pumpManager, decisionId, rounded, activationType) { error in
+            let doseId = await self.newDoseId(for: DoseMetadata(origin: .user, device: .watch, decisionId: decisionId, activationType: activationType))
+            self.enactBolusCommand(pumpManager, doseId, rounded, activationType) { error in
                 DispatchQueue.main.async {
                     if let error = error {
                         SportLog.event("loan", String(format: "manual bolus %.2f U failed: %@", rounded, String(describing: error)))
@@ -211,7 +212,9 @@ extension WatchLoopManager: PumpManagerDeliveryDelegate {
             SportLog.event("dose", String(format: "enacting automatic bolus %.2f U", bolus))
         }
         do {
-            try await doseEnactor.enact(decisionId: decisionId, bolus: bolus, tempBasal: tempBasal, with: pumpManager)
+            try await doseEnactor.enact(bolus: bolus, tempBasal: tempBasal, with: pumpManager) { activationType in
+                await self.newDoseId(for: DoseMetadata(origin: .automatic, device: .watch, decisionId: decisionId, activationType: activationType))
+            }
         } catch {
             SportLog.event("dose", "enact failed: \(String(describing: error))")
             throw error
@@ -226,11 +229,42 @@ extension WatchLoopManager: PumpManagerDeliveryDelegate {
 
     /// Stock's `DeviceDataManager.enactBolus`, for the cycle's protocol; the watch's own bolus flow
     /// is `enactManualBolus`.
-    func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws {
+    func enactBolus(units: Double, metadata: DoseMetadata, activationType: BolusActivationType) async throws {
         guard let pumpManager else {
             throw LoopError.configurationError(.pumpManager)
         }
-        try await pumpManager.enactBolus(decisionId: decisionId, units: units, activationType: activationType)
+        var metadata = metadata
+        metadata.activationType = activationType
+        let doseId = await newDoseId(for: metadata)
+        try await pumpManager.enactBolus(doseId: doseId, units: units, activationType: activationType)
+    }
+
+    /// Stock's `DeviceDataManager.newDoseId(for:)`: the metadata is stored under a new dose id, which the
+    /// pod returns on the dose it reports. A failure to store is logged, not thrown: it must not keep
+    /// insulin from being delivered.
+    /// What this watch stored for each dose id it sent; empty without a store or on a failed read.
+    func doseMetadata(for doseIds: [UUID]) async -> [UUID: DoseMetadata] {
+        guard let doseMetadataStore, !doseIds.isEmpty else { return [:] }
+        do {
+            return try await doseMetadataStore.metadata(for: doseIds)
+        } catch {
+            SportLog.event("dose", "could not read the metadata of \(doseIds.count) dose(s): \(String(describing: error))")
+            return [:]
+        }
+    }
+
+    func newDoseId(for metadata: DoseMetadata) async -> UUID {
+        let doseId = UUID()
+        guard let store = doseMetadataStore else {
+            SportLog.event("dose", "no dose metadata store; dose \(doseId.uuidString) sent without its metadata")
+            return doseId
+        }
+        do {
+            try await store.storeMetadata(metadata, for: doseId)
+        } catch {
+            SportLog.event("dose", "could not store the metadata for dose \(doseId.uuidString): \(String(describing: error))")
+        }
+        return doseId
     }
 }
 

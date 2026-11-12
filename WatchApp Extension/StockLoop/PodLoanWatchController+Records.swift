@@ -41,9 +41,11 @@ extension PodLoanWatchController {
     }
 
     /// Once per pod-native raw; the running temp is re-reported and must not be re-minted.
-    func journalPumpEvents(_ events: [NewPumpEvent]) {
+    func journalPumpEvents(_ events: [NewPumpEvent], doseMetadata: [UUID: DoseMetadata] = [:]) {
         guard phase == .active else { return }
-        let reported = events.compactMap { event in event.dose.flatMap { Self.loanRecord(for: $0, raw: event.raw) } }
+        let reported = events.compactMap { event in
+            event.dose.flatMap { Self.loanRecord(for: $0, raw: event.raw, metadata: $0.doseId.flatMap { doseMetadata[$0] }) }
+        }
         var minted = 0
         for record in Self.recordsToJournal(reported, journaled: journal.record(syncIdentifier:)) {
             guard (try? journal.mintEvent(record: record, provenance: .confirmed)) != nil else {
@@ -103,19 +105,19 @@ extension PodLoanWatchController {
     /// The watch never suspends the pod; a pod that stops by itself (a fault) reports a suspend, an
     /// instant. It travels open, so the phone's books stop the scheduled basal there until the loan's
     /// end, where the phone cuts it. A resume ends it as a cancel does: a zero-length rate record.
-    static func loanRecord(for dose: DoseEntry, raw: Data) -> LoanDoseRecord? {
+    static func loanRecord(for dose: DoseEntry, raw: Data, metadata: DoseMetadata? = nil) -> LoanDoseRecord? {
         let identity = raw.map { String(format: "%02x", $0) }.joined()
         switch dose.type {
         case .bolus:
             return LoanDoseRecord(kind: .bolus, startDate: dose.startDate, endDate: dose.endDate,
                                   amount: dose.programmedUnits, syncIdentifier: identity,
                                   insulinType: dose.insulinType, deliveredUnits: dose.deliveredUnits,
-                                  automatic: dose.automatic, decisionId: dose.decisionId)
+                                  automatic: dose.automatic, doseId: dose.doseId, doseMetadata: metadata)
         case .tempBasal:
             return LoanDoseRecord(kind: .tempBasal, startDate: dose.startDate, endDate: dose.endDate,
                                   unitsPerHour: dose.unitsPerHour, syncIdentifier: identity,
                                   insulinType: dose.insulinType, deliveredUnits: dose.deliveredUnits,
-                                  decisionId: dose.decisionId)
+                                  doseId: dose.doseId, doseMetadata: metadata)
         case .suspend:
             return LoanDoseRecord(kind: .suspend, startDate: dose.startDate, endDate: .distantFuture,
                                   unitsPerHour: 0, syncIdentifier: identity, insulinType: dose.insulinType)

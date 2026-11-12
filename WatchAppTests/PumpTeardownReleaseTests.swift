@@ -68,7 +68,6 @@ final class PumpTeardownReleaseTests: XCTestCase {
             XCTAssertNotNil(weakBluetooth, "a DASH manager owns a Bluetooth manager")
             await controller.onMain {
                 pump.pumpManagerDelegate = controller
-                pump.delegateQueue = .main
                 controller.pumpManager = pump
                 controller.loopManager.pumpManager = pump
                 if takeControl { pump.takeControl() }
@@ -99,7 +98,6 @@ final class PumpTeardownReleaseTests: XCTestCase {
         let pump = try makePump()
         await controller.onMain {
             pump.pumpManagerDelegate = controller
-            pump.delegateQueue = .main
             controller.pumpManager = pump
             controller.loopManager.pumpManager = pump
         }
@@ -108,16 +106,9 @@ final class PumpTeardownReleaseTests: XCTestCase {
         XCTAssertTrue((pump.pumpManagerDelegate as AnyObject?) === controller, "still the delegate: a late report must find one")
         XCTAssertNil(controller.pumpStateStore.wrappedValue, "precondition: the teardown cleared the saved state")
 
-        let reported = expectation(description: "the late report completes")
         let event = NewPumpEvent(date: Date(), dose: nil, raw: Data([1]), title: "late")
-        await controller.onMain {
-            controller.pumpManagerDidUpdateState(pump)
-            controller.pumpManager(pump, hasNewPumpEvents: [event], lastReconciliation: Date(), replacePendingEvents: false) { error in
-                XCTAssertNil(error)
-                reported.fulfill()
-            }
-        }
-        await fulfillment(of: [reported], timeout: 5)
+        await controller.pumpManagerDidUpdateState(pump)
+        try await controller.pumpManager(pump, hasNewPumpEvents: [event], lastReconciliation: Date(), replacePendingEvents: false)
         XCTAssertNil(controller.pumpStateStore.wrappedValue, "a released driver's state is not saved: the next launch must not resume it")
         XCTAssertNil(controller.pumpManager)
     }

@@ -151,7 +151,7 @@ private final class LoanBooksDriver {
         let raw = podRaw(type: "bolus", value: units, start: instant)
         let dose = DoseEntry(type: .bolus, startDate: instant,
                              endDate: instant.addingTimeInterval(span),
-                             value: units, unit: .units, decisionId: nil)
+                             value: units, unit: .units, doseId: nil)
         var batch = [NewPumpEvent(date: instant, dose: dose, raw: raw, title: "Bolus")]
         if let temp = runningTemp {
             batch.append(mutableEvent(for: temp))
@@ -256,7 +256,7 @@ private final class LoanBooksDriver {
     /// The pod's view of the running temp: mutable, full span, identity from raw.
     private func mutableEvent(for temp: RunningTemp) -> NewPumpEvent {
         let dose = DoseEntry(type: .tempBasal, startDate: temp.start, endDate: temp.programmedEnd,
-                             value: temp.rate, unit: .unitsPerHour, decisionId: nil, isMutable: true)
+                             value: temp.rate, unit: .unitsPerHour, doseId: nil, isMutable: true)
         return NewPumpEvent(date: temp.start, dose: dose, raw: temp.raw, title: "Temp Basal")
     }
 
@@ -265,7 +265,7 @@ private final class LoanBooksDriver {
         guard let temp = runningTemp else { return nil }
         let end = min(instant, temp.programmedEnd)
         let dose = DoseEntry(type: .tempBasal, startDate: temp.start, endDate: end,
-                             value: temp.rate, unit: .unitsPerHour, decisionId: nil)
+                             value: temp.rate, unit: .unitsPerHour, doseId: nil)
         foldedSession.append(LoanDoseRecord(kind: .tempBasal, startDate: temp.start, endDate: end,
                                             unitsPerHour: temp.rate,
                                             syncIdentifier: hexString(temp.raw)))
@@ -391,7 +391,7 @@ final class LoanBooksHarnessTests: XCTestCase {
             NewPumpEvent(date: $0.startDate, dose: $0, raw: Data(($0.syncIdentifier ?? "").utf8), title: "Temp Basal")
         }, lastReconciliation: now)
         driver.backfill([DoseEntry(type: .tempBasal, startDate: tempStart, endDate: cancelAt, value: 0.0,
-                                   unit: .unitsPerHour, decisionId: nil, syncIdentifier: hexString(Data(syncTemp.utf8)))])
+                                   unit: .unitsPerHour, doseId: nil, syncIdentifier: hexString(Data(syncTemp.utf8)))])
 
         let temps = driver.normalizedDoses(start: loanStart, end: now)
             .filter { $0.type == .tempBasal && $0.startDate >= tempStart && $0.startDate < cancelAt }
@@ -788,11 +788,11 @@ final class LoanBooksHarnessTests: XCTestCase {
         let syncT3 = "loanv2-\(UUID().uuidString)"
 
         func tempDose(_ rate: Double, _ start: Date, _ end: Date) -> DoseEntry {
-            DoseEntry(type: .tempBasal, startDate: start, endDate: end, value: rate, unit: .unitsPerHour, decisionId: nil)
+            DoseEntry(type: .tempBasal, startDate: start, endDate: end, value: rate, unit: .unitsPerHour, doseId: nil)
         }
         func bolusDose(_ units: Double, _ start: Date) -> DoseEntry {
             DoseEntry(type: .bolus, startDate: start, endDate: start.addingTimeInterval(38),
-                      value: units, unit: .units, decisionId: nil)
+                      value: units, unit: .units, doseId: nil)
         }
         /// The controller's `newPumpEvents`: identity in `raw`, discarded from the dose.
         func loanEvent(_ dose: DoseEntry, _ sync: String) -> NewPumpEvent {
@@ -803,7 +803,7 @@ final class LoanBooksHarnessTests: XCTestCase {
         func upsert(_ dose: DoseEntry, _ sync: String) -> DoseEntry {
             DoseEntry(type: dose.type, startDate: dose.startDate, endDate: dose.endDate,
                       value: dose.unit == .unitsPerHour ? dose.unitsPerHour : dose.programmedUnits,
-                      unit: dose.unit, decisionId: nil, syncIdentifier: hexString(Data(sync.utf8)))
+                      unit: dose.unit, doseId: nil, syncIdentifier: hexString(Data(sync.utf8)))
         }
 
         let driver = makeDriver()

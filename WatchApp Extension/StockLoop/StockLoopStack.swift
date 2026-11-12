@@ -31,6 +31,7 @@ enum StockLoopStack {
             carbStore: stores.carbStore,
             overrideHistory: stores.overrideHistory,
             dosingDecisionStore: stores.dosingDecisionStore,
+            doseMetadataStore: stores.doseMetadataStore,
             alertStore: stores.alertStore,
             deviceLog: stores.deviceLog
         )
@@ -40,12 +41,12 @@ enum StockLoopStack {
 
     /// The watch's stores, which its `LoopDataManager` opens for its screens and this loop alike.
     @MainActor
-    static func makeStores() async -> (doseStore: DoseStore, glucoseStore: GlucoseStore, carbStore: CarbStore, overrideHistory: TemporaryScheduleOverrideHistory, dosingDecisionStore: DosingDecisionStore, alertStore: AlertStore, deviceLog: PersistentDeviceLog)? {
+    static func makeStores() async -> (doseStore: DoseStore, glucoseStore: GlucoseStore, carbStore: CarbStore, overrideHistory: TemporaryScheduleOverrideHistory, dosingDecisionStore: DosingDecisionStore, doseMetadataStore: DoseMetadataStore, alertStore: AlertStore, deviceLog: PersistentDeviceLog)? {
         guard let stores = await LoopDataManager.shared.openedStores() else { return nil }
         // One override history: a second would dose unscaled while the screens showed the override.
         let overrideHistory = makeOverrideHistory()
         let loop = stores.loopStores
-        return (loop.doseStore, stores.glucoseStore, stores.carbStore, overrideHistory, loop.dosingDecisionStore, loop.alertStore, loop.deviceLog)
+        return (loop.doseStore, stores.glucoseStore, stores.carbStore, overrideHistory, loop.dosingDecisionStore, loop.doseMetadataStore, loop.alertStore, loop.deviceLog)
     }
 
     /// Keeps ended overrides for the algorithm's lookback (about 18 h, about 83 with slow retrospective
