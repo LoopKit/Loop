@@ -88,7 +88,6 @@ final class WatchCGMHost {
     }
 
     private func install(_ manager: CGMManager) {
-        manager.delegateQueue = .main
         manager.cgmManagerDelegate = self
         manager.addStatusObserver(self, queue: .main)
         cgmManager = manager
@@ -119,37 +118,33 @@ final class WatchCGMHost {
 extension WatchCGMHost: CGMManagerStatusObserver {}
 
 extension WatchCGMHost: CGMManagerDelegate {
-    nonisolated func startDateToFilterNewData(for manager: CGMManager) -> Date? {
-        MainActor.assumeIsolated { LoopDataManager.shared.glucoseStore?.latestGlucose?.startDate }
+    func startDateToFilterNewData(for manager: CGMManager) async -> Date? {
+        LoopDataManager.shared.glucoseStore?.latestGlucose?.startDate
     }
 
-    nonisolated func cgmManager(_ manager: CGMManager, hasNew readingResult: CGMReadingResult) {
-        MainActor.assumeIsolated {
-            switch readingResult {
-            case .newData(let samples):
-                log.default("Direct reading: %d sample(s)", samples.count)
-                LoopDataManager.shared.addDirectGlucose(samples)
-            case .error(let error):
-                log.error("CGM reading error: %{public}@", String(describing: error))
-            case .unreliableData:
-                LoopDataManager.shared.directGlucoseUnreliable()
-            case .noData:
-                break
-            }
+    func cgmManager(_ manager: CGMManager, hasNew readingResult: CGMReadingResult) async {
+        switch readingResult {
+        case .newData(let samples):
+            log.default("Direct reading: %d sample(s)", samples.count)
+            LoopDataManager.shared.addDirectGlucose(samples)
+        case .error(let error):
+            log.error("CGM reading error: %{public}@", String(describing: error))
+        case .unreliableData:
+            LoopDataManager.shared.directGlucoseUnreliable()
+        case .noData:
+            break
         }
     }
 
-    nonisolated func cgmManager(_ manager: CGMManager, hasNew events: [PersistedCgmEvent]) {}
+    nonisolated func cgmManager(_ manager: CGMManager, hasNew events: [PersistedCgmEvent]) async {}
 
     /// The phone owns the sensor; a manager passed its configuration lets go when the phone stops sharing.
     nonisolated func cgmManagerWantsDeletion(_ manager: CGMManager) async {}
 
-    nonisolated func cgmManagerDidUpdateState(_ manager: CGMManager) {
-        MainActor.assumeIsolated {
-            guard manager === cgmManager else { return }
-            save(manager)
-            updateStatusNote()
-        }
+    func cgmManagerDidUpdateState(_ manager: CGMManager) async {
+        guard manager === cgmManager else { return }
+        save(manager)
+        updateStatusNote()
     }
 
     nonisolated func credentialStoragePrefix(for manager: CGMManager) -> String {
@@ -157,7 +152,7 @@ extension WatchCGMHost: CGMManagerDelegate {
     }
 
     nonisolated func cgmManager(_ manager: CGMManager, didUpdate status: CGMManagerStatus) {
-        MainActor.assumeIsolated {
+        Task { @MainActor in
             guard manager === cgmManager else { return }
             updateStatusNote()
         }

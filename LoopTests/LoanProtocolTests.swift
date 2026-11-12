@@ -675,28 +675,30 @@ final class LoanProtocolTests: XCTestCase {
 @MainActor
 final class LoanDosingDecisionTests: XCTestCase {
 
-    // MARK: - Decision ids on the wire
+    // MARK: - Dose ids on the wire
 
-    /// The id rides the dose record into the phone's dose entries; a record from an older peer,
-    /// without it, still decodes.
-    func testADoseRecordCarriesItsDecisionIdAndAnOlderRecordStillDecodes() throws {
-        let decisionId = UUID()
+    /// The dose's id rides the dose record into the phone's dose entries; a record without one still
+    /// decodes.
+    func testADoseRecordCarriesItsDoseIdAndARecordWithoutOneStillDecodes() throws {
+        let doseId = UUID()
         let at = Date(timeIntervalSince1970: 1_700_000_000)
-        let record = LoanDoseRecord(kind: .bolus, startDate: at, amount: 1.0, syncIdentifier: "0a0b", decisionId: decisionId)
+        let metadata = DoseMetadata(origin: .user, device: .watch, decisionId: UUID(), activationType: .manualRecommendationAccepted)
+        let record = LoanDoseRecord(kind: .bolus, startDate: at, amount: 1.0, syncIdentifier: "0a0b", doseId: doseId, doseMetadata: metadata)
         let decoded = try LoanProtocol.decoder.decode(LoanDoseRecord.self, from: LoanProtocol.encoder.encode(record))
-        XCTAssertEqual(decoded.decisionId, decisionId)
-        XCTAssertEqual(record.seedDoseEntry(syncIdentifier: "0a0b")?.decisionId, decisionId, "the seed carries it")
+        XCTAssertEqual(decoded.doseId, doseId)
+        XCTAssertEqual(decoded.doseMetadata, metadata, "the watch's metadata for the dose rides with it")
+        XCTAssertEqual(record.seedDoseEntry(syncIdentifier: "0a0b")?.doseId, doseId, "the seed carries it")
 
         let event = LoanEvent(id: UUID(), seq: 1, provenance: .confirmed, record: record, loggedAt: at)
         let outcome = LoanReconciler.reconcile(LoanReconciler.Input(events: [event], schedule: nil, loanStart: at.addingTimeInterval(-60),
                                                                     loanEnd: at.addingTimeInterval(60), isFinalHandback: true))
-        XCTAssertEqual(outcome.doses.first?.decisionId, decisionId, "the reconciler carries it")
+        XCTAssertEqual(outcome.doses.first?.doseId, doseId, "the reconciler carries it")
 
-        var older = try XCTUnwrap(JSONSerialization.jsonObject(with: LoanProtocol.encoder.encode(record)) as? [String: Any])
-        older["decisionId"] = nil
-        let fromOlder = try LoanProtocol.decoder.decode(LoanDoseRecord.self, from: JSONSerialization.data(withJSONObject: older))
-        XCTAssertNil(fromOlder.decisionId)
-        XCTAssertEqual(fromOlder.amount, 1.0)
+        var without = try XCTUnwrap(JSONSerialization.jsonObject(with: LoanProtocol.encoder.encode(record)) as? [String: Any])
+        without["doseId"] = nil
+        let fromWithout = try LoanProtocol.decoder.decode(LoanDoseRecord.self, from: JSONSerialization.data(withJSONObject: without))
+        XCTAssertNil(fromWithout.doseId)
+        XCTAssertEqual(fromWithout.amount, 1.0)
     }
 
     // MARK: - The watch's decisions, added once

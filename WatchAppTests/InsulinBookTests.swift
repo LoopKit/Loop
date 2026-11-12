@@ -86,7 +86,7 @@ final class InsulinBookTests: XCTestCase {
         let start = Date().addingTimeInterval(-minutesAgo * 60)
         return DoseEntry(type: .bolus, startDate: start, endDate: start,
                          value: units, unit: .units,
-                         decisionId: nil,
+                         doseId: nil,
                          syncIdentifier: UUID().uuidString,
                          insulinType: .novolog)
     }
@@ -207,7 +207,7 @@ final class InsulinBookTests: XCTestCase {
                                  startDate: start,
                                  endDate: start.addingTimeInterval(30 * 60),
                                  value: 2.0, unit: .unitsPerHour,
-                                 decisionId: nil,
+                                 doseId: nil,
                                  syncIdentifier: UUID().uuidString,
                                  insulinType: .novolog,
                                  isMutable: true)

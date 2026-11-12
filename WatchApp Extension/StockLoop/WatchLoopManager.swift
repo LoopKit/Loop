@@ -27,6 +27,8 @@ final class WatchLoopManager {
     /// Stock's dosing decisions, kept by the watch while it holds the pod; nil in suites that
     /// do not look at them.
     let dosingDecisionStore: DosingDecisionStore?
+    /// Stock's `DeviceDataManager.doseMetadataStore`: what the watch knows about each dose it sends.
+    let doseMetadataStore: DoseMetadataStore?
 
     /// Stock's alert history, recorded while the watch holds the pod; nil in suites that do not
     /// look at it.
@@ -350,6 +352,7 @@ final class WatchLoopManager {
     init(doseStore: DoseStore, glucoseStore: GlucoseStore, carbStore: CarbStore,
          overrideHistory: TemporaryScheduleOverrideHistory = TemporaryScheduleOverrideHistory(),
          dosingDecisionStore: DosingDecisionStore? = nil,
+         doseMetadataStore: DoseMetadataStore? = nil,
          alertStore: AlertStore? = nil,
          deviceLog: PersistentDeviceLog? = nil,
          settings: LoopSettings = LoopSettings(),
@@ -365,6 +368,7 @@ final class WatchLoopManager {
         self.glucoseStore = glucoseStore
         self.carbStore = carbStore
         self.dosingDecisionStore = dosingDecisionStore
+        self.doseMetadataStore = doseMetadataStore
         self.alertStore = alertStore
         self.deviceLog = deviceLog
         self.settingsProvider = WatchSettingsProvider(settings: settings)
@@ -530,10 +534,10 @@ final class WatchLoopManager {
     var contextDosingDecisions: [(date: Date, potentialCarbEntry: NewCarbEntry?, decision: BolusDosingDecision)] = []
 
     /// The pod command for a manual bolus, as stock `DeviceDataManager.enactBolus` sends it; a
-    /// `var` so the suite can see the decision id it carries.
-    var enactBolusCommand: (PumpManager, _ decisionId: UUID?, _ units: Double, BolusActivationType,
-                            @escaping (PumpManagerError?) -> Void) -> Void = { pumpManager, decisionId, units, activationType, completion in
-        pumpManager.enactBolus(decisionId: decisionId, units: units, activationType: activationType, completion: completion)
+    /// `var` so the suite can see the dose id it carries.
+    var enactBolusCommand: (PumpManager, _ doseId: UUID, _ units: Double, BolusActivationType,
+                            @escaping (PumpManagerError?) -> Void) -> Void = { pumpManager, doseId, units, activationType, completion in
+        pumpManager.enactBolus(doseId: doseId, units: units, activationType: activationType, completion: completion)
     }
 
     /// Stock's cancel of an automatic bolus before a manual one; a `var` so the suite can see it.
