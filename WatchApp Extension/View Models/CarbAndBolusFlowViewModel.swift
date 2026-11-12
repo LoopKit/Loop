@@ -28,7 +28,14 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
 
     // MARK: - Other state
     let interactionStartDate = Date()
-    var carbEntryUnderConsideration: NewCarbEntry?   // CarbAndBolusFlowViewModel+PodLoan.swift reads it
+    var carbEntryUnderConsideration: NewCarbEntry? {   // CarbAndBolusFlowViewModel+PodLoan.swift reads it
+        didSet { if oldValue != carbEntryUnderConsideration { loanRecommendationIsForEntry = false } }
+    }
+    // During a loan (CarbAndBolusFlowViewModel+PodLoan.swift): one recommendation asked of the watch at a time,
+    // whether another was asked for meanwhile, and whether the number shown was computed for the entry considered.
+    var loanRecommendationInFlight = false
+    var loanRecommendationStale = false
+    var loanRecommendationIsForEntry = false
     private var contextUpdateObservation: AnyObject?
     private var contextDate: Date?
 
@@ -62,6 +69,8 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
             }
         }
 
+        observeLoanDecisions()
+
         contextUpdateObservation = NotificationCenter.default.addObserver(
             forName: LoopDataManager.didUpdateContextNotification,
             object: loopManager,
@@ -91,6 +100,9 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
                 }
             }
         case .manualBolus:
+            // During a loan the watch's context carries no recommendation: the screen asks the watch's
+            // loop for its own, again at each change of what it displays.
+            if let session = loanSessionIfActive { return recommendLoanBolus(with: nil, session: session) }
             let activeContext = loopManager.displayContext
             self.contextDate = activeContext?.creationDate
             if self.recommendedBolusAmount != activeContext?.recommendedBolusDose {
@@ -129,7 +141,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func recommendBolus(with entry: NewCarbEntry? = nil) async {
-        if let session = loanSessionIfActive { return await recommendLoanBolus(with: entry, session: session) }
+        if let session = loanSessionIfActive { return recommendLoanBolus(with: entry, session: session) }
 
         do {
             isComputingRecommendedBolus = true

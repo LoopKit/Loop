@@ -1002,6 +1002,49 @@ final class StockRunsTests: XCTestCase {
         XCTAssertEqual(manager.displayRunsStarted - before, 1, "asked after the cycle was queued")
     }
 
+    /// An open carb screen's recommendation is asked for at the decision and runs ahead of the cycle's
+    /// display run, which still follows once.
+    func testAnOpenCarbScreensRecommendationRunsAheadOfTheCyclesDisplayRun() async throws {
+        let (manager, _) = try await makeClosedLoopManager()
+        let before = manager.displayRunsStarted
+        let entry = carbs(20)
+        var asked = 0
+        var displayRunsWhenRecommended: Int?
+        manager.recommendAfterDecision = {
+            asked += 1
+            manager.recommendManualBolus(potentialCarbEntry: entry) { _ in
+                displayRunsWhenRecommended = manager.displayRunsStarted
+            }
+            return true
+        }
+        manager.loop()
+        await manager.laneSettled()
+        await manager.laneSettled()
+        XCTAssertEqual(asked, 1, "asked once per cycle")
+        XCTAssertEqual(displayRunsWhenRecommended, before, "the recommendation returned before the display run began")
+        XCTAssertEqual(manager.displayRunsStarted - before, 1, "the cycle's display run still follows")
+    }
+
+    /// A screen with nothing to recommend for leaves the cycle as it was: one display run, in turn.
+    func testACycleWithNoRecommendationWantedRunsItsDisplayRunDirectly() async throws {
+        let (manager, _) = try await makeClosedLoopManager()
+        let before = manager.displayRunsStarted
+        manager.recommendAfterDecision = { false }
+        manager.loop()
+        await manager.laneSettled()
+        XCTAssertEqual(manager.displayRunsStarted - before, 1)
+    }
+
+    /// With no bolus screen open a cycle computes no bolus recommendation: the watch's context for its
+    /// own screens carries none, and the screen asks when it opens.
+    func testACycleWithNoBolusScreenOpenComputesNoRecommendation() async throws {
+        let (manager, _) = try await makeClosedLoopManager()
+        manager.loop()
+        manager.updateDisplayStateForChange()
+        await manager.laneSettled()
+        XCTAssertTrue(manager.contextDosingDecisions.isEmpty)
+    }
+
     /// The glucose store announces every write, also one that stored nothing; neither asks for a display run.
     func testAGlucoseStoreWriteAsksForNoDisplayRun() async throws {
         let (manager, _) = try await makeClosedLoopManager()

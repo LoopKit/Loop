@@ -196,7 +196,7 @@ final class WatchLoopManager {
             self.appliedClosedLoopEnabled = enabled
             SportLog.event("loop", enabled ? "loop closed \(reason)" : "loop opened \(reason); no automatic dosing")
 
-            await self.publishHUDContext()
+            self.publishHUDContext()
 
             // As stock: a change of loop mode refreshes the display run.
             if wasEnabled != enabled { self.updateDisplayStateForChange() }
@@ -300,6 +300,9 @@ final class WatchLoopManager {
     var displayRunWanted = false
     /// Cycles asked for that have not started on the lane yet.
     var cyclesWaiting = 0
+    /// The open carb screen, asked at each cycle's decision to recompute its recommendation: true when
+    /// it put one on the lane (see `loop()`). Nil or false: the cycle ends in one piece.
+    var recommendAfterDecision: (() -> Bool)?
     /// Display runs started, for the tests.
     private(set) var displayRunsStarted = 0
     func noteDisplayRunStarted() { displayRunsStarted += 1 }

@@ -124,14 +124,32 @@ extension WatchLoopManager {
                 self.updatePredictionBreakdown()
             }
 
-            // Both arms, as stock's `loop()` ends: the display run, its forced
-            // "updateRemoteRecommendation" decision, then the stock pages' context.
-            await self.updateDisplayStateOnLane(forceStoreRemoteRecommendation: true)
-
-            // Stock's predicted-low alert reads `LoopDataManager.predictedGlucose`, the display
-            // run's forecast, on both arms.
-            self.evaluatePredictedLowAlert(self.displayState.output?.predictedGlucose.map(\.loopKit))
+            // The open carb screen's recommendation goes ahead of the display run: it is asked for here,
+            // after the decision and its dose are booked, and the rest of the cycle takes its turn behind it.
+            // Counted as a cycle waiting, so a store change's display run in between is left to it.
+            if let recompute = self.recommendAfterDecision, recompute() {
+                self.cyclesWaiting += 1
+                self.onLane {
+                    self.cyclesWaiting -= 1
+                    // A loan that ended meanwhile has nothing left to display or warn about.
+                    guard self.pumpManager != nil else { return }
+                    await self.finishCycleOnLane()
+                }
+            } else {
+                await self.finishCycleOnLane()
+            }
         }
+    }
+
+    /// How a cycle ends, after its decision. Lane work.
+    func finishCycleOnLane() async {
+        // Both arms, as stock's `loop()` ends: the display run, its forced
+        // "updateRemoteRecommendation" decision, then the stock pages' context.
+        await updateDisplayStateOnLane(forceStoreRemoteRecommendation: true)
+
+        // Stock's predicted-low alert reads `LoopDataManager.predictedGlucose`, the display
+        // run's forecast, on both arms.
+        evaluatePredictedLowAlert(displayState.output?.predictedGlucose.map(\.loopKit))
     }
 
     /// The cycle's fetch, as stock's `LoopDataManager.fetchData`, with the watch's sources (`LoopCycleHost`).
@@ -215,7 +233,7 @@ extension WatchLoopManager {
         noteDisplayRunStarted()
         displayState = await cycle.displayState()
 
-        await publishHUDContext()
+        publishHUDContext()
         refreshGlanceData()
 
         await updateRemoteRecommendation(force: forceStoreRemoteRecommendation)
