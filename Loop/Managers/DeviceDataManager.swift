@@ -173,7 +173,8 @@ final class DeviceDataManager {
     let carbStore: CarbStore
     let doseStore: DoseStore
     let glucoseStore: GlucoseStore
-    
+    let doseMetadataStore: DoseMetadataStore
+
     private let healthStore: HKHealthStore
     private let cacheStore: PersistenceController
     private let cgmEventStore: CgmEventStore
@@ -281,6 +282,7 @@ final class DeviceDataManager {
         self.carbStore = carbStore
         self.doseStore = doseStore
         self.glucoseStore = glucoseStore
+        self.doseMetadataStore = DoseMetadataStore(store: cacheStore, expireAfter: localCacheDuration)
         self.cgmEventStore = cgmEventStore
         self.loopControl = loopControl
         self.analyticsServicesManager = analyticsServicesManager
@@ -792,7 +794,19 @@ extension DeviceDataManager {
 
 // MARK: - Client API
 extension DeviceDataManager {
-    func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws {
+    /// Stores the metadata under a new dose id, for the pump manager to return on the dose it reports.
+    /// A failure to store is logged, not thrown: it must not keep insulin from being delivered.
+    func newDoseId(for metadata: DoseMetadata) async -> UUID {
+        let doseId = UUID()
+        do {
+            try await doseMetadataStore.storeMetadata(metadata, for: doseId)
+        } catch {
+            log.error("Unable to store metadata for dose %{public}@: %{public}@", doseId.uuidString, String(describing: error))
+        }
+        return doseId
+    }
+
+    func enactBolus(units: Double, metadata: DoseMetadata, activationType: BolusActivationType) async throws {
         guard let pumpManager = pumpManager else {
             throw LoopError.configurationError(.pumpManager)
         }
@@ -806,14 +820,18 @@ extension DeviceDataManager {
             let _ = try? await pumpManager.cancelBolus()
         }
 
+        var metadata = metadata
+        metadata.activationType = activationType
+        let doseId = await newDoseId(for: metadata)
+
         do {
-            try await pumpManager.enactBolus(decisionId: decisionId, units: units, activationType: activationType)
+            try await pumpManager.enactBolus(doseId: doseId, units: units, activationType: activationType)
         } catch PumpManagerError.uncertainDelivery {
             // Do not generate notification on uncertain delivery error
         } catch {
             if !activationType.isAutomatic, let error = error as? PumpManagerError {
                 do {
-                    try await NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), decisionId: decisionId, activationType: activationType)
+                    try await NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), decisionId: metadata.decisionId, activationType: activationType)
                 } catch {
                     log.error("Error sending bolus failure notification %{public}@", String(describing: error))
                 }
@@ -1425,7 +1443,9 @@ extension DeviceDataManager: PumpManagerDeliveryDelegate {
     func send(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?, to pumpManager: PumpManager) async throws {
         log.default("Enacting dose: %{public}@", String(describing: (bolus, tempBasal)))
         
-        try await doseEnactor.enact(decisionId: decisionId, bolus: bolus, tempBasal: tempBasal, with: pumpManager)
+        try await doseEnactor.enact(bolus: bolus, tempBasal: tempBasal, with: pumpManager) { activationType in
+            await self.newDoseId(for: DoseMetadata(origin: .automatic, device: .phone, decisionId: decisionId, activationType: activationType))
+        }
     }
 
     var isAutomaticDosingActive: Bool {
