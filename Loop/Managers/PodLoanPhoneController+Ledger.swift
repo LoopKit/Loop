@@ -307,7 +307,7 @@ extension PodLoanPhoneController {
         let now = deps.now()
         let sync = "\(Self.estimateSyncPrefix)-e\(epoch)-\(Int(now.timeIntervalSince1970))"
         let entry = DoseEntry(type: .bolus, startDate: now, endDate: now,
-                              value: units, unit: .units, decisionId: nil, deliveredUnits: units,
+                              value: units, unit: .units, doseId: nil, deliveredUnits: units,
                               syncIdentifier: sync, manuallyEntered: true)
         deps.issueUrgentNotice(Self.estimatedTitle, notice)
         deps.bookGapDose(entry) { [weak self] ok in

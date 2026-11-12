@@ -473,19 +473,19 @@ final class WakeResumeTests: XCTestCase {
         // Still delivering when the copy's pod reading was taken: half of it is in that reading,
         // the other half arrives after it — and the copy's own record explains that half.
         let bolus = DoseEntry(type: .bolus, startDate: t0.addingTimeInterval(-.minutes(2)), endDate: t0.addingTimeInterval(.minutes(2)),
-                              value: 6.0, unit: .units, decisionId: nil, deliveredUnits: 6.0, syncIdentifier: "copy-bolus")
+                              value: 6.0, unit: .units, doseId: nil, deliveredUnits: 6.0, syncIdentifier: "copy-bolus")
         let straddling = await unexplained(podTotal: 10.0 + 3.0 + 0.2, after: 10, records: [bolus])
         XCTAssertEqual(straddling, 0)
         // …and a bolus wholly after the reading is explained in full.
         let later = DoseEntry(type: .bolus, startDate: t0.addingTimeInterval(.minutes(1)), endDate: t0.addingTimeInterval(.minutes(3)),
-                              value: 2.0, unit: .units, decisionId: nil, deliveredUnits: 2.0, syncIdentifier: "later-bolus")
+                              value: 2.0, unit: .units, doseId: nil, deliveredUnits: 2.0, syncIdentifier: "later-bolus")
         let after = await unexplained(podTotal: 10.0 + 2.0 + 0.2, after: 10, records: [later])
         XCTAssertEqual(after, 0)
     }
 
     func testATempInTheCopyExplainsItsOwnDelivery() async {
         let temp = DoseEntry(type: .tempBasal, startDate: t0.addingTimeInterval(-.minutes(5)), endDate: t0.addingTimeInterval(.minutes(25)),
-                             value: 3.0, unit: .unitsPerHour, decisionId: nil, syncIdentifier: "copy-temp")
+                             value: 3.0, unit: .unitsPerHour, doseId: nil, syncIdentifier: "copy-temp")
         let explained = await unexplained(podTotal: 10.5, after: 10, records: [temp])
         XCTAssertEqual(explained, 0, "ten minutes at 3.0 U/h is 0.5 U")
         let beyond = await unexplained(podTotal: 12.5, after: 10, records: [temp])

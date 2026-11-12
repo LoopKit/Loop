@@ -124,6 +124,9 @@ final class PodLoanPhoneController {
         /// The watch's dosing decisions into this phone's store, skipping any already there; the
         /// result is how many were added.
         var addDosingDecisions: (_ decisions: [StoredDosingDecision], _ completion: @escaping (Result<Int, Error>) -> Void) -> Void = { _, done in done(.success(0)) }
+        /// Stores the watch's metadata for the doses it sent, each under its dose id, skipping one
+        /// already stored; answers how many were added.
+        var addDoseMetadata: (_ metadata: [UUID: DoseMetadata], _ completion: @escaping (Result<Int, Error>) -> Void) -> Void = { _, done in done(.success(0)) }
 
         /// The watch's alert records into this phone's `AlertStore`, one per sync identifier; the
         /// result is how many were added or updated.
@@ -222,10 +225,22 @@ final class PodLoanPhoneController {
     }
 
     /// Keyed by event ID, so a resend replaces. Tombstones are the watch retracting superseded records.
+    /// The watch's metadata for its doses goes to this phone's metadata store as the records arrive.
     func stage(events: [LoanEvent], tombstones: [UUID]) {
         for event in events { staged[event.id] = event }
         stagedTombstones.formUnion(tombstones)
         persistStaged()
+
+        var doseMetadata: [UUID: DoseMetadata] = [:]
+        for event in events {
+            if let doseId = event.record.doseId, let metadata = event.record.doseMetadata { doseMetadata[doseId] = metadata }
+        }
+        guard !doseMetadata.isEmpty else { return }
+        let loan = epoch
+        deps.addDoseMetadata(doseMetadata) { [weak self] result in
+            guard case .failure(let error) = result else { return }
+            self?.handbackDiag(loan, "metadata of \(doseMetadata.count) watch dose(s) not stored: \(error)")
+        }
     }
 
     /// Drops records from staging once nothing more will be done with them.

@@ -413,7 +413,7 @@ final class OverrideHistoryTests: XCTestCase {
         let doses = stride(from: 79.0 * 2, through: 1, by: -1).compactMap { i in
             LoanDoseRecord(storeDose: DoseEntry(type: .tempBasal, startDate: now.addingTimeInterval(-i * 1800),
                                                 endDate: now.addingTimeInterval(-(i - 1) * 1800), value: 1.2, unit: .unitsPerHour,
-                                                decisionId: nil, deliveredUnits: 0.6, syncIdentifier: "temp-\(i)",
+                                                doseId: nil, deliveredUnits: 0.6, syncIdentifier: "temp-\(i)",
                                                 insulinType: .novolog, automatic: true))
         }.filter { $0.startDate >= windows.doses }
         let carbs = [30.0, 6].map { hours in
