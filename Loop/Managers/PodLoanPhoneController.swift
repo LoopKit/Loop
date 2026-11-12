@@ -198,7 +198,7 @@ final class PodLoanPhoneController {
 
             log.error("the watch could not read a message from this phone; the apps may be on different versions")
         // Phone-authored kinds, seen only if something loops a message back.
-        case .grant, .handbackAck, .revoke, .statusQuery, .denied, .dormantGrant:
+        case .grant, .handbackAck, .revoke, .statusQuery, .denied, .dormantGrant, .requestReceived:
             break
         }
     }

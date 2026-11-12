@@ -153,6 +153,60 @@ final class G7RelayDedupTests: XCTestCase {
         XCTAssertTrue(readingAskedForACycle(wrist), "a stored reading runs one")
     }
 
+    /// The phone's answer to a request for missed readings, as it crosses to the watch.
+    private func catchUpAnswer(_ readings: [NewGlucoseSample]) throws -> [NewGlucoseSample] {
+        let phone = readings.map {
+            StoredGlucoseSample(uuid: UUID(), provenanceIdentifier: "phone", syncIdentifier: $0.syncIdentifier, syncVersion: 1,
+                                startDate: $0.date, quantity: $0.quantity, trend: $0.trend)
+        }
+        let answer = try XCTUnwrap(WatchHistoricalGlucose(rawValue: WatchHistoricalGlucose(samples: phone).rawValue))
+        return answer.samples.map(NewGlucoseSample.init(phoneSample:))
+    }
+
+    /// A reading that reaches the store first in the phone's answer to a request for missed readings
+    /// runs a cycle, as one in the phone's regular update does; the watch's own copy of it then
+    /// stores nothing. An answer holding only what the store has runs none.
+    func testAReadingFirstStoredFromThePhonesCatchUpAnswerRunsACycle() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let cacheStore = PersistenceController(directoryURL: dir.appendingPathComponent("cache"))
+        let doseStore = await DoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                        longestEffectDuration: ExponentialInsulinModelPreset.rapidActingAdult.effectDuration,
+                                        provenanceIdentifier: "G7RelayDedupTests")
+        let glucoseStore = await GlucoseStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                              cacheLength: 4 * 60 * 60, provenanceIdentifier: "G7RelayDedupTests")
+        let carbStore = CarbStore(healthKitSampleStore: nil, cacheStore: cacheStore,
+                                  cacheLength: 24 * 60 * 60, provenanceIdentifier: "G7RelayDedupTests")
+        let wrist = WatchLoopManager(doseStore: doseStore, glucoseStore: glucoseStore, carbStore: carbStore,
+                                     defaults: UserDefaults(suiteName: "G7RelayDedupTests-\(UUID().uuidString)")!,
+                                     stateDirectory: dir)
+        let now = Date()
+        let held = reading(now.addingTimeInterval(-5 * 60), id: "held-\(UUID().uuidString)")
+        _ = try await glucoseStore.addGlucoseSamples([held])
+
+        // As `LoopDataManager.addPhoneGlucose`: the newest reading the store took is offered to the loop.
+        let nothingNew = try await LoopDataManager.addGlucose(try catchUpAnswer([held]), to: glucoseStore)
+        XCTAssertNil(nothingNew, "the store already held it: nothing to offer")
+
+        let new = reading(now, id: "new-\(UUID().uuidString)")
+        let newest = try await LoopDataManager.addGlucose(try catchUpAnswer([held, new]), to: glucoseStore)
+        XCTAssertEqual(newest?.syncIdentifier, new.syncIdentifier, "the reading the store took")
+        XCTAssertFalse(readingAskedForACycle(wrist))
+        wrist.didStorePhoneGlucose(try XCTUnwrap(newest))
+        var tries = 0
+        while !readingAskedForACycle(wrist), tries < 50 {
+            tries += 1
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
+        XCTAssertTrue(readingAskedForACycle(wrist), "it runs a cycle")
+
+        // The watch's own copy of the reading, a moment later.
+        let own = try await glucoseStore.addGlucoseSamples([new])
+        XCTAssertTrue(own.isEmpty, "the watch's own copy stores nothing")
+        let rows = try await glucoseStore.getGlucoseSamples(start: now.addingTimeInterval(-10 * 60), end: nil)
+        XCTAssertEqual(rows.count, 2, "one row for each reading")
+    }
+
     func testARelayedReadingAndTheWatchsOwnReadingOfItAreOneRow() async throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)

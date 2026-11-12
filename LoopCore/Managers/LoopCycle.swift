@@ -243,7 +243,8 @@ public final class LoopCycle {
 
             try input.checkRecency(at: loopBaseTime, lastAddedPumpData: doseStore.lastAddedPumpData)
 
-            var output = Algorithm.run(input: input)
+            // Off the caller's actor, as the display run: on the watch a run can take seconds.
+            var output = await Self.runAlgorithm(input: input)
             outcome.output = output
             outcome.dosingDecision.algorithmExperiments = host.algorithmExperiments(for: dosingStrategy, output: output)
 
@@ -374,7 +375,8 @@ public final class LoopCycle {
                                                truncatingActiveOverride: truncatingActiveOverride)
 
         try input.validateCarbScheduleCoverage()
-        let output = Algorithm.run(input: input)
+        // Off the caller's actor, as the display run: on the watch a run can take seconds.
+        let output = await Self.runAlgorithm(input: input)
 
         switch output.recommendationResult {
         case .success(let prediction):
@@ -525,8 +527,13 @@ public final class LoopCycle {
         return state
     }
 
-    /// Off the caller's actor.
+    /// Off the caller's actor: the algorithm's arithmetic must not hold the main thread, which the system
+    /// needs free (watchOS ends a watch app whose main thread keeps a phone message waiting).
     private static func runAlgorithm(input: StoredDataAlgorithmInput) async -> AlgorithmOutput<StoredCarbEntry> {
-        Algorithm.run(input: input)
+        #if DEBUG
+        // Stops a debug build or a unit test if a compiler setting ever puts this back on the caller's actor.
+        dispatchPrecondition(condition: .notOnQueue(.main))
+        #endif
+        return Algorithm.run(input: input)
     }
 }
