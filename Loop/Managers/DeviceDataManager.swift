@@ -1153,6 +1153,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         replacePendingEvents: Bool
     ) async throws {
         log.default("PumpManager:%{public}@ hasNewPumpEvents (lastReconciliation = %{public}@)", String(describing: type(of: pumpManager)), String(describing: lastReconciliation))
+        let events = await doseMetadataStore.addingMetadata(to: events)
         do {
             try await doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: replacePendingEvents)
         } catch {

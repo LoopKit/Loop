@@ -57,8 +57,7 @@ class InsulinDeliveryLogViewModel {
     
     private let loopDataManager: LoopDataManager
     private let pumpManager: PumpManager
-    private let doseMetadataStore: DoseMetadataStore
-    
+
     private let log = OSLog(category: "InsulinDeliveryLogViewModel")
     
     private(set) var state: State
@@ -143,12 +142,10 @@ class InsulinDeliveryLogViewModel {
     init(
         loopDataManager: LoopDataManager,
         pumpManager: PumpManager,
-        doseMetadataStore: DoseMetadataStore,
         initialState: State = .loading
     ) {
         self.loopDataManager = loopDataManager
         self.pumpManager = pumpManager
-        self.doseMetadataStore = doseMetadataStore
         self.state = initialState
         
         self.doseStore = (loopDataManager.doseStore as? DoseStore)
@@ -182,7 +179,7 @@ class InsulinDeliveryLogViewModel {
         let (totalInsulinDelivered, typicalInsulinDelivered) = await fetchInsulinDeliveredToday()
         let doses = await fetchDoses(since: startDate)
         let lastAutoBolus = fetchLastAutoBolus(doses: doses)
-        let decisions = await fetchDosingDecisions(doseIds: doses.compactMap(\.doseId))
+        let decisions = await fetchDosingDecisions(ids: Set(doses.compactMap(\.decisionId)))
         
         // map raw event data into delivery log events for display
         var events = [InsulinDeliveryLogEvent]()
@@ -266,15 +263,11 @@ class InsulinDeliveryLogViewModel {
         (try? await loopDataManager.doseStore.getNormalizedDoseEntries(start: startDate, end: nil)) ?? []
     }
     
-    /// The dosing decision of each dose, by dose id
-    private func fetchDosingDecisions(doseIds: [UUID]) async -> [UUID: LightDosingDecision] {
-        guard let decisionIds = try? await doseMetadataStore.decisionIds(for: doseIds),
-              let decisions: [LightDosingDecision] = try? await loopDataManager.dosingDecisionStore.findDosingDecisionsByIds(Array(Set(decisionIds.values)))
-        else {
+    private func fetchDosingDecisions(ids: Set<UUID>) async -> [UUID: LightDosingDecision] {
+        guard let decisions: [LightDosingDecision] = try? await loopDataManager.dosingDecisionStore.findDosingDecisionsByIds(Array(ids)) else {
             return [:]
         }
-        let decisionsById = Dictionary(decisions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        return decisionIds.compactMapValues { decisionsById[$0] }
+        return Dictionary(decisions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
     }
     
     /// Today's total, and the usual amount by this time of day when there's enough history.
@@ -566,7 +559,7 @@ class InsulinDeliveryLogViewModel {
         let latestSuspendStartDate = doses.last(where: { $0.type == .suspend })?.startDate
 
         for dose in doses {
-            let decision = dose.doseId.flatMap { decisions[$0] }
+            let decision = dose.decisionId.flatMap { decisions[$0] }
             switch dose.type {
             case .basal, .tempBasal:
                 handleBasalEvent(dose: dose, decision: decision, events: &events)
