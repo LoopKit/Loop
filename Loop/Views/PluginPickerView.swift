@@ -18,6 +18,7 @@ struct PluginPickerView: View {
     enum PluginType: Hashable {
         case cgm
         case pump
+        case watch
         case service
         
         var localizedTitle: String {
@@ -26,17 +27,31 @@ struct PluginPickerView: View {
                 NSLocalizedString("Add CGM", comment: "The title of the CGM chooser in settings")
             case .pump:
                 NSLocalizedString("Add Pump", comment: "The title of the pump chooser in settings")
+            case .watch:
+                NSLocalizedString("Add Watch", comment: "The title of the watch chooser in settings")
             case .service:
                 NSLocalizedString("Add Service", comment: "The title of the add service picker in settings")
             }
         }
         
+        /// Shown below the list, for what the list doesn't cover.
+        var footer: String? {
+            switch self {
+            case .watch:
+                NSLocalizedString("Apple Watch isn't added here. Loop's Apple Watch app is installed from the Watch app on your iPhone.", comment: "Footer of the watch chooser in settings: Apple Watch is not set up there")
+            case .cgm, .pump, .service:
+                nil
+            }
+        }
+
         var fallbackSystemImage: String {
             switch self {
             case .cgm:
                 "sensor.tag.radiowaves.forward"
             case .pump:
                 "ivfluid.bag"
+            case .watch:
+                "watch.analog"
             case .service:
                 "network"
             }
@@ -100,6 +115,11 @@ struct PluginPickerView: View {
                 ForEach(groups) { group in
                     Section(header: SectionHeader(label: group.id)) {
                         rows(for: group)
+                    }
+                }
+                if let footer = pluginType.footer {
+                    Section(footer: Text(footer)) {
+                        EmptyView()
                     }
                 }
             }
@@ -184,6 +204,10 @@ extension PluginPickerView.Item {
     }
 
     init(_ descriptor: CGMManagerDescriptor) {
+        self.init(id: descriptor.identifier, title: descriptor.localizedTitle, subtitle: descriptor.subtitle, group: descriptor.manufacturer, image: descriptor.image)
+    }
+
+    init(_ descriptor: SmartwatchManagerDescriptor) {
         self.init(id: descriptor.identifier, title: descriptor.localizedTitle, subtitle: descriptor.subtitle, group: descriptor.manufacturer, image: descriptor.image)
     }
 

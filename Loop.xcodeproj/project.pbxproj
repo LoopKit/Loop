@@ -234,6 +234,10 @@
 		439A7944211FE22F0041B75F /* NSUserActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A7943211FE22F0041B75F /* NSUserActivity.swift */; };
 		439A7945211FE23A0041B75F /* NSUserActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A7943211FE22F0041B75F /* NSUserActivity.swift */; };
 		439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439BED291E76093C00B0AED5 /* CGMManager.swift */; };
+		0AB9F65B073904D4F9E5FCB9 /* SmartwatchManagerHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35441020C3D0037E9AEB302 /* SmartwatchManagerHost.swift */; };
+		1ADD1EF77E2083AC7690BD85 /* SmartwatchManagerHost+AlertForwarder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8772495BA2855FC99DDC3EB0 /* SmartwatchManagerHost+AlertForwarder.swift */; };
+		A018C4AF5E040B0DAC379735 /* SmartwatchManagerHost+RemoteActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE5E1D046A80EAC16C5514F /* SmartwatchManagerHost+RemoteActions.swift */; };
+		D23CD09C2E6905F436987257 /* SmartwatchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3621E1DB280412962D20BE6C /* SmartwatchManager.swift */; };
 		43A51E1F1EB6D62A000736CC /* CarbAbsorptionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A51E1E1EB6D62A000736CC /* CarbAbsorptionViewController.swift */; };
 		43A51E211EB6DBDD000736CC /* LoopChartsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A51E201EB6DBDD000736CC /* LoopChartsTableViewController.swift */; };
 		43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A567681C94880B00334FAC /* LoopDataManager.swift */; };
@@ -595,6 +599,7 @@
 		C17DDC9C28AC339E005FBF4C /* PersistedProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DA986B2843B6F9001D04CC /* PersistedProperty.swift */; };
 		C17DDC9D28AC33A1005FBF4C /* PersistedProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DA986B2843B6F9001D04CC /* PersistedProperty.swift */; };
 		C188599B2AF15E1B0010F21F /* DeviceDataManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C188599A2AF15E1B0010F21F /* DeviceDataManagerTests.swift */; };
+		22A2B3D7A696722C213DDFCD /* SmartwatchManagerHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E4F9D180117EFDC2A339E1 /* SmartwatchManagerHostTests.swift */; };
 		C188599E2AF15FAB0010F21F /* AlertMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C188599D2AF15FAB0010F21F /* AlertMocks.swift */; };
 		C18859A02AF1612B0010F21F /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C188599F2AF1612B0010F21F /* PersistenceController.swift */; };
 		C18859A22AF165130010F21F /* MockPumpManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18859A12AF165130010F21F /* MockPumpManager.swift */; };
@@ -1039,6 +1044,10 @@
 		439A7941211F631C0041B75F /* RootNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootNavigationController.swift; sourceTree = "<group>"; };
 		439A7943211FE22F0041B75F /* NSUserActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSUserActivity.swift; sourceTree = "<group>"; };
 		439BED291E76093C00B0AED5 /* CGMManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGMManager.swift; sourceTree = "<group>"; };
+		A35441020C3D0037E9AEB302 /* SmartwatchManagerHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartwatchManagerHost.swift; sourceTree = "<group>"; };
+		8772495BA2855FC99DDC3EB0 /* SmartwatchManagerHost+AlertForwarder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SmartwatchManagerHost+AlertForwarder.swift"; sourceTree = "<group>"; };
+		3EE5E1D046A80EAC16C5514F /* SmartwatchManagerHost+RemoteActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SmartwatchManagerHost+RemoteActions.swift"; sourceTree = "<group>"; };
+		3621E1DB280412962D20BE6C /* SmartwatchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartwatchManager.swift; sourceTree = "<group>"; };
 		43A51E1E1EB6D62A000736CC /* CarbAbsorptionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbAbsorptionViewController.swift; sourceTree = "<group>"; };
 		43A51E201EB6DBDD000736CC /* LoopChartsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopChartsTableViewController.swift; sourceTree = "<group>"; };
 		43A567681C94880B00334FAC /* LoopDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = LoopDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -1459,6 +1468,7 @@
 		C17D52072E7F0E18001D2AD2 /* CarbList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbList.swift; sourceTree = "<group>"; };
 		C1814B85225E507C008D2D8E /* Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
 		C188599A2AF15E1B0010F21F /* DeviceDataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDataManagerTests.swift; sourceTree = "<group>"; };
+		13E4F9D180117EFDC2A339E1 /* SmartwatchManagerHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartwatchManagerHostTests.swift; sourceTree = "<group>"; };
 		C188599D2AF15FAB0010F21F /* AlertMocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertMocks.swift; sourceTree = "<group>"; };
 		C188599F2AF1612B0010F21F /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		C18859A12AF165130010F21F /* MockPumpManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPumpManager.swift; sourceTree = "<group>"; };
@@ -1824,6 +1834,7 @@
 				C16575722538AFF6004AE16E /* CGMStalenessMonitorTests.swift */,
 				A91E4C2224F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift */,
 				C188599A2AF15E1B0010F21F /* DeviceDataManagerTests.swift */,
+				13E4F9D180117EFDC2A339E1 /* SmartwatchManagerHostTests.swift */,
 				C16B983F26B4898800256B05 /* DoseEnactorTests.swift */,
 				E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */,
 				A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */,
@@ -2287,6 +2298,10 @@
 				C1F2075B26D6F9B0007AB7EB /* AppExpirationAlerter.swift */,
 				B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */,
 				439BED291E76093C00B0AED5 /* CGMManager.swift */,
+				A35441020C3D0037E9AEB302 /* SmartwatchManagerHost.swift */,
+				8772495BA2855FC99DDC3EB0 /* SmartwatchManagerHost+AlertForwarder.swift */,
+				3EE5E1D046A80EAC16C5514F /* SmartwatchManagerHost+RemoteActions.swift */,
+				3621E1DB280412962D20BE6C /* SmartwatchManager.swift */,
 				C16575702538A36B004AE16E /* CGMStalenessMonitor.swift */,
 				A977A2F324ACFECF0059C207 /* CriticalEventLogExportManager.swift */,
 				C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */,
@@ -3821,6 +3836,10 @@
 				434FF1EE1CF27EEF000DB779 /* UITableViewCell.swift in Sources */,
 				84DF48C32F6A0AF600BEDB40 /* Image+Crop.swift in Sources */,
 				439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */,
+				0AB9F65B073904D4F9E5FCB9 /* SmartwatchManagerHost.swift in Sources */,
+				1ADD1EF77E2083AC7690BD85 /* SmartwatchManagerHost+AlertForwarder.swift in Sources */,
+				A018C4AF5E040B0DAC379735 /* SmartwatchManagerHost+RemoteActions.swift in Sources */,
+				D23CD09C2E6905F436987257 /* SmartwatchManager.swift in Sources */,
 				C16B983E26B4893300256B05 /* DoseEnactor.swift in Sources */,
 				3ED319962EB65A5C00820BCF /* LiveActivityManagementViewModel.swift in Sources */,
 				B4001CEE28CBBC82002FB414 /* AlertManagementView.swift in Sources */,
@@ -4225,6 +4244,7 @@
 				1DA7A84224476EAD008257F0 /* AlertManagerTests.swift in Sources */,
 				A91E4C2324F86F1000BE9213 /* CriticalEventLogExportManagerTests.swift in Sources */,
 				C188599B2AF15E1B0010F21F /* DeviceDataManagerTests.swift in Sources */,
+				22A2B3D7A696722C213DDFCD /* SmartwatchManagerHostTests.swift in Sources */,
 				C18859A42AF165330010F21F /* MockCGMManager.swift in Sources */,
 				E9C58A7324DB4A2700487A17 /* LoopDataManagerTests.swift in Sources */,
 				A1B2C3D40000000000000002 /* GlucoseAlertManagerTests.swift in Sources */,

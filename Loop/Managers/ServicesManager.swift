@@ -244,7 +244,7 @@ class ServicesManager {
 }
 
 public protocol ServicesManagerDosingDelegate: AnyObject {
-    func deliverBolus(amountInUnits: Double, decisionId: UUID?, request: DoseMetadata.RemoteRequest?) async throws
+    func deliverBolus(amountInUnits: Double, decisionId: UUID?, request: DoseMetadata.RemoteRequest?, throwingPumpErrors: Bool) async throws
 }
 
 public protocol ServicesManagerDelegate: AnyObject {
@@ -341,6 +341,12 @@ extension ServicesManager: ServiceDelegate {
     }
 
     func deliverRemoteBolus(amountInUnits: Double, decisionId: UUID?, request: DoseMetadata.RemoteRequest?) async throws {
+        try await deliverRemoteBolus(amountInUnits: amountInUnits, decisionId: decisionId, request: request, throwingPumpErrors: false)
+    }
+
+    /// `throwingPumpErrors`: see `DeviceDataManager.enactBolus`. Off for remote
+    /// commands, which keep their behaviour; on for the smartwatch host.
+    func deliverRemoteBolus(amountInUnits: Double, decisionId: UUID?, request: DoseMetadata.RemoteRequest?, throwingPumpErrors: Bool) async throws {
         do {
             
             guard amountInUnits > 0 else {
@@ -355,7 +361,7 @@ extension ServicesManager: ServiceDelegate {
                 throw BolusActionError.exceedsMaxBolus
             }
             
-            try await servicesManagerDosingDelegate?.deliverBolus(amountInUnits: amountInUnits, decisionId: decisionId, request: request)
+            try await servicesManagerDosingDelegate?.deliverBolus(amountInUnits: amountInUnits, decisionId: decisionId, request: request, throwingPumpErrors: throwingPumpErrors)
             NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
             await remoteDataServicesManager.performUpload(for: .dose)
             analyticsServicesManager.didBolus(source: "Remote")
