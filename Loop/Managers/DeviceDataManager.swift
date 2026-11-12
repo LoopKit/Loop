@@ -214,12 +214,20 @@ final class DeviceDataManager {
         return healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .sharingDenied
     }
 
+    private var authorizationDetermined = false
+
     /// True if any stores require HealthKit authorization
     var authorizationRequired: Bool {
-        return healthStore.authorizationStatus(for: HealthKitSampleStore.glucoseType) == .notDetermined ||
+        // These are synchronous calls to healthd; once determined they stay determined, so stop asking
+        guard !authorizationDetermined else {
+            return false
+        }
+        let required = healthStore.authorizationStatus(for: HealthKitSampleStore.glucoseType) == .notDetermined ||
                healthStore.authorizationStatus(for: HealthKitSampleStore.carbType) == .notDetermined ||
                healthStore.authorizationStatus(for: HealthKitSampleStore.insulinQuantityType) == .notDetermined ||
                sleepDataAuthorizationRequired
+        authorizationDetermined = !required
+        return required
     }
 
     // MARK: Services
