@@ -191,6 +191,29 @@ final class PodLoanTimerCharacterizationTests: XCTestCase {
                        "the recovered controller arms its own timeout rather than reusing the dead one")
     }
 
+    /// The phone's "request received" starts the wait again, longer; with no request
+    /// pending it arms nothing.
+    func testRequestReceivedRearmsALongerTimeout() async throws {
+        let controller = await makeController()
+        let rec = TimerRecorder()
+        rec.install(on: controller)
+        controller.send = { _ in }
+        let received = try LoanMessage.requestReceived(RequestReceived(requestID: nil)).transportDictionary()
+
+        controller.handleIncoming(userInfo: received)
+        await drain(controller)
+        XCTAssertEqual(rec.labels, [], "no request pending: nothing armed")
+
+        controller.requestLoan(watchBuild: "characterization")
+        await waitForArmed(rec, atLeast: 1)
+        controller.handleIncoming(userInfo: received)
+        await waitForArmed(rec, atLeast: 2)
+
+        XCTAssertEqual(rec.armed, [.init(label: "request-timeout", delay: PodLoanWatchController.requestTimeout),
+                                   .init(label: "request-timeout", delay: LoanControl.Wait.requestReceived.seconds)])
+        XCTAssertEqual(controller.phase, .requested)
+    }
+
     // MARK: - Harness integrity
 
     /// Firing through the recorder runs the seam's wrapper and has real effects.

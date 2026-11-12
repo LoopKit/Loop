@@ -170,12 +170,23 @@ extension PodLoanWatchController {
         }
     }
 
+    /// The phone has answered that it has the request. The wait for its grant starts again,
+    /// longer: silence now would mean the phone's own work failed, not that the phone is away. On `queue`.
+    func phoneHasRequest() {
+        guard phase == .requested else { return }
+        let wait = LoanControl.Wait.requestReceived.seconds
+        // Testing: how long the phone's first answer took.
+        SportLog.event("loan", String(format: "the phone has the request, %.1f s after Start; waiting up to %.0f s for its grant",
+                                      attemptStartedAt.map { now().timeIntervalSince($0) } ?? -1, wait))
+        armRequestTimeout(wait)
+    }
+
     /// An unreachable phone at an End is read again this much later: just after the app comes on
     /// screen, reachability reads false for a moment with the phone there.
     static let unreachableRecheck: TimeInterval = 1
 
     /// On `queue`. The timeout ends the request; a stored credential turns it into the offline offer.
-    private func armRequestTimeout(_ timeout: TimeInterval) {
+    func armRequestTimeout(_ timeout: TimeInterval) {
         requestTimeoutWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
             guard let self = self, self.phase == .requested else { return }

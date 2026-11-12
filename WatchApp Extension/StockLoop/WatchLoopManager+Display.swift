@@ -115,9 +115,9 @@ extension WatchLoopManager {
 
     /// The state of the watch holding the pod, for the stock pages (`LoopDataManager.wristState`), only
     /// while a pod is held. As stock's `WatchDataManager.createWatchContext`: IOB, COB and the
-    /// prediction come from the display run (`displayState`), and the recommended bolus from its own
-    /// manual-bolus run, which changes nothing displayed. The screens lay it over the phone's context.
-    func publishHUDContext() async {
+    /// prediction come from the display run (`displayState`). Unlike stock's it carries no recommended
+    /// bolus. The screens lay it over the phone's context.
+    func publishHUDContext() {
         guard pumpManager != nil else { return }
         let ctx = WatchContext()
 
@@ -149,18 +149,9 @@ extension WatchLoopManager {
             ctx.cob = cob
         }
 
-        // Fill the recommendation before installing the context: the stock flow reads nil as zero.
-        let recommendationResult = await self.manualBolusRecommendation()
-        // As stock's context for the watch, the watchBolus decision built with it is kept.
-        self.noteContextDosingDecision(potentialCarbEntry: nil, recommendation: (try? recommendationResult.get()) ?? nil)
-        switch recommendationResult {
-        case .success(let recommendation):
-            ctx.recommendedBolusDose = recommendation?.amount
-        case .failure(let error):
-            SportLog.eventOnChange("loan", key: "hud.rec", "bolus recommendation unavailable: \(error)")
-        }
-        // A loan that ended since this was built has cleared the state already.
-        guard pumpManager != nil else { return }
+        // No recommended bolus here: the bolus screen asks for its own while it is open
+        // (`CarbAndBolusFlowViewModel.recommendLoanBolus`), so no model run is spent on a number
+        // nobody is looking at.
         ExtensionDelegate.sharedIfAvailable()?.loopManager.wristState = ctx
     }
 }

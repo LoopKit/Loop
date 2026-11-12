@@ -19,7 +19,7 @@ extension PodLoanPhoneController {
 
     /// Older requests have a sender that has moved on: past its wait, the watch may already have
     /// started without this phone.
-    static let requestTTL: TimeInterval = LoanControl.Wait.onScreen.seconds
+    static let requestTTL: TimeInterval = LoanControl.Wait.startRequest.seconds
 
     /// How long a take-back waits for the pod's link before it refuses. Short on purpose: the pod is
     /// normally in reach at once, and a refusal costs the user one more tap. Shortened by tests.
