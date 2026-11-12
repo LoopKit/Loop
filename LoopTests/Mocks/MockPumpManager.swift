@@ -119,8 +119,6 @@ class MockPumpManager: PumpManager {
 
     var localizedTitle: String = "MockPumpManager"
 
-    var delegateQueue: DispatchQueue!
-
     required init?(rawState: RawStateValue) {
 
     }
