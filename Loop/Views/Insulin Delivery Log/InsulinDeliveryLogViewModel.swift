@@ -57,7 +57,7 @@ class InsulinDeliveryLogViewModel {
     
     private let loopDataManager: LoopDataManager
     private let pumpManager: PumpManager
-    
+
     private let log = OSLog(category: "InsulinDeliveryLogViewModel")
     
     private(set) var state: State
@@ -179,7 +179,7 @@ class InsulinDeliveryLogViewModel {
         let (totalInsulinDelivered, typicalInsulinDelivered) = await fetchInsulinDeliveredToday()
         let doses = await fetchDoses(since: startDate)
         let lastAutoBolus = fetchLastAutoBolus(doses: doses)
-        let decisions = await fetchDosingDecisions(doses.compactMap(\.decisionId))
+        let decisions = await fetchDosingDecisions(ids: Set(doses.compactMap(\.decisionId)))
         
         // map raw event data into delivery log events for display
         var events = [InsulinDeliveryLogEvent]()
@@ -263,8 +263,11 @@ class InsulinDeliveryLogViewModel {
         (try? await loopDataManager.doseStore.getNormalizedDoseEntries(start: startDate, end: nil)) ?? []
     }
     
-    private func fetchDosingDecisions(_ ids: [UUID]) async -> [LightDosingDecision] {
-        (try? await loopDataManager.dosingDecisionStore.findDosingDecisionsByIds(ids)) ?? []
+    private func fetchDosingDecisions(ids: Set<UUID>) async -> [UUID: LightDosingDecision] {
+        guard let decisions: [LightDosingDecision] = try? await loopDataManager.dosingDecisionStore.findDosingDecisionsByIds(Array(ids)) else {
+            return [:]
+        }
+        return Dictionary(decisions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
     }
     
     /// Today's total, and the usual amount by this time of day when there's enough history.
@@ -545,7 +548,7 @@ class InsulinDeliveryLogViewModel {
         }
     }
     
-    private func handleDoseEvents(doses: [DoseEntry], decisions: [LightDosingDecision], fetchedDate: Date, events: inout [InsulinDeliveryLogEvent]) {
+    private func handleDoseEvents(doses: [DoseEntry], decisions: [UUID: LightDosingDecision], fetchedDate: Date, events: inout [InsulinDeliveryLogEvent]) {
         let isPumpSuspended: Bool = {
             if case .suspended = pumpManager.status.basalDeliveryState {
                 return true
@@ -556,7 +559,7 @@ class InsulinDeliveryLogViewModel {
         let latestSuspendStartDate = doses.last(where: { $0.type == .suspend })?.startDate
 
         for dose in doses {
-            let decision = decisions.first(where: { $0.id == dose.decisionId })
+            let decision = dose.decisionId.flatMap { decisions[$0] }
             switch dose.type {
             case .basal, .tempBasal:
                 handleBasalEvent(dose: dose, decision: decision, events: &events)

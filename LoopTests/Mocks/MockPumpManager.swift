@@ -83,7 +83,10 @@ class MockPumpManager: PumpManager {
         return nil
     }
 
-    func enactBolus(decisionId: UUID?, units: Double, activationType: BolusActivationType, completion: @escaping (PumpManagerError?) -> Void) {
+    var enactedDoseIds: [UUID] = []
+
+    func enactBolus(doseId: UUID, units: Double, activationType: BolusActivationType, completion: @escaping (PumpManagerError?) -> Void) {
+        enactedDoseIds.append(doseId)
         enactBolusCalled?(units, activationType)
         completion(enactBolusError)
     }
@@ -92,7 +95,8 @@ class MockPumpManager: PumpManager {
         completion(.success(nil))
     }
 
-    func enactTempBasal(decisionId: UUID?, unitsPerHour: Double, for duration: TimeInterval, completion: @escaping (PumpManagerError?) -> Void) {
+    func enactTempBasal(doseId: UUID, unitsPerHour: Double, for duration: TimeInterval, completion: @escaping (PumpManagerError?) -> Void) {
+        enactedDoseIds.append(doseId)
         enactTempBasalCalled?(unitsPerHour, duration)
         completion(enactTempBasalError)
     }
@@ -119,8 +123,6 @@ class MockPumpManager: PumpManager {
     var pluginIdentifier: String = "MockPumpManager"
 
     var localizedTitle: String = "MockPumpManager"
-
-    var delegateQueue: DispatchQueue!
 
     required init?(rawState: RawStateValue) {
 

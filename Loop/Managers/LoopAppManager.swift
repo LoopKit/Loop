@@ -441,7 +441,7 @@ class LoopAppManager: NSObject {
                 guard let servicesManager else {
                     throw SmartwatchBolusError.notAllowed
                 }
-                try await servicesManager.deliverRemoteBolus(amountInUnits: units, decisionId: nil, throwingPumpErrors: true)
+                try await servicesManager.deliverRemoteBolus(amountInUnits: units, decisionId: nil, request: nil, throwingPumpErrors: true)
             },
             // The same path as remote carbs: validation, notification, upload.
             deliverCarbs: { [weak servicesManager] grams, date, absorptionTime in
@@ -1035,7 +1035,8 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
                 startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5)
             {
                 analyticsServicesManager.didRetryBolus()
-                try? await deviceDataManager?.enactBolus(units: units, decisionId: UUID(uuidString: response.notification.request.content.userInfo[LoopNotificationUserInfoKey.decisionId.rawValue] as? String ?? ""), activationType: activationType)
+                let decisionId = UUID(uuidString: response.notification.request.content.userInfo[LoopNotificationUserInfoKey.decisionId.rawValue] as? String ?? "")
+                try? await deviceDataManager?.enactBolus(units: units, metadata: DoseMetadata(origin: .user, device: .phone, decisionId: decisionId), activationType: activationType)
             }
         case NotificationManager.Action.acknowledgeAlert.rawValue:
             let userInfo = response.notification.request.content.userInfo
@@ -1141,8 +1142,8 @@ extension LoopAppManager: ResetLoopManagerDelegate {
 // MARK: - ServicesManagerDosingDelegate
 
 extension LoopAppManager: ServicesManagerDosingDelegate {
-    func deliverBolus(amountInUnits: Double, decisionId: UUID?, throwingPumpErrors: Bool) async throws {
-        try await deviceDataManager.enactBolus(units: amountInUnits, decisionId: decisionId, activationType: .manualNoRecommendation, throwingPumpErrors: throwingPumpErrors)
+    func deliverBolus(amountInUnits: Double, decisionId: UUID?, request: DoseMetadata.RemoteRequest?, throwingPumpErrors: Bool) async throws {
+        try await deviceDataManager.enactBolus(units: amountInUnits, metadata: DoseMetadata(origin: .remote, decisionId: decisionId, remoteRequest: request), activationType: .manualNoRecommendation, throwingPumpErrors: throwingPumpErrors)
     }
 }
 
