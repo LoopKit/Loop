@@ -527,8 +527,13 @@ public final class LoopCycle {
         return state
     }
 
-    /// Off the caller's actor.
+    /// Off the caller's actor: the algorithm's arithmetic must not hold the main thread, which the system
+    /// needs free (watchOS ends a watch app whose main thread keeps a phone message waiting).
     private static func runAlgorithm(input: StoredDataAlgorithmInput) async -> AlgorithmOutput<StoredCarbEntry> {
-        Algorithm.run(input: input)
+        #if DEBUG
+        // Stops a debug build or a unit test if a compiler setting ever puts this back on the caller's actor.
+        dispatchPrecondition(condition: .notOnQueue(.main))
+        #endif
+        return Algorithm.run(input: input)
     }
 }
