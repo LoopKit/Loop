@@ -296,6 +296,14 @@ final class WatchLoopManager {
     /// another rebuild — see `refreshGlanceData` for why that does not coalesce.
     static let glanceDataDidUpdate = Notification.Name("com.loopkit.Loop.glanceDataDidUpdate")
 
+    /// A change asked for a display run that has not started yet; see `updateDisplayStateForChange`.
+    var displayRunWanted = false
+    /// Cycles asked for that have not started on the lane yet.
+    var cyclesWaiting = 0
+    /// Display runs started, for the tests.
+    private(set) var displayRunsStarted = 0
+    func noteDisplayRunStarted() { displayRunsStarted += 1 }
+
     /// The lane's last operation; see `onLane`.
     private var laneTail: Task<Void, Never>?
 
@@ -376,10 +384,13 @@ final class WatchLoopManager {
         // As stock: required for the device status in stored dosing decisions.
         WKInterfaceDevice.current().isBatteryMonitoringEnabled = true
 
-        // Stock `LoopDataManager`'s observers: a change in any of its stores refreshes the display run.
+        // Stock `LoopDataManager`'s observers: a change in the carb or dose store refreshes the display
+        // run. Not the glucose store's: it announces every write, including one that stored nothing
+        // (the phone's copy of a reading, the sensor's backfill), and a display run on the watch takes
+        // seconds. A reading the store lacked runs a cycle, which ends with the display run
+        // (`didStoreDirectGlucose`, `didStorePhoneGlucose`).
         let storeChanges: [(Notification.Name, AnyObject)] = [
             (CarbStore.carbEntriesDidChange, carbStore),
-            (GlucoseStore.glucoseSamplesDidChange, glucoseStore),
             (DoseStore.valuesDidChange, doseStore),
         ]
         for (name, store) in storeChanges {

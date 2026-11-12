@@ -974,6 +974,57 @@ final class StockRunsTests: XCTestCase {
         XCTAssertTrue(Set(second.decisions.map(\.id)).isDisjoint(with: Set(first.decisions.map(\.id))), "only what was stored since")
     }
 
+    // MARK: - What asks for a display run
+
+    /// A burst of changes waits as one display run, not one each.
+    func testABurstOfChangesAsksForOneDisplayRun() async throws {
+        let (manager, _) = try await makeClosedLoopManager()
+        let before = manager.displayRunsStarted
+        for _ in 0..<5 { manager.updateDisplayStateForChange() }
+        await manager.laneSettled()
+        XCTAssertEqual(manager.displayRunsStarted - before, 1)
+    }
+
+    /// A cycle ends with the display run, so a change asked for while it waits or runs adds none.
+    func testAChangeBesideACycleIsCoveredByTheCyclesDisplayRun() async throws {
+        let (manager, _) = try await makeClosedLoopManager()
+        var before = manager.displayRunsStarted
+        manager.updateDisplayStateForChange()
+        manager.loop()
+        manager.updateDisplayStateForChange()
+        await manager.laneSettled()
+        XCTAssertEqual(manager.displayRunsStarted - before, 1, "asked before the cycle and while it waited")
+
+        before = manager.displayRunsStarted
+        manager.loop()
+        manager.updateDisplayStateForChange()
+        await manager.laneSettled()
+        XCTAssertEqual(manager.displayRunsStarted - before, 1, "asked after the cycle was queued")
+    }
+
+    /// The glucose store announces every write, also one that stored nothing; neither asks for a display run.
+    func testAGlucoseStoreWriteAsksForNoDisplayRun() async throws {
+        let (manager, _) = try await makeClosedLoopManager()
+        let before = manager.displayRunsStarted
+        let sample = NewGlucoseSample(date: Date(), quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 140),
+                                      condition: nil, trend: .flat, trendRate: nil, isDisplayOnly: false, wasUserEntered: false,
+                                      syncIdentifier: "display-run-duplicate")
+        for _ in 0..<3 { _ = try await manager.glucoseStore.addGlucoseSamples([sample]) }
+        try await Task.sleep(nanoseconds: 300_000_000)
+        await manager.laneSettled()
+        XCTAssertEqual(manager.displayRunsStarted - before, 0)
+    }
+
+    /// A carb entry is a concrete action: it asks for a display run.
+    func testACarbEntryAsksForADisplayRun() async throws {
+        let (manager, _) = try await makeClosedLoopManager()
+        let before = manager.displayRunsStarted
+        _ = try await manager.carbStore.addCarbEntry(carbs(20))
+        try await Task.sleep(nanoseconds: 300_000_000)
+        await manager.laneSettled()
+        XCTAssertGreaterThanOrEqual(manager.displayRunsStarted - before, 1)
+    }
+
     // MARK: - What runs a cycle, as stock
 
     /// Every cycle with a pod held stores one "loop" decision, so the count is the cycles run.

@@ -375,7 +375,8 @@ public final class LoopCycle {
                                                truncatingActiveOverride: truncatingActiveOverride)
 
         try input.validateCarbScheduleCoverage()
-        let output = Algorithm.run(input: input)
+        // Off the caller's actor, as the display run: on the watch a run can take seconds.
+        let output = await Self.runAlgorithm(input: input)
 
         switch output.recommendationResult {
         case .success(let prediction):

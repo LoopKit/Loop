@@ -42,7 +42,9 @@ extension WatchLoopManager {
     /// run. The cycle doses only with the watch's loop closed, and its decision is kept only while the
     /// pod is held.
     func loop() {
+        cyclesWaiting += 1
         onLane {
+            self.cyclesWaiting -= 1
             self.log.default("Loop running")
             self.lastLoopError = nil
             self.lastRecommendation = nil
@@ -185,19 +187,32 @@ extension WatchLoopManager {
         }
     }
 
-    /// Stock's other triggers for the display run: a change in the carb, glucose or dose store, an
-    /// override set or cleared, and the loop mode. No debounce, as stock. Only while a pod is held:
+    /// Stock's other triggers for the display run: a change in the carb or dose store, an override
+    /// set or cleared, the loop mode, and a new reading that runs no cycle. Unlike stock, at most one
+    /// waits: a display run on the watch takes seconds, and each one waiting delays the cycle behind
+    /// it. A request made while one waits is covered by it, and one whose turn comes with a cycle
+    /// waiting is left to that cycle, which ends with the display run. Only while a pod is held:
     /// between loans the display run is not refreshed, as before. The run writes to none of the
     /// stores observed (only to the dosing decision store), so it cannot retrigger itself.
     func updateDisplayStateForChange() {
+        if displayRunWanted { return }
+        displayRunWanted = true
         onLane {
-            guard self.pumpManager != nil else { return }
+            // Still wanted: any display run since, a cycle's included, has covered it.
+            guard self.displayRunWanted else { return }
+            guard self.pumpManager != nil, self.cyclesWaiting == 0 else {
+                self.displayRunWanted = false
+                return
+            }
             await self.updateDisplayStateOnLane()
         }
     }
 
     /// Lane work.
     func updateDisplayStateOnLane(forceStoreRemoteRecommendation: Bool = false) async {
+        // Cleared before the run reads the stores, so a change during it asks for another.
+        displayRunWanted = false
+        noteDisplayRunStarted()
         displayState = await cycle.displayState()
 
         await publishHUDContext()
