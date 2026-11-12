@@ -29,9 +29,9 @@ final class LoanControlTests: XCTestCase {
     // Rows 1 and 2 · Start tapped on the watch. The request is the query; with no answer, the offline
     // start is offered if the watch holds a copy, else the looper is told the phone did not answer.
     func testRows1And2_StartAsksThePhoneAndOffersTheOfflineStartOnSilence() {
-        XCTAssertEqual(watch(.startTapped, storedCopy: true), .query(.onScreen, onSilence: .prompt(.startWithoutPhone)))
-        XCTAssertEqual(watch(.startTapped, storedCopy: false), .query(.onScreen, onSilence: .tell(.noResponseFromPhone)))
-        XCTAssertEqual(watch(.startTapped, storedCopy: true, readsCGM: false), .query(.onScreen, onSilence: .tell(.noResponseFromPhoneAndNoCGM)),
+        XCTAssertEqual(watch(.startTapped, storedCopy: true), .query(.startRequest, onSilence: .prompt(.startWithoutPhone)))
+        XCTAssertEqual(watch(.startTapped, storedCopy: false), .query(.startRequest, onSilence: .tell(.noResponseFromPhone)))
+        XCTAssertEqual(watch(.startTapped, storedCopy: true, readsCGM: false), .query(.startRequest, onSilence: .tell(.noResponseFromPhoneAndNoCGM)),
                        "a watch not reading the CGM has nothing to dose from, so no offline start is offered")
     }
 
@@ -163,6 +163,8 @@ final class LoanControlTests: XCTestCase {
 
     func testTheWaits() {
         XCTAssertEqual(C.Wait.onScreen.seconds, 10)
+        XCTAssertEqual(C.Wait.startRequest.seconds, 6)
+        XCTAssertEqual(C.Wait.requestReceived.seconds, 20)
         XCTAssertEqual(C.Wait.inBackground.seconds, 30)
         XCTAssertEqual(C.watchReportOverdue, 6 * 60)
         XCTAssertEqual(C.watchSilenceWarning, 20 * 60)
