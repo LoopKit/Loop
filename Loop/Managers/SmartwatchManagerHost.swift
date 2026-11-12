@@ -330,9 +330,14 @@ extension SmartwatchManagerHost: SmartwatchManagerDelegate {
             isClosedLoop: deviceManager.isAutomaticDosingActive,
             insulinOnBoard: loopDataManager.activeInsulin,
             carbsOnBoard: loopDataManager.activeCarbs,
-            predictedGlucose: predictedGlucose,
+            predictedGlucose: Self.forecastCurves(predictedGlucose),
             eventualGlucose: predictedGlucose.last?.quantity
         )
+    }
+
+    /// Loop makes one forecast: one curve, or none before the loop has run.
+    static func forecastCurves(_ forecast: [PredictedGlucoseValue]) -> [[PredictedGlucoseValue]] {
+        forecast.isEmpty ? [] : [forecast]
     }
 
     func smartwatchManagerScheduledBasalRate(_ manager: SmartwatchManager) async -> LoopQuantity? {

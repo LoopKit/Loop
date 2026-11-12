@@ -166,6 +166,18 @@ final class SmartwatchManagerHostTests: XCTestCase {
         XCTAssertNil(SmartwatchManagerHost.displayLimits(from: reversed))
     }
 
+    /// Loop's one forecast is one curve; before the loop has run there is none.
+    func testLoopsForecastIsOneCurve() {
+        let start = Date(timeIntervalSinceReferenceDate: 0)
+        let forecast = (0..<3).map {
+            PredictedGlucoseValue(startDate: start.addingTimeInterval(Double($0) * 300), quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 120 - Double($0)))
+        }
+        XCTAssertEqual(SmartwatchManagerHost.forecastCurves(forecast).count, 1)
+        XCTAssertEqual(SmartwatchManagerHost.forecastCurves(forecast).first?.map(\.startDate), forecast.map(\.startDate))
+        XCTAssertEqual(SmartwatchManagerHost.forecastCurves(forecast).first?.map(\.quantity), forecast.map(\.quantity))
+        XCTAssertTrue(SmartwatchManagerHost.forecastCurves([]).isEmpty)
+    }
+
     func testTheWatchIsToldOnlyWhenClosedLoopReallyChanges() {
         var last = true
         XCTAssertFalse(SmartwatchManagerHost.isNewDosingEnabled(true, last: &last))
