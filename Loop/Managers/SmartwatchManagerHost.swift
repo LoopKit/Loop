@@ -335,9 +335,12 @@ extension SmartwatchManagerHost: SmartwatchManagerDelegate {
         )
     }
 
-    /// Loop makes one forecast: one curve, or none before the loop has run.
+    /// Loop makes one forecast: one curve, up to `SmartwatchLoopState.forecastHorizon`
+    /// past its first value, or none before the loop has run.
     static func forecastCurves(_ forecast: [PredictedGlucoseValue]) -> [[PredictedGlucoseValue]] {
-        forecast.isEmpty ? [] : [forecast]
+        guard let start = forecast.first?.startDate else { return [] }
+        let end = start.addingTimeInterval(SmartwatchLoopState.forecastHorizon)
+        return [forecast.filter { $0.startDate <= end }]
     }
 
     func smartwatchManagerScheduledBasalRate(_ manager: SmartwatchManager) async -> LoopQuantity? {

@@ -178,6 +178,17 @@ final class SmartwatchManagerHostTests: XCTestCase {
         XCTAssertTrue(SmartwatchManagerHost.forecastCurves([]).isEmpty)
     }
 
+    /// Loop's forecast runs about six hours; the watch gets the first four.
+    func testLoopsForecastIsCutAtTheHorizon() {
+        let start = Date(timeIntervalSinceReferenceDate: 0)
+        let forecast = (0..<73).map {
+            PredictedGlucoseValue(startDate: start.addingTimeInterval(Double($0) * 300), quantity: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 120))
+        }
+        let curve = SmartwatchManagerHost.forecastCurves(forecast).first
+        XCTAssertEqual(curve?.count, 49)
+        XCTAssertEqual(curve?.last?.startDate, start.addingTimeInterval(SmartwatchLoopState.forecastHorizon))
+    }
+
     func testTheWatchIsToldOnlyWhenClosedLoopReallyChanges() {
         var last = true
         XCTAssertFalse(SmartwatchManagerHost.isNewDosingEnabled(true, last: &last))
