@@ -145,7 +145,6 @@ extension PodLoanWatchController {
         }
         SportLog.event("loan", "pump manager rebuilt; handing the pod to the loop")
         manager.pumpManagerDelegate = self
-        manager.delegateQueue = .main
         pumpManager = manager
         handPodToLoop(manager)
     }

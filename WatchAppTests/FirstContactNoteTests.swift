@@ -67,7 +67,6 @@ final class FirstContactNoteTests: XCTestCase {
                                                      localState: controller.pumpLocalState(for: configuration)) as? OmniPumpManager)
         await controller.onMain {
             manager.pumpManagerDelegate = controller
-            manager.delegateQueue = .main
             controller.pumpManager = manager
             controller.savePumpLocalState(of: manager)
         }

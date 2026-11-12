@@ -461,7 +461,6 @@ extension PodLoanWatchController {
         }
 
         manager.pumpManagerDelegate = self
-        manager.delegateQueue = .main
         pumpManager = manager
         pumpStateStore.wrappedValue = manager.watchRawValue
         savePumpLocalState(of: manager)

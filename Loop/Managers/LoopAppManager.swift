@@ -1004,7 +1004,8 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
                 startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5)
             {
                 analyticsServicesManager.didRetryBolus()
-                try? await deviceDataManager?.enactBolus(units: units, decisionId: UUID(uuidString: response.notification.request.content.userInfo[LoopNotificationUserInfoKey.decisionId.rawValue] as? String ?? ""), activationType: activationType)
+                let decisionId = UUID(uuidString: response.notification.request.content.userInfo[LoopNotificationUserInfoKey.decisionId.rawValue] as? String ?? "")
+                try? await deviceDataManager?.enactBolus(units: units, metadata: DoseMetadata(origin: .user, device: .phone, decisionId: decisionId), activationType: activationType)
             }
         case NotificationManager.Action.acknowledgeAlert.rawValue:
             let userInfo = response.notification.request.content.userInfo
@@ -1111,7 +1112,7 @@ extension LoopAppManager: ResetLoopManagerDelegate {
 
 extension LoopAppManager: ServicesManagerDosingDelegate {
     func deliverBolus(amountInUnits: Double, decisionId: UUID?) async throws {
-        try await deviceDataManager.enactBolus(units: amountInUnits, decisionId: decisionId, activationType: .manualNoRecommendation)
+        try await deviceDataManager.enactBolus(units: amountInUnits, metadata: DoseMetadata(origin: .remote, decisionId: decisionId), activationType: .manualNoRecommendation)
     }
 }
 

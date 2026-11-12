@@ -490,6 +490,7 @@ class BolusEntryViewModelTests: XCTestCase {
         XCTAssertTrue(delegate.glucoseSamplesAdded.isEmpty)
         XCTAssertTrue(delegate.carbEntriesAdded.isEmpty)
         XCTAssertEqual(1, delegate.bolusDosingDecisionsAdded.count)
+        XCTAssertEqual(delegate.enactedBolusMetadata, DoseMetadata(origin: .user, device: .phone, decisionId: delegate.bolusDosingDecisionsAdded.first?.0.id))
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0.reason, .normalBolus)
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.0.manualBolusRequested, 1.0)
         XCTAssertEqual(delegate.bolusDosingDecisionsAdded.first?.1, now)
@@ -950,9 +951,11 @@ fileprivate class MockBolusEntryViewModelDelegate: BolusEntryViewModelDelegate {
     
     var enactedBolusUnits: Double?
     var enactedBolusActivationType: BolusActivationType?
-    func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws {
+    var enactedBolusMetadata: DoseMetadata?
+    func enactBolus(units: Double, metadata: DoseMetadata, activationType: BolusActivationType) async throws {
         enactedBolusUnits = units
         enactedBolusActivationType = activationType
+        enactedBolusMetadata = metadata
     }
 
     var activeInsulin: InsulinValue?

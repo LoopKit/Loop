@@ -51,7 +51,7 @@ final class EndDuringBolusTests: XCTestCase {
                                 lotNo: 1, lotSeq: 1, insulinType: .novolog, podType: dashType)
         podState.setupProgress = .completed
         if bolusing {
-            podState.unfinalizedBolus = UnfinalizedDose(decisionId: nil, bolusAmount: 2.0, startTime: Date(),
+            podState.unfinalizedBolus = UnfinalizedDose(doseId: nil, bolusAmount: 2.0, startTime: Date(),
                                                         scheduledCertainty: .certain, insulinType: .novolog)
         }
         let raw: [String: Any] = ["basalSchedule": ["entries": [["rate": 1.0, "startTime": 0.0]]],
@@ -68,7 +68,6 @@ final class EndDuringBolusTests: XCTestCase {
         guard case .inProgress = pump.status.bolusState else { return XCTFail("precondition: the pod is giving a bolus") }
         await c.onMain {
             pump.pumpManagerDelegate = c
-            pump.delegateQueue = .main
             c.pumpManager = pump
             c.loopManager.pumpManager = pump
             c.phase = .active
@@ -97,7 +96,6 @@ final class EndDuringBolusTests: XCTestCase {
         let pump = try makePumpMidBolus(false)
         await c.onMain {
             pump.pumpManagerDelegate = c
-            pump.delegateQueue = .main
             c.pumpManager = pump
             c.loopManager.pumpManager = pump
             c.phase = .active

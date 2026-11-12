@@ -176,7 +176,8 @@ final class DeviceDataManager {
     let carbStore: CarbStore
     let doseStore: DoseStore
     let glucoseStore: GlucoseStore
-    
+    let doseMetadataStore: DoseMetadataStore
+
     private let healthStore: HKHealthStore
     private let cacheStore: PersistenceController
     private let cgmEventStore: CgmEventStore
@@ -284,6 +285,7 @@ final class DeviceDataManager {
         self.carbStore = carbStore
         self.doseStore = doseStore
         self.glucoseStore = glucoseStore
+        self.doseMetadataStore = DoseMetadataStore(store: cacheStore, expireAfter: localCacheDuration)
         self.cgmEventStore = cgmEventStore
         self.loopControl = loopControl
         self.analyticsServicesManager = analyticsServicesManager
@@ -679,7 +681,6 @@ final class DeviceDataManager {
 private extension DeviceDataManager {
     func setupCGM() {
         cgmManager?.cgmManagerDelegate = self
-        cgmManager?.delegateQueue = DispatchQueue.main
         reportPluginInitializationComplete()
 
         glucoseStore.managedDataInterval = cgmManager?.managedDataInterval
@@ -796,7 +797,19 @@ extension DeviceDataManager {
 
 // MARK: - Client API
 extension DeviceDataManager {
-    func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws {
+    /// Stores the metadata under a new dose id, for the pump manager to return on the dose it reports.
+    /// A failure to store is logged, not thrown: it must not keep insulin from being delivered.
+    func newDoseId(for metadata: DoseMetadata) async -> UUID {
+        let doseId = UUID()
+        do {
+            try await doseMetadataStore.storeMetadata(metadata, for: doseId)
+        } catch {
+            log.error("Unable to store metadata for dose %{public}@: %{public}@", doseId.uuidString, String(describing: error))
+        }
+        return doseId
+    }
+
+    func enactBolus(units: Double, metadata: DoseMetadata, activationType: BolusActivationType) async throws {
         guard let pumpManager = pumpManager else {
             throw LoopError.configurationError(.pumpManager)
         }
@@ -810,14 +823,18 @@ extension DeviceDataManager {
             let _ = try? await pumpManager.cancelBolus()
         }
 
+        var metadata = metadata
+        metadata.activationType = activationType
+        let doseId = await newDoseId(for: metadata)
+
         do {
-            try await pumpManager.enactBolus(decisionId: decisionId, units: units, activationType: activationType)
+            try await pumpManager.enactBolus(doseId: doseId, units: units, activationType: activationType)
         } catch PumpManagerError.uncertainDelivery {
             // Do not generate notification on uncertain delivery error
         } catch {
             if !activationType.isAutomatic, let error = error as? PumpManagerError {
                 do {
-                    try await NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), decisionId: decisionId, activationType: activationType)
+                    try await NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), decisionId: metadata.decisionId, activationType: activationType)
                 } catch {
                     log.error("Error sending bolus failure notification %{public}@", String(describing: error))
                 }
@@ -894,8 +911,10 @@ extension DeviceDataManager: DeviceManagerDelegate {
         }
     }
 
-    func deviceManager(_ manager: DeviceManager, recordAnalyticsEvent name: String, properties: [AnyHashable: Any]?) {
-        analyticsServicesManager.deviceManagerDidRecordEvent(name, properties: properties)
+    nonisolated func deviceManager(_ manager: DeviceManager, recordAnalyticsEvent name: String, properties: [AnyHashable: Any]?) {
+        Task { @MainActor in
+            analyticsServicesManager.deviceManagerDidRecordEvent(name, properties: properties)
+        }
     }
 
     var allowDebugFeatures: Bool {
@@ -950,44 +969,39 @@ extension DeviceDataManager: CGMManagerDelegate {
         settingsManager.storeSettings()
     }
 
-    nonisolated
-    func cgmManager(_ manager: CGMManager, hasNew readingResult: CGMReadingResult) {
-        Task { @MainActor in
-            log.default("CGMManager:%{public}@ did update with %{public}@", String(describing: type(of: manager)), String(describing: readingResult))
-            let storedNewGlucose = await processCGMReadingResult(manager, readingResult: readingResult)
-            let now = Date()
-            // A CGM can re-deliver readings the store already holds (Nightscout polls do, every
-            // poll). Only a reading that was actually stored is a reason to run the loop.
-            if storedNewGlucose, now.timeIntervalSince(self.lastCGMLoopTrigger) > .minutes(4.2) {
-                self.log.default("Triggering loop from new CGM data at %{public}@", String(describing: now))
-                self.lastCGMLoopTrigger = now
+    func cgmManager(_ manager: CGMManager, hasNew readingResult: CGMReadingResult) async {
+        log.default("CGMManager:%{public}@ did update with %{public}@", String(describing: type(of: manager)), String(describing: readingResult))
+        let storedNewGlucose = await processCGMReadingResult(manager, readingResult: readingResult)
+        let now = Date()
+        // A CGM can re-deliver readings the store already holds (Nightscout polls do, every
+        // poll). Only a reading that was actually stored is a reason to run the loop.
+        if storedNewGlucose, now.timeIntervalSince(self.lastCGMLoopTrigger) > .minutes(4.2) {
+            self.log.default("Triggering loop from new CGM data at %{public}@", String(describing: now))
+            self.lastCGMLoopTrigger = now
+            // Not awaited: the manager's next call shouldn't wait for a loop cycle.
+            Task {
                 await self.checkPumpDataAndLoop()
             }
         }
     }
 
-    nonisolated
-    func cgmManager(_ manager: LoopKit.CGMManager, hasNew events: [PersistedCgmEvent]) {
-        Task { @MainActor in
-            do {
-                try await cgmEventStore.add(events: events)
-            } catch {
-                self.log.error("Error storing cgm events: %{public}@", error.localizedDescription)
-            }
+    func cgmManager(_ manager: LoopKit.CGMManager, hasNew events: [PersistedCgmEvent]) async {
+        do {
+            try await cgmEventStore.add(events: events)
+        } catch {
+            self.log.error("Error storing cgm events: %{public}@", error.localizedDescription)
         }
     }
 
-    func startDateToFilterNewData(for manager: CGMManager) -> Date? {
-        dispatchPrecondition(condition: .onQueue(.main))
+    func startDateToFilterNewData(for manager: CGMManager) async -> Date? {
         return glucoseStore.latestGlucose?.startDate
     }
 
-    func cgmManagerDidUpdateState(_ manager: CGMManager) {
-        dispatchPrecondition(condition: .onQueue(.main))
+    func cgmManagerDidUpdateState(_ manager: CGMManager) async {
         rawCGMManager = manager.rawValue
     }
 
-    func credentialStoragePrefix(for manager: CGMManager) -> String {
+    nonisolated func credentialStoragePrefix(for manager: CGMManager) -> String {
         // return string unique to this instance of the CGMManager
         return UUID().uuidString
     }
@@ -1036,36 +1050,33 @@ extension DeviceDataManager: PumpManagerDelegate {
         return loopControl.automatedTreatmentState
     }
     
-    var detectedSystemTimeOffset: TimeInterval { UserDefaults.standard.detectedSystemTimeOffset ?? 0 }
+    nonisolated var detectedSystemTimeOffset: TimeInterval { UserDefaults.standard.detectedSystemTimeOffset ?? 0 }
 
-    func pumpManager(_ pumpManager: PumpManager, didAdjustPumpClockBy adjustment: TimeInterval) {
-        dispatchPrecondition(condition: .onQueue(.main))
+    func pumpManager(_ pumpManager: PumpManager, didAdjustPumpClockBy adjustment: TimeInterval) async {
         log.default("PumpManager:%{public}@ did adjust pump clock by %fs", String(describing: type(of: pumpManager)), adjustment)
 
         analyticsServicesManager.pumpTimeDidDrift(adjustment)
     }
 
-    func pumpManagerDidUpdateState(_ pumpManager: PumpManager) {
-        dispatchPrecondition(condition: .onQueue(.main))
+    func pumpManagerDidUpdateState(_ pumpManager: PumpManager) async {
         log.default("PumpManager:%{public}@ did update state", String(describing: type(of: pumpManager)))
 
         rawPumpManager = pumpManager.rawValue
     }
-    
-    func pumpManager(_ pumpManager: PumpManager, didRequestBasalRateScheduleChange basalRateSchedule: BasalRateSchedule, completion: @escaping (Error?) -> Void) {
+
+    func pumpManager(_ pumpManager: PumpManager, didRequestBasalRateScheduleChange basalRateSchedule: BasalRateSchedule) async throws {
         saveUpdatedBasalRateSchedule(basalRateSchedule)
-        completion(nil)
     }
 
-    func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {
-        Task { @MainActor in
-            log.default("PumpManager:%{public}@ did fire heartbeat", String(describing: type(of: pumpManager)))
+    func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) async {
+        log.default("PumpManager:%{public}@ did fire heartbeat", String(describing: type(of: pumpManager)))
+        // Not awaited: refreshing the CGM can talk to the pump, whose next call would wait on this one.
+        Task {
             await refreshCGM()
         }
     }
 
-    func pumpManagerMustProvideBLEHeartbeat(_ pumpManager: PumpManager) -> Bool {
-        dispatchPrecondition(condition: .onQueue(.main))
+    func pumpManagerMustProvideBLEHeartbeat(_ pumpManager: PumpManager) async -> Bool {
         return pumpManagerMustProvideBLEHeartbeat
     }
 
@@ -1116,7 +1127,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         }
     }
 
-    nonisolated func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) {
+    func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) async {
     }
     
     func pumpManagerWantsDeletion(_ pumpManager: PumpManager) async {
@@ -1127,65 +1138,51 @@ extension DeviceDataManager: PumpManagerDelegate {
         settingsManager.storeSettings()
     }
 
-    nonisolated func pumpManager(_ pumpManager: PumpManager, didUpdatePumpRecordsBasalProfileStartEvents pumpRecordsBasalProfileStartEvents: Bool) {
-        Task { @MainActor in
-            log.default("PumpManager:%{public}@ did update pumpRecordsBasalProfileStartEvents to %{public}@", String(describing: type(of: pumpManager)), String(describing: pumpRecordsBasalProfileStartEvents))
-            doseStore.pumpRecordsBasalProfileStartEvents = pumpRecordsBasalProfileStartEvents
-        }
+    func pumpManager(_ pumpManager: PumpManager, didUpdatePumpRecordsBasalProfileStartEvents pumpRecordsBasalProfileStartEvents: Bool) async {
+        log.default("PumpManager:%{public}@ did update pumpRecordsBasalProfileStartEvents to %{public}@", String(describing: type(of: pumpManager)), String(describing: pumpRecordsBasalProfileStartEvents))
+        doseStore.pumpRecordsBasalProfileStartEvents = pumpRecordsBasalProfileStartEvents
     }
 
-    nonisolated func pumpManager(_ pumpManager: PumpManager, didError error: PumpManagerError) {
-        Task { @MainActor in
-            dispatchPrecondition(condition: .onQueue(.main))
-            log.error("PumpManager:%{public}@ did error: %{public}@", String(describing: type(of: pumpManager)), String(describing: error))
+    func pumpManager(_ pumpManager: PumpManager, didError error: PumpManagerError) async {
+        log.error("PumpManager:%{public}@ did error: %{public}@", String(describing: type(of: pumpManager)), String(describing: error))
 
-            setLastError(error: error)
-        }
+        setLastError(error: error)
     }
 
-    nonisolated func pumpManager(
+    func pumpManager(
         _ pumpManager: PumpManager,
         hasNewPumpEvents events: [NewPumpEvent],
         lastReconciliation: Date?,
-        replacePendingEvents: Bool,
-        completion: @escaping (_ error: Error?) -> Void)
-    {
-        Task { @MainActor in
-            log.default("PumpManager:%{public}@ hasNewPumpEvents (lastReconciliation = %{public}@)", String(describing: type(of: pumpManager)), String(describing: lastReconciliation))
-            do {
-                try await doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: replacePendingEvents)
-            } catch {
-                self.log.error("Failed to addPumpEvents to DoseStore: %{public}@", String(describing: error))
-                completion(error)
-                return
-            }
-            await podLoanPumpDidReport()
-            completion(nil)
-            NotificationCenter.default.post(name: .PumpEventsAdded, object: self, userInfo: nil)
+        replacePendingEvents: Bool
+    ) async throws {
+        log.default("PumpManager:%{public}@ hasNewPumpEvents (lastReconciliation = %{public}@)", String(describing: type(of: pumpManager)), String(describing: lastReconciliation))
+        do {
+            try await doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: replacePendingEvents)
+        } catch {
+            self.log.error("Failed to addPumpEvents to DoseStore: %{public}@", String(describing: error))
+            throw error
         }
+        await podLoanPumpDidReport()
+        NotificationCenter.default.post(name: .PumpEventsAdded, object: self, userInfo: nil)
     }
 
-    nonisolated func pumpManager(
+    func pumpManager(
         _ pumpManager: PumpManager,
         didReadReservoirValue units: Double,
-        at date: Date,
-        completion: @escaping (_ result: Swift.Result<(newValue: ReservoirValue, lastValue: ReservoirValue?, areStoredValuesContinuous: Bool), Error>) -> Void
-    ) {
-        Task { @MainActor in
-            dispatchPrecondition(condition: .onQueue(.main))
-            log.default("PumpManager:%{public}@ did read reservoir value", String(describing: type(of: pumpManager)))
+        at date: Date
+    ) async throws -> (newValue: ReservoirValue, lastValue: ReservoirValue?, areStoredValuesContinuous: Bool) {
+        log.default("PumpManager:%{public}@ did read reservoir value", String(describing: type(of: pumpManager)))
 
-            do {
-                let (newValue, lastValue, areStoredValuesContinuous) = try await doseStore.addReservoirValue(units, at: date)
-                completion(.success((newValue: newValue, lastValue: lastValue, areStoredValuesContinuous: areStoredValuesContinuous)))
-            } catch {
-                self.log.error("Failed to addReservoirValue: %{public}@", String(describing: error))
-                completion(.failure(error))
-            }
+        do {
+            let (newValue, lastValue, areStoredValuesContinuous) = try await doseStore.addReservoirValue(units, at: date)
+            return (newValue: newValue, lastValue: lastValue, areStoredValuesContinuous: areStoredValuesContinuous)
+        } catch {
+            self.log.error("Failed to addReservoirValue: %{public}@", String(describing: error))
+            throw error
         }
     }
 
-    func startDateToFilterNewPumpEvents(for manager: PumpManager) -> Date {
+    func startDateToFilterNewPumpEvents(for manager: PumpManager) async -> Date {
         return doseStore.pumpEventQueryAfterDate
     }
 
@@ -1451,7 +1448,9 @@ extension DeviceDataManager: PumpManagerDeliveryDelegate {
     func send(bolus: Double?, tempBasal: TempBasalRecommendation?, decisionId: UUID?, to pumpManager: PumpManager) async throws {
         log.default("Enacting dose: %{public}@", String(describing: (bolus, tempBasal)))
         
-        try await doseEnactor.enact(decisionId: decisionId, bolus: bolus, tempBasal: tempBasal, with: pumpManager)
+        try await doseEnactor.enact(bolus: bolus, tempBasal: tempBasal, with: pumpManager) { activationType in
+            await self.newDoseId(for: DoseMetadata(origin: .automatic, device: .phone, decisionId: decisionId, activationType: activationType))
+        }
     }
 
     var isAutomaticDosingActive: Bool {

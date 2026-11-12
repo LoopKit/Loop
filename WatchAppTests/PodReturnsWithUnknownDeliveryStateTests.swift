@@ -18,7 +18,7 @@ final class PodReturnsWithUnknownDeliveryStateTests: XCTestCase {
         var podState = PodState(address: 0x1f0b3557, firmwareVersion: "2.7.0", iFirmwareVersion: "2.7.0",
                                 lotNo: 1, lotSeq: 1, insulinType: .novolog, podType: dashType)
         if bolusInFlight {
-            podState.unfinalizedBolus = UnfinalizedDose(decisionId: nil, bolusAmount: 2.0, startTime: Date(),
+            podState.unfinalizedBolus = UnfinalizedDose(doseId: nil, bolusAmount: 2.0, startTime: Date(),
                                                         scheduledCertainty: .certain, insulinType: .novolog)
         }
         let raw: [String: Any] = ["basalSchedule": ["entries": [["rate": 1.0, "startTime": 0.0]]],

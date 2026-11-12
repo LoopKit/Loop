@@ -21,7 +21,7 @@ extension PodLoanWatchController: PumpManagerDelegate {
     }
 
     /// Saved on every update; its presence tells the next launch the loan was live.
-    func pumpManagerDidUpdateState(_ pumpManager: PumpManager) {
+    func pumpManagerDidUpdateState(_ pumpManager: PumpManager) async {
         // The pod's handle is saved after the loan too: a release can still drop one that never connected.
         savePumpLocalState(of: pumpManager)
         guard isCurrentDriver(pumpManager) else { return }
@@ -36,74 +36,69 @@ extension PodLoanWatchController: PumpManagerDelegate {
         sendHoldsPodStatusReport(reason: "the pod faulted")
     }
 
-    /// Book, close the ledger's window, complete, then journal. On a failed write nothing is acked or
+    /// Book, close the ledger's window, return, then journal. On a failed write nothing is acked or
     /// journaled; the pod re-reports. An empty report still advances the recency gate. The window
-    /// closes before the completion, so the cycle this report feeds sees anything it books.
-    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, replacePendingEvents: Bool, completion: @escaping (Error?) -> Void) {
+    /// closes before the return, so the cycle this report feeds sees anything it books.
+    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, replacePendingEvents: Bool) async throws {
         guard isCurrentDriver(pumpManager) else {
             SportLog.event("loan", "ignored \(events.count) pump event(s) from a released pod driver")
-            completion(nil)
             return
         }
-        let loopManager = self.loopManager
         let odometer = pumpManager as? PumpDeliveryOdometer
         let reading = odometer?.deliveredUnits
         let insulinType = pumpManager.status.insulinType
-        Task {
-            do {
-                try await loopManager.recordPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: replacePendingEvents)
-                if let odometer, let reading {
-                    await self.checkOwnPumpTotal(reading: reading, pulseUnits: odometer.deliveryPulseUnits, insulinType: insulinType)
-                }
-                completion(nil)
-                DispatchQueue.main.async { self.journalPumpEvents(events) }
-            } catch {
-                SportLog.event("book", "could not store \(events.count) pump event(s); the pod reports them again: \(String(describing: error))")
-                completion(error)
+        do {
+            try await loopManager.recordPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: replacePendingEvents)
+            if let odometer, let reading {
+                await checkOwnPumpTotal(reading: reading, pulseUnits: odometer.deliveryPulseUnits, insulinType: insulinType)
             }
+        } catch {
+            SportLog.event("book", "could not store \(events.count) pump event(s); the pod reports them again: \(String(describing: error))")
+            throw error
         }
+        let doseMetadata = await loopManager.doseMetadata(for: events.compactMap { $0.dose?.doseId })
+        DispatchQueue.main.async { self.journalPumpEvents(events, doseMetadata: doseMetadata) }
     }
 
     /// No reservoir history on the wrist; declared not continuous.
-    func pumpManager(_ pumpManager: PumpManager, didReadReservoirValue units: Double, at date: Date, completion: @escaping (Swift.Result<(newValue: ReservoirValue, lastValue: ReservoirValue?, areStoredValuesContinuous: Bool), Error>) -> Void) {
+    func pumpManager(_ pumpManager: PumpManager, didReadReservoirValue units: Double, at date: Date) async throws -> (newValue: ReservoirValue, lastValue: ReservoirValue?, areStoredValuesContinuous: Bool) {
         struct SimpleReservoirValue: ReservoirValue {
             let startDate: Date
             let unitVolume: Double
         }
-        completion(.success((newValue: SimpleReservoirValue(startDate: date, unitVolume: units),
-                             lastValue: nil, areStoredValuesContinuous: false)))
+        return (newValue: SimpleReservoirValue(startDate: date, unitVolume: units), lastValue: nil, areStoredValuesContinuous: false)
     }
 
     /// The loan-seeded dose store sets the boundary, as on the phone.
-    func startDateToFilterNewPumpEvents(for manager: PumpManager) -> Date {
+    func startDateToFilterNewPumpEvents(for manager: PumpManager) async -> Date {
         return loopManager.doseStore.pumpEventQueryAfterDate
     }
 
     /// Cycles run on CGM readings, not the pod's heartbeat.
-    func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {
+    func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) async {
     }
 
     /// Runtime comes from the sensor's and the pod's own Bluetooth wakes.
-    func pumpManagerMustProvideBLEHeartbeat(_ pumpManager: PumpManager) -> Bool {
+    func pumpManagerMustProvideBLEHeartbeat(_ pumpManager: PumpManager) async -> Bool {
         return false
     }
 
-    func pumpManager(_ pumpManager: PumpManager, didError error: PumpManagerError) {
+    func pumpManager(_ pumpManager: PumpManager, didError error: PumpManagerError) async {
         log.error("PumpManager error: %{public}@", String(describing: error))
     }
 
-    func pumpManager(_ pumpManager: PumpManager, didUpdatePumpRecordsBasalProfileStartEvents pumpRecordsBasalProfileStartEvents: Bool) {
+    func pumpManager(_ pumpManager: PumpManager, didUpdatePumpRecordsBasalProfileStartEvents pumpRecordsBasalProfileStartEvents: Bool) async {
         loopManager.doseStore.pumpRecordsBasalProfileStartEvents = pumpRecordsBasalProfileStartEvents
     }
 
-    func pumpManager(_ pumpManager: PumpManager, didAdjustPumpClockBy adjustment: TimeInterval) {
+    func pumpManager(_ pumpManager: PumpManager, didAdjustPumpClockBy adjustment: TimeInterval) async {
         log.default("Pump clock adjusted by %f", adjustment)
     }
 
     /// Refused: the schedule is frozen to the grant, and the phone's audit uses the same one.
-    func pumpManager(_ pumpManager: PumpManager, didRequestBasalRateScheduleChange basalRateSchedule: BasalRateSchedule, completion: @escaping (Error?) -> Void) {
+    func pumpManager(_ pumpManager: PumpManager, didRequestBasalRateScheduleChange basalRateSchedule: BasalRateSchedule) async throws {
         // Basal schedule changes are the phone's; the closest stock error.
-        completion(LoopError.configurationError(.basalRateSchedule))
+        throw LoopError.configurationError(.basalRateSchedule)
     }
 
     /// The phone owns the pump's lifecycle: the loan's pump manager is not removed on request here.
@@ -111,7 +106,7 @@ extension PodLoanWatchController: PumpManagerDelegate {
         log.default("PumpManager wants deletion")
     }
 
-    func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) {
+    func pumpManagerPumpWasReplaced(_ pumpManager: PumpManager) async {
         log.default("Pump was replaced")
     }
 
@@ -191,8 +186,8 @@ extension PodLoanWatchController: DeviceManagerDelegate {
         loopManager.recordRetractedAlert(alert, at: date)
     }
 
-    /// The pump's link is up and it has answered; arrives on the controller's queue.
-    func deviceManagerControlDidBecomeReady(_ manager: DeviceManager) {
+    /// The pump's link is up and it has answered.
+    func deviceManagerControlDidBecomeReady(_ manager: DeviceManager) async {
         guard (manager as AnyObject) === (pumpManager as AnyObject?) else { return }
         pumpControlDidBecomeReady()
     }
