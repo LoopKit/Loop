@@ -130,7 +130,7 @@ final class PodLoanWatchController {
     }
 
     /// How long a Start waits for the phone's grant before offering the offline start.
-    static let requestTimeout: TimeInterval = LoanControl.Wait.onScreen.seconds
+    static let requestTimeout: TimeInterval = LoanControl.Wait.startRequest.seconds
 
     /// Sticky for the hand-back.
     var handbackSawUnreachable = false
