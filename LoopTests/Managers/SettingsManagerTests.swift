@@ -8,6 +8,7 @@
 
 import XCTest
 import LoopKit
+import LoopCore
 @testable import Loop
 
 @MainActor
@@ -60,6 +61,60 @@ final class SettingsManagerTests: XCTestCase {
 
         XCTAssertEqual(settingsManager.settings.therapyProfiles.map(\.name), ["Default", "Sport"])
         XCTAssertEqual(settingsManager.settings.activeProfileName, "Sport")
+    }
+
+    private func loopSettings(basal: Double) -> LoopSettings {
+        let therapySettings = TherapySettings.mockTherapySettings
+        var settings = LoopSettings()
+        settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule
+        settings.carbRatioSchedule = therapySettings.carbRatioSchedule
+        settings.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
+        settings.basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: basal)], timeZone: therapySettings.basalRateSchedule?.timeZone)
+        return settings
+    }
+
+    private func profile(_ name: String, from settings: LoopSettings) throws -> TherapyProfile {
+        var profile = try XCTUnwrap(settings.liveTherapyProfile)
+        profile.name = name
+        return profile
+    }
+
+    func testAnActiveProfileThatIsNotStoredIsRecreatedFromTheLiveSettingsAndDefaultKeepsItsValues() throws {
+        var settings = loopSettings(basal: 0.5)
+        let defaultProfile = try profile(TherapyProfile.defaultName, from: loopSettings(basal: 1.0))
+        let weekend = try profile("Weekend", from: loopSettings(basal: 0.7))
+        settings.therapyProfiles = [defaultProfile, weekend]
+        settings.activeProfileName = "Sport"
+
+        XCTAssertEqual(settings.synchronizeTherapyProfiles(), "Sport")
+
+        XCTAssertEqual(settings.activeProfileName, "Sport")
+        XCTAssertEqual(settings.therapyProfiles.map(\.name), ["Default", "Weekend", "Sport"])
+        XCTAssertEqual(settings.therapyProfiles.map { $0.basalRateSchedule.items.map(\.value) }, [[1.0], [0.7], [0.5]])
+        XCTAssertNil(settings.synchronizeTherapyProfiles())
+    }
+
+    func testAnActiveProfileThatIsNotStoredIsKeptByNameWithoutLiveSettings() throws {
+        var settings = LoopSettings()
+        let defaultProfile = try profile(TherapyProfile.defaultName, from: loopSettings(basal: 1.0))
+        settings.therapyProfiles = [defaultProfile]
+        settings.activeProfileName = "Sport"
+
+        XCTAssertEqual(settings.synchronizeTherapyProfiles(), "Sport")
+
+        XCTAssertEqual(settings.activeProfileName, "Sport")
+        XCTAssertEqual(settings.therapyProfiles, [defaultProfile])
+    }
+
+    func testAnActiveProfileWithNoStoredProfilesRecreatesDefaultAndTheActiveProfile() throws {
+        var settings = loopSettings(basal: 0.5)
+        settings.activeProfileName = "Sport"
+
+        XCTAssertEqual(settings.synchronizeTherapyProfiles(), "Sport")
+
+        XCTAssertEqual(settings.activeProfileName, "Sport")
+        XCTAssertEqual(settings.therapyProfiles.map(\.name), ["Default", "Sport"])
+        XCTAssertEqual(settings.therapyProfiles.map { $0.basalRateSchedule.items.map(\.value) }, [[0.5], [0.5]])
     }
 
     func testSettingsAreStoredOnceTheDevicesAreKnown() async throws {

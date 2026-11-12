@@ -381,16 +381,18 @@ extension DeviceDataManagerTests {
         await assertThrows(.maximumBasalRateNotSet) { try await self.deviceDataManager.activateTherapyProfile(named: "Running") }
     }
 
-    func testUnknownActiveProfileNameIsDefault() async throws {
+    func testUnknownActiveProfileNameIsStoredAgainWithTheLiveSettings() async throws {
         setUpTherapySettings()
         try await deviceDataManager.saveTherapyProfile(sportProfile(), originalName: nil)
         let live = settingsManager.loopSettings.liveTherapyProfile!
+        let storedDefault = deviceDataManager.therapyProfile(named: "Default")!
 
         settingsManager.mutateLoopSettings { $0.activeProfileName = "Missing" }
 
-        XCTAssertNil(settingsManager.loopSettings.activeProfileName)
-        XCTAssertEqual(deviceDataManager.activeTherapyProfileName, "Default")
-        XCTAssertEqual(deviceDataManager.therapyProfiles.map(\.name), ["Default", "Sport"])
-        XCTAssertTrue(deviceDataManager.therapyProfile(named: "Default")!.hasSameValues(as: live))
+        XCTAssertEqual(settingsManager.loopSettings.activeProfileName, "Missing")
+        XCTAssertEqual(deviceDataManager.activeTherapyProfileName, "Missing")
+        XCTAssertEqual(deviceDataManager.therapyProfiles.map(\.name), ["Default", "Sport", "Missing"])
+        XCTAssertTrue(deviceDataManager.therapyProfile(named: "Missing")!.hasSameValues(as: live))
+        XCTAssertEqual(deviceDataManager.therapyProfile(named: "Default"), storedDefault)
     }
 }

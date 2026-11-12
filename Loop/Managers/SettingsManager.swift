@@ -136,7 +136,7 @@ class SettingsManager {
     {
         var newLoopSettings = newLoopSettings ?? loopSettings
         if let unknownName = newLoopSettings.synchronizeTherapyProfiles() {
-            log.error("Active profile %{public}@ is not stored; Default, holding the live settings, is active", unknownName)
+            log.error("Active profile %{public}@ was not stored; it is stored again with the live settings", unknownName)
         }
         let newNotificationSettings = notificationSettings ?? settingsStore?.latestSettings?.notificationSettings
 
