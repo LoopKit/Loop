@@ -243,7 +243,8 @@ public final class LoopCycle {
 
             try input.checkRecency(at: loopBaseTime, lastAddedPumpData: doseStore.lastAddedPumpData)
 
-            var output = Algorithm.run(input: input)
+            // Off the caller's actor, as the display run: on the watch a run can take seconds.
+            var output = await Self.runAlgorithm(input: input)
             outcome.output = output
             outcome.dosingDecision.algorithmExperiments = host.algorithmExperiments(for: dosingStrategy, output: output)
 
