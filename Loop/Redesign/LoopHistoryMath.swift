@@ -10,33 +10,11 @@ import Foundation
 /// Pure calculations behind the Trends screen. Nothing here touches a store.
 enum LoopHistoryMath {
 
-    // MARK: Glucose statistics
+    // MARK: Glucose
 
-    struct GlucoseStats: Equatable {
-        let count: Int
-        let meanMgdl: Double
-        let sdMgdl: Double
-        /// Coefficient of variation, 0–1.
-        let cv: Double
-        /// Glucose management indicator, as a percentage (Bergenstal 2018).
-        let gmiPercent: Double
-        var gmiMmolMol: Double { (gmiPercent - 2.152) * 10.929 }
-    }
-
-    static func glucoseStats(_ points: [GlucosePoint]) -> GlucoseStats? {
-        guard points.count >= 2 else { return nil }
-        let values = points.map(\.mgdl)
-        let mean = values.reduce(0, +) / Double(values.count)
-        let variance = values.reduce(0) { $0 + pow($1 - mean, 2) } / Double(values.count - 1)
-        let sd = variance.squareRoot()
-        return GlucoseStats(count: values.count, meanMgdl: mean, sdMgdl: sd, cv: sd / mean, gmiPercent: 3.31 + 0.02392 * mean)
-    }
-
-    /// The share of the period with CGM readings, assuming one reading every 5 minutes.
-    static func cgmActiveFraction(_ points: [GlucosePoint], over interval: DateInterval) -> Double {
-        let expected = interval.duration / 300
-        guard expected > 0 else { return 0 }
-        return min(1, Double(points.count) / expected)
+    /// An HbA1c or GMI percentage (NGSP) in mmol/mol (IFCC).
+    static func mmolPerMol(percent: Double) -> Double {
+        (percent - 2.152) * 10.929
     }
 
     /// Whether GMI is as representative as the consensus asks: a period of at least 14 calendar days (today counts,
@@ -45,92 +23,10 @@ enum LoopHistoryMath {
         periodDays >= 14 && cgmActive >= 0.7
     }
 
-    /// Hours a day with CGM readings: what a band's share of readings is a share of. One day gives that day's hours
+    /// Hours a day with CGM readings: what a band's share of time is a share of. One day gives that day's hours
     /// with readings, so far when it is today; a longer period gives the average over its days.
     static func cgmHoursPerDay(cgmActive: Double, over interval: DateInterval, periodDays: Int) -> Double {
         periodDays <= 1 ? cgmActive * interval.duration / 3600 : cgmActive * 24
-    }
-
-    // MARK: Time in range
-
-    enum RangeBand: Int, CaseIterable, Identifiable {
-        case veryHigh, high, inRange, low, veryLow
-
-        var id: Int { rawValue }
-
-        static func band(for mgdl: Double) -> RangeBand {
-            switch mgdl {
-            case ..<54: return .veryLow
-            case ..<70: return .low
-            case ...180: return .inRange
-            case ...250: return .high
-            default: return .veryHigh
-            }
-        }
-    }
-
-    /// Fractions (0–1) per band, in ladder order. Empty input gives all zeros.
-    static func timeInRange(_ points: [GlucosePoint]) -> [RangeBand: Double] {
-        var counts: [RangeBand: Int] = [:]
-        for point in points {
-            counts[RangeBand.band(for: point.mgdl), default: 0] += 1
-        }
-        let total = Double(points.count)
-        return Dictionary(uniqueKeysWithValues: RangeBand.allCases.map { band in
-            (band, total > 0 ? Double(counts[band] ?? 0) / total : 0)
-        })
-    }
-
-    /// Whole-number percentages that add up to 100 (largest remainder), so the labels never sum to 99 or 101.
-    static func roundedPercentages(_ fractions: [RangeBand: Double]) -> [RangeBand: Int] {
-        let raw = RangeBand.allCases.map { (band: $0, value: (fractions[$0] ?? 0) * 100) }
-        let total = raw.reduce(0) { $0 + $1.value }
-        guard total > 0 else { return Dictionary(uniqueKeysWithValues: RangeBand.allCases.map { ($0, 0) }) }
-        var floors = raw.map { (band: $0.band, floor: Int($0.value.rounded(.down)), remainder: $0.value - $0.value.rounded(.down)) }
-        var missing = Int(total.rounded()) - floors.reduce(0) { $0 + $1.floor }
-        for index in floors.indices.sorted(by: { floors[$0].remainder > floors[$1].remainder }) where missing > 0 {
-            floors[index].floor += 1
-            missing -= 1
-        }
-        return Dictionary(uniqueKeysWithValues: floors.map { ($0.band, $0.floor) })
-    }
-
-    // MARK: AGP
-
-    struct AGPSlot: Equatable {
-        /// Minutes after midnight at the start of the slot.
-        let minute: Int
-        let p5: Double
-        let p25: Double
-        let p50: Double
-        let p75: Double
-        let p95: Double
-    }
-
-    /// Readings folded onto one day in `slotMinutes` slots, as mg/dL percentiles. Slots with fewer than 3 readings are skipped.
-    static func agp(_ points: [GlucosePoint], slotMinutes: Int = 15, calendar: Calendar = .current) -> [AGPSlot] {
-        var slots: [Int: [Double]] = [:]
-        for point in points {
-            let parts = calendar.dateComponents([.hour, .minute], from: point.date)
-            let minute = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
-            slots[minute / slotMinutes, default: []].append(point.mgdl)
-        }
-        return slots.keys.sorted().compactMap { key in
-            let values = slots[key]!.sorted()
-            guard values.count >= 3 else { return nil }
-            return AGPSlot(minute: key * slotMinutes,
-                           p5: percentile(values, 0.05), p25: percentile(values, 0.25), p50: percentile(values, 0.5),
-                           p75: percentile(values, 0.75), p95: percentile(values, 0.95))
-        }
-    }
-
-    /// Linear-interpolated percentile of sorted values.
-    static func percentile(_ sorted: [Double], _ p: Double) -> Double {
-        guard !sorted.isEmpty else { return .nan }
-        let position = p * Double(sorted.count - 1)
-        let lower = Int(position.rounded(.down)), upper = Int(position.rounded(.up))
-        let weight = position - Double(lower)
-        return sorted[lower] * (1 - weight) + sorted[upper] * weight
     }
 
     /// The number of distinct calendar days with readings.
@@ -146,6 +42,24 @@ enum LoopHistoryMath {
         guard available + 1 < Double(periodDays) else { return nil }
         return max(1, Int(available.rounded()))
     }
+
+    // MARK: Time in range
+
+    /// Whole-number percentages that add up to 100 (largest remainder), so the labels never sum to 99 or 101.
+    static func roundedPercentages(_ fractions: [GlucoseBand: Double]) -> [GlucoseBand: Int] {
+        let raw = GlucoseBand.allCases.map { (band: $0, value: (fractions[$0] ?? 0) * 100) }
+        let total = raw.reduce(0) { $0 + $1.value }
+        guard total > 0 else { return Dictionary(uniqueKeysWithValues: GlucoseBand.allCases.map { ($0, 0) }) }
+        var floors = raw.map { (band: $0.band, floor: Int($0.value.rounded(.down)), remainder: $0.value - $0.value.rounded(.down)) }
+        var missing = Int(total.rounded()) - floors.reduce(0) { $0 + $1.floor }
+        for index in floors.indices.sorted(by: { floors[$0].remainder > floors[$1].remainder }) where missing > 0 {
+            floors[index].floor += 1
+            missing -= 1
+        }
+        return Dictionary(uniqueKeysWithValues: floors.map { ($0.band, $0.floor) })
+    }
+
+    // MARK: Scheduled basal
 
     /// Units the schedule would deliver over `span`, or nil where the points don't cover all of it.
     static func scheduledUnits(_ points: [ScheduledBasalPoint], over span: DateInterval) -> Double? {

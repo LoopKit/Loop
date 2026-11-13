@@ -319,7 +319,7 @@
       "comment" : "Carb entry row label: the exact time the food was eaten"
     },
     "Time in range" : {
-      "comment" : "Trends card title: share of glucose readings in each range"
+      "comment" : "Trends card title: share of time in each glucose range"
     },
     "Time in range, daily pattern, insulin per day and Loop status" : {
       "comment" : "Trends settings descriptive text"
