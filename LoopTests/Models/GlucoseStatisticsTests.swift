@@ -99,6 +99,29 @@ final class GlucoseStatisticsTests: XCTestCase {
         }
     }
 
+    /// A reading converted from mmol/L sits between whole mg/dL values, so the band edges
+    /// have to leave no gap: 10.0 mmol/L is in range and 13.9 mmol/L is high, as the
+    /// consensus defines them in mmol/L.
+    func testBandEdgesBetweenWholeMilligrams() {
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 53.9), .veryLow)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 54), .low)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 69.9), .low)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 70), .target)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 180.4), .target)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 10.0 * 18.0156), .target)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 181), .high)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 13.9 * 18.0156), .high)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 251), .veryHigh)
+    }
+
+    func testStandardDeviation() {
+        let start = midnight
+        let samples = [sample(90, at: start), sample(110, at: start.addingTimeInterval(.minutes(5)))]
+        let stats = GlucoseStatistics(samples: samples, start: start, end: start.addingTimeInterval(.minutes(10)))
+        XCTAssertEqual(stats.standardDeviation!, 200.0.squareRoot(), accuracy: 1e-6)
+        XCTAssertNil(GlucoseStatistics(samples: [samples[0]], start: start, end: start.addingTimeInterval(.hours(1))).standardDeviation)
+    }
+
     // MARK: - Percent active
 
     func testPercentActive() {

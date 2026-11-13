@@ -21,12 +21,12 @@ final class TrendsModel: ObservableObject {
         var glucose: [GlucosePoint] = []
         /// Days from the first reading, when that is short of the period; nil when the readings span it.
         var cgmCoveredDays: Int?
-        var stats: LoopHistoryMath.GlucoseStats?
-        var cgmActive: Double = 0
+        var stats: GlucoseStatistics?
+        var cgmActive: Double { stats?.percentActive ?? 0 }
         /// Hours a day with CGM readings, which the time in range shares are of.
         var cgmHoursPerDay: Double = 0
-        var timeInRange: [LoopHistoryMath.RangeBand: Double] = [:]
-        var agp: [LoopHistoryMath.AGPSlot] = []
+        var timeInRange: [GlucoseBand: Double] { stats?.timeInRange ?? [:] }
+        var agp: [AGPBand] { stats?.agpProfile ?? [] }
         var agpDays = 0
         var totals: [LoopHistoryMath.DayTotal] = []
         /// Carbs and bolus counts cover only the days per-day figures divide by (see `dataDays`).
@@ -117,12 +117,10 @@ final class TrendsModel: ObservableObject {
 
         let cgm = history.glucose.filter { !$0.userEntered }
         summary.glucose = cgm
-        summary.stats = LoopHistoryMath.glucoseStats(cgm)
-        summary.cgmActive = LoopHistoryMath.cgmActiveFraction(cgm, over: interval)
+        summary.stats = GlucoseStatistics(readings: cgm.map { (date: $0.date, mgdl: $0.mgdl) }, start: interval.start,
+                                          end: interval.end, bucketDuration: .minutes(15))
         summary.cgmHoursPerDay = LoopHistoryMath.cgmHoursPerDay(cgmActive: summary.cgmActive, over: interval,
                                                                 periodDays: LoopHistoryMath.days(in: interval).count)
-        summary.timeInRange = LoopHistoryMath.timeInRange(cgm)
-        summary.agp = LoopHistoryMath.agp(cgm)
         summary.agpDays = LoopHistoryMath.daysWithReadings(cgm)
         summary.cgmCoveredDays = LoopHistoryMath.cgmCoveredDays(cgm, in: interval,
                                                                 periodDays: LoopHistoryMath.days(in: interval).count)
@@ -185,14 +183,15 @@ final class TrendsModel: ObservableObject {
         func gmiIFCC(_ value: String) -> String? {
             unit.isMmol ? String(format: NSLocalizedString("%1$@ mmol/mol", comment: "Trends GMI tile detail: the GMI in IFCC units. (1: value)"), value) : nil
         }
-        if let stats = s.stats {
-            tiles.append(StatTile(label: averageLabel, value: unit.format(stats.meanMgdl), unit: unit.unitName,
+        if let stats = s.stats, let mean = stats.averageGlucose, let gmi = stats.gmi,
+           let sd = stats.standardDeviation, let cv = stats.coefficientOfVariation {
+            tiles.append(StatTile(label: averageLabel, value: unit.format(mean), unit: unit.unitName,
                                   detail: String(format: NSLocalizedString("SD %1$@ · CV %2$@%%", comment: "Trends Average tile detail: standard deviation and coefficient of variation of glucose. (1: standard deviation in the glucose unit, 2: coefficient of variation as a percentage number)"),
-                                                 unit.format(stats.sdMgdl), LoopFormat.number(stats.cv * 100, decimals: 0)),
+                                                 unit.format(sd), LoopFormat.number(cv, decimals: 0)),
                                   aim: averageAim(unit)))
             // Always shown, as Statistics did. The consensus says how representative it is: 14 days, 70% CGM data.
-            tiles.append(StatTile(label: gmiLabel, value: LoopFormat.number(stats.gmiPercent, decimals: 1), unit: "%",
-                                  detail: gmiIFCC(LoopFormat.number(stats.gmiMmolMol, decimals: 0)),
+            tiles.append(StatTile(label: gmiLabel, value: LoopFormat.number(gmi, decimals: 1), unit: "%",
+                                  detail: gmiIFCC(LoopFormat.number(LoopHistoryMath.mmolPerMol(percent: gmi), decimals: 0)),
                                   aim: ConsensusTarget.aim(ConsensusTarget.under(7)),
                                   caveat: gmiCaveat))
         } else {
@@ -296,7 +295,7 @@ struct TrendsView: View {
                 dayCard(day, targets: s.dayTargets, unit: s.unit)
             }
             LoopCard {
-                CardHeader(title: NSLocalizedString("Time in range", comment: "Trends card title: share of glucose readings in each range")) {
+                CardHeader(title: NSLocalizedString("Time in range", comment: "Trends card title: share of time in each glucose range")) {
                     Text(String(format: NSLocalizedString("%1$@%% CGM active", comment: "Trends Time in range card: share of the period with CGM readings. (1: percentage number)"),
                                 LoopFormat.number(s.cgmActive * 100, decimals: 0))
                          + " · " + ConsensusTarget.aim(ConsensusTarget.over(70)))

@@ -94,33 +94,16 @@ class LoopHistoryMathTests: XCTestCase {
 
     // MARK: Glucose
 
-    func testTimeInRangeBandsAndRoundingSumTo100() {
-        let values: [Double] = [50, 60, 100, 100, 100, 200, 300]
-        let points = values.enumerated().map { GlucosePoint(date: at(Double($0.offset * 5)), mgdl: $0.element) }
-        let fractions = LoopHistoryMath.timeInRange(points)
-        XCTAssertEqual(fractions[.veryLow]!, 1 / 7, accuracy: 1e-9)
-        XCTAssertEqual(fractions[.low]!, 1 / 7, accuracy: 1e-9)
-        XCTAssertEqual(fractions[.inRange]!, 3 / 7, accuracy: 1e-9)
-        XCTAssertEqual(fractions[.high]!, 1 / 7, accuracy: 1e-9)
-        XCTAssertEqual(fractions[.veryHigh]!, 1 / 7, accuracy: 1e-9)
-        XCTAssertEqual(LoopHistoryMath.roundedPercentages(fractions).values.reduce(0, +), 100)
+    func testRoundedPercentagesSumTo100() {
+        let fractions: [GlucoseBand: Double] = [.veryLow: 1 / 7, .low: 1 / 7, .target: 3 / 7, .high: 1 / 7, .veryHigh: 1 / 7]
+        let percentages = LoopHistoryMath.roundedPercentages(fractions)
+        XCTAssertEqual(percentages.values.reduce(0, +), 100)
+        XCTAssertEqual(percentages[.target], 43)
     }
 
-    func testBandEdgesFollowConsensusThresholds() {
-        XCTAssertEqual(LoopHistoryMath.RangeBand.band(for: 53.9), .veryLow)
-        XCTAssertEqual(LoopHistoryMath.RangeBand.band(for: 54), .low)
-        XCTAssertEqual(LoopHistoryMath.RangeBand.band(for: 70), .inRange)
-        XCTAssertEqual(LoopHistoryMath.RangeBand.band(for: 180), .inRange)
-        XCTAssertEqual(LoopHistoryMath.RangeBand.band(for: 181), .high)
-        XCTAssertEqual(LoopHistoryMath.RangeBand.band(for: 251), .veryHigh)
-    }
-
-    func testGMIFromMean() {
-        let points = [GlucosePoint(date: at(0), mgdl: 150), GlucosePoint(date: at(5), mgdl: 150)]
-        let stats = LoopHistoryMath.glucoseStats(points)!
-        XCTAssertEqual(stats.gmiPercent, 3.31 + 0.02392 * 150, accuracy: 1e-9)
-        XCTAssertEqual(stats.gmiMmolMol, (stats.gmiPercent - 2.152) * 10.929, accuracy: 1e-9)
-        XCTAssertNil(LoopHistoryMath.glucoseStats([points[0]]))
+    func testGMIInMmolPerMol() {
+        // An HbA1c of 7% is 53 mmol/mol.
+        XCTAssertEqual(LoopHistoryMath.mmolPerMol(percent: 7), 52.98, accuracy: 0.01)
     }
 
     func testCGMCoverageNotedOnlyWhenReadingsStartLate() {
@@ -226,12 +209,6 @@ class LoopHistoryMathTests: XCTestCase {
         let points = [ScheduledBasalPoint(start: at(0), end: at(120), rate: 1.0), ScheduledBasalPoint(start: at(120), end: at(240), rate: 0.5)]
         XCTAssertEqual(try XCTUnwrap(LoopHistoryMath.scheduledUnits(points, over: DateInterval(start: at(60), end: at(180)))), 1.5, accuracy: 1e-9)
         XCTAssertNil(LoopHistoryMath.scheduledUnits(points, over: DateInterval(start: at(60), end: at(360))))
-    }
-
-    func testPercentileInterpolates() {
-        XCTAssertEqual(LoopHistoryMath.percentile([1, 2, 3, 4, 5], 0.5), 3)
-        XCTAssertEqual(LoopHistoryMath.percentile([1, 2, 3, 4], 0.5), 2.5)
-        XCTAssertEqual(LoopHistoryMath.percentile([10, 20], 0.25), 12.5)
     }
 
     // MARK: Loop modes

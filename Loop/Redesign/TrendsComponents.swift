@@ -166,13 +166,13 @@ struct StatGridView: View {
 
 // MARK: - TimeInRange
 
-extension LoopHistoryMath.RangeBand {
+extension GlucoseBand {
     /// The band's name in the user's language.
     var localizedName: String {
         switch self {
         case .veryHigh: return NSLocalizedString("Very high", comment: "Time in range band: glucose above 250 mg/dL (13.9 mmol/L)")
         case .high: return NSLocalizedString("High", comment: "Time in range band: glucose 181–250 mg/dL (10.1–13.9 mmol/L)")
-        case .inRange: return NSLocalizedString("In range", comment: "Time in range band: glucose 70–180 mg/dL (3.9–10.0 mmol/L)")
+        case .target: return NSLocalizedString("In range", comment: "Time in range band: glucose 70–180 mg/dL (3.9–10.0 mmol/L)")
         case .low: return NSLocalizedString("Low", comment: "Time in range band: glucose 54–69 mg/dL (3.0–3.8 mmol/L)")
         case .veryLow: return NSLocalizedString("Very low", comment: "Time in range band: glucose below 54 mg/dL (3.0 mmol/L)")
         }
@@ -184,7 +184,7 @@ extension LoopHistoryMath.RangeBand {
         switch self {
         case .veryHigh: return ConsensusTarget.under(5)
         case .high: return String(format: NSLocalizedString("%1$@ above range", comment: "Time in range High row: the consensus target for all time above range, high and very high together. (1: target, e.g. < 25%)"), ConsensusTarget.under(25))
-        case .inRange: return ConsensusTarget.over(70)
+        case .target: return ConsensusTarget.over(70)
         case .low: return String(format: NSLocalizedString("%1$@ below range", comment: "Time in range Low row: the consensus target for all time below range, low and very low together. (1: target, e.g. < 4%)"), ConsensusTarget.under(4))
         case .veryLow: return ConsensusTarget.under(1)
         }
@@ -197,12 +197,12 @@ extension LoopHistoryMath.RangeBand {
         switch (self, unit.isMmol) {
         case (.veryHigh, true): return "> " + n(13.9)
         case (.high, true): return n(10.1) + "–" + n(13.9)
-        case (.inRange, true): return n(3.9) + "–" + n(10.0)
+        case (.target, true): return n(3.9) + "–" + n(10.0)
         case (.low, true): return n(3.0) + "–" + n(3.8)
         case (.veryLow, true): return "< " + n(3.0)
         case (.veryHigh, false): return "> " + n(250)
         case (.high, false): return n(181) + "–" + n(250)
-        case (.inRange, false): return n(70) + "–" + n(180)
+        case (.target, false): return n(70) + "–" + n(180)
         case (.low, false): return n(54) + "–" + n(69)
         case (.veryLow, false): return "< " + n(54)
         }
@@ -231,29 +231,22 @@ struct TimeInRangeView: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
     /// Fractions per band, 0–1, of the time with CGM readings.
-    let fractions: [LoopHistoryMath.RangeBand: Double]
+    let fractions: [GlucoseBand: Double]
     /// Hours a day with CGM readings, so a band's hours leave out time without them.
     let hoursPerDay: Double
     let unit: GlucoseUnitStyle
 
-    private var percentages: [LoopHistoryMath.RangeBand: Int] { LoopHistoryMath.roundedPercentages(fractions) }
+    private var percentages: [GlucoseBand: Int] { LoopHistoryMath.roundedPercentages(fractions) }
 
-    static func color(_ band: LoopHistoryMath.RangeBand) -> Color {
-        switch band {
-        case .veryHigh: return GlucoseBand.veryHigh.agpColor
-        case .high: return GlucoseBand.high.agpColor
-        case .inRange: return GlucoseBand.target.agpColor
-        case .low: return GlucoseBand.low.agpColor
-        case .veryLow: return GlucoseBand.veryLow.agpColor
-        }
-    }
+    /// Highest band first, as the bar is drawn.
+    private static let ladder = Array(GlucoseBand.allCases.reversed())
 
     var body: some View {
         HStack(alignment: .top, spacing: LoopDesign.Space.s4) {
             bar
                 .frame(width: 14)
             VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
-                ForEach(LoopHistoryMath.RangeBand.allCases) { band in
+                ForEach(Self.ladder, id: \.self) { band in
                     row(band)
                 }
             }
@@ -264,7 +257,7 @@ struct TimeInRangeView: View {
     private var bar: some View {
         GeometryReader { geometry in
             let minimum: CGFloat = 4
-            let bands = LoopHistoryMath.RangeBand.allCases
+            let bands = Self.ladder
             let raw = bands.map { CGFloat(fractions[$0] ?? 0) }
             let floors = raw.map { $0 > 0 ? max(minimum, $0 * geometry.size.height) : 0 }
             let spare = geometry.size.height - floors.reduce(0, +)
@@ -274,7 +267,7 @@ struct TimeInRangeView: View {
                 ForEach(Array(bands.enumerated()), id: \.offset) { index, band in
                     let height = index == largest ? max(0, floors[index] + spare) : floors[index]
                     if height > 0 {
-                        Rectangle().fill(Self.color(band)).frame(height: max(0, height - 1))
+                        Rectangle().fill(band.agpColor).frame(height: max(0, height - 1))
                     }
                 }
             }
@@ -283,7 +276,7 @@ struct TimeInRangeView: View {
         .accessibilityHidden(true)
     }
 
-    private func row(_ band: LoopHistoryMath.RangeBand) -> some View {
+    private func row(_ band: GlucoseBand) -> some View {
         let fraction = fractions[band] ?? 0
         let hours = fraction * hoursPerDay
         let hoursText = String(format: NSLocalizedString("%1$@ h", comment: "Time in range row: average hours a day spent in the band, abbreviated. (1: hours with one decimal)"),
@@ -336,8 +329,13 @@ struct TimeInRangeView: View {
 
 // MARK: - AGP
 
+private extension AGPBand {
+    /// The middle of the slot, in minutes after midnight.
+    var minute: Int { Int(timeOfDay / 60) }
+}
+
 struct TrendsAGPChart: View {
-    let slots: [LoopHistoryMath.AGPSlot]
+    let slots: [AGPBand]
     let readings: [GlucosePoint]
     let days: Int
     let unit: GlucoseUnitStyle
@@ -389,7 +387,7 @@ struct TrendsAGPChart: View {
             }
             if enoughDays {
                 ForEach(slots, id: \.minute) { slot in
-                    AreaMark(x: .value("Time", slot.minute), yStart: .value("5%", v(slot.p5)), yEnd: .value("95%", v(slot.p95)), series: .value("Band", "outer"))
+                    AreaMark(x: .value("Time", slot.minute), yStart: .value("5%", v(slot.p05)), yEnd: .value("95%", v(slot.p95)), series: .value("Band", "outer"))
                         .foregroundStyle(P.agpOuter)
                         .interpolationMethod(.monotone)
                 }
