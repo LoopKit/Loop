@@ -99,6 +99,29 @@ final class GlucoseStatisticsTests: XCTestCase {
         }
     }
 
+    /// A reading converted from mmol/L sits between whole mg/dL values, so the band edges
+    /// have to leave no gap: 10.0 mmol/L is in range and 13.9 mmol/L is high, as the
+    /// consensus defines them in mmol/L.
+    func testBandEdgesBetweenWholeMilligrams() {
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 53.9), .veryLow)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 54), .low)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 69.9), .low)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 70), .target)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 180.4), .target)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 10.0 * 18.0156), .target)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 181), .high)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 13.9 * 18.0156), .high)
+        XCTAssertEqual(GlucoseBand.classify(mgdl: 251), .veryHigh)
+    }
+
+    func testStandardDeviation() {
+        let start = midnight
+        let samples = [sample(90, at: start), sample(110, at: start.addingTimeInterval(.minutes(5)))]
+        let stats = GlucoseStatistics(samples: samples, start: start, end: start.addingTimeInterval(.minutes(10)))
+        XCTAssertEqual(stats.standardDeviation!, 200.0.squareRoot(), accuracy: 1e-6)
+        XCTAssertNil(GlucoseStatistics(samples: [samples[0]], start: start, end: start.addingTimeInterval(.hours(1))).standardDeviation)
+    }
+
     // MARK: - Percent active
 
     func testPercentActive() {
@@ -107,6 +130,28 @@ final class GlucoseStatisticsTests: XCTestCase {
         let samples = (0..<6).map { sample(120, at: start.addingTimeInterval(.minutes(Double($0) * 10))) }
         let stats = GlucoseStatistics(samples: samples, start: start, end: start.addingTimeInterval(.hours(1)))
         XCTAssertEqual(stats.percentActive, 0.5, accuracy: 1e-6)
+    }
+
+    /// A sensor that reports every minute covers only the minutes it reports, not five
+    /// minutes a reading.
+    func testPercentActiveWithOneMinuteReadings() {
+        let start = midnight
+        let end = start.addingTimeInterval(.hours(1))
+        // Readings every minute for the first 20 minutes, then nothing.
+        let readings = (0..<20).map { (date: start.addingTimeInterval(.minutes(Double($0))), mgdl: 120.0) }
+        let stats = GlucoseStatistics(readings: readings, start: start, end: end)
+        XCTAssertEqual(stats.percentActive, 24.0 / 60, accuracy: 1e-6)  // 19 one-minute gaps, then one 5-minute slot
+        XCTAssertEqual(stats.timeInRange[.target]!, 1, accuracy: 1e-6)
+    }
+
+    /// Readings thinned to one every 2½ minutes and readings every minute give the same coverage.
+    func testPercentActiveDoesNotDependOnCadence() {
+        let start = midnight
+        let end = start.addingTimeInterval(.hours(1))
+        let everyMinute = (0..<60).map { (date: start.addingTimeInterval(.minutes(Double($0))), mgdl: 120.0) }
+        let thinned = stride(from: 0.0, to: 60, by: 2.5).map { (date: start.addingTimeInterval(.minutes($0)), mgdl: 120.0) }
+        XCTAssertEqual(GlucoseStatistics(readings: everyMinute, start: start, end: end).percentActive, 1, accuracy: 1e-6)
+        XCTAssertEqual(GlucoseStatistics(readings: thinned, start: start, end: end).percentActive, 1, accuracy: 1e-6)
     }
 
     // MARK: - AGP profile

@@ -621,6 +621,8 @@ class LoopAppManager: NSObject {
             return SetupHistory(settings: settings, experiments: experiments)
         }
         viewModel.outcomesPackageBuilder = criticalEventLogExportManager.map { OutcomesPackageBuilder(logs: $0.logs) }
+        viewModel.historyProvider = LoopHistoryProvider(deviceManager: deviceDataManager, loopDataManager: loopDataManager,
+                                                        settingsManager: settingsManager, temporaryPresetsManager: temporaryPresetsManager)
 
         return viewModel
     }()

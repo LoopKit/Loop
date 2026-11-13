@@ -13,6 +13,350 @@
     " -" : {
 
     },
+    "%1$@ above range" : {
+      "comment" : "Time in range High row: the consensus target for all time above range, high and very high together. (1: target, e.g. < 25%)"
+    },
+    "%1$@ below range" : {
+      "comment" : "Time in range Low row: the consensus target for all time below range, low and very low together. (1: target, e.g. < 4%)"
+    },
+    "%1$@ d" : {
+      "comment" : "Trends period picker, short label for a period of several days, e.g. 7 d. (1: number of days)"
+    },
+    "%1$@ entries" : {
+      "comment" : "Trends Carbs per day tile detail: average number of carb entries per day, a fractional value such as 2.5, so not pluralised. (1: number with one decimal)"
+    },
+    "%1$@ g" : {
+      "comment" : "Format string for an amount of carbohydrate in grams. (1: grams)"
+    },
+    "%1$@ h" : {
+      "comment" : "Time in range row: average hours a day spent in the band, abbreviated. (1: hours with one decimal)"
+    },
+    "%1$@ manual, %2$@ automatic" : {
+      "comment" : "VoiceOver: how the bolus divides. (1: manual units, 2: automatic units)"
+    },
+    "%1$@ mmol/mol" : {
+      "comment" : "Trends GMI tile detail: the GMI in IFCC units. (1: value)"
+    },
+    "%1$@ of %2$@" : {
+      "comment" : "Trends Loop active tile detail: time in closed loop out of the time Loop status is known. (1: duration in closed loop, e.g. 6d 4h, 2: duration covered, e.g. 7d)    Trends: how many days of the period are averaged. (1: days averaged, a number; 2: days in the period, e.g. 14 days)"
+    },
+    "%1$@ of unknown kind\n+ %2$@ automatic" : {
+      "comment" : "Trends Boluses per day tile detail when some boluses don't say whether they were manual or automatic, such as some in Apple Health, on two lines: how many of the figure above are of unknown kind, then the automatic boluses on top. (1: boluses of unknown kind per day; 2: automatic boluses per day; both fractional, such as 4.2)"
+    },
+    "%1$@ U/h" : {
+      "comment" : "Format string for an insulin rate in units per hour. (1: rate)"
+    },
+    "%1$@ unknown" : {
+      "comment" : "Basal and bolus: bolus whose record doesn't say whether it was manual or automatic, such as some in Apple Health, after the manual and automatic amounts. (1: units, e.g. 3.2 U)"
+    },
+    "%1$@%%" : {
+      "comment" : "A percentage. (1: number)"
+    },
+    "%1$@%% CGM active" : {
+      "comment" : "Trends Time in range card: share of the period with CGM readings. (1: percentage number)"
+    },
+    "%1$@, %2$@ %3$@: %4$@ percent, %5$@ hours a day" : {
+      "comment" : "VoiceOver label for a Time in range row. (1: band name, e.g. In range, 2: glucose thresholds, e.g. 3.9–10.0, 3: glucose unit, 4: percentage number, 5: average hours a day with one decimal)"
+    },
+    "%lld days" : {
+      "comment" : "A number of days, e.g. a Trends period or how many days are averaged. (1: number of days)    Trends period picker, VoiceOver name for a period of several days. (1: number of days)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld day"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld days"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld entries" : {
+      "comment" : "Trends Carbs tile detail for a one-day period: how many carb entries were made that day. (1: number)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld entry"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld entries"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld shorter gaps" : {
+      "comment" : "Chart note: how many other, shorter gaps in glucose readings there were; follows the longest gap. (1: number of gaps)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld shorter gap"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld shorter gaps"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "+ %1$@ automatic" : {
+      "comment" : "Trends Boluses per day tile detail: average number of automatic boluses per day on top of the manual ones, a fractional value such as 4.2. (1: number with one decimal)"
+    },
+    "25–75%" : {
+      "comment" : "Trends Daily pattern legend: band between the 25th and 75th percentiles of glucose"
+    },
+    "5–95%" : {
+      "comment" : "Trends Daily pattern legend: band between the 5th and 95th percentiles of glucose"
+    },
+    "aim %1$@" : {
+      "comment" : "Trends: the consensus target under a figure, in lower case. (1: target, e.g. < 7%)"
+    },
+    "aim %1$@, CV %2$@" : {
+      "comment" : "Trends Average tile: the consensus targets for average glucose and its coefficient of variation, in lower case. (1: glucose target, e.g. < 8.6; 2: CV target, e.g. ≤ 36%)"
+    },
+    "Automatic" : {
+      "comment" : "Chart legend: hatched bars are automatic boluses given by Loop"
+    },
+    "Automatic %1$@" : {
+      "comment" : "Basal and bolus: bolus Loop gave automatically. (1: units, e.g. 5.4 U)"
+    },
+    "Automatic bolus" : {
+      "comment" : "Chart callout label for a bolus Loop delivered automatically near the touched time    Logbook row title: a bolus Loop delivered automatically"
+    },
+    "average of %1$@" : {
+      "comment" : "Trends Insulin per day card subtitle when only some days of the period are averaged, such as a day still in progress. (1: days averaged, e.g. 13 of 14 days)"
+    },
+    "average per day" : {
+      "comment" : "Trends Basal and bolus card subtitle when the figures are averaged per day over the period"
+    },
+    "Basal" : {
+      "comment" : "Chart callout label for the basal rate at the touched time    Label of a tile showing the current basal rate (Now screen) or the day's basal insulin total (Today so far totals)    Logbook filter chip: show only basal changes"
+    },
+    "Basal %1$@, %2$@ percent" : {
+      "comment" : "VoiceOver: basal units and share. (1: units, 2: percentage number)"
+    },
+    "Basal given" : {
+      "comment" : "Chart legend: filled area is basal insulin actually delivered"
+    },
+    "Best over 14 days with %1$@ CGM data" : {
+      "comment" : "Trends GMI tile caption when the period is shorter than 14 days or CGM readings cover less than 70% of it: the consensus for when GMI is representative. (1: share of CGM data, e.g. 70%)"
+    },
+    "Bolus %1$@, %2$@ percent" : {
+      "comment" : "VoiceOver: bolus units and share. (1: units, 2: percentage number)"
+    },
+    "Boluses" : {
+      "comment" : "Trends summary tile for a one-day period: how many boluses were given that day, other than Loop's automatic ones"
+    },
+    "Boluses per day" : {
+      "comment" : "Trends summary tile: average number of boluses per day, other than Loop's automatic ones"
+    },
+    "Carbs" : {
+      "comment" : "Label of a tile showing the day's total carbohydrate    Logbook filter chip: show only carb entries    Logbook row title: a carb entry"
+    },
+    "Carbs per day" : {
+      "comment" : "Trends summary tile: average grams of carbohydrate entered per day"
+    },
+    "CGM data covers %1$@." : {
+      "comment" : "Trends Summary note when glucose readings start partway through the period. (1: days covered, e.g. 5 of 14 days)"
+    },
+    "Closed loop" : {
+      "comment" : "Trends Loop status: time Loop was running in closed loop"
+    },
+    "Couldn't load Trends: %1$@" : {
+      "comment" : "Trends error message when the history can't be read. (1: error description)"
+    },
+    "Covers %1$@, from the start of Loop's records, which it keeps for %2$@." : {
+      "comment" : "Trends Loop status footnote when Loop's records of its runs and settings start partway through the period. (1: date range covered; 2: how long Loop keeps them, e.g. 90 days)"
+    },
+    "Daily pattern" : {
+      "comment" : "Trends card title: the ambulatory glucose profile, glucose by time of day across the period"
+    },
+    "Daily pattern over %1$@. Median highest %2$@ at %3$@, lowest %4$@ at %5$@" : {
+      "comment" : "VoiceOver label for the Trends Daily pattern chart. (1: days with readings, e.g. 14 days; 2: highest median glucose; 3: time of day; 4: lowest median glucose; 5: time of day)"
+    },
+    "Daily pattern: not enough days" : {
+      "comment" : "VoiceOver label for the Trends Daily pattern chart when fewer than 5 days have readings"
+    },
+    "Day" : {
+      "comment" : "Appearance option and app icon name: the light (daytime) version"
+    },
+    "Day (Trends period)" : {
+      "comment" : "Trends period picker: a period of one calendar day (not daytime)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day"
+          }
+        }
+      }
+    },
+    "In range" : {
+      "comment" : "Time in range band: glucose 70–180 mg/dL (3.9–10.0 mmol/L)    Time-in-range band name: glucose 70–180 mg/dL (3.9–10.0 mmol/L)"
+    },
+    "Insulin per day" : {
+      "comment" : "Trends tile and card title: average total insulin per day"
+    },
+    "Insulin per day, average %1$@" : {
+      "comment" : "VoiceOver label for the Trends Insulin per day chart. (1: average insulin per day, e.g. 32.1 U)"
+    },
+    "Insulin per day, weekly average, average %1$@" : {
+      "comment" : "VoiceOver label for the Trends Insulin per day chart when bars are weekly averages. (1: average insulin per day, e.g. 32.1 U)"
+    },
+    "Insulin timeline, %1$@, bolus %2$@, basal %3$@, carbs %4$@" : {
+      "comment" : "VoiceOver summary of the day's insulin timeline chart with no glucose readings. (1: weekday and date; 2: bolus total, e.g. 12.5 U; 3: basal total; 4: carbs total, e.g. 140 g)"
+    },
+    "Insulin timeline, %1$@, bolus %2$@, basal %3$@, carbs %4$@, latest glucose %5$@ %6$@" : {
+      "comment" : "VoiceOver summary of the day's insulin timeline chart. (1: weekday and date; 2: bolus total, e.g. 12.5 U; 3: basal total; 4: carbs total, e.g. 140 g; 5: latest glucose value; 6: glucose unit, mmol/L or mg/dL)"
+    },
+    "Limited" : {
+      "comment" : "Trends Loop status: time closed loop was on but Loop wasn't completing runs"
+    },
+    "Loop status" : {
+      "comment" : "Trends card title: how long Loop spent in closed loop, limited or open loop"
+    },
+    "Manual %1$@" : {
+      "comment" : "Basal and bolus: bolus the person gave. (1: units, e.g. 16.2 U)"
+    },
+    "Median" : {
+      "comment" : "Trends Daily pattern legend: the median glucose line"
+    },
+    "Next period" : {
+      "comment" : "VoiceOver label for the Trends button that moves forward one period"
+    },
+    "No CGM data" : {
+      "comment" : "Trends Average tile detail when the period has no glucose readings"
+    },
+    "No CGM data %1$@ – %2$@" : {
+      "comment" : "Chart note: a gap in glucose readings. (1: start time; 2: end time)"
+    },
+    "No CGM data %1$@ – %2$@ and %3$@" : {
+      "comment" : "Chart note: the longest gap in glucose readings, plus the shorter ones. (1: start time; 2: end time; 3: number of shorter gaps, e.g. 2 shorter gaps)"
+    },
+    "No CGM data in this period" : {
+      "comment" : "Trends chart placeholder when the period has no glucose readings"
+    },
+    "No CGM data on this day" : {
+      "comment" : "Chart note: there are no glucose readings for the whole day"
+    },
+    "No CGM data yet today" : {
+      "comment" : "Chart note: there are no glucose readings so far today"
+    },
+    "No insulin recorded in this period" : {
+      "comment" : "Trends Insulin per day chart placeholder when no insulin was delivered in the period"
+    },
+    "No loop runs recorded in this period" : {
+      "comment" : "Trends Loop status placeholder when there is no Loop run history for the period"
+    },
+    "Not enough days for a pattern: %1$@ of 5" : {
+      "comment" : "Trends Daily pattern footnote when fewer than 5 days have readings; the chart shows raw readings instead. (1: days with readings)"
+    },
+    "Now" : {
+      "comment" : "Title at the top of the Now screen, showing current glucose and Loop status    Title of the Now tab in the redesigned interface, showing current glucose and Loop status"
+    },
+    "Older days come from Apple Health, which doesn't record the basal schedule, and some boluses there don't say whether they were manual or automatic." : {
+      "comment" : "Trends Insulin per day footnote when the period reaches back past Loop's own records into Apple Health, so scheduled basal can't be shown, or some boluses there have no record of whether they were manual or automatic"
+    },
+    "Open loop / manual" : {
+      "comment" : "Trends Loop status: time closed loop was switched off"
+    },
+    "per day, weekly average" : {
+      "comment" : "Trends Insulin per day card subtitle when each bar is a week's average daily total"
+    },
+    "per day, weekly average · %1$@" : {
+      "comment" : "Trends Insulin per day card subtitle when each bar is a week's average daily total and only some days of the period are averaged. (1: days averaged, e.g. 4 of 90 days)"
+    },
+    "Period" : {
+      "comment" : "Trends: VoiceOver label of the picker that chooses how many days the screen covers"
+    },
+    "Previous period" : {
+      "comment" : "VoiceOver label for the Trends button that moves back one period"
+    },
+    "Scheduled %1$@" : {
+      "comment" : "Basal and bolus: what the basal schedule delivers over the same time, under the basal row. (1: units, e.g. 18.0 U)"
+    },
+    "SD %1$@ · CV %2$@%%" : {
+      "comment" : "Trends Average tile detail: standard deviation and coefficient of variation of glucose. (1: standard deviation in the glucose unit, 2: coefficient of variation as a percentage number)"
+    },
+    "Summary" : {
+      "comment" : "Trends card title: the summary statistics tiles"
+    },
+    "Suspended" : {
+      "comment" : "Chart callout value: insulin delivery was suspended at the touched time    Shown in the Basal tile on the Now screen when insulin delivery is suspended"
+    },
+    "this day" : {
+      "comment" : "Trends Basal and bolus card subtitle when the period is one complete day"
+    },
+    "Time" : {
+      "comment" : "Carb entry row label: the exact time the food was eaten"
+    },
+    "Time in range" : {
+      "comment" : "Trends card title: share of time in each glucose range"
+    },
+    "Time in range, daily pattern, insulin per day and Loop status" : {
+      "comment" : "Trends settings descriptive text"
+    },
+    "today so far" : {
+      "comment" : "Trends Basal and bolus card subtitle when the figures are today's total so far"
+    },
+    "Today so far" : {
+      "comment" : "Title of the card on the Now screen showing today's insulin and carbs"
+    },
+    "Today so far %1$@, usually %2$@ by %3$@." : {
+      "comment" : "Trends Insulin per day footnote: today's insulin so far against the median by this time of day over the last 14 days. (1: today's units, 2: usual units, 3: time of day)"
+    },
+    "Total" : {
+      "comment" : "Basal and bolus total row: basal plus bolus"
+    },
+    "Total %1$@" : {
+      "comment" : "VoiceOver: total insulin. (1: units)"
+    },
+    "Total so far" : {
+      "comment" : "Basal and bolus total row for today, which isn't over yet"
+    },
+    "Total so far %1$@" : {
+      "comment" : "VoiceOver: today's total insulin so far. (1: units)"
+    },
+    "Trends" : {
+      "comment" : "Title of the Trends tab    Title of the Trends tab in the redesigned interface"
+    },
+    "Usually %1$@ by %2$@" : {
+      "comment" : "Trends: the median insulin delivered by this time of day over the last 14 days. (1: units, e.g. 28.4 U, 2: time of day)"
+    },
+    "Very high" : {
+      "comment" : "Time in range band: glucose above 250 mg/dL (13.9 mmol/L)    Time-in-range band name: glucose above 250 mg/dL (13.9 mmol/L)"
+    },
+    "Very low" : {
+      "comment" : "Time in range band: glucose below 54 mg/dL (3.0 mmol/L)    Time-in-range band name: glucose below 54 mg/dL (3.0 mmol/L)"
+    },
     " - " : {
 
     },
@@ -11577,9 +11921,6 @@
     "CAUTION - Investigational device. Limited by Federal (or United States) law to investigational use." : {
 
     },
-    "CGM Active" : {
-      "comment" : "Percent of time CGM data present metric title"
-    },
     "Change the pump battery immediately" : {
       "comment" : "The notification alert describing a low pump battery",
       "extractionState" : "manual",
@@ -14827,12 +15168,6 @@
         }
       }
     },
-    "Daily glucose pattern" : {
-      "comment" : "Accessibility label for the daily glucose pattern (AGP) chart"
-    },
-    "Daily Glucose Pattern" : {
-      "comment" : "Daily glucose pattern (AGP) section header"
-    },
     "Date" : {
       "comment" : "Date picker label",
       "localizations" : {
@@ -17341,12 +17676,6 @@
     },
     "During this kind of hard exercise, your body may release hormones that raise glucose. This is more common in the morning before eating." : {
 
-    },
-    "Each 1% time in range ≈ 15 minutes." : {
-      "comment" : "TIR helper"
-    },
-    "Each 5% increase in range is clinically beneficial." : {
-      "comment" : "TIR suggestion"
     },
     "Easy breath. Can carry on a conversation." : {
 
@@ -21049,9 +21378,6 @@
         }
       }
     },
-    "Glucose Metrics" : {
-      "comment" : "Glucose metrics section header"
-    },
     "Glucose Momentum" : {
       "comment" : "Title of the prediction input effect for glucose momentum",
       "localizations" : {
@@ -21185,24 +21511,6 @@
     },
     "Go to Settings > Focus." : {
       "comment" : "Focus modes step 1"
-    },
-    "Goal: <%@" : {
-      "comment" : "Average glucose goal"
-    },
-    "Goal: <1%" : {
-      "comment" : "TIR goal for very low"
-    },
-    "Goal: <5%" : {
-      "comment" : "TIR goal for very high"
-    },
-    "Goal: <7%" : {
-      "comment" : "GMI goal"
-    },
-    "Goal: >70%" : {
-      "comment" : "CGM active goal\nTIR goal for target range"
-    },
-    "Goal: ≤36%" : {
-      "comment" : "Glucose variability goal"
     },
     "grams" : {
 
@@ -21946,9 +22254,6 @@
           }
         }
       }
-    },
-    "In Range" : {
-      "comment" : "Time-in-range band label (70–180 mg/dL)"
     },
     "Includes basal and automated boluses" : {
 
@@ -26394,9 +26699,6 @@
     "Meal Timing" : {
 
     },
-    "Median (line) with 25–75% and 5–95% bands, by time of day." : {
-      "comment" : "AGP chart explanation"
-    },
     "Medium Intensity (Aerobic)" : {
 
     },
@@ -27808,9 +28110,6 @@
     "No Delivery" : {
 
     },
-    "No glucose data for this period." : {
-      "comment" : "Statistics empty state"
-    },
     "No Maximum Bolus Configured" : {
       "comment" : "Alert title for a missing maximum bolus setting error",
       "localizations" : {
@@ -28506,9 +28805,6 @@
     },
     "None in last 24 hours" : {
 
-    },
-    "Not enough data to plot a profile." : {
-      "comment" : "AGP empty state"
     },
     "Not Set" : {
       "comment" : "Health sharing status: not determined"
@@ -34145,9 +34441,6 @@
     "She can do this by raising her **Overall Insulin** setting. This tells %@ to deliver more than her usual amount, making her insulin settings stronger." : {
 
     },
-    "Showing %1$d days of data — not enough for the full %2$d-day period yet." : {
-      "comment" : "Notice when the selected statistics range has incomplete data"
-    },
     "Shows last loop error" : {
       "comment" : "Loop Completion HUD accessibility hint",
       "localizations" : {
@@ -35195,9 +35488,6 @@
     },
     "Starting your exercise with high active insulin" : {
 
-    },
-    "Statistics" : {
-      "comment" : "Statistics screen title\nStatistics settings button text"
     },
     "Stay hydrated" : {
 
@@ -37409,9 +37699,6 @@
     },
     "These recommendations should be used as a starting point. Checking your glucose during exercise will help you find the settings that work best for you." : {
 
-    },
-    "This device keeps %d days of glucose. Increase the cache duration and rebuild to review the full period." : {
-      "comment" : "Notice when the local cache limits the statistics history"
     },
     "This dose still has active insulin. Deleting it may cause Loop to make up for the reduced active insulin by dosing more." : {
       "comment" : "Warning when deleting a Loop-recorded dose that still has active insulin"
@@ -40057,9 +40344,6 @@
           }
         }
       }
-    },
-    "Variability" : {
-      "comment" : "Coefficient of variation metric title"
     },
     "Version" : {
       "comment" : "Label for the app version row in the Support section"
