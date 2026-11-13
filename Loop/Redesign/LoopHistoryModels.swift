@@ -216,7 +216,8 @@ struct GlucoseUnitStyle: Equatable {
         self.isMmol = isMmol
     }
 
-    static let mgdlPerMmol = 18.0182
+    /// The factor Loop converts glucose with everywhere else, so a value reads the same here as on Loop's other screens.
+    static let mgdlPerMmol = 1 / LoopUnit.milligramsPerDeciliter.conversionFactor(toUnit: .millimolesPerLiter)!
 
     var unitName: String { isMmol ? "mmol/L" : "mg/dL" }
 
