@@ -62,14 +62,20 @@ final class StockLoopSession {
                 && session.isReachable && !wedged
             let ridesBothChannels = urgent && LoanMessage.ridesBothChannels(transport: dictionary)
 
-            // At most one queued hand-back offer. Capture the stale list before enqueueing, cancel after.
+            // A queued copy that the new message carries is cancelled (`LoanMessage.supersedesQueued`): at most
+            // one queued offer, and one queued set of records per loan. Capture the stale list before
+            // enqueueing, cancel after; a copy already transferring is left to finish.
             let enqueueSuperseding = { (payload: [String: Any]) in
-                let isOffer = LoanMessage.peekKind(transport: payload) == "handbackOffer"
-                let stale = isOffer
-                    ? session.outstandingUserInfoTransfers.filter {
-                        LoanMessage.peekKind(transport: $0.userInfo) == "handbackOffer"
-                      }
-                    : []
+                let replaceable: Set<String> = ["handbackOffer", "doseRecordBatch"]
+                let newer = LoanMessage.peekKind(transport: payload).flatMap { replaceable.contains($0) ? $0 : nil }
+                    .flatMap { _ in try? LoanMessage.decode(fromTransport: payload) }
+                let stale = newer.map { newer in
+                    session.outstandingUserInfoTransfers.filter { transfer in
+                        guard let kind = LoanMessage.peekKind(transport: transfer.userInfo), replaceable.contains(kind),
+                              let older = try? LoanMessage.decode(fromTransport: transfer.userInfo) else { return false }
+                        return newer.supersedesQueued(older)
+                    }
+                } ?? []
                 session.transferUserInfo(payload)
                 let cancelled = stale.filter { !$0.isTransferring }
                 cancelled.forEach { $0.cancel() }
