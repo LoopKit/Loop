@@ -136,6 +136,19 @@ class LoopHistoryMathTests: XCTestCase {
         XCTAssertEqual(LoopHistoryMath.cgmHoursPerDay(cgmActive: 0.75, over: fortnight, periodDays: 14), 18, accuracy: 1e-9)
     }
 
+    func testHealthGlucoseThinningKeepsCGMReadingsBesideFingersticks() {
+        let points = [
+            GlucosePoint(date: at(0), mgdl: 100),
+            GlucosePoint(date: at(0.5), mgdl: 100),                     // the same reading from another app
+            GlucosePoint(date: at(4), mgdl: 140, userEntered: true),    // a fingerstick a minute before the next reading
+            GlucosePoint(date: at(5), mgdl: 110),
+            GlucosePoint(date: at(10), mgdl: 120),
+        ]
+        let thinned = LoopHistoryMath.thinnedHealthGlucose(points)
+        XCTAssertEqual(thinned.map(\.date), [at(0), at(4), at(5), at(10)])
+        XCTAssertEqual(thinned.filter { !$0.userEntered }.count, 3)
+    }
+
     func testHealthBoundaryIsTheLaterOfLocalHistoryAndFirstRecord() {
         let localStart = at(0), now = at(90 * 1440)
         // Loop began recording 20 days into its 90-day history: Health covers the days before.

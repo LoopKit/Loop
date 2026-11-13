@@ -409,18 +409,13 @@ final class LoopHistoryProvider {
         }
     }
 
-    /// Several apps can write the same CGM reading to Health; keep one reading per 2½ minutes.
     private func healthGlucose(_ interval: DateInterval?) async throws -> [GlucosePoint] {
         let samples = try await healthSamples(HKQuantityType(.bloodGlucose), interval)
-        var points: [GlucosePoint] = []
         let own = HKSource.default().bundleIdentifier
-        for sample in samples where !sample.isDisplayOnly
-            && (FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps || sample.sourceRevision.source.bundleIdentifier == own) {
-            if let last = points.last, sample.startDate.timeIntervalSince(last.date) < 150 { continue }
-            points.append(GlucosePoint(date: sample.startDate, mgdl: sample.quantity.doubleValue(for: .milligramsPerDeciliter),
-                                       userEntered: sample.wasUserEntered))
-        }
-        return points
+        return LoopHistoryMath.thinnedHealthGlucose(samples
+            .filter { !$0.isDisplayOnly
+                && (FeatureFlags.observeHealthKitGlucoseSamplesFromOtherApps || $0.sourceRevision.source.bundleIdentifier == own) }
+            .map { GlucosePoint(date: $0.startDate, mgdl: $0.quantity.doubleValue(for: .milligramsPerDeciliter), userEntered: $0.wasUserEntered) })
     }
 
     private func healthInsulin(_ interval: DateInterval?) async throws -> ([BolusEvent], [BasalSegment]) {

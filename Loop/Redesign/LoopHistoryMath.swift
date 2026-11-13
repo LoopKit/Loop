@@ -95,6 +95,18 @@ enum LoopHistoryMath {
             .min()
     }
 
+    /// Several apps can write the same CGM reading to Health: keeps one CGM reading per 2½ minutes, from readings in
+    /// date order. Fingersticks are kept apart, so one never takes the place of a CGM reading beside it.
+    static func thinnedHealthGlucose(_ points: [GlucosePoint]) -> [GlucosePoint] {
+        var lastCGM: Date?
+        return points.filter { point in
+            guard !point.userEntered else { return true }
+            if let lastCGM, point.date.timeIntervalSince(lastCGM) < 150 { return false }
+            lastCGM = point.date
+            return true
+        }
+    }
+
     /// `window` cut at `boundary`: the part before it is read from Apple Health, the part from it on from Loop's
     /// stores. Either is nil when the window has none of it; the two never overlap.
     static func split(_ window: DateInterval, at boundary: Date) -> (health: DateInterval?, local: DateInterval?) {
