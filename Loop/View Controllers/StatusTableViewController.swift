@@ -412,6 +412,33 @@ final class StatusTableViewController: LoopChartsTableViewController {
         return max(0, window.edgeInsets(for: .safeArea(cornerAdaptation: .vertical)).top - window.safeAreaInsets.top)
     }
 
+    /// The active profile's name, once profiles other than Default exist, and until when it stays active.
+    private var activeProfileName: String? {
+        let loopSettings = settingsManager.loopSettings
+        guard !landscapeMode, loopSettings.therapyProfiles.count > 1 || loopSettings.activeProfileName != nil else {
+            return nil
+        }
+        var label = String(format: NSLocalizedString("Profile: %1$@", comment: "Status screen label naming the active therapy profile (1: profile name)"), TherapyProfiles.activeName(loopSettings.activeProfileName))
+        let scheduledSwitches = loopSettings.scheduledSwitches
+        let pausedCount = scheduledSwitches.filter(\.paused).count
+        if !scheduledSwitches.isEmpty, pausedCount == scheduledSwitches.count {
+            label += " · " + NSLocalizedString("all starts paused", comment: "Status screen: every scheduled profile start is paused")
+            return label
+        }
+        if let next = deviceManager.nextScheduledProfileSwitch(after: loopSettings.scheduledSwitchesSettledAt ?? Date()) {
+            label += " · " + String(format: NSLocalizedString("until %1$@ starts %2$@ %3$@", comment: "Status screen: the next scheduled profile start (1: profile name, 2: short weekday, 3: time)"),
+                                    next.entry.profileName, ScheduledProfileSwitches.weekdayName(next.entry.weekday, short: true), ScheduledProfileSwitches.localizedTime(next.entry.time))
+        }
+        if pausedCount == 1 {
+            label += " · " + NSLocalizedString("1 start paused", comment: "Status screen: one scheduled profile start is paused")
+        } else if pausedCount > 1 {
+            label += " · " + String(format: NSLocalizedString("%1$d starts paused", comment: "Status screen: scheduled profile starts are paused (1: number of paused starts)"), pausedCount)
+        }
+        return label
+    }
+
+    private var displayedActiveProfileName: String?
+
     private var shouldShowStatus: Bool {
         return !landscapeMode && statusRowMode.hasRow
     }
@@ -718,6 +745,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case presets
         case alertWarning
         case hud
+        case activeProfile
         case status
         case charts
     }
@@ -870,6 +898,9 @@ final class StatusTableViewController: LoopChartsTableViewController {
             landscapeMode = traitCollection.verticalSizeClass == .compact
         }
 
+        let oldActiveProfileName = displayedActiveProfileName
+        displayedActiveProfileName = activeProfileName
+
         let presetsIsVisible = self.shouldShowPresets
         let hudIsVisible = self.shouldShowHUD
         let statusIsVisible = self.shouldShowStatus
@@ -895,6 +926,18 @@ final class StatusTableViewController: LoopChartsTableViewController {
             tableView.insertRows(at: [IndexPath(row: 0, section: Section.hud.rawValue)], with: animated ? .top : .none)
         case (true, false):
             tableView.deleteRows(at: [IndexPath(row: 0, section: Section.hud.rawValue)], with: animated ? .fade : .none)
+        default:
+            break
+        }
+
+        let activeProfileIndexPath = IndexPath(row: 0, section: Section.activeProfile.rawValue)
+        switch (oldActiveProfileName, displayedActiveProfileName) {
+        case (nil, .some):
+            tableView.insertRows(at: [activeProfileIndexPath], with: animated ? .top : .none)
+        case (.some, nil):
+            tableView.deleteRows(at: [activeProfileIndexPath], with: animated ? .fade : .none)
+        case (.some(let oldName), .some(let newName)) where oldName != newName:
+            tableView.reloadRows(at: [activeProfileIndexPath], with: animated ? .fade : .none)
         default:
             break
         }
@@ -979,6 +1022,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
             return shouldShowBannerWarning ? 1 : 0
         case .hud:
             return shouldShowHUD ? 1 : 0
+        case .activeProfile:
+            return displayedActiveProfileName != nil ? 1 : 0
         case .charts:
             return ChartRow.allCases.count
         case .status:
@@ -1067,6 +1112,26 @@ final class StatusTableViewController: LoopChartsTableViewController {
             hudView = cell.hudView
             cell.hudView.loopCompletionHUD.loopStatusColors = .loopStatus
 
+            return cell
+        case .activeProfile:
+            let cell = UITableViewCell()
+            let label = displayedActiveProfileName ?? ""
+            cell.contentConfiguration = UIHostingConfiguration {
+                HStack(spacing: 6) {
+                    Image(systemName: "person.crop.circle")
+                    Text(label)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
+                }
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("label_ActiveProfile")
+            }
+            .margins(.vertical, 4)
+            cell.backgroundColor = .secondarySystemBackground
+            cell.selectionStyle = .none
             return cell
         case .charts:
             let cell = tableView.dequeueReusableCell(withIdentifier: ChartTableViewCell.className, for: indexPath) as! ChartTableViewCell
@@ -1274,7 +1339,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     cell.setSubtitleLabel(label: nil)
                 }
             }
-        case .presets, .hud, .status, .alertWarning:
+        case .presets, .hud, .activeProfile, .status, .alertWarning:
             break
         }
     }
@@ -1299,7 +1364,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             }
         case .alertWarning:
             return UITableView.automaticDimension
-        case .presets, .hud, .status:
+        case .presets, .hud, .activeProfile, .status:
             return UITableView.automaticDimension
         }
     }
@@ -1316,7 +1381,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 tableView.deselectRow(at: indexPath, animated: true)
                 presentUnmuteAlertConfirmation()
             }
-        case .hud:
+        case .hud, .activeProfile:
             break
         case .status:
             switch StatusRow(rawValue: indexPath.row)! {

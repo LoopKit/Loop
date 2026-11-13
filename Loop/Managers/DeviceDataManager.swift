@@ -168,6 +168,12 @@ final class DeviceDataManager {
 
     
     var doseEnactor = DoseEnactor()
+
+    /// Set while a profile switch or save runs, so profile changes run one at a time.
+    private(set) var therapyProfileChangeInProgress = false
+
+    /// Issues the alerts about scheduled profile switches.
+    weak var scheduledProfileSwitchAlertIssuer: AlertIssuer?
     
     // MARK: Stores
     let carbStore: CarbStore
@@ -269,6 +275,7 @@ final class DeviceDataManager {
         self.pluginManager = pluginManager
         self.deviceLog = deviceLog
         self.alertManager = alertManager
+        self.scheduledProfileSwitchAlertIssuer = alertManager
         self.glucoseAlertManager = GlucoseAlertManager(alertIssuer: alertManager,
                                                        displayGlucosePreference: displayGlucosePreference)
         alertManager.addAlertSoundVendor(managerIdentifier: GlucoseAlertManager.managerIdentifier,
@@ -882,6 +889,9 @@ extension DeviceDataManager {
 
     func didBecomeActive() {
         updatePumpManagerBLEHeartbeatPreference()
+        Task {
+            await runDueScheduledProfileSwitch()
+        }
     }
 
     func updatePumpManagerBLEHeartbeatPreference() {
@@ -1112,6 +1122,11 @@ extension DeviceDataManager: PumpManagerDelegate {
                 } else {
                     self.deliveryUncertaintyAlertManager?.clearAlert()
                 }
+            }
+
+            // A scheduled switch waits for a bolus to finish and for delivery to resume.
+            if !status.holdsScheduledProfileSwitch, oldStatus.holdsScheduledProfileSwitch {
+                await runDueScheduledProfileSwitch()
             }
         }
     }
@@ -1376,8 +1391,31 @@ extension DeviceDataManager : RemoteDataServicesManagerDelegate {
 
 extension DeviceDataManager: TherapySettingsViewModelDelegate {
     
+    /// Profile changes are refused while the basal schedule is written, so the pump and the settings end up with
+    /// the same schedule. A suspended pump would resume delivery when it takes a basal schedule, so the schedule is
+    /// not sent.
     func syncBasalRateSchedule(items: [RepeatingScheduleValue<Double>], completion: @escaping (Swift.Result<BasalRateSchedule, Error>) -> Void) {
-        pumpManager?.syncBasalRateSchedule(items: items, completion: completion)
+        guard let pumpManager else {
+            return
+        }
+        guard !therapyProfileChangeInProgress else {
+            completion(.failure(TherapyProfileError.operationInProgress))
+            return
+        }
+        switch pumpManager.status.basalDeliveryState {
+        case .suspended, .suspending:
+            completion(.failure(TherapyProfileError.pumpSuspended))
+            return
+        default:
+            break
+        }
+        therapyProfileChangeInProgress = true
+        pumpManager.syncBasalRateSchedule(items: items) { result in
+            Task { @MainActor in
+                self.therapyProfileChangeInProgress = false
+                completion(result)
+            }
+        }
     }
     
     func syncDeliveryLimits(deliveryLimits: DeliveryLimits) async throws -> DeliveryLimits
@@ -1394,7 +1432,41 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
         return try await pumpManager?.syncDeliveryLimits(limits: deliveryLimits) ?? deliveryLimits
     }
 
+    /// Edits must start from the active profile's current schedules, and no profile change may be running.
+    func validateTherapySettingsEdit(from therapySettings: TherapySettings) throws {
+        guard !therapyProfileChangeInProgress else {
+            throw TherapyProfileError.operationInProgress
+        }
+        let activeName = activeTherapyProfileName
+        guard TherapyProfiles.activeName(therapySettings.activeProfileName) == activeName else {
+            throw TherapyProfileError.activeProfileChangedWhileEditing(activeName)
+        }
+        let edited = TherapyProfile(name: activeName,
+                                    glucoseTargetRangeSchedule: therapySettings.glucoseTargetRangeSchedule,
+                                    carbRatioSchedule: therapySettings.carbRatioSchedule,
+                                    basalRateSchedule: therapySettings.basalRateSchedule,
+                                    insulinSensitivitySchedule: therapySettings.insulinSensitivitySchedule)
+        let live = settingsManager.loopSettings.liveTherapyProfile
+        if let edited, let live {
+            guard edited.hasSameValues(as: live) else {
+                throw TherapyProfileError.settingsChangedWhileEditing
+            }
+        } else if (edited == nil) != (live == nil) {
+            throw TherapyProfileError.settingsChangedWhileEditing
+        }
+    }
+
+    /// Settings for another profile than the active one, or saved while a profile change runs, are not saved, so
+    /// stale schedules never reach the active profile.
     func saveCompletion(therapySettings: TherapySettings) {
+        guard !therapyProfileChangeInProgress else {
+            log.error("Therapy settings not saved: a profile change is in progress")
+            return
+        }
+        guard TherapyProfiles.activeName(therapySettings.activeProfileName) == activeTherapyProfileName else {
+            log.error("Therapy settings for profile %{public}@ not saved: %{public}@ is active", TherapyProfiles.activeName(therapySettings.activeProfileName), activeTherapyProfileName)
+            return
+        }
         settingsManager.mutateLoopSettings { settings in
             settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule
             settings.preMealTargetRange = therapySettings.correctionRangeOverrides?.preMeal
@@ -1414,6 +1486,417 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
                                     bolusVolumes: $0.supportedBolusVolumes,
                                     maximumBolusVolumes: $0.supportedMaximumBolusVolumes,
                                     maximumBasalScheduleEntryCount: $0.maximumBasalScheduleEntryCount)
+        }
+    }
+}
+
+extension DeviceDataManager: TherapyProfileDelegate {
+
+    var therapyProfiles: [TherapyProfile] {
+        settingsManager.loopSettings.resolvedTherapyProfiles
+    }
+
+    var activeTherapyProfileName: String {
+        TherapyProfiles.activeName(settingsManager.loopSettings.activeProfileName)
+    }
+
+    var therapyProfileValidator: TherapyProfileValidator? {
+        guard let pumpManager else {
+            return nil
+        }
+        let settings = settingsManager.loopSettings
+        return TherapyProfileValidator(supportedBasalRates: pumpManager.supportedBasalRates,
+                                       maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
+                                       maximumBasalScheduleEntryCount: pumpManager.maximumBasalScheduleEntryCount,
+                                       suspendThreshold: settings.suspendThreshold)
+    }
+
+    func activateTherapyProfile(named name: String, expectedFingerprint: String?, trigger: TherapyProfileSwitchTrigger) async throws {
+        let now = Date()
+        try await loggingFailure("Activating therapy profile \(name) (\(trigger.rawValue))") {
+            try await self.activateTherapyProfile(named: name, expectedFingerprint: expectedFingerprint, trigger: trigger, at: now)
+        }
+        await armScheduledProfileSwitchAlert(now: now)
+    }
+
+    /// Validates, writes the basal schedule to the pump, then sets the four schedules, the active name and the trigger
+    /// in one change. Scheduled starts up to `date`, the time of the switch, are settled in the same change.
+    private func activateTherapyProfile(named name: String, expectedFingerprint: String?, trigger: TherapyProfileSwitchTrigger, at date: Date) async throws {
+        try beginTherapyProfileChange()
+        defer { therapyProfileChangeInProgress = false }
+
+        guard let profile = therapyProfile(named: name) else {
+            throw TherapyProfileError.notFound(name)
+        }
+        try checkFingerprint(of: profile, expected: expectedFingerprint)
+        guard let validator = therapyProfileValidator else {
+            throw TherapyProfileError.noPump
+        }
+        let validated = try validator.validate(profile)
+
+        if name == activeTherapyProfileName, let live = settingsManager.loopSettings.liveTherapyProfile, live.hasSameValues(as: validated) {
+            return
+        }
+
+        let syncedBasal = try await syncBasalRateSchedule(items: validated.basalRateSchedule.items)
+        let live = settingsManager.loopSettings.liveTherapyProfile
+        settingsManager.mutateLoopSettings { settings in
+            settings.therapyProfiles = TherapyProfiles.resolved(settings.therapyProfiles, live: settings.activeProfileName == nil ? live : nil)
+            settings.applyTherapyProfileSchedules(validated)
+            settings.basalRateSchedule = syncedBasal
+            settings.activeProfileName = name == TherapyProfile.defaultName ? nil : name
+            settings.activeProfileSwitchTrigger = trigger
+            settings.scheduledSwitchesSettledAt = date
+        }
+        log.default("Activated therapy profile %{public}@ (%{public}@)", name, trigger.rawValue)
+    }
+
+    func saveTherapyProfile(_ profile: TherapyProfile, originalName: String?, expectedFingerprint: String?) async throws {
+        try await loggingFailure("Saving therapy profile \(profile.name)") {
+            try await self.performSaveTherapyProfile(profile, originalName: originalName, expectedFingerprint: expectedFingerprint)
+        }
+    }
+
+    /// Saves `profile`; for the active profile the basal schedule goes to the pump first. Values that are already
+    /// stored (a rename or a copy) are not validated again, and glucose values sent back unchanged keep their stored value.
+    private func performSaveTherapyProfile(_ profile: TherapyProfile, originalName: String?, expectedFingerprint: String?) async throws {
+        var profile = profile
+        try beginTherapyProfileChange()
+        defer { therapyProfileChangeInProgress = false }
+
+        let isActive = originalName != nil && originalName == activeTherapyProfileName
+        var original: TherapyProfile?
+        if let originalName {
+            guard let stored = therapyProfile(named: originalName) else {
+                throw TherapyProfileError.notFound(originalName)
+            }
+            try checkFingerprint(of: stored, expected: expectedFingerprint)
+            original = stored
+            profile = profile.keepingStoredGlucoseValues(of: stored)
+        }
+        var validated: TherapyProfile
+        let holdsStoredValues = original.map { profile.hasSameValues(as: $0) } ?? therapyProfiles.contains { profile.hasSameValues(as: $0) }
+        if holdsStoredValues {
+            validated = profile
+        } else {
+            guard let validator = therapyProfileValidator else {
+                throw TherapyProfileError.noPump
+            }
+            validated = try validator.validate(profile)
+        }
+        if let timeZone = settingsManager.loopSettings.basalRateSchedule?.timeZone {
+            validated = validated.withTimeZone(timeZone)
+        }
+
+        let loopSettings = settingsManager.loopSettings
+        let live = loopSettings.liveTherapyProfile
+        let result = try TherapyProfiles.saving(validated,
+                                                originalName: originalName,
+                                                in: loopSettings.therapyProfiles,
+                                                activeProfileName: loopSettings.activeProfileName,
+                                                live: live)
+
+        if isActive {
+            let syncedBasal: BasalRateSchedule
+            if let live, live.basalRateSchedule.items == validated.basalRateSchedule.items {
+                syncedBasal = live.basalRateSchedule
+            } else {
+                syncedBasal = try await syncBasalRateSchedule(items: validated.basalRateSchedule.items)
+            }
+            settingsManager.mutateLoopSettings { settings in
+                settings.therapyProfiles = result.profiles
+                settings.activeProfileName = result.activeProfileName
+                settings.applyTherapyProfileSchedules(validated)
+                settings.basalRateSchedule = syncedBasal
+                if let originalName {
+                    settings.scheduledSwitches = ScheduledProfileSwitches.renaming(settings.scheduledSwitches, from: originalName, to: validated.name)
+                }
+            }
+        } else {
+            settingsManager.mutateLoopSettings { settings in
+                settings.therapyProfiles = result.profiles
+                settings.activeProfileName = result.activeProfileName
+                if let originalName {
+                    settings.scheduledSwitches = ScheduledProfileSwitches.renaming(settings.scheduledSwitches, from: originalName, to: validated.name)
+                }
+            }
+        }
+        if let originalName, originalName != validated.name {
+            await armScheduledProfileSwitchAlert()
+        }
+        log.default("Saved therapy profile %{public}@ (original %{public}@, active %{public}@)", validated.name, originalName ?? "none", String(describing: isActive))
+    }
+
+    func deleteTherapyProfile(named name: String, expectedFingerprint: String?) async throws {
+        try await loggingFailure("Deleting therapy profile \(name)") {
+            try await self.performDeleteTherapyProfile(named: name, expectedFingerprint: expectedFingerprint)
+        }
+    }
+
+    private func performDeleteTherapyProfile(named name: String, expectedFingerprint: String?) async throws {
+        try beginTherapyProfileChange()
+        defer { therapyProfileChangeInProgress = false }
+
+        let loopSettings = settingsManager.loopSettings
+        let profiles = try TherapyProfiles.deleting(name, in: loopSettings.therapyProfiles, activeProfileName: loopSettings.activeProfileName, live: loopSettings.liveTherapyProfile)
+        if let profile = therapyProfile(named: name) {
+            try checkFingerprint(of: profile, expected: expectedFingerprint)
+        }
+        let removedSwitches = settingsManager.loopSettings.scheduledSwitches.filter { $0.profileName == name }.count
+        settingsManager.mutateLoopSettings { settings in
+            settings.therapyProfiles = profiles
+            settings.scheduledSwitches = ScheduledProfileSwitches.removing(profile: name, from: settings.scheduledSwitches)
+        }
+        log.default("Deleted therapy profile %{public}@ and %d scheduled switches", name, removedSwitches)
+        if removedSwitches > 0 {
+            await armScheduledProfileSwitchAlert()
+        }
+    }
+
+    var scheduledProfileSwitches: [ScheduledProfileSwitch] {
+        settingsManager.loopSettings.scheduledSwitches
+    }
+
+    func saveScheduledProfileSwitches(_ entries: [ScheduledProfileSwitch], expectedFingerprint: String?) async throws {
+        try await loggingFailure("Saving \(entries.count) scheduled profile switches") {
+            try await self.performSaveScheduledProfileSwitches(entries, expectedFingerprint: expectedFingerprint)
+        }
+    }
+
+    /// Only starts after the save run: the save settles every earlier one.
+    private func performSaveScheduledProfileSwitches(_ entries: [ScheduledProfileSwitch], expectedFingerprint: String?) async throws {
+        try beginTherapyProfileChange()
+        defer { therapyProfileChangeInProgress = false }
+
+        let current = settingsManager.loopSettings.scheduledSwitches
+        if let expectedFingerprint, ScheduledProfileSwitches.fingerprint(current) != expectedFingerprint {
+            throw ScheduledProfileSwitchError.conflict
+        }
+        try ScheduledProfileSwitches.validate(entries, profileNames: therapyProfiles.map(\.name))
+        guard entries != current else {
+            return
+        }
+        let now = Date()
+        settingsManager.mutateLoopSettings { settings in
+            settings.scheduledSwitches = entries
+            settings.scheduledSwitchesSettledAt = now
+        }
+        log.default("Saved %d scheduled profile switches", entries.count)
+        await armScheduledProfileSwitchAlert(now: now)
+    }
+
+    func reorderTherapyProfiles(names: [String]) {
+        let loopSettings = settingsManager.loopSettings
+        let profiles = TherapyProfiles.reordering(loopSettings.therapyProfiles, names: names, live: loopSettings.liveTherapyProfile, activeProfileName: loopSettings.activeProfileName)
+        settingsManager.mutateLoopSettings { settings in
+            settings.therapyProfiles = profiles
+        }
+    }
+
+    private func loggingFailure(_ action: String, _ operation: () async throws -> Void) async throws {
+        do {
+            try await operation()
+        } catch {
+            log.error("%{public}@ failed: %{public}@", action, String(describing: error))
+            throw error
+        }
+    }
+
+    private func checkFingerprint(of profile: TherapyProfile, expected fingerprint: String?) throws {
+        if let fingerprint, !profile.matches(fingerprint: fingerprint) {
+            throw TherapyProfileError.conflict
+        }
+    }
+
+    private func beginTherapyProfileChange() throws {
+        guard !therapyProfileChangeInProgress else {
+            throw TherapyProfileError.operationInProgress
+        }
+        therapyProfileChangeInProgress = true
+    }
+
+    /// A suspended pump would resume delivery when it takes a basal schedule, so the schedule is not sent.
+    private func syncBasalRateSchedule(items: [RepeatingScheduleValue<Double>]) async throws -> BasalRateSchedule {
+        guard let pumpManager else {
+            throw TherapyProfileError.noPump
+        }
+        switch pumpManager.status.basalDeliveryState {
+        case .suspended, .suspending:
+            throw TherapyProfileError.pumpSuspended
+        default:
+            break
+        }
+        do {
+            return try await withCheckedThrowingContinuation { continuation in
+                pumpManager.syncBasalRateSchedule(items: items) { result in
+                    continuation.resume(with: result)
+                }
+            }
+        } catch {
+            throw TherapyProfileError.pumpSyncFailed(error.localizedDescription)
+        }
+    }
+}
+
+// MARK: - Scheduled profile switches
+
+extension DeviceDataManager {
+
+    static let scheduledProfileSwitchManagerIdentifier = "ScheduledProfileSwitches"
+    /// A start is applied at most this late; an older one is reported as missed.
+    static let scheduledProfileSwitchGrace = TimeInterval(hours: 24)
+    /// A start not applied this long after its time raises an alert.
+    static let scheduledProfileSwitchLateAlertDelay = TimeInterval(minutes: 30)
+
+    private var scheduleTimeZone: TimeZone {
+        settingsManager.loopSettings.basalRateSchedule?.timeZone ?? .current
+    }
+
+    private var pendingScheduledProfileSwitchAlertIdentifier: Alert.Identifier {
+        Alert.Identifier(managerIdentifier: Self.scheduledProfileSwitchManagerIdentifier, alertIdentifier: "pending")
+    }
+
+    /// The next start that makes another profile than the active one active.
+    func nextScheduledProfileSwitch(after date: Date) -> ScheduledProfileSwitchOccurrence? {
+        let settings = settingsManager.loopSettings
+        let activeName = TherapyProfiles.activeName(settings.activeProfileName)
+        return ScheduledProfileSwitches.next(in: settings.scheduledSwitches.filter { $0.profileName != activeName }, after: date, timeZone: scheduleTimeZone)
+    }
+
+    /// Runs the newest start since the settled instant: a start older than the grace is reported as missed, a start
+    /// whose profile is already active is settled, and other starts switch through the validated switch. A pump that
+    /// can not take the basal schedule now leaves the start unsettled, so the next run tries again.
+    func runDueScheduledProfileSwitch(now: Date = Date()) async {
+        let settings = settingsManager.loopSettings
+        guard !settings.scheduledSwitches.isEmpty, !therapyProfileChangeInProgress else {
+            return
+        }
+        guard let settledAt = settings.scheduledSwitchesSettledAt else {
+            settleScheduledProfileSwitches(at: now)
+            await armScheduledProfileSwitchAlert(now: now)
+            return
+        }
+        guard let due = ScheduledProfileSwitches.occurrences(of: settings.scheduledSwitches, after: settledAt, upTo: now, timeZone: scheduleTimeZone).first else {
+            return
+        }
+        let name = due.entry.profileName
+
+        guard now.timeIntervalSince(due.date) <= Self.scheduledProfileSwitchGrace else {
+            log.error("Scheduled switch to %{public}@ at %{public}@ is too late to run", name, String(describing: due.date))
+            settleScheduledProfileSwitches(at: now)
+            await issueScheduledProfileSwitchFailedAlert(due, reason: String(format: NSLocalizedString("It is more than %1$d hours late.", comment: "Reason a scheduled profile switch did not run: too late (1: hours)"), Int(Self.scheduledProfileSwitchGrace.hours)))
+            await armScheduledProfileSwitchAlert(now: now)
+            return
+        }
+        guard therapyProfile(named: name) != nil else {
+            settleScheduledProfileSwitches(at: now)
+            await issueScheduledProfileSwitchFailedAlert(due, reason: TherapyProfileError.notFound(name).localizedDescription)
+            await armScheduledProfileSwitchAlert(now: now)
+            return
+        }
+        guard name != activeTherapyProfileName else {
+            settleScheduledProfileSwitches(at: now)
+            await armScheduledProfileSwitchAlert(now: now)
+            return
+        }
+        if case .inProgress = pumpManager?.status.bolusState {
+            log.default("Scheduled switch to %{public}@ waits for the bolus to finish", name)
+            return
+        }
+
+        do {
+            try await activateTherapyProfile(named: name, expectedFingerprint: nil, trigger: .scheduled, at: due.date)
+            NotificationManager.sendScheduledProfileSwitchNotification(profileName: name, scheduledAt: due.date, switchedAt: now, timeZone: scheduleTimeZone)
+            await armScheduledProfileSwitchAlert(now: now)
+        } catch let error as TherapyProfileError where error.isTransientForScheduledSwitch {
+            log.default("Scheduled switch to %{public}@ not run yet: %{public}@", name, error.localizedDescription)
+            await armScheduledProfileSwitchAlert(now: now, reason: error.localizedDescription)
+        } catch {
+            log.error("Scheduled switch to %{public}@ failed: %{public}@", name, error.localizedDescription)
+            settleScheduledProfileSwitches(at: now)
+            await issueScheduledProfileSwitchFailedAlert(due, reason: error.localizedDescription)
+            await armScheduledProfileSwitchAlert(now: now)
+        }
+    }
+
+    private func settleScheduledProfileSwitches(at date: Date) {
+        settingsManager.mutateLoopSettings { settings in
+            settings.scheduledSwitchesSettledAt = date
+        }
+    }
+
+    /// Arms one alert for 30 minutes after the next start that is not settled, which iOS delivers also when Loop is
+    /// not running. A successful switch or a settle arms it for the following start instead; a retry of a start whose
+    /// alert was delivered leaves it.
+    func armScheduledProfileSwitchAlert(now: Date = Date(), reason: String? = nil) async {
+        let identifier = pendingScheduledProfileSwitchAlertIdentifier
+        let settledAt = settingsManager.loopSettings.scheduledSwitchesSettledAt ?? now
+        let next = nextScheduledProfileSwitch(after: settledAt)
+        let alertDate = next?.date.addingTimeInterval(Self.scheduledProfileSwitchLateAlertDelay)
+        if let alertDate, alertDate <= now {
+            // Delivered already; it stays until the start is settled.
+            return
+        }
+        await scheduledProfileSwitchAlertIssuer?.retractAlert(identifier: identifier)
+        guard let next, let alertDate else {
+            return
+        }
+        let time = ScheduledProfileSwitches.localizedTime(next.entry.time)
+        var body = String(format: NSLocalizedString("Loop has not been able to switch to %1$@ as scheduled at %2$@. Open Loop.", comment: "Alert body when a scheduled profile switch has not run (1: profile name, 2: time)"), next.entry.profileName, time)
+        if let reason {
+            body += "\n\n" + reason
+        }
+        let content = Alert.Content(title: NSLocalizedString("Profile Not Switched", comment: "Title of the alerts about a scheduled profile switch that did not run"),
+                                    body: body,
+                                    acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Acknowledge button of a scheduled profile switch alert"))
+        await scheduledProfileSwitchAlertIssuer?.issueAlert(Alert(identifier: identifier,
+                                                                  foregroundContent: content,
+                                                                  backgroundContent: content,
+                                                                  trigger: .delayed(interval: alertDate.timeIntervalSince(now)),
+                                                                  interruptionLevel: .timeSensitive,
+                                                                  categoryIdentifier: LoopNotificationCategory.scheduledProfileSwitch.rawValue))
+    }
+
+    private func issueScheduledProfileSwitchFailedAlert(_ occurrence: ScheduledProfileSwitchOccurrence, reason: String) async {
+        let body = String(format: NSLocalizedString("The scheduled switch to %1$@ (%2$@) did not happen: %3$@", comment: "Alert body when a scheduled profile switch did not run (1: profile name, 2: weekday and time, 3: reason)"),
+                          occurrence.entry.profileName, occurrence.entry.localizedWeekdayAndTime, reason)
+        let content = Alert.Content(title: NSLocalizedString("Profile Not Switched", comment: "Title of the alerts about a scheduled profile switch that did not run"),
+                                    body: body,
+                                    acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Acknowledge button of a scheduled profile switch alert"))
+        let identifier = Alert.Identifier(managerIdentifier: Self.scheduledProfileSwitchManagerIdentifier,
+                                          alertIdentifier: "\(occurrence.entry.id).\(Int(occurrence.date.timeIntervalSince1970))")
+        await scheduledProfileSwitchAlertIssuer?.issueAlert(Alert(identifier: identifier,
+                                                                  foregroundContent: content,
+                                                                  backgroundContent: content,
+                                                                  trigger: .immediate,
+                                                                  interruptionLevel: .timeSensitive,
+                                                                  categoryIdentifier: LoopNotificationCategory.scheduledProfileSwitch.rawValue))
+    }
+}
+
+private extension PumpManagerStatus {
+    /// A bolus is running or delivery is suspended, so a scheduled switch can not write the basal schedule now.
+    var holdsScheduledProfileSwitch: Bool {
+        if case .inProgress = bolusState {
+            return true
+        }
+        switch basalDeliveryState {
+        case .suspended, .suspending:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+private extension TherapyProfileError {
+    /// The pump can take the basal schedule later, so a scheduled switch tries again on the next run.
+    var isTransientForScheduledSwitch: Bool {
+        switch self {
+        case .pumpSuspended, .pumpSyncFailed, .operationInProgress, .noPump:
+            return true
+        default:
+            return false
         }
     }
 }
@@ -1461,7 +1944,15 @@ extension DeviceDataManager: PumpManagerDeliveryDelegate {
     }
 }
 
-extension DeviceDataManager: DeviceStatusProvider {}
+extension DeviceDataManager: DeviceStatusProvider {
+    var pumpSupportedBasalRates: [Double]? {
+        pumpManager?.supportedBasalRates
+    }
+
+    var pumpMaximumBasalScheduleEntryCount: Int? {
+        pumpManager?.maximumBasalScheduleEntryCount
+    }
+}
 
 extension DeviceDataManager: BolusStateProvider {
     var bolusState: LoopKit.PumpManagerStatus.BolusState? {

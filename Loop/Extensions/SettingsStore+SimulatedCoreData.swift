@@ -25,7 +25,9 @@ extension SettingsStore {
 
         while startDate < endDate {
             for index in 0..<simulatedPerDay {
-                simulated.append(StoredSettings.simulated(date: startDate.addingTimeInterval(.hours(24) * Double(index) / Double(simulatedPerDay))))
+                // The second settings of each day switch to the Exercise profile.
+                simulated.append(StoredSettings.simulated(date: startDate.addingTimeInterval(.hours(24) * Double(index) / Double(simulatedPerDay)),
+                                                          activeProfileName: index % 2 == 1 ? "Exercise" : nil))
             }
 
             if simulated.count >= simulatedLimit {
@@ -45,7 +47,7 @@ extension SettingsStore {
 }
 
 fileprivate extension StoredSettings {
-    static func simulated(date: Date) -> StoredSettings {
+    static func simulated(date: Date, activeProfileName: String?) -> StoredSettings {
         let controllerTimeZone = TimeZone(identifier: "America/Los_Angeles")!
         let scheduleTimeZone = TimeZone(secondsFromGMT: TimeZone(identifier: "America/Phoenix")!.secondsFromGMT())!
         let glucoseTargetRangeSchedule =  GlucoseRangeSchedule(rangeSchedule: DailyQuantitySchedule(unit: .milligramsPerDeciliter,
@@ -90,6 +92,24 @@ fileprivate extension StoredSettings {
                                                                RepeatingScheduleValue(startTime: .hours(18), value: 8.0),
                                                                RepeatingScheduleValue(startTime: .hours(21), value: 10.0)],
                                                   timeZone: scheduleTimeZone)
+        let defaultProfile = TherapyProfile(name: TherapyProfile.defaultName,
+                                            glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
+                                            carbRatioSchedule: carbRatioSchedule!,
+                                            basalRateSchedule: basalRateSchedule!,
+                                            insulinSensitivitySchedule: insulinSensitivitySchedule!)
+        let exerciseProfile = TherapyProfile(name: "Exercise",
+                                             glucoseTargetRangeSchedule: GlucoseRangeSchedule(unit: .milligramsPerDeciliter,
+                                                                                              dailyItems: [RepeatingScheduleValue(startTime: .hours(0), value: DoubleRange(minValue: 120.0, maxValue: 130.0))],
+                                                                                              timeZone: scheduleTimeZone)!,
+                                             carbRatioSchedule: CarbRatioSchedule(unit: .gram,
+                                                                                  dailyItems: [RepeatingScheduleValue(startTime: .hours(0), value: 14.0)],
+                                                                                  timeZone: scheduleTimeZone)!,
+                                             basalRateSchedule: BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: .hours(0), value: 0.75)],
+                                                                                  timeZone: scheduleTimeZone)!,
+                                             insulinSensitivitySchedule: InsulinSensitivitySchedule(unit: .milligramsPerDeciliter,
+                                                                                                    dailyItems: [RepeatingScheduleValue(startTime: .hours(0), value: 60.0)],
+                                                                                                    timeZone: scheduleTimeZone)!)
+        let activeProfile = activeProfileName == exerciseProfile.name ? exerciseProfile : defaultProfile
         let notificationSettings = NotificationSettings(authorizationStatus: .authorized,
                                                         soundSetting: .enabled,
                                                         badgeSetting: .enabled,
@@ -129,7 +149,7 @@ fileprivate extension StoredSettings {
         return StoredSettings(date: date,
                               controllerTimeZone: controllerTimeZone,
                               dosingEnabled: true,
-                              glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
+                              glucoseTargetRangeSchedule: activeProfile.glucoseTargetRangeSchedule,
                               preMealTargetRange: DoubleRange(minValue: 80.0, maxValue: 90.0).quantityRange(for: .milligramsPerDeciliter),
                               overridePresets: [],
                               maximumBasalRatePerHour: 3.5,
@@ -138,13 +158,15 @@ fileprivate extension StoredSettings {
                               deviceToken: UUID().uuidString,
                               insulinType: .humalog,
                               defaultRapidActingModel: StoredInsulinModel(ExponentialInsulinModelPreset.rapidActingAdult),
-                              basalRateSchedule: basalRateSchedule,
-                              insulinSensitivitySchedule: insulinSensitivitySchedule,
-                              carbRatioSchedule: carbRatioSchedule,
+                              basalRateSchedule: activeProfile.basalRateSchedule,
+                              insulinSensitivitySchedule: activeProfile.insulinSensitivitySchedule,
+                              carbRatioSchedule: activeProfile.carbRatioSchedule,
                               notificationSettings: notificationSettings,
                               controllerDevice: controllerDevice,
                               cgmDevice: cgmDevice,
                               pumpDevice: pumpDevice,
-                              bloodGlucoseUnit: .milligramsPerDeciliter)
+                              bloodGlucoseUnit: .milligramsPerDeciliter,
+                              therapyProfiles: [defaultProfile, exerciseProfile],
+                              activeProfileName: activeProfileName)
     }
 }
