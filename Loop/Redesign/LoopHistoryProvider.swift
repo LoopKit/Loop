@@ -305,6 +305,8 @@ final class LoopHistoryProvider {
     func manualTempBasals(in interval: DateInterval) async throws -> [DateInterval] {
         // The last run before the period may have stopped for a temp basal that ended before the period too.
         // Keep its record so the run-based fallback cannot reopen the loop after that recorded end.
+        // As on the home screen, only a record that says it isn't automatic counts: one that doesn't say, such as a
+        // dose worked out from reservoir readings, isn't known to be manual.
         try await doseStore.getNormalizedDoseEntries(start: interval.start.addingTimeInterval(-.minutes(15)), end: interval.end)
             .filter { $0.type == .tempBasal && $0.automatic == false && $0.endDate > $0.startDate }
             .map { DateInterval(start: $0.startDate, end: $0.endDate) }
