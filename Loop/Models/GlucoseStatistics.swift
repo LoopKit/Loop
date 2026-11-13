@@ -63,7 +63,9 @@ struct GlucoseStatistics: Equatable {
     let coefficientOfVariation: Double?
     /// Fraction of time (0…1) spent in each band. Time-weighted, gap-capped.
     let timeInRange: [GlucoseBand: Double]
-    /// Fraction (0…1) of the window for which CGM data is present.
+    /// Fraction (0…1) of the window for which CGM data is present: each reading
+    /// covers the time until the next, up to one `assumedCadence` slot, so a
+    /// sensor that reports every minute doesn't count its gaps as covered.
     let percentActive: Double
     /// Per-time-of-day percentile bands for the AGP chart, ordered by time of day.
     let agpProfile: [AGPBand]
@@ -122,14 +124,16 @@ struct GlucoseStatistics: Equatable {
 
         // Time-in-range: weight each reading by the time until the next reading,
         // capping each interval so an offline gap can't dominate the breakdown.
+        // Percent active counts the same intervals, each capped at one reading's slot.
         let maxInterval = Self.assumedCadence * 2
         var durations: [GlucoseBand: TimeInterval] = [:]
+        var covered: TimeInterval = 0
         for (index, reading) in sorted.enumerated() {
             let nextDate = index + 1 < sorted.count ? sorted[index + 1].date : end
-            let duration = min(nextDate.timeIntervalSince(reading.date), maxInterval)
-            guard duration > 0 else { continue }
-            let band = GlucoseBand.classify(mgdl: values[index])
-            durations[band, default: 0] += duration
+            let interval = nextDate.timeIntervalSince(reading.date)
+            guard interval > 0 else { continue }
+            durations[GlucoseBand.classify(mgdl: values[index]), default: 0] += min(interval, maxInterval)
+            covered += min(interval, Self.assumedCadence)
         }
         let totalDuration = durations.values.reduce(0, +)
         if totalDuration > 0 {
@@ -138,14 +142,8 @@ struct GlucoseStatistics: Equatable {
             timeInRange = [:]
         }
 
-        // Percent active: covered time (gap-capped) over the window length.
         let windowDuration = end.timeIntervalSince(start)
-        if windowDuration > 0 {
-            let covered = Double(values.count) * Self.assumedCadence
-            percentActive = min(1, covered / windowDuration)
-        } else {
-            percentActive = 0
-        }
+        percentActive = windowDuration > 0 ? min(1, covered / windowDuration) : 0
 
         // AGP: pool readings into time-of-day buckets across all days, then take
         // percentiles per bucket. Skip buckets with too few readings to be useful.

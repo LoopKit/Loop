@@ -132,6 +132,28 @@ final class GlucoseStatisticsTests: XCTestCase {
         XCTAssertEqual(stats.percentActive, 0.5, accuracy: 1e-6)
     }
 
+    /// A sensor that reports every minute covers only the minutes it reports, not five
+    /// minutes a reading.
+    func testPercentActiveWithOneMinuteReadings() {
+        let start = midnight
+        let end = start.addingTimeInterval(.hours(1))
+        // Readings every minute for the first 20 minutes, then nothing.
+        let readings = (0..<20).map { (date: start.addingTimeInterval(.minutes(Double($0))), mgdl: 120.0) }
+        let stats = GlucoseStatistics(readings: readings, start: start, end: end)
+        XCTAssertEqual(stats.percentActive, 24.0 / 60, accuracy: 1e-6)  // 19 one-minute gaps, then one 5-minute slot
+        XCTAssertEqual(stats.timeInRange[.target]!, 1, accuracy: 1e-6)
+    }
+
+    /// Readings thinned to one every 2½ minutes and readings every minute give the same coverage.
+    func testPercentActiveDoesNotDependOnCadence() {
+        let start = midnight
+        let end = start.addingTimeInterval(.hours(1))
+        let everyMinute = (0..<60).map { (date: start.addingTimeInterval(.minutes(Double($0))), mgdl: 120.0) }
+        let thinned = stride(from: 0.0, to: 60, by: 2.5).map { (date: start.addingTimeInterval(.minutes($0)), mgdl: 120.0) }
+        XCTAssertEqual(GlucoseStatistics(readings: everyMinute, start: start, end: end).percentActive, 1, accuracy: 1e-6)
+        XCTAssertEqual(GlucoseStatistics(readings: thinned, start: start, end: end).percentActive, 1, accuracy: 1e-6)
+    }
+
     // MARK: - AGP profile
 
     func testAGPProfileBucketing() {
