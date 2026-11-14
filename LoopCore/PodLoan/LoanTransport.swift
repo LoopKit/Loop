@@ -188,6 +188,26 @@ extension LoanMessage {
         }
     }
 
+    /// A queued message that carries everything an older queued one does replaces it. The watch's
+    /// records go as the whole unacknowledged list each time, and an End's offer carries that list too,
+    /// so only the newest needs to arrive. Without this, a watch out of the phone's reach for hours
+    /// queues one copy per cycle, and when they meet again the phone works through them one at a time,
+    /// with the End's offer queued behind them (loan of 2026-11-13: 80 queued, the End took 2 min 47 s).
+    /// Records leave the watch's journal only when the phone acknowledges them, so a cancelled copy loses
+    /// nothing. A queued offer replaces any older queued offer, as before.
+    public func supersedesQueued(_ older: LoanMessage) -> Bool {
+        switch (self, older) {
+        case (.handbackOffer, .handbackOffer):
+            return true
+        case (.handbackOffer(let newer), .doseRecordBatch(let older)):
+            return newer.epoch == older.epoch
+        case (.doseRecordBatch(let newer), .doseRecordBatch(let older)):
+            return newer.epoch == older.epoch
+        default:
+            return false
+        }
+    }
+
     public static func ridesBothChannels(transport userInfo: [String: Any]) -> Bool {
         (try? decode(fromTransport: userInfo))?.ridesBothChannels ?? false
     }
