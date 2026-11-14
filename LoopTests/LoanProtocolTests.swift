@@ -710,6 +710,26 @@ final class LoanProtocolTests: XCTestCase {
         XCTAssertTrue(LoanMessage.takeoverComplete(TakeoverComplete(epoch: 1, firstPodStatus: status)).ridesBothChannels)
     }
 
+    /// Each set of records carries every unacknowledged record, and an End's offer carries them too: a
+    /// queued copy from the same loan is replaced; another loan's records and other kinds never are.
+    func testANewerQueuedCopyReplacesOnlyWhatItCarries() {
+        let batch5 = LoanMessage.doseRecordBatch(DoseRecordBatch(epoch: 5, events: [], tombstones: []))
+        let batch6 = LoanMessage.doseRecordBatch(DoseRecordBatch(epoch: 6, events: [], tombstones: []))
+        func offer(_ epoch: Int) -> LoanMessage {
+            .handbackOffer(HandbackOffer(epoch: epoch, handedBackAt: Date(), finalStatus: nil, odometer: nil,
+                                         events: [], tombstones: [], recovered: false))
+        }
+        XCTAssertTrue(batch5.supersedesQueued(batch5))
+        XCTAssertFalse(batch6.supersedesQueued(batch5))
+        XCTAssertTrue(offer(5).supersedesQueued(batch5))
+        XCTAssertFalse(offer(6).supersedesQueued(batch5))
+        XCTAssertTrue(offer(6).supersedesQueued(offer(5)))
+        XCTAssertFalse(batch5.supersedesQueued(offer(5)))
+        XCTAssertFalse(batch5.supersedesQueued(.statusReport(StatusReport(epoch: 5, lastDirectGlucoseAge: nil,
+                                                                          lastEventSeq: 0, podFault: nil, holdsPod: true))))
+        XCTAssertFalse(LoanMessage.statusQuery(StatusQuery(epoch: 5)).supersedesQueued(.statusQuery(StatusQuery(epoch: 5))))
+    }
+
     // MARK: - Transport kind peek
 
     /// The peek names hand-back offers exactly and returns nil for anything else.
