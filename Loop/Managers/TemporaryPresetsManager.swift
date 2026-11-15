@@ -67,6 +67,9 @@ class TemporaryPresetsManager {
         TemporaryScheduleOverrideHistory.relevantTimeWindow = Bundle.main.localCacheDuration
 
         _scheduleOverride = self.presetHistory.activeOverride(at: now)
+        if let scheduleOverride {
+            scheduleClearOverride(override: scheduleOverride)
+        }
 
         overrideIntentObserver = UserDefaults.appGroup?.observe(
             \.intentExtensionOverrideToSet,
