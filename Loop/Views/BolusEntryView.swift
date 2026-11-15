@@ -326,8 +326,13 @@ struct BolusEntryView: View {
         case .stalePumpData:
             return WarningView(
                 title: Text("No Recent Pump Data", comment: "Title for bolus screen notice when pump data is missing or stale"),
-                caption: Text(String(format: NSLocalizedString("Your pump data is stale. %1$@ cannot recommend a bolus amount.", comment: "Caption for bolus screen notice when pump data is missing or stale"), appName)),
+                caption: Text(String(format: NSLocalizedString("Your pump data is stale. Bolus delivery may be unavailable.", comment: "Caption for bolus screen notice when pump data is stale"), appName)),
                 severity: .critical
+            )
+        case .noPumpConnected:
+            return WarningView(
+                title: Text("No Pump Connected", comment: "Title for bolus screen notice when no pump is connected"),
+                caption: Text(NSLocalizedString("No pump is connected. Bolus delivery is unavailable.", comment: "Caption for bolus screen notice when no pump is connected"))
             )
         case .predictedGlucoseInRange, .glucoseBelowTarget:
             return WarningView(
