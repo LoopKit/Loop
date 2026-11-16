@@ -76,21 +76,6 @@ final class SmartwatchManagerHostTests: XCTestCase {
         XCTAssertTrue(unretractedAfterRetraction.isEmpty)
     }
 
-    /// The plugin's 0 g recommendation read, made after every change, is logged
-    /// only when its answer changes.
-    func testTheContextRecommendationIsLoggedOnlyWhenItChanges() {
-        var last: Double?
-        XCTAssertTrue(SmartwatchManagerHost.isNewContextRecommendation(0, last: &last))
-        XCTAssertEqual(last, 0)
-        XCTAssertFalse(SmartwatchManagerHost.isNewContextRecommendation(0, last: &last))
-        XCTAssertFalse(SmartwatchManagerHost.isNewContextRecommendation(0, last: &last))
-        XCTAssertTrue(SmartwatchManagerHost.isNewContextRecommendation(1.25, last: &last))
-        XCTAssertEqual(last, 1.25)
-        XCTAssertFalse(SmartwatchManagerHost.isNewContextRecommendation(1.25, last: &last))
-        XCTAssertTrue(SmartwatchManagerHost.isNewContextRecommendation(0, last: &last))
-        XCTAssertEqual(last, 0)
-    }
-
     /// A test alert counts as its alarm's, so the watch colours its ring and buzzes for it.
     func testTestAlertsHaveTheirAlarmsGlucoseType() {
         XCTAssertEqual(SmartwatchManagerHost.glucoseAlertType(of: identifier(GlucoseAlarmKind.urgentLow.testAlertIdentifier)), .urgentLow)

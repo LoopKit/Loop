@@ -122,13 +122,7 @@ extension SmartwatchManagerHost {
     /// The bolus itself is checked again when it's requested.
     func smartwatchManager(_ manager: SmartwatchManager, recommendBolusForCarbs grams: Double, absorptionTime: TimeInterval?) async throws -> Double {
         let absorptionTime = absorptionTime ?? LoopCoreConstants.defaultCarbAbsorptionTimes.medium
-        // With 0 g it's the plugin's read for its bolus context, made after every
-        // change: logged only when the answer changes. The watch's own questions
-        // come with carbs and are always logged.
-        let isContextRead = grams == 0
-        if !isContextRead {
-            logWatchRequest(manager, type: .receive, String(format: "Bolus recommendation request with %.0f g of carbs, %.0f min absorption", grams, absorptionTime / 60))
-        }
+        logWatchRequest(manager, type: .receive, String(format: "Bolus recommendation request with %.0f g of carbs, %.0f min absorption", grams, absorptionTime / 60))
         guard isCurrentWatch(manager) else {
             logWatchRequest(manager, type: .error, "Bolus recommendation refused: the request isn't from the current watch")
             throw SmartwatchActionError.notAllowed
@@ -157,9 +151,6 @@ extension SmartwatchManagerHost {
         let recommended = max(0, recommendation?.amount ?? 0)
         let units = deviceManager.pumpManager?.roundToSupportedBolusVolume(units: recommended) ?? recommended
         let maximumBolus = settingsManager.loopSettings.maximumBolus
-        if isContextRead, !Self.isNewContextRecommendation(units, last: &lastContextRecommendation) {
-            return units
-        }
         logWatchRequest(manager, type: .delegateResponse, String(format: "Bolus recommendation with %.0f g of carbs: %.2f U%@", grams, units, maximumBolus.map { String(format: " (maximum bolus %.2f U)", $0) } ?? ""))
         return units
     }
@@ -212,16 +203,6 @@ extension SmartwatchManagerHost {
         logWatchRequest(manager, type: .delegateResponse, String(format: "Watch carb entry of %.0f g added", grams))
         signal(.loop)
         return grams
-    }
-
-    /// Whether the plugin's 0 g context read answered differently from last time,
-    /// so it is logged; records the answer in `last` when it did.
-    static func isNewContextRecommendation(_ units: Double, last: inout Double?) -> Bool {
-        guard units != last else {
-            return false
-        }
-        last = units
-        return true
     }
 
     private func logWatchRequest(_ manager: SmartwatchManager, type: DeviceLogEntryType, _ message: String) {
