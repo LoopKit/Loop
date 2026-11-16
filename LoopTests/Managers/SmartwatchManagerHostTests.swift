@@ -166,6 +166,20 @@ final class SmartwatchManagerHostTests: XCTestCase {
         XCTAssertNil(SmartwatchManagerHost.displayLimits(from: reversed))
     }
 
+    /// Loop's schedule stores the insulin sensitivity in a glucose unit; the
+    /// watch gets it per unit, in mg/dL, from an mg/dL or mmol/L schedule.
+    func testTheInsulinSensitivityIsSentPerUnit() {
+        let fromMgdL = SmartwatchManagerHost.insulinSensitivity(scheduleValue: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 54))
+        XCTAssertEqual(fromMgdL?.unit, .milligramsPerDeciliterPerInternationalUnit)
+        XCTAssertEqual(fromMgdL?.doubleValue(for: .milligramsPerDeciliterPerInternationalUnit), 54)
+
+        let fromMmol = SmartwatchManagerHost.insulinSensitivity(scheduleValue: LoopQuantity(unit: .millimolesPerLiter, doubleValue: 3))
+        XCTAssertEqual(fromMmol?.unit, .milligramsPerDeciliterPerInternationalUnit)
+        XCTAssertEqual(fromMmol?.doubleValue(for: .milligramsPerDeciliterPerInternationalUnit) ?? 0, 54.06, accuracy: 0.1)
+
+        XCTAssertNil(SmartwatchManagerHost.insulinSensitivity(scheduleValue: LoopQuantity(unit: .gram, doubleValue: 10)))
+    }
+
     /// Loop's one forecast is one curve; before the loop has run there is none.
     func testLoopsForecastIsOneCurve() {
         let start = Date(timeIntervalSinceReferenceDate: 0)

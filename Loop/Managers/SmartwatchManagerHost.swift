@@ -358,7 +358,18 @@ extension SmartwatchManagerHost: SmartwatchManagerDelegate {
     }
 
     func smartwatchManagerInsulinSensitivity(_ manager: SmartwatchManager) async -> LoopQuantity? {
-        loopDataManager.temporaryPresetsManager.insulinSensitivityScheduleApplyingOverrideHistory?.quantity(at: Date())
+        loopDataManager.temporaryPresetsManager.insulinSensitivityScheduleApplyingOverrideHistory.flatMap {
+            Self.insulinSensitivity(scheduleValue: $0.quantity(at: Date()))
+        }
+    }
+
+    /// The insulin sensitivity in mg/dL per unit, as the protocol asks. Loop's
+    /// schedule stores it in a glucose unit with "per unit" implied.
+    static func insulinSensitivity(scheduleValue: LoopQuantity) -> LoopQuantity? {
+        guard scheduleValue.is(compatibleWith: .milligramsPerDeciliter) else {
+            return nil
+        }
+        return LoopQuantity(unit: .milligramsPerDeciliterPerInternationalUnit, doubleValue: scheduleValue.doubleValue(for: .milligramsPerDeciliter))
     }
 
     func smartwatchManagerCorrectionRange(_ manager: SmartwatchManager) async -> ClosedRange<LoopQuantity>? {
