@@ -86,6 +86,10 @@ final class RemoteDataServicesManager {
         return lock.withLock { unlockedRemoteDataServices }
     }
 
+    var exerciseDataDescriptions: [String] {
+        remoteDataServices.compactMap(\.exerciseDataDescription)
+    }
+
 
     // Dispatch Queues for each Service/DataType
 

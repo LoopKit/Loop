@@ -74,13 +74,16 @@ struct HealthAccessView: View {
     private func exerciseSection(_ sharing: ExerciseDataSharing) -> some View {
         Section {
             Toggle(
-                NSLocalizedString("Share Exercise Data", comment: "Health access toggle for sharing workouts with services"),
+                NSLocalizedString("Use Exercise Data", comment: "Health access toggle for reading exercise data from Apple Health"),
                 isOn: Binding(get: { sharing.isEnabled }, set: { newValue in Task { await sharing.setEnabled(newValue) } })
             )
         } header: {
             Text("Exercise", comment: "Health access section header for exercise data")
         } footer: {
-            Text(String(format: NSLocalizedString("When on, %1$@ reads your workouts from Apple Health, along with heart rate throughout the day, resting heart rate, heart rate variability, VO2 max, steps, active energy, physical effort and weight, and uploads them to your connected services. Tidepool currently receives workouts only. If you donate your Tidepool data to research, these workouts are included. Exercise data does not change dosing.", comment: "Health access exercise sharing footer (1: app name)"), appName))
+            VStack(alignment: .leading, spacing: 8) {
+                Text(String(format: NSLocalizedString("When on, %1$@ reads your workouts from Apple Health, along with heart rate throughout the day, resting heart rate, heart rate variability, VO2 max, steps, distance, active energy, physical effort and weight. %1$@ uses this to learn how activity affects your glucose, and shares it with connected services that accept it.", comment: "Health access exercise data footer (1: app name)"), appName))
+                ForEach(sharing.serviceDescriptions, id: \.self) { Text($0) }
+            }
         }
     }
 

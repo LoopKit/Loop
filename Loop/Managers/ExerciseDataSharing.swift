@@ -32,6 +32,10 @@ final class ExerciseDataSharing {
         }
     }
 
+    var serviceDescriptions: [String] {
+        remoteDataServicesManager?.exerciseDataDescriptions ?? []
+    }
+
     func setEnabled(_ enabled: Bool) async {
         if enabled {
             do {
