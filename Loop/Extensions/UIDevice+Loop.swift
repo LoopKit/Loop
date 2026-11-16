@@ -32,7 +32,8 @@ extension UIDevice {
 
     public var controllerStatus: StoredDosingDecision.ControllerStatus {
         return StoredDosingDecision.ControllerStatus(batteryState: isBatteryMonitoringEnabled ? batteryState.batteryState : nil,
-                                                     batteryLevel: isBatteryMonitoringEnabled && batteryLevel != -1.0 ? batteryLevel : nil)   // -1.0 indicates unknown
+                                                     batteryLevel: isBatteryMonitoringEnabled && batteryLevel != -1.0 ? batteryLevel : nil,   // -1.0 indicates unknown
+                                                     build: BuildDetails.default.controllerBuild)
     }
 }
 

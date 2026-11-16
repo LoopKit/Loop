@@ -1756,6 +1756,8 @@ extension DeviceDataManager: DeviceSupportDelegate {
                         "* Customizations: \(BuildDetails.default.customizations.isEmpty ? "None" : BuildDetails.default.customizations.joined(separator: ", "))",
                         "* Submodule name: branch, SHA",
                         "\(submodulesInfo)",
+                        "* Version history (first launch, newest first):",
+                        UserDefaults.standard.versionHistory.map { "*   \($0)" }.joined(separator: "\n"),
                         "",
                         "## FeatureFlags",
                         "\(FeatureFlags)",
