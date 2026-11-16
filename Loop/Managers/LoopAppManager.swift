@@ -803,7 +803,7 @@ class LoopAppManager: NSObject {
         guard let deeplink = Deeplink(url: url) else {
             // Not one of Loop's own links: offer it to the watch plugin, for a
             // companion app's callback such as a watch picker.
-            return deviceDataManager?.smartwatchManager?.watchHostDidReceiveURL(url) ?? false
+            return deviceDataManager?.smartwatchManager?.hostDidReceiveURL(url) ?? false
         }
 
         analyticsServicesManager.didOpenFromLink()

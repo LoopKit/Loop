@@ -41,7 +41,7 @@ extension SmartwatchManagerHost: AlertForwarder {
             logAlert(smartwatchManager, "\(content.title) not sent to the watch: Loop's alerts are muted")
             return
         }
-        smartwatchManager.watchAlertDidIssue(alert, glucoseAlertType: Self.glucoseAlertType(of: alert.identifier), issuedAt: Date())
+        smartwatchManager.hostDidIssueAlert(alert, glucoseAlertType: Self.glucoseAlertType(of: alert.identifier), issuedAt: Date())
         // Loop never retracts a test alert: clear it on the watch once it has shown.
         if Self.isTestAlert(alert.identifier) {
             lastWatchTestAlertAt = Date()
@@ -124,6 +124,6 @@ extension SmartwatchManagerHost: AlertForwarder {
         else {
             return
         }
-        smartwatchManager.watchAlertDidRetract(identifier)
+        smartwatchManager.hostDidRetractAlert(identifier)
     }
 }

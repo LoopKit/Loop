@@ -275,7 +275,7 @@ final class SmartwatchManagerHost {
             now: now
         )
         for identifier in identifiers {
-            smartwatchManager.watchAlertDidRetract(Alert.Identifier(managerIdentifier: GlucoseAlertManager.managerIdentifier, alertIdentifier: identifier))
+            smartwatchManager.hostDidRetractAlert(Alert.Identifier(managerIdentifier: GlucoseAlertManager.managerIdentifier, alertIdentifier: identifier))
         }
     }
 
@@ -284,7 +284,7 @@ final class SmartwatchManagerHost {
     func logAlert(_ manager: SmartwatchManager, _ message: String, showInPluginLog: Bool = true) {
         deviceManager.deviceLog.log(managerIdentifier: manager.pluginIdentifier, deviceIdentifier: nil, type: .delegate, message: message, completion: nil)
         if showInPluginLog {
-            manager.watchHostDidLog(message)
+            manager.hostDidLog(message)
         }
     }
 }
