@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import LoopKit
 
 class BuildDetails {
 
@@ -68,6 +69,25 @@ class BuildDetails {
 
     var customizations: [String] {
         return dict["com-loopkit-Loop-customizations"] as? [String] ?? []
+    }
+
+    var versionDescription: String {
+        let build = controllerBuild
+        return [
+            "\(build.version ?? "?") (\(build.buildNumber ?? "?"))",
+            build.workspaceBranch ?? "?",
+            build.workspaceRevision ?? "?",
+            "built \(build.buildDate ?? "?")",
+        ].joined(separator: " ")
+    }
+
+    var controllerBuild: StoredDosingDecision.ControllerStatus.Build {
+        let info = Bundle.main.infoDictionary ?? [:]
+        return StoredDosingDecision.ControllerStatus.Build(version: info["CFBundleShortVersionString"] as? String,
+                                                           buildNumber: info["CFBundleVersion"] as? String,
+                                                           workspaceBranch: workspaceGitBranch ?? gitBranch,
+                                                           workspaceRevision: workspaceGitRevision ?? gitRevision,
+                                                           buildDate: buildDateString)
     }
 
     /// Returns a dictionary of submodule details.

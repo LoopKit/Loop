@@ -103,7 +103,9 @@ class LoopAppManager: NSObject {
 
         self.windowProvider = windowProvider
         self.launchOptions = launchOptions
-        
+
+        UserDefaults.standard.recordLaunchedVersion(BuildDetails.default.versionDescription)
+
         if FeatureFlags.siriEnabled && INPreferences.siriAuthorizationStatus() == .notDetermined {
             INPreferences.requestSiriAuthorization { _ in }
         }

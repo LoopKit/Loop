@@ -17,6 +17,21 @@ extension UserDefaults {
         case loopNotRunningNotifications = "com.loopkit.Loop.loopNotRunningNotifications"
         case inFlightAutomaticDose = "com.loopkit.Loop.inFlightAutomaticDose"
         case favoriteFoods = "com.loopkit.Loop.favoriteFoods"
+        case versionHistory = "com.loopkit.Loop.versionHistory"
+    }
+
+    /// Newest first: "<first launch, ISO 8601> <build description>".
+    var versionHistory: [String] {
+        return stringArray(forKey: Key.versionHistory.rawValue) ?? []
+    }
+
+    func recordLaunchedVersion(_ build: String, at date: Date = Date(), limit: Int = 10) {
+        var history = versionHistory
+        if let newest = history.first, newest.split(separator: " ", maxSplits: 1).last.map(String.init) == build {
+            return
+        }
+        history.insert("\(ISO8601DateFormatter().string(from: date)) \(build)", at: 0)
+        set(Array(history.prefix(limit)), forKey: Key.versionHistory.rawValue)
     }
 
     var legacyPumpManagerRawValue: PumpManager.RawValue? {
