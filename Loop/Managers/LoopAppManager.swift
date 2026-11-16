@@ -439,27 +439,27 @@ class LoopAppManager: NSObject {
             // A pump error is thrown, so the watch isn't told a failed bolus was delivered.
             deliverBolus: { [weak servicesManager] units in
                 guard let servicesManager else {
-                    throw SmartwatchBolusError.notAllowed
+                    throw SmartwatchActionError.notAllowed
                 }
                 try await servicesManager.deliverRemoteBolus(amountInUnits: units, decisionId: nil, request: nil, throwingPumpErrors: true)
             },
             // The same path as remote carbs: validation, notification, upload.
             deliverCarbs: { [weak servicesManager] grams, date, absorptionTime in
                 guard let servicesManager else {
-                    throw SmartwatchCarbEntryError.notAllowed
+                    throw SmartwatchActionError.notAllowed
                 }
                 try await servicesManager.deliverRemoteCarbs(amountInGrams: grams, absorptionTime: absorptionTime, foodType: nil, startDate: date)
             },
             // The same path as remote overrides: the preset's own duration, upload.
             startOverride: { [weak servicesManager] name in
                 guard let servicesManager else {
-                    throw SmartwatchPresetError.notAllowed
+                    throw SmartwatchActionError.notAllowed
                 }
                 try await servicesManager.enactRemoteOverride(name: name, durationTime: nil, remoteAddress: "Watch")
             },
             cancelOverride: { [weak servicesManager] in
                 guard let servicesManager else {
-                    throw SmartwatchPresetError.notAllowed
+                    throw SmartwatchActionError.notAllowed
                 }
                 try await servicesManager.cancelRemoteOverride()
             }

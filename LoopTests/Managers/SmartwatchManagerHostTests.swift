@@ -149,8 +149,8 @@ final class SmartwatchManagerHostTests: XCTestCase {
 
     func testTheDisplayLimitsAreTheActiveAlertProfilesLowAndHigh() {
         let limits = SmartwatchManagerHost.displayLimits(from: .default)
-        XCTAssertEqual(limits?.low, LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 70))
-        XCTAssertEqual(limits?.high, LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 180))
+        XCTAssertEqual(limits?.lowerBound, LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 70))
+        XCTAssertEqual(limits?.upperBound, LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 180))
 
         var changed = GlucoseAlertConfiguration.default
         changed.lowThresholdMgDL = 80
@@ -158,8 +158,8 @@ final class SmartwatchManagerHostTests: XCTestCase {
         changed.lowEnabled = false
         changed.highEnabled = false
         let changedLimits = SmartwatchManagerHost.displayLimits(from: changed)
-        XCTAssertEqual(changedLimits?.low, LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 80), "even with the alert off")
-        XCTAssertEqual(changedLimits?.high, LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 250))
+        XCTAssertEqual(changedLimits?.lowerBound, LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 80), "even with the alert off")
+        XCTAssertEqual(changedLimits?.upperBound, LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 250))
 
         var reversed = GlucoseAlertConfiguration.default
         reversed.lowThresholdMgDL = 200

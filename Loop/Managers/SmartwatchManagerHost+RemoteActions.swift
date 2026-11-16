@@ -19,44 +19,40 @@ import LoopKit
 extension SmartwatchManagerHost {
     /// Starts or ends a preset for a request from the watch, through the same path
     /// as remote overrides.
-    func smartwatchManager(_ manager: SmartwatchManager, enactOverride action: SmartwatchPresetAction) async throws {
-        let preset: TemporaryPreset?
-        switch action {
-        case .activate(let presetID):
-            preset = settingsManager.settings.overridePresets.first { $0.id == presetID }
+    func smartwatchManager(_ manager: SmartwatchManager, enactOverride presetID: String?) async throws {
+        let preset = presetID.flatMap { id in settingsManager.settings.overridePresets.first { $0.id == id } }
+        if let presetID {
             logWatchRequest(manager, type: .receive, "Preset request: start \(preset.map { "\"\($0.name)\"" } ?? presetID)")
-        case .cancel:
-            preset = nil
+        } else {
             logWatchRequest(manager, type: .receive, "Preset request: end the running preset")
         }
         guard isCurrentWatch(manager) else {
             logWatchRequest(manager, type: .error, "Preset request rejected: notAllowed (the request isn't from the current watch)")
-            throw SmartwatchPresetError.notAllowed
+            throw SmartwatchActionError.notAllowed
         }
         do {
-            switch action {
-            case .activate:
+            if presetID != nil {
                 guard let preset else {
                     logWatchRequest(manager, type: .error, "Preset request rejected: unknownPreset")
-                    throw SmartwatchPresetError.unknownPreset
+                    throw SmartwatchActionError.unknownPreset
                 }
                 // Loop starts a preset by name; with another one of the same name it
                 // could start that one instead of the one the watch chose.
                 guard settingsManager.settings.overridePresets.filter({ $0.name == preset.name }).count == 1 else {
                     logWatchRequest(manager, type: .error, "Preset request rejected: another preset is also named \"\(preset.name)\"")
-                    throw SmartwatchPresetError.failed("another preset has the same name")
+                    throw SmartwatchActionError.failed("another preset has the same name")
                 }
                 try await startOverride(preset.name)
                 logWatchRequest(manager, type: .delegateResponse, "Preset \"\(preset.name)\" started from the watch")
-            case .cancel:
+            } else {
                 try await cancelOverride()
                 logWatchRequest(manager, type: .delegateResponse, "Preset ended from the watch")
             }
-        } catch let error as SmartwatchPresetError {
+        } catch let error as SmartwatchActionError {
             throw error
         } catch {
             logWatchRequest(manager, type: .error, "Preset request from the watch failed: \(error)")
-            throw SmartwatchPresetError.failed(String(describing: error))
+            throw SmartwatchActionError.failed(String(describing: error))
         }
         signal(.presets)
     }
@@ -74,35 +70,35 @@ extension SmartwatchManagerHost {
         let maximumText = maximumBolus.map { String(format: "maximum bolus %.2f U", $0) } ?? "no maximum bolus"
         guard isCurrentWatch(manager) else {
             logWatchRequest(manager, type: .error, "Bolus request rejected: notAllowed (the request isn't from the current watch)")
-            throw SmartwatchBolusError.notAllowed
+            throw SmartwatchActionError.notAllowed
         }
         // Checked and set with no suspension in between, so two requests can't
         // both pass.
         guard !isDeliveringWatchBolus else {
             logWatchRequest(manager, type: .error, "Bolus request answered with inProgress: a watch bolus is still being delivered")
-            throw SmartwatchBolusError.inProgress
+            throw SmartwatchActionError.inProgress
         }
         guard units.isFinite, units > 0 else {
             logWatchRequest(manager, type: .error, "Bolus request rejected: invalidAmount")
-            throw SmartwatchBolusError.invalidAmount
+            throw SmartwatchActionError.invalidAmount
         }
         guard let maximumBolus else {
             logWatchRequest(manager, type: .error, "Bolus request rejected: no maximum bolus is set")
-            throw SmartwatchBolusError.refusedByHost("no maximum bolus is set")
+            throw SmartwatchActionError.refusedByHost("no maximum bolus is set")
         }
         guard let pumpManager = deviceManager.pumpManager else {
             logWatchRequest(manager, type: .error, "Bolus request rejected: no pump")
-            throw SmartwatchBolusError.refusedByHost("no pump")
+            throw SmartwatchActionError.refusedByHost("no pump")
         }
         let rounded = pumpManager.roundToSupportedBolusVolume(units: units)
         // Both the amount asked for and the one delivered, whichever way the pump rounds.
         guard units <= maximumBolus, rounded <= maximumBolus else {
-            logWatchRequest(manager, type: .error, String(format: "Bolus request rejected: exceedsMaximumBolus (%.3f U, rounded %.3f U; %@)", units, rounded, maximumText))
-            throw SmartwatchBolusError.exceedsMaximumBolus
+            logWatchRequest(manager, type: .error, String(format: "Bolus request rejected: exceedsMaximum (%.3f U, rounded %.3f U; %@)", units, rounded, maximumText))
+            throw SmartwatchActionError.exceedsMaximum
         }
         guard rounded > 0 else {
             logWatchRequest(manager, type: .error, String(format: "Bolus request rejected: invalidAmount (%.3f U rounds to 0 U)", units))
-            throw SmartwatchBolusError.invalidAmount
+            throw SmartwatchActionError.invalidAmount
         }
 
         isDeliveringWatchBolus = true
@@ -113,7 +109,7 @@ extension SmartwatchManagerHost {
         } catch {
             logWatchRequest(manager, type: .error, "Watch bolus delivery failed: \(error)")
             signal(.loop)
-            throw SmartwatchBolusError.deliveryFailed(String(describing: error))
+            throw SmartwatchActionError.deliveryFailed(String(describing: error))
         }
         logWatchRequest(manager, type: .delegateResponse, String(format: "Watch bolus of %.3f U delivered", rounded))
         signal(.loop)
@@ -135,14 +131,14 @@ extension SmartwatchManagerHost {
         }
         guard isCurrentWatch(manager) else {
             logWatchRequest(manager, type: .error, "Bolus recommendation refused: the request isn't from the current watch")
-            throw SmartwatchBolusError.notAllowed
+            throw SmartwatchActionError.notAllowed
         }
         let maximumGrams = LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram)
         guard grams.isFinite, grams >= 0, grams <= maximumGrams,
               absorptionTime >= LoopConstants.minCarbAbsorptionTime, absorptionTime <= LoopConstants.maxCarbAbsorptionTime
         else {
             logWatchRequest(manager, type: .error, String(format: "Bolus recommendation refused: %.0f g over %.0f min isn't a valid carb entry (maximum %.0f g)", grams, absorptionTime / 60, maximumGrams))
-            throw SmartwatchBolusError.invalidAmount
+            throw SmartwatchActionError.invalidAmount
         }
         let potentialCarbEntry = grams > 0 ? NewCarbEntry(
             syncIdentifier: UUID().uuidString,
@@ -156,7 +152,7 @@ extension SmartwatchManagerHost {
             recommendation = try await loopDataManager.recommendManualBolus(carbEntryChange: potentialCarbEntry.map { .add($0) })
         } catch {
             logWatchRequest(manager, type: .error, "Bolus recommendation failed: \(error)")
-            throw SmartwatchBolusError.refusedByHost(String(describing: error))
+            throw SmartwatchActionError.refusedByHost(String(describing: error))
         }
         let recommended = max(0, recommendation?.amount ?? 0)
         let units = deviceManager.pumpManager?.roundToSupportedBolusVolume(units: recommended) ?? recommended
@@ -174,7 +170,7 @@ extension SmartwatchManagerHost {
     func smartwatchManager(_ manager: SmartwatchManager, muteAlertsFor duration: TimeInterval) async throws -> Date {
         guard isCurrentWatch(manager) else {
             logWatchRequest(manager, type: .error, "Mute request from the watch refused: the request isn't from the current watch")
-            throw SmartwatchAlertMuteError.notAllowed
+            throw SmartwatchActionError.notAllowed
         }
         guard duration > 0 else {
             alertMuter.unmuteAlerts()
@@ -196,22 +192,22 @@ extension SmartwatchManagerHost {
         logWatchRequest(manager, type: .receive, String(format: "Carb entry request: %.0f g, %.0f min absorption, dated %@", grams, absorptionTime / 60, String(describing: date)))
         guard isCurrentWatch(manager) else {
             logWatchRequest(manager, type: .error, "Carb entry request rejected: notAllowed (the request isn't from the current watch)")
-            throw SmartwatchCarbEntryError.notAllowed
+            throw SmartwatchActionError.notAllowed
         }
         guard grams.isFinite, grams > 0 else {
             logWatchRequest(manager, type: .error, "Carb entry request rejected: invalidAmount")
-            throw SmartwatchCarbEntryError.invalidAmount
+            throw SmartwatchActionError.invalidAmount
         }
         let maximumGrams = LoopConstants.maxCarbEntryQuantity.doubleValue(for: .gram)
         guard grams <= maximumGrams else {
             logWatchRequest(manager, type: .error, String(format: "Carb entry request rejected: exceedsMaximum (maximum %.0f g)", maximumGrams))
-            throw SmartwatchCarbEntryError.exceedsMaximum
+            throw SmartwatchActionError.exceedsMaximum
         }
         do {
             try await deliverCarbs(grams, date, absorptionTime)
         } catch {
             logWatchRequest(manager, type: .error, "Watch carb entry failed: \(error)")
-            throw SmartwatchCarbEntryError.failed(String(describing: error))
+            throw SmartwatchActionError.failed(String(describing: error))
         }
         logWatchRequest(manager, type: .delegateResponse, String(format: "Watch carb entry of %.0f g added", grams))
         signal(.loop)

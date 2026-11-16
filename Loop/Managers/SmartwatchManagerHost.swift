@@ -378,15 +378,16 @@ extension SmartwatchManagerHost: SmartwatchManagerDelegate {
 
     /// Loop has no display limits of its own: the low and high of the active
     /// glucose alert profile, whether or not those alerts are on.
-    func smartwatchManagerGlucoseDisplayLimits(_ manager: SmartwatchManager) async -> SmartwatchGlucoseDisplayLimits? {
+    func smartwatchManagerGlucoseDisplayLimits(_ manager: SmartwatchManager) async -> ClosedRange<LoopQuantity>? {
         Self.displayLimits(from: deviceManager.glucoseAlertManager.activeConfiguration())
     }
 
-    static func displayLimits(from configuration: GlucoseAlertConfiguration) -> SmartwatchGlucoseDisplayLimits? {
-        SmartwatchGlucoseDisplayLimits(
-            low: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: configuration.lowThresholdMgDL),
-            high: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: configuration.highThresholdMgDL)
-        )
+    static func displayLimits(from configuration: GlucoseAlertConfiguration) -> ClosedRange<LoopQuantity>? {
+        guard configuration.lowThresholdMgDL < configuration.highThresholdMgDL else {
+            return nil
+        }
+        return LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: configuration.lowThresholdMgDL)
+            ... LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: configuration.highThresholdMgDL)
     }
 
     func smartwatchManagerOverridePresets(_ manager: SmartwatchManager) async -> [TemporaryPreset] {
