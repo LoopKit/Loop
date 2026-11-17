@@ -36,6 +36,11 @@ extension DeviceDataManager {
         await withCheckedContinuation { done in controller.checkOwnPumpTotal { done.resume() } }
     }
 
+    /// The pump's state changed: its driver may have found another controller using the pod (rows 28, 29).
+    func podLoanPumpStateChanged() {
+        podLoanController?.considerOtherController()
+    }
+
     /// Revoke the watch's loan and bring the pod home. Dosing stays paused until the records
     /// the watch is holding have been reconciled.
     func reclaimPodLoanFromWatch() {
