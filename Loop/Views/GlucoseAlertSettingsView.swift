@@ -405,6 +405,7 @@ struct GlucoseAlertDetailView: View {
     /// Which alarm this is, so the picker can lead with the sets written for it.
     var soundKind: GlucoseAlarmKind? = nil
     var playsThroughSilent: Binding<Bool>? = nil
+    var soundsUntilAcknowledged: Binding<Bool>? = nil
 
     struct SnoozeBinding {
         let enabled: Binding<Bool>
@@ -451,6 +452,13 @@ struct GlucoseAlertDetailView: View {
                         Text("Repeat the alert at the chosen interval if your reading stays out of range.")
                     }
                 }
+                if let soundsUntilAcknowledged {
+                    Section {
+                        Toggle("Sound Until Acknowledged", isOn: soundsUntilAcknowledged)
+                    } footer: {
+                        Text(soundsUntilAcknowledgedFooter)
+                    }
+                }
                 if let horizon {
                     Section { HorizonRow(value: horizon.value) } footer: {
                         Text("Fires once when Loop's forecast first dips below the level inside this horizon. Re-arms when the forecast clears.")
@@ -485,6 +493,18 @@ struct GlucoseAlertDetailView: View {
         }
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var soundsUntilAcknowledgedFooter: String {
+        let description = NSLocalizedString(
+            "Rings as an alarm, like Urgent Low, until you stop it. The alarm sounds even when the phone is silenced or in a Focus, and also rings on a paired Apple Watch.",
+            comment: "Footer of the option for a glucose alert to sound until acknowledged")
+        guard CriticalAlertAlarmScheduler.alarmsAuthorized != true else {
+            return description
+        }
+        return description + " " + NSLocalizedString(
+            "Loop isn't allowed to set alarms, so the alert plays once. Allow alarms for Loop in the Settings app.",
+            comment: "Footer note when the sound-until-acknowledged option can't ring because alarms aren't allowed")
     }
 }
 
@@ -553,7 +573,8 @@ extension GlucoseAlertDetailView {
             snooze: .init(enabled: detail.cfgBind(\.lowSnoozeEnabled), interval: detail.cfgBind(\.lowRepeatInterval)),
             horizon: nil, infoNotice: nil,
             soundBinding: Binding(get: { manager.lowSound }, set: { manager.lowSound = $0 }), soundKind: .low,
-            playsThroughSilent: Binding(get: { manager.lowPlaysThroughSilent }, set: { manager.lowPlaysThroughSilent = $0 })
+            playsThroughSilent: Binding(get: { manager.lowPlaysThroughSilent }, set: { manager.lowPlaysThroughSilent = $0 }),
+            soundsUntilAcknowledged: Binding(get: { manager.lowSoundsUntilAcknowledged }, set: { manager.lowSoundsUntilAcknowledged = $0 })
         )
     }
 
