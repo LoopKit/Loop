@@ -37,6 +37,9 @@ extension UserDefaults {
         }
     }
 
+    /// The phone shares exercise data; the watch's uploads during a loan never send it.
+    var sharesExerciseData: Bool { false }
+
     var supportedBolusVolumes: [Double]? {
         get {
             array(forKey: Key.SupportedBolusVolumes.rawValue) as? [Double]
