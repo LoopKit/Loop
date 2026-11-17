@@ -155,6 +155,20 @@ final class LoanControlTests: XCTestCase {
                        "a closed loan's pod is already home")
     }
 
+    // Row 28 · The phone holding the pod finds another controller has used it: it asks the watch, and
+    // silence means it keeps the pod (taking control again and reading it).
+    func testRow28PhoneFindsAnotherControllerAsksTheWatch() {
+        XCTAssertEqual(phone(.otherControllerSeen, role: .holdsPod), .query(.inBackground, onSilence: .keepPodOnSilence))
+        XCTAssertEqual(phone(.otherControllerSeen, role: .lending), .nothing, "lent: the watch is expected on the pod")
+        XCTAssertEqual(phone(.otherControllerSeen, role: .standingAside), .nothing)
+    }
+
+    // Row 29 · The watch holding a loan finds another controller has used the pod: it asks the phone, and
+    // silence means it carries on.
+    func testRow29WatchFindsAnotherControllerAsksThePhone() {
+        XCTAssertEqual(watch(.otherControllerSeen), .query(.inBackground, onSilence: .carryOn))
+    }
+
     // Rows 22 and 23 · No device can act: no trigger reaches `decide`. Anything else is not a decision point.
     func testOtherPairingsDecideNothing() {
         XCTAssertEqual(phone(.startTapped), .nothing)

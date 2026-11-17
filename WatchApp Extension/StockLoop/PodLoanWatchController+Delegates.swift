@@ -27,6 +27,7 @@ extension PodLoanWatchController: PumpManagerDelegate {
         guard isCurrentDriver(pumpManager) else { return }
         pumpStateStore.wrappedValue = pumpManager.watchRawValue
         reportPumpFaultOnce()
+        considerOtherController()
     }
 
     /// The phone hears of a fault once per loan, without waiting to be asked.
