@@ -130,6 +130,8 @@ class SettingsViewModel {
 
     @ObservationIgnored var outcomesPackageBuilder: OutcomesPackageBuilder?
 
+    @ObservationIgnored var exerciseDataSharing: ExerciseDataSharing?
+
     @MainActor
     var showDeleteTestData: Bool {
         availableSupports.contains(where: { $0.showsDeleteTestDataUI })
