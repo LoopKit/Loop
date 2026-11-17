@@ -368,6 +368,8 @@ final class PodLoanPhoneController {
     var lastClosedSessionRevokeAt: Date?
     /// A question to the watch awaiting its answer (`askWatch`), and when the last status report came.
     var openQuestion: OpenQuestion?
+    /// The pod driver's last report of another controller that this phone has acted on.
+    var otherControllerHandledAt: Date?
     var lastWatchAnswerAt: Date?
     /// The last report said the watch holds the pod but cannot reach it.
     var lastWatchAnswerCannotReachPod = false

@@ -130,6 +130,40 @@ extension PodLoanWatchController {
         if case .carryOn = LoanControl.afterQuery(.silence, onSilence: check.onSilence) { buildAndHandPodToLoop(check.savedState) }
     }
 
+    /// Row 29 · The pod driver found another controller using the pod and stopped: most likely the phone
+    /// took the pod back and its stop has not arrived. Ask the phone, as a watch back from off does: the
+    /// stop makes this watch stand aside; silence at a reading past the wait means it is the only device
+    /// there, and it takes control again. Once per report.
+    func considerOtherController() {
+        guard phase == .active, let control = pumpManager as? ExclusiveDeviceControl,
+              let at = control.otherControllerDetectedAt, at != otherControllerHandledAt else { return }
+        otherControllerHandledAt = at
+        SportLog.event("loan", "the pod driver found another controller using the pod and stopped; asking the phone")
+        guard case .query(let wait, let onSilence, _) = LoanControl.decide(LoanControl.Situation(device: .watch, trigger: .otherControllerSeen)) else { return }
+        sendHoldsPodStatusReport(reason: "the pod shows another controller, asking before going on")
+        otherControllerCheck = OtherControllerCheck(askedAt: now(), wait: wait.seconds, onSilence: onSilence, epoch: epoch)
+    }
+
+    struct OtherControllerCheck {
+        let askedAt: Date
+        let wait: TimeInterval
+        let onSilence: LoanControl.Decision
+        let epoch: Int?
+    }
+
+    func otherControllerCheckAtReading() {
+        guard let check = otherControllerCheck else { return }
+        guard phase == .active, epoch == check.epoch, let control = pumpManager as? ExclusiveDeviceControl else {
+            otherControllerCheck = nil
+            return
+        }
+        guard now().timeIntervalSince(check.askedAt) >= check.wait, !WCSession.default.hasContentPending else { return }
+        otherControllerCheck = nil
+        guard case .carryOn = LoanControl.afterQuery(.silence, onSilence: check.onSilence) else { return }
+        SportLog.event("loan", "the phone did not say it holds the pod; taking control again")
+        control.takeControl()
+    }
+
     /// The pump manager is built only once the check has passed: built, it reaches the pod by itself,
     /// which it must not do while the phone may be looping the pod. Unreadable, it degrades to a drain.
     func buildAndHandPodToLoop(_ savedState: PumpManager.RawStateValue) {

@@ -307,6 +307,11 @@ final class PodLoanWatchController {
     /// A resume waiting on the phone's word (`resumeCheckAtReading`).
     var resumeCheck: ResumeCheck?
 
+    /// A question to the phone after the pod driver found another controller (`otherControllerCheckAtReading`).
+    var otherControllerCheck: OtherControllerCheck?
+    /// The pod driver's last report of another controller that this watch has acted on.
+    var otherControllerHandledAt: Date?
+
     /// The looper cancelled a Start at the offline offer; a grant for it starts nothing. Cleared by
     /// the next Start.
     var startCancelled = false

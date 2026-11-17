@@ -513,6 +513,30 @@ itself has nothing to dose from, so it offers nothing and says so.
 - **Status:** built · **Code:** watch `+Handback`, phone `+Hold`, `+Mirror`, `+Reclaim`
 - **Why:** Unlike row 8 there is no loop to keep, so silence ends nothing worth refusing: the looper is told what happens next. The phone's take-back needs no query because the Deactivate was the looper's latest decision. The watch's report is the only way the phone learns the pod is gone; without it the phone would reach for a dead pod and refuse.
 
+### 28. The pod shows another controller, phone holding it
+
+- **Control state:** pod held by phone · loan: none open on the phone · took over on silence at: any · looper's latest tap: Start without the phone on the watch, unheard; or none
+- **Where:** phone near, alive · watch on wrist, alive or dead
+- **What changed:** the phone reaches the pod and the pod's session count is ahead of what the phone expects
+- **Phone sees:** believes it holds the pod · sensor: fresh · pod: its driver has stopped: it found another controller has used the pod and sends it nothing · heard from the watch: nothing yet
+- **Watch sees:** holds a loan it started without the phone, or dead
+- **Result:** query: phone → watch, in the background → answer: "I hold loan n" → stand aside (row 17); silence → keep the pod: take control again, read the pod, count the other controller's insulin (row 18)
+- **Afterwards:** pod held by the watch, or by the phone · time without looping: up to the query's wait · looper sees: as rows 17 and 18
+- **Status:** built (test branch) · **Code:** phone `+Hold` `considerOtherController`
+- **Why:** The pod driver is the only one that sees another controller has used the pod, and the only one that can stop this device sending it anything; who should hold the pod is this table's decision. Without the stop, a phone back within the driver's 6 minutes of freshness after a watch-only Start sends one command before it learns of the watch.
+
+### 29. The pod shows another controller, watch holding a loan
+
+- **Control state:** pod held by watch · loan: n · took over on silence at: none · looper's latest tap: Take Back on the phone, whose stop has not arrived; or Start on the watch
+- **Where:** phone near or away · watch on wrist, alive
+- **What changed:** the watch reaches the pod and the pod's session count is ahead of what the watch expects
+- **Phone sees:** holds the pod after a take-back, or away
+- **Watch sees:** believes it holds loan n · sensor: fresh · pod: its driver has stopped · heard from the phone: nothing yet
+- **Result:** query: watch → phone (its "I hold loan n"), in the background → answer: the stop → stand aside (row 12); silence at a reading past the wait → carry on: take control again
+- **Afterwards:** pod held by the phone, or by the watch · time without looping: up to the query's wait · looper sees: as row 12
+- **Status:** built (test branch) · **Code:** watch `+Resume` `considerOtherController`
+- **Why:** A take-back tapped while the watch app sleeps sends its stop queued; the watch's next reading can reach the pod first. The driver stops it there instead of after one command. Silence means it is the only device there, as for a watch back from off.
+
 **Physically impossible (no behaviour, at most a log line):** the sensor away from the body; a device that can see
 the sensor but not the pod, or the pod but not the sensor.
 

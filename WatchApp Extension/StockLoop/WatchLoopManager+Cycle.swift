@@ -29,6 +29,7 @@ extension WatchLoopManager {
             return
         }
         loggedIdleNoPump = false
+        onReadingWithPod?()
 
         // The only entry point that refreshes the pod before computing; its answer can come on the
         // driver's own queue.

@@ -84,6 +84,7 @@ extension PodLoanPhoneController {
         case .keepPodOnSilence:
             updateState { $0.tookOverOnSilenceAt = deps.now() }
             handbackDiag(epoch, "this phone keeps the pod and keeps looping: no answer from the watch, or it cannot reach the pod; \(why)")
+            takeControlAgainIfStopped()
         case .takeOnSilence(let tell):
             guard state == .loaned || (state == .owner && yieldingToInferredLoan) else { return }
             updateState { $0.tookOverOnSilenceAt = deps.now() }
@@ -134,6 +135,25 @@ extension PodLoanPhoneController {
     }
 
     // MARK: - Observations that ask for a decision
+
+    /// The pod driver found another controller using the pod, and stopped (rows 28 and 29). Once per report.
+    func considerOtherController() {
+        guard let control = deps.pumpManager() as? ExclusiveDeviceControl,
+              let at = control.otherControllerDetectedAt, at != otherControllerHandledAt else { return }
+        otherControllerHandledAt = at
+        handbackDiag(epoch, "the pod driver found another controller using the pod and stopped")
+        decideAndAct(.otherControllerSeen, why: "the pod shows another controller has used it")
+    }
+
+    /// A phone keeping the pod lifts the driver's stop, then reads the pod so the insulin check counts
+    /// what the other controller gave.
+    func takeControlAgainIfStopped() {
+        guard let control = deps.pumpManager() as? ExclusiveDeviceControl, control.otherControllerDetectedAt != nil else { return }
+        handbackDiag(epoch, "taking control of the pod again and reading it")
+        reclaimPodConnection()
+        guard let odometer = control as? PumpDeliveryOdometer else { return }
+        Task { _ = await odometer.refreshDeliveredUnits() }
+    }
 
     /// Called every phone cycle: the watch's report overdue is rows 10, 11, 14 and 15.
     func considerHoldLapse() {
