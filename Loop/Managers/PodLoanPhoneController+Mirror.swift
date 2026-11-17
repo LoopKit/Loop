@@ -55,9 +55,15 @@ extension PodLoanPhoneController {
     }
 
     /// Standing aside, the pod driver keeps the pod while a command to it is unconfirmed. A pump report
-    /// follows an exchange with the pod, which settles the command: ask the driver again.
+    /// follows an exchange with the pod, which settles the command: ask the driver again. Only while this
+    /// phone means to be without the pod: a read that ends after the pod came back, or while a take-back
+    /// reaches for it, must not let go of a pod the phone holds.
     func letGoAgainIfKept() {
         guard let control = deps.pumpManager() as? ExclusiveDeviceControl, !control.isControlReleased else { return }
+        guard controlRole.isWithoutThePod else {
+            PhoneLog.event("mirror", "the pod driver keeps the pod: this phone holds it again or is taking it back (\(state.rawValue))")
+            return
+        }
         control.releaseControl()
         guard control.isControlReleased else {
             PhoneLog.event("mirror", "standing aside: the pod driver still keeps the pod; dosing stays paused")
@@ -73,7 +79,7 @@ extension PodLoanPhoneController {
     /// read the pod, then ask the driver again. A failed read waits for the next time the phone stands
     /// aside or the next pump report.
     func readThePodIfKept() {
-        guard let control = deps.pumpManager() as? ExclusiveDeviceControl, !control.isControlReleased,
+        guard controlRole.isWithoutThePod, let control = deps.pumpManager() as? ExclusiveDeviceControl, !control.isControlReleased,
               let odometer = control as? PumpDeliveryOdometer else { return }
         PhoneLog.event("mirror", "standing aside: the pod driver keeps the pod until its last command is confirmed; reading the pod to settle it")
         Task { [weak self] in
