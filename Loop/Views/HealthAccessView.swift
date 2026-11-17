@@ -26,6 +26,7 @@ struct HealthAccessView: View {
     let glucoseSharingStatus: () -> HKAuthorizationStatus
     let insulinSharingStatus: () -> HKAuthorizationStatus
     let carbSharingStatus: () -> HKAuthorizationStatus
+    var exerciseDataSharing: ExerciseDataSharing?
 
     @State private var glucoseStatus: HKAuthorizationStatus = .notDetermined
     @State private var insulinStatus: HKAuthorizationStatus = .notDetermined
@@ -54,6 +55,10 @@ struct HealthAccessView: View {
             } header: {
                 Text("Reading & Changing Access", comment: "Health access section header for reading and changing access")
             }
+
+            if let exerciseDataSharing {
+                exerciseSection(exerciseDataSharing)
+            }
         }
         .listStyle(.insetGrouped)
         .navigationTitle(Text("Apple Health", comment: "Title of the Apple Health access screen"))
@@ -64,6 +69,22 @@ struct HealthAccessView: View {
         glucoseStatus = glucoseSharingStatus()
         insulinStatus = insulinSharingStatus()
         carbStatus = carbSharingStatus()
+    }
+
+    private func exerciseSection(_ sharing: ExerciseDataSharing) -> some View {
+        Section {
+            Toggle(
+                NSLocalizedString("Read Exercise Data", comment: "Health access toggle for reading exercise data from Apple Health"),
+                isOn: Binding(get: { sharing.isEnabled }, set: { newValue in Task { await sharing.setEnabled(newValue) } })
+            )
+        } header: {
+            Text("Exercise", comment: "Health access section header for exercise data")
+        } footer: {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(String(format: NSLocalizedString("When on, %1$@ reads your workouts from Apple Health, along with heart rate throughout the day, resting heart rate, heart rate variability, VO2 max, steps, distance, active energy, physical effort and weight. %1$@ shares it with connected services that accept it, and in a future version will use it to learn how activity affects your glucose.", comment: "Health access exercise data footer (1: app name)"), appName))
+                ForEach(sharing.serviceDescriptions, id: \.self) { Text($0) }
+            }
+        }
     }
 
     private func statusRow(label: String, status: HKAuthorizationStatus) -> some View {

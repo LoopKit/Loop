@@ -841,7 +841,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation. Sleep data from the Health database is used to optimize delivery of Apple Watch complication updates during the time you are awake."
+            "value" : "Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation. Sleep data from the Health database is used to optimize delivery of Apple Watch complication updates during the time you are awake. If you turn on exercise data, workouts, heart rate, steps and other activity data are shared with connected services that accept them, and in a future version will be used to learn how activity affects your glucose."
           }
         },
         "es" : {
