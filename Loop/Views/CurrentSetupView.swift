@@ -64,9 +64,9 @@ struct CurrentSetupView: View {
         let before = comparison.before
         let after = comparison.after
         return Section(header: SectionHeader(label: NSLocalizedString("Results", comment: "Header of the setup comparison results")),
-                       footer: Text(before == nil
-                                    ? NSLocalizedString("Median glucose by time of day since the change, with its 25–75% band.", comment: "Setup comparison chart explanation without a before period")
-                                    : NSLocalizedString("Median glucose by time of day: dashed for the 3 weeks before the change, solid since the change, with its 25–75% band.", comment: "Setup comparison chart explanation"))) {
+                       footer: Text(before.map {
+                                        String(format: NSLocalizedString("Median glucose by time of day: dashed for the %@ before the change, solid since the change, with its 25–75% band.", comment: "Setup comparison chart explanation (1: length of the before period, e.g. 3 weeks)"), periodDescription($0.days))
+                                    } ?? NSLocalizedString("Median glucose by time of day since the change, with its 25–75% band.", comment: "Setup comparison chart explanation without a before period"))) {
             comparisonRow(NSLocalizedString("Time in Range", comment: "Setup comparison row for time in range"),
                           before?.timeInRange.map(percent), after.timeInRange.map(percent))
             comparisonRow(String(format: NSLocalizedString("Time Below %@", comment: "Setup comparison row for time below the low threshold (1: glucose value, e.g. 70 mg/dL)"), lowThreshold),
@@ -90,7 +90,7 @@ struct CurrentSetupView: View {
 
     private func historySection(_ history: SetupHistory) -> some View {
         Section(header: SectionHeader(label: NSLocalizedString("Setup History", comment: "Header of the list of past setup changes")),
-                footer: Text(NSLocalizedString("Tap a change to see results from that change until now, compared with the 3 weeks before it.", comment: "Footer of the setup history list"))) {
+                footer: Text(NSLocalizedString("Tap a change to see results from that change until now, compared with up to 3 weeks before it.", comment: "Footer of the setup history list"))) {
             ForEach(history.changes.reversed(), id: \.date) { change in
                 Button {
                     viewModel.select(change)

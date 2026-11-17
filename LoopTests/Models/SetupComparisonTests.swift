@@ -63,6 +63,21 @@ final class SetupComparisonTests: XCTestCase {
         XCTAssertNil(comparison.before)
     }
 
+    func testBeforeStartsWhereTheRecordsStart() throws {
+        let now = changeDate.addingTimeInterval(.days(3))
+        let glucose = samples(from: changeDate - .days(9), to: now) { _ in 120 }
+        let comparison = try XCTUnwrap(SetupComparison(change: change(), samples: glucose, insulinHistory: nil, now: now))
+        XCTAssertEqual(comparison.before?.start, changeDate - .days(9))
+        XCTAssertEqual(comparison.before?.days ?? 0, 9, accuracy: 0.001)
+    }
+
+    func testNoBeforeWithLessThanAWeekOfRecords() throws {
+        let now = changeDate.addingTimeInterval(.days(3))
+        let glucose = samples(from: changeDate - .days(6), to: now) { _ in 120 }
+        let comparison = try XCTUnwrap(SetupComparison(change: change(), samples: glucose, insulinHistory: nil, now: now))
+        XCTAssertNil(comparison.before)
+    }
+
     func testAfterRunsUntilNow() throws {
         let now = changeDate.addingTimeInterval(.days(30))
         let glucose = samples(from: changeDate - .days(25), to: now) { _ in 120 }
