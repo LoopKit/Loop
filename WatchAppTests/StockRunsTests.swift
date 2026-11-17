@@ -764,7 +764,7 @@ final class StockRunsTests: XCTestCase {
     /// Everything the watch's decision store holds, in the order stored.
     /// The decision each dose id names, in the order given; a dose without metadata is left out.
     private func decisionIds(_ manager: WatchLoopManager, _ doseIds: [UUID]) async throws -> [UUID] {
-        let byDose = try await XCTUnwrap(manager.doseMetadataStore).decisionIds(for: doseIds)
+        let byDose = try await XCTUnwrap(manager.doseMetadataStore).metadata(for: doseIds).compactMapValues(\.decisionId)
         return doseIds.compactMap { byDose[$0] }
     }
 
