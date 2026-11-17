@@ -20,8 +20,10 @@ extension WatchLoopManager {
         try await doseStore.syncDoseEntries(entries)
     }
 
-    /// Call even with no events: it advances `lastAddedPumpData`, the recency gate's clock.
+    /// Call even with no events: it advances `lastAddedPumpData`, the recency gate's clock. Each dose
+    /// carries the metadata stored under its dose id, as stock's pump report does.
     func recordPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, replacePendingEvents: Bool) async throws {
+        let events = await doseMetadataStore?.addingMetadata(to: events) ?? events
         try await doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, replacePendingEvents: replacePendingEvents)
     }
 

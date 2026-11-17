@@ -713,6 +713,7 @@ final class LoanDosingDecisionTests: XCTestCase {
         let outcome = LoanReconciler.reconcile(LoanReconciler.Input(events: [event], schedule: nil, loanStart: at.addingTimeInterval(-60),
                                                                     loanEnd: at.addingTimeInterval(60), isFinalHandback: true))
         XCTAssertEqual(outcome.doses.first?.doseId, doseId, "the reconciler carries it")
+        XCTAssertEqual(outcome.doses.first?.metadata, metadata, "and the dose saved on the phone carries the watch's metadata")
 
         var without = try XCTUnwrap(JSONSerialization.jsonObject(with: LoanProtocol.encoder.encode(record)) as? [String: Any])
         without["doseId"] = nil
