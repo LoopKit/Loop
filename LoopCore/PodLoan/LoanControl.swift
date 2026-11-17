@@ -90,6 +90,11 @@ public enum LoanControl {
         case watchSilentLong
         case watchClaims(Claim)
         case takeBackTapped
+
+        // Either device
+        /// The pod driver found, on reaching the pod, that another controller has used it since this
+        /// device last did, and stopped: it sends the pod nothing until this device takes control again.
+        case otherControllerSeen
     }
 
     public struct Situation: Equatable {
@@ -329,6 +334,18 @@ public enum LoanControl {
         // Rows 12, 13 and 19 · The watch back from off. It cannot know what was decided while it was out,
         // so it asks before touching the pod. A phone that holds the pod answers with the stop, acted on
         // where it lands. With no answer it is the only device there and carries on.
+        // Rows 28 and 29 · The pod driver found another controller using the pod and stopped. The
+        // driver only sees it; who should hold the pod is decided here. The phone holding the pod asks
+        // the watch (a loan started without it): an answer makes it stand aside; silence means the watch
+        // is gone, and the phone takes control again and reads the pod. A watch holding a loan asks the
+        // phone (a take-back whose stop it missed): the stop makes it stand aside; silence means it is
+        // the only device there, and it takes control again.
+        case (.phone, .otherControllerSeen):
+            guard s.phoneRole == .holdsPod else { return .nothing }
+            return .query(.inBackground, onSilence: .keepPodOnSilence)
+        case (.watch, .otherControllerSeen):
+            return .query(.inBackground, onSilence: .carryOn)
+
         case (.watch, .backFromOff):
             return .query(.inBackground, onSilence: .carryOn)
 
