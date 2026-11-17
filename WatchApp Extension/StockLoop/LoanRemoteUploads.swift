@@ -13,6 +13,7 @@
 //
 
 import Foundation
+import HealthKit
 import LoopKit
 import Network
 import WatchKit
@@ -148,7 +149,8 @@ final class LoanRemoteUploads {
             overrideHistory: loopManager.overrideHistory,
             insulinDeliveryStore: loopManager.doseStore.insulinDeliveryStore,
             deviceLog: deviceLog,
-            automationHistoryProvider: self
+            automationHistoryProvider: self,
+            exerciseStore: ExerciseStore(healthStore: HKHealthStore())
         )
         manager.delegate = self
         let current = lock.withLock { () -> Bool in
