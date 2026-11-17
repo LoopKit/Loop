@@ -46,7 +46,8 @@ extension PodLoanPhoneController {
 
     /// The phone loop's dosing gate: a grant is under way, the pod is lent out, a take-back is
     /// reaching for it, a take-back's audit has not ruled, this phone holds watch records it has not
-    /// saved, or it is asking the watch about insulin it cannot explain.
+    /// saved, it is asking the watch about insulin it cannot explain, or it has taken the pod again
+    /// after another controller and has not yet read it.
     var holdsAutomaticDosing: Bool {
         let saved = persisted
         return grantInFlight
@@ -55,6 +56,7 @@ extension PodLoanPhoneController {
             || Self.watchLoopsThePod(saved)
             || holdsUnsavedWatchRecords
             || askingAboutUnexplainedInsulin
+            || readingAfterTake
     }
 
     /// With the pod back, this phone still holds watch records its dose history does not: a take-back's
@@ -159,6 +161,11 @@ extension PodLoanPhoneController {
         }
         guard reading.at > last.at else { return completion() }
         self.noteReading(units: reading.units, at: reading.at)
+        // A new reading, counted: a phone that took the pod again after another controller may dose.
+        let completion = { [weak self] in
+            self?.readingAfterTake = false
+            completion()
+        }
         // A lower total is a different pod: start again from it.
         guard reading.units >= last.units else { return completion() }
         let gap = reading.at.timeIntervalSince(last.at)
