@@ -145,14 +145,27 @@ extension PodLoanPhoneController {
         decideAndAct(.otherControllerSeen, why: "the pod shows another controller has used it")
     }
 
-    /// A phone keeping the pod lifts the driver's stop, then reads the pod so the insulin check counts
-    /// what the other controller gave.
+    /// A phone keeping the pod lifts the driver's stop, then reads the pod and runs its insulin check
+    /// before it doses again: the check books what the other controller gave. Its pod reading may
+    /// otherwise still count as fresh, so its next cycle would dose without reading the pod.
     func takeControlAgainIfStopped() {
-        guard let control = deps.pumpManager() as? ExclusiveDeviceControl, control.otherControllerDetectedAt != nil else { return }
-        handbackDiag(epoch, "taking control of the pod again and reading it")
+        guard let control = deps.pumpManager() as? ExclusiveDeviceControl, control.otherControllerDetectedAt != nil,
+              let odometer = control as? PumpDeliveryOdometer else { return }
+        handbackDiag(epoch, "taking control of the pod again; dosing waits until the pod is read and its insulin counted")
+        readingAfterTake = true
         reclaimPodConnection()
-        guard let odometer = control as? PumpDeliveryOdometer else { return }
-        Task { _ = await odometer.refreshDeliveredUnits() }
+        Task { [weak self] in
+            let read = await odometer.refreshDeliveredUnits()
+            DispatchQueue.main.async {
+                guard let self else { return }
+                guard read else {
+                    // Dosing keeps waiting: the next pod reading runs the check and ends the wait.
+                    self.handbackDiag(self.epoch, "the pod read after taking control failed; dosing waits for the next pod reading")
+                    return
+                }
+                self.checkOwnPumpTotal()
+            }
+        }
     }
 
     /// Called every phone cycle: the watch's report overdue is rows 10, 11, 14 and 15.
