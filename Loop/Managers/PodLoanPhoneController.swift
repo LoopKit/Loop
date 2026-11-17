@@ -362,6 +362,8 @@ final class PodLoanPhoneController {
     var openQuestion: OpenQuestion?
     /// The pod driver's last report of another controller that this phone has acted on.
     var otherControllerHandledAt: Date?
+    /// Taken again after another controller: dosing waits for the pod's read and its insulin check.
+    var readingAfterTake = false
     var lastWatchAnswerAt: Date?
     /// The last report said the watch holds the pod but cannot reach it.
     var lastWatchAnswerCannotReachPod = false

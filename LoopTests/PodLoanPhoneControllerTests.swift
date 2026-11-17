@@ -51,6 +51,8 @@ extension MockPumpManager {
     static var testPodFaulted = false
     /// How many times the phone forgot a pod deactivated on the watch.
     static var testForgotDeactivatedCount = 0
+    /// The driver found another controller using the pod and stopped; a take lifts it.
+    static var testOtherControllerAt: Date?
 }
 
 /// Test-only hand-off conformance so the full grant path runs against the test pump.
@@ -63,7 +65,8 @@ final class LendableMockPumpManager: MockPumpManager, ExclusiveDeviceControl, Pu
     }
     var isControlReleased: Bool { Self.testConnectionReleased }
     func releaseControl() { if !Self.testKeepsControl { Self.testConnectionReleased = true } }
-    func takeControl() { Self.testConnectionReleased = false }
+    func takeControl() { Self.testConnectionReleased = false; Self.testOtherControllerAt = nil }
+    var otherControllerDetectedAt: Date? { Self.testOtherControllerAt }
     var deliveredUnits: (units: Double, at: Date)? { Self.testOdometer.map { ($0, Self.testOdometerAt ?? Date()) } }
     var deliveryPulseUnits: Double { 0.05 }
     func refreshDeliveredUnits() async -> Bool {
@@ -222,6 +225,7 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         MockPumpManager.testOdometer = nil
         MockPumpManager.testOdometerAt = nil
         MockPumpManager.testPodFaulted = false
+        MockPumpManager.testOtherControllerAt = nil
 
         let timeZone = TimeZone(identifier: "GMT")!
         settings = LoopSettings(
@@ -3898,6 +3902,23 @@ extension PodLoanPhoneControllerTests {
         MockPumpManager.testOdometerAt = at
         controller.checkOwnPumpTotal()
         waitUntil(timeout: 5, "reading kept") { controller.ledgerLast?.at == at }
+    }
+
+    /// Row 28, silence: the phone takes the pod again after another controller and doses nothing until it
+    /// has read the pod and counted the insulin, since its last reading may still count as fresh.
+    func testTakingThePodAgainAfterAnotherControllerHoldsDosingUntilThePodIsCounted() throws {
+        let controller = makeController()
+        readPod(controller, units: 10, at: Date().addingTimeInterval(-120))
+        MockPumpManager.testOtherControllerAt = Date()
+        MockPumpManager.testOdometer = 10.5
+        MockPumpManager.testOdometerAt = Date()
+
+        controller.carryOut(.keepPodOnSilence, why: "test: no answer from the watch")
+        XCTAssertTrue(controller.holdsAutomaticDosing, "no dose before the pod is read and counted")
+        XCTAssertNil(MockPumpManager.testOtherControllerAt, "the take lifted the driver's stop")
+
+        waitUntil(timeout: 5, "the pod read and its insulin counted") { !controller.readingAfterTake }
+        XCTAssertEqual(controller.ledgerLast?.units, 10.5, "the reading after the take was counted")
     }
 
     /// An estimate as the ledger keeps it, over the half hour before it was booked.
