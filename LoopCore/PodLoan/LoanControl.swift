@@ -34,6 +34,11 @@ public enum LoanControl {
         /// Mid-transfer (a grant out, a hand-back being written, a take-back reaching for the pod):
         /// transfers decide for themselves.
         case transferring
+
+        /// The phone means to be without the pod, so its pod driver lets go of the pod: only lending or
+        /// standing aside. Holding the pod it keeps it, and a transfer moves the pod driver itself, so a
+        /// read that ends late cannot undo a take-back.
+        public var isWithoutThePod: Bool { self == .lending || self == .standingAside }
     }
 
     /// How the loan the watch claims relates to the phone's own record.
