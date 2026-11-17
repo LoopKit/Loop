@@ -21,6 +21,7 @@ final class CurrentSetupViewModel: ObservableObject {
 
     let outcomesPackageBuilder: OutcomesPackageBuilder?
     private let loadHistory: () async throws -> SetupHistory
+    private let customChangeStore: CustomSetupChangeStore
     private let glucoseStore: GlucoseStoreProtocol?
     private let insulinDeliveryHistory: ((Int) async throws -> InsulinDeliveryHistory)?
     private let cacheDuration: TimeInterval
@@ -36,11 +37,13 @@ final class CurrentSetupViewModel: ObservableObject {
          glucoseStore: GlucoseStoreProtocol?,
          insulinDeliveryHistory: ((Int) async throws -> InsulinDeliveryHistory)?,
          outcomesPackageBuilder: OutcomesPackageBuilder? = nil,
+         customChangeStore: CustomSetupChangeStore = CustomSetupChangeStore(),
          cacheDuration: TimeInterval = Bundle.main.localCacheDuration,
          now: @escaping () -> Date = { Date() }) {
         self.selected = selected
         self.outcomesPackageBuilder = outcomesPackageBuilder
         self.loadHistory = loadHistory
+        self.customChangeStore = customChangeStore
         self.glucoseStore = glucoseStore
         self.insulinDeliveryHistory = insulinDeliveryHistory
         self.cacheDuration = cacheDuration
@@ -52,6 +55,7 @@ final class CurrentSetupViewModel: ObservableObject {
     }
 
     func load() async {
+        isLoading = true
         defer { isLoading = false }
         guard let history = try? await loadHistory() else {
             return
@@ -75,6 +79,22 @@ final class CurrentSetupViewModel: ObservableObject {
     func select(_ change: SetupChange) {
         selected = change
         compare()
+    }
+
+    /// The earliest date a marked change can have and still show results.
+    var earliestCustomChangeDate: Date {
+        now() - cacheDuration
+    }
+
+    func addCustomChange(date: Date, note: String) async {
+        let note = note.trimmingCharacters(in: .whitespacesAndNewlines)
+        customChangeStore.add(CustomSetupChange(date: date, note: note.isEmpty ? nil : note))
+        await load()
+    }
+
+    func removeCustomChanges(in change: SetupChange) async {
+        change.customChanges.forEach { customChangeStore.remove(id: $0.id) }
+        await load()
     }
 
     private func compare() {
