@@ -127,6 +127,9 @@ final class WatchLoopManager {
     /// Fired when a reading would start a cycle but no pod is held: a resume's check is judged there.
     var onReadingWithoutPod: (() -> Void)?
 
+    /// Fired when a reading starts a cycle with a pod held: a question about another controller is judged there.
+    var onReadingWithPod: (() -> Void)?
+
     /// Fired when the wrist opens the loop (closed to open), where stock ends a pre-meal preset.
     var onLoopOpened: (() -> Void)?
 
