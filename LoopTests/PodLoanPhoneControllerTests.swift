@@ -45,6 +45,10 @@ extension MockPumpManager {
     static var testForcedReadCount = 0
     /// A forced read settles the unconfirmed command, so the driver lets go when asked again.
     static var testReadSettlesCommand = false
+    /// The next forced read waits until the test ends it (`testHeldRead`), so it can end after the pod
+    /// has changed hands. Later reads run as usual.
+    static var testHoldsNextRead = false
+    static var testHeldRead: CheckedContinuation<Void, Never>?
     /// What the pod's own status says about a bolus being given, whoever started it.
     static var testPodBolusEndsAt: Date?
     /// The pod has faulted: its total is final and it answers no read.
@@ -71,6 +75,10 @@ final class LendableMockPumpManager: MockPumpManager, ExclusiveDeviceControl, Pu
     var deliveryPulseUnits: Double { 0.05 }
     func refreshDeliveredUnits() async -> Bool {
         Self.testForcedReadCount += 1
+        if Self.testHoldsNextRead {
+            Self.testHoldsNextRead = false
+            await withCheckedContinuation { held in DispatchQueue.main.async { Self.testHeldRead = held } }
+        }
         if Self.testReadSettlesCommand { Self.testKeepsControl = false }
         return true
     }
@@ -165,6 +173,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
     var appliedOverrideChanges: [(override: TemporaryScheduleOverride?, changedAt: Date)] = []
 
     override func tearDown() {
+        MockPumpManager.testHeldRead?.resume()
+        MockPumpManager.testHeldRead = nil
         // The controller runs on main: finish this test's queued work before the next test resets the shared fakes.
         drainMainQueue(hops: 3)
         try? FileManager.default.removeItem(at: stateDir)
@@ -178,6 +188,8 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         try? FileManager.default.createDirectory(at: stateDir, withIntermediateDirectories: true)
         MockPumpManager.testForcedReadCount = 0
         MockPumpManager.testReadSettlesCommand = false
+        MockPumpManager.testHoldsNextRead = false
+        MockPumpManager.testHeldRead = nil
         MockPumpManager.testPodBolusEndsAt = nil
         MockPumpManager.testForgotDeactivatedCount = 0
         PodLoanPhoneController.takeBackLinkLimit = 5
@@ -1025,6 +1037,55 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertEqual(MockPumpManager.testForcedReadCount, 1, "one read of the pod")
         XCTAssertTrue(controller.holdsAutomaticDosing)
         XCTAssertTrue(addedDoses.isEmpty, "nothing booked while standing aside")
+    }
+
+    /// The read made on standing aside can end after the pod is back, here after a take-back that read
+    /// the pod itself. Ending then, it must not let go of the pod: the phone would show the pod on the
+    /// watch while the watch has no loan, and nothing would loop.
+    func testAReadThatEndsAfterATakeBackDoesNotLetGoOfThePod() {
+        let controller = makeController()
+        MockPumpManager.testKeepsControl = true          // a command to the pod is unconfirmed
+        MockPumpManager.testHoldsNextRead = true
+        controller.engageInferredLoanYield(evidence: "test: the watch started without this phone")
+        waitUntil(timeout: 5, "the stand-aside read is under way") { MockPumpManager.testHeldRead != nil }
+        XCTAssertFalse(MockPumpManager.testConnectionReleased, "the driver keeps the pod while its command is unconfirmed")
+
+        controller.reclaimNow()
+        waitForState(controller, .owner)
+        XCTAssertFalse(controller.yieldingToInferredLoan)
+        XCTAssertFalse(MockPumpManager.testConnectionReleased, "the take-back holds the pod")
+
+        // The take-back's exchange settled the command; then the stand-aside read ends.
+        MockPumpManager.testKeepsControl = false
+        MockPumpManager.testHeldRead?.resume()
+        MockPumpManager.testHeldRead = nil
+        drainMainQueue(hops: 3)
+        XCTAssertFalse(MockPumpManager.testConnectionReleased, "the phone keeps the pod it took back")
+        XCTAssertFalse(controller.isPodLoanedOut)
+    }
+
+    /// A pump report while a take-back from a yield reaches for the pod must not let go of it: the
+    /// take-back has taken the pod driver back, though the yield lasts until the take-back finishes.
+    func testAPumpReportDuringATakeBackFromAYieldDoesNotLetGoOfThePod() {
+        PodLoanPhoneController.takeBackLinkLimit = 60
+        let controller = makeController()
+        controller.engageInferredLoanYield(evidence: "test: the watch started without this phone")
+        XCTAssertTrue(MockPumpManager.testConnectionReleased, "standing aside, the driver let go")
+
+        connectionReady = false
+        controller.reclaimNow()
+        waitForState(controller, .reclaimPending)
+        XCTAssertTrue(controller.yieldingToInferredLoan, "the yield ends when the take-back finishes")
+        XCTAssertFalse(MockPumpManager.testConnectionReleased, "the take-back took the driver back")
+
+        let reported = expectation(description: "pump report handled")
+        controller.checkOwnPumpTotal { reported.fulfill() }
+        wait(for: [reported], timeout: 5)
+        XCTAssertFalse(MockPumpManager.testConnectionReleased, "the take-back keeps the pod")
+
+        connectionReady = true
+        waitForState(controller, .owner)
+        XCTAssertFalse(MockPumpManager.testConnectionReleased)
     }
 
     /// A re-Start while the pod is still returning is denied until the pod is back.
