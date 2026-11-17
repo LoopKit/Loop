@@ -780,6 +780,23 @@ final class StockRunsTests: XCTestCase {
         }
     }
 
+    /// A dose the pod reports carries the metadata stored under its dose id, as on the phone.
+    func testAReportedDoseCarriesTheMetadataStoredUnderItsId() async throws {
+        let manager = await makeManager()
+        let store = try XCTUnwrap(manager.doseMetadataStore)
+        let doseId = UUID()
+        let metadata = DoseMetadata(origin: .user, device: .watch, decisionId: UUID(), activationType: .manualRecommendationAccepted)
+        try await store.storeMetadata(metadata, for: doseId)
+
+        let now = Date()
+        let dose = DoseEntry(type: .bolus, startDate: now.addingTimeInterval(-60), endDate: now, value: 1.0, unit: .units,
+                             doseId: doseId, syncIdentifier: UUID().uuidString, insulinType: .novolog)
+        await report(manager, [dose])
+
+        let stored = try await manager.doseStore.getNormalizedDoseEntries(start: now.addingTimeInterval(-3600))
+        XCTAssertEqual(stored.first { $0.doseId == doseId }?.metadata, metadata)
+    }
+
     /// A closed-loop cycle stores one "loop" decision, as stock builds it, and the dose it enacts
     /// carries that decision's id.
     func testAClosedLoopCycleStoresOneLoopDecisionWhoseIdTheDoseCarries() async throws {
