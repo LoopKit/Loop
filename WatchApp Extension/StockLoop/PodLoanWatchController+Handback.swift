@@ -170,8 +170,8 @@ extension PodLoanWatchController {
         // A link stuck one way, while the loan is still live and the watch still doses: a normal
         // alert. A re-establishing link self-heals in a minute or two, so it is never alerted.
         if wedge == .oneWay, !wasFinal {
-            issueProtocolAlert(title: "End Not Confirmed",
-                               body: "The watch is still looping. Reopening Loop on both devices usually clears this.",
+            issueProtocolAlert(title: NSLocalizedString("End Not Confirmed", comment: "Watch alert title: the phone has not confirmed a hand-back"),
+                               body: NSLocalizedString("The watch is still looping. Reopening Loop on both devices usually clears this.", comment: "Watch alert body: the hand-back is unconfirmed and the watch keeps looping"),
                                identifier: "handbackOneWay", interruptionLevel: .active)
         }
 
