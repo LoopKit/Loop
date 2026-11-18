@@ -13,6 +13,7 @@ import LoopKitUI
 struct CurrentSetupView: View {
     @StateObject private var viewModel: CurrentSetupViewModel
     @EnvironmentObject private var displayGlucosePreference: DisplayGlucosePreference
+    @State private var isAddingCustomChange = false
 
     init(viewModel: @autoclosure @escaping () -> CurrentSetupViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel())
@@ -48,25 +49,35 @@ struct CurrentSetupView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            Section(footer: Text(NSLocalizedString("Mark a change of your own, such as a new routine or supplement, to see results since it and share them with a note.", comment: "Footer of the button to mark a custom setup change"))) {
+                Button(NSLocalizedString("Mark a Change", comment: "Button to mark a custom setup change")) {
+                    isAddingCustomChange = true
+                }
+            }
             if let history = viewModel.history, !history.changes.isEmpty {
                 historySection(history)
             }
-            Section(footer: Text(NSLocalizedString("Changes to therapy settings, insulin type or model, dosing strategy and algorithm experiments start a new setup. Running a preset doesn't.\n\nAbout 2 weeks with the same setup is a good amount of time to see a change in outcomes such as time in range and lows. Over just a few days, ordinary day-to-day variation can hide or exaggerate the effect.", comment: "Footer explaining what starts a new setup and how long to keep one"))) {
+            Section(footer: Text(NSLocalizedString("Changes to therapy settings, insulin type or model, dosing strategy and algorithm experiments start a new setup, as do changes you mark. Running a preset doesn't.\n\nAbout 2 weeks with the same setup is a good amount of time to see a change in outcomes such as time in range and lows. Over just a few days, ordinary day-to-day variation can hide or exaggerate the effect.", comment: "Footer explaining what starts a new setup and how long to keep one"))) {
                 EmptyView()
             }
         }
         .insetGroupedListStyle()
         .navigationTitle(NSLocalizedString("Current Setup", comment: "Title of the current setup screen"))
         .task { await viewModel.load() }
+        .sheet(isPresented: $isAddingCustomChange) {
+            CustomSetupChangeEditor(earliest: viewModel.earliestCustomChangeDate) { date, note in
+                Task { await viewModel.addCustomChange(date: date, note: note) }
+            }
+        }
     }
 
     private func resultsSection(_ comparison: SetupComparison) -> some View {
         let before = comparison.before
         let after = comparison.after
         return Section(header: SectionHeader(label: NSLocalizedString("Results", comment: "Header of the setup comparison results")),
-                       footer: Text(before == nil
-                                    ? NSLocalizedString("Median glucose by time of day since the change, with its 25–75% band.", comment: "Setup comparison chart explanation without a before period")
-                                    : NSLocalizedString("Median glucose by time of day: dashed for the 3 weeks before the change, solid since the change, with its 25–75% band.", comment: "Setup comparison chart explanation"))) {
+                       footer: Text(before.map {
+                                        String(format: NSLocalizedString("Median glucose by time of day: dashed for the %@ before the change, solid since the change, with its 25–75% band.", comment: "Setup comparison chart explanation (1: length of the before period, e.g. 3 weeks)"), periodDescription($0.days))
+                                    } ?? NSLocalizedString("Median glucose by time of day since the change, with its 25–75% band.", comment: "Setup comparison chart explanation without a before period"))) {
             comparisonRow(NSLocalizedString("Time in Range", comment: "Setup comparison row for time in range"),
                           before?.timeInRange.map(percent), after.timeInRange.map(percent))
             comparisonRow(String(format: NSLocalizedString("Time Below %@", comment: "Setup comparison row for time below the low threshold (1: glucose value, e.g. 70 mg/dL)"), lowThreshold),
@@ -90,7 +101,7 @@ struct CurrentSetupView: View {
 
     private func historySection(_ history: SetupHistory) -> some View {
         Section(header: SectionHeader(label: NSLocalizedString("Setup History", comment: "Header of the list of past setup changes")),
-                footer: Text(NSLocalizedString("Tap a change to see results from that change until now, compared with the 3 weeks before it.", comment: "Footer of the setup history list"))) {
+                footer: Text(NSLocalizedString("Tap a change to see results from that change until now, compared with up to 3 weeks before it.", comment: "Footer of the setup history list"))) {
             ForEach(history.changes.reversed(), id: \.date) { change in
                 Button {
                     viewModel.select(change)
@@ -113,6 +124,15 @@ struct CurrentSetupView: View {
                         if change == viewModel.selected {
                             Image(systemName: "checkmark")
                                 .foregroundColor(.accentColor)
+                        }
+                    }
+                }
+                .swipeActions {
+                    if !change.customChanges.isEmpty {
+                        Button(role: .destructive) {
+                            Task { await viewModel.removeCustomChanges(in: change) }
+                        } label: {
+                            Text(NSLocalizedString("Delete", comment: "Swipe action to delete a marked setup change"))
                         }
                     }
                 }
@@ -261,6 +281,43 @@ extension SetupChange.Item {
                 ? NSLocalizedString("%@ turned on", comment: "Setup change item for an algorithm experiment turned on (1: experiment name)")
                 : NSLocalizedString("%@ turned off", comment: "Setup change item for an algorithm experiment turned off (1: experiment name)")
             return String(format: format, experiment.title)
+        case .custom(let change):
+            return change.note ?? NSLocalizedString("Marked change", comment: "Setup change item for a change the person marked without a note")
+        }
+    }
+}
+
+struct CustomSetupChangeEditor: View {
+    let earliest: Date
+    let onSave: (Date, String) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var date = Date()
+    @State private var note = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(footer: Text(NSLocalizedString("When the change started. Results compare the time since then with the 3 weeks before.", comment: "Footer of the date for a marked setup change"))) {
+                    DatePicker(NSLocalizedString("Started", comment: "Label of the date a marked setup change started"), selection: $date, in: earliest...Date())
+                }
+                Section(footer: Text(NSLocalizedString("Optional. What changed, such as \"Started walking in the mornings\". The note is included if you share outcomes.", comment: "Footer of the note for a marked setup change"))) {
+                    TextField(NSLocalizedString("Note", comment: "Placeholder for the note on a marked setup change"), text: $note, axis: .vertical)
+                }
+            }
+            .navigationTitle(NSLocalizedString("Mark a Change", comment: "Title of the screen for marking a custom setup change"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(NSLocalizedString("Cancel", comment: "Cancel marking a setup change")) { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(NSLocalizedString("Save", comment: "Save a marked setup change")) {
+                        onSave(date, note)
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }

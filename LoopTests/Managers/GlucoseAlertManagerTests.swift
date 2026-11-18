@@ -293,6 +293,17 @@ final class GlucoseAlertManagerTests: XCTestCase {
         XCTAssertNil(relaunch().armedTest)
     }
 
+    func testOnlyLowSoundsUntilAcknowledged() {
+        XCTAssertFalse(manager.soundsUntilAcknowledged(for: GlucoseAlarmKind.low.alertIdentifier))
+        manager.lowSoundsUntilAcknowledged = true
+        XCTAssertTrue(manager.soundsUntilAcknowledged(for: GlucoseAlarmKind.low.alertIdentifier))
+        XCTAssertTrue(manager.soundsUntilAcknowledged(for: GlucoseAlarmKind.low.testAlertIdentifier))
+        for kind in GlucoseAlarmKind.allCases where kind != .low {
+            XCTAssertFalse(manager.soundsUntilAcknowledged(for: kind.alertIdentifier))
+        }
+        XCTAssertTrue(relaunch().lowSoundsUntilAcknowledged)
+    }
+
     func testUnknownIdentifierHasNoAlarm() {
         XCTAssertNil(GlucoseAlarmKind.kind(forAlertIdentifier: "something.else"))
         XCTAssertFalse(manager.playsThroughSilent(for: "something.else"))
