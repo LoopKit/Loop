@@ -234,15 +234,15 @@ extension PodLoanPhoneController {
                 "insulin warning: residual %+.3f U exceeds +%.2f U; the watch's records are complete, so nothing is booked",
                 residual, Self.unexplainedInsulinBand))
 
-            deps.issueUrgentNotice("Unexplained Insulin",
-                             String(format: "Unexpected: the pod delivered %.2f U more than the watch recorded. It isn't counted in insulin on board. Consider reporting it with a Loop Report.", residual))
+            deps.issueUrgentNotice(NSLocalizedString("Unexplained Insulin", comment: "Phone notice title: after Sport Mode the pod delivered more than the watch recorded"),
+                             String(format: NSLocalizedString("Unexpected: the pod delivered %.2f U more than the watch recorded. It isn't counted in insulin on board. Consider reporting it with a Loop Report.", comment: "Phone notice body: unexplained insulin after Sport Mode (1: units)"), residual))
         } else if residual < -Self.warnNegativeResidual {
             handbackDiag(epoch, String(format:
                 "insulin warning: residual %+.3f U is beyond -%.2f U; the records claim more than the pod delivered",
                 residual, Self.warnNegativeResidual))
 
-            deps.issueUrgentNotice("Insulin On Board May Be Overstated",
-                             String(format: "Unexpected: the watch recorded %.2f U more than the pod delivered. Loop may dose cautiously for a few hours. Consider reporting it with a Loop Report.", -residual))
+            deps.issueUrgentNotice(Self.overstatedTitle,
+                             String(format: NSLocalizedString("Unexpected: the watch recorded %.2f U more than the pod delivered. Loop may dose cautiously for a few hours. Consider reporting it with a Loop Report.", comment: "Phone notice body: the watch's records claim more insulin than the pod delivered (1: units)"), -residual))
         }
     }
 
@@ -255,7 +255,7 @@ extension PodLoanPhoneController {
                 residual, Self.unexplainedInsulinBand))
 
             bookEstimate(units: residual, window: window, epoch: epoch,
-                         notice: String(format: "%.2f U booked as a bolus because the watch's records haven't arrived. Its records replace this when the watch is back.", residual))
+                         notice: String(format: NSLocalizedString("%.2f U booked as a bolus because the watch's records haven't arrived. Its records replace this when the watch is back.", comment: "Phone notice body: insulin booked as an estimate because the watch's records haven't arrived (1: units)"), residual))
         } else if residual < -Self.warnNegativeResidual {
             handbackDiag(epoch, String(format:
                 "insulin warning after take-back: residual %+.3f U is beyond -%.2f U; the records claim more than the pod delivered",
@@ -281,7 +281,7 @@ extension PodLoanPhoneController {
                 "insulin warning: %+.3f U over the last %.0f min that this phone's records cannot explain; booking it as an estimate",
                 residual, gapMinutes))
             bookEstimate(units: residual, window: window, epoch: epoch,
-                         notice: String(format: "%.2f U booked as a bolus: insulin the iPhone didn't record, probably from Sport Mode started on the watch. The watch's records replace it when it's back.", residual),
+                         notice: String(format: NSLocalizedString("%.2f U booked as a bolus: insulin the iPhone didn't record, probably from Sport Mode started on the watch. The watch's records replace it when it's back.", comment: "Phone notice body: insulin the phone didn't record, booked as an estimate (1: units)"), residual),
                          completion: completion)
         } else if residual < -Self.warnNegativeResidual {
             handbackDiag(epoch, String(format:
@@ -293,11 +293,11 @@ extension PodLoanPhoneController {
         }
     }
 
-    static let estimatedTitle = "Insulin Estimated After Sport Mode"
-    static let overstatedTitle = "Insulin On Board May Be Overstated"
+    static let estimatedTitle = NSLocalizedString("Insulin Estimated After Sport Mode", comment: "Phone notice title: insulin the watch's missing records would explain is booked as an estimate")
+    static let overstatedTitle = NSLocalizedString("Insulin On Board May Be Overstated", comment: "Phone notice title: the records claim more insulin than the pod delivered")
 
     static func overstatedBody(_ units: Double) -> String {
-        String(format: "Insulin on board may be %.2f U high until the watch's records arrive. Loop will dose cautiously meanwhile.", units)
+        String(format: NSLocalizedString("Insulin on board may be %.2f U high until the watch's records arrive. Loop will dose cautiously meanwhile.", comment: "Phone notice body: insulin on board may be high until the watch's records arrive (1: units)"), units)
     }
 
     // MARK: - Estimates
@@ -364,9 +364,9 @@ extension PodLoanPhoneController {
                             booking.units, doses.count, bolusUnits, rateCount, carbs))
 
                         self.rearmPlaceholderReminders()
-                        self.deps.issueNotice("Watch Records Recovered", carbs > 0
-                            ? String(format: "The watch's records replaced the estimated %.2f U. Loop now doses with the watch's insulin and carbs.", booking.units)
-                            : String(format: "The watch's records replaced the estimated %.2f U. Insulin on board is exact again.", booking.units))
+                        self.deps.issueNotice(NSLocalizedString("Watch Records Recovered", comment: "Phone notice title: the watch's records arrived and replaced an estimate"), carbs > 0
+                            ? String(format: NSLocalizedString("The watch's records replaced the estimated %.2f U. Loop now doses with the watch's insulin and carbs.", comment: "Phone notice body: the watch's records, with carbs, replaced an estimate (1: units)"), booking.units)
+                            : String(format: NSLocalizedString("The watch's records replaced the estimated %.2f U. Insulin on board is exact again.", comment: "Phone notice body: the watch's records replaced an estimate (1: units)"), booking.units))
                     } else {
                         self.updateState {
                             for i in $0.ledger.bookings.indices where $0.ledger.bookings[i].sync == booking.sync {
