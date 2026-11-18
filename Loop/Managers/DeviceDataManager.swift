@@ -43,6 +43,9 @@ protocol UploadEventListener {
 @MainActor
 final class DeviceDataManager {
 
+    /// Pod loan: set by LoopAppManager, weak because the app manager owns it — read by `DeviceDataManager+PodLoan.swift`.
+    weak var watchManager: WatchDataManager?
+
     private let log = DiagnosticLog(category: "DeviceDataManager")
 
     let pluginManager: PluginManager
@@ -1056,6 +1059,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         log.default("PumpManager:%{public}@ did update state", String(describing: type(of: pumpManager)))
 
         rawPumpManager = pumpManager.rawValue
+        podLoanPumpStateChanged()
     }
 
     func pumpManager(_ pumpManager: PumpManager, didRequestBasalRateScheduleChange basalRateSchedule: BasalRateSchedule) async throws {
@@ -1157,6 +1161,7 @@ extension DeviceDataManager: PumpManagerDelegate {
             self.log.error("Failed to addPumpEvents to DoseStore: %{public}@", String(describing: error))
             throw error
         }
+        await podLoanPumpDidReport()
         NotificationCenter.default.post(name: .PumpEventsAdded, object: self, userInfo: nil)
     }
 
@@ -1364,6 +1369,7 @@ struct CancelTempBasalFailedMaximumBasalRateChangedError: LocalizedError {
 
 extension DeviceDataManager : RemoteDataServicesManagerDelegate {
     var shouldSyncGlucoseToRemoteService: Bool {
+        guard !podLoanHoldsGlucoseUploads else { return false }
         guard let cgmManager = cgmManager else {
             return true
         }
@@ -1432,7 +1438,7 @@ extension DeviceDataManager: DeviceSupportDelegate {
             self.pumpManager != nil ? String(reflecting: self.pumpManager!) : "pumpManager: nil",
             "",
             await deviceLog.generateDiagnosticReport()
-            ]
+            ] + podLoanDiagnosticReport
         return report.joined(separator: "\n")
     }
 }
