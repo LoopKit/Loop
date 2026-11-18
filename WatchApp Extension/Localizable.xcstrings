@@ -4412,6 +4412,9 @@
     "The watch app restarted and couldn't resume looping. Nothing is looping until your iPhone gets the watch's records and takes over." : {
       "comment" : "Watch alert body on relaunch after the app died mid-loan"
     },
+    "The watch is still looping. Reopening Loop on both devices usually clears this." : {
+      "comment" : "Watch alert body: the hand-back is unconfirmed and the watch keeps looping"
+    },
     "This is a test of this alarm's sound and delivery. Your glucose has not crossed the level." : {
       "comment" : "Body of a test glucose alert"
     },
