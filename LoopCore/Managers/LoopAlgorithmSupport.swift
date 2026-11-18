@@ -451,6 +451,18 @@ public extension StoredDataAlgorithmInput {
     }
 }
 
+public extension LoanGrant {
+    /// For a grant at `referenceDate` with slow retrospective correction on: where each history starts, as
+    /// `StoredDataAlgorithmInput.fetch` reads with the experiment (72 h of glucose, doses from 72 h + the
+    /// insulin activity duration, carbs from 72 h + the longest absorption), with 5 min to spare.
+    static func slowRetrospectiveCorrectionWindows(referenceDate: Date) -> (glucose: Date, doses: Date, carbs: Date) {
+        let window = TimeInterval.hours(72), spare = TimeInterval.minutes(5)
+        return (glucose: referenceDate.addingTimeInterval(-window - spare),
+                doses: referenceDate.addingTimeInterval(-window - InsulinMath.defaultInsulinActivityDuration - spare),
+                carbs: referenceDate.addingTimeInterval(-window - CarbMath.maximumAbsorptionTimeInterval - spare))
+    }
+}
+
 public extension AlgorithmExperiment {
     /// `LoopDataManager.algorithmExperiments(for:output:)`'s body, shared with the watch: the
     /// enabled experiments as a dosing decision records them. Glucose based partial application only
