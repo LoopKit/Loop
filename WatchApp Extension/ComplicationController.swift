@@ -239,3 +239,21 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         }
     }
 }
+
+// MARK: - Migration to WidgetKit
+
+/// Faces that show a ClockKit complication from this app are moved to its WidgetKit replacement when
+/// the app updates. Both ClockKit descriptors share the identifier "glucosegraph", so they are told
+/// apart by family: the graph is the one offered in the large rectangular slot.
+extension ComplicationController: CLKComplicationWidgetMigrator {
+
+    var widgetMigrator: CLKComplicationWidgetMigrator { self }
+
+    func widgetConfiguration(from complicationDescriptor: CLKComplicationDescriptor) async -> CLKComplicationWidgetMigrationConfiguration? {
+        guard let appBundle = Bundle.main.bundleIdentifier else { return nil }
+        let kind = complicationDescriptor.supportedFamilies.contains(.graphicRectangular)
+            ? LoopComplicationKind.glucoseGraph
+            : LoopComplicationKind.loopStatus
+        return CLKComplicationStaticWidgetMigrationConfiguration(kind: kind, extensionBundleIdentifier: appBundle + ".Complications")
+    }
+}
