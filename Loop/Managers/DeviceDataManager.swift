@@ -210,20 +210,8 @@ final class DeviceDataManager {
         ])
     }
 
-    var sleepDataAuthorizationRequired: Bool {
-        return healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .notDetermined
-    }
-    
     var sleepDataSharingDenied: Bool {
         return healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .sharingDenied
-    }
-
-    /// True if any stores require HealthKit authorization
-    var authorizationRequired: Bool {
-        return healthStore.authorizationStatus(for: HealthKitSampleStore.glucoseType) == .notDetermined ||
-               healthStore.authorizationStatus(for: HealthKitSampleStore.carbType) == .notDetermined ||
-               healthStore.authorizationStatus(for: HealthKitSampleStore.insulinQuantityType) == .notDetermined ||
-               sleepDataAuthorizationRequired
     }
 
     // MARK: Services
@@ -632,14 +620,19 @@ final class DeviceDataManager {
         healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             Task { @MainActor in
                 if success {
-                    // Call the individual authorization methods to trigger query creation
-                    self.carbStore.hkSampleStore?.authorizationIsDetermined()
-                    self.doseStore.hkSampleStore?.authorizationIsDetermined()
-                    self.glucoseStore.hkSampleStore?.authorizationIsDetermined()
+                    self.healthStoreAuthorizationIsDetermined()
                 }
                 self.getHealthStoreAuthorization(completion)
             }
         }
+    }
+
+    /// Tells the HealthKit-backed stores that authorization has been requested, so they start
+    /// their HealthKit queries and refresh the preferred glucose unit.
+    func healthStoreAuthorizationIsDetermined() {
+        carbStore.hkSampleStore?.authorizationIsDetermined()
+        doseStore.hkSampleStore?.authorizationIsDetermined()
+        glucoseStore.hkSampleStore?.authorizationIsDetermined()
     }
 
     private func refreshCGM() async {
