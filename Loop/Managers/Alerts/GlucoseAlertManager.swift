@@ -425,6 +425,7 @@ final class GlucoseAlertManager: ObservableObject {
     private static let lowPlaysThroughSilentKey = "GlucoseAlertLowPlaysThroughSilent"
     private static let highPlaysThroughSilentKey = "GlucoseAlertHighPlaysThroughSilent"
     private static let predictedLowPlaysThroughSilentKey = "GlucoseAlertPredictedLowPlaysThroughSilent"
+    private static let lowSoundsUntilAcknowledgedKey = "GlucoseAlertLowSoundsUntilAcknowledged"
     static let episodeStateKey = "GlucoseAlertEpisodeState"
     private static let armedTestKey = "GlucoseAlertArmedTest"
 
@@ -496,6 +497,15 @@ final class GlucoseAlertManager: ObservableObject {
     }
     @Published var predictedLowPlaysThroughSilent: Bool {
         didSet { userDefaults.set(predictedLowPlaysThroughSilent, forKey: Self.predictedLowPlaysThroughSilentKey) }
+    }
+
+    /// Whether the low alert rings as an alarm until it's acknowledged, as urgent low does.
+    @Published var lowSoundsUntilAcknowledged: Bool {
+        didSet { userDefaults.set(lowSoundsUntilAcknowledged, forKey: Self.lowSoundsUntilAcknowledgedKey) }
+    }
+
+    func soundsUntilAcknowledged(for identifier: Alert.AlertIdentifier) -> Bool {
+        GlucoseAlarmKind.kind(forAlertIdentifier: identifier) == .low && lowSoundsUntilAcknowledged
     }
 
     func playsThroughSilent(for identifier: Alert.AlertIdentifier) -> Bool {
@@ -577,6 +587,7 @@ final class GlucoseAlertManager: ObservableObject {
         lowPlaysThroughSilent = Self.defaultLowPlaysThroughSilent
         highPlaysThroughSilent = Self.defaultHighPlaysThroughSilent
         predictedLowPlaysThroughSilent = Self.defaultPredictedLowPlaysThroughSilent
+        lowSoundsUntilAcknowledged = false
         loopAlertsOverrideForOwnAlertingCGM = false
     }
 
@@ -776,6 +787,7 @@ final class GlucoseAlertManager: ObservableObject {
         self.lowPlaysThroughSilent = userDefaults.object(forKey: Self.lowPlaysThroughSilentKey) as? Bool ?? Self.defaultLowPlaysThroughSilent
         self.highPlaysThroughSilent = userDefaults.object(forKey: Self.highPlaysThroughSilentKey) as? Bool ?? Self.defaultHighPlaysThroughSilent
         self.predictedLowPlaysThroughSilent = userDefaults.object(forKey: Self.predictedLowPlaysThroughSilentKey) as? Bool ?? Self.defaultPredictedLowPlaysThroughSilent
+        self.lowSoundsUntilAcknowledged = userDefaults.bool(forKey: Self.lowSoundsUntilAcknowledgedKey)
 
         if didMigrate {
             // Write new format and erase all legacy + WIP keys atomically so

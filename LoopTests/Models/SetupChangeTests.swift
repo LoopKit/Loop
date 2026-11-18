@@ -160,4 +160,35 @@ final class SetupChangeTests: XCTestCase {
         let history = history([settings(at: 5)], [experiments(at: 1, nil), experiments(at: 3, [])])
         XCTAssertEqual(history.start, start.addingTimeInterval(.hours(3)))
     }
+
+    func testMarkedChangesStartSetups() {
+        let walking = CustomSetupChange(date: start.addingTimeInterval(.hours(10)), note: "Started walking")
+        let berberine = CustomSetupChange(date: start.addingTimeInterval(.hours(20.5)), note: nil)
+        let history = SetupHistory(settings: [settings(at: 0), settings(at: 20, basal: 1.2)], experiments: [], custom: [berberine, walking])
+        XCTAssertEqual(history.changes, [
+            SetupChange(date: walking.date, isLowerBound: false, items: [.custom(walking)], previousDate: start),
+            SetupChange(date: berberine.date, isLowerBound: false, items: [.custom(berberine), .therapySetting(.basalRate)], previousDate: walking.date),
+        ])
+        XCTAssertEqual(history.customChanges, [walking, berberine])
+    }
+
+    func testMarkedChangeBeforeRecordsMovesStart() {
+        let marked = CustomSetupChange(date: start - .days(1), note: nil)
+        let history = SetupHistory(settings: [settings(at: 0)], experiments: [], custom: [marked])
+        XCTAssertEqual(history.start, marked.date)
+        XCTAssertEqual(history.latest?.items, [.custom(marked)])
+    }
+
+    func testCustomChangeStore() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+        let store = CustomSetupChangeStore(defaults: defaults)
+        let first = CustomSetupChange(date: start, note: "Started berberine")
+        let second = CustomSetupChange(date: start + .days(1), note: nil)
+        store.add(first)
+        store.add(second)
+        XCTAssertEqual(CustomSetupChangeStore(defaults: defaults).changes, [first, second])
+        store.remove(id: first.id)
+        XCTAssertEqual(store.changes, [second])
+    }
 }
