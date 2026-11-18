@@ -55,6 +55,8 @@ public final class AlertManager {
 
     /// Non-critical alerts that should play their sound in-app, through the silent switch and Focus.
     var playsThroughSilent: (Alert) -> Bool = { _ in false }
+    /// Non-critical alerts that ring as an AlarmKit alarm until acknowledged, when alarms are allowed.
+    var soundsUntilAcknowledged: (Alert) -> Bool = { _ in false }
 
     let alertStore: AlertStore
 
@@ -111,7 +113,8 @@ public final class AlertManager {
             .sink { [weak self] publisher in
                 if let loopDataManager = publisher.object as? LoopDataManager {
                     Task { @MainActor in
-                        await self?.loopDidComplete(loopDataManager.lastLoopCompleted)
+                        let manualTempBasalRunning = loopDataManager.deliveryDelegate?.isManualTempBasalRunning == true
+                        await self?.loopDidComplete(manualTempBasalRunning ? nil : loopDataManager.lastLoopCompleted)
                     }
                 }
             }
@@ -370,7 +373,7 @@ extension AlertManager: AlertManagerResponder {
         userNotificationAlertScheduler.alertWasAcknowledged(identifier: identifier)
         await modalAlertScheduler.removePresentedAlert(identifier: identifier)
         criticalAlertAlarmScheduler.cancelAlarm(for: identifier)
-        criticalAlertAudioPlayer.stop()
+        criticalAlertAudioPlayer.stop(for: identifier)
         try await alertStore.recordAcknowledgement(of: identifier)
     }
 
@@ -437,14 +440,29 @@ extension AlertManager: AlertIssuer {
     private func scheduleAlertWithSchedulers(_ alert: Alert, issuedDate: Date = Date()) {
         modalAlertScheduler.scheduleAlert(alert)
         let muted = alertMuter.shouldMuteAlert(alert, issuedDate: issuedDate)
-        let inAppSound = muted ? nil : inAppSoundThroughSilent(for: alert)
+        let ringsAsAlarm = !muted && ringsAsAlarm(alert)
+        let inAppSound = muted || ringsAsAlarm ? nil : inAppSoundThroughSilent(for: alert)
         // The notification stays silent when the app plays the sound, so it isn't heard twice
-        userNotificationAlertScheduler.scheduleAlert(alert, muted: muted || inAppSound != nil)
+        userNotificationAlertScheduler.scheduleAlert(alert, muted: muted || ringsAsAlarm || inAppSound != nil)
+        if ringsAsAlarm {
+            log.default("Ringing alarm until acknowledged for %{public}@", String(describing: alert.identifier))
+            let soundName = alert.sound?.filename ?? "critical.caf"
+            criticalAlertAlarmScheduler.scheduleAlarm(for: alert, onScheduleFailure: { [weak self] in
+                self?.criticalAlertAudioPlayer.play(soundNamed: soundName, boostVolume: false, for: alert.identifier)
+            })
+        }
         if let inAppSound {
             log.default("Playing %{public}@ through silent mode for %{public}@", inAppSound, String(describing: alert.identifier))
-            criticalAlertAudioPlayer.play(soundNamed: inAppSound, boostVolume: false)
+            criticalAlertAudioPlayer.play(soundNamed: inAppSound, boostVolume: false, for: alert.identifier)
         }
         playCriticalAlertAudioFallbackIfNeeded(for: alert, muted: muted, issuedDate: issuedDate)
+    }
+
+    private func ringsAsAlarm(_ alert: Alert) -> Bool {
+        guard alert.interruptionLevel != .critical, case .immediate = alert.trigger, alert.sound != nil else {
+            return false
+        }
+        return soundsUntilAcknowledged(alert) && criticalAlertAlarmScheduler.isAuthorizedAndAvailable
     }
 
     private func inAppSoundThroughSilent(for alert: Alert) -> String? {
@@ -461,7 +479,7 @@ extension AlertManager: AlertIssuer {
         await modalAlertScheduler.unscheduleAlert(identifier: identifier)
         userNotificationAlertScheduler.unscheduleAlert(identifier: identifier)
         criticalAlertAlarmScheduler.cancelAlarm(for: identifier)
-        criticalAlertAudioPlayer.stop()
+        criticalAlertAudioPlayer.stop(for: identifier)
     }
 
     /// When the system can't deliver a true Critical Alert (no
@@ -493,13 +511,13 @@ extension AlertManager: AlertIssuer {
         let soundName = alert.sound?.filename ?? "critical.caf"
         if criticalAlertAlarmScheduler.scheduleAlarm(for: alert, onScheduleFailure: { [weak self] in
             self?.log.default("AlarmKit scheduling failed for %@; playing audio fallback", String(describing: alert.identifier))
-            self?.criticalAlertAudioPlayer.play(soundNamed: soundName)
+            self?.criticalAlertAudioPlayer.play(soundNamed: soundName, for: alert.identifier)
         }) {
             log.default("Scheduled AlarmKit alarm for critical alert %@ (no entitlement or user-disabled)", String(describing: alert.identifier))
             return
         }
         log.default("Playing audio fallback for critical alert %@ with sound %@ (no entitlement or user-disabled)", String(describing: alert.identifier), soundName)
-        criticalAlertAudioPlayer.play(soundNamed: soundName)
+        criticalAlertAudioPlayer.play(soundNamed: soundName, for: alert.identifier)
     }
 
     private func rescheduleAlertWithSchedulers(_ alert: Alert, issuedDate: Date) async {
@@ -873,15 +891,6 @@ extension AlertManager {
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
             cancelAction()
         }))
-        
-        await alertPresenter.present(alert, animated: true)
-    }
-    
-    func presentCouldNotResetLoopAlert(error: Error) async {
-        let titleString = String(format: NSLocalizedString("Could Not Restart %1$@", comment: "Format string for title of reset loop alert. (1: App name)"), Bundle.main.bundleDisplayName)
-        let message = String(format: NSLocalizedString("While trying to restart %1$@ an error occured.\n\n%2$@", comment: "Format string for message of reset loop alert. (1: App name) (2: error description)"), Bundle.main.bundleDisplayName, error.localizedDescription)
-        let alert = UIAlertController(title: titleString, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Cancel button for reset loop alert"), style: .cancel))
         
         await alertPresenter.present(alert, animated: true)
     }

@@ -135,7 +135,7 @@ final class ExtensionDataManager {
         context.mostRecentGlucoseDataDate = loopDataManager.mostRecentGlucoseDataDate
         context.mostRecentPumpDataDate = loopDataManager.mostRecentPumpDataDate
 
-        context.isClosedLoop = self.settingsManager.dosingEnabled
+        context.isClosedLoop = self.deviceManager.isAutomaticDosingActive
 
         context.preMealPresetAllowed = self.settingsManager.dosingEnabled && self.settingsManager.settings.preMealTargetRange != nil
         context.preMealPresetActive = self.temporaryPresetsManager.isPreMealTargetActive()

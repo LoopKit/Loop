@@ -42,6 +42,7 @@ public struct ExperimentsSettingsView: View {
     @AppStorage(UserDefaults.Key.GlucoseBasedApplicationFactorEnabled.rawValue) private var isGlucoseBasedApplicationFactorEnabled = false
     @AppStorage(UserDefaults.Key.IntegralRetrospectiveCorrectionEnabled.rawValue) private var isIntegralRetrospectiveCorrectionEnabled = false
     @AppStorage(UserDefaults.Key.GuardAndRunwayEnabled.rawValue) private var isGuardAndRunwayEnabled = false
+    @AppStorage(UserDefaults.Key.SlowRetrospectiveCorrectionEnabled.rawValue) private var isSlowRetrospectiveCorrectionEnabled = false
     var automaticDosingStrategy: AutomaticDosingStrategy
 
     public var body: some View {
@@ -63,8 +64,13 @@ public struct ExperimentsSettingsView: View {
                 Divider()
                 NavigationLink(destination: GuardAndRunwaySelectionView(isGuardAndRunwayEnabled: $isGuardAndRunwayEnabled)) {
                     ExperimentRow(
-                        name: NSLocalizedString("Guard + Runway", comment: "Title of guard and runway experiment"),
+                        name: NSLocalizedString("Guard + Runway v2", comment: "Title of guard and runway experiment, second version"),
                         enabled: isGuardAndRunwayEnabled)
+                }
+                NavigationLink(destination: SlowRetrospectiveCorrectionSelectionView(isSlowRetrospectiveCorrectionEnabled: $isSlowRetrospectiveCorrectionEnabled)) {
+                    ExperimentRow(
+                        name: NSLocalizedString("Slow Retrospective Correction", comment: "Title of slow retrospective correction experiment"),
+                        enabled: isSlowRetrospectiveCorrectionEnabled)
                 }
                 NavigationLink(destination: GlucoseBasedApplicationFactorSelectionView(isGlucoseBasedApplicationFactorEnabled: $isGlucoseBasedApplicationFactorEnabled, automaticDosingStrategy: automaticDosingStrategy)) {
                     ExperimentRow(
@@ -94,6 +100,7 @@ extension UserDefaults {
         case GlucoseBasedApplicationFactorEnabled = "com.loopkit.algorithmExperiments.glucoseBasedApplicationFactorEnabled"
         case IntegralRetrospectiveCorrectionEnabled = "com.loopkit.algorithmExperiments.integralRetrospectiveCorrectionEnabled"
         case GuardAndRunwayEnabled = "com.loopkit.algorithmExperiments.guardAndRunwayEnabled"
+        case SlowRetrospectiveCorrectionEnabled = "com.loopkit.algorithmExperiments.slowRetrospectiveCorrectionEnabled"
     }
 
     var glucoseBasedApplicationFactorEnabled: Bool {
@@ -120,6 +127,15 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.GuardAndRunwayEnabled.rawValue)
+        }
+    }
+
+    var slowRetrospectiveCorrectionEnabled: Bool {
+        get {
+            bool(forKey: Key.SlowRetrospectiveCorrectionEnabled.rawValue) as Bool
+        }
+        set {
+            set(newValue, forKey: Key.SlowRetrospectiveCorrectionEnabled.rawValue)
         }
     }
 

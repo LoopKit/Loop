@@ -7,6 +7,7 @@
 
 import XCTest
 import LoopAlgorithm
+import LoopCore
 import LoopKit
 @testable import Loop
 
@@ -62,6 +63,21 @@ final class SetupComparisonTests: XCTestCase {
         XCTAssertNil(comparison.before)
     }
 
+    func testBeforeStartsWhereTheRecordsStart() throws {
+        let now = changeDate.addingTimeInterval(.days(3))
+        let glucose = samples(from: changeDate - .days(9), to: now) { _ in 120 }
+        let comparison = try XCTUnwrap(SetupComparison(change: change(), samples: glucose, insulinHistory: nil, now: now))
+        XCTAssertEqual(comparison.before?.start, changeDate - .days(9))
+        XCTAssertEqual(comparison.before?.days ?? 0, 9, accuracy: 0.001)
+    }
+
+    func testNoBeforeWithLessThanAWeekOfRecords() throws {
+        let now = changeDate.addingTimeInterval(.days(3))
+        let glucose = samples(from: changeDate - .days(6), to: now) { _ in 120 }
+        let comparison = try XCTUnwrap(SetupComparison(change: change(), samples: glucose, insulinHistory: nil, now: now))
+        XCTAssertNil(comparison.before)
+    }
+
     func testAfterRunsUntilNow() throws {
         let now = changeDate.addingTimeInterval(.days(30))
         let glucose = samples(from: changeDate - .days(25), to: now) { _ in 120 }
@@ -109,5 +125,74 @@ final class SetupComparisonTests: XCTestCase {
         XCTAssertNotNil(comparison.before)
         XCTAssertNil(comparison.before?.insulinPerDay)
         XCTAssertNotNil(comparison.after.insulinPerDay)
+    }
+
+    func testInsulinBeforeFromWhenTheDoseRecordsStart() throws {
+        let now = changeDate.addingTimeInterval(.days(2))
+        let glucose = samples(from: changeDate - .days(21), to: now) { _ in 120 }
+        let recordsStart = changeDate - .days(18)
+        let history = InsulinDeliveryHistory(
+            doses: [],
+            scheduledBasal: [AbsoluteScheduleValue(startDate: changeDate - .days(21), endDate: now, value: 1.0)],
+            coverageStart: recordsStart,
+            end: now)
+        let comparison = try XCTUnwrap(SetupComparison(change: change(), samples: glucose, insulinHistory: history, now: now))
+
+        XCTAssertEqual(comparison.before?.insulinPerDay ?? 0, 24, accuracy: 0.001)
+        XCTAssertEqual(comparison.before?.insulinStart, recordsStart)
+        XCTAssertNil(comparison.after.insulinStart)
+    }
+
+    func testNoInsulinBeforeWithLessThanTwoWeeksOfDoseRecords() throws {
+        let now = changeDate.addingTimeInterval(.days(2))
+        let glucose = samples(from: changeDate - .days(21), to: now) { _ in 120 }
+        let history = InsulinDeliveryHistory(doses: [], scheduledBasal: [], coverageStart: changeDate - .days(10), end: now)
+        let comparison = try XCTUnwrap(SetupComparison(change: change(), samples: glucose, insulinHistory: history, now: now))
+
+        XCTAssertNil(comparison.before?.insulinPerDay)
+        XCTAssertNil(comparison.before?.insulinStart)
+    }
+
+    /// A clock that moves on with every reading, as the real one does.
+    private final class Clock {
+        var date: Date
+        init(_ date: Date) { self.date = date }
+        func now() -> Date {
+            date += 1
+            return date
+        }
+    }
+
+    @MainActor
+    func testCurrentSetupShowsInsulinPerDaySinceTheChange() async throws {
+        let timeZone = TimeZone(identifier: "America/Chicago")!
+        func settings(at date: Date, basal: Double) -> StoredSettings {
+            StoredSettings(
+                date: date,
+                dosingEnabled: true,
+                maximumBolus: 10,
+                deviceToken: nil,
+                insulinType: .novolog,
+                basalRateSchedule: BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: basal)], timeZone: timeZone),
+                insulinSensitivitySchedule: InsulinSensitivitySchedule(unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 50)], timeZone: timeZone),
+                automaticDosingStrategy: .automaticBolus)
+        }
+        let start = changeDate - .days(30)
+        let history = SetupHistory(settings: [settings(at: start, basal: 1.0), settings(at: changeDate, basal: 1.2)], experiments: [])
+        let clock = Clock(changeDate + .days(2))
+
+        let viewModel = CurrentSetupViewModel(
+            selected: nil,
+            loadHistory: { history },
+            glucoseStore: nil,
+            insulinDeliveryHistory: { _ in
+                let end = clock.now()
+                return InsulinDeliveryHistory(doses: [], scheduledBasal: [AbsoluteScheduleValue(startDate: start, endDate: end, value: 1.0)], coverageStart: start, end: end)
+            },
+            now: clock.now)
+        await viewModel.load()
+
+        let comparison = try XCTUnwrap(viewModel.comparison)
+        XCTAssertEqual(comparison.after.insulinPerDay ?? 0, 24, accuracy: 0.01)
     }
 }

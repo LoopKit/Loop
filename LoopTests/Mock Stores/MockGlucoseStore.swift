@@ -8,6 +8,7 @@
 
 import LoopKit
 @testable import Loop
+@testable import LoopCore
 
 class MockGlucoseStore: GlucoseStoreProtocol {
 

@@ -163,7 +163,7 @@ class LoopStatusModalViewModel {
     }
     
     var loopIconClosed: Bool {
-        settingsManager?.dosingEnabled ?? true
+        deviceManager?.isAutomaticDosingActive ?? settingsManager?.dosingEnabled ?? true
     }
     
     var hasBluetoothIssue: Bool {
@@ -246,6 +246,8 @@ class LoopStatusModalViewModel {
                 return (titleDeviceIssue, NSLocalizedString("Tap your CGM or insulin pump status icons right away for more information and steps to resolve the issue.", comment: "message when automation is off and there is a bluetooth or pump issue"))
             } else if isDeliverySuspended {
                 return (titleAutomationOff, NSLocalizedString("Resume insulin if you wish for the app to restart insulin delivery.\n\nIf you wish for the app to automate your insulin, go to Settings and toggle Closed Loop to on.", comment: "message when automation is off and insulin delivery is suspended"))
+            } else if isManualTempBasalRunning, settingsManager?.dosingEnabled == true {
+                return (titleAutomationOff, NSLocalizedString("Your pump and CGM will continue to operate, but the app will not adjust insulin dosing while a manual temporary basal is in progress.\n\nCancel the manual temporary basal if you wish for the app to restart automated dosing.", comment: "message when closed loop is on and a manual temp basal is in progress"))
             } else if isManualTempBasalRunning {
                 return (titleAutomationOff, NSLocalizedString("Cancel the manual temporary basal if you wish for the app to restart automated dosing.\n\nIf you wish for the app to automate your insulin, go to Settings and toggle Closed Loop to on.", comment: "message when automation is off and a manual temp basal is in progress"))
             } else if isCGMInoperable {

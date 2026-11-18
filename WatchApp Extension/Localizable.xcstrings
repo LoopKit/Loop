@@ -1,6 +1,30 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "\n" : {
+
+    },
+    " " : {
+
+    },
+    " %@" : {
+
+    },
+    " %@ ago" : {
+      "comment" : "Format string describing the time interval since the last completion date, last cgm or last pump communication. (1: The localized date components"
+    },
+    " • " : {
+
+    },
+    " >%@ ago" : {
+      "comment" : "Format string describing the time interval since the last completion date, last cgm or last pump communication. (1: The localized date components"
+    },
+    " at %@" : {
+
+    },
+    "-" : {
+
+    },
     "---" : {
       "comment" : "No glucose value representation (3 dashes for mg/dL; no spaces as this will get truncated in the watch complication)",
       "localizations" : {
@@ -86,6 +110,7 @@
     },
     "– – –" : {
       "comment" : "No glucose value representation (3 dashes for mg/dL)",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -215,6 +240,9 @@
         }
       }
     },
+    "—" : {
+
+    },
     "%@" : {
       "localizations" : {
         "da" : {
@@ -299,6 +327,7 @@
     },
     "%1$@ – %2$@ %3$@" : {
       "comment" : "Format string for glucose range (1: lower bound)(2: upper bound)(3: unit)",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1261,6 +1290,9 @@
         }
       }
     },
+    "Current Delivery" : {
+
+    },
     "dB" : {
       "comment" : "The short unit display string for decibles",
       "localizations" : {
@@ -1386,6 +1418,9 @@
         }
       }
     },
+    "Decreased" : {
+      "comment" : "Title for increased insulin delivery state"
+    },
     "Dismiss" : {
       "comment" : "The action button title to dismiss an error message",
       "localizations" : {
@@ -1505,8 +1540,11 @@
         }
       }
     },
+    "Ending Preset..." : {
+
+    },
     "g" : {
-      "comment" : "Short unit label for gram measurement\nThe short unit display string for grams",
+      "comment" : "Short unit label for gram measurement",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1630,8 +1668,30 @@
         }
       }
     },
+    "HIGH" : {
+      "comment" : "String displayed instead of a glucose value above the CGM range"
+    },
+    "Increased" : {
+      "comment" : "Title for increased insulin delivery state state"
+    },
+    "Last Bolus" : {
+
+    },
+    "Last Connection" : {
+
+    },
+    "Last Loop" : {
+
+    },
+    "Last Reading" : {
+
+    },
+    "LOW" : {
+      "comment" : "String displayed instead of a glucose value below the CGM range"
+    },
     "Make sure your iPhone is nearby and try again" : {
       "comment" : "The recovery message displayed after a glucose range override send attempt fails",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1840,6 +1900,7 @@
     },
     "mg/dL" : {
       "comment" : "The short unit display string for milligrams of glucose per decilter",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1965,6 +2026,7 @@
     },
     "mmol/L" : {
       "comment" : "The short unit display string for millimoles of glucose per liter",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2090,6 +2152,7 @@
     },
     "Net Basal Rate" : {
       "comment" : "HUD row title for Net Basal Rate",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2207,8 +2270,15 @@
         }
       }
     },
+    "Next Reading" : {
+
+    },
+    "No Delivery" : {
+      "comment" : "Title for increased insulin delivery state state"
+    },
     "Off" : {
       "comment" : "Label for off button",
+      "extractionState" : "stale",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
@@ -2446,6 +2516,7 @@
     },
     "On" : {
       "comment" : "Label for on button",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2575,6 +2646,18 @@
         }
       }
     },
+    "on until %@" : {
+      "comment" : "The format for the description of a finite custom preset end date"
+    },
+    "on until carbs added" : {
+      "comment" : "The format for the description of a premeal preset end date"
+    },
+    "on until turned off" : {
+      "comment" : "The format for the description of an indefinite custom preset end date"
+    },
+    "One-time use override has ended." : {
+
+    },
     "Override" : {
       "comment" : "The text for the Watch button for enabling a temporary override",
       "extractionState" : "manual",
@@ -2701,6 +2784,9 @@
         }
       }
     },
+    "Please complete onboarding to use the %1$@ Watch app" : {
+      "comment" : "Watch app onboarding prompt (1: app name)"
+    },
     "Please reconfirm the bolus amount." : {
       "comment" : "Alert message for updated bolus recommendation on Apple Watch",
       "localizations" : {
@@ -2792,6 +2878,7 @@
     },
     "Pre-Meal" : {
       "comment" : "Title for sheet to enable/disable pre-meal on watch",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2911,6 +2998,7 @@
     },
     "Preset" : {
       "comment" : "The text for the Watch button for enabling a custom preset",
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -2997,6 +3085,9 @@
           }
         }
       }
+    },
+    "Preset Delivery" : {
+      "comment" : "Title for neutral delivery state state with preset adjusting basal"
     },
     "QUANTITY_VALUE_AND_UNIT" : {
       "comment" : "Format string for combining localized numeric value and unit. (1: numeric value)(2: unit)",
@@ -3761,8 +3852,15 @@
         }
       }
     },
+    "Scheduled" : {
+      "comment" : "Title for neutral delivery state"
+    },
+    "Select Preset" : {
+
+    },
     "Send Failed" : {
       "comment" : "The title of the alert controller displayed after a glucose range override send attempt fails",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3880,6 +3978,24 @@
         }
       }
     },
+    "Sensor" : {
+      "comment" : "Title of the watch's sensor page when the sensor has no name yet"
+    },
+    "Start Preset" : {
+      "comment" : "Button text to confirm starting preset before using digital crown"
+    },
+    "starting at %@" : {
+      "comment" : "The format for the description of a custom preset start date"
+    },
+    "Starting Preset..." : {
+
+    },
+    "Suspended" : {
+      "comment" : "Title for increased insulin delivery state state"
+    },
+    "Total Carbs" : {
+
+    },
     "Turn Digital Crown\nto bolus" : {
       "comment" : "Help text for bolus confirmation on Apple Watch",
       "localizations" : {
@@ -3968,6 +4084,12 @@
           }
         }
       }
+    },
+    "Turn Digital Crown to End" : {
+
+    },
+    "Turn Digital Crown to Start" : {
+
     },
     "U" : {
       "comment" : "The short unit display string for international units of insulin",
@@ -4304,6 +4426,7 @@
     },
     "Workout" : {
       "comment" : "The text for the Watch button for enabling workout mode\nTitle for sheet to enable/disable workout mode on watch",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

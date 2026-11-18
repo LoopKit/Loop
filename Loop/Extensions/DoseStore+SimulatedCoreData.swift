@@ -109,7 +109,7 @@ fileprivate extension PersistedPumpEvent {
                                          endDate: date.addingTimeInterval(duration),
                                          value: rate,
                                          unit: .unitsPerHour,
-                                         decisionId: nil,
+                                         doseId: nil,
                                          deliveredUnits: rate * duration / .hours(1)))
     }
 
@@ -119,7 +119,7 @@ fileprivate extension PersistedPumpEvent {
                                          endDate: date.addingTimeInterval(.minutes(1)),
                                          value: amount,
                                          unit: .units,
-                                         decisionId: nil))
+                                         doseId: nil))
     }
 
     static func simulatedPrime(date: Date) -> PersistedPumpEvent {
@@ -144,7 +144,7 @@ fileprivate extension PersistedPumpEvent {
                                          endDate: date.addingTimeInterval(duration),
                                          value: rate,
                                          unit: .unitsPerHour,
-                                         decisionId: nil,
+                                         doseId: nil,
                                          deliveredUnits: rate * duration / .hours(1),
                                          scheduledBasalRate: LoopQuantity(unit: .internationalUnitsPerHour, doubleValue: scheduledRate)))
     }

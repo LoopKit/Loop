@@ -22,6 +22,24 @@ extension MockPumpManagerError: LocalizedError {
 
 
 class DoseEnactorTests: XCTestCase {
+    func testEachDoseGetsItsOwnDoseId() async throws {
+        let enactor = DoseEnactor()
+        let pumpManager = MockPumpManager()
+        var requestedActivationTypes: [BolusActivationType?] = []
+        var issuedDoseIds: [UUID] = []
+
+        try await enactor.enact(bolus: 1.5, tempBasal: TempBasalRecommendation(unitsPerHour: 0, duration: 0), with: pumpManager) { activationType in
+            requestedActivationTypes.append(activationType)
+            let doseId = UUID()
+            issuedDoseIds.append(doseId)
+            return doseId
+        }
+
+        XCTAssertEqual(requestedActivationTypes, [nil, .automatic])
+        XCTAssertEqual(pumpManager.enactedDoseIds, issuedDoseIds)
+        XCTAssertEqual(Set(issuedDoseIds).count, 2)
+    }
+
     func testBasalAndBolusDosedSerially() async throws {
         let enactor = DoseEnactor()
         let tempBasalRecommendation = TempBasalRecommendation(unitsPerHour: 0, duration: 0) // Cancel
@@ -38,7 +56,7 @@ class DoseEnactorTests: XCTestCase {
             bolusExpectation.fulfill()
         }
 
-        try await enactor.enact(decisionId: nil, bolus: recommendation.bolusUnits, tempBasal: recommendation.basalAdjustment, with: pumpManager)
+        try await enactor.enact(bolus: recommendation.bolusUnits, tempBasal: recommendation.basalAdjustment, with: pumpManager) { _ in UUID() }
 
         await fulfillment(of: [tempBasalExpectation, bolusExpectation], timeout: 5, enforceOrder: true)
     }
@@ -61,7 +79,7 @@ class DoseEnactorTests: XCTestCase {
         pumpManager.enactTempBasalError = .configuration(MockPumpManagerError.failed)
 
         do {
-            try await enactor.enact(decisionId: nil, bolus: recommendation.bolusUnits, tempBasal: recommendation.basalAdjustment, with: pumpManager)
+            try await enactor.enact(bolus: recommendation.bolusUnits, tempBasal: recommendation.basalAdjustment, with: pumpManager) { _ in UUID() }
             XCTFail("Expected enact to throw error on failure.")
         } catch {
         }
@@ -86,7 +104,7 @@ class DoseEnactorTests: XCTestCase {
             XCTFail("Should not enact bolus")
         }
 
-        try await enactor.enact(decisionId: nil, bolus: recommendation.bolusUnits, tempBasal: recommendation.basalAdjustment, with: pumpManager)
+        try await enactor.enact(bolus: recommendation.bolusUnits, tempBasal: recommendation.basalAdjustment, with: pumpManager) { _ in UUID() }
 
         await fulfillment(of: [tempBasalExpectation])
     }

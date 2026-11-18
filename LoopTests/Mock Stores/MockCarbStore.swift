@@ -7,7 +7,7 @@
 //
 
 import LoopKit
-import LoopCore
+@testable import LoopCore
 @testable import Loop
 
 class MockCarbStore: CarbStoreProtocol {

@@ -419,7 +419,7 @@ class LoopDataManagerTests: XCTestCase {
             StoredGlucoseSample(startDate: d(.minutes(-1)), quantity: .glucose(value: 150)),
         ]
 
-        let dose = DoseEntry(type: .tempBasal, startDate: Date(), value: 1.0, unit: .unitsPerHour, decisionId: nil)
+        let dose = DoseEntry(type: .tempBasal, startDate: Date(), value: 1.0, unit: .unitsPerHour, doseId: nil)
         deliveryDelegate.basalDeliveryState = .tempBasal(dose)
 
         dosingDecisionStore.storeExpectation = expectation(description: #function)
@@ -478,7 +478,7 @@ class LoopDataManagerTests: XCTestCase {
             endDate: d(.minutes(29)),
             value: 5.05,
             unit: .unitsPerHour,
-            decisionId: nil,
+            doseId: nil,
         )
         deliveryDelegate.basalDeliveryState = .tempBasal(dose)
 
@@ -600,6 +600,53 @@ class LoopDataManagerTests: XCTestCase {
         let recent = try await loopDataManager.fetchData(for: now, ensureCarbCoverageStart: d(.minutes(-5)))
         XCTAssertEqual(normal.carbRatio, recent.carbRatio)
         XCTAssertEqual(normal.sensitivityMgdlPerUnit, recent.sensitivityMgdlPerUnit)
+    }
+
+    func testSlowRetrospectiveCorrectionReadsThreeDaysOfHistory() async throws {
+        glucoseStore.storedGlucose = [
+            StoredGlucoseSample(startDate: d(.hours(-71)), quantity: .glucose(value: 120)),
+            StoredGlucoseSample(startDate: d(.minutes(-1)), quantity: .glucose(value: 150))
+        ]
+        carbStore.carbHistory = [
+            StoredCarbEntry(startDate: d(.hours(-80)), quantity: .carbs(value: 20))
+        ]
+
+        let normal = try await loopDataManager.fetchData(for: now)
+        XCTAssertEqual(normal.glucoseHistory.count, 1)
+        XCTAssertTrue(normal.carbEntries.isEmpty)
+        XCTAssertFalse(normal.experiments.contains(.slowRetrospectiveCorrection))
+
+        UserDefaults.standard.slowRetrospectiveCorrectionEnabled = true
+        defer { UserDefaults.standard.slowRetrospectiveCorrectionEnabled = false }
+
+        let slow = try await loopDataManager.fetchData(for: now)
+        XCTAssertEqual(slow.glucoseHistory.count, 2)
+        XCTAssertEqual(slow.carbEntries.count, 1)
+        XCTAssertTrue(slow.experiments.contains(.slowRetrospectiveCorrection))
+        // The algorithm refuses carb entries older than the carb ratio and ISF timelines.
+        XCTAssertLessThanOrEqual(try XCTUnwrap(slow.carbRatio.first).startDate, d(.hours(-80)))
+        XCTAssertLessThanOrEqual(try XCTUnwrap(slow.sensitivityMgdlPerUnit.first).startDate, d(.hours(-80)))
+    }
+
+    func testSlowRetrospectiveCorrectionIsRecordedOnTheDosingDecision() async throws {
+        // Three days of a slow rise that no carbs or insulin explain
+        glucoseStore.storedGlucose = stride(from: 864, through: 1, by: -1).map { step in
+            StoredGlucoseSample(startDate: d(.minutes(Double(-5 * step) + 4)), quantity: .glucose(value: 250 - 0.15 * Double(step)))
+        }
+        UserDefaults.standard.slowRetrospectiveCorrectionEnabled = true
+        defer { UserDefaults.standard.slowRetrospectiveCorrectionEnabled = false }
+
+        await loopDataManager.loop()
+
+        let slow = try XCTUnwrap(loopDataManager.displayState.output?.slowRetrospectiveCorrection)
+        XCTAssertGreaterThan(slow.level, 0)
+        XCTAssertLessThan(slow.multiplier, 1)
+
+        let experiment = try XCTUnwrap(dosingDecisionStore.dosingDecisions.first?.algorithmExperiments?.first { $0.identifier == "slowRetrospectiveCorrection" })
+        guard case .object(let parameters)? = experiment.parameters, case .number(let multiplier)? = parameters["multiplier"] else {
+            return XCTFail("The multiplier is not recorded")
+        }
+        XCTAssertEqual(multiplier, slow.multiplier, accuracy: 0.01)
     }
 
     private func assertMissingCarbScheduleThrows(_ detail: ConfigurationErrorDetail, preview: Bool) async throws {
@@ -733,7 +780,7 @@ extension DoseEntry {
             endDate: fixture.endDate,
             value: fixture.volume,
             unit: .units,
-            decisionId: nil
+            doseId: nil
         )
     }
 }

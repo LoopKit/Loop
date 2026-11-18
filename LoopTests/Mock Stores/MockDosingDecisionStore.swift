@@ -9,6 +9,7 @@
 import LoopKit
 import XCTest
 @testable import Loop
+@testable import LoopCore
 
 class MockDosingDecisionStore: DosingDecisionStoreProtocol {
     var delegate: LoopKit.DosingDecisionStoreDelegate?

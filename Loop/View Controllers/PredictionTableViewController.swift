@@ -79,6 +79,8 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
     private var guardAndRunway: GuardAndRunwayOutput?
 
+    private var slowRetrospectiveCorrection: SlowRetrospectiveCorrectionOutput?
+
     private var refreshContext = RefreshContext.all
 
     private var chartStartDate: Date {
@@ -129,14 +131,20 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         self.retrospectiveGlucoseDiscrepancies = algoOutput?.effects.retrospectiveGlucoseDiscrepancies.map(\.loopKit)
         totalRetrospectiveCorrection = algoOutput?.effects.totalRetrospectiveCorrectionEffect.map { LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: $0) }
         self.guardAndRunway = algoOutput?.guardAndRunway
+        self.slowRetrospectiveCorrection = algoOutput?.slowRetrospectiveCorrection
 
-        self.glucoseChart.setPredictedGlucoseValues((algoOutput?.predictedGlucose ?? []).map(\.loopKit))
+        let predictedGlucose = algoOutput?.predictedGlucose ?? []
+        self.glucoseChart.setPredictedGlucoseValues(predictedGlucose.map(\.loopKit))
+
+        if self.selectedInputs.contains(.guardAndRunway), let guardAndRunway = self.guardAndRunway, guardAndRunway.bandApplied {
+            self.glucoseChart.setGuardPredictedGlucoseValues(guardAndRunway.guarded(predictedGlucose).map(\.loopKit))
+        } else {
+            self.glucoseChart.setGuardPredictedGlucoseValues([])
+        }
 
         do {
-            var glucose = try algoInput?.predictGlucose(effectsOptions: self.selectedInputs.algorithmEffectOptions) ?? []
-            if self.selectedInputs.contains(.guardAndRunway), let guardAndRunway = self.guardAndRunway {
-                glucose = guardAndRunway.guarded(glucose)
-            }
+            let sensitivityMultiplier = self.selectedInputs.contains(.slowRetrospectiveCorrection) ? self.slowRetrospectiveCorrection?.multiplier ?? 1 : 1
+            let glucose = try algoInput?.predictGlucose(effectsOptions: self.selectedInputs.algorithmEffectOptions, sensitivityMultiplier: sensitivityMultiplier) ?? []
             self.glucoseChart.setAlternatePredictedGlucoseValues(glucose.map(\.loopKit))
         } catch {
             self.refreshContext.update(with: .status)
@@ -207,6 +215,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
     // for better ways to support desired use cases. https://github.com/LoopKit/Loop/pull/2026
     private lazy var availableInputs: [PredictionInputEffect] = [.carbs, .insulin, .momentum, .retrospection]
         + (UserDefaults.standard.guardAndRunwayEnabled ? [.guardAndRunway] : [])
+        + (UserDefaults.standard.slowRetrospectiveCorrectionEnabled ? [.slowRetrospectiveCorrection] : [])
 
     private var selectedInputs = PredictionInputEffect.all
 
@@ -320,14 +329,27 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
                 formatter.string(from: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: milligramsPerDeciliter)) ?? "?"
             }
             let guardText = guardAndRunway.bandApplied
-                ? String(format: NSLocalizedString("Forecast lowered up to %1$@ (recent volatility %2$@)", comment: "Guard and runway band description. (1: The most the forecast is lowered)(2: Recent glucose volatility)"),
+                ? String(format: NSLocalizedString("Low guard checks the forecast lowered up to %1$@ (dotted line, recent volatility %2$@)", comment: "Guard and runway band description. (1: The most the forecast the low guard checks is lowered)(2: Recent glucose volatility)"),
                          display(guardAndRunway.bandDepth), display(guardAndRunway.volatility))
-                : NSLocalizedString("Forecast not lowered while carbs are active", comment: "Guard and runway band description when active carbs keep it off")
+                : NSLocalizedString("Low guard checks the forecast unchanged while carbs are active", comment: "Guard and runway band description when active carbs keep it off")
             let runwayText = guardAndRunway.runwayShift > 0
                 ? String(format: NSLocalizedString("Automatic dosing target lowered %1$@", comment: "Guard and runway runway description. (1: How far the automatic dosing target is lowered)"),
                          display(guardAndRunway.runwayShift))
                 : NSLocalizedString("Automatic dosing target not lowered", comment: "Guard and runway runway description when the target is not lowered")
             subtitleText = String(format: "%@\n%@", guardText, runwayText)
+        }
+
+        if input == .slowRetrospectiveCorrection, let slowRetrospectiveCorrection {
+            let formatter = QuantityFormatter(for: glucoseChart.glucoseUnit)
+            formatter.numberFormatter.positivePrefix = formatter.numberFormatter.plusSign
+            let fractionDigits = glucoseChart.glucoseUnit == .milligramsPerDeciliter ? 1 : 2
+            formatter.numberFormatter.minimumFractionDigits = fractionDigits
+            formatter.numberFormatter.maximumFractionDigits = fractionDigits
+            let level = formatter.string(from: LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: slowRetrospectiveCorrection.level)) ?? "?"
+            let multiplier = slowRetrospectiveCorrection.multiplier.formatted(.number.precision(.fractionLength(2)))
+            subtitleText = String(
+                format: NSLocalizedString("Insulin sensitivity × %1$@\nUnexplained change %2$@ per 5 min, weighted over about a day", comment: "Slow retrospective correction description. (1: The multiplier applied to insulin sensitivity)(2: The unexplained glucose change per 5 minutes)"),
+                multiplier, level)
         }
 
         cell.subtitleLabel?.text = subtitleText

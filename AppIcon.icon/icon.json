@@ -12,10 +12,35 @@
       "layers" : [
         {
           "blend-mode" : "normal",
-          "fill" : {
-            "solid" : "display-p3:0.30588,0.84314,0.39608,1.00000"
-          },
-          "glass" : true,
+          "fill-specializations" : [
+            {
+              "value" : {
+                "solid" : "display-p3:0.29240,0.86000,0.38769,1.00000"
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "display-p3:0.33120,0.92000,0.43005,1.00000"
+              }
+            },
+            {
+              "appearance" : "tinted",
+              "value" : {
+                "solid" : "display-p3:0.00000,1.00000,0.18964,1.00000"
+              }
+            }
+          ],
+          "glass-specializations" : [
+            {
+              "value" : true
+            },
+            {
+              "appearance" : "dark",
+              "value" : true
+            }
+          ],
+          "hidden" : false,
           "image-name" : "loop_circle.svg",
           "name" : "loop_circle",
           "position" : {

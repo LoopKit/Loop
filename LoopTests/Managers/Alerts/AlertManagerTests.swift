@@ -359,3 +359,19 @@ extension Swift.Result {
         }
     }
 }
+
+@MainActor
+class CriticalAlertAudioPlayerTests: XCTestCase {
+    func testStopForAnotherAlertKeepsPlaying() {
+        let player = CriticalAlertAudioPlayer()
+        let low = Alert.Identifier(managerIdentifier: "GlucoseAlertManager", alertIdentifier: "glucose.low")
+        let timeChange = Alert.Identifier(managerIdentifier: "Loop", alertIdentifier: "significantTimeChange")
+
+        player.play(soundNamed: "critical.caf", boostVolume: false, for: low)
+        player.stop(for: timeChange)
+        XCTAssertEqual(player.playingAlert, low)
+
+        player.stop(for: low)
+        XCTAssertNil(player.playingAlert)
+    }
+}

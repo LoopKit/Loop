@@ -74,10 +74,16 @@ struct InsulinDeliveryEventDetailsView: View {
         return durationFormatter.string(from: doseEntry.duration)
     }
     
+    var basalRateValue: String? {
+        guard case .basal(_, let rate) = pumpEventType else { return nil }
+        return basalUnitsFormatter.string(from: rate)
+    }
+
     var deliveredUnitsValue: String? {
         switch pumpEventType {
-        case .basal(_, let rate):
-            return basalUnitsFormatter.string(from: rate)
+        case .basal:
+            guard !doseEntry.isMutable else { return nil }
+            return bolusUnitsFormatter.string(from: LoopQuantity(unit: .internationalUnit, doubleValue: doseEntry.deliveredUnits ?? doseEntry.programmedUnits))
         case .bolus(_, _, let deliveryAmount):
             return bolusUnitsFormatter.string(from: deliveryAmount)
         case .insulin:
@@ -178,7 +184,17 @@ struct InsulinDeliveryEventDetailsView: View {
                             Text(durationValue)
                         }
                     }
-                    
+
+                    if let basalRateValue {
+                        VStack(alignment: .leading) {
+                            Text("Basal Rate")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+
+                            Text(basalRateValue)
+                        }
+                    }
+
                     if let deliveredUnitsValue {
                         VStack(alignment: .leading) {
                             Text("Insulin Delivery")

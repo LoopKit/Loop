@@ -25,6 +25,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         setenv("CFNETWORK_DIAGNOSTICS", "3", 1)
 
         self.launchOptions = launchOptions
+        loopAppManager.registerBackgroundTasks()
 
         return true
     }
