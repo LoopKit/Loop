@@ -28,6 +28,12 @@ struct OutcomesManifest: Codable, Equatable {
         var end: Date
     }
 
+    /// A change the person marked, such as starting a new routine.
+    struct CustomChange: Codable, Equatable {
+        var date: Date
+        var note: String?
+    }
+
     struct File: Codable, Equatable {
         var name: String
         var bytes: Int64
@@ -39,6 +45,7 @@ struct OutcomesManifest: Codable, Equatable {
     var setup: Setup
     var range: Range
     var days: Int
+    var customChanges: [CustomChange] = []
     var files: [File] = []
 }
 
@@ -63,10 +70,12 @@ struct OutcomesPackageBuilder {
 
     let logs: [CriticalEventLog]
     var fileManager: FileManager = .default
+    var customChanges: () -> [CustomSetupChange]
 
-    init(logs: [CriticalEventLog], fileManager: FileManager = .default) {
+    init(logs: [CriticalEventLog], fileManager: FileManager = .default, customChanges: @escaping () -> [CustomSetupChange] = { CustomSetupChangeStore().changes }) {
         self.logs = logs.filter { Self.exportNames.contains($0.exportName) }
         self.fileManager = fileManager
+        self.customChanges = customChanges
     }
 
     /// Writes the share for the setup since `change`, covering up to `duration` before `now`.
@@ -127,6 +136,10 @@ struct OutcomesPackageBuilder {
             setup: OutcomesManifest.Setup(changeDate: change.date, changeDateIsLowerBound: change.isLowerBound, changes: change.items.map(\.identifier)),
             range: OutcomesManifest.Range(start: start, end: now),
             days: dayStarts.count,
+            customChanges: customChanges()
+                .filter { $0.date >= start && $0.date <= now }
+                .sorted { $0.date < $1.date }
+                .map { OutcomesManifest.CustomChange(date: $0.date, note: $0.note) },
             files: files)
 
         let manifestStream = archive.createArchiveFile(withPath: "manifest.json")
@@ -291,6 +304,8 @@ extension SetupChange.Item {
             return "dosingStrategy"
         case .experiment(let experiment, let enabled):
             return "experiment.\(experiment.rawValue).\(enabled ? "on" : "off")"
+        case .custom:
+            return "custom"
         }
     }
 }

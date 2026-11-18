@@ -673,7 +673,7 @@ class LoopAppManager: NSObject {
             let experiments = try await ExperimentsHistoryCache().records(since: start, now: now) { readFrom in
                 try await dosingDecisionStore?.getDosingDecisions(start: readFrom, end: now, as: ExperimentsRecord.self) ?? []
             }
-            return SetupHistory(settings: settings, experiments: experiments)
+            return SetupHistory(settings: settings, experiments: experiments, custom: CustomSetupChangeStore().changes)
         }
         viewModel.outcomesPackageBuilder = criticalEventLogExportManager.map { OutcomesPackageBuilder(logs: $0.logs) }
 

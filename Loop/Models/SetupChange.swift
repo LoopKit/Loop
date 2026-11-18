@@ -17,6 +17,8 @@ struct SetupChange: Equatable {
         case insulinModel
         case dosingStrategy
         case experiment(ExperimentOption, enabled: Bool)
+        /// A change the person marked themselves, such as starting a new routine.
+        case custom(CustomSetupChange)
     }
 
     var date: Date
@@ -210,16 +212,49 @@ struct ExperimentsHistoryCache {
     }
 }
 
-/// Every setup change in Loop's records, from the settings history and the experiments recorded
-/// on dosing decisions.
+/// A change the person marks on a date, with an optional note such as "started walking in the mornings".
+struct CustomSetupChange: Codable, Equatable, Identifiable {
+    var id = UUID()
+    var date: Date
+    var note: String?
+}
+
+struct CustomSetupChangeStore {
+    private let defaults: UserDefaults
+    private let key = "com.loopkit.Loop.customSetupChanges"
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+    }
+
+    var changes: [CustomSetupChange] {
+        defaults.data(forKey: key).flatMap { try? PropertyListDecoder().decode([CustomSetupChange].self, from: $0) } ?? []
+    }
+
+    func add(_ change: CustomSetupChange) {
+        save(changes + [change])
+    }
+
+    func remove(id: UUID) {
+        save(changes.filter { $0.id != id })
+    }
+
+    private func save(_ changes: [CustomSetupChange]) {
+        defaults.set(try? PropertyListEncoder().encode(changes), forKey: key)
+    }
+}
+
+/// Every setup change in Loop's records, from the settings history, the experiments recorded
+/// on dosing decisions and the changes the person marked.
 struct SetupHistory: Equatable {
     /// Oldest first, each with the date of the change before it.
     let changes: [SetupChange]
     /// The oldest record. The setup before the first change is known only since then.
     let start: Date?
 
-    init(settings: [StoredSettings], experiments: [ExperimentsRecord]) {
-        let individual = (SetupChange.changes(in: settings) + SetupChange.changes(in: experiments)).sorted { $0.date < $1.date }
+    init(settings: [StoredSettings], experiments: [ExperimentsRecord], custom: [CustomSetupChange] = []) {
+        let marked = custom.map { SetupChange(date: $0.date, isLowerBound: false, items: [.custom($0)]) }
+        let individual = (SetupChange.changes(in: settings) + SetupChange.changes(in: experiments) + marked).sorted { $0.date < $1.date }
         var groups: [SetupChange] = []
         for change in individual {
             if let last = groups.last, change.date <= last.date + SetupChange.groupingInterval {
@@ -228,7 +263,7 @@ struct SetupHistory: Equatable {
                 groups.append(change)
             }
         }
-        let start = (settings.map(\.date) + experiments.filter { $0.algorithmExperiments != nil }.map(\.date)).min()
+        let start = (settings.map(\.date) + experiments.filter { $0.algorithmExperiments != nil }.map(\.date) + custom.map(\.date)).min()
         self.start = start
         changes = groups.indices.map { index in
             var change = groups[index]
@@ -245,5 +280,18 @@ struct SetupHistory: Equatable {
     /// When the setup that `change` started was replaced, or nil if it's current.
     func end(of change: SetupChange) -> Date? {
         changes.first { $0.date > change.date }?.date
+    }
+
+    var customChanges: [CustomSetupChange] {
+        changes.flatMap(\.customChanges)
+    }
+}
+
+extension SetupChange {
+    var customChanges: [CustomSetupChange] {
+        items.compactMap {
+            if case .custom(let change) = $0 { return change }
+            return nil
+        }
     }
 }
