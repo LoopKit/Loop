@@ -41,7 +41,7 @@ extension PodLoanPhoneController {
     }
 
     /// For a pump that gave no delivered total to check against.
-    static let sessionUnverifiedTitle = "Insulin Not Checked After Sport Mode"
+    static let sessionUnverifiedTitle = NSLocalizedString("Insulin Not Checked After Sport Mode", comment: "Phone notice title when a watch session's insulin could not be verified after reclaim")
     static let sessionUnverifiedBody = NSLocalizedString(
         "Unexpected: the iPhone couldn't check the watch's insulin against the pod. Insulin the watch gave may be missing from insulin on board. Consider reporting it with a Loop Report.",
         comment: "Phone notice when a watch session's insulin could not be verified after reclaim")
