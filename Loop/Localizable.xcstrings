@@ -1566,6 +1566,12 @@
         }
       }
     },
+    "%.2f U booked as a bolus because the watch's records haven't arrived. Its records replace this when the watch is back." : {
+      "comment" : "Phone notice body: insulin booked as an estimate because the watch's records haven't arrived (1: units)"
+    },
+    "%.2f U booked as a bolus: insulin the iPhone didn't record, probably from Sport Mode started on the watch. The watch's records replace it when it's back." : {
+      "comment" : "Phone notice body: insulin the phone didn't record, booked as an estimate (1: units)"
+    },
     "%1$@ %2$@" : {
       "comment" : "Format string combining carb entry quantity and absorption time emoji",
       "localizations" : {
@@ -22607,6 +22613,9 @@
     "Insulin delivery stopped. Change Pod now." : {
       "comment" : "Phone notice body when the watch reports a pod fault during a loan (the pod's own alarm text)"
     },
+    "Insulin Estimated After Sport Mode" : {
+      "comment" : "Phone notice title: insulin the watch's missing records would explain is booked as an estimate"
+    },
     "Insulin Event" : {
 
     },
@@ -22741,6 +22750,12 @@
           }
         }
       }
+    },
+    "Insulin Not Checked After Sport Mode" : {
+      "comment" : "Phone notice title when a watch session's insulin could not be verified after reclaim"
+    },
+    "Insulin On Board May Be Overstated" : {
+      "comment" : "Phone notice title: the records claim more insulin than the pod delivered"
     },
     "Insulin Pump" : {
       "comment" : "Descriptive text for Insulin Pump",
@@ -23164,6 +23179,9 @@
           }
         }
       }
+    },
+    "Insulin on board may be %.2f U high until the watch's records arrive. Loop will dose cautiously meanwhile." : {
+      "comment" : "Phone notice body: insulin on board may be high until the watch's records arrive (1: units)"
     },
     "Integral Retrospective Correction" : {
       "comment" : "Title for integral retrospective correction experiment description\nTitle of integral retrospective correction experiment",
@@ -37424,6 +37442,12 @@
     "The watch is still looping. Try again." : {
       "comment" : "Phone notice body when a take-back found the pod out of reach"
     },
+    "The watch's records replaced the estimated %.2f U. Insulin on board is exact again." : {
+      "comment" : "Phone notice body: the watch's records replaced an estimate (1: units)"
+    },
+    "The watch's records replaced the estimated %.2f U. Loop now doses with the watch's insulin and carbs." : {
+      "comment" : "Phone notice body: the watch's records, with carbs, replaced an estimate (1: units)"
+    },
     "Therapy Settings" : {
       "comment" : "Title text for button to Therapy Settings",
       "localizations" : {
@@ -38802,6 +38826,15 @@
     },
     "Unexpected: the iPhone couldn't check the watch's insulin against the pod. Insulin the watch gave may be missing from insulin on board. Consider reporting it with a Loop Report." : {
       "comment" : "Phone notice when a watch session's insulin could not be verified after reclaim"
+    },
+    "Unexpected: the pod delivered %.2f U more than the watch recorded. It isn't counted in insulin on board. Consider reporting it with a Loop Report." : {
+      "comment" : "Phone notice body: unexplained insulin after Sport Mode (1: units)"
+    },
+    "Unexpected: the watch recorded %.2f U more than the pod delivered. Loop may dose cautiously for a few hours. Consider reporting it with a Loop Report." : {
+      "comment" : "Phone notice body: the watch's records claim more insulin than the pod delivered (1: units)"
+    },
+    "Unexplained Insulin" : {
+      "comment" : "Phone notice title: after Sport Mode the pod delivered more than the watch recorded"
     },
     "Unknown" : {
       "comment" : "Event title displayed when StoredPumpEvent.title is not set\nHealth sharing status: unknown\nThe default description to use when an entry has no dose description\nresult when time cannot be formatted",
@@ -40469,6 +40502,9 @@
     },
     "Watch Not Looping" : {
       "comment" : "Phone notice title: the watch did not answer, or cannot reach the pod, and the phone is taking the pod back"
+    },
+    "Watch Records Recovered" : {
+      "comment" : "Phone notice title: the watch's records arrived and replaced an estimate"
     },
     "What are examples of Critical Alerts and Time Sensitive Notifications?" : {
 
