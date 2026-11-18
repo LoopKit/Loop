@@ -45,8 +45,9 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
                         self?.refreshContext.formUnion([.status, .targets])
                     case .glucose?:
                         self?.refreshContext.update(with: .glucose)
-                    default:
-                        break
+                    case .insulin?, .carbs?, .forecast?, .none:
+                        // The forecast is redrawn on every reload; a watch's records arrive without a reading.
+                        self?.refreshContext.update(with: .status)
                     }
 
                     Task {
