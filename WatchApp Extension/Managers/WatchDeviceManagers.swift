@@ -43,6 +43,11 @@ func watchCGMStatusNote(_ manager: CGMManager?) -> String? {
 
 let watchCGMStatusDidChange = G7CGMManager.statusDidChange
 
+/// Whether the watch's CGM is searching for its sensor, which needs the app kept open.
+func watchCGMIsSearching(_ manager: CGMManager?) -> Bool {
+    (manager as? G7CGMManager)?.isSearchingForSensor == true
+}
+
 func watchCGMSensorName(_ manager: CGMManager?) -> String? {
     (manager as? G7CGMManager)?.sensorName
 }
