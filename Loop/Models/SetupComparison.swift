@@ -25,6 +25,8 @@ struct SetupComparison: Equatable {
     }
 
     static let beforeDuration = TimeInterval.days(21)
+    /// The period before is shortened to where the records start, but no further than this.
+    static let minimumBeforeDuration = TimeInterval.days(7)
     static let suggestedDuration = TimeInterval.days(14)
     /// Less CGM data than this in a period makes its numbers unreliable.
     static let minimumCGMActive = 0.7
@@ -57,7 +59,14 @@ struct SetupComparison: Equatable {
         }
         after = period(change.date, now)
 
-        let candidate = period(change.date - Self.beforeDuration, change.date)
+        // Shortened to where the local records start, such as after updating from a build that kept less
+        let windowStart = change.date - Self.beforeDuration
+        let firstReading = samples.lazy.map(\.startDate).filter { $0 >= windowStart && $0 < change.date }.min()
+        guard let firstReading, change.date.timeIntervalSince(firstReading) >= Self.minimumBeforeDuration else {
+            before = nil
+            return
+        }
+        let candidate = period(firstReading > windowStart + .hours(1) ? firstReading : windowStart, change.date)
         before = candidate.glucose.percentActive >= Self.minimumCGMActive ? candidate : nil
     }
 
