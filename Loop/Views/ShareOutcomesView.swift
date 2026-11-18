@@ -30,6 +30,7 @@ struct ShareOutcomesView: View {
                 item(NSLocalizedString("Insulin delivery", comment: "Outcomes share content item"))
                 item(NSLocalizedString("Loop's dosing decisions and forecasts", comment: "Outcomes share content item"))
                 item(NSLocalizedString("Therapy settings history, including algorithm experiments", comment: "Outcomes share content item"))
+                item(NSLocalizedString("Changes you've marked, with their notes", comment: "Outcomes share content item"))
                 item(NSLocalizedString("Preset history, including preset names", comment: "Outcomes share content item"))
                 item(NSLocalizedString("Pump and CGM models, app version and build", comment: "Outcomes share content item"))
                 item(NSLocalizedString("A random ID for this app, so shares from it can be linked", comment: "Outcomes share content item"))
