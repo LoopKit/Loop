@@ -109,6 +109,9 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
+#if LOOP_BLUETOOTH_PERIPHERAL
+		<string>bluetooth-peripheral</string>
+#endif
 		<string>processing</string>
 		<string>remote-notification</string>
 		<string>audio</string>
