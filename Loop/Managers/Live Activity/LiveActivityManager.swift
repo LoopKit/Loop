@@ -295,7 +295,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
                         lowerLimitChartMg: self.settings.lowerLimitChartMg
                     ),
                     content: .init(state: dynamicState, staleDate: nil),
-                    pushType: .token
+                    pushType: nil
                 )
             }
             self.startDate = Date.now
@@ -559,7 +559,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
                     lowerLimitChartMg: settings.lowerLimitChartMg
                 ),
                 content: .init(state: dynamicState, staleDate: nil),
-                pushType: .token
+                pushType: nil
             )
         } catch {
             print("ERROR: Error while creating empty live activity: \(error.localizedDescription)")
