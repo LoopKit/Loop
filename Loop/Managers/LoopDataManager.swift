@@ -594,7 +594,11 @@ extension LoopDataManager {
 
     @discardableResult
     func deleteCarbEntry(_ oldEntry: StoredCarbEntry) async throws -> Bool {
-        try await carbStore.deleteCarbEntry(oldEntry)
+        let deleted = try await carbStore.deleteCarbEntry(oldEntry)
+        if deleted {
+            MealReminderManager.shared.cancelReminder(for: oldEntry)
+        }
+        return deleted
     }
 
     /// Logs a new external bolus insulin dose in the DoseStore and HealthKit

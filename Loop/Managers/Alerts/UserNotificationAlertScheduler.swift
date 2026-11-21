@@ -19,6 +19,26 @@ public protocol UserNotificationCenter {
 }
 extension UNUserNotificationCenter: UserNotificationCenter {}
 
+extension UserNotificationCenter {
+    func addNotificationRequest(_ request: UNNotificationRequest) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            add(request) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+
+    func pendingNotificationRequests() async -> [UNNotificationRequest] {
+        await withCheckedContinuation { continuation in
+            getPendingNotificationRequests { continuation.resume(returning: $0) }
+        }
+    }
+}
+
 public class UserNotificationAlertScheduler {
     
     let userNotificationCenter: UserNotificationCenter

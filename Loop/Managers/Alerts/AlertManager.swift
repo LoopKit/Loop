@@ -325,6 +325,11 @@ public final class AlertManager {
 
         Task {
             do {
+                try await MealReminderManager.shared.updatePendingReminderSounds(newValue)
+            } catch {
+                log.error("Failed to update meal reminder sounds: %{public}@", String(describing: error))
+            }
+            do {
                 let persistedAlerts = try await lookupAllPendingDelayedOrRepeatingAlerts()
                 for persistedAlert in persistedAlerts {
                     await self.rescheduleAlertWithSchedulers(persistedAlert.alert, issuedDate: persistedAlert.issuedDate)
@@ -896,14 +901,14 @@ extension AlertManager {
     }
 }
 
-fileprivate extension UserDefaults {
+extension UserDefaults {
     private enum Key: String {
         case hasIssuedNotificationPermissionsAlert = "com.loopkit.Loop.HasIssuedNotificationPermissionsAlert"
         case hasIssuedScheduledDeliveryEnabledAlert = "com.loopkit.Loop.HasIssuedScheduledDeliveryEnabledAlert"
         case alertMuterConfiguration = "com.loopkit.Loop.alertMuterConfiguration"
     }
 
-    var hasIssuedNotificationPermissionsAlert: Bool {
+    fileprivate var hasIssuedNotificationPermissionsAlert: Bool {
         get {
             return object(forKey: Key.hasIssuedNotificationPermissionsAlert.rawValue) as? Bool ?? false
         }
@@ -912,7 +917,7 @@ fileprivate extension UserDefaults {
         }
     }
 
-    var hasIssuedScheduledDeliveryEnabledAlert: Bool {
+    fileprivate var hasIssuedScheduledDeliveryEnabledAlert: Bool {
         get {
             return object(forKey: Key.hasIssuedScheduledDeliveryEnabledAlert.rawValue) as? Bool ?? false
         }
