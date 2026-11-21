@@ -92,7 +92,9 @@ struct GlucoseLiveActivityConfiguration: Widget {
             VStack {
                 if context.attributes.mode == .large {
                     HStack(spacing: 15) {
-                        loopIcon(context)
+                        if context.attributes.showLoopIcon {
+                            loopIcon(context)
+                        }
                         if context.attributes.addPredictiveLine {
                             ChartView(
                                 glucoseSamples: context.state.glucoseSamples,
@@ -111,7 +113,8 @@ struct GlucoseLiveActivityConfiguration: Widget {
                                 : context.attributes.upperLimitChartMg,
                                 glucoseRanges: context.state.glucoseRanges,
                                 preset: context.state.preset,
-                                yAxisMarks: context.state.yAxisMarks
+                                yAxisMarks: context.state.yAxisMarks,
+                                showBackground: context.attributes.showChartBackground
                             )
                             .frame(height: 85)
                         } else {
@@ -126,7 +129,8 @@ struct GlucoseLiveActivityConfiguration: Widget {
                                 : context.attributes.upperLimitChartMg,
                                 glucoseRanges: context.state.glucoseRanges,
                                 preset: context.state.preset,
-                                yAxisMarks: context.state.yAxisMarks
+                                yAxisMarks: context.state.yAxisMarks,
+                                showBackground: context.attributes.showChartBackground
                             )
                             .frame(height: 85)
                         }
@@ -139,7 +143,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                     let endIndex = context.state.bottomRow.endIndex - 1
                     ForEach(
                         Array(context.state.bottomRow.enumerated()),
-                        id: \.element
+                        id: \.offset
                     ) { (index, item) in
                         switch item.type {
                         case .generic:
@@ -217,7 +221,9 @@ struct GlucoseLiveActivityConfiguration: Widget {
         let eventualBG = formatEventualBG(value: context.state.eventualGlucose, formatter: glucoseFormatter)
         
         HStack(spacing: 10) {
-            loopIcon(context, size: 24)
+            if context.attributes.showLoopIcon {
+                loopIcon(context, size: 24)
+            }
             
             HStack(alignment: .top) {
                 VStack(alignment: .leading) {
@@ -269,8 +275,10 @@ struct GlucoseLiveActivityConfiguration: Widget {
         return DynamicIsland {
             DynamicIslandExpandedRegion(.leading) {
                 HStack(alignment: .center) {
-                    loopIcon(context)
-                        .frame(width: 40, height: 40, alignment: .trailing)
+                    if context.attributes.showLoopIcon {
+                        loopIcon(context)
+                            .frame(width: 40, height: 40, alignment: .trailing)
+                    }
                     Spacer()
                     Text(
                         "\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))"
@@ -311,7 +319,8 @@ struct GlucoseLiveActivityConfiguration: Widget {
                             : context.attributes.upperLimitChartMg,
                         glucoseRanges: context.state.glucoseRanges,
                         preset: context.state.preset,
-                        yAxisMarks: context.state.yAxisMarks
+                        yAxisMarks: context.state.yAxisMarks,
+                        showBackground: context.attributes.showChartBackground
                     )
                     .frame(height: 75)
                 } else {
@@ -326,7 +335,8 @@ struct GlucoseLiveActivityConfiguration: Widget {
                             : context.attributes.upperLimitChartMg,
                         glucoseRanges: context.state.glucoseRanges,
                         preset: context.state.preset,
-                        yAxisMarks: context.state.yAxisMarks
+                        yAxisMarks: context.state.yAxisMarks,
+                        showBackground: context.attributes.showChartBackground
                     )
                     .frame(height: 75)
                 }
