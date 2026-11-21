@@ -43,6 +43,8 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
     
     public let mode: LiveActivityMode
     public let addPredictiveLine: Bool
+    public let showLoopIcon: Bool
+    public let showChartBackground: Bool
     public let useLimits: Bool
     public let upperLimitChartMmol: Double
     public let lowerLimitChartMmol: Double

@@ -16880,6 +16880,12 @@
         }
       }
     },
+    "Display Loop icon" : {
+      "comment" : "Title for Loop icon toggle"
+    },
+    "Display plot background" : {
+      "comment" : "Title for plot background toggle"
+    },
     "Display prediction in plot" : {
       "comment" : "Title for prediction line toggle",
       "localizations" : {

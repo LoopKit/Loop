@@ -18,6 +18,7 @@ struct ChartView: View {
     private let preset: Preset?
     private let yAxisMarks: [Double]
     private let colorGradient: LinearGradient
+    private let showBackground: Bool
 
     private static let colorInRange = Color.green
     private static let colorBelowRange = Color.red
@@ -33,7 +34,7 @@ struct ChartView: View {
         return (minValue - 3 * chartableIncrement, maxValue + 3 * chartableIncrement)
     }
 
-    init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?, yAxisMarks: [Double]) {
+    init(glucoseSamples: [GlucoseSampleAttributes], predicatedGlucose: [Double], predicatedStartDate: Date?, predicatedInterval: TimeInterval?, useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?, yAxisMarks: [Double], showBackground: Bool) {
         self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, useLimits: useLimits, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = ChartValues.convert(
             data: predicatedGlucose,
@@ -47,15 +48,17 @@ struct ChartView: View {
         self.preset = preset
         self.glucoseRanges = glucoseRanges
         self.yAxisMarks = yAxisMarks
+        self.showBackground = showBackground
     }
     
-    init(glucoseSamples: [GlucoseSampleAttributes], useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?, yAxisMarks: [Double]) {
+    init(glucoseSamples: [GlucoseSampleAttributes], useLimits: Bool, lowerLimit: Double, upperLimit: Double, glucoseRanges: [GlucoseRangeValue], preset: Preset?, yAxisMarks: [Double], showBackground: Bool) {
         self.glucoseSampleData = ChartValues.convert(data: glucoseSamples, useLimits: useLimits, lowerLimit: lowerLimit, upperLimit: upperLimit)
         self.predicatedData = []
         self.preset = preset
         self.glucoseRanges = glucoseRanges
         self.yAxisMarks = yAxisMarks
         self.colorGradient = LinearGradient(colors: [], startPoint: .bottom, endPoint: .top)
+        self.showBackground = showBackground
     }
 
     private static func getGradient(useLimits: Bool, lowerLimit: Double, upperLimit: Double, lowestValue: Double, highestValue: Double) -> LinearGradient {
@@ -147,7 +150,7 @@ struct ChartView: View {
             ])
         .chartPlotStyle { plotContent in
             plotContent
-                .background(.cyan.opacity(0.15))
+                .background(showBackground ? Color.cyan.opacity(0.15) : Color.clear)
                 .overlay(alignment: .topTrailing) {
                     if let preset = self.preset, preset.endDate > Date.now {
                         Group {

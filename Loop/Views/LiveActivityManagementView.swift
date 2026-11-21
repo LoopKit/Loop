@@ -60,6 +60,18 @@ struct LiveActivityManagementView: View {
                         .onChange(of: viewModel.addPredictiveLine) {
                             self.isDirty = previousViewModel.addPredictiveLine != viewModel.addPredictiveLine
                         }
+
+                    Toggle(NSLocalizedString("Display Loop icon", comment: "Title for Loop icon toggle"), isOn: $viewModel.showLoopIcon)
+                        .transition(.move(edge: viewModel.mode == .large ? .top : .bottom))
+                        .onChange(of: viewModel.showLoopIcon) {
+                            self.isDirty = previousViewModel.showLoopIcon != viewModel.showLoopIcon
+                        }
+
+                    Toggle(NSLocalizedString("Display plot background", comment: "Title for plot background toggle"), isOn: $viewModel.showChartBackground)
+                        .transition(.move(edge: viewModel.mode == .large ? .top : .bottom))
+                        .onChange(of: viewModel.showChartBackground) {
+                            self.isDirty = previousViewModel.showChartBackground != viewModel.showChartBackground
+                        }
                     
                     Toggle(NSLocalizedString("Display colors for glucose", comment: "Title for glucose coloring"), isOn: $viewModel.useLimits)
                         .transition(.move(edge: viewModel.mode == .large ? .top : .bottom))
@@ -131,6 +143,8 @@ struct LiveActivityManagementView: View {
         settings.enabled = viewModel.enabled
         settings.mode = viewModel.mode
         settings.addPredictiveLine = viewModel.addPredictiveLine
+        settings.showLoopIcon = viewModel.showLoopIcon
+        settings.showChartBackground = viewModel.showChartBackground
         settings.useLimits = viewModel.useLimits
         settings.upperLimitChartMmol = viewModel.upperLimitChartMmol
         settings.lowerLimitChartMmol = viewModel.lowerLimitChartMmol

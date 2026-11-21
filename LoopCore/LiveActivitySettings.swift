@@ -82,6 +82,8 @@ public struct LiveActivitySettings: Codable, Equatable {
     public var enabled: Bool
     public var mode: LiveActivityMode
     public var addPredictiveLine: Bool
+    public var showLoopIcon: Bool
+    public var showChartBackground: Bool
     public var useLimits: Bool
     public var upperLimitChartMmol: Double
     public var lowerLimitChartMmol: Double
@@ -93,6 +95,8 @@ public struct LiveActivitySettings: Codable, Equatable {
         case enabled
         case mode
         case addPredictiveLine
+        case showLoopIcon
+        case showChartBackground
         case bottomRowConfiguration
         case useLimits
         case upperLimitChartMmol
@@ -112,6 +116,8 @@ public struct LiveActivitySettings: Codable, Equatable {
         self.enabled = try values.decode(Bool.self, forKey: .enabled)
         self.mode = try values.decodeIfPresent(LiveActivityMode.self, forKey: .mode) ?? .large
         self.addPredictiveLine = try values.decode(Bool.self, forKey: .addPredictiveLine)
+        self.showLoopIcon = try values.decodeIfPresent(Bool.self, forKey: .showLoopIcon) ?? true
+        self.showChartBackground = try values.decodeIfPresent(Bool.self, forKey: .showChartBackground) ?? true
         self.useLimits = try values.decode(Bool.self, forKey: .useLimits)
         self.upperLimitChartMmol = try values.decode(Double?.self, forKey: .upperLimitChartMmol) ?? LiveActivitySettings.defaultUpperLimitMmol
         self.lowerLimitChartMmol = try values.decode(Double?.self, forKey: .lowerLimitChartMmol) ?? LiveActivitySettings.defaultLowerLimitMmol
@@ -124,6 +130,8 @@ public struct LiveActivitySettings: Codable, Equatable {
         self.enabled = true
         self.mode = .large
         self.addPredictiveLine = true
+        self.showLoopIcon = true
+        self.showChartBackground = true
         self.useLimits = true
         self.upperLimitChartMmol = LiveActivitySettings.defaultUpperLimitMmol
         self.lowerLimitChartMmol = LiveActivitySettings.defaultLowerLimitMmol
@@ -135,6 +143,8 @@ public struct LiveActivitySettings: Codable, Equatable {
     public static func == (lhs: LiveActivitySettings, rhs: LiveActivitySettings) -> Bool {
         return lhs.addPredictiveLine == rhs.addPredictiveLine &&
             lhs.mode == rhs.mode &&
+            lhs.showLoopIcon == rhs.showLoopIcon &&
+            lhs.showChartBackground == rhs.showChartBackground &&
             lhs.useLimits == rhs.useLimits &&
             lhs.lowerLimitChartMmol == rhs.lowerLimitChartMmol &&
             lhs.upperLimitChartMmol == rhs.upperLimitChartMmol &&
@@ -145,6 +155,8 @@ public struct LiveActivitySettings: Codable, Equatable {
     public static func != (lhs: LiveActivitySettings, rhs: LiveActivitySettings) -> Bool {
         return lhs.addPredictiveLine != rhs.addPredictiveLine ||
             lhs.mode != rhs.mode ||
+            lhs.showLoopIcon != rhs.showLoopIcon ||
+            lhs.showChartBackground != rhs.showChartBackground ||
             lhs.useLimits != rhs.useLimits ||
             lhs.lowerLimitChartMmol != rhs.lowerLimitChartMmol ||
             lhs.upperLimitChartMmol != rhs.upperLimitChartMmol ||

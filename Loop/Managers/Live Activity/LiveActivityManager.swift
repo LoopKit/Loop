@@ -288,6 +288,8 @@ class LiveActivityManager : LiveActivityManagerProxy {
                     attributes: GlucoseActivityAttributes(
                         mode: self.settings.mode,
                         addPredictiveLine: self.settings.addPredictiveLine,
+                        showLoopIcon: self.settings.showLoopIcon,
+                        showChartBackground: self.settings.showChartBackground,
                         useLimits: self.settings.useLimits,
                         upperLimitChartMmol: self.settings.upperLimitChartMmol,
                         lowerLimitChartMmol: self.settings.lowerLimitChartMmol,
@@ -552,6 +554,8 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 attributes: GlucoseActivityAttributes(
                     mode: settings.mode,
                     addPredictiveLine: settings.addPredictiveLine,
+                    showLoopIcon: settings.showLoopIcon,
+                    showChartBackground: settings.showChartBackground,
                     useLimits: settings.useLimits,
                     upperLimitChartMmol: settings.upperLimitChartMmol,
                     lowerLimitChartMmol: settings.lowerLimitChartMmol,
