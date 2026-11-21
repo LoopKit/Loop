@@ -308,7 +308,8 @@ final class WakeResumeTests: XCTestCase {
     }
 
     /// The answer to a query says whether the watch can reach the pod and when its loan started
-    /// (control document, rows 14 and 19).
+    /// (control document, rows 14 and 19). It goes at once, before any pod read: a read can hang for
+    /// minutes, and an answer waiting on it reaches the phone as silence.
     func testTheAnswerCarriesPodReachAndLoanStart() async throws {
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         let started = Date().addingTimeInterval(-.minutes(30))
@@ -318,11 +319,8 @@ final class WakeResumeTests: XCTestCase {
             if let m = try? LoanMessage.decode(fromTransport: dict), case .statusReport(let r) = m { reports.append(r) }
         }
         c.handleIncoming(userInfo: try LoanMessage.statusQuery(StatusQuery(epoch: 7)).transportDictionary())
-        // No recent reading of the pod: the watch tries it before answering, so the answer comes after the read.
-        for _ in 0..<100 where reports.isEmpty {
-            try await Task.sleep(nanoseconds: 50_000_000)
-            await c.onMain { }
-        }
+        await c.onMain { }
+        XCTAssertEqual(reports.count, 1, "answered at once, before the pod read")
         let report = try XCTUnwrap(reports.last)
         XCTAssertTrue(report.holdsPod)
         XCTAssertEqual(report.loanStartedAt?.timeIntervalSince1970 ?? 0, started.timeIntervalSince1970, accuracy: 1)
