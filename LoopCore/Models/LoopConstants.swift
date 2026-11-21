@@ -14,9 +14,9 @@ public enum LoopConstants {
     
     // Input field bounds
     
-    public static let maxCarbEntryQuantity = LoopQuantity(unit: .gram, doubleValue: 250) // cannot exceed this value
+    public static let maxCarbEntryQuantity = LoopQuantity(unit: .gram, doubleValue: 250) // default maximum
 
-    public static let warningCarbEntryQuantity = LoopQuantity(unit: .gram, doubleValue: 99) // user is warned above this value
+    public static let warningCarbEntryQuantity = LoopQuantity(unit: .gram, doubleValue: 99) // default warning threshold
     
     public static let validManualGlucoseEntryRange = LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 10)...LoopQuantity(unit: .milligramsPerDeciliter, doubleValue: 600)
     

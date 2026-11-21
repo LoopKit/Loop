@@ -25,8 +25,7 @@ final class FavoriteFoodAddEditViewModel: ObservableObject {
     
     @Published var carbsQuantity: Double? = nil
     var preferredCarbUnit = LoopUnit.gram
-    var maxCarbEntryQuantity = LoopConstants.maxCarbEntryQuantity
-    var warningCarbEntryQuantity = LoopConstants.warningCarbEntryQuantity
+    var maxCarbEntryQuantity: LoopQuantity { UserDefaults.standard.carbEntryLimits.maximumQuantity }
     
     @Published var foodType = ""
 
@@ -88,15 +87,20 @@ final class FavoriteFoodAddEditViewModel: ObservableObject {
     }
     
     func save() {
+        save(confirmedLargeQuantity: false)
+    }
+
+    private func save(confirmedLargeQuantity: Bool) {
         guard let updatedFavoriteFood, absorptionTime <= maxAbsorptionTime else { return }
 
         guard let carbsQuantity, carbsQuantity > 0 else { return }
         let quantity = LoopQuantity(unit: preferredCarbUnit, doubleValue: carbsQuantity)
-        if quantity.compare(maxCarbEntryQuantity) == .orderedDescending {
+        let limits = UserDefaults.standard.carbEntryLimits
+        if quantity > limits.maximumQuantity {
             self.alert = .maxQuantityExceded
             return
         }
-        else if quantity.compare(warningCarbEntryQuantity) == .orderedDescending {
+        else if !confirmedLargeQuantity, quantity > limits.warningQuantity {
             self.alert = .warningQuantityValidation
             return
         }
@@ -105,9 +109,8 @@ final class FavoriteFoodAddEditViewModel: ObservableObject {
     }
     
     func clearAlertAndSave() {
-        guard let updatedFavoriteFood else { return }
         self.alert = nil
-        onSave(updatedFavoriteFood)
+        save(confirmedLargeQuantity: true)
     }
     
     func clearAlert() {
