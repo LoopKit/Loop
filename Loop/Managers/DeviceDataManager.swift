@@ -821,17 +821,26 @@ extension DeviceDataManager {
         metadata.activationType = activationType
         let doseId = await newDoseId(for: metadata)
 
+        // A remote command reports the pump's error to its sender and sends its own failure notification
+        let rethrowsErrors = metadata.origin == .remote
+
         do {
             try await pumpManager.enactBolus(doseId: doseId, units: units, activationType: activationType)
         } catch PumpManagerError.uncertainDelivery {
             // Do not generate notification on uncertain delivery error
+            if rethrowsErrors {
+                throw PumpManagerError.uncertainDelivery
+            }
         } catch {
-            if !activationType.isAutomatic, let error = error as? PumpManagerError {
+            if !activationType.isAutomatic, !rethrowsErrors, let error = error as? PumpManagerError {
                 do {
                     try await NotificationManager.sendBolusFailureNotification(for: error, units: units, at: Date(), decisionId: metadata.decisionId, activationType: activationType)
                 } catch {
                     log.error("Error sending bolus failure notification %{public}@", String(describing: error))
                 }
+            }
+            if rethrowsErrors {
+                throw error
             }
         }
     }
