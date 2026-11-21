@@ -110,7 +110,6 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
         // glucose we're missing.
         loopManager.requestContextUpdate()
         loopManager.requestGlucoseBackfillIfNecessary()
-        WatchCGMHost.shared.recheckAcquisition()
     }
 
     func applicationWillResignActive() {
@@ -135,7 +134,6 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             switch task {
             case is WKApplicationRefreshBackgroundTask:
                 log.default("Processing WKApplicationRefreshBackgroundTask")
-                WatchCGMHost.shared.recheckAcquisition()
             case let task as WKBluetoothAlertRefreshBackgroundTask:
                 // A connect the system held for the CGM relaunched or woke the app: keep it running
                 // through the reading rather than completing the task at once.
