@@ -132,8 +132,8 @@ extension PodLoanWatchController {
 
     /// Row 29 · The pod driver found another controller using the pod and stopped: most likely the phone
     /// took the pod back and its stop has not arrived. Ask the phone, as a watch back from off does: the
-    /// stop makes this watch stand aside; silence at a reading past the wait means it is the only device
-    /// there, and it takes control again. Once per report.
+    /// stop makes this watch stand aside. Silence never moves the pod: at a reading past the wait this
+    /// watch stays stopped, tells the looper once, and asks again. Once per report.
     func considerOtherController() {
         guard phase == .active, let control = pumpManager as? ExclusiveDeviceControl,
               let at = control.otherControllerDetectedAt, at != otherControllerHandledAt else { return }
@@ -141,7 +141,7 @@ extension PodLoanWatchController {
         SportLog.event("loan", "the pod driver found another controller using the pod and stopped; asking the phone")
         guard case .query(let wait, let onSilence, _) = LoanControl.decide(LoanControl.Situation(device: .watch, trigger: .otherControllerSeen)) else { return }
         sendHoldsPodStatusReport(reason: "the pod shows another controller, asking before going on")
-        otherControllerCheck = OtherControllerCheck(askedAt: now(), wait: wait.seconds, onSilence: onSilence, epoch: epoch)
+        otherControllerCheck = OtherControllerCheck(askedAt: now(), wait: wait.seconds, onSilence: onSilence, epoch: epoch, told: false)
     }
 
     struct OtherControllerCheck {
@@ -149,19 +149,44 @@ extension PodLoanWatchController {
         let wait: TimeInterval
         let onSilence: LoanControl.Decision
         let epoch: Int?
+        /// The looper has been told for this stop; asking again does not tell again.
+        let told: Bool
     }
 
     func otherControllerCheckAtReading() {
         guard let check = otherControllerCheck else { return }
-        guard phase == .active, epoch == check.epoch, let control = pumpManager as? ExclusiveDeviceControl else {
+        guard phase == .active, epoch == check.epoch else {
             otherControllerCheck = nil
             return
         }
         guard now().timeIntervalSince(check.askedAt) >= check.wait, !WCSession.default.hasContentPending else { return }
-        otherControllerCheck = nil
-        guard case .carryOn = LoanControl.afterQuery(.silence, onSilence: check.onSilence) else { return }
-        SportLog.event("loan", "the phone did not say it holds the pod; taking control again")
-        control.takeControl()
+        guard case .tell(let tell) = LoanControl.afterQuery(.silence, onSilence: check.onSilence) else {
+            otherControllerCheck = nil
+            return
+        }
+        if !check.told {
+            SportLog.event("loan", "the phone did not say it holds the pod; staying off the pod and telling the looper")
+            tellLooper(tell)
+        } else {
+            SportLog.event("loan", "still no word from the phone; staying off the pod and asking again")
+        }
+        sendHoldsPodStatusReport(reason: "the pod shows another controller, asking again")
+        otherControllerCheck = OtherControllerCheck(askedAt: now(), wait: check.wait, onSilence: check.onSilence,
+                                                    epoch: check.epoch, told: true)
+    }
+
+    /// The watch's notice for a decision that tells the looper.
+    func tellLooper(_ tell: LoanControl.Tell) {
+        guard case .phoneMayHaveTakenPod = tell else { return }
+        let title = NSLocalizedString("iPhone May Have Taken the Pod", comment: "Watch alert title: the pod shows the phone ran it, and the phone does not answer")
+        let body = NSLocalizedString("Sport Mode is paused on this watch. Check your iPhone.", comment: "Watch alert body: the watch stays off the pod until the phone answers")
+        Task { @MainActor in
+            loopManager.issueAlert(Alert(
+                identifier: Alert.Identifier(managerIdentifier: "PodLoan", alertIdentifier: "phoneMayHaveTakenPod"),
+                foregroundContent: Alert.Content(title: title, body: body, acknowledgeActionButtonLabel: "OK"),
+                backgroundContent: Alert.Content(title: title, body: body, acknowledgeActionButtonLabel: "OK"),
+                trigger: .immediate))
+        }
     }
 
     /// The pump manager is built only once the check has passed: built, it reaches the pod by itself,

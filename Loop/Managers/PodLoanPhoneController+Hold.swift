@@ -98,9 +98,26 @@ extension PodLoanPhoneController {
                 reclaimPodConnection()
                 return
             }
+            // Taking back a loan this phone only inferred: its stop may not name the watch's loan (row 28
+            // with the watch unheard), so the time is kept, and a claim to a loan started before it is a
+            // revived one, refused with the stop (row 19).
+            if state == .owner, yieldingToInferredLoan {
+                updateState { $0.tookOverOnSilenceAt = deps.now() }
+            }
             reclaimNow()
         case .standAside:
             engageInferredLoanYield(evidence: why)
+        case .standAsideUnheard(let tell):
+            // Row 28, silence: the pod shows the watch ran it. Silence never moves the pod, so this phone
+            // stays off it, shows the loan, and tells the looper at once; the tap takes the pod back.
+            guard state == .owner, !yieldingToInferredLoan else { return }
+            handbackDiag(epoch, "standing aside for a loan only the pod shows: no answer from the watch, or it cannot reach the pod; telling the looper; \(why)")
+            engageInferredLoanYield(evidence: why)
+            updateState { $0.yieldedUnheard = true }
+            // This notice covers the silent stretch; the 20-minute notice stays quiet for it.
+            silenceWarnedFor = watchLastHeard
+            tellLooper(tell)
+            deps.ownershipDidChange()
         case .sendStop:
             guard let claimEpoch else { return }
             resendRevokeForClosedSession(epoch: claimEpoch, evidence: why)
@@ -128,8 +145,12 @@ extension PodLoanPhoneController {
             deps.issueUrgentNotice(
                 NSLocalizedString("Watch May Not Be Looping", comment: "Phone notice title: the watch has not reported and did not answer, and the phone could loop"),
                 NSLocalizedString("Usually it missed glucose readings. This iPhone can loop: open Loop and tap the pod to take it back.", comment: "Phone notice body: the watch may not be looping; the looper can take the pod back"))
+        case .watchProbablyLooping:
+            deps.issueUrgentNotice(
+                NSLocalizedString("Watch Probably Looping", comment: "Phone notice title: the pod shows the watch ran it, and the watch does not answer"),
+                NSLocalizedString("Sport Mode was started on your watch without this iPhone, and the watch isn't answering. If you're not using it, open Loop and tap the Sport Mode banner to take the pod back.", comment: "Phone notice body: the phone stays off the pod; the looper can take it back"))
         case .phoneAwayCannotHandBack, .noResponseFromPhone, .noResponseFromPhoneAndNoCGM, .notHearingFromPhone,
-             .podDeactivatedPhoneAway:
+             .podDeactivatedPhoneAway, .phoneMayHaveTakenPod:
             break
         }
     }

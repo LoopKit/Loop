@@ -313,7 +313,8 @@ final class WakeResumeTests: XCTestCase {
     }
 
     /// The answer to a query says whether the watch can reach the pod and when its loan started
-    /// (control document, rows 14 and 19).
+    /// (control document, rows 14 and 19). It goes at once, before any pod read: a read can hang for
+    /// minutes, and an answer waiting on it reaches the phone as silence.
     func testTheAnswerCarriesPodReachAndLoanStart() async throws {
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         let started = Date().addingTimeInterval(-.minutes(30))
@@ -323,15 +324,40 @@ final class WakeResumeTests: XCTestCase {
             if let m = try? LoanMessage.decode(fromTransport: dict), case .statusReport(let r) = m { reports.append(r) }
         }
         c.handleIncoming(userInfo: try LoanMessage.statusQuery(StatusQuery(epoch: 7)).transportDictionary())
-        // No recent reading of the pod: the watch tries it before answering, so the answer comes after the read.
-        for _ in 0..<100 where reports.isEmpty {
-            try await Task.sleep(nanoseconds: 50_000_000)
-            await c.onMain { }
-        }
+        await c.onMain { }
+        XCTAssertEqual(reports.count, 1, "answered at once, before the pod read")
         let report = try XCTUnwrap(reports.last)
         XCTAssertTrue(report.holdsPod)
         XCTAssertEqual(report.loanStartedAt?.timeIntervalSince1970 ?? 0, started.timeIntervalSince1970, accuracy: 1)
         XCTAssertNotEqual(report.podReachable, true, "the pod could not be read: not reported as reachable")
+    }
+
+    /// Row 29, silence: the pod showed another controller and the phone does not answer. Silence never
+    /// moves the pod: the watch stays stopped, tells the looper once, and asks again at each reading.
+    func testAfterAnotherControllerASilentPhoneLeavesTheWatchStoppedAndAsking() async throws {
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        var asked = 0
+        c.send = { dict in
+            if let m = try? LoanMessage.decode(fromTransport: dict), case .statusReport(let r) = m, r.holdsPod { asked += 1 }
+        }
+        await c.onMain {
+            c.otherControllerCheck = .init(askedAt: Date().addingTimeInterval(-.minutes(10)), wait: 60,
+                                           onSilence: .tell(.phoneMayHaveTakenPod), epoch: c.epoch, told: false)
+            c.otherControllerCheckAtReading()
+        }
+        XCTAssertEqual(asked, 1, "asked again")
+        XCTAssertEqual(c.otherControllerCheck?.told, true, "the looper was told")
+        XCTAssertEqual(c.phase, .active, "the loan stays; the watch does not take the pod again")
+
+        await c.onMain { c.otherControllerCheckAtReading() }
+        XCTAssertEqual(asked, 1, "a reading inside the wait asks nothing")
+        await c.onMain {
+            c.otherControllerCheck = .init(askedAt: Date().addingTimeInterval(-.minutes(10)), wait: 60,
+                                           onSilence: .tell(.phoneMayHaveTakenPod), epoch: c.epoch, told: true)
+            c.otherControllerCheckAtReading()
+        }
+        XCTAssertEqual(asked, 2, "asked again at the next reading past the wait")
+        XCTAssertNotNil(c.otherControllerCheck)
     }
 
     func testPhoneRefusalEndsTheHandbackAtOnceAndKeepsTheLoan() async throws {
