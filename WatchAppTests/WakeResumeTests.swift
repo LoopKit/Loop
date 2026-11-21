@@ -329,6 +329,34 @@ final class WakeResumeTests: XCTestCase {
         XCTAssertNotEqual(report.podReachable, true, "the pod could not be read: not reported as reachable")
     }
 
+    /// Row 29, silence: the pod showed another controller and the phone does not answer. Silence never
+    /// moves the pod: the watch stays stopped, tells the looper once, and asks again at each reading.
+    func testAfterAnotherControllerASilentPhoneLeavesTheWatchStoppedAndAsking() async throws {
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        var asked = 0
+        c.send = { dict in
+            if let m = try? LoanMessage.decode(fromTransport: dict), case .statusReport(let r) = m, r.holdsPod { asked += 1 }
+        }
+        await c.onMain {
+            c.otherControllerCheck = .init(askedAt: Date().addingTimeInterval(-.minutes(10)), wait: 60,
+                                           onSilence: .tell(.phoneMayHaveTakenPod), epoch: c.epoch, told: false)
+            c.otherControllerCheckAtReading()
+        }
+        XCTAssertEqual(asked, 1, "asked again")
+        XCTAssertEqual(c.otherControllerCheck?.told, true, "the looper was told")
+        XCTAssertEqual(c.phase, .active, "the loan stays; the watch does not take the pod again")
+
+        await c.onMain { c.otherControllerCheckAtReading() }
+        XCTAssertEqual(asked, 1, "a reading inside the wait asks nothing")
+        await c.onMain {
+            c.otherControllerCheck = .init(askedAt: Date().addingTimeInterval(-.minutes(10)), wait: 60,
+                                           onSilence: .tell(.phoneMayHaveTakenPod), epoch: c.epoch, told: true)
+            c.otherControllerCheckAtReading()
+        }
+        XCTAssertEqual(asked, 2, "asked again at the next reading past the wait")
+        XCTAssertNotNil(c.otherControllerCheck)
+    }
+
     func testPhoneRefusalEndsTheHandbackAtOnceAndKeepsTheLoan() async throws {
         // With the phone's Bluetooth off, End is refused and the watch
         // knows at once — no budget to wait out. The phone says so; the watch shows its reason.

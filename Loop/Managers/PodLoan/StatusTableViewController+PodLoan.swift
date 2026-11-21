@@ -18,13 +18,19 @@ extension StatusTableViewController {
         let cell = UITableViewCell()
         cell.backgroundColor = .secondarySystemBackground
         let subtitle: String
+        let unheard = deviceManager.isPodLoanWatchUnheard
         if deviceManager.isPodTakeoverInProgress {
             subtitle = NSLocalizedString("Handing the pod to Apple Watch…", comment: "The subtitle of the banner while the watch is taking over the pod")
         } else if deviceManager.isPodLoanReclaiming {
             subtitle = NSLocalizedString("Reclaiming the pod…", comment: "The subtitle of the banner while the phone is reclaiming the pod")
+        } else if unheard {
+            subtitle = NSLocalizedString("Apple Watch isn't answering. Tap to take the pod back.", comment: "The subtitle of the banner when the pod shows the watch ran it and the watch does not answer")
         } else {
             subtitle = NSLocalizedString("Apple Watch is controlling the pod. Tap to reclaim.", comment: "The subtitle of the banner indicating the pod is controlled by the watch")
         }
+        let title = unheard
+            ? NSLocalizedString("Sport Mode Probably Active", comment: "The title of the banner when the pod shows the watch ran it and the watch does not answer")
+            : NSLocalizedString("Sport Mode Active", comment: "The title of the banner indicating the pod is controlled by the watch")
         // How current the phone's copy is: its stores hold every carb and insulin record made by this time.
         var freshness: String?
         if !deviceManager.isPodTakeoverInProgress, !deviceManager.isPodLoanReclaiming,
@@ -37,7 +43,7 @@ extension StatusTableViewController {
                 Text(Image(systemName: "applewatch")).font(.title) + Text(" ")
 
                 VStack(alignment: .leading) {
-                    Text(NSLocalizedString("Sport Mode Active", comment: "The title of the banner indicating the pod is controlled by the watch"))
+                    Text(title)
                         .font(.headline.bold())
 
                     Text(subtitle)

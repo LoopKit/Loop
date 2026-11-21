@@ -57,6 +57,11 @@ extension DeviceDataManager {
         podLoanController?.isPodLoanedOutForUI ?? false
     }
 
+    /// The pod shows a loan on the watch, and the watch has not answered (control row 28).
+    var isPodLoanWatchUnheard: Bool {
+        podLoanController?.isWatchUnheardForUI ?? false
+    }
+
     /// During a loan, when the watch's records last arrived.
     var podLoanLastRecordsAt: Date? {
         podLoanController?.lastRecordsAtForUI
