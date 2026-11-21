@@ -380,6 +380,7 @@ class LoopAppManager: NSObject {
             servicesManagerDelegate: loopDataManager,
             servicesManagerDosingDelegate: self
         )
+        servicesManager.remoteCommandGate.treatmentSource = self
 
         statefulPluginManager = StatefulPluginManager(pluginManager: pluginManager, servicesManager: servicesManager)
 
@@ -1101,6 +1102,29 @@ extension LoopAppManager: ResetLoopManagerDelegate {
 extension LoopAppManager: ServicesManagerDosingDelegate {
     func deliverBolus(amountInUnits: Double, decisionId: UUID?, request: DoseMetadata.RemoteRequest?) async throws {
         try await deviceDataManager.enactBolus(units: amountInUnits, metadata: DoseMetadata(origin: .remote, decisionId: decisionId, remoteRequest: request), activationType: .manualNoRecommendation)
+    }
+}
+
+// MARK: - RemoteCommandTreatmentSource
+
+extension LoopAppManager: RemoteCommandTreatmentSource {
+    func bolusHistory(since start: Date) async throws -> [DoseEntry] {
+        try await doseStore.getBoluses(start: start)
+    }
+
+    var bolusInProgress: DoseEntry? {
+        guard case .inProgress(let dose) = deviceDataManager?.bolusState else {
+            return nil
+        }
+        return dose
+    }
+
+    func carbEntries(since start: Date) async throws -> [StoredCarbEntry] {
+        try await carbStore.getCarbEntries(start: start)
+    }
+
+    func roundToSupportedBolusVolume(units: Double) -> Double {
+        deviceDataManager?.pumpManager?.roundToSupportedBolusVolume(units: units) ?? units
     }
 }
 
