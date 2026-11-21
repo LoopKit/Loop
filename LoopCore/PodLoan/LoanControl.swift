@@ -173,6 +173,11 @@ public enum LoanControl {
         case notHearingFromPhone
         /// The pod is deactivated, and the phone ends Sport Mode when it hears.
         case podDeactivatedPhoneAway
+        /// The pod shows the watch ran it, and the watch does not answer: Sport Mode probably runs there.
+        case watchProbablyLooping
+        /// The pod shows the phone ran it, and the phone does not answer: probably a take-back whose stop
+        /// has not arrived.
+        case phoneMayHaveTakenPod
     }
 
     public enum Prompt: Equatable {
@@ -185,14 +190,18 @@ public enum LoanControl {
         /// it lands; silence, or "I hold it but cannot reach it", leads to `onSilence` (`afterQuery`), and
         /// so does "I hold nothing" unless `onHoldsNothing` says otherwise.
         case query(Wait, onSilence: Decision, onHoldsNothing: Decision? = nil)
-        /// Phone: it already holds the pod and keeps it; remember the takeover on silence.
+        /// Phone: it already holds the pod and keeps it, taking control again if its driver stopped;
+        /// remember the takeover. Only where nobody else is looping: no other device's sessions (row 5),
+        /// or the watch says it holds nothing (row 28).
         case keepPodOnSilence
-        /// Phone: take the pod back after silence; remember the takeover; tell.
+        /// Phone: take the pod back from a watch that says it holds nothing; remember the takeover; tell.
         case takeOnSilence(Tell)
         /// Phone: take the pod back because the looper tapped.
         case takeOnTap
         /// Phone: stand aside for the watch's loan.
         case standAside
+        /// Phone: stand aside for a loan only the pod shows, and tell: the watch has not answered.
+        case standAsideUnheard(Tell)
         /// Phone: send the stop for the claimed loan.
         case sendStop
         /// Phone: the watch is still there; renew its hold.
@@ -273,10 +282,12 @@ public enum LoanControl {
             return .tellIfSilent(.notHearingFromPhone, after: notHearingFromPhoneWarning)
 
         // Row 4 · A clean reading: the resting state carries on.
-        // Rows 5 and 18 · A reading shows insulin the phone's records cannot explain, so another device
-        // controlled the pod. The insulin is booked regardless (rule 1, in the ledger). The phone already
-        // holds the pod, so asking can only end with it standing aside (the watch says it holds a loan,
-        // row 17) or keeping the pod.
+        // Row 5 · A reading shows insulin the phone's records cannot explain. The insulin is booked
+        // regardless (rule 1, in the ledger). A watch that ran the pod would have moved its session count,
+        // and the pod driver stops at that before any reading (row 28): every copy this phone hands out
+        // marks the pod shared. So no other device's sessions are behind this insulin, nobody else is
+        // looping, and keeping the pod on silence is a known fact, not a guess. The watch is still asked:
+        // a loan it claims makes the phone stand aside (row 17).
         case (.phone, .podReading(let beyondBand)):
             guard beyondBand, s.phoneRole == .holdsPod, s.offlineCopyOut else { return .nothing }
             return .query(.inBackground, onSilence: .keepPodOnSilence)
@@ -340,16 +351,20 @@ public enum LoanControl {
         // so it asks before touching the pod. A phone that holds the pod answers with the stop, acted on
         // where it lands. With no answer it is the only device there and carries on.
         // Rows 28 and 29 · The pod driver found another controller using the pod and stopped. The
-        // driver only sees it; who should hold the pod is decided here. The phone holding the pod asks
-        // the watch (a loan started without it): an answer makes it stand aside; silence means the watch
-        // is gone, and the phone takes control again and reads the pod. A watch holding a loan asks the
-        // phone (a take-back whose stop it missed): the stop makes it stand aside; silence means it is
-        // the only device there, and it takes control again.
+        // driver only sees it; who should hold the pod is decided here. Silence never moves the pod
+        // (rule 4): the stop shows another device ran the pod, and a silent device may still be looping.
+        // The phone holding the pod asks the watch (a loan started without it): an answer makes it stand
+        // aside; silence, or "I hold it but cannot reach it", makes it stand aside too, staying off the
+        // pod, and tell the looper, whose tap takes the pod back (rows 18, 20). A watch holding a loan
+        // asks the phone (a take-back whose stop it missed): the stop makes it stand aside; silence leaves
+        // it stopped, and it tells the looper and asks again. A watch that says it holds nothing is not
+        // looping: the phone takes control again, reads the pod and counts what it delivered.
         case (.phone, .otherControllerSeen):
             guard s.phoneRole == .holdsPod else { return .nothing }
-            return .query(.inBackground, onSilence: .keepPodOnSilence)
+            return .query(.inBackground, onSilence: .standAsideUnheard(.watchProbablyLooping),
+                          onHoldsNothing: .keepPodOnSilence)
         case (.watch, .otherControllerSeen):
-            return .query(.inBackground, onSilence: .carryOn)
+            return .query(.inBackground, onSilence: .tell(.phoneMayHaveTakenPod))
 
         case (.watch, .backFromOff):
             return .query(.inBackground, onSilence: .carryOn)

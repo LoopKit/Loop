@@ -377,8 +377,15 @@ final class PodLoanPhoneController {
     /// The phone's glucose alert settings as last seen; part of the standing copy's fingerprint.
     var glucoseAlertSettingsSeen: GlucoseAlertSettings?
 
-    /// The newest loan the watch claimed that this phone never granted, and when.
-    var newestForeignLoanEvidence: (epoch: Int, at: Date)?
+    /// The newest loan the watch claimed that this phone never granted, and when. The watch's word ends
+    /// a stand-aside on the pod's evidence alone (row 28): the banner then says the watch is looping.
+    var newestForeignLoanEvidence: (epoch: Int, at: Date)? {
+        didSet {
+            guard newestForeignLoanEvidence != nil, persisted.yieldedUnheard else { return }
+            updateState { $0.yieldedUnheard = false }
+            deps.ownershipDidChange()
+        }
+    }
 
     /// Per grant; cleared wherever a loan is abandoned.
     var grantOfferedAt: Date?

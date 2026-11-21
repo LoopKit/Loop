@@ -3965,8 +3965,67 @@ extension PodLoanPhoneControllerTests {
         waitUntil(timeout: 5, "reading kept") { controller.ledgerLast?.at == at }
     }
 
-    /// Row 28, silence: the phone takes the pod again after another controller and doses nothing until it
-    /// has read the pod and counted the insulin, since its last reading may still count as fresh.
+    /// Row 28, silence: the pod shows the watch ran it and the watch does not answer. Silence never moves
+    /// the pod: the phone stays off it, shows the loan as probable, and tells the looper at once. The
+    /// watch's word, when it comes, turns the banner to its usual words.
+    func testAnotherControllerAndASilentWatchStandAsideAndTellAtOnce() throws {
+        try withShortAnswerWait {
+            _ = seizeCredentialOutstanding()
+            let controller = makeController()
+            MockPumpManager.testOtherControllerAt = Date()
+
+            controller.considerOtherController()
+            waitUntil(timeout: 5, "the watch is asked") { self.statusQueries() == 1 }
+            XCTAssertFalse(controller.yieldingToInferredLoan, "nothing moves before the answer is due")
+
+            cycleAfterTheAnswerWait(controller)
+            XCTAssertTrue(controller.yieldingToInferredLoan, "silence: the phone stands aside")
+            XCTAssertTrue(controller.isWatchUnheardForUI, "the banner says the loan is probable")
+            XCTAssertTrue(controller.isPodLoanedOutForUI)
+            XCTAssertTrue(controller.holdsAutomaticDosing, "the phone does not dose")
+            XCTAssertNotNil(MockPumpManager.testOtherControllerAt, "the phone did not take control again")
+            lock.lock(); let titles = urgentNotices; lock.unlock()
+            XCTAssertEqual(titles.filter { $0 == "Watch Probably Looping" }.count, 1, "told at once")
+
+            // The 20-minute notice stays quiet for the silent stretch this notice covered.
+            controller.carryOut(.tell(.watchMayNotBeLooping), why: "test: still silent")
+            lock.lock(); let after = urgentNotices; lock.unlock()
+            XCTAssertFalse(after.contains("Watch May Not Be Looping"))
+
+            controller.handleIncoming(userInfo: try LoanMessage.statusReport(StatusReport(
+                epoch: 5, lastDirectGlucoseAge: nil, lastEventSeq: 0, podFault: nil, holdsPod: true, knowsGrant: false)).transportDictionary())
+            waitUntil(timeout: 5, "the watch's word") { !controller.isWatchUnheardForUI }
+            XCTAssertTrue(controller.yieldingToInferredLoan, "still standing aside, now for a loan the watch claims")
+        }
+    }
+
+    /// Row 28 then Take Back: the phone never heard the watch's loan number, so its stop may not name it.
+    /// The take-back keeps the time, and a revived claim to a loan started before it is refused (row 19).
+    func testTakingBackALoanOnlyThePodShowedKeepsTheTakeoverTime() throws {
+        try withShortAnswerWait {
+            _ = seizeCredentialOutstanding()
+            let controller = makeController()
+            MockPumpManager.testOtherControllerAt = Date()
+            controller.considerOtherController()
+            waitUntil(timeout: 5, "the watch is asked") { self.statusQueries() == 1 }
+            cycleAfterTheAnswerWait(controller)
+            XCTAssertTrue(controller.yieldingToInferredLoan)
+            XCTAssertNil(controller.persisted.tookOverOnSilenceAt, "standing aside is not a takeover")
+
+            controller.takeBackTapped()
+            drainMainQueue()
+            XCTAssertNotNil(controller.persisted.tookOverOnSilenceAt, "the take-back's time is kept for row 19")
+            let claim = LoanControl.Claim(loan: .newer, startedAt: Date().addingTimeInterval(-.minutes(30)), refusedBefore: false)
+            XCTAssertEqual(LoanControl.decide(LoanControl.Situation(device: .phone, trigger: .watchClaims(claim), phoneRole: .holdsPod,
+                                                                    tookOverOnSilenceAt: controller.persisted.tookOverOnSilenceAt,
+                                                                    sensorFresh: true, offlineCopyOut: true)),
+                           .sendStop, "a loan started before the take-back is a revived claim")
+        }
+    }
+
+    /// Row 28, the watch says it holds nothing: nobody is looping, so the phone takes the pod again and
+    /// doses nothing until it has read the pod and counted the insulin, since its last reading may still
+    /// count as fresh.
     func testTakingThePodAgainAfterAnotherControllerHoldsDosingUntilThePodIsCounted() throws {
         let controller = makeController()
         readPod(controller, units: 10, at: Date().addingTimeInterval(-120))
@@ -3974,7 +4033,7 @@ extension PodLoanPhoneControllerTests {
         MockPumpManager.testOdometer = 10.5
         MockPumpManager.testOdometerAt = Date()
 
-        controller.carryOut(.keepPodOnSilence, why: "test: no answer from the watch")
+        controller.carryOut(.keepPodOnSilence, why: "test: the watch holds nothing")
         XCTAssertTrue(controller.holdsAutomaticDosing, "no dose before the pod is read and counted")
         XCTAssertNil(MockPumpManager.testOtherControllerAt, "the take lifted the driver's stop")
 

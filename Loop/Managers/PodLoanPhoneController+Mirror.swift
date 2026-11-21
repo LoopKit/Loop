@@ -126,7 +126,10 @@ extension PodLoanPhoneController {
     /// Does not re-take the radio or resume dosing; callers differ on both.
     func clearInferredLoanYield(reason: String) {
         guard yieldingToInferredLoan else { return }
-        yieldingToInferredLoan = false
+        updateState {
+            $0.yieldingToInferredLoan = false
+            $0.yieldedUnheard = false
+        }
         deps.ownershipDidChange()
         PhoneLog.event("mirror", "no longer standing aside: \(reason)")
     }
