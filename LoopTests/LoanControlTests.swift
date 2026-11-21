@@ -155,18 +155,27 @@ final class LoanControlTests: XCTestCase {
                        "a closed loan's pod is already home")
     }
 
-    // Row 28 · The phone holding the pod finds another controller has used it: it asks the watch, and
-    // silence means it keeps the pod (taking control again and reading it).
+    // Row 28 · The phone holding the pod finds another controller has used it: it asks the watch.
+    // Silence never moves the pod: silence, or "cannot reach", makes it stand aside and tell; a watch
+    // that holds nothing is not looping, so the phone takes control again.
     func testRow28PhoneFindsAnotherControllerAsksTheWatch() {
-        XCTAssertEqual(phone(.otherControllerSeen, role: .holdsPod), .query(.inBackground, onSilence: .keepPodOnSilence))
+        let decision = phone(.otherControllerSeen, role: .holdsPod)
+        XCTAssertEqual(decision, .query(.inBackground, onSilence: .standAsideUnheard(.watchProbablyLooping),
+                                        onHoldsNothing: .keepPodOnSilence))
+        guard case .query(_, let onSilence, let onHoldsNothing) = decision else { return XCTFail() }
+        XCTAssertEqual(C.afterQuery(.silence, onSilence: onSilence, onHoldsNothing: onHoldsNothing),
+                       .standAsideUnheard(.watchProbablyLooping))
+        XCTAssertEqual(C.afterQuery(.holdsPodButCannotReach, onSilence: onSilence, onHoldsNothing: onHoldsNothing),
+                       .standAsideUnheard(.watchProbablyLooping))
+        XCTAssertEqual(C.afterQuery(.holdsNothing, onSilence: onSilence, onHoldsNothing: onHoldsNothing), .keepPodOnSilence)
         XCTAssertEqual(phone(.otherControllerSeen, role: .lending), .nothing, "lent: the watch is expected on the pod")
         XCTAssertEqual(phone(.otherControllerSeen, role: .standingAside), .nothing)
     }
 
-    // Row 29 · The watch holding a loan finds another controller has used the pod: it asks the phone, and
-    // silence means it carries on.
+    // Row 29 · The watch holding a loan finds another controller has used the pod: it asks the phone.
+    // Silence never moves the pod: the watch stays stopped and tells the looper.
     func testRow29WatchFindsAnotherControllerAsksThePhone() {
-        XCTAssertEqual(watch(.otherControllerSeen), .query(.inBackground, onSilence: .carryOn))
+        XCTAssertEqual(watch(.otherControllerSeen), .query(.inBackground, onSilence: .tell(.phoneMayHaveTakenPod)))
     }
 
     // Rows 22 and 23 · No device can act: no trigger reaches `decide`. Anything else is not a decision point.
