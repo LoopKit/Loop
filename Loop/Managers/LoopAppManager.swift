@@ -681,6 +681,7 @@ class LoopAppManager: NSObject {
                 .edgesIgnoringSafeArea(.top)
         )
 
+        LoopInterfacePreference.syncToExtensions()
         if LoopInterfacePreference.useRedesign {
             let rootNavigationController = RootNavigationController()
             rootNavigationController.setViewControllers([statusScreen], animated: false)
