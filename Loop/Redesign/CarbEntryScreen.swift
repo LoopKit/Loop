@@ -239,7 +239,14 @@ struct CarbEntryScreen: View {
                                 endEditing()
                                 // A favourite brings its own food and time, so the speed shown follows it rather than an earlier Other.
                                 otherChosen = false
-                                animated { viewModel.selectedFavoriteFoodIndex = selected ? -1 : index }
+                                animated {
+                                    viewModel.selectedFavoriteFoodIndex = selected ? -1 : index
+                                    // Letting a new meal's favourite go resets it to medium absorption, so the speed shown and
+                                    // the food type saved go back to medium too, rather than a speed chosen before the favourite.
+                                    if selected && viewModel.originalCarbEntry == nil {
+                                        viewModel.selectedDefaultAbsorptionTimeEmoji = Speed.medium.emoji
+                                    }
+                                }
                             } label: {
                                 HStack(spacing: 6) {
                                     Text(food.foodType)
