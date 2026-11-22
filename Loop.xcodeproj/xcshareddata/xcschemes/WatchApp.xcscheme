@@ -17,7 +17,21 @@
                BlueprintIdentifier = "A9E6758022713F4700E25293"
                BuildableName = "LoopKit.framework"
                BlueprintName = "LoopKit-watchOS"
-               ReferencedContainer = "container:../Common/LoopKit/LoopKit.xcodeproj">
+               ReferencedContainer = "container:../LoopKit/LoopKit.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "FADE00000000000000000305"
+               BuildableName = "G7SensorKit.framework"
+               BlueprintName = "G7SensorKit-watchOS"
+               ReferencedContainer = "container:../G7SensorKit/G7SensorKit.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
