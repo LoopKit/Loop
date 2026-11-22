@@ -2479,7 +2479,19 @@ extension StatusTableViewController {
         } else {
             // The classic HUD keeps this current; the new interface has no HUD, so set it before presenting.
             loopCompletionModalViewModel.ago = lastCompleted.map { Date().timeIntervalSince($0) }
-            showLoopCompletionMessage(self)
+            let sheet = UIHostingController(rootView: LoopStatusSheet(
+                viewModel: loopCompletionModalViewModel,
+                provider: nowModel.provider,
+                openSettings: { [weak self] in
+                    self?.dismiss(animated: true) { self?.presentSettings() }
+                },
+                done: { [weak self] in self?.dismiss(animated: true) }
+            ).environment(\.loopStatusColorPalette, .loopStatus))
+            if let presentation = sheet.sheetPresentationController {
+                presentation.detents = [.medium(), .large()]
+                presentation.prefersGrabberVisible = true
+            }
+            present(sheet, animated: true)
         }
     }
 }

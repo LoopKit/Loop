@@ -31,9 +31,9 @@ struct CarbEntryScreen: View {
     @State private var eatenChoice: Int?
     @State private var showHowAbsorptionTimeWorks = false
     @State private var showAddFavoriteFood = false
+    @State private var showTimePicker = false
     /// Other was tapped, so it stays chosen even while its food and time still match a preset.
     @State private var otherChosen = false
-    @FocusState private var amountFocused: Bool
     @FocusState private var foodTypeFocused: Bool
     @Namespace private var thumbs
 
@@ -68,7 +68,7 @@ struct CarbEntryScreen: View {
 
     private var content: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: LoopDesign.Space.s4) {
                 if let override = viewModel.currentOverride {
                     ActivePresetBanner(override: override)
                 }
@@ -89,32 +89,26 @@ struct CarbEntryScreen: View {
         // Any scroll puts the keyboard away: at large text sizes it otherwise covers the rest of the form for good.
         .scrollDismissesKeyboard(.immediately)
         .toolbar {
-            if amountFocused || foodTypeFocused {
+            if foodTypeFocused {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        amountFocused = false
+                    Button(NSLocalizedString("Done", comment: "Button to put the keyboard away after typing a food type on the carb entry screen")) {
                         foodTypeFocused = false
                     }
                 }
             }
         }
         .background(P.surface)
-        .safeAreaInset(edge: .bottom) { continueBar }
+        .safeAreaInset(edge: .bottom) { entryBar }
         .onAppear {
             // As FoodTypeRow does: a new entry starts as the medium food, so the entry carries its emoji.
             if isNewEntry && !viewModel.usesCustomFoodType && viewModel.selectedDefaultAbsorptionTimeEmoji.isEmpty {
                 viewModel.selectedDefaultAbsorptionTimeEmoji = Speed.medium.emoji
             }
         }
-        .task {
-            // Focus set while the sheet is still presenting is dropped, so wait for it to settle.
-            guard viewModel.shouldBeginEditingQuantity else { return }
-            try? await Task.sleep(for: .milliseconds(450))
-            amountFocused = true
-        }
         .onChange(of: viewModel.carbsQuantity) { _, quantity in
-            // A favourite fills the amount in; keep the field in step unless the person is typing it.
-            guard !amountFocused else { return }
+            // A favourite fills the amount in. What's typed already shows its own amount ("3." is 3), so only a
+            // change from elsewhere rewrites it.
+            guard Self.amountFormatter.number(from: amountText)?.doubleValue != quantity else { return }
             amountText = quantity.flatMap { $0 > 0 ? Self.amountFormatter.string(from: NSNumber(value: $0)) : nil } ?? ""
         }
         .navigationDestination(isPresented: Binding(get: { viewModel.bolusViewModel != nil }, set: { if !$0 { viewModel.bolusViewModel = nil } })) {
@@ -159,29 +153,7 @@ struct CarbEntryScreen: View {
 
     private var mealPreview: some View {
         VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
-            HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s1) {
-                TextField(text: $amountText, prompt: Text(verbatim: "0").foregroundStyle(P.inkMuted.opacity(0.45))) {
-                    Text(NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"))
-                }
-                .font(.system(size: 72, weight: .bold, design: .rounded).monospacedDigit())
-                .foregroundStyle(P.carbsInk)
-                .tint(P.carbsInk)
-                .keyboardType(.decimalPad)
-                .accessibilityLabel(NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"))
-                .accessibilityIdentifier("textField_CarbsAmount")
-                .fixedSize()
-                .focused($amountFocused)
-                .onChange(of: amountText) { _, text in
-                    viewModel.carbsQuantity = Self.amountFormatter.number(from: text)?.doubleValue
-                }
-                Text(NSLocalizedString("g", comment: "Abbreviation for grams"))
-                    .font(.system(size: 30, weight: .semibold, design: .rounded))
-                    .foregroundStyle(P.inkMuted)
-                    .accessibilityHidden(true)
-                Spacer(minLength: 0)
-            }
-            .contentShape(Rectangle())
-            .onTapGesture { amountFocused = true }
+            amountDisplay
 
             TimelineView(.everyMinute) { context in
                 MealAbsorptionChart(grams: viewModel.carbsQuantity ?? 0,
@@ -197,19 +169,78 @@ struct CarbEntryScreen: View {
         .background(P.surfaceRaised, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
+    private var hasAmount: Bool { (viewModel.carbsQuantity ?? 0) > 0 }
+
+    /// The amount, typed on the pad below. It reads as the meal's size: carbs green once there is one.
+    private var amountDisplay: some View {
+        HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s1) {
+            Text(amountText.isEmpty ? "0" : amountText)
+                .font(.system(size: 56, weight: .bold, design: .rounded).monospacedDigit())
+                .foregroundStyle(hasAmount ? P.carbsInk : P.inkMuted.opacity(0.4))
+                .contentTransition(.numericText())
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            Text(NSLocalizedString("g", comment: "Abbreviation for grams"))
+                .font(.system(size: 28, weight: .semibold, design: .rounded))
+                .foregroundStyle(P.inkMuted)
+            Spacer(minLength: 0)
+        }
+        .animation(reduceMotion ? nil : .snappy(duration: 0.2), value: amountText)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"))
+        .accessibilityValue(LoopFormat.grams(viewModel.carbsQuantity ?? 0))
+        .accessibilityIdentifier("textField_CarbsAmount")
+        .accessibilityAdjustableAction { direction in
+            let grams = (viewModel.carbsQuantity ?? 0) + (direction == .increment ? 1 : -1)
+            setAmount(max(0, grams.rounded()))
+        }
+    }
+
+    private func setAmount(_ grams: Double) {
+        amountText = grams > 0 ? Self.amountFormatter.string(from: NSNumber(value: grams)) ?? "" : ""
+        viewModel.carbsQuantity = grams > 0 ? grams : nil
+    }
+
+    private static var decimalSeparator: String { amountFormatter.decimalSeparator ?? "." }
+
+    /// One key on the pad. Up to three whole grams and one decimal place, as the field allowed.
+    private func press(_ key: CarbKeypad.Key) {
+        var text = amountText
+        switch key {
+        case .digit(let digit):
+            let parts = text.components(separatedBy: Self.decimalSeparator)
+            if parts.count == 2 {
+                guard parts[1].isEmpty else { return }
+            } else if text == "0" {
+                text = ""
+            } else if text.count >= 3 {
+                return
+            }
+            text += String(digit)
+        case .decimal:
+            guard !text.contains(Self.decimalSeparator) else { return }
+            text = (text.isEmpty ? "0" : text) + Self.decimalSeparator
+        case .delete:
+            guard !text.isEmpty else { return }
+            text.removeLast()
+        case .clear:
+            text = ""
+        }
+        amountText = text
+        viewModel.carbsQuantity = Self.amountFormatter.number(from: text)?.doubleValue
+    }
+
     // MARK: Favourites
 
     @ViewBuilder
     private var favourites: some View {
         if !viewModel.favoriteFoods.isEmpty || !viewModel.saveFavoriteFoodButtonDisabled {
             VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
-                sectionTitle(NSLocalizedString("Favorite Foods", comment: "The section title for Carb entry screen where Favorite Foods can be selected"))
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: LoopDesign.Space.s2) {
                         ForEach(Array(viewModel.favoriteFoods.enumerated()), id: \.element.id) { index, food in
                             let selected = viewModel.selectedFavoriteFoodIndex == index
                             Button {
-                                amountFocused = false
                                 // A favourite brings its own food and time, so the speed shown follows it rather than an earlier Other.
                                 otherChosen = false
                                 animated { viewModel.selectedFavoriteFoodIndex = selected ? -1 : index }
@@ -249,6 +280,7 @@ struct CarbEntryScreen: View {
                     .padding(.vertical, 1)
                 }
                 .scrollClipDisabled()
+                .accessibilityLabel(NSLocalizedString("Favorite Foods", comment: "The section title for Carb entry screen where Favorite Foods can be selected"))
             }
         }
     }
@@ -261,36 +293,75 @@ struct CarbEntryScreen: View {
             : String(format: NSLocalizedString("%1$@ ago", comment: "Carb entry time choice: eaten this long before now. (1: duration, e.g. 15m or 1h)"), LoopFormat.duration(Double(minutes) * 60))
     }
 
+    /// One row: the usual times, then a clock for any other. A time picked there takes the clock's place.
     private var eaten: some View {
         VStack(alignment: .leading, spacing: LoopDesign.Space.s2) {
-            let header = typeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: LoopDesign.Space.s2))
-                : AnyLayout(HStackLayout(alignment: .center))
-            header {
-                sectionTitle(NSLocalizedString("Eaten", comment: "Carb entry section title: when the food was eaten"))
-                if !typeSize.isAccessibilitySize { Spacer() }
+            sectionTitle(NSLocalizedString("Eaten", comment: "Carb entry section title: when the food was eaten"))
+            HStack(spacing: LoopDesign.Space.s2) {
+                ChoiceTrack(choices: Self.eatenChoices, selection: eatenChoice, thumb: "eaten", namespace: thumbs) { minutes in
+                    let date = Date().addingTimeInterval(-Double(minutes) * 60)
+                    animated {
+                        eatenChoice = minutes
+                        viewModel.time = min(max(date, viewModel.minimumDate), viewModel.maximumDate)
+                    }
+                } label: { minutes, selected in
+                    Text(eatenTitle(minutes))
+                        .font(LoopDesign.Typeface.subhead.weight(selected ? .semibold : .medium).monospacedDigit())
+                        .foregroundStyle(selected ? P.carbsInk : P.ink)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .padding(.vertical, LoopDesign.Space.s2)
+                }
+                .frame(maxWidth: .infinity)
+                .layoutPriority(1)
+                Button {
+                    showTimePicker = true
+                } label: {
+                    Group {
+                        if eatenChoice == nil {
+                            Text(LoopFormat.time(viewModel.time))
+                                .font(LoopDesign.Typeface.subhead.weight(.semibold).monospacedDigit())
+                                .foregroundStyle(P.carbsInk)
+                        } else {
+                            Image(systemName: "clock")
+                                .font(LoopDesign.Typeface.subhead.weight(.semibold))
+                                .foregroundStyle(P.ink)
+                        }
+                    }
+                    .padding(.horizontal, LoopDesign.Space.s3)
+                    .frame(minWidth: 52, minHeight: 52)
+                    .background(eatenChoice == nil ? P.carbs.opacity(0.18) : P.surfaceRaised,
+                                in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+                    .overlay {
+                        if eatenChoice == nil {
+                            RoundedRectangle(cornerRadius: 15, style: .continuous).strokeBorder(P.carbs, lineWidth: 1.5)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(NSLocalizedString("Time", comment: "Carb entry row label: the exact time the food was eaten"))
+                .accessibilityValue(LoopFormat.time(viewModel.time))
+            }
+        }
+        .sheet(isPresented: $showTimePicker) {
+            NavigationStack {
                 DatePicker(selection: Binding(get: { viewModel.time }, set: { viewModel.time = $0; eatenChoice = nil }),
-                           in: viewModel.minimumDate...viewModel.maximumDate, displayedComponents: [.date, .hourAndMinute]) {
+                           in: (viewModel.originalCarbEntry.map { min($0.startDate, viewModel.minimumDate) } ?? viewModel.minimumDate)...viewModel.maximumDate,
+                           displayedComponents: [.date, .hourAndMinute]) {
                     Text(NSLocalizedString("Time", comment: "Carb entry row label: the exact time the food was eaten"))
                 }
+                .datePickerStyle(.wheel)
                 .labelsHidden()
-                .tint(P.carbsInk)
-            }
-            ChoiceTrack(choices: Self.eatenChoices, selection: eatenChoice, thumb: "eaten", namespace: thumbs) { minutes in
-                amountFocused = false
-                let date = Date().addingTimeInterval(-Double(minutes) * 60)
-                animated {
-                    eatenChoice = minutes
-                    viewModel.time = min(max(date, viewModel.minimumDate), viewModel.maximumDate)
+                .padding(.horizontal, LoopDesign.Space.s4)
+                .navigationTitle(NSLocalizedString("Eaten", comment: "Carb entry section title: when the food was eaten"))
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(NSLocalizedString("Done", comment: "Button to close the carb entry time picker")) { showTimePicker = false }
+                    }
                 }
-            } label: { minutes, selected in
-                Text(eatenTitle(minutes))
-                    .font(LoopDesign.Typeface.subhead.weight(selected ? .semibold : .medium).monospacedDigit())
-                    .foregroundStyle(selected ? P.carbsInk : P.ink)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                    .padding(.vertical, LoopDesign.Space.s2)
             }
+            .presentationDetents([.height(320)])
         }
     }
 
@@ -420,7 +491,6 @@ struct CarbEntryScreen: View {
     }
 
     private func choose(_ speed: Speed) {
-        amountFocused = false
         // Re-choosing the shown speed changes nothing, so an unedited entry stays unedited.
         guard speed != selectedSpeed else { return }
         // A favourite sets its own food and absorption; choosing a speed instead lets it go but keeps the amount.
@@ -441,24 +511,35 @@ struct CarbEntryScreen: View {
         }
     }
 
-    // MARK: Continue
+    // MARK: Pad and Continue
 
-    private var continueBar: some View {
-        Button(action: viewModel.continueToBolus) {
-            Text(NSLocalizedString("Continue", comment: "Button label for continue"))
-                .font(LoopDesign.Typeface.headline)
-                .foregroundStyle(viewModel.continueButtonDisabled ? P.inkMuted : P.onFill)
-                .frame(maxWidth: .infinity, minHeight: 54)
-                .background(viewModel.continueButtonDisabled ? P.surfaceRaised : P.carbs,
-                            in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    /// The pad stays in place of the keyboard, so the preview and every choice above it stay in view while typing.
+    private var entryBar: some View {
+        VStack(spacing: LoopDesign.Space.s3) {
+            CarbKeypad(decimalSeparator: Self.decimalSeparator, action: press)
+            Button(action: viewModel.continueToBolus) {
+                Text(hasAmount || !viewModel.continueButtonDisabled
+                     ? NSLocalizedString("Continue", comment: "Button label for continue")
+                     : NSLocalizedString("Enter an amount", comment: "Carb entry Continue button while no amount has been typed"))
+                    .font(LoopDesign.Typeface.headline)
+                    .foregroundStyle(viewModel.continueButtonDisabled ? P.inkMuted : P.onFill)
+                    .frame(maxWidth: .infinity, minHeight: 52)
+                    .background(viewModel.continueButtonDisabled ? P.surfaceSunken : P.carbs,
+                                in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            .disabled(viewModel.continueButtonDisabled)
+            .accessibilityIdentifier("button_Continue")
         }
-        .buttonStyle(.plain)
-        .disabled(viewModel.continueButtonDisabled)
-        .accessibilityIdentifier("button_Continue")
         .padding(.horizontal, LoopDesign.Space.s4)
-        .padding(.top, LoopDesign.Space.s2)
+        .padding(.top, LoopDesign.Space.s3)
         .padding(.bottom, LoopDesign.Space.s1)
-        .background(P.surface)
+        .background {
+            P.surface
+                .overlay(alignment: .top) { Rectangle().fill(P.separator.opacity(0.35)).frame(height: 0.5) }
+                .ignoresSafeArea(edges: .bottom)
+        }
     }
 
     // MARK: Pieces
@@ -523,6 +604,85 @@ struct CarbEntryScreen: View {
     }
 }
 
+/// Two rows of keys in place of the keyboard: 1–5 and delete, 6–0 and the decimal point. Holding delete clears.
+private struct CarbKeypad: View {
+    enum Key: Hashable {
+        case digit(Int)
+        case decimal
+        case delete
+        case clear
+    }
+
+    let decimalSeparator: String
+    let action: (Key) -> Void
+
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    private var rows: [[Key]] {
+        typeSize.isAccessibilitySize
+            ? [[.digit(1), .digit(2), .digit(3)], [.digit(4), .digit(5), .digit(6)], [.digit(7), .digit(8), .digit(9)], [.decimal, .digit(0), .delete]]
+            : [[.digit(1), .digit(2), .digit(3), .digit(4), .digit(5), .delete], [.digit(6), .digit(7), .digit(8), .digit(9), .digit(0), .decimal]]
+    }
+
+    var body: some View {
+        VStack(spacing: 6) {
+            ForEach(rows, id: \.self) { row in
+                HStack(spacing: 6) {
+                    ForEach(row, id: \.self) { key in
+                        keyButton(key)
+                    }
+                }
+            }
+        }
+    }
+
+    private func keyButton(_ key: Key) -> some View {
+        Button {
+            action(key)
+        } label: {
+            Group {
+                switch key {
+                case .digit(let digit):
+                    Text(verbatim: String(digit))
+                case .decimal:
+                    Text(verbatim: decimalSeparator)
+                case .delete, .clear:
+                    Image(systemName: "delete.left")
+                        .font(.system(size: 20, weight: .medium))
+                }
+            }
+            .font(.system(size: 24, weight: .semibold, design: .rounded))
+            .foregroundStyle(key == .delete ? P.inkMuted : P.ink)
+            .frame(maxWidth: .infinity, minHeight: 48)
+            .background(key == .delete || key == .decimal ? P.surfaceSunken : P.surfaceRaised,
+                        in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+        .buttonStyle(KeyPressStyle())
+        .simultaneousGesture(LongPressGesture(minimumDuration: 0.5).onEnded { _ in
+            if key == .delete { action(.clear) }
+        })
+        .accessibilityLabel(label(key))
+    }
+
+    private func label(_ key: Key) -> String {
+        switch key {
+        case .digit(let digit): return String(digit)
+        case .decimal: return NSLocalizedString("Decimal point", comment: "VoiceOver label for the decimal point key on the carb entry number pad")
+        case .delete, .clear: return NSLocalizedString("Delete", comment: "VoiceOver label for the delete key on the carb entry number pad")
+        }
+    }
+}
+
+/// Keys dim while held, as the system keyboard's do.
+private struct KeyPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.55 : 1)
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+    }
+}
+
 /// A row of choices sharing one track, with a thumb that slides to the chosen one. Two by two at accessibility text sizes.
 private struct ChoiceTrack<Choice: Hashable, Label: View>: View {
     let choices: [Choice]
@@ -577,7 +737,7 @@ private struct MealAbsorptionChart: View {
     @State private var selection: Date?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private static let height: CGFloat = 120
+    private static let height: CGFloat = 88
     private static let nowLabelHeight: CGFloat = 20
 
     private var absorbed: Date { eaten.addingTimeInterval(absorptionTime) }
@@ -656,12 +816,12 @@ private struct MealAbsorptionChart: View {
                 }
                 ForEach(past) { sample in
                     LineMark(x: .value("Time", sample.date), y: .value("Rate", sample.value), series: .value("Series", "past"))
-                        .foregroundStyle(grams > 0 ? P.carbs : P.inkMuted.opacity(0.5))
+                        .foregroundStyle(grams > 0 ? P.carbs : P.inkMuted.opacity(0.15))
                         .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
                 }
                 ForEach(future) { sample in
                     LineMark(x: .value("Time", sample.date), y: .value("Rate", sample.value), series: .value("Series", "future"))
-                        .foregroundStyle(grams > 0 ? P.carbs : P.inkMuted.opacity(0.5))
+                        .foregroundStyle(grams > 0 ? P.carbs : P.inkMuted.opacity(0.15))
                         .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round, dash: [4, 3]))
                 }
                 RuleMark(y: .value("Zero", 0))
@@ -708,6 +868,17 @@ private struct MealAbsorptionChart: View {
                 }
             }
             .frame(height: Self.height)
+            .overlay(alignment: .top) {
+                if grams <= 0 {
+                    Text(NSLocalizedString("Type an amount to see when it'll be absorbed", comment: "Carb entry preview before an amount is typed"))
+                        .font(LoopDesign.Typeface.subhead.weight(.medium))
+                        .foregroundStyle(P.inkMuted)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, LoopDesign.Space.s6)
+                        .padding(.top, LoopDesign.Space.s1)
+                        .allowsHitTesting(false)
+                }
+            }
             .padding(.top, Self.nowLabelHeight)
             .animation(reduceMotion ? nil : .snappy(duration: 0.35), value: grams)
             .animation(reduceMotion ? nil : .snappy(duration: 0.35), value: absorptionTime)

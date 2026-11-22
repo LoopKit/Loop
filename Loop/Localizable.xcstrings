@@ -299,6 +299,9 @@
         }
       }
     },
+    "%1$lld of %2$lld runs completed" : {
+      "comment" : "Loop status sheet: how many five-minute slots in the last two hours had a completed Loop run. (1: completed; 2: slots, 24)"
+    },
     "%lld doses" : {
       "comment" : "Logbook folded automatic boluses row: how many automatic boluses it holds. (1: number)",
       "localizations" : {
@@ -2950,6 +2953,9 @@
         }
       }
     },
+    "Decimal point" : {
+      "comment" : "VoiceOver label for the decimal point key on the carb entry number pad"
+    },
     "Eaten" : {
       "comment" : "Carb entry section title: when the food was eaten",
       "localizations" : {
@@ -3092,6 +3098,9 @@
           }
         }
       }
+    },
+    "Enter an amount" : {
+      "comment" : "Carb entry Continue button while no amount has been typed"
     },
     "Fast" : {
       "comment" : "Carb entry absorption choice: food that absorbs quickly, such as sweets",
@@ -3378,6 +3387,15 @@
           }
         }
       }
+    },
+    "Last 2 hours" : {
+      "comment" : "Loop status sheet: title over the strip of Loop's runs in the last two hours"
+    },
+    "Last ran at %1$@" : {
+      "comment" : "Loop status sheet: when Loop last completed a run, under a minute ago. (1: time of day)"
+    },
+    "Last ran at %1$@, %2$@" : {
+      "comment" : "Loop status sheet: when Loop last completed a run. (1: time of day; 2: how long ago, e.g. 3 min ago)"
     },
     "Loop · %1$@ · tap to list" : {
       "comment" : "Logbook folded automatic boluses row subtitle: Loop gave them, the time span they cover, and tapping lists them. (1: time range, e.g. 15:08 – 16:14)",
@@ -3808,6 +3826,9 @@
         }
       }
     },
+    "Open Settings" : {
+      "comment" : "Loop status sheet button that opens Loop's settings"
+    },
     "Scheduled %1$@" : {
       "comment" : "Basal and bolus: what the basal schedule delivers over the same time, under the basal row. (1: units, e.g. 18.0 U)",
       "localizations" : {
@@ -4093,6 +4114,9 @@
           }
         }
       }
+    },
+    "Target %1$@" : {
+      "comment" : "Glucose target on the Now screen hero card when the target range is a single value. (1: glucose value)"
     },
     "this day" : {
       "comment" : "Trends Basal and bolus card subtitle when the period is one complete day",
@@ -5237,6 +5261,9 @@
           }
         }
       }
+    },
+    "Type an amount to see when it'll be absorbed" : {
+      "comment" : "Carb entry preview before an amount is typed"
     },
     "Usually %1$@ by %2$@" : {
       "comment" : "Trends: the median insulin delivered by this time of day over the last 14 days. (1: units, e.g. 28.4 U, 2: time of day)",
