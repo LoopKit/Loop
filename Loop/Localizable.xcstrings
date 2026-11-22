@@ -201,6 +201,15 @@
     "All" : {
       "comment" : "Logbook filter chip: show every entry"
     },
+    "App Icon" : {
+      "comment" : "Header for the app icon choice"
+    },
+    "Appearance" : {
+      "comment" : "Title of the light or dark appearance choice"
+    },
+    "Appearance and App Icon" : {
+      "comment" : "Title of the row that opens the appearance and app icon settings"
+    },
     "Automatic" : {
       "comment" : "Chart legend: hatched bars are automatic boluses given by Loop"
     },
@@ -260,6 +269,12 @@
     },
     "CGM data covers %1$@." : {
       "comment" : "Trends Summary note when glucose readings start partway through the period. (1: days covered, e.g. 5 of 14 days)"
+    },
+    "Changes with the home screen's light or dark appearance" : {
+      "comment" : "Description of the app icon that follows the home screen appearance"
+    },
+    "Classic" : {
+      "comment" : "Name of Loop's original app icon"
     },
     "Closed loop" : {
       "comment" : "Trends Loop status: time Loop was running in closed loop"
@@ -322,6 +337,9 @@
           }
         }
       }
+    },
+    "Day and Night" : {
+      "comment" : "Name of the app icon that follows the home screen's light or dark appearance"
     },
     "Eaten" : {
       "comment" : "Carb entry section title: when the food was eaten"
@@ -475,6 +493,9 @@
     "Next period" : {
       "comment" : "VoiceOver label for the Trends button that moves forward one period"
     },
+    "Night" : {
+      "comment" : "Appearance option that always uses dark mode"
+    },
     "No CGM data" : {
       "comment" : "Trends Average tile detail when the period has no glucose readings"
     },
@@ -616,6 +637,12 @@
     "Suspended" : {
       "comment" : "Chart callout value: insulin delivery was suspended at the touched time    Shown in the Basal tile on the Now screen when insulin delivery is suspended"
     },
+    "System" : {
+      "comment" : "Appearance option that follows the iPhone's light or dark setting"
+    },
+    "System follows your iPhone's light or dark setting." : {
+      "comment" : "Footer for the appearance choice"
+    },
     "Target %1$@" : {
       "comment" : "Glucose target on the Now screen hero card when the target range is a single value. (1: glucose value)"
     },
@@ -624,6 +651,9 @@
     },
     "Temp basal" : {
       "comment" : "Logbook row title: a temporary basal rate"
+    },
+    "The icon couldn't be changed: %@" : {
+      "comment" : "Error shown when iOS refuses an app icon change"
     },
     "The new interface adds Trends and Logbook tabs. Turn it off to go back to the classic status screen; Settings closes to switch." : {
       "comment" : "Footer for the interface choice in settings"

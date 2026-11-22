@@ -762,6 +762,7 @@
 		A743DC26D066EE5AC88C2F45 /* LoopHistoryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09448CF97996C40BEDDE6588 /* LoopHistoryProvider.swift */; };
 		591F13AF435B37B4818E2F2B /* TrendsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFDE56977CC73CBDA1170C5 /* TrendsComponents.swift */; };
 		5CD0888FF33D6F844A81E638 /* TrendsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF0FD64B2B3E9C9AA8764684 /* TrendsScreen.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E1D0C9B8A7F6E5D4C3B2A1 /* AppearanceSettings.swift */; };
 		C4B5E0A1D2F3A4B5C6D7E8F9 /* CarbEntryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4B5E0A1D2F3A4B5C6D7E8FA /* CarbEntryScreen.swift */; };
 		3ED693ACBF8F9E416055BD56 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844BECBB6357021979B9443F /* MainTabBarController.swift */; };
 		7705483CFFCF0B89F8F1A08E /* NowScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0874B7B679DB9CE661CCE152 /* NowScreen.swift */; };
@@ -1651,6 +1652,7 @@
 		09448CF97996C40BEDDE6588 /* LoopHistoryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopHistoryProvider.swift; sourceTree = "<group>"; };
 		4BFDE56977CC73CBDA1170C5 /* TrendsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendsComponents.swift; sourceTree = "<group>"; };
 		AF0FD64B2B3E9C9AA8764684 /* TrendsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendsScreen.swift; sourceTree = "<group>"; };
+		F2E1D0C9B8A7F6E5D4C3B2A1 /* AppearanceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettings.swift; sourceTree = "<group>"; };
 		C4B5E0A1D2F3A4B5C6D7E8FA /* CarbEntryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryScreen.swift; sourceTree = "<group>"; };
 		844BECBB6357021979B9443F /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		0874B7B679DB9CE661CCE152 /* NowScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowScreen.swift; sourceTree = "<group>"; };
@@ -3101,6 +3103,7 @@
 				0874B7B679DB9CE661CCE152 /* NowScreen.swift */,
 				7AEDC42672A7A8C57546EA0C /* LogbookScreen.swift */,
 				4BFDE56977CC73CBDA1170C5 /* TrendsComponents.swift */,
+				F2E1D0C9B8A7F6E5D4C3B2A1 /* AppearanceSettings.swift */,
 				09448CF97996C40BEDDE6588 /* LoopHistoryProvider.swift */,
 				471FFD525A4EB897745608BE /* LoopHistoryModels.swift */,
 				21622B2355AED8F6A12FE17C /* LoopHistoryMath.swift */,
@@ -3783,6 +3786,7 @@
 				7705483CFFCF0B89F8F1A08E /* NowScreen.swift in Sources */,
 				23B98F0A53A093412229364D /* LogbookScreen.swift in Sources */,
 				591F13AF435B37B4818E2F2B /* TrendsComponents.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* AppearanceSettings.swift in Sources */,
 				A743DC26D066EE5AC88C2F45 /* LoopHistoryProvider.swift in Sources */,
 				2ADBB92A8ABB74360D18EEFA /* LoopHistoryModels.swift in Sources */,
 				0C70F4D862F6D3FDB3D91D87 /* LoopHistoryMath.swift in Sources */,
@@ -4853,6 +4857,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIconDayNight AppIconDay AppIconNight";
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -4882,6 +4887,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIconDayNight AppIconDay AppIconNight";
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -5272,6 +5278,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIconDayNight AppIconDay AppIconNight";
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;

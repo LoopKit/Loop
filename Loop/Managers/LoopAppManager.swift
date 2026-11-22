@@ -202,6 +202,7 @@ class LoopAppManager: NSObject {
         precondition(state == .launchManagers)
 
         windowProvider?.window?.tintColor = .loopAccent
+        windowProvider?.window?.overrideUserInterfaceStyle = LoopAppearancePreference.current.interfaceStyle
         OrientationLock.deviceOrientationController = self
 
         resetLoopManager = ResetLoopManager(delegate: self)
@@ -525,6 +526,11 @@ class LoopAppManager: NSObject {
         }
 
         analyticsServicesManager.application(didFinishLaunchingWithOptions: launchOptions)
+
+        NotificationCenter.default.publisher(for: LoopAppearancePreference.didChange)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.windowProvider?.window?.overrideUserInterfaceStyle = LoopAppearancePreference.current.interfaceStyle }
+            .store(in: &cancellables)
 
         NotificationCenter.default.publisher(for: LoopInterfacePreference.didChange)
             .receive(on: RunLoop.main)
