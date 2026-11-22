@@ -16,6 +16,9 @@
     "%1$@ above range" : {
       "comment" : "Time in range High row: the consensus target for all time above range, high and very high together. (1: target, e.g. < 25%)"
     },
+    "%1$@ ago" : {
+      "comment" : "Carb entry time choice: eaten this long before now. (1: duration, e.g. 15m or 1h)"
+    },
     "%1$@ below range" : {
       "comment" : "Time in range Low row: the consensus target for all time below range, low and very low together. (1: target, e.g. < 4%)"
     },
@@ -177,6 +180,9 @@
     "5–95%" : {
       "comment" : "Trends Daily pattern legend: band between the 5th and 95th percentiles of glucose"
     },
+    "Absorbed by %1$@" : {
+      "comment" : "Under the end of the carb absorption curve: when the carbs will have absorbed (1: time)"
+    },
     "absorbs over %1$@ h" : {
       "comment" : "Logbook carb row detail: carb absorption time in hours. (1: hours, e.g. 3 or 2.5)"
     },
@@ -291,6 +297,9 @@
     "Covers %1$@, from the start of Loop's records, which it keeps for %2$@." : {
       "comment" : "Trends Loop status footnote when Loop's records of its runs and settings start partway through the period. (1: date range covered; 2: how long Loop keeps them, e.g. 90 days)"
     },
+    "Custom" : {
+      "comment" : "Carb entry absorption choice Other, before it is chosen: you set the food and absorption time yourself"
+    },
     "Daily pattern" : {
       "comment" : "Trends card title: the ambulatory glucose profile, glucose by time of day across the period"
     },
@@ -314,11 +323,23 @@
         }
       }
     },
+    "Eaten" : {
+      "comment" : "Carb entry section title: when the food was eaten"
+    },
+    "Eaten at %1$@, absorbed by %2$@" : {
+      "comment" : "Accessibility summary of the carb entry preview chart (1: time eaten, 2: time absorbed)"
+    },
     "Edit" : {
       "comment" : "Swipe action to edit a Logbook carb entry"
     },
     "Edit Carb Entry" : {
       "comment" : "Title of the screen for editing a carb entry from the Logbook"
+    },
+    "Enter an amount" : {
+      "comment" : "Carb entry Continue button while no amount has been typed"
+    },
+    "Fast" : {
+      "comment" : "Carb entry absorption choice: food that absorbs quickly, such as sweets"
     },
     "glucose %1$@" : {
       "comment" : "Logbook row detail: glucose when the dose was given. (1: glucose value, e.g. 7.5)"
@@ -334,6 +355,9 @@
     },
     "Health" : {
       "comment" : "Logbook carb row detail: the entry came from Apple Health"
+    },
+    "How fast it absorbs" : {
+      "comment" : "Carb entry section title: choose how quickly the food's carbs absorb"
     },
     "In range" : {
       "comment" : "Time in range band: glucose 70–180 mg/dL (3.9–10.0 mmol/L)    Time-in-range band name: glucose 70–180 mg/dL (3.9–10.0 mmol/L)"
@@ -441,6 +465,9 @@
     },
     "Median" : {
       "comment" : "Trends Daily pattern legend: the median glucose line"
+    },
+    "Medium" : {
+      "comment" : "Carb entry absorption choice: a typical mixed meal"
     },
     "New Interface" : {
       "comment" : "Title of the toggle for the redesigned interface"
@@ -580,6 +607,9 @@
     "Shows when Loop last ran" : {
       "comment" : "VoiceOver hint for the Loop status pill and the Loop notice on the Now screen"
     },
+    "Slow" : {
+      "comment" : "Carb entry absorption choice: food that absorbs slowly, such as pizza"
+    },
     "Summary" : {
       "comment" : "Trends card title: the summary statistics tiles"
     },
@@ -636,6 +666,9 @@
     },
     "Trends" : {
       "comment" : "Title of the Trends tab    Title of the Trends tab in the redesigned interface"
+    },
+    "Type an amount to see when it'll be absorbed" : {
+      "comment" : "Carb entry preview before an amount is typed"
     },
     "U/h" : {
       "comment" : "Abbreviation for insulin units per hour"
