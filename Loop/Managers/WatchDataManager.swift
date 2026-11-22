@@ -293,7 +293,7 @@ final class WatchDataManager: NSObject {
         }
 
         context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
-        if let sharing = self.deviceManager.cgmManager as? DeviceConfigurationSharing, sharing.isConfigurationSharingEnabled {
+        if let sharing = self.deviceManager.cgmManager as? ShareableDeviceControl, sharing.isConfigurationSharingEnabled {
             context.cgmConfiguration = sharing.exportConfiguration().rawValue
         }
 
