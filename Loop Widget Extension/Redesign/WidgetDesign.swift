@@ -65,6 +65,7 @@ enum WidgetDesign {
 
     /// Loop's state as on the Now pill. The time of the last run stands in for the Now screen's age,
     /// because a widget isn't redrawn every minute and an age would go stale on screen.
+    /// While the loop is open Loop doesn't complete runs, so callers pass the latest reading's time instead.
     struct LoopStatus {
         let text: String
         let color: Color
@@ -79,7 +80,7 @@ enum WidgetDesign {
                 return
             }
             let age = max(0, now.timeIntervalSince(lastCompleted))
-            if LoopCompletionFreshness(age: age) == .stale {
+            if closedLoop, LoopCompletionFreshness(age: age) == .stale {
                 text = String(format: NSLocalizedString("Loop hasn't run for %1$@", comment: "Notice title on the Now screen when Loop hasn't completed a run recently. (1: duration, e.g. 25m)"), WidgetDesign.duration(age))
                 color = P.statusWarning
                 return
@@ -90,7 +91,7 @@ enum WidgetDesign {
                 color = LoopCompletionFreshness(age: age) == .fresh ? P.statusAutomated : P.statusWarning
             } else {
                 text = String(format: NSLocalizedString("Open loop · %1$@", comment: "Status pill on the Now screen: closed loop is off. (1: how long ago Loop last ran, e.g. 2m)"), time)
-                color = P.inkMuted
+                color = LoopCompletionFreshness(age: age) == .fresh ? P.inkMuted : P.statusWarning
             }
         }
     }

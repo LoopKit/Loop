@@ -38,7 +38,7 @@ struct RedesignStatusWidgetView: View {
 
     private var status: some View {
         VStack(alignment: .leading, spacing: 0) {
-            WidgetStatusLine(status: WidgetDesign.LoopStatus(closedLoop: entry.closeLoop, lastCompleted: entry.lastLoopCompleted, now: entry.date))
+            WidgetStatusLine(status: WidgetDesign.LoopStatus(closedLoop: entry.closeLoop, lastCompleted: entry.closeLoop ? entry.lastLoopCompleted : entry.mostRecentGlucoseDataDate, now: entry.date))
                 .opacity(entry.contextIsStale ? 0.6 : 1)
             Spacer(minLength: LoopDesign.Space.s1)
             reading

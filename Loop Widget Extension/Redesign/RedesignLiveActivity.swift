@@ -36,7 +36,7 @@ enum RedesignLiveActivity {
     }
 
     static func status(_ context: Context) -> WidgetDesign.LoopStatus {
-        WidgetDesign.LoopStatus(closedLoop: context.state.isCloseLoop, lastCompleted: context.state.lastCompleted)
+        WidgetDesign.LoopStatus(closedLoop: context.state.isCloseLoop, lastCompleted: context.state.isCloseLoop ? context.state.lastCompleted : context.state.date)
     }
 
     /// Low and high in words, otherwise the unit and the change, as under the Now screen's number.

@@ -102,11 +102,18 @@ final class NowModel: ObservableObject {
         }
     }
 
+    /// The time the Loop pill counts from. Loop only completes a run when it can dose automatically, so while
+    /// closed loop is off or paused (for example by a manual temp basal) the pill follows the latest reading,
+    /// as Loop's status HUD and Live Activity do.
+    var loopStatusDate: Date? {
+        closedLoop ? lastLoopCompleted : reading?.date ?? lastLoopCompleted
+    }
+
     var loopState: LoopState {
-        guard let lastLoopCompleted else { return .never }
-        let age = now.timeIntervalSince(lastLoopCompleted)
+        guard let loopStatusDate else { return .never }
+        let age = now.timeIntervalSince(loopStatusDate)
         if age <= 5 * 60 + 30 { return .fresh }
-        if age <= 15 * 60 { return .stale }
+        if age <= 15 * 60 || !closedLoop { return .stale }
         return .failed
     }
 
@@ -352,7 +359,7 @@ struct NowHeaderView: View {
     }
 
     private var loopText: String {
-        guard let last = model.lastLoopCompleted else {
+        guard let last = model.loopStatusDate else {
             if model.closedLoop {
                 return NSLocalizedString("Closed loop · not run yet", comment: "Status pill on the Now screen: closed loop is on but Loop has never completed")
             } else if model.closedLoopPaused {
