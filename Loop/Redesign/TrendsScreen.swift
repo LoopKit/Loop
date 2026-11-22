@@ -39,7 +39,7 @@ final class TrendsModel: ObservableObject {
         var unknownBoluses = 0
         var loopSpans: [LoopModeSpan] = []
         var targetRange: ClosedRange<Double>?
-        /// The whole calendar day, for a one-day period: drawn as one timeline.
+        /// The whole calendar day, for a one-day period: drawn as the same timeline as Now's Today so far.
         var day: DayHistory?
         var dayTargets: [TargetBand] = []
         /// What the basal schedule delivers per day, over the averaged days Loop has its schedule for.
@@ -290,7 +290,7 @@ struct TrendsView: View {
     private var content: some View {
         if let s = model.summary {
             summaryCard(s)
-            // A single day leads with its timeline.
+            // A single day leads with its timeline, as Today so far does on Now.
             if let day = s.day {
                 dayCard(day, targets: s.dayTargets, unit: s.unit)
             }

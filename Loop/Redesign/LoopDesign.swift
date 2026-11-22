@@ -78,6 +78,7 @@ enum LoopDesign {
 
     /// Text styles follow Dynamic Type; the large numbers are fixed sizes in SF Pro Rounded with tabular figures.
     enum Typeface {
+        static let glucoseHero = Font.system(size: 64, weight: .bold, design: .rounded).monospacedDigit()
         static let statValue = Font.system(.title, design: .rounded).weight(.semibold).monospacedDigit()
         static let statValueSmall = Font.system(.title3, design: .rounded).weight(.semibold).monospacedDigit()
         static let title = Font.title.bold()
@@ -195,6 +196,51 @@ struct LegendSwatch: View {
                 .overlay(RoundedRectangle(cornerRadius: 2).strokeBorder(LoopDesign.Palette.basalOutline, lineWidth: 1.25))
                 .frame(width: 10, height: 10)
         }
+    }
+}
+
+/// A small sunken tile with a label over a value, as used under the hero and the timeline.
+struct ValueTile<Value: View>: View {
+    let label: String
+    @ViewBuilder var value: Value
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(LoopDesign.Typeface.footnote)
+                .foregroundStyle(LoopDesign.Palette.inkMuted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .allowsTightening(true)
+            // A value with a long unit ("0.04 単位") shrinks to fit rather than breaking mid-word.
+            value
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+        }
+        .padding(LoopDesign.Space.s3)
+        .frame(maxWidth: .infinity, minHeight: 64, maxHeight: .infinity, alignment: .topLeading)
+        .background(LoopDesign.Palette.surfaceSunken, in: RoundedRectangle(cornerRadius: LoopDesign.Radius.md, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+struct StatusPill: View {
+    let text: String
+    var dot: Color? = nil
+
+    var body: some View {
+        HStack(spacing: LoopDesign.Space.s1) {
+            if let dot {
+                Circle().fill(dot).frame(width: 8, height: 8)
+            }
+            Text(text)
+                .lineLimit(1)
+        }
+        .font(LoopDesign.Typeface.footnote.weight(.medium))
+        .foregroundStyle(LoopDesign.Palette.ink)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(LoopDesign.Palette.surfaceSunken, in: Capsule())
     }
 }
 

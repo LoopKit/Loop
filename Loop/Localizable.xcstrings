@@ -55,6 +55,15 @@
     "%1$@ unknown" : {
       "comment" : "Basal and bolus: bolus whose record doesn't say whether it was manual or automatic, such as some in Apple Health, after the manual and automatic amounts. (1: units, e.g. 3.2 U)"
     },
+    "%1$@ vs plan" : {
+      "comment" : "Basal tile on the Now screen: how the current basal rate differs from the scheduled rate. (1: signed difference in U/h, e.g. +0.25)"
+    },
+    "%1$@ · %2$@ in 5 min" : {
+      "comment" : "Under the glucose value on the Now screen: the glucose unit and how much glucose changed over 5 minutes. (1: glucose unit, e.g. mmol/L; 2: signed change, e.g. +0.3)"
+    },
+    "%1$@ · ending soon" : {
+      "comment" : "Status pill on the Now screen when a pump pod or CGM sensor is near the end of its life. (1: device name from the pump or CGM plugin, e.g. Omnipod 5)"
+    },
     "%1$@%%" : {
       "comment" : "A percentage. (1: number)"
     },
@@ -63,6 +72,9 @@
     },
     "%1$@, %2$@ %3$@: %4$@ percent, %5$@ hours a day" : {
       "comment" : "VoiceOver label for a Time in range row. (1: band name, e.g. In range, 2: glucose thresholds, e.g. 3.9–10.0, 3: glucose unit, 4: percentage number, 5: average hours a day with one decimal)"
+    },
+    "%1$lld of %2$lld runs completed" : {
+      "comment" : "Loop status sheet: how many five-minute slots in the last two hours had a completed Loop run. (1: completed; 2: slots, 24)"
     },
     "%lld days" : {
       "comment" : "A number of days, e.g. a Trends period or how many days are averaged. (1: number of days)    Trends period picker, VoiceOver name for a period of several days. (1: number of days)",
@@ -168,6 +180,12 @@
     "absorbs over %1$@ h" : {
       "comment" : "Logbook carb row detail: carb absorption time in hours. (1: hours, e.g. 3 or 2.5)"
     },
+    "Add carbs" : {
+      "comment" : "Button on the Now screen that opens carb entry"
+    },
+    "Add pump" : {
+      "comment" : "Status pill on the Now screen when no pump is set up; tapping it starts pump setup"
+    },
     "aim %1$@" : {
       "comment" : "Trends: the consensus target under a figure, in lower case. (1: target, e.g. < 7%)"
     },
@@ -240,11 +258,32 @@
     "Closed loop" : {
       "comment" : "Trends Loop status: time Loop was running in closed loop"
     },
+    "Closed loop paused · %1$@" : {
+      "comment" : "Status pill on the Now screen: closed loop is switched on but paused (e.g. no CGM data), and Loop last ran this long ago. (1: duration, e.g. 3m)"
+    },
+    "Closed loop paused · not run yet" : {
+      "comment" : "Status pill on the Now screen: closed loop is switched on but paused (e.g. no CGM data), and Loop has never completed"
+    },
+    "Closed loop · %1$@" : {
+      "comment" : "Status pill on the Now screen: closed loop is on and Loop last ran this long ago. (1: duration, e.g. 3m)"
+    },
+    "Closed loop · not run yet" : {
+      "comment" : "Status pill on the Now screen: closed loop is on but Loop has never completed"
+    },
+    "COB" : {
+      "comment" : "Abbreviation for carbs on board; label of a tile on the Now screen"
+    },
     "Couldn't delete" : {
       "comment" : "Alert title when deleting a Logbook entry fails"
     },
     "Couldn't load Logbook: %1$@" : {
       "comment" : "Logbook error when its history can't be read. (1: system error description)"
+    },
+    "Couldn't load recent CGM readings" : {
+      "comment" : "Prediction chart on the Now screen when recent glucose couldn't be read"
+    },
+    "Couldn't load today's history: %1$@" : {
+      "comment" : "Shown on the Now screen's Today so far card when history couldn't be read. (1: system error description)"
     },
     "Couldn't load Trends: %1$@" : {
       "comment" : "Trends error message when the history can't be read. (1: error description)"
@@ -290,6 +329,9 @@
     "glucose %1$@ rising" : {
       "comment" : "Logbook row detail: glucose when the dose was given, and rising. (1: glucose value, e.g. 11.0)"
     },
+    "Glucose prediction unavailable" : {
+      "comment" : "VoiceOver label for the prediction chart when Loop has no prediction"
+    },
     "Health" : {
       "comment" : "Logbook carb row detail: the entry came from Apple Health"
     },
@@ -298,6 +340,9 @@
     },
     "Infusion set changed" : {
       "comment" : "Pump event in the history: the infusion set was replaced"
+    },
+    "Insulin isn't being adjusted. Tap for details." : {
+      "comment" : "Notice detail on the Now screen when Loop hasn't completed recently"
     },
     "Insulin per day" : {
       "comment" : "Trends tile and card title: average total insulin per day"
@@ -314,6 +359,21 @@
     "Insulin timeline, %1$@, bolus %2$@, basal %3$@, carbs %4$@, latest glucose %5$@ %6$@" : {
       "comment" : "VoiceOver summary of the day's insulin timeline chart. (1: weekday and date; 2: bolus total, e.g. 12.5 U; 3: basal total; 4: carbs total, e.g. 140 g; 5: latest glucose value; 6: glucose unit, mmol/L or mg/dL)"
     },
+    "IOB" : {
+      "comment" : "Abbreviation for insulin on board; label of a tile on the Now screen"
+    },
+    "Last 2 hours" : {
+      "comment" : "Loop status sheet: title over the strip of Loop's runs in the last two hours"
+    },
+    "Last ran at %1$@" : {
+      "comment" : "Loop status sheet: when Loop last completed a run, under a minute ago. (1: time of day)"
+    },
+    "Last ran at %1$@, %2$@" : {
+      "comment" : "Loop status sheet: when Loop last completed a run. (1: time of day; 2: how long ago, e.g. 3 min ago)"
+    },
+    "Last reading %1$@ ago" : {
+      "comment" : "Shown on the Now screen under No reading when the latest CGM reading is too old. (1: duration, e.g. 25m)"
+    },
     "Limited" : {
       "comment" : "Trends Loop status: time closed loop was on but Loop wasn't completing runs"
     },
@@ -326,8 +386,23 @@
     "Loop" : {
       "comment" : "Logbook filter chip: show only what Loop did automatically (Loop is the app's name)"
     },
+    "Loop can't adjust insulin without readings." : {
+      "comment" : "Notice detail on the Now screen under a CGM problem when there is no recent glucose reading"
+    },
+    "Loop failed · %1$@" : {
+      "comment" : "Status pill on the Now screen: Loop hasn't completed for over 15 minutes. (1: duration since Loop last ran, e.g. 16m)"
+    },
+    "Loop hasn't run for %1$@" : {
+      "comment" : "Notice title on the Now screen when Loop hasn't completed recently. (1: duration since Loop last ran, e.g. 16m)"
+    },
     "Loop keeps the last 7 days on this phone. Older doses and carbs are in Apple Health and on Trends." : {
       "comment" : "Logbook footer explaining why only 7 days are listed"
+    },
+    "Loop may not be giving insulin." : {
+      "comment" : "Notice detail on the Now screen under a critical pump problem reported by the pump"
+    },
+    "Loop predicts %1$@ %2$@ by %3$@" : {
+      "comment" : "VoiceOver summary of the prediction chart. (1: predicted glucose value; 2: glucose unit, mmol/L or mg/dL; 3: time of the prediction)"
     },
     "Loop status" : {
       "comment" : "Trends card title: how long Loop spent in closed loop, limited or open loop"
@@ -367,6 +442,9 @@
     "Median" : {
       "comment" : "Trends Daily pattern legend: the median glucose line"
     },
+    "New Interface" : {
+      "comment" : "Title of the toggle for the redesigned interface"
+    },
     "Next period" : {
       "comment" : "VoiceOver label for the Trends button that moves forward one period"
     },
@@ -378,6 +456,9 @@
     },
     "No CGM data %1$@ – %2$@ and %3$@" : {
       "comment" : "Chart note: the longest gap in glucose readings, plus the shorter ones. (1: start time; 2: end time; 3: number of shorter gaps, e.g. 2 shorter gaps)"
+    },
+    "No CGM data in the last 3 hours" : {
+      "comment" : "Empty prediction chart on the Now screen"
     },
     "No CGM data in this period" : {
       "comment" : "Trends chart placeholder when the period has no glucose readings"
@@ -394,6 +475,9 @@
     "No loop runs recorded in this period" : {
       "comment" : "Trends Loop status placeholder when there is no Loop run history for the period"
     },
+    "No reading" : {
+      "comment" : "Shown on the Now screen in place of the glucose value when there is no recent CGM reading"
+    },
     "Not enough days for a pattern: %1$@ of 5" : {
       "comment" : "Trends Daily pattern footnote when fewer than 5 days have readings; the chart shows raw readings instead. (1: days with readings)"
     },
@@ -409,11 +493,38 @@
     "Now" : {
       "comment" : "Title at the top of the Now screen, showing current glucose and Loop status    Title of the Now tab in the redesigned interface, showing current glucose and Loop status"
     },
+    "now" : {
+      "comment" : "Prediction chart x-axis label marking the current time"
+    },
     "Older days come from Apple Health, which doesn't record the basal schedule, and some boluses there don't say whether they were manual or automatic." : {
       "comment" : "Trends Insulin per day footnote when the period reaches back past Loop's own records into Apple Health, so scheduled basal can't be shown, or some boluses there have no record of whether they were manual or automatic"
     },
     "Open loop / manual" : {
       "comment" : "Trends Loop status: time closed loop was switched off"
+    },
+    "Open loop · %1$@" : {
+      "comment" : "Status pill on the Now screen: closed loop is off (Loop recommends only) and Loop last ran this long ago. (1: duration, e.g. 3m)"
+    },
+    "Open loop · not run yet" : {
+      "comment" : "Status pill on the Now screen: closed loop is off and Loop has never completed"
+    },
+    "Open Settings" : {
+      "comment" : "Loop status sheet button that opens Loop's settings"
+    },
+    "Opens carb absorption" : {
+      "comment" : "VoiceOver hint for the COB tile on the Now screen"
+    },
+    "Opens CGM settings" : {
+      "comment" : "VoiceOver hint for the CGM status pill and CGM notice on the Now screen"
+    },
+    "Opens insulin delivery history" : {
+      "comment" : "VoiceOver hint for the IOB tile on the Now screen"
+    },
+    "Opens Loop's prediction breakdown" : {
+      "comment" : "VoiceOver hint for the prediction card on the Now screen"
+    },
+    "Opens pump settings" : {
+      "comment" : "VoiceOver hint for the pump status pill and pump notice on the Now screen"
     },
     "per day, weekly average" : {
       "comment" : "Trends Insulin per day card subtitle when each bar is a week's average daily total"
@@ -427,6 +538,12 @@
     "Pod changed" : {
       "comment" : "Pump event in the history: the pump or pod was replaced"
     },
+    "Pre-meal on" : {
+      "comment" : "Presets button title on the Now screen while the pre-meal target is on"
+    },
+    "Predicted" : {
+      "comment" : "Prediction chart callout label for Loop's predicted glucose at the touched time"
+    },
     "Previous period" : {
       "comment" : "VoiceOver label for the Trends button that moves back one period"
     },
@@ -435,6 +552,9 @@
     },
     "Pump alarm" : {
       "comment" : "Pump event in the history: an alarm whose pump gave no title"
+    },
+    "Recent readings unavailable: %1$@" : {
+      "comment" : "Error under the prediction chart on the Now screen. (1: system error description)"
     },
     "Reservoir changed" : {
       "comment" : "Pump event in the history: the insulin reservoir was replaced"
@@ -451,14 +571,32 @@
     "SD %1$@ · CV %2$@%%" : {
       "comment" : "Trends Average tile detail: standard deviation and coefficient of variation of glucose. (1: standard deviation in the glucose unit, 2: coefficient of variation as a percentage number)"
     },
+    "Sets up a CGM" : {
+      "comment" : "VoiceOver hint for the Add CGM status pill on the Now screen"
+    },
+    "Sets up a pump" : {
+      "comment" : "VoiceOver hint for the Add pump status pill on the Now screen"
+    },
+    "Shows when Loop last ran" : {
+      "comment" : "VoiceOver hint for the Loop status pill and the Loop notice on the Now screen"
+    },
     "Summary" : {
       "comment" : "Trends card title: the summary statistics tiles"
     },
     "Suspended" : {
       "comment" : "Chart callout value: insulin delivery was suspended at the touched time    Shown in the Basal tile on the Now screen when insulin delivery is suspended"
     },
+    "Target %1$@" : {
+      "comment" : "Glucose target on the Now screen hero card when the target range is a single value. (1: glucose value)"
+    },
+    "Target %1$@–%2$@" : {
+      "comment" : "Glucose target range on the Now screen hero card. (1: lower bound; 2: upper bound)"
+    },
     "Temp basal" : {
       "comment" : "Logbook row title: a temporary basal rate"
+    },
+    "The new interface adds Trends and Logbook tabs. Turn it off to go back to the classic status screen; Settings closes to switch." : {
+      "comment" : "Footer for the interface choice in settings"
     },
     "this day" : {
       "comment" : "Trends Basal and bolus card subtitle when the period is one complete day"
@@ -498,6 +636,12 @@
     },
     "Trends" : {
       "comment" : "Title of the Trends tab    Title of the Trends tab in the redesigned interface"
+    },
+    "U/h" : {
+      "comment" : "Abbreviation for insulin units per hour"
+    },
+    "Urgent low" : {
+      "comment" : "Pill under the glucose value on the Now screen when glucose is below 54 mg/dL (3.0 mmol/L)"
     },
     "Usually %1$@ by %2$@" : {
       "comment" : "Trends: the median insulin delivered by this time of day over the last 14 days. (1: units, e.g. 28.4 U, 2: time of day)"

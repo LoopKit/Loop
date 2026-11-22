@@ -87,6 +87,7 @@ struct SettingsView: View {
                     }
                     alertManagementSection
                     statisticsSection
+                    interfaceSection
                     if viewModel.pumpManagerSettingsViewModel.isSetUp() {
                         therapySection
                     }
@@ -352,7 +353,8 @@ extension SettingsView {
     private var statisticsSection: some View {
         if let glucoseStore = viewModel.deviceManager?.glucoseStore {
             Section {
-                if viewModel.historyProvider != nil {
+                // The new interface's Trends and Logbook tabs cover these.
+                if viewModel.historyProvider != nil && !LoopInterfacePreference.useRedesign {
                     LargeButton(
                         action: { sheet = .trends },
                         // Opens a sheet, but sits among navigation rows, so it shows their chevron.
@@ -471,6 +473,15 @@ extension SettingsView {
         .environment(\.glucoseTintColor, self.glucoseTintColor)
         .environment(\.guidanceColors, self.guidanceColors)
         .environment(\.insulinTintColor, self.insulinTintColor)
+    }
+
+    private var interfaceSection: some View {
+        Section(footer: Text(NSLocalizedString("The new interface adds Trends and Logbook tabs. Turn it off to go back to the classic status screen; Settings closes to switch.", comment: "Footer for the interface choice in settings"))) {
+            Toggle(NSLocalizedString("New Interface", comment: "Title of the toggle for the redesigned interface"), isOn: Binding(
+                get: { LoopInterfacePreference.useRedesign },
+                set: { LoopInterfacePreference.useRedesign = $0 }
+            ))
+        }
     }
 
     private var therapySection: some View {

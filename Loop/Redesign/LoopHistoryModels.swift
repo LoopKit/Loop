@@ -302,6 +302,16 @@ enum LoopFormat {
         return formatter.string(from: start, to: end)
     }
 
+    /// "2m", "1h 5m": how long ago, for the status pill.
+    static func ago(_ date: Date, now: Date = Date()) -> String {
+        let minutes = max(0, Int(now.timeIntervalSince(date) / 60))
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .abbreviated
+        formatter.allowedUnits = minutes >= 1440 ? [.day, .hour] : minutes >= 60 ? [.hour, .minute] : [.minute]
+        formatter.zeroFormattingBehavior = minutes == 0 ? .pad : .dropAll
+        return formatter.string(from: TimeInterval(minutes * 60)) ?? ""
+    }
+
     /// "13d 11h", "9h 45m", "40m" in English; abbreviated in the user's language.
     static func duration(_ interval: TimeInterval) -> String {
         let minutes = Int((interval / 60).rounded())
