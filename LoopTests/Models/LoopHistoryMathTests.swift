@@ -56,7 +56,7 @@ class LoopHistoryMathTests: XCTestCase {
     func testNormalisedBasalPreservesDeliveredQuantityInPartialWindow() throws {
         // The pump reports 1.05 U delivered, although the programmed rate implies 1.0625 U.
         let dose = DoseEntry(type: .tempBasal, startDate: at(0), endDate: at(30), value: 2.125,
-                             unit: .unitsPerHour, decisionId: nil, deliveredUnits: 1.05, automatic: true)
+                             unit: .unitsPerHour, doseId: nil, deliveredUnits: 1.05, automatic: true)
         let delivery = try XCTUnwrap(LoopHistoryMath.BasalDelivery(dose: dose))
         for (end, expected) in [(30.0, 1.05), (15.0, 0.525)] {
             let segments = LoopHistoryMath.basalSegments(window: DateInterval(start: at(0), end: at(end)),
@@ -74,7 +74,7 @@ class LoopHistoryMathTests: XCTestCase {
         let right = try XCTUnwrap(BasalSegment(healthSample: sample, in: DateInterval(start: at(30), end: at(90))))
         XCTAssertEqual(left.units, 0.5, accuracy: 1e-9)
         XCTAssertEqual(right.units, 0.5, accuracy: 1e-9, "Include basal beginning before the selected interval")
-        let dose = DoseEntry(type: .basal, startDate: at(0), endDate: at(60), value: 1, unit: .units, decisionId: nil, deliveredUnits: 1)
+        let dose = DoseEntry(type: .basal, startDate: at(0), endDate: at(60), value: 1, unit: .units, doseId: nil, deliveredUnits: 1)
         let local = LoopHistoryMath.basalSegments(window: DateInterval(start: at(30), end: at(90)), schedule: [],
                                                  deliveries: [try XCTUnwrap(LoopHistoryMath.BasalDelivery(dose: dose))])
         XCTAssertEqual(left.units + local.reduce(0) { $0 + $1.units }, 1, accuracy: 1e-9)
@@ -85,7 +85,7 @@ class LoopHistoryMathTests: XCTestCase {
     func testBolusWindowIsHalfOpenAndPreservesDeliveredUnits() {
         let window = DateInterval(start: at(0), end: at(60))
         for (minute, expected) in [(-1.0, false), (0.0, true), (30.0, true), (60.0, false)] {
-            let dose = DoseEntry(type: .bolus, startDate: at(minute), value: 1, unit: .units, decisionId: nil, deliveredUnits: 0.75)
+            let dose = DoseEntry(type: .bolus, startDate: at(minute), value: 1, unit: .units, doseId: nil, deliveredUnits: 0.75)
             let event = BolusEvent(dose: dose, in: window)
             XCTAssertEqual(event != nil, expected, "Bolus at minute \(minute)")
             if expected { XCTAssertEqual(event?.units, 0.75) }
@@ -182,7 +182,7 @@ class LoopHistoryMathTests: XCTestCase {
             (true, false, 0.0, 1.0, 0.0),
             (nil, false, 0.0, 0.0, 1.0),
         ] as [(Bool?, Bool, Double, Double, Double)] {
-            let dose = DoseEntry(type: .bolus, startDate: at(5), value: 1, unit: .units, decisionId: nil,
+            let dose = DoseEntry(type: .bolus, startDate: at(5), value: 1, unit: .units, doseId: nil,
                                  automatic: automatic, manuallyEntered: entered)
             guard let event = BolusEvent(dose: dose, in: window) else { return XCTFail("Dose must be in the window") }
             let split = InsulinSplit(basal: 0, boluses: [event])
