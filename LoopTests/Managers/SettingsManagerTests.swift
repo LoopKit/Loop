@@ -116,30 +116,4 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(settings.therapyProfiles.map(\.name), ["Default", "Sport"])
         XCTAssertEqual(settings.therapyProfiles.map { $0.basalRateSchedule.items.map(\.value) }, [[0.5], [0.5]])
     }
-
-    func testSettingsAreStoredOnceTheDevicesAreKnown() async throws {
-        let settingsManager = SettingsManager(cacheStore: PersistenceController.mock(), expireAfter: .days(1), alertMuter: AlertMuter())
-        let settingsStore = try XCTUnwrap(settingsManager.settingsStore)
-
-        settingsManager.remoteNotificationRegistrationDidFinish(.success(Data([0xAB])))
-        settingsManager.mutateLoopSettings { $0.maximumBasalRatePerHour = 2.0 }
-        settingsManager.deviceStatusProvider = DeviceStatusProviderStub()
-
-        var stored: [StoredSettings] = []
-        for _ in 0..<20 where stored.isEmpty {
-            try await Task.sleep(nanoseconds: 100_000_000)
-            stored = try await settingsStore.getStoredSettings(limit: 10)
-        }
-        XCTAssertEqual(stored.count, 1)
-        XCTAssertEqual(stored.first?.deviceToken, "ab")
-        XCTAssertEqual(stored.first?.maximumBasalRatePerHour, 2.0)
-        XCTAssertEqual(stored.first?.pumpSupportedBasalRates, [0.05, 0.1])
-    }
-}
-
-private struct DeviceStatusProviderStub: DeviceStatusProvider {
-    var pumpManagerStatus: PumpManagerStatus? { nil }
-    var cgmManagerStatus: CGMManagerStatus? { nil }
-    var pumpSupportedBasalRates: [Double]? { [0.05, 0.1] }
-    var pumpMaximumBasalScheduleEntryCount: Int? { nil }
 }

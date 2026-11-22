@@ -13,20 +13,11 @@
     " -" : {
 
     },
-    "%1$@ (paused)" : {
-      "comment" : "A paused scheduled switch in a notification (1: scheduled switch)"
-    },
-    "%1$d scheduled switches removed" : {
-      "comment" : "Remote profile delete notification: scheduled switches to the deleted profile were removed (1: number of scheduled switches)"
-    },
     "%1$d starts paused" : {
       "comment" : "Status screen: scheduled profile starts are paused (1: number of paused starts)"
     },
     "1 start paused" : {
       "comment" : "Status screen: one scheduled profile start is paused"
-    },
-    "All scheduled switches were removed remotely" : {
-      "comment" : "Remote scheduled switches notification when the list was cleared"
     },
     "all starts paused" : {
       "comment" : "Status screen: every scheduled profile start is paused"
@@ -51,12 +42,6 @@
     },
     "Profiles Need Attention" : {
       "comment" : "Title of the alert after a pump change when profiles fail the activation checks"
-    },
-    "Scheduled switches changed remotely: %1$@" : {
-      "comment" : "Remote scheduled switches notification (1: the scheduled switches)"
-    },
-    "Scheduled switches not saved: %1$@" : {
-      "comment" : "Remote scheduled switches failure notification (1: reason)"
     },
     "The scheduled switch to %1$@ (%2$@) did not happen: %3$@" : {
       "comment" : "Alert body when a scheduled profile switch did not run (1: profile name, 2: weekday and time, 3: reason)"
@@ -30808,24 +30793,6 @@
     "Presets for Illness" : {
 
     },
-    "Profile '%1$@' activated" : {
-      "comment" : "Remote profile switch notification (1: profile name)"
-    },
-    "Profile '%1$@' deleted" : {
-      "comment" : "Remote profile delete notification (1: profile name)"
-    },
-    "Profile '%1$@' not activated: %2$@" : {
-      "comment" : "Remote profile switch failure notification (1: profile name, 2: reason)"
-    },
-    "Profile '%1$@' not deleted: %2$@" : {
-      "comment" : "Remote profile delete failure notification (1: profile name, 2: reason)"
-    },
-    "Profile '%1$@' not saved: %2$@" : {
-      "comment" : "Remote profile save failure notification (1: profile name, 2: reason)"
-    },
-    "Profile '%1$@' saved" : {
-      "comment" : "Remote profile save notification (1: profile name)"
-    },
     "Profile Expiration" : {
       "comment" : "Settings App Profile expiration view",
       "localizations" : {
@@ -31096,9 +31063,6 @@
     },
     "Profiles" : {
       "comment" : "Title text for button to Profiles"
-    },
-    "Profiles are not available" : {
-      "comment" : "Therapy profile action error description: no profile handler."
     },
     "Pump" : {
       "comment" : "The title of the pump section in settings",
@@ -32908,9 +32872,6 @@
           }
         }
       }
-    },
-    "Remote Profile Command" : {
-      "comment" : "The notification title for a remote therapy profile command"
     },
     "Repeat every" : {
       "comment" : "A label describing the option to change how often a glucose alert will repeat.",

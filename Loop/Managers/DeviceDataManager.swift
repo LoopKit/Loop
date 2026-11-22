@@ -1981,15 +1981,7 @@ extension DeviceDataManager: PumpManagerDeliveryDelegate {
     }
 }
 
-extension DeviceDataManager: DeviceStatusProvider {
-    var pumpSupportedBasalRates: [Double]? {
-        pumpManager?.supportedBasalRates
-    }
-
-    var pumpMaximumBasalScheduleEntryCount: Int? {
-        pumpManager?.maximumBasalScheduleEntryCount
-    }
-}
+extension DeviceDataManager: DeviceStatusProvider {}
 
 extension DeviceDataManager: BolusStateProvider {
     var bolusState: LoopKit.PumpManagerStatus.BolusState? {

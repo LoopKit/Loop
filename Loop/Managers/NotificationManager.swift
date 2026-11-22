@@ -220,21 +220,6 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
-    static func sendRemoteTherapyProfileNotification(message: String, category: LoopNotificationCategory) {
-        let notification = UNMutableNotificationContent()
-        notification.title = NSLocalizedString("Remote Profile Command", comment: "The notification title for a remote therapy profile command")
-        notification.body = message
-        notification.sound = .default
-
-        let request = UNNotificationRequest(
-            identifier: category.rawValue,
-            content: notification,
-            trigger: nil
-        )
-
-        UNUserNotificationCenter.current().add(request)
-    }
-
     /// Tells the user that a scheduled start switched the profile, and when it was late, when.
     static func sendScheduledProfileSwitchNotification(profileName: String, scheduledAt: Date, switchedAt: Date, timeZone: TimeZone) {
         let notification = UNMutableNotificationContent()
