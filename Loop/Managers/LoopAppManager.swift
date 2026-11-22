@@ -408,6 +408,7 @@ class LoopAppManager: NSObject {
 
         dosingDecisionStore.delegate = deviceDataManager
         remoteDataServicesManager.delegate = deviceDataManager
+        servicesManager.therapyProfileDelegate = deviceDataManager
 
         let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore!, glucoseStore, carbStore, dosingDecisionStore, doseStore, temporaryPresetsManager.presetHistory, deviceDataManager.deviceLog, alertManager.alertStore]
         criticalEventLogExportManager = CriticalEventLogExportManager(logs: criticalEventLogs,
@@ -974,6 +975,8 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
              LoopNotificationCategory.remoteBolusFailure.rawValue,
              LoopNotificationCategory.remoteCarbs.rawValue,
              LoopNotificationCategory.remoteCarbsFailure.rawValue,
+             LoopNotificationCategory.remoteProfile.rawValue,
+             LoopNotificationCategory.remoteProfileFailure.rawValue,
              LoopNotificationCategory.missedMeal.rawValue,
              LoopNotificationCategory.scheduledProfileSwitch.rawValue,
              LoopNotificationCategory.requiredUpdate.rawValue:

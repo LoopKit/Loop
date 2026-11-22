@@ -20,6 +20,8 @@ import os.log
 protocol DeviceStatusProvider {
     var pumpManagerStatus: PumpManagerStatus? { get }
     var cgmManagerStatus: CGMManagerStatus? { get }
+    var pumpSupportedBasalRates: [Double]? { get }
+    var pumpMaximumBasalScheduleEntryCount: Int? { get }
 }
 
 @MainActor
@@ -32,7 +34,12 @@ class SettingsManager {
 
     var analyticsServicesManager: AnalyticsServicesManager?
 
-    var deviceStatusProvider: DeviceStatusProvider?
+    /// Settings are stored once this is set, so a stored snapshot knows the pump.
+    var deviceStatusProvider: DeviceStatusProvider? {
+        didSet {
+            storeSettings()
+        }
+    }
 
     var alertMuter: AlertMuter
 
@@ -41,6 +48,8 @@ class SettingsManager {
     private var storedSettings: StoredSettings
 
     private var remoteNotificationRegistrationResult: Swift.Result<Data,Error>?
+
+    private var isStoreWaitingForDevices = false
 
     private var cancellables: Set<AnyCancellable> = []
 
@@ -151,6 +160,8 @@ class SettingsManager {
                               pumpDevice: deviceStatusProvider?.pumpManagerStatus?.device,
                               bloodGlucoseUnit: displayGlucosePreference?.unit,
                               automaticDosingStrategy: newLoopSettings.automaticDosingStrategy,
+                              pumpSupportedBasalRates: deviceStatusProvider?.pumpSupportedBasalRates,
+                              pumpMaximumBasalScheduleEntryCount: deviceStatusProvider?.pumpMaximumBasalScheduleEntryCount,
                               therapyProfiles: newLoopSettings.therapyProfiles,
                               activeProfileName: newLoopSettings.activeProfileName,
                               scheduledSwitches: newLoopSettings.scheduledSwitches,
@@ -168,7 +179,7 @@ class SettingsManager {
 
         let mergedSettings = mergeSettings(newLoopSettings: newLoopSettings, notificationSettings: notificationSettings, deviceToken: deviceTokenStr)
 
-        guard settings != mergedSettings else {
+        guard settings != mergedSettings || isStoreWaitingForDevices else {
             // Skipping unchanged settings store
             return
         }
@@ -179,6 +190,12 @@ class SettingsManager {
             // remote notification registration not finished
             return
         }
+
+        guard deviceStatusProvider != nil else {
+            isStoreWaitingForDevices = true
+            return
+        }
+        isStoreWaitingForDevices = false
 
         if settings.insulinSensitivitySchedule == nil {
             log.default("Saving settings with no ISF schedule.")
