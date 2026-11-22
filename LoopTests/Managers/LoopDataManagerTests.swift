@@ -768,7 +768,7 @@ class LoopDataManagerTests: XCTestCase {
             )
             temporaryPresetsManager.presetHistory.recordOverride(preset, at: now)
             doseStore.doseHistory = [DoseEntry(type: .tempBasal, startDate: window.start, endDate: window.end,
-                                              value: multiplier, unit: .unitsPerHour, decisionId: nil)]
+                                              value: multiplier, unit: .unitsPerHour, doseId: nil)]
 
             let timeline = try await loopDataManager.insulinOnBoardTimeline(in: window)
             XCTAssertFalse(timeline.isEmpty)
