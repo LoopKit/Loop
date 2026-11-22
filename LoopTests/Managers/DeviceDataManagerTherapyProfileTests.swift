@@ -353,7 +353,7 @@ extension DeviceDataManagerTests {
         let localTwoThirty = DateComponents(calendar: Calendar(identifier: .gregorian), timeZone: travel, year: 2026, month: 3, day: 29, hour: 2, minute: 30).date!
         XCTAssertEqual(live.basalRateSchedule?.value(at: localTwoThirty), 0.7)
 
-        // A save made in another time zone (a follower's phone) is stored in the live time zone.
+        // A save made in another time zone is stored in the live time zone.
         var edited = deviceDataManager.therapyProfile(named: "Sport")!.withTimeZone(TimeZone(identifier: "Asia/Tokyo")!)
         edited.carbRatioSchedule = CarbRatioSchedule(unit: .gram, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 9), RepeatingScheduleValue(startTime: 1800, value: 8)], timeZone: edited.carbRatioSchedule.timeZone)!
         try await deviceDataManager.saveTherapyProfile(edited, originalName: "Sport")
@@ -435,8 +435,10 @@ extension DeviceDataManagerTests {
         setUpTherapySettings()
         try await deviceDataManager.saveTherapyProfile(sportProfile(basal: 0.5), originalName: nil)
         try await deviceDataManager.saveTherapyProfile({ var p = sportProfile(basal: 3.5); p.name = "Training"; return p }(), originalName: nil)
+        try await deviceDataManager.saveTherapyProfile({ var p = sportProfile(basal: 4.0); p.name = "Race"; return p }(), originalName: nil)
         let issuer = RecordingAlertIssuer()
         deviceDataManager.therapyProfileAlertIssuer = issuer
+        let identifier = Alert.Identifier(managerIdentifier: DeviceDataManager.therapyProfileAlertManagerIdentifier, alertIdentifier: "pumpChange")
 
         pumpManager.supportedBasalRates = (0...60).map { (Double($0) * 5).rounded() / 100 }
         deviceDataManager.pumpManagerOnboarding(didOnboardPumpManager: OnboardedPumpManager())
@@ -444,16 +446,28 @@ extension DeviceDataManagerTests {
             try await Task.sleep(nanoseconds: 100_000_000)
         }
 
-        XCTAssertEqual(issuer.issued.map(\.identifier), [Alert.Identifier(managerIdentifier: DeviceDataManager.therapyProfileAlertManagerIdentifier, alertIdentifier: "pumpChange")])
+        XCTAssertEqual(issuer.issued.map(\.identifier), [identifier])
         let body = try XCTUnwrap(issuer.issued.first?.backgroundContent.body)
-        XCTAssertTrue(body.contains("Training"))
+        XCTAssertTrue(body.contains("Training") && body.contains("Race"))
         XCTAssertFalse(body.contains("Default"))
         XCTAssertFalse(body.contains("Sport"))
 
-        var training = deviceDataManager.therapyProfile(named: "Training")!
-        training.basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 2.5)], timeZone: training.basalRateSchedule.timeZone)!
-        try await deviceDataManager.saveTherapyProfile(training, originalName: "Training")
-        XCTAssertEqual(issuer.retracted.map(\.alertIdentifier), ["pumpChange"])
+        func repair(_ name: String) async throws {
+            var profile = deviceDataManager.therapyProfile(named: name)!
+            profile.basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 2.5)], timeZone: profile.basalRateSchedule.timeZone)!
+            try await deviceDataManager.saveTherapyProfile(profile, originalName: name)
+        }
+
+        try await repair("Training")
+        XCTAssertEqual(issuer.retracted, [])
+        XCTAssertEqual(issuer.issued.count, 2)
+        let shorter = try XCTUnwrap(issuer.issued.last?.backgroundContent.body)
+        XCTAssertTrue(shorter.contains("Race"))
+        XCTAssertFalse(shorter.contains("Training"))
+
+        try await repair("Race")
+        XCTAssertEqual(issuer.retracted, [identifier])
+        XCTAssertNil(deviceDataManager.therapyProfilesFailingAlertNames)
     }
 
     func testNoPumpChangeAlertBeforeAMaximumBasalRateIsSet() async throws {

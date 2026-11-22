@@ -128,11 +128,6 @@ public struct LoopSettings: Equatable {
             guard let live = liveTherapyProfile else {
                 return nil
             }
-            if !therapyProfiles.contains(where: \.isDefault) {
-                var defaultProfile = live
-                defaultProfile.name = TherapyProfile.defaultName
-                therapyProfiles.insert(defaultProfile, at: 0)
-            }
             therapyProfiles.append(live)
             unknownName = name
         }
