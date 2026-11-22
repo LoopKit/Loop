@@ -64,7 +64,7 @@ extension DeviceDataManagerTests {
         sport.basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 0.5)], timeZone: live.basalRateSchedule.timeZone)!
         try await deviceDataManager.saveTherapyProfile(sport, originalName: nil)
         let issuer = RecordingAlertIssuer()
-        deviceDataManager.scheduledProfileSwitchAlertIssuer = issuer
+        deviceDataManager.therapyProfileAlertIssuer = issuer
         try await deviceDataManager.saveScheduledProfileSwitches(entries(occurrence), expectedFingerprint: nil)
         settingsManager.mutateLoopSettings { settings in
             settings.scheduledSwitchesSettledAt = settledAt
@@ -197,7 +197,7 @@ extension DeviceDataManagerTests {
     func testBolusInProgressSkipsTheRunWithoutAPumpCall() async throws {
         _ = try await setUpSchedule({ [self.start("Sport", at: $0)] }, settledAt: occurrence.addingTimeInterval(-.hours(1)))
         let status = pumpManager.status
-        let bolus = DoseEntry(type: .bolus, startDate: occurrence, value: 1, unit: .units, decisionId: nil, automatic: false)
+        let bolus = DoseEntry(type: .bolus, startDate: occurrence, value: 1, unit: .units, automatic: false)
         pumpManager.status = PumpManagerStatus(timeZone: status.timeZone, device: status.device, pumpBatteryChargeRemaining: nil,
                                                basalDeliveryState: status.basalDeliveryState, bolusState: .inProgress(bolus), insulinType: status.insulinType)
         let settledBefore = settingsManager.loopSettings.scheduledSwitchesSettledAt

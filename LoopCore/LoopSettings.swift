@@ -110,9 +110,10 @@ public struct LoopSettings: Equatable {
                        insulinSensitivitySchedule: insulinSensitivitySchedule)
     }
 
-    /// Every profile with Default first. Before any other profile exists this is Default alone.
+    /// Every profile with Default first, the active one holding the live schedules. Before any other profile exists
+    /// this is Default alone.
     public var resolvedTherapyProfiles: [TherapyProfile] {
-        TherapyProfiles.resolved(therapyProfiles, live: TherapyProfiles.activeName(activeProfileName) == TherapyProfile.defaultName ? liveTherapyProfile : nil)
+        TherapyProfiles.resolved(therapyProfiles, activeProfileName: activeProfileName, live: liveTherapyProfile)
     }
 
     /// Writes the live schedules to the active profile, stores Default as nil and drops a list holding Default alone,

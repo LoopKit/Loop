@@ -172,8 +172,8 @@ final class DeviceDataManager {
     /// Set while a profile switch or save runs, so profile changes run one at a time.
     private(set) var therapyProfileChangeInProgress = false
 
-    /// Issues the alerts about scheduled profile switches.
-    weak var scheduledProfileSwitchAlertIssuer: AlertIssuer?
+    /// Issues the alerts about scheduled profile switches and profiles a new pump can not take.
+    weak var therapyProfileAlertIssuer: AlertIssuer?
     
     // MARK: Stores
     let carbStore: CarbStore
@@ -263,7 +263,7 @@ final class DeviceDataManager {
         self.pluginManager = pluginManager
         self.deviceLog = deviceLog
         self.alertManager = alertManager
-        self.scheduledProfileSwitchAlertIssuer = alertManager
+        self.therapyProfileAlertIssuer = alertManager
         self.glucoseAlertManager = GlucoseAlertManager(alertIssuer: alertManager,
                                                        displayGlucosePreference: displayGlucosePreference)
         alertManager.addAlertSoundVendor(managerIdentifier: GlucoseAlertManager.managerIdentifier,
@@ -1215,6 +1215,7 @@ extension DeviceDataManager: PumpManagerOnboardingDelegate {
         Task {
             await refreshDeviceData()
             settingsManager.storeSettings()
+            await issueTherapyProfilesFailingAlert()
         }
     }
 
@@ -1538,7 +1539,7 @@ extension DeviceDataManager: TherapyProfileDelegate {
         let syncedBasal = try await syncBasalRateSchedule(items: validated.basalRateSchedule.items)
         let live = settingsManager.loopSettings.liveTherapyProfile
         settingsManager.mutateLoopSettings { settings in
-            settings.therapyProfiles = TherapyProfiles.resolved(settings.therapyProfiles, live: settings.activeProfileName == nil ? live : nil)
+            settings.therapyProfiles = TherapyProfiles.resolved(settings.therapyProfiles, activeProfileName: settings.activeProfileName, live: live)
             settings.applyTherapyProfileSchedules(validated)
             settings.basalRateSchedule = syncedBasal
             settings.activeProfileName = name == TherapyProfile.defaultName ? nil : name
@@ -1554,8 +1555,9 @@ extension DeviceDataManager: TherapyProfileDelegate {
         }
     }
 
-    /// Saves `profile`; for the active profile the basal schedule goes to the pump first. Values that are already
-    /// stored (a rename or a copy) are not validated again, and glucose values sent back unchanged keep their stored value.
+    /// Saves `profile`; for the active profile the basal schedule goes to the pump first. Only the schedules that differ
+    /// from the stored profile are validated, so a profile that no longer passes can be repaired one schedule at a time;
+    /// a copy of a stored profile is not validated again. Glucose values sent back unchanged keep their stored value.
     private func performSaveTherapyProfile(_ profile: TherapyProfile, originalName: String?, expectedFingerprint: String?) async throws {
         var profile = profile
         try beginTherapyProfileChange()
@@ -1572,14 +1574,21 @@ extension DeviceDataManager: TherapyProfileDelegate {
             profile = profile.keepingStoredGlucoseValues(of: stored)
         }
         var validated: TherapyProfile
-        let holdsStoredValues = original.map { profile.hasSameValues(as: $0) } ?? therapyProfiles.contains { profile.hasSameValues(as: $0) }
-        if holdsStoredValues {
+        let changedSchedules: Set<TherapyProfileSchedule>
+        if let original {
+            changedSchedules = profile.schedulesDiffering(from: original)
+        } else if therapyProfiles.contains(where: { profile.hasSameValues(as: $0) }) {
+            changedSchedules = []
+        } else {
+            changedSchedules = Set(TherapyProfileSchedule.allCases)
+        }
+        if changedSchedules.isEmpty {
             validated = profile
         } else {
             guard let validator = therapyProfileValidator else {
                 throw TherapyProfileError.noPump
             }
-            validated = try validator.validate(profile)
+            validated = try validator.validate(profile, schedules: changedSchedules)
         }
         if let timeZone = settingsManager.loopSettings.basalRateSchedule?.timeZone {
             validated = validated.withTimeZone(timeZone)
@@ -1834,7 +1843,7 @@ extension DeviceDataManager {
             // Delivered already; it stays until the start is settled.
             return
         }
-        await scheduledProfileSwitchAlertIssuer?.retractAlert(identifier: identifier)
+        await therapyProfileAlertIssuer?.retractAlert(identifier: identifier)
         guard let next, let alertDate else {
             return
         }
@@ -1846,7 +1855,7 @@ extension DeviceDataManager {
         let content = Alert.Content(title: NSLocalizedString("Profile Not Switched", comment: "Title of the alerts about a scheduled profile switch that did not run"),
                                     body: body,
                                     acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Acknowledge button of a scheduled profile switch alert"))
-        await scheduledProfileSwitchAlertIssuer?.issueAlert(Alert(identifier: identifier,
+        await therapyProfileAlertIssuer?.issueAlert(Alert(identifier: identifier,
                                                                   foregroundContent: content,
                                                                   backgroundContent: content,
                                                                   trigger: .delayed(interval: alertDate.timeIntervalSince(now)),
@@ -1862,12 +1871,43 @@ extension DeviceDataManager {
                                     acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Acknowledge button of a scheduled profile switch alert"))
         let identifier = Alert.Identifier(managerIdentifier: Self.scheduledProfileSwitchManagerIdentifier,
                                           alertIdentifier: "\(occurrence.entry.id).\(Int(occurrence.date.timeIntervalSince1970))")
-        await scheduledProfileSwitchAlertIssuer?.issueAlert(Alert(identifier: identifier,
+        await therapyProfileAlertIssuer?.issueAlert(Alert(identifier: identifier,
                                                                   foregroundContent: content,
                                                                   backgroundContent: content,
                                                                   trigger: .immediate,
                                                                   interruptionLevel: .timeSensitive,
                                                                   categoryIdentifier: LoopNotificationCategory.scheduledProfileSwitch.rawValue))
+    }
+}
+
+// MARK: - Profiles a pump can not take
+
+extension DeviceDataManager {
+    /// Raises one alert naming the profiles that fail the activation checks with the current pump and settings.
+    func issueTherapyProfilesFailingAlert() async {
+        guard let validator = therapyProfileValidator else {
+            return
+        }
+        let failing = therapyProfiles.compactMap { profile -> String? in
+            let failures = validator.failures(of: profile)
+            guard !failures.isEmpty else {
+                return nil
+            }
+            let reasons = TherapyProfileSchedule.allCases.compactMap { failures[$0]?.localizedDescription }
+            return profile.name + ": " + reasons.joined(separator: "; ")
+        }
+        guard !failing.isEmpty else {
+            return
+        }
+        log.default("Profiles that fail the activation checks with the new pump: %{public}@", failing.joined(separator: " | "))
+        let body = String(format: NSLocalizedString("These profiles cannot be activated with this pump until their settings are edited in Settings > Profiles:\n\n%1$@", comment: "Alert body after a pump change naming the profiles that fail the activation checks (1: one line per profile with its reasons)"), failing.joined(separator: "\n"))
+        let content = Alert.Content(title: NSLocalizedString("Profiles Need Attention", comment: "Title of the alert after a pump change when profiles fail the activation checks"),
+                                    body: body,
+                                    acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Acknowledge button of the alert about profiles a pump can not take"))
+        await therapyProfileAlertIssuer?.issueAlert(Alert(identifier: Alert.Identifier(managerIdentifier: "TherapyProfiles", alertIdentifier: "pumpChange"),
+                                                          foregroundContent: content,
+                                                          backgroundContent: content,
+                                                          trigger: .immediate))
     }
 }
 

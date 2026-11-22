@@ -395,4 +395,60 @@ extension DeviceDataManagerTests {
         XCTAssertTrue(deviceDataManager.therapyProfile(named: "Missing")!.hasSameValues(as: live))
         XCTAssertEqual(deviceDataManager.therapyProfile(named: "Default"), storedDefault)
     }
+
+    func testProfileFailingTwoSchedulesIsRepairedOneScheduleAtATime() async throws {
+        setUpTherapySettings()
+        try await deviceDataManager.saveTherapyProfile(sportProfile(), originalName: nil)
+        try await deviceDataManager.activateTherapyProfile(named: "Sport")
+        settingsManager.mutateLoopSettings { settings in
+            settings.maximumBasalRatePerHour = 0.6
+            settings.suspendThreshold = GlucoseThreshold(unit: .milligramsPerDeciliter, value: 110)
+        }
+        let timeZone = deviceDataManager.therapyProfile(named: "Default")!.basalRateSchedule.timeZone
+
+        XCTAssertEqual(Set(deviceDataManager.therapyProfileValidator!.failures(of: deviceDataManager.therapyProfile(named: "Default")!).keys), [.correctionRange, .basalRate])
+        await assertThrows(.correctionRangeBelowSuspendThreshold) { try await self.deviceDataManager.activateTherapyProfile(named: "Default") }
+
+        var repaired = deviceDataManager.therapyProfile(named: "Default")!
+        repaired.basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 0.5)], timeZone: timeZone)!
+        try await deviceDataManager.saveTherapyProfile(repaired, originalName: "Default")
+        await assertThrows(.correctionRangeBelowSuspendThreshold) { try await self.deviceDataManager.activateTherapyProfile(named: "Default") }
+
+        repaired = deviceDataManager.therapyProfile(named: "Default")!
+        repaired.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: DoubleRange(minValue: 110, maxValue: 120))], timeZone: timeZone)!
+        try await deviceDataManager.saveTherapyProfile(repaired, originalName: "Default")
+        try await deviceDataManager.activateTherapyProfile(named: "Default")
+
+        XCTAssertNil(settingsManager.loopSettings.activeProfileName)
+        XCTAssertEqual(pumpManager.basalRateSchedule?.items.map(\.value), [0.5])
+    }
+
+    func testChangedScheduleOfAStoredProfileIsStillValidated() async throws {
+        setUpTherapySettings()
+        try await deviceDataManager.saveTherapyProfile(sportProfile(), originalName: nil)
+        var edited = deviceDataManager.therapyProfile(named: "Sport")!
+        edited.basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 5.5)], timeZone: edited.basalRateSchedule.timeZone)!
+        await assertThrows(.basalRateAboveMaximum(5.5)) { try await self.deviceDataManager.saveTherapyProfile(edited, originalName: "Sport") }
+    }
+
+    func testPumpChangeAlertNamesTheProfilesThatFail() async throws {
+        setUpTherapySettings()
+        try await deviceDataManager.saveTherapyProfile(sportProfile(basal: 0.5), originalName: nil)
+        try await deviceDataManager.saveTherapyProfile({ var p = sportProfile(basal: 3.5); p.name = "Training"; return p }(), originalName: nil)
+        let issuer = RecordingAlertIssuer()
+        deviceDataManager.therapyProfileAlertIssuer = issuer
+
+        await deviceDataManager.issueTherapyProfilesFailingAlert()
+        XCTAssertTrue(issuer.issued.isEmpty)
+
+        pumpManager.supportedBasalRates = (0...60).map { (Double($0) * 5).rounded() / 100 }
+        await deviceDataManager.issueTherapyProfilesFailingAlert()
+
+        XCTAssertEqual(issuer.issued.map(\.identifier.alertIdentifier), ["pumpChange"])
+        let body = try XCTUnwrap(issuer.issued.first?.backgroundContent.body)
+        XCTAssertTrue(body.contains("Training"))
+        XCTAssertFalse(body.contains("Default"))
+        XCTAssertFalse(body.contains("Sport"))
+    }
 }
+

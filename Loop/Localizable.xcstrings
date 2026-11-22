@@ -49,6 +49,9 @@
     "Profile Switched" : {
       "comment" : "The notification title for a scheduled profile switch"
     },
+    "Profiles Need Attention" : {
+      "comment" : "Title of the alert after a pump change when profiles fail the activation checks"
+    },
     "Scheduled switches changed remotely: %1$@" : {
       "comment" : "Remote scheduled switches notification (1: the scheduled switches)"
     },
@@ -57,6 +60,9 @@
     },
     "The scheduled switch to %1$@ (%2$@) did not happen: %3$@" : {
       "comment" : "Alert body when a scheduled profile switch did not run (1: profile name, 2: weekday and time, 3: reason)"
+    },
+    "These profiles cannot be activated with this pump until their settings are edited in Settings > Profiles:\n\n%1$@" : {
+      "comment" : "Alert body after a pump change naming the profiles that fail the activation checks (1: one line per profile with its reasons)"
     },
     "until %1$@ starts %2$@ %3$@" : {
       "comment" : "Status screen: the next scheduled profile start (1: profile name, 2: short weekday, 3: time)"
