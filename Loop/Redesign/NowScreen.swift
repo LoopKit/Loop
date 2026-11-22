@@ -112,7 +112,7 @@ final class NowModel: ObservableObject {
 
     var readingIsStale: Bool {
         guard let reading else { return true }
-        return now.timeIntervalSince(reading.date) > LoopAlgorithm.inputDataRecencyInterval
+        return now.timeIntervalSince(reading.date) > LoopCoreConstants.inputDataRecencyInterval
     }
 
     /// Refreshes everything; calls made while a refresh runs are coalesced into one more.
@@ -138,7 +138,7 @@ final class NowModel: ObservableObject {
         unit = provider.unitStyle
 
         let displayState = await loopDataManager.algorithmDisplayState
-        let predicted = (displayState.output?.predictedGlucose ?? []).map {
+        let predicted = (displayState.output?.predictedGlucose ?? []).map(\.loopKit).map {
             GlucosePoint(date: $0.startDate, mgdl: $0.quantity.doubleValue(for: .milligramsPerDeciliter))
         }
         var failed = false

@@ -524,12 +524,15 @@ extension LoopDataManager {
         let basalStart = min(dosesStart, doses.map(\.startDate).min() ?? dosesStart)
         let basal = try await settingsProvider.getBasalHistory(startDate: basalStart, endDate: interval.end)
         let overrides = temporaryPresetsManager.presetHistory.getOverrideHistory(startDate: basalStart, endDate: interval.end)
-        return doses.annotated(with: overrides.applyBasal(over: basal)).insulinOnBoardTimeline(from: interval.start, to: interval.end)
+        return doses.annotated(with: overrides.applyBasal(over: basal).algorithmSchedule())
+            .insulinOnBoardTimeline(from: interval.start, to: interval.end)
+            .map(\.loopKit)
     }
 
     /// Carbs on board across `interval`, using the same absorption review as Loop's carb screen.
     func carbsOnBoardTimeline(in interval: DateInterval) async throws -> [CarbValue] {
         let review = try await fetchCarbAbsorptionReview(start: interval.start.addingTimeInterval(-CarbMath.maximumAbsorptionTimeInterval), end: interval.end)
         return review.carbStatuses.dynamicCarbsOnBoard(from: interval.start, to: interval.end, absorptionModel: carbAbsorptionModel.model)
+            .map(\.loopKit)
     }
 }
