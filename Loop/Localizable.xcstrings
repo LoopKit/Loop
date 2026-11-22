@@ -2953,9 +2953,6 @@
         }
       }
     },
-    "Decimal point" : {
-      "comment" : "VoiceOver label for the decimal point key on the carb entry number pad"
-    },
     "Eaten" : {
       "comment" : "Carb entry section title: when the food was eaten",
       "localizations" : {

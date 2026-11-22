@@ -32,6 +32,8 @@ struct CarbEntryScreen: View {
     @State private var showHowAbsorptionTimeWorks = false
     @State private var showAddFavoriteFood = false
     @State private var showTimePicker = false
+    /// Set once the sheet has settled, so the number pad comes up as Loop's carb entry always has.
+    @State private var focusAmount = false
     /// Other was tapped, so it stays chosen even while its food and time still match a preset.
     @State private var otherChosen = false
     @FocusState private var foodTypeFocused: Bool
@@ -105,6 +107,12 @@ struct CarbEntryScreen: View {
                 viewModel.selectedDefaultAbsorptionTimeEmoji = Speed.medium.emoji
             }
         }
+        .task {
+            // A first responder set while the sheet is still presenting is dropped, so wait for it to settle.
+            guard viewModel.shouldBeginEditingQuantity else { return }
+            try? await Task.sleep(for: .milliseconds(450))
+            focusAmount = true
+        }
         .onChange(of: viewModel.carbsQuantity) { _, quantity in
             // A favourite fills the amount in. What's typed already shows its own amount ("3." is 3), so only a
             // change from elsewhere rewrites it.
@@ -171,63 +179,50 @@ struct CarbEntryScreen: View {
 
     private var hasAmount: Bool { (viewModel.carbsQuantity ?? 0) > 0 }
 
-    /// The amount, typed on the pad below. It reads as the meal's size: carbs green once there is one.
+    private static let amountFont: UIFont = {
+        let base = UIFont.monospacedDigitSystemFont(ofSize: 56, weight: .bold)
+        return UIFont(descriptor: base.fontDescriptor.withDesign(.rounded) ?? base.fontDescriptor, size: 56)
+    }()
+
+    /// The amount, typed on the iPhone's number pad. It reads as the meal's size: carbs green once there is one.
+    /// A hidden copy of the text sizes the field, so the unit sits right after the number.
     private var amountDisplay: some View {
         HStack(alignment: .firstTextBaseline, spacing: LoopDesign.Space.s1) {
             Text(amountText.isEmpty ? "0" : amountText)
-                .font(.system(size: 56, weight: .bold, design: .rounded).monospacedDigit())
-                .foregroundStyle(hasAmount ? P.carbsInk : P.inkMuted.opacity(0.4))
-                .contentTransition(.numericText())
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
+                .font(Font(Self.amountFont))
+                .padding(.trailing, 4)
+                .hidden()
+                .overlay(alignment: .leading) {
+                    DismissibleKeyboardTextField(text: $amountText, placeholder: "0", font: Self.amountFont,
+                                                 textColor: UIColor(P.carbsInk), keyboardType: .decimalPad,
+                                                 shouldBecomeFirstResponder: focusAmount, maxLength: 5,
+                                                 doneButtonColor: UIColor(P.accentInk))
+                        .frame(minWidth: 40)
+                        .accessibilityLabel(NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"))
+                        .accessibilityIdentifier("textField_CarbsAmount")
+                }
             Text(NSLocalizedString("g", comment: "Abbreviation for grams"))
                 .font(.system(size: 28, weight: .semibold, design: .rounded))
                 .foregroundStyle(P.inkMuted)
+                .accessibilityHidden(true)
             Spacer(minLength: 0)
         }
-        .animation(reduceMotion ? nil : .snappy(duration: 0.2), value: amountText)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"))
-        .accessibilityValue(LoopFormat.grams(viewModel.carbsQuantity ?? 0))
-        .accessibilityIdentifier("textField_CarbsAmount")
-        .accessibilityAdjustableAction { direction in
-            let grams = (viewModel.carbsQuantity ?? 0) + (direction == .increment ? 1 : -1)
-            setAmount(max(0, grams.rounded()))
+        .onChange(of: amountText) { _, text in
+            // One decimal place at most, as Loop's carb entry allows.
+            let parts = text.components(separatedBy: Self.decimalSeparator)
+            if parts.count > 2 || (parts.count == 2 && parts[1].count > 1) {
+                amountText = parts[0] + Self.decimalSeparator + String((parts.dropFirst().joined()).prefix(1))
+                return
+            }
+            viewModel.carbsQuantity = Self.amountFormatter.number(from: text)?.doubleValue
         }
-    }
-
-    private func setAmount(_ grams: Double) {
-        amountText = grams > 0 ? Self.amountFormatter.string(from: NSNumber(value: grams)) ?? "" : ""
-        viewModel.carbsQuantity = grams > 0 ? grams : nil
     }
 
     private static var decimalSeparator: String { amountFormatter.decimalSeparator ?? "." }
 
-    /// One key on the pad. Up to three whole grams and one decimal place, as the field allowed.
-    private func press(_ key: CarbKeypad.Key) {
-        var text = amountText
-        switch key {
-        case .digit(let digit):
-            let parts = text.components(separatedBy: Self.decimalSeparator)
-            if parts.count == 2 {
-                guard parts[1].isEmpty else { return }
-            } else if text == "0" {
-                text = ""
-            } else if text.count >= 3 {
-                return
-            }
-            text += String(digit)
-        case .decimal:
-            guard !text.contains(Self.decimalSeparator) else { return }
-            text = (text.isEmpty ? "0" : text) + Self.decimalSeparator
-        case .delete:
-            guard !text.isEmpty else { return }
-            text.removeLast()
-        case .clear:
-            text = ""
-        }
-        amountText = text
-        viewModel.carbsQuantity = Self.amountFormatter.number(from: text)?.doubleValue
+    /// Puts the number pad away when another choice is made, so what it covered comes back into view.
+    private func endEditing() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
     // MARK: Favourites
@@ -241,6 +236,7 @@ struct CarbEntryScreen: View {
                         ForEach(Array(viewModel.favoriteFoods.enumerated()), id: \.element.id) { index, food in
                             let selected = viewModel.selectedFavoriteFoodIndex == index
                             Button {
+                                endEditing()
                                 // A favourite brings its own food and time, so the speed shown follows it rather than an earlier Other.
                                 otherChosen = false
                                 animated { viewModel.selectedFavoriteFoodIndex = selected ? -1 : index }
@@ -299,6 +295,7 @@ struct CarbEntryScreen: View {
             sectionTitle(NSLocalizedString("Eaten", comment: "Carb entry section title: when the food was eaten"))
             HStack(spacing: LoopDesign.Space.s2) {
                 ChoiceTrack(choices: Self.eatenChoices, selection: eatenChoice, thumb: "eaten", namespace: thumbs) { minutes in
+                    endEditing()
                     let date = Date().addingTimeInterval(-Double(minutes) * 60)
                     animated {
                         eatenChoice = minutes
@@ -315,6 +312,7 @@ struct CarbEntryScreen: View {
                 .frame(maxWidth: .infinity)
                 .layoutPriority(1)
                 Button {
+                    endEditing()
                     showTimePicker = true
                 } label: {
                     Group {
@@ -491,6 +489,7 @@ struct CarbEntryScreen: View {
     }
 
     private func choose(_ speed: Speed) {
+        endEditing()
         // Re-choosing the shown speed changes nothing, so an unedited entry stays unedited.
         guard speed != selectedSpeed else { return }
         // A favourite sets its own food and absorption; choosing a speed instead lets it go but keeps the amount.
@@ -513,10 +512,9 @@ struct CarbEntryScreen: View {
 
     // MARK: Pad and Continue
 
-    /// The pad stays in place of the keyboard, so the preview and every choice above it stay in view while typing.
+    /// Continue rides above the number pad while it's up.
     private var entryBar: some View {
         VStack(spacing: LoopDesign.Space.s3) {
-            CarbKeypad(decimalSeparator: Self.decimalSeparator, action: press)
             Button(action: viewModel.continueToBolus) {
                 Text(hasAmount || !viewModel.continueButtonDisabled
                      ? NSLocalizedString("Continue", comment: "Button label for continue")
@@ -601,85 +599,6 @@ struct CarbEntryScreen: View {
                 secondaryButton: .cancel(Text("Yes", comment: "The title of the action used when confirming entered amount of carbohydrates."), action: viewModel.clearAlertAndContinueToBolus)
             )
         }
-    }
-}
-
-/// Two rows of keys in place of the keyboard: 1–5 and delete, 6–0 and the decimal point. Holding delete clears.
-private struct CarbKeypad: View {
-    enum Key: Hashable {
-        case digit(Int)
-        case decimal
-        case delete
-        case clear
-    }
-
-    let decimalSeparator: String
-    let action: (Key) -> Void
-
-    @Environment(\.dynamicTypeSize) private var typeSize
-
-    private var rows: [[Key]] {
-        typeSize.isAccessibilitySize
-            ? [[.digit(1), .digit(2), .digit(3)], [.digit(4), .digit(5), .digit(6)], [.digit(7), .digit(8), .digit(9)], [.decimal, .digit(0), .delete]]
-            : [[.digit(1), .digit(2), .digit(3), .digit(4), .digit(5), .delete], [.digit(6), .digit(7), .digit(8), .digit(9), .digit(0), .decimal]]
-    }
-
-    var body: some View {
-        VStack(spacing: 6) {
-            ForEach(rows, id: \.self) { row in
-                HStack(spacing: 6) {
-                    ForEach(row, id: \.self) { key in
-                        keyButton(key)
-                    }
-                }
-            }
-        }
-    }
-
-    private func keyButton(_ key: Key) -> some View {
-        Button {
-            action(key)
-        } label: {
-            Group {
-                switch key {
-                case .digit(let digit):
-                    Text(verbatim: String(digit))
-                case .decimal:
-                    Text(verbatim: decimalSeparator)
-                case .delete, .clear:
-                    Image(systemName: "delete.left")
-                        .font(.system(size: 20, weight: .medium))
-                }
-            }
-            .font(.system(size: 24, weight: .semibold, design: .rounded))
-            .foregroundStyle(key == .delete ? P.inkMuted : P.ink)
-            .frame(maxWidth: .infinity, minHeight: 48)
-            .background(key == .delete || key == .decimal ? P.surfaceSunken : P.surfaceRaised,
-                        in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        }
-        .buttonStyle(KeyPressStyle())
-        .simultaneousGesture(LongPressGesture(minimumDuration: 0.5).onEnded { _ in
-            if key == .delete { action(.clear) }
-        })
-        .accessibilityLabel(label(key))
-    }
-
-    private func label(_ key: Key) -> String {
-        switch key {
-        case .digit(let digit): return String(digit)
-        case .decimal: return NSLocalizedString("Decimal point", comment: "VoiceOver label for the decimal point key on the carb entry number pad")
-        case .delete, .clear: return NSLocalizedString("Delete", comment: "VoiceOver label for the delete key on the carb entry number pad")
-        }
-    }
-}
-
-/// Keys dim while held, as the system keyboard's do.
-private struct KeyPressStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .opacity(configuration.isPressed ? 0.55 : 1)
-            .scaleEffect(configuration.isPressed ? 0.96 : 1)
     }
 }
 
