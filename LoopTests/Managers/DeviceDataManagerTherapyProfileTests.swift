@@ -353,7 +353,7 @@ extension DeviceDataManagerTests {
         let localTwoThirty = DateComponents(calendar: Calendar(identifier: .gregorian), timeZone: travel, year: 2026, month: 3, day: 29, hour: 2, minute: 30).date!
         XCTAssertEqual(live.basalRateSchedule?.value(at: localTwoThirty), 0.7)
 
-        // A save made in another time zone is stored in the live time zone.
+        // A save made in another time zone (a follower's phone) is stored in the live time zone.
         var edited = deviceDataManager.therapyProfile(named: "Sport")!.withTimeZone(TimeZone(identifier: "Asia/Tokyo")!)
         edited.carbRatioSchedule = CarbRatioSchedule(unit: .gram, dailyItems: [RepeatingScheduleValue(startTime: 0, value: 9), RepeatingScheduleValue(startTime: 1800, value: 8)], timeZone: edited.carbRatioSchedule.timeZone)!
         try await deviceDataManager.saveTherapyProfile(edited, originalName: "Sport")
