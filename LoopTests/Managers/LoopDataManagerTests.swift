@@ -419,7 +419,7 @@ class LoopDataManagerTests: XCTestCase {
             StoredGlucoseSample(startDate: d(.minutes(-1)), quantity: .glucose(value: 150)),
         ]
 
-        let dose = DoseEntry(type: .tempBasal, startDate: Date(), value: 1.0, unit: .unitsPerHour, decisionId: nil)
+        let dose = DoseEntry(type: .tempBasal, startDate: Date(), value: 1.0, unit: .unitsPerHour, doseId: nil)
         deliveryDelegate.basalDeliveryState = .tempBasal(dose)
 
         dosingDecisionStore.storeExpectation = expectation(description: #function)
@@ -478,7 +478,7 @@ class LoopDataManagerTests: XCTestCase {
             endDate: d(.minutes(29)),
             value: 5.05,
             unit: .unitsPerHour,
-            decisionId: nil,
+            doseId: nil,
         )
         deliveryDelegate.basalDeliveryState = .tempBasal(dose)
 
@@ -780,7 +780,7 @@ extension DoseEntry {
             endDate: fixture.endDate,
             value: fixture.volume,
             unit: .units,
-            decisionId: nil
+            doseId: nil
         )
     }
 }

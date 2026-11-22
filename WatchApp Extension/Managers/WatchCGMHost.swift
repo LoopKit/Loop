@@ -39,18 +39,10 @@ final class WatchCGMHost {
     private(set) var statusNote: String?
     private(set) var lastConnection: Date?
 
-    /// A background refresh this long after each reading re-checks acquisition, in case watchOS froze
-    /// the app before it lodged the next connect. Past the G7's 35 s tail clearance, so a connect it
-    /// lodges never lands in the sensor's advertising tail.
-    static let acquisitionBackstopDelay: TimeInterval = 60
-
     private init() {
         if let raw = rawManager, let manager = watchCGMManager(rawValue: raw) {
             builtFrom = raw["builtFrom"] as? [String: Any]
             install(manager)
-        }
-        NotificationCenter.default.addObserver(forName: watchCGMStatusDidChange, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.updateStatusNote() }
         }
     }
 
@@ -62,7 +54,7 @@ final class WatchCGMHost {
     }
 
     /// The phone's context arrived. Builds a manager when its export names a different sensor or code,
-    /// lets go of the sensor when the phone stopped sharing, and otherwise treats it as a wake.
+    /// and lets go of the sensor when the phone stopped sharing.
     func update(from context: WatchContext) {
         guard let raw = context.cgmConfiguration, let configuration = SharedDeviceConfiguration(rawValue: raw) else {
             if cgmManager != nil {
@@ -72,7 +64,6 @@ final class WatchCGMHost {
             return
         }
         if cgmManager != nil, let builtFrom, (builtFrom as NSDictionary).isEqual(to: configuration.state) {
-            recheckAcquisition()
             return
         }
         guard let manager = watchCGMManager(adopting: configuration, localState: nil) else {
@@ -86,14 +77,9 @@ final class WatchCGMHost {
         save(manager)
     }
 
-    /// Any wake that is not the sensor's own.
-    func recheckAcquisition() {
-        watchCGMRecheckAcquisition(cgmManager)
-    }
-
     private func install(_ manager: CGMManager) {
-        manager.delegateQueue = .main
         manager.cgmManagerDelegate = self
+        manager.addStatusObserver(self, queue: .main)
         cgmManager = manager
         updateStatusNote()
     }
@@ -101,6 +87,7 @@ final class WatchCGMHost {
     private func remove() {
         guard let previous = cgmManager else { return }
         previous.cgmManagerDelegate = nil
+        previous.removeStatusObserver(self)
         Task { await previous.delete() }
         cgmManager = nil
         builtFrom = nil
@@ -114,47 +101,38 @@ final class WatchCGMHost {
         raw["builtFrom"] = builtFrom
         rawManager = raw
     }
-
-    private func scheduleAcquisitionBackstop() {
-        WKApplication.shared().scheduleBackgroundRefresh(withPreferredDate: Date(timeIntervalSinceNow: Self.acquisitionBackstopDelay), userInfo: nil) { error in
-            if let error {
-                self.log.error("Could not schedule the acquisition backstop: %{public}@", String(describing: error))
-            }
-        }
-    }
 }
 
+/// Its `cgmManager(_:didUpdate:)`, below, serves as delegate and as status observer: the search and the note
+/// change without the manager's state changing, and reach only status observers.
+extension WatchCGMHost: CGMManagerStatusObserver {}
+
 extension WatchCGMHost: CGMManagerDelegate {
-    nonisolated func startDateToFilterNewData(for manager: CGMManager) -> Date? {
-        MainActor.assumeIsolated { LoopDataManager.shared.glucoseStore?.latestGlucose?.startDate }
+    func startDateToFilterNewData(for manager: CGMManager) async -> Date? {
+        LoopDataManager.shared.glucoseStore?.latestGlucose?.startDate
     }
 
-    nonisolated func cgmManager(_ manager: CGMManager, hasNew readingResult: CGMReadingResult) {
-        MainActor.assumeIsolated {
-            switch readingResult {
-            case .newData(let samples):
-                log.default("Direct reading: %d sample(s)", samples.count)
-                LoopDataManager.shared.addDirectGlucose(samples)
-                scheduleAcquisitionBackstop()
-            case .error(let error):
-                log.error("CGM reading error: %{public}@", String(describing: error))
-            case .noData, .unreliableData:
-                break
-            }
+    func cgmManager(_ manager: CGMManager, hasNew readingResult: CGMReadingResult) async {
+        switch readingResult {
+        case .newData(let samples):
+            log.default("Direct reading: %d sample(s)", samples.count)
+            LoopDataManager.shared.addDirectGlucose(samples)
+        case .error(let error):
+            log.error("CGM reading error: %{public}@", String(describing: error))
+        case .noData, .unreliableData:
+            break
         }
     }
 
-    nonisolated func cgmManager(_ manager: CGMManager, hasNew events: [PersistedCgmEvent]) {}
+    nonisolated func cgmManager(_ manager: CGMManager, hasNew events: [PersistedCgmEvent]) async {}
 
     /// The phone owns the sensor; a manager passed its configuration lets go when the phone stops sharing.
     nonisolated func cgmManagerWantsDeletion(_ manager: CGMManager) async {}
 
-    nonisolated func cgmManagerDidUpdateState(_ manager: CGMManager) {
-        MainActor.assumeIsolated {
-            guard manager === cgmManager else { return }
-            save(manager)
-            updateStatusNote()
-        }
+    func cgmManagerDidUpdateState(_ manager: CGMManager) async {
+        guard manager === cgmManager else { return }
+        save(manager)
+        updateStatusNote()
     }
 
     nonisolated func credentialStoragePrefix(for manager: CGMManager) -> String {
@@ -162,7 +140,7 @@ extension WatchCGMHost: CGMManagerDelegate {
     }
 
     nonisolated func cgmManager(_ manager: CGMManager, didUpdate status: CGMManagerStatus) {
-        MainActor.assumeIsolated {
+        Task { @MainActor in
             guard manager === cgmManager else { return }
             updateStatusNote()
         }

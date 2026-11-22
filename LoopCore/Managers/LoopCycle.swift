@@ -24,7 +24,7 @@ public protocol DeliveryDelegate: AnyObject {
     var cgmManagerStatus: CGMManagerStatus? { get }
 
     func enact(bolus: Double?, tempBasal: LoopKit.TempBasalRecommendation?, decisionId: UUID?) async throws
-    func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) async throws
+    func enactBolus(units: Double, metadata: DoseMetadata, activationType: BolusActivationType) async throws
     func roundBasalRate(unitsPerHour: Double) -> Double
     func roundBolusVolume(units: Double) -> Double
 }

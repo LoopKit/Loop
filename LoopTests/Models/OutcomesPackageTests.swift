@@ -77,7 +77,12 @@ class OutcomesPackageBuilderTests: XCTestCase {
             (now - .hours(1), record(now - .hours(1), ["quantity": 120])),
         ])
         let deviceLog = FakeLog(exportName: "DeviceLog.json", records: [(now - .hours(1), record(now - .hours(1)))])
-        let builder = OutcomesPackageBuilder(logs: [settings, glucose, deviceLog])
+        let marked = [
+            CustomSetupChange(date: now - .days(5), note: "Started walking"),
+            CustomSetupChange(date: start - .days(1), note: "Too old"),
+            CustomSetupChange(date: now - .days(20), note: nil),
+        ]
+        let builder = OutcomesPackageBuilder(logs: [settings, glucose, deviceLog], customChanges: { marked })
         let change = SetupChange(date: now - .days(15), isLowerBound: false, items: [.therapySetting(.carbRatio), .experiment(.guardAndRunway, enabled: true)])
 
         let package = try builder.build(change: change, installID: "install", now: now, progress: Progress())
@@ -111,11 +116,15 @@ class OutcomesPackageBuilderTests: XCTestCase {
         XCTAssertEqual(manifest.installID, "install")
         XCTAssertEqual(manifest.setup.changes, ["carbRatio", "experiment.guardAndRunway.on"])
         XCTAssertEqual(manifest.range.start, start)
+        XCTAssertEqual(manifest.customChanges, [
+            OutcomesManifest.CustomChange(date: now - .days(20), note: nil),
+            OutcomesManifest.CustomChange(date: now - .days(5), note: "Started walking"),
+        ])
         XCTAssertEqual(manifest.files.count, 1 + 43 * 2)
     }
 
     func testBuildCancelled() {
-        let builder = OutcomesPackageBuilder(logs: [FakeLog(exportName: "Glucose.json", records: [])])
+        let builder = OutcomesPackageBuilder(logs: [FakeLog(exportName: "Glucose.json", records: [])], customChanges: { [] })
         let progress = Progress()
         progress.cancel()
         let change = SetupChange(date: now - .days(15), isLowerBound: true, items: [])

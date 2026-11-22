@@ -534,7 +534,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         hudView?.loopCompletionHUD.mostRecentGlucoseDataDate = loopManager.mostRecentGlucoseDataDate
         hudView?.loopCompletionHUD.mostRecentPumpDataDate = loopManager.mostRecentPumpDataDate
 
-        guard !reloading && !deviceManager.authorizationRequired else {
+        guard !reloading else {
             return
         }
 

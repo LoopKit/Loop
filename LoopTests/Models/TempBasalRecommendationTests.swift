@@ -36,7 +36,7 @@ class TempBasalRecommendationTests: XCTestCase {
             endDate: now.addingTimeInterval(endingIn),
             value: rate,
             unit: .unitsPerHour,
-            decisionId: nil
+            doseId: nil
         )
     }
 
@@ -87,7 +87,7 @@ class TempBasalRecommendationTests: XCTestCase {
             endDate: now.addingTimeInterval(.minutes(25)),
             value: 1.0,
             unit: .unitsPerHour,
-            decisionId: nil
+            doseId: nil
         )
         let rec = TempBasalRecommendation(unitsPerHour: 1.0, duration: .minutes(30))
         let result = rec.adjustForCurrentDelivery(

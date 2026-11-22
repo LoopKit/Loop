@@ -196,7 +196,18 @@ class OnboardingManager {
     }
 
     private func ensureHealthStoreAuthorization(_ completion: @escaping () -> Void) {
-        self.authorizeHealthStore { _ in completion() }
+        getHealthStoreAuthorization { authorization in
+            DispatchQueue.main.async {
+                guard authorization == .notDetermined else {
+                    // Nothing to ask. The stores still need the signal a request would give them,
+                    // to start their HealthKit queries and refresh the preferred glucose unit.
+                    self.deviceDataManager.healthStoreAuthorizationIsDetermined()
+                    completion()
+                    return
+                }
+                self.authorizeHealthStore { _ in completion() }
+            }
+        }
     }
 
     private func ensureBluetoothAuthorization(_ completion: @escaping () -> Void) {
@@ -208,6 +219,12 @@ class OnboardingManager {
     }
 
     private func authorizeAndComplete() {
+        // Don't hold a returning user's home screen on these checks. HealthKit calls back only
+        // once its permission sheet is answered, and the sheet can't appear while Loop is
+        // launched in the background, so launch would stop here.
+        if isComplete {
+            complete()
+        }
         ensureAuthorization {
             DispatchQueue.main.async {
                 self.isComplete = true

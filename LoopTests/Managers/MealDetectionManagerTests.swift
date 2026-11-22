@@ -504,7 +504,7 @@ class MealDetectionManagerTests: XCTestCase {
                 endDate: now.addingTimeInterval(.minutes(10)),
                 value: 20,
                 unit: .units,
-                decisionId: nil,
+                doseId: nil,
                 automatic: true
             )
         )
@@ -528,7 +528,7 @@ class MealDetectionManagerTests: XCTestCase {
                 endDate: now.addingTimeInterval(20),
                 value: 2,
                 unit: .units,
-                decisionId: nil,
+                doseId: nil,
                 automatic: true
             )
         )
@@ -546,7 +546,7 @@ class MealDetectionManagerTests: XCTestCase {
                 endDate: now.addingTimeInterval(.minutes(3)),
                 value: 4.5,
                 unit: .units,
-                decisionId: nil,
+                doseId: nil,
                 automatic: true
             )
         )

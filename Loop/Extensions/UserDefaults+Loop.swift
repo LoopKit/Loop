@@ -19,6 +19,7 @@ extension UserDefaults {
         case favoriteFoods = "com.loopkit.Loop.favoriteFoods"
         case automationHistory = "com.loopkit.Loop.automationHistory"
         case showsActivityPresets = "com.loopkit.Loop.showsActivityPresets"
+        case sharesExerciseData = "com.loopkit.Loop.sharesExerciseData"
     }
 
     var legacyPumpManagerRawValue: PumpManager.RawValue? {
@@ -137,6 +138,15 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.showsActivityPresets.rawValue)
+        }
+    }
+
+    var sharesExerciseData: Bool {
+        get {
+            bool(forKey: Key.sharesExerciseData.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.sharesExerciseData.rawValue)
         }
     }
 }

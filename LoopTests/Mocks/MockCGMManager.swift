@@ -28,8 +28,6 @@ class MockCGMManager: CGMManager {
         return CGMManagerStatus(hasValidSensorSession: true, device: nil)
     }
 
-    var delegateQueue: DispatchQueue!
-
     func fetchNewDataIfNeeded(_ completion: @escaping (LoopKit.CGMReadingResult) -> Void) {
         completion(.noData)
     }

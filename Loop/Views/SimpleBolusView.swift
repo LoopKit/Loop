@@ -389,7 +389,7 @@ struct SimpleBolusCalculatorView_Previews: PreviewProvider {
             return nil
         }
 
-        func enactBolus(units: Double, decisionId: UUID?, activationType: BolusActivationType) {
+        func enactBolus(units: Double, metadata: DoseMetadata, activationType: BolusActivationType) {
         }
         
         func insulinOnBoard(at date: Date, completion: @escaping (DoseStoreResult<InsulinValue>) -> Void) {
