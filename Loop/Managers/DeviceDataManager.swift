@@ -1476,6 +1476,9 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
             settings.carbRatioSchedule = therapySettings.carbRatioSchedule
             settings.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
         }
+        Task {
+            await retractTherapyProfilesFailingAlertIfResolved()
+        }
     }
     
     func pumpSupportedIncrements() -> PumpSupportedIncrements? {
@@ -1499,14 +1502,7 @@ extension DeviceDataManager: TherapyProfileDelegate {
     }
 
     var therapyProfileValidator: TherapyProfileValidator? {
-        guard let pumpManager else {
-            return nil
-        }
-        let settings = settingsManager.loopSettings
-        return TherapyProfileValidator(supportedBasalRates: pumpManager.supportedBasalRates,
-                                       maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
-                                       maximumBasalScheduleEntryCount: pumpManager.maximumBasalScheduleEntryCount,
-                                       suspendThreshold: settings.suspendThreshold)
+        TherapyProfileValidator(therapySettings: settingsManager.therapySettings, pumpSupportedIncrements: pumpSupportedIncrements())
     }
 
     func activateTherapyProfile(named name: String, expectedFingerprint: String?, trigger: TherapyProfileSwitchTrigger) async throws {
@@ -1553,6 +1549,7 @@ extension DeviceDataManager: TherapyProfileDelegate {
         try await loggingFailure("Saving therapy profile \(profile.name)") {
             try await self.performSaveTherapyProfile(profile, originalName: originalName, expectedFingerprint: expectedFingerprint)
         }
+        await retractTherapyProfilesFailingAlertIfResolved()
     }
 
     /// Saves `profile`; for the active profile the basal schedule goes to the pump first. Only the schedules that differ
@@ -1637,6 +1634,7 @@ extension DeviceDataManager: TherapyProfileDelegate {
         try await loggingFailure("Deleting therapy profile \(name)") {
             try await self.performDeleteTherapyProfile(named: name, expectedFingerprint: expectedFingerprint)
         }
+        await retractTherapyProfilesFailingAlertIfResolved()
     }
 
     private func performDeleteTherapyProfile(named name: String, expectedFingerprint: String?) async throws {
@@ -1883,31 +1881,49 @@ extension DeviceDataManager {
 // MARK: - Profiles a pump can not take
 
 extension DeviceDataManager {
-    /// Raises one alert naming the profiles that fail the activation checks with the current pump and settings.
-    func issueTherapyProfilesFailingAlert() async {
-        guard let validator = therapyProfileValidator else {
-            return
+    static let therapyProfileAlertManagerIdentifier = "TherapyProfiles"
+
+    private var therapyProfilesFailingAlertIdentifier: Alert.Identifier {
+        Alert.Identifier(managerIdentifier: Self.therapyProfileAlertManagerIdentifier, alertIdentifier: "pumpChange")
+    }
+
+    /// Each profile that fails the activation checks with the current pump and settings, with the reasons. Empty
+    /// before a maximum basal rate is set, as during onboarding.
+    private var therapyProfilesFailing: [(name: String, reasons: String)] {
+        guard let validator = therapyProfileValidator, validator.maximumBasalRatePerHour != nil else {
+            return []
         }
-        let failing = therapyProfiles.compactMap { profile -> String? in
+        return therapyProfiles.compactMap { profile in
             let failures = validator.failures(of: profile)
-            guard !failures.isEmpty else {
-                return nil
-            }
-            let reasons = TherapyProfileSchedule.allCases.compactMap { failures[$0]?.localizedDescription }
-            return profile.name + ": " + reasons.joined(separator: "; ")
+            return failures.isEmpty ? nil : (profile.name, TherapyProfileValidator.description(of: failures))
         }
+    }
+
+    /// Raises one alert naming the profiles that fail the activation checks with the current pump and settings, and
+    /// retracts it when none fails.
+    func issueTherapyProfilesFailingAlert() async {
+        let failing = therapyProfilesFailing
         guard !failing.isEmpty else {
+            await therapyProfileAlertIssuer?.retractAlert(identifier: therapyProfilesFailingAlertIdentifier)
             return
         }
-        log.default("Profiles that fail the activation checks with the new pump: %{public}@", failing.joined(separator: " | "))
-        let body = String(format: NSLocalizedString("These profiles cannot be activated with this pump until their settings are edited in Settings > Profiles:\n\n%1$@", comment: "Alert body after a pump change naming the profiles that fail the activation checks (1: one line per profile with its reasons)"), failing.joined(separator: "\n"))
+        log.default("Profiles that fail the activation checks with the new pump: %{public}@", failing.map(\.name).joined(separator: ", "))
+        let list = failing.map { $0.name + "\n" + $0.reasons }.joined(separator: "\n\n")
+        let body = String(format: NSLocalizedString("These profiles cannot be activated with this pump until their settings are edited in Settings > Profiles:\n\n%1$@", comment: "Alert body after a pump change naming the profiles that fail the activation checks (1: each profile with its reasons)"), list)
         let content = Alert.Content(title: NSLocalizedString("Profiles Need Attention", comment: "Title of the alert after a pump change when profiles fail the activation checks"),
                                     body: body,
                                     acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Acknowledge button of the alert about profiles a pump can not take"))
-        await therapyProfileAlertIssuer?.issueAlert(Alert(identifier: Alert.Identifier(managerIdentifier: "TherapyProfiles", alertIdentifier: "pumpChange"),
+        await therapyProfileAlertIssuer?.issueAlert(Alert(identifier: therapyProfilesFailingAlertIdentifier,
                                                           foregroundContent: content,
                                                           backgroundContent: content,
                                                           trigger: .immediate))
+    }
+
+    /// Retracts the pump-change alert once every profile passes the activation checks.
+    func retractTherapyProfilesFailingAlertIfResolved() async {
+        if therapyProfilesFailing.isEmpty {
+            await therapyProfileAlertIssuer?.retractAlert(identifier: therapyProfilesFailingAlertIdentifier)
+        }
     }
 }
 

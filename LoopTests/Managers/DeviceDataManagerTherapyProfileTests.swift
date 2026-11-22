@@ -431,24 +431,77 @@ extension DeviceDataManagerTests {
         await assertThrows(.basalRateAboveMaximum(5.5)) { try await self.deviceDataManager.saveTherapyProfile(edited, originalName: "Sport") }
     }
 
-    func testPumpChangeAlertNamesTheProfilesThatFail() async throws {
+    func testPumpChangeAlertNamesTheProfilesThatFailAndIsRetractedOnceRepaired() async throws {
         setUpTherapySettings()
         try await deviceDataManager.saveTherapyProfile(sportProfile(basal: 0.5), originalName: nil)
         try await deviceDataManager.saveTherapyProfile({ var p = sportProfile(basal: 3.5); p.name = "Training"; return p }(), originalName: nil)
         let issuer = RecordingAlertIssuer()
         deviceDataManager.therapyProfileAlertIssuer = issuer
 
-        await deviceDataManager.issueTherapyProfilesFailingAlert()
-        XCTAssertTrue(issuer.issued.isEmpty)
-
         pumpManager.supportedBasalRates = (0...60).map { (Double($0) * 5).rounded() / 100 }
-        await deviceDataManager.issueTherapyProfilesFailingAlert()
+        deviceDataManager.pumpManagerOnboarding(didOnboardPumpManager: OnboardedPumpManager())
+        for _ in 0..<50 where issuer.issued.isEmpty {
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
 
-        XCTAssertEqual(issuer.issued.map(\.identifier.alertIdentifier), ["pumpChange"])
+        XCTAssertEqual(issuer.issued.map(\.identifier), [Alert.Identifier(managerIdentifier: DeviceDataManager.therapyProfileAlertManagerIdentifier, alertIdentifier: "pumpChange")])
         let body = try XCTUnwrap(issuer.issued.first?.backgroundContent.body)
         XCTAssertTrue(body.contains("Training"))
         XCTAssertFalse(body.contains("Default"))
         XCTAssertFalse(body.contains("Sport"))
+
+        var training = deviceDataManager.therapyProfile(named: "Training")!
+        training.basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 2.5)], timeZone: training.basalRateSchedule.timeZone)!
+        try await deviceDataManager.saveTherapyProfile(training, originalName: "Training")
+        XCTAssertEqual(issuer.retracted.map(\.alertIdentifier), ["pumpChange"])
+    }
+
+    func testNoPumpChangeAlertBeforeAMaximumBasalRateIsSet() async throws {
+        setUpTherapySettings()
+        settingsManager.mutateLoopSettings { $0.maximumBasalRatePerHour = nil }
+        let issuer = RecordingAlertIssuer()
+        deviceDataManager.therapyProfileAlertIssuer = issuer
+        await deviceDataManager.issueTherapyProfilesFailingAlert()
+        XCTAssertTrue(issuer.issued.isEmpty)
+    }
+
+    func testSaveWithTwoChangedSchedulesIsRefusedWhenTheSecondFails() async throws {
+        setUpTherapySettings()
+        try await deviceDataManager.saveTherapyProfile(sportProfile(), originalName: nil)
+        let stored = deviceDataManager.therapyProfile(named: "Sport")!
+        var edited = stored
+        edited.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue(startTime: 0, value: DoubleRange(minValue: 110, maxValue: 120))], timeZone: stored.basalRateSchedule.timeZone)!
+        edited.basalRateSchedule = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: 0, value: 5.5)], timeZone: stored.basalRateSchedule.timeZone)!
+        await assertThrows(.basalRateAboveMaximum(5.5)) { try await self.deviceDataManager.saveTherapyProfile(edited, originalName: "Sport") }
+        XCTAssertEqual(deviceDataManager.therapyProfile(named: "Sport"), stored)
     }
 }
 
+/// A pump manager that reports itself onboarded, for the onboarding delegate calls.
+private final class OnboardedPumpManager: MockPumpManager, PumpManagerUI {
+    static var onboardingImage: UIImage? { nil }
+    var smallImage: UIImage? { nil }
+    var pumpStatusHighlight: PumpStatusHighlight? { nil }
+    var pumpLifecycleProgress: DeviceLifecycleProgress? { nil }
+    var pumpStatusBadge: DeviceStatusBadge? { nil }
+
+    static func setupViewController(initialSettings settings: PumpManagerSetupSettings, bluetoothProvider: BluetoothProvider, colorPalette: LoopUIColorPalette, allowDebugFeatures: Bool, prefersToSkipUserInteraction: Bool, allowedInsulinTypes: [InsulinType]) -> SetupUIResult<PumpManagerViewController, PumpManagerUI> {
+        fatalError("not used in tests")
+    }
+
+    func settingsViewController(bluetoothProvider: BluetoothProvider, colorPalette: LoopUIColorPalette, allowDebugFeatures: Bool, allowedInsulinTypes: [InsulinType]) -> PumpManagerViewController {
+        fatalError("not used in tests")
+    }
+
+    func deliveryUncertaintyRecoveryViewController(colorPalette: LoopUIColorPalette, allowDebugFeatures: Bool) -> (UIViewController & CompletionNotifying) {
+        fatalError("not used in tests")
+    }
+
+    func hudProvider(bluetoothProvider: BluetoothProvider, colorPalette: LoopUIColorPalette, allowedInsulinTypes: [InsulinType]) -> HUDProvider? {
+        nil
+    }
+
+    static func createHUDView(rawValue: HUDProvider.HUDViewRawState) -> BaseHUDView? {
+        nil
+    }
+}
