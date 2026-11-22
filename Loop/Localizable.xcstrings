@@ -47,7 +47,7 @@
       "comment" : "Alert body when a scheduled profile switch did not run (1: profile name, 2: weekday and time, 3: reason)"
     },
     "These profiles cannot be activated with this pump until their settings are edited in Settings > Profiles:\n\n%1$@" : {
-      "comment" : "Alert body after a pump change naming the profiles that fail the activation checks (1: one line per profile with its reasons)"
+      "comment" : "Alert body after a pump change naming the profiles that fail the activation checks (1: each profile with its reasons)"
     },
     "until %1$@ starts %2$@ %3$@" : {
       "comment" : "Status screen: the next scheduled profile start (1: profile name, 2: short weekday, 3: time)"

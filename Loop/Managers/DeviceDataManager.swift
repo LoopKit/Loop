@@ -174,6 +174,9 @@ final class DeviceDataManager {
 
     /// Issues the alerts about scheduled profile switches and profiles a new pump can not take.
     weak var therapyProfileAlertIssuer: AlertIssuer?
+
+    /// The profiles the issued pump-change alert names, or nil when it is not issued.
+    var therapyProfilesFailingAlertNames: [String]?
     
     // MARK: Stores
     let carbStore: CarbStore
@@ -1477,7 +1480,7 @@ extension DeviceDataManager: TherapySettingsViewModelDelegate {
             settings.insulinSensitivitySchedule = therapySettings.insulinSensitivitySchedule
         }
         Task {
-            await retractTherapyProfilesFailingAlertIfResolved()
+            await updateTherapyProfilesFailingAlert()
         }
     }
     
@@ -1549,11 +1552,11 @@ extension DeviceDataManager: TherapyProfileDelegate {
         try await loggingFailure("Saving therapy profile \(profile.name)") {
             try await self.performSaveTherapyProfile(profile, originalName: originalName, expectedFingerprint: expectedFingerprint)
         }
-        await retractTherapyProfilesFailingAlertIfResolved()
+        await updateTherapyProfilesFailingAlert()
     }
 
     /// Saves `profile`; for the active profile the basal schedule goes to the pump first. Only the schedules that differ
-    /// from the stored profile are validated, so a profile that no longer passes can be repaired one schedule at a time;
+    /// from the stored profile are validated, so a profile that fails the checks can be repaired one schedule at a time;
     /// a copy of a stored profile is not validated again. Glucose values sent back unchanged keep their stored value.
     private func performSaveTherapyProfile(_ profile: TherapyProfile, originalName: String?, expectedFingerprint: String?) async throws {
         var profile = profile
@@ -1634,7 +1637,7 @@ extension DeviceDataManager: TherapyProfileDelegate {
         try await loggingFailure("Deleting therapy profile \(name)") {
             try await self.performDeleteTherapyProfile(named: name, expectedFingerprint: expectedFingerprint)
         }
-        await retractTherapyProfilesFailingAlertIfResolved()
+        await updateTherapyProfilesFailingAlert()
     }
 
     private func performDeleteTherapyProfile(named name: String, expectedFingerprint: String?) async throws {
@@ -1904,9 +1907,11 @@ extension DeviceDataManager {
     func issueTherapyProfilesFailingAlert() async {
         let failing = therapyProfilesFailing
         guard !failing.isEmpty else {
+            therapyProfilesFailingAlertNames = nil
             await therapyProfileAlertIssuer?.retractAlert(identifier: therapyProfilesFailingAlertIdentifier)
             return
         }
+        therapyProfilesFailingAlertNames = failing.map(\.name)
         log.default("Profiles that fail the activation checks with the new pump: %{public}@", failing.map(\.name).joined(separator: ", "))
         let list = failing.map { $0.name + "\n" + $0.reasons }.joined(separator: "\n\n")
         let body = String(format: NSLocalizedString("These profiles cannot be activated with this pump until their settings are edited in Settings > Profiles:\n\n%1$@", comment: "Alert body after a pump change naming the profiles that fail the activation checks (1: each profile with its reasons)"), list)
@@ -1919,11 +1924,13 @@ extension DeviceDataManager {
                                                           trigger: .immediate))
     }
 
-    /// Retracts the pump-change alert once every profile passes the activation checks.
-    func retractTherapyProfilesFailingAlertIfResolved() async {
-        if therapyProfilesFailing.isEmpty {
-            await therapyProfileAlertIssuer?.retractAlert(identifier: therapyProfilesFailingAlertIdentifier)
+    /// Brings an issued pump-change alert up to date: retracts it once every profile passes the activation checks,
+    /// and names the profiles that still fail when fewer do.
+    func updateTherapyProfilesFailingAlert() async {
+        guard let issued = therapyProfilesFailingAlertNames, issued != therapyProfilesFailing.map(\.name) else {
+            return
         }
+        await issueTherapyProfilesFailingAlert()
     }
 }
 
