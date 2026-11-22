@@ -300,6 +300,9 @@
     "Couldn't delete" : {
       "comment" : "Alert title when deleting a Logbook entry fails"
     },
+    "Couldn't export" : {
+      "comment" : "Alert title when exporting the Trends PDF or CSV fails"
+    },
     "Couldn't load Logbook: %1$@" : {
       "comment" : "Logbook error when its history can't be read. (1: system error description)"
     },
@@ -317,6 +320,9 @@
     },
     "Covers %1$@, from the start of Loop's records, which it keeps for %2$@." : {
       "comment" : "Trends Loop status footnote when Loop's records of its runs and settings start partway through the period. (1: date range covered; 2: how long Loop keeps them, e.g. 90 days)"
+    },
+    "CSV, one row per day" : {
+      "comment" : "Trends export menu item: share a CSV spreadsheet file with one row for each day"
     },
     "Custom" : {
       "comment" : "Carb entry absorption choice Other, before it is chosen: you set the food and absorption time yourself"
@@ -361,6 +367,9 @@
     },
     "Enter an amount" : {
       "comment" : "Carb entry Continue button while no amount has been typed"
+    },
+    "Export" : {
+      "comment" : "Trends menu title: export the period as a PDF report or CSV file"
     },
     "Fast" : {
       "comment" : "Carb entry absorption choice: food that absorbs quickly, such as sweets"
@@ -460,6 +469,12 @@
     },
     "Loop status" : {
       "comment" : "Trends card title: how long Loop spent in closed loop, limited or open loop"
+    },
+    "Loop trends" : {
+      "comment" : "Title of the exported Trends PDF report"
+    },
+    "Loop trends %1$@" : {
+      "comment" : "File name of an exported Trends report or CSV, without the extension. (1: date range of the period)"
     },
     "Loop · %1$@ · tap to list" : {
       "comment" : "Logbook folded automatic boluses row subtitle: Loop gave them, the time span they cover, and tapping lists them. (1: time range, e.g. 15:08 – 16:14)"
@@ -594,6 +609,9 @@
     },
     "Opens the full day" : {
       "comment" : "VoiceOver hint for the Today so far card on the Now screen"
+    },
+    "PDF report" : {
+      "comment" : "Trends export menu item: share a PDF report of the period"
     },
     "per day, weekly average" : {
       "comment" : "Trends Insulin per day card subtitle when each bar is a week's average daily total"
