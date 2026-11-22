@@ -255,8 +255,15 @@ struct TrendsView: View {
         self.done = done
     }
 
+    @State private var path: [TrendsRoute] = []
+
+    enum TrendsRoute: Hashable {
+        case day(Date)
+        case gaps
+    }
+
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: LoopDesign.Space.s6, pinnedViews: [.sectionHeaders]) {
                     Section {
@@ -278,6 +285,14 @@ struct TrendsView: View {
                     ToolbarItem(placement: .confirmationAction) {
                         Button(NSLocalizedString("Done", comment: "Button to close Trends"), action: done)
                     }
+                }
+            }
+            .navigationDestination(for: TrendsRoute.self) { route in
+                switch route {
+                case .day(let day):
+                    DayDetailView(provider: model.provider, day: day)
+                case .gaps:
+                    LoopGapsList(spans: model.summary?.loopSpans ?? [])
                 }
             }
         }
@@ -311,7 +326,11 @@ struct TrendsView: View {
             }
             insulinCard(s)
             LoopCard {
-                CardHeader(title: NSLocalizedString("Loop status", comment: "Trends card title: how long Loop spent in closed loop, limited or open loop"))
+                CardHeader(title: NSLocalizedString("Loop status", comment: "Trends card title: how long Loop spent in closed loop, limited or open loop")) {
+                    Button(NSLocalizedString("Gaps", comment: "Trends Loop status button and screen title: list of times Loop wasn't in closed loop")) { path.append(.gaps) }
+                        .foregroundStyle(P.accent)
+                        .disabled(s.loopSpans.isEmpty)
+                }
                 LoopModeBarView(spans: s.loopSpans)
                 if let note = coverageNote(s) {
                     Footnote(note)
@@ -353,7 +372,9 @@ struct TrendsView: View {
             }
             if s.split.total > 0 {
                 if s.day == nil {
-                    InsulinDailyTotalsView(totals: weekly ? LoopHistoryMath.weekly(s.totals) : s.totals, weekly: weekly, average: s.insulinPerDay)
+                    InsulinDailyTotalsView(totals: weekly ? LoopHistoryMath.weekly(s.totals) : s.totals, weekly: weekly, average: s.insulinPerDay) { day in
+                        path.append(.day(day))
+                    }
                 }
                 // Under the chart, the rows name its marks, so there is no separate legend.
                 let averaged = LoopHistoryMath.averagingDays(s.totals).count
@@ -377,8 +398,14 @@ struct TrendsView: View {
     /// The same timeline as Today so far: glucose, every bolus and basal change, and carbs, through the day.
     private func dayCard(_ day: DayHistory, targets: [TargetBand], unit: GlucoseUnitStyle) -> some View {
         let isToday = Calendar.current.isDateInToday(day.window.start)
-        return DayTimelineCard(title: isToday ? DayTimelineCard.todayTitle : LoopFormat.weekdayDay(day.window.start),
-                               history: day, unit: unit, targetBands: targets, height: 260)
+        return Button {
+            path.append(.day(day.window.start))
+        } label: {
+            DayTimelineCard(title: isToday ? DayTimelineCard.todayTitle : LoopFormat.weekdayDay(day.window.start),
+                            history: day, unit: unit, targetBands: targets, height: 260)
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint(NSLocalizedString("Opens the full day", comment: "VoiceOver hint for the Today so far card on the Now screen"))
     }
 
     private func patternCard(_ s: TrendsModel.Summary) -> some View {

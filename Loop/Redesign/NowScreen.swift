@@ -239,6 +239,7 @@ struct NowActions {
     var bolus: () -> Void = {}
     var presets: () -> Void = {}
     var showPrediction: () -> Void = {}
+    var showToday: () -> Void = {}
     var showInsulin: () -> Void = {}
     var showCarbs: () -> Void = {}
     var pumpTapped: () -> Void = {}
@@ -690,7 +691,7 @@ struct NowChartsView: View {
     }
 
     private var todayCard: some View {
-        Group {
+        Button(action: actions.showToday) {
             if let error = model.historyError {
                 LoopCard {
                     CardHeader(title: DayTimelineCard.todayTitle)
@@ -701,6 +702,8 @@ struct NowChartsView: View {
                                 now: model.now, height: 230)
             }
         }
+        .buttonStyle(.plain)
+        .accessibilityHint(NSLocalizedString("Opens the full day", comment: "VoiceOver hint for the Today so far card on the Now screen"))
     }
 }
 

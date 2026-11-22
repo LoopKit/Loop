@@ -698,6 +698,8 @@ struct InsulinDailyTotalsView: View {
     /// Calculated from the original daily totals, even when the bars are weekly averages.
     let average: Double
     var height: CGFloat = 170
+    /// Opens a day when its bar is tapped; weekly bars don't open anything.
+    var onSelectDay: ((Date) -> Void)? = nil
     @Environment(\.colorScheme) private var scheme
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -805,6 +807,19 @@ struct InsulinDailyTotalsView: View {
                     AxisGridLine().foregroundStyle(P.grid)
                     AxisValueLabel().font(LoopDesign.Typeface.caption).foregroundStyle(P.inkMuted)
                 }
+            }
+        }
+        .chartOverlay { proxy in
+            GeometryReader { geometry in
+                Rectangle().fill(.clear).contentShape(Rectangle())
+                    .onTapGesture { location in
+                        guard let onSelectDay, !weekly, let frame = proxy.plotFrame else { return }
+                        let x = location.x - geometry[frame].origin.x
+                        if let date: Date = proxy.value(atX: x),
+                           let day = totals.min(by: { abs($0.day.addingTimeInterval(43200).timeIntervalSince(date)) < abs($1.day.addingTimeInterval(43200).timeIntervalSince(date)) }) {
+                            onSelectDay(day.day)
+                        }
+                    }
             }
         }
         .accessibilityElement(children: .ignore)
@@ -940,5 +955,37 @@ struct LoopModeBarView: View {
             }
         }
         .accessibilityElement(children: .combine)
+    }
+}
+
+struct LoopGapsList: View {
+    let spans: [LoopModeSpan]
+
+    private var gaps: [LoopModeSpan] {
+        spans.filter { $0.mode != .closed }.sorted { $0.start > $1.start }
+    }
+
+    var body: some View {
+        List {
+            if gaps.isEmpty {
+                Text(NSLocalizedString("No gaps: Loop ran closed loop all through this period.", comment: "Trends Gaps list when Loop was in closed loop for the whole period"))
+                    .foregroundStyle(P.inkMuted)
+            }
+            ForEach(Array(gaps.enumerated()), id: \.offset) { _, gap in
+                HStack(alignment: .top, spacing: LoopDesign.Space.s3) {
+                    Circle().fill(LoopModeBarView.color(gap.mode)).frame(width: 8, height: 8).padding(.top, 6)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(LoopModeBarView.name(gap.mode))
+                            .font(LoopDesign.Typeface.body)
+                        Text("\(gap.start.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute())) · \(LoopFormat.duration(gap.duration))")
+                            .font(LoopDesign.Typeface.footnote)
+                            .foregroundStyle(P.inkMuted)
+                    }
+                }
+                .accessibilityElement(children: .combine)
+            }
+        }
+        .navigationTitle(NSLocalizedString("Gaps", comment: "Trends Loop status button and screen title: list of times Loop wasn't in closed loop"))
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

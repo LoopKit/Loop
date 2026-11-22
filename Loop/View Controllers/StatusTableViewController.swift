@@ -384,6 +384,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         bolus: { [weak self] in self?.presentBolusScreen() },
         presets: { [weak self] in self?.presentPresets() },
         showPrediction: { [weak self] in self?.showPredictionFromNow() },
+        showToday: { [weak self] in self?.showDay(Date()) },
         showInsulin: { [weak self] in self?.showInsulinDelivery(sender: self) },
         showCarbs: { [weak self] in self?.performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: self) },
         pumpTapped: { [weak self] in self?.executeHUDTapAction(self?.deviceManager.didTapOnPumpStatus(), from: self?.view) },
@@ -2460,6 +2461,13 @@ extension StatusTableViewController {
     private func showPredictionFromNow() {
         guard settingsManager.dosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled else { return }
         performSegue(withIdentifier: PredictionTableViewController.className, sender: self)
+    }
+
+    func showDay(_ day: Date) {
+        let detail = UIHostingController(rootView: DayDetailView(provider: nowModel.provider, day: day))
+        // As for the Insulin, Carbohydrates and Predicted Glucose screens pushed from Now.
+        detail.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(detail, animated: true)
     }
 
     private func showLoopStatusFromNow() {
