@@ -272,6 +272,7 @@
 		4F7E8AC520E2AB9600AEA65E /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7E8AC420E2AB9600AEA65E /* Date.swift */; };
 		4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FDDD23720DC51DF00D04B16 /* LoopDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */; };
+		E4419E527A90825DF65EE417 /* WatchPluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9851EB2E0332D299034E1BE9 /* WatchPluginManager.swift */; };
 		4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
 		59C09A9513767F582B35F7F9 /* Loop Complications.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AC0853072224AE8CC4C388E7 /* Loop Complications.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		6C089A6A6A8AB8F5D835C9F1 /* ComplicationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF57BFE5DDB939285839898 /* ComplicationSnapshot.swift */; };
@@ -749,7 +750,6 @@
 		D7A3000100000000000A0002 /* WatchCGMHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A3000100000000000A0001 /* WatchCGMHost.swift */; };
 		D7A3000100000000000A0004 /* WatchDeviceManagers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A3000100000000000A0003 /* WatchDeviceManagers.swift */; };
 		101AA7370B0E499FBD88BB9F /* G7SensorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		921B7FAE002E40EFAB3F50C6 /* G7SensorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8760AF31E3C43F6AFBA1BE7 /* G7SensorKit.framework */; };
 		8B5CF0144D79477AACBE4A82 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4344628320A7A3BE00C4BE6F /* LoopKit.framework */; };
 		A1B2C3D40000000000000012 /* AlarmSoundCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000011 /* AlarmSoundCatalogTests.swift */; };
 		D7A3000100000000000A0006 /* WatchSensorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A3000100000000000A0005 /* WatchSensorView.swift */; };
@@ -1159,6 +1159,7 @@
 		4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchPredictedGlucose.swift; sourceTree = "<group>"; };
 		4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+StatusExtension.swift"; sourceTree = "<group>"; };
 		4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopDataManager.swift; sourceTree = "<group>"; };
+		9851EB2E0332D299034E1BE9 /* WatchPluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchPluginManager.swift; sourceTree = "<group>"; };
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
 		5181B60CBF3CB2DA537F0475 /* simple.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/simple.caf; sourceTree = SOURCE_ROOT; };
 		62F7CB5D5DC337E705032AC7 /* dings.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/dings.caf; sourceTree = SOURCE_ROOT; };
@@ -1685,7 +1686,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				921B7FAE002E40EFAB3F50C6 /* G7SensorKit.framework in Frameworks */,
 				8B5CF0144D79477AACBE4A82 /* LoopKit.framework in Frameworks */,
 				C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */,
 				4344628220A7A37F00C4BE6F /* CoreBluetooth.framework in Frameworks */,
@@ -2472,6 +2472,7 @@
 				4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */,
 				D7A3000100000000000A0001 /* WatchCGMHost.swift */,
 				D7A3000100000000000A0003 /* WatchDeviceManagers.swift */,
+				9851EB2E0332D299034E1BE9 /* WatchPluginManager.swift */,
 				898ECA62218ABD21001E9D35 /* ComplicationChartManager.swift */,
 				6515A16900D12040FF31E279 /* ComplicationPublisher.swift */,
 			);
@@ -4136,6 +4137,7 @@
 				4FDDD23720DC51DF00D04B16 /* LoopDataManager.swift in Sources */,
 				D7A3000100000000000A0002 /* WatchCGMHost.swift in Sources */,
 				D7A3000100000000000A0004 /* WatchDeviceManagers.swift in Sources */,
+				E4419E527A90825DF65EE417 /* WatchPluginManager.swift in Sources */,
 				89E267FD2292456700A3F2AF /* FeatureFlags.swift in Sources */,
 				898ECA60218ABD17001E9D35 /* GlucoseChartScaler.swift in Sources */,
 				894F6DD9243C060600CCE676 /* ScalablePositionedText.swift in Sources */,
