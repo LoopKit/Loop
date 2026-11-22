@@ -421,7 +421,37 @@ class LoopHistoryMathTests: XCTestCase {
         XCTAssertEqual(LoopFormat.signed(0.0001), "+0.00")
     }
 
-    // MARK: Day history
+    // MARK: Day history and Logbook folding
+
+    private func logRow(_ id: String, _ minutes: Double, automaticUnits: Double? = nil, basalSummary: Bool = false) -> LogEntry {
+        LogEntry(id: id, date: at(minutes), title: id, subtitle: "", amount: "", amountColor: .primary, detail: "",
+                 icon: "plus", iconStyle: .solid(.primary), filters: [],
+                 basalChanges: basalSummary ? [BasalSegment(start: at(0), end: at(30), rate: 0, scheduledRate: 1, kind: .temp, automatic: true)] : [],
+                 automaticUnits: automaticUnits)
+    }
+
+    @MainActor
+    func testLogbookFoldsRunsOfAutomaticBolusesBetweenOtherEntries() {
+        // Newest first, as the Logbook lists them.
+        let rows = [
+            logRow("auto5", 100, automaticUnits: 0.3),
+            logRow("auto4", 95, automaticUnits: 0.2),
+            logRow("basal", 90, basalSummary: true),
+            logRow("auto3", 85, automaticUnits: 0.1),
+            logRow("carbs", 60),
+            logRow("auto2", 30, automaticUnits: 0.5),
+            logRow("manual", 20),
+            logRow("auto1", 10, automaticUnits: 0.1),
+        ]
+        let folded = LogbookModel.foldingAutomaticBoluses(rows)
+        // auto5, auto4 and auto3 fold together: the basal summary doesn't break a run, the carbs do.
+        XCTAssertEqual(folded.map(\.id), ["autorun-auto5", "basal", "carbs", "auto2", "manual", "auto1"])
+        XCTAssertEqual(folded[0].bolusRun.map(\.id), ["auto5", "auto4", "auto3"])
+        XCTAssertEqual(folded[0].date, at(100))
+        XCTAssertTrue(folded[0].matches(.loop) && folded[0].matches(.bolus))
+        XCTAssertEqual(folded[0].amount, LoopFormat.doseUnits(0.6))
+    }
+
 
     func testDayHistoryClippedToNowDropsLaterEventsAndCutsBasal() {
         var history = DayHistory(window: DateInterval(start: at(0), end: at(1440)))

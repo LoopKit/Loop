@@ -25,6 +25,7 @@ final class LoopHistoryProvider {
     private let loopDataManager: LoopDataManager
     /// Read once on the main actor, which owns `SettingsManager`; the store itself is safe to use from anywhere.
     private let settingsStore: SettingsStore?
+    private let settingsManager: SettingsManager
     private let temporaryPresetsManager: TemporaryPresetsManager
     private let dosingDecisionStore: DosingDecisionStoreProtocol
     private let doseStore: DoseStore
@@ -40,6 +41,7 @@ final class LoopHistoryProvider {
         self.deviceManager = deviceManager
         self.loopDataManager = loopDataManager
         self.settingsStore = settingsManager.settingsStore
+        self.settingsManager = settingsManager
         self.temporaryPresetsManager = temporaryPresetsManager
         self.dosingDecisionStore = loopDataManager.dosingDecisionStore
         self.doseStore = deviceManager.doseStore
@@ -71,6 +73,12 @@ final class LoopHistoryProvider {
     @MainActor
     var unitStyle: GlucoseUnitStyle {
         GlucoseUnitStyle(unit: deviceManager.displayGlucosePreference.unit)
+    }
+
+    /// Match the classic carb editor's eligibility rule, including mode changes while a screen is open.
+    @MainActor
+    var allowsCarbEditing: Bool {
+        settingsManager.dosingEnabled || !FeatureFlags.simpleBolusCalculatorEnabled
     }
 
     /// The start of what Loop keeps locally.
@@ -310,6 +318,64 @@ final class LoopHistoryProvider {
         try await doseStore.getNormalizedDoseEntries(start: interval.start.addingTimeInterval(-.minutes(15)), end: interval.end)
             .filter { $0.type == .tempBasal && $0.automatic == false && $0.endDate > $0.startDate }
             .map { DateInterval(start: $0.startDate, end: $0.endDate) }
+    }
+
+    // MARK: - Pump events
+
+    func pumpEvents(since start: Date) async throws -> [PumpLogEvent] {
+        let events = try await doseStore.getPumpEventValues(since: start)
+        let items: [PumpLogEvent] = events.compactMap { event in
+            let id = event.objectIDURL.absoluteString
+            switch event.type {
+            case .replaceComponent(let component)?:
+                let name: String
+                switch component {
+                case .pump: name = NSLocalizedString("Pod changed", comment: "Pump event in the history: the pump or pod was replaced")
+                case .reservoir: name = NSLocalizedString("Reservoir changed", comment: "Pump event in the history: the insulin reservoir was replaced")
+                case .infusionSet: name = NSLocalizedString("Infusion set changed", comment: "Pump event in the history: the infusion set was replaced")
+                }
+                return PumpLogEvent(id: id, date: event.date, kind: .siteChange(name))
+            case .rewind?:
+                return PumpLogEvent(id: id, date: event.date, kind: .siteChange(NSLocalizedString("Reservoir rewound", comment: "Pump event in the history: the pump rewound its reservoir")))
+            case .prime?:
+                return PumpLogEvent(id: id, date: event.date, kind: .siteChange(NSLocalizedString("Primed", comment: "Pump event in the history: the pump primed the tubing or cannula")))
+            case .alarm?:
+                // `title` is a debug description; only a pump's own alarm text is meant for people.
+                let pumpText: String?
+                if case .other(let details)? = event.alarmType, !details.isEmpty { pumpText = details } else { pumpText = nil }
+                return PumpLogEvent(id: id, date: event.date, kind: .alarm(pumpText ?? NSLocalizedString("Pump alarm", comment: "Pump event in the history: an alarm whose pump gave no title")))
+            default:
+                return nil
+            }
+        }
+        return items
+    }
+
+    // MARK: - Editing
+
+    /// Edits an entry the way Loop's carb absorption screen does.
+    @MainActor
+    func carbEntryViewModel(editing entry: StoredCarbEntry) -> CarbEntryViewModel {
+        let viewModel = CarbEntryViewModel(delegate: loopDataManager, originalCarbEntry: entry)
+        viewModel.analyticsServicesManager = loopDataManager.analyticsServicesManager
+        viewModel.deliveryDelegate = deviceManager
+        return viewModel
+    }
+
+    func delete(carb entry: StoredCarbEntry) async throws {
+        _ = try await loopDataManager.deleteCarbEntry(entry)
+    }
+
+    func delete(dose: DoseEntry) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            doseStore.deleteDose(dose) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
     }
 
     // MARK: - Loop's stores

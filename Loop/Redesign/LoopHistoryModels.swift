@@ -106,6 +106,18 @@ struct CarbEvent: Equatable, Identifiable {
 }
 
 /// Everything known about one day or reporting period, for InsulinTimeline.
+struct PumpLogEvent: Equatable, Identifiable {
+    enum Kind: Equatable {
+        case siteChange(String)
+        case alarm(String)
+        case resume
+    }
+
+    let id: String
+    let date: Date
+    let kind: Kind
+}
+
 struct DayHistory {
     var window: DateInterval
     var glucose: [GlucosePoint] = []
