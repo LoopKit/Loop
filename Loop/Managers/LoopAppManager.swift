@@ -408,6 +408,7 @@ class LoopAppManager: NSObject {
 
         dosingDecisionStore.delegate = deviceDataManager
         remoteDataServicesManager.delegate = deviceDataManager
+        servicesManager.therapyProfileDelegate = deviceDataManager
 
         let criticalEventLogs: [CriticalEventLog] = [settingsManager.settingsStore!, glucoseStore, carbStore, dosingDecisionStore, doseStore, temporaryPresetsManager.presetHistory, deviceDataManager.deviceLog, alertManager.alertStore]
         criticalEventLogExportManager = CriticalEventLogExportManager(logs: criticalEventLogs,
@@ -540,6 +541,7 @@ class LoopAppManager: NSObject {
     }
 
     private func loopCycleDidComplete() async {
+        await deviceDataManager.runDueScheduledProfileSwitch()
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             self.widgetLog.default("Refreshing widget. Reason: Loop completed")
             WidgetCenter.shared.reloadAllTimelines()
@@ -607,6 +609,7 @@ class LoopAppManager: NSObject {
                                           availableSupports: supportManager.availableSupports,
                                           isOnboardingComplete: onboardingManager.isComplete,
                                           therapySettingsViewModelDelegate: deviceDataManager,
+                                          therapyProfileDelegate: deviceDataManager,
                                           presetHistory: temporaryPresetsManager.presetHistory,
                                           deliveryDelegate: deviceDataManager,
                                           deviceManager: deviceDataManager
@@ -683,6 +686,7 @@ class LoopAppManager: NSObject {
         ], animated: true)
 
         await deviceDataManager.refreshDeviceData()
+        await deviceDataManager.runDueScheduledProfileSwitch()
 
         handleRemoteNotificationFromLaunchOptions()
 
@@ -971,7 +975,10 @@ extension LoopAppManager: UNUserNotificationCenterDelegate {
              LoopNotificationCategory.remoteBolusFailure.rawValue,
              LoopNotificationCategory.remoteCarbs.rawValue,
              LoopNotificationCategory.remoteCarbsFailure.rawValue,
+             LoopNotificationCategory.remoteProfile.rawValue,
+             LoopNotificationCategory.remoteProfileFailure.rawValue,
              LoopNotificationCategory.missedMeal.rawValue,
+             LoopNotificationCategory.scheduledProfileSwitch.rawValue,
              LoopNotificationCategory.requiredUpdate.rawValue:
             completionHandler([.badge, .sound, .list, .banner])
         default:

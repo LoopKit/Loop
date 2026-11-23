@@ -220,6 +220,41 @@ extension NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
     
+    static func sendRemoteTherapyProfileNotification(message: String, category: LoopNotificationCategory) {
+        let notification = UNMutableNotificationContent()
+        notification.title = NSLocalizedString("Remote Profile Command", comment: "The notification title for a remote therapy profile command")
+        notification.body = message
+        notification.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: category.rawValue,
+            content: notification,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    /// Tells the user that a scheduled start switched the profile, and when it was late, when.
+    static func sendScheduledProfileSwitchNotification(profileName: String, scheduledAt: Date, switchedAt: Date, timeZone: TimeZone) {
+        let notification = UNMutableNotificationContent()
+        notification.title = NSLocalizedString("Profile Switched", comment: "The notification title for a scheduled profile switch")
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        formatter.timeZone = timeZone
+        if switchedAt.timeIntervalSince(scheduledAt) < .minutes(15) {
+            notification.body = String(format: NSLocalizedString("Loop switched to %1$@ as scheduled (%2$@).", comment: "Notification body of a scheduled profile switch (1: profile name, 2: scheduled time)"), profileName, formatter.string(from: scheduledAt))
+        } else {
+            notification.body = String(format: NSLocalizedString("Loop switched to %1$@, scheduled for %2$@, at %3$@.", comment: "Notification body of a late scheduled profile switch (1: profile name, 2: scheduled time, 3: time of the switch)"), profileName, formatter.string(from: scheduledAt), formatter.string(from: switchedAt))
+        }
+        notification.interruptionLevel = .active
+        notification.categoryIdentifier = LoopNotificationCategory.scheduledProfileSwitch.rawValue
+
+        let request = UNNotificationRequest(identifier: LoopNotificationCategory.scheduledProfileSwitch.rawValue, content: notification, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
+    }
+
     static func sendMissedMealNotification(mealStart: Date, amountInGrams: Double, delay: TimeInterval? = nil) {
         let notification = UNMutableNotificationContent()
         /// Notifications should expire after the missed meal is no longer relevant

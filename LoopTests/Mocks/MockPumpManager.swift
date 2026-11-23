@@ -108,7 +108,36 @@ class MockPumpManager: PumpManager {
         completion(nil)
     }
 
+    /// The last basal schedule written to the pump.
+    var basalRateSchedule: BasalRateSchedule?
+
+    var basalRateScheduleSyncError: Error?
+
+    /// When true, basal schedule writes wait until `finishBasalRateScheduleSync()`.
+    var holdsBasalRateScheduleSync = false
+    private var heldBasalRateScheduleSyncs: [() -> Void] = []
+
+    func finishBasalRateScheduleSync() {
+        let held = heldBasalRateScheduleSyncs
+        heldBasalRateScheduleSyncs = []
+        held.forEach { $0() }
+    }
+
     func syncBasalRateSchedule(items scheduleItems: [RepeatingScheduleValue<Double>], completion: @escaping (Result<BasalRateSchedule, Error>) -> Void) {
+        let sync = { [self] in
+            if let basalRateScheduleSyncError {
+                completion(.failure(basalRateScheduleSyncError))
+                return
+            }
+            let schedule = BasalRateSchedule(dailyItems: scheduleItems, timeZone: status.timeZone)!
+            basalRateSchedule = schedule
+            completion(.success(schedule))
+        }
+        if holdsBasalRateScheduleSync {
+            heldBasalRateScheduleSyncs.append(sync)
+        } else {
+            sync()
+        }
     }
 
     func syncDeliveryLimits(limits deliveryLimits: DeliveryLimits, completion: @escaping (Result<DeliveryLimits, Error>) -> Void) {
