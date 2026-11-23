@@ -114,13 +114,21 @@ class SettingsManager {
                 maximumBolus: settings.maximumBolus,
                 suspendThreshold: settings.suspendThreshold,
                 automaticDosingStrategy: settings.automaticDosingStrategy,
-                defaultRapidActingModel: settings.defaultRapidActingModel?.presetForRapidActingInsulin)
+                defaultRapidActingModel: settings.defaultRapidActingModel?.presetForRapidActingInsulin,
+                therapyProfiles: settings.therapyProfiles,
+                activeProfileName: settings.activeProfileName,
+                scheduledSwitches: settings.scheduledSwitches,
+                scheduledSwitchesSettledAt: settings.scheduledSwitchesSettledAt,
+                activeProfileSwitchTrigger: settings.activeProfileSwitchTrigger)
         }
     }
 
     private func mergeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil, deviceToken: String? = nil) -> StoredSettings
     {
-        let newLoopSettings = newLoopSettings ?? loopSettings
+        var newLoopSettings = newLoopSettings ?? loopSettings
+        if let unknownName = newLoopSettings.synchronizeTherapyProfiles() {
+            log.error("Active profile %{public}@ was not stored; it is stored again with the live settings", unknownName)
+        }
         let newNotificationSettings = notificationSettings ?? settingsStore?.latestSettings?.notificationSettings
 
         return StoredSettings(date: Date(),
@@ -142,7 +150,12 @@ class SettingsManager {
                               cgmDevice: deviceStatusProvider?.cgmManagerStatus?.device,
                               pumpDevice: deviceStatusProvider?.pumpManagerStatus?.device,
                               bloodGlucoseUnit: displayGlucosePreference?.unit,
-                              automaticDosingStrategy: newLoopSettings.automaticDosingStrategy)
+                              automaticDosingStrategy: newLoopSettings.automaticDosingStrategy,
+                              therapyProfiles: newLoopSettings.therapyProfiles,
+                              activeProfileName: newLoopSettings.activeProfileName,
+                              scheduledSwitches: newLoopSettings.scheduledSwitches,
+                              scheduledSwitchesSettledAt: newLoopSettings.scheduledSwitchesSettledAt,
+                              activeProfileSwitchTrigger: newLoopSettings.activeProfileSwitchTrigger)
     }
 
     func storeSettings(newLoopSettings: LoopSettings? = nil, notificationSettings: NotificationSettings? = nil) {
@@ -193,6 +206,7 @@ class SettingsManager {
             settings.carbRatioSchedule?.timeZone = timeZone
             settings.insulinSensitivitySchedule?.timeZone = timeZone
             settings.glucoseTargetRangeSchedule?.timeZone = timeZone
+            settings.therapyProfiles = settings.therapyProfiles.map { $0.withTimeZone(timeZone) }
         }
     }
 
@@ -313,7 +327,10 @@ extension SettingsManager {
                 insulinSensitivitySchedule: settings.insulinSensitivitySchedule,
                 carbRatioSchedule: settings.carbRatioSchedule,
                 basalRateSchedule: settings.basalRateSchedule,
-                defaultRapidActingModel: settings.defaultRapidActingModel?.presetForRapidActingInsulin
+                defaultRapidActingModel: settings.defaultRapidActingModel?.presetForRapidActingInsulin,
+                therapyProfiles: settings.resolvedTherapyProfiles,
+                activeProfileName: settings.activeProfileName,
+                scheduledSwitches: settings.scheduledSwitches
             )
         }
 
@@ -329,6 +346,15 @@ extension SettingsManager {
                 settings.maximumBolus = newValue.maximumBolus
                 settings.maximumBasalRatePerHour = newValue.maximumBasalRatePerHour
                 settings.overridePresets = newValue.overridePresets ?? []
+                if let therapyProfiles = newValue.therapyProfiles {
+                    settings.therapyProfiles = therapyProfiles
+                    settings.activeProfileName = newValue.activeProfileName
+                }
+                // Only starts after the list is set run.
+                if let scheduledSwitches = newValue.scheduledSwitches, scheduledSwitches != settings.scheduledSwitches {
+                    settings.scheduledSwitches = scheduledSwitches
+                    settings.scheduledSwitchesSettledAt = Date()
+                }
             }
         }
     }
