@@ -95,7 +95,12 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                     .padding(.top, 8)
                 }
                 
-                let isBolusViewActive = Binding(get: { viewModel.bolusViewModel != nil }, set: { _, _ in viewModel.bolusViewModel = nil })
+                let isBolusViewActive = Binding(
+                    get: { viewModel.bolusViewModel != nil },
+                    set: { isActive in
+                        if !isActive { viewModel.returnFromBolus() }
+                    }
+                )
                 NavigationLink(destination: bolusView, isActive: isBolusViewActive) {
                     EmptyView()
                 }
@@ -103,6 +108,10 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
                 .opacity(0)
                 .accessibility(hidden: true)
             }
+        }
+        .disabled(viewModel.isSavingReminder)
+        .task {
+            await viewModel.loadMealReminder()
         }
         .alert(item: $viewModel.alert, content: alert(for:))
         .sheet(isPresented: $showAddFavoriteFood, onDismiss: clearExpandedRow) {
@@ -119,41 +128,58 @@ struct CarbEntryView: View, HorizontalSizeClassOverride {
     }
     
     private var mainCard: some View {
-        VStack(spacing: 10) {
-            let amountConsumedFocused: Binding<Bool> = Binding(get: { expandedRow == .amountConsumed }, set: { expandedRow = $0 ? .amountConsumed : nil })
-            let timeFocused: Binding<Bool> = Binding(get: { expandedRow == .time }, set: { expandedRow = $0 ? .time : nil })
-            let foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
-            let absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
-            // Food type row shows an x button next to favorite food chip that clears favorite food by setting this binding to nil
-            let selectedFavoriteFoodBinding = Binding(
-                get: { viewModel.selectedFavoriteFood },
-                set: { food in
-                    guard food == nil else { return }
-                    viewModel.selectedFavoriteFoodIndex = -1
-                }
-            )
-            
-            CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: amountConsumedFocused, title: NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"), preferredCarbUnit: viewModel.preferredCarbUnit)
+        // Refresh at the meal time even if the user leaves the screen open.
+        TimelineView(.explicit([viewModel.time])) { _ in
+            VStack(spacing: 10) {
+                let amountConsumedFocused: Binding<Bool> = Binding(get: { expandedRow == .amountConsumed }, set: { expandedRow = $0 ? .amountConsumed : nil })
+                let timeFocused: Binding<Bool> = Binding(get: { expandedRow == .time }, set: { expandedRow = $0 ? .time : nil })
+                let foodTypeFocused: Binding<Bool> = Binding(get: { expandedRow == .foodType }, set: { expandedRow = $0 ? .foodType : nil })
+                let absorptionTimeFocused: Binding<Bool> = Binding(get: { expandedRow == .absorptionTime }, set: { expandedRow = $0 ? .absorptionTime : nil })
+                // Food type row shows an x button next to favorite food chip that clears favorite food by setting this binding to nil
+                let selectedFavoriteFoodBinding = Binding(
+                    get: { viewModel.selectedFavoriteFood },
+                    set: { food in
+                        guard food == nil else { return }
+                        viewModel.selectedFavoriteFoodIndex = -1
+                    }
+                )
 
-            CardSectionDivider()
-            
-            DatePickerRow(date: $viewModel.time, isFocused: timeFocused, minimumDate: viewModel.minimumDate, maximumDate: viewModel.maximumDate)
-            
-            CardSectionDivider()
-            
-            FoodTypeRow(selectedFavoriteFood: selectedFavoriteFoodBinding, foodType: $viewModel.foodType, absorptionTime: $viewModel.absorptionTime, selectedDefaultAbsorptionTimeEmoji: $viewModel.selectedDefaultAbsorptionTimeEmoji, usesCustomFoodType: $viewModel.usesCustomFoodType, absorptionTimeWasEdited: $viewModel.absorptionTimeWasEdited, isFocused: foodTypeFocused, showClearFavoriteFoodButton: !isNewEntry, defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes)
-            
-            CardSectionDivider()
-            
-            AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, validDurationRange: viewModel.absorptionRimesRange, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
-                .padding(.bottom, 2)
+                CarbQuantityRow(quantity: $viewModel.carbsQuantity, isFocused: amountConsumedFocused, title: NSLocalizedString("Amount Consumed", comment: "Label for carb quantity entry row on carb entry screen"), preferredCarbUnit: viewModel.preferredCarbUnit)
+
+                CardSectionDivider()
+
+                DatePickerRow(date: $viewModel.time, isFocused: timeFocused, minimumDate: viewModel.minimumDate, maximumDate: viewModel.maximumDate)
+
+                CardSectionDivider()
+
+                let canSetMealReminder = viewModel.canSetMealReminder()
+                let reminderSelection = Binding(
+                    get: { canSetMealReminder && viewModel.mealReminderRequested },
+                    set: viewModel.setMealReminderRequested
+                )
+                Toggle(isOn: reminderSelection) {
+                    Text("⏰ Remind Me", comment: "Toggle to request a notification at the future carb entry time")
+                        .foregroundStyle(canSetMealReminder ? Color.primary : Color.secondary)
+                }
+                .disabled(!canSetMealReminder)
+                .accessibilityIdentifier("toggle_MealReminder")
+
+                CardSectionDivider()
+
+                FoodTypeRow(selectedFavoriteFood: selectedFavoriteFoodBinding, foodType: $viewModel.foodType, absorptionTime: $viewModel.absorptionTime, selectedDefaultAbsorptionTimeEmoji: $viewModel.selectedDefaultAbsorptionTimeEmoji, usesCustomFoodType: $viewModel.usesCustomFoodType, absorptionTimeWasEdited: $viewModel.absorptionTimeWasEdited, isFocused: foodTypeFocused, showClearFavoriteFoodButton: !isNewEntry, defaultAbsorptionTimes: viewModel.defaultAbsorptionTimes)
+
+                CardSectionDivider()
+
+                AbsorptionTimePickerRow(absorptionTime: $viewModel.absorptionTime, isFocused: absorptionTimeFocused, validDurationRange: viewModel.absorptionRimesRange, showHowAbsorptionTimeWorks: $showHowAbsorptionTimeWorks)
+                    .padding(.bottom, 2)
+            }
+            .padding(.vertical, 12)
+            .padding(.horizontal)
+            .background(CardBackground())
+            .padding(.horizontal)
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal)
-        .background(CardBackground())
-        .padding(.horizontal)
     }
-    
+
     @ViewBuilder
     private var bolusView: some View {
         if let viewModel = viewModel.bolusViewModel {
@@ -234,6 +260,11 @@ extension CarbEntryView {
                 message: Text(message),
                 primaryButton: .default(Text("No, edit amount", comment: "The title of the action used when rejecting the the amount of carbohydrates entered."), action: viewModel.clearAlert),
                 secondaryButton: .cancel(Text("Yes", comment: "The title of the action used when confirming entered amount of carbohydrates."), action: viewModel.clearAlertAndContinueToBolus)
+            )
+        case .mealReminderSchedulingFailure:
+            return SwiftUI.Alert(
+                title: Text("Unable to Set Meal Reminder", comment: "Alert title when scheduling a meal reminder fails"),
+                message: Text("Check notification permissions in Settings and try saving the reminder again.", comment: "Alert message when saving only a reminder fails")
             )
         }
     }
@@ -340,19 +371,34 @@ extension CarbEntryView {
     }
     
     private var continueButton: some View {
-        Button(action: viewModel.continueToBolus) {
-            Text("Continue", comment: "Button label for continue")
-        }
+        Button(action: submit) { submitLabel }
         .disabled(viewModel.continueButtonDisabled)
     }
     
     private var continueActionButton: some View {
-        Button(action: viewModel.continueToBolus) {
-            Text("Continue", comment: "Button label for continue")
-        }
+        Button(action: submit) { submitLabel }
         .buttonStyle(ActionButtonStyle())
         .padding()
         .disabled(viewModel.continueButtonDisabled)
+    }
+
+    private var submitLabel: Text {
+        if viewModel.isReminderOnlyChange {
+            return Text("Save Reminder", comment: "Button label for saving only a meal reminder change")
+        }
+        return Text("Continue", comment: "Button label for continue")
+    }
+
+    private func submit() {
+        if viewModel.isReminderOnlyChange {
+            Task {
+                if await viewModel.saveReminderOnly() {
+                    dismiss()
+                }
+            }
+        } else {
+            viewModel.continueToBolus()
+        }
     }
     
 }

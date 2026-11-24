@@ -171,9 +171,14 @@ class MockUserNotificationCenter: UserNotificationCenter {
 
     var pendingRequests = [UNNotificationRequest]()
     var deliveredRequests = [UNNotificationRequest]()
+    var addError: Error?
 
     func add(_ request: UNNotificationRequest, withCompletionHandler completionHandler: ((Error?) -> Void)? = nil) {
-        pendingRequests.append(request)
+        if addError == nil {
+            pendingRequests.removeAll { $0.identifier == request.identifier }
+            pendingRequests.append(request)
+        }
+        completionHandler?(addError)
     }
 
     func removePendingNotificationRequests(withIdentifiers identifiers: [String]) {

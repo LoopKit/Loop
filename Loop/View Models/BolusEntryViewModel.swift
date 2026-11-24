@@ -63,6 +63,7 @@ final class BolusEntryViewModel: ObservableObject {
         case noPumpManagerConfigured
         case noMaxBolusConfigured
         case carbEntryPersistenceFailure
+        case mealReminderSchedulingFailure
         case manualGlucoseEntryOutOfAcceptableRange
         case manualGlucoseEntryPersistenceFailure
         case forecastInfo
@@ -108,6 +109,14 @@ final class BolusEntryViewModel: ObservableObject {
 
     let carbEntryChange: CarbEntryChange?
     let selectedCarbAbsorptionTimeEmoji: String?
+    private(set) var mealReminderAction: MealReminderAction
+    private let mealReminderScheduler: MealReminderScheduling
+
+    var savedCarbEntry: StoredCarbEntry? { dosingDecision.carbEntry }
+
+    private var pendingCarbEntryChange: CarbEntryChange? {
+        savedCarbEntry == nil ? carbEntryChange : nil
+    }
 
     @Published var recommendedBolus: LoopQuantity?
     var recommendedBolusAmount: Double? {
@@ -167,7 +176,9 @@ final class BolusEntryViewModel: ObservableObject {
         timeZone: TimeZone? = nil,
         carbEntryChange: CarbEntryChange? = nil,
         selectedCarbAbsorptionTimeEmoji: String? = nil,
-        isManualGlucoseEntryEnabled: Bool = false
+        isManualGlucoseEntryEnabled: Bool = false,
+        mealReminderAction: MealReminderAction = .keep,
+        mealReminderScheduler: MealReminderScheduling? = nil
     ) {
         self.delegate = delegate
         self.now = now
@@ -182,6 +193,8 @@ final class BolusEntryViewModel: ObservableObject {
         }
         
         self.carbEntryChange = carbEntryChange
+        self.mealReminderAction = mealReminderAction
+        self.mealReminderScheduler = mealReminderScheduler ?? MealReminderManager.shared
         self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
         
         self.isManualGlucoseEntryEnabled = isManualGlucoseEntryEnabled
@@ -305,6 +318,7 @@ final class BolusEntryViewModel: ObservableObject {
 
     // returns true if action succeeded
     func didPressActionButton() async -> Bool {
+        guard !enacting else { return false }
         enacting = true
         if await saveAndDeliver() {
             return true
@@ -364,11 +378,13 @@ final class BolusEntryViewModel: ObservableObject {
         }
 
         if let manualGlucoseSample {
-            do {
-                dosingDecision.manualGlucoseSample = try await delegate.saveGlucose(sample: manualGlucoseSample)
-            } catch {
-                presentAlert(.manualGlucoseEntryPersistenceFailure)
-                return false
+            if dosingDecision.manualGlucoseSample?.syncIdentifier != manualGlucoseSample.syncIdentifier {
+                do {
+                    dosingDecision.manualGlucoseSample = try await delegate.saveGlucose(sample: manualGlucoseSample)
+                } catch {
+                    presentAlert(.manualGlucoseEntryPersistenceFailure)
+                    return false
+                }
             }
         } else {
             self.dosingDecision.manualGlucoseSample = nil
@@ -376,7 +392,7 @@ final class BolusEntryViewModel: ObservableObject {
 
         let activationType = BolusActivationType.activationTypeFor(recommendedAmount: recommendedBolus?.doubleValue(for: .internationalUnit), bolusAmount: amountToDeliver)
 
-        if let carbEntryChange {
+        if let carbEntryChange = pendingCarbEntryChange {
             if case .add = carbEntryChange {
                 let interaction = INInteraction(intent: NewCarbEntryIntent(), response: nil)
 
@@ -386,11 +402,24 @@ final class BolusEntryViewModel: ObservableObject {
                     log.error("Failed to donate intent: %{public}@", String(describing: error))
                 }
             }
-            if let storedCarbEntry = await saveCarbEntry(carbEntryChange) {
-                self.dosingDecision.carbEntry = storedCarbEntry
-                self.analyticsServicesManager?.didAddCarbs(source: "Phone", isFavoriteFood: storedCarbEntry.favoriteFoodID != nil)
-            } else {
-                self.presentAlert(.carbEntryPersistenceFailure)
+            guard let storedCarbEntry = await saveCarbEntry(carbEntryChange) else {
+                presentAlert(.carbEntryPersistenceFailure)
+                return false
+            }
+            dosingDecision.carbEntry = storedCarbEntry
+            analyticsServicesManager?.didAddCarbs(source: "Phone", isFavoriteFood: storedCarbEntry.favoriteFoodID != nil)
+        }
+
+        if let entry = savedCarbEntry {
+            do {
+                try await saveMealReminder(for: entry)
+            } catch {
+                // The carb edit is already saved, so the old notification can now be stale.
+                if let original = carbEntryChange?.originalEntry {
+                    mealReminderScheduler.cancelReminder(for: original)
+                }
+                log.error("Failed to schedule meal reminder: %{public}@", String(describing: error))
+                presentAlert(.mealReminderSchedulingFailure)
                 return false
             }
         }
@@ -410,6 +439,25 @@ final class BolusEntryViewModel: ObservableObject {
             self.analyticsServicesManager?.didBolus(source: "Phone")
         }
         return true
+    }
+
+    private func saveMealReminder(for entry: StoredCarbEntry) async throws {
+        let original = carbEntryChange?.originalEntry
+        if mealReminderAction == .keep {
+            guard let original, await mealReminderScheduler.hasPendingReminder(for: original) else { return }
+            // Preserve this intent on retry even if the previous request is removed.
+            mealReminderAction = .set
+        }
+
+        if mealReminderAction == .clear {
+            mealReminderScheduler.cancelReminder(for: original ?? entry)
+        } else {
+            try await mealReminderScheduler.scheduleReminder(for: entry, replacing: original)
+        }
+    }
+
+    func skipMealReminder() {
+        mealReminderAction = .clear
     }
 
     private func presentAlert(_ alert: Alert) {
@@ -534,7 +582,7 @@ final class BolusEntryViewModel: ObservableObject {
             )
 
             let (glucoseHistory, prediction) = try await delegate.generatePrediction(
-                carbEntryChange: carbEntryChange,
+                carbEntryChange: pendingCarbEntryChange,
                 potentialDose: enteredBolusDose,
                 manualGlucose: manualGlucoseSample
             )
@@ -650,7 +698,7 @@ final class BolusEntryViewModel: ObservableObject {
 
         return try await delegate.recommendManualBolus(
             manualGlucoseSample: manualGlucoseSample,
-            carbEntryChange: carbEntryChange,
+            carbEntryChange: pendingCarbEntryChange,
             truncatingActiveOverride: truncatingActiveOverride
         )
     }

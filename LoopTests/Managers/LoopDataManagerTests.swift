@@ -555,6 +555,25 @@ class LoopDataManagerTests: XCTestCase {
         XCTAssertFalse(preview.predictedGlucose.isEmpty)
     }
 
+    func testFourHourFutureCarbEntrySupportsBolusPreview() async throws {
+        try await assertManualBolusAndPreviewSucceed(for: pendingCarbEntry(at: d(.hours(4))))
+    }
+
+    func testDeliverCarbsAcceptsFourHoursAheadAndRejectsLaterEntries() async throws {
+        let maximumStart = d(.hours(4))
+        try await loopDataManager.deliverCarbs(amountInGrams: 20, absorptionTime: nil, foodType: nil, startDate: maximumStart)
+        XCTAssertEqual(carbStore.carbHistory.map(\.startDate), [maximumStart])
+
+        let tooLate = maximumStart.addingTimeInterval(1)
+        do {
+            try await loopDataManager.deliverCarbs(amountInGrams: 20, absorptionTime: nil, foodType: nil, startDate: tooLate)
+            XCTFail("Expected the entry past the four-hour limit to be rejected")
+        } catch LoopDataManager.CarbActionError.invalidStartDate(let date) {
+            XCTAssertEqual(date, tooLate)
+        }
+        XCTAssertEqual(carbStore.carbHistory.map(\.startDate), [maximumStart])
+    }
+
     func testPendingCarbEntryRemainsCoveredAfterBolusScreenAges() async throws {
         let openedAt = now
         let change = pendingCarbEntry(at: d(.hours(-12)))
