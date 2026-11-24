@@ -118,6 +118,31 @@ final class DeviceDataManagerTests: XCTestCase {
         XCTAssertEqual(metadata, DoseMetadata(origin: .user, device: .watch, decisionId: decisionId, activationType: .manualRecommendationAccepted))
     }
 
+    func testEnactBolusRethrowsPumpErrorsForRemoteOrigin() async throws {
+        pumpManager.enactBolusError = .uncertainDelivery
+        do {
+            try await deviceDataManager.enactBolus(units: 1, metadata: DoseMetadata(origin: .remote), activationType: .manualNoRecommendation)
+            XCTFail("Expected the pump error")
+        } catch PumpManagerError.uncertainDelivery {
+        }
+
+        pumpManager.enactBolusError = .deviceState(nil)
+        do {
+            try await deviceDataManager.enactBolus(units: 1, metadata: DoseMetadata(origin: .remote), activationType: .manualNoRecommendation)
+            XCTFail("Expected the pump error")
+        } catch PumpManagerError.deviceState {
+        }
+        pumpManager.enactBolusError = nil
+    }
+
+    func testEnactBolusDoesNotThrowPumpErrorsForOtherOrigins() async throws {
+        pumpManager.enactBolusError = .uncertainDelivery
+        try await deviceDataManager.enactBolus(units: 1, metadata: DoseMetadata(origin: .user), activationType: .manualRecommendationAccepted)
+        pumpManager.enactBolusError = .deviceState(nil)
+        try await deviceDataManager.enactBolus(units: 1, metadata: DoseMetadata(origin: .user), activationType: .manualRecommendationAccepted)
+        pumpManager.enactBolusError = nil
+    }
+
     func testAutomaticDosesStoreMetadataWithTheDecision() async throws {
         let decisionId = UUID()
         pumpManager.enactedDoseIds = []

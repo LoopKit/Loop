@@ -13,6 +13,27 @@
     " -" : {
 
     },
+    "Bolus may have been delivered. Check the history before sending another bolus." : {
+      "comment" : "Remote bolus error description: the pump did not confirm whether the bolus was delivered."
+    },
+    "Command rejected: %1$@ U of insulin has not been uploaded to Nightscout yet." : {
+      "comment" : "Remote bolus error description: insulin not yet uploaded. (1: units of insulin)"
+    },
+    "Command rejected: %1$@ U of insulin was delivered after the command was sent (or after the newest treatment you had seen)." : {
+      "comment" : "Remote bolus error description: insulin the sender had not seen. (1: units of insulin)"
+    },
+    "Command rejected: %1$d carb entries totaling %2$@ g were recorded that you had not seen." : {
+      "comment" : "Remote carb error description: several carb entries the sender had not seen. (1: number of entries, 2: total grams of carbs)"
+    },
+    "Command rejected: a carb entry of %1$@ g was recorded that you had not seen." : {
+      "comment" : "Remote carb error description: one carb entry the sender had not seen. (1: grams of carbs)"
+    },
+    "Command rejected: treatment history is not available." : {
+      "comment" : "Remote command error description: treatment history could not be checked."
+    },
+    "Loop is not ready to deliver remote commands" : {
+      "comment" : "Remote command error description: the component that delivers remote boluses and carbs is not available."
+    },
     " - " : {
 
     },

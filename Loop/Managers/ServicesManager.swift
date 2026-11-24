@@ -35,6 +35,8 @@ class ServicesManager {
 
     private let servicesLock = UnfairLock()
 
+    let remoteCommandGate = RemoteCommandGate()
+
     private let log = OSLog(category: "ServicesManager")
     
     lazy private var cancellables = Set<AnyCancellable>()
@@ -325,8 +327,17 @@ extension ServicesManager: ServiceDelegate {
     }
     
     func deliverRemoteCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?) async throws {
+        try await deliverRemoteCarbs(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate, context: nil)
+    }
+
+    func deliverRemoteCarbs(amountInGrams: Double, absorptionTime: TimeInterval?, foodType: String?, startDate: Date?, context: RemoteCommandContext?) async throws {
         do {
-            try await servicesManagerDelegate?.deliverCarbs(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
+            try await remoteCommandGate.deliverCarbs(context: context) { [weak self] in
+                guard let delegate = self?.servicesManagerDelegate else {
+                    throw RemoteDeliveryError.unavailable
+                }
+                try await delegate.deliverCarbs(amountInGrams: amountInGrams, absorptionTime: absorptionTime, foodType: foodType, startDate: startDate)
+            }
             NotificationManager.sendRemoteCarbEntryNotification(amountInGrams: amountInGrams)
             await remoteDataServicesManager.performUpload(for: .carb)
             analyticsServicesManager.didAddCarbs(source: "Remote")
@@ -341,6 +352,10 @@ extension ServicesManager: ServiceDelegate {
     }
 
     func deliverRemoteBolus(amountInUnits: Double, decisionId: UUID?, request: DoseMetadata.RemoteRequest?) async throws {
+        try await deliverRemoteBolus(amountInUnits: amountInUnits, decisionId: decisionId, request: request, context: nil)
+    }
+
+    func deliverRemoteBolus(amountInUnits: Double, decisionId: UUID?, request: DoseMetadata.RemoteRequest?, context: RemoteCommandContext?) async throws {
         do {
             
             guard amountInUnits > 0 else {
@@ -355,7 +370,12 @@ extension ServicesManager: ServiceDelegate {
                 throw BolusActionError.exceedsMaxBolus
             }
             
-            try await servicesManagerDosingDelegate?.deliverBolus(amountInUnits: amountInUnits, decisionId: decisionId, request: request)
+            try await remoteCommandGate.deliverBolus(amountInUnits: amountInUnits, context: context) { [weak self] in
+                guard let dosingDelegate = self?.servicesManagerDosingDelegate else {
+                    throw RemoteDeliveryError.unavailable
+                }
+                try await dosingDelegate.deliverBolus(amountInUnits: amountInUnits, decisionId: decisionId, request: request)
+            }
             NotificationManager.sendRemoteBolusNotification(amount: amountInUnits)
             await remoteDataServicesManager.performUpload(for: .dose)
             analyticsServicesManager.didBolus(source: "Remote")
@@ -365,6 +385,18 @@ extension ServicesManager: ServiceDelegate {
         }
     }
     
+    enum RemoteDeliveryError: LocalizedError {
+
+        case unavailable
+
+        var errorDescription: String? {
+            switch self {
+            case .unavailable:
+                return NSLocalizedString("Loop is not ready to deliver remote commands", comment: "Remote command error description: the component that delivers remote boluses and carbs is not available.")
+            }
+        }
+    }
+
     enum BolusActionError: LocalizedError {
         
         case invalidBolus
