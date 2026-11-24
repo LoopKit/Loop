@@ -245,6 +245,26 @@ class SimpleBolusViewModelTests: XCTestCase {
         viewModel.enteredCarbString = "400"
         XCTAssert(!viewModel.bolusRecommended)
     }
+
+    func testCustomCarbMaximumAppliesToRecommendationAndSaving() async throws {
+        let previousLimits = UserDefaults.standard.carbEntryLimits
+        defer { UserDefaults.standard.carbEntryLimits = previousLimits }
+        UserDefaults.standard.carbEntryLimits = try XCTUnwrap(CarbEntryLimits(warningGrams: 99, maximumGrams: 300.5))
+
+        let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: true, displayGlucosePreference: displayGlucosePreference)
+        currentRecommendation = 2.5
+        viewModel.enteredCarbString = "300.5"
+        XCTAssertEqual(viewModel.recommendedBolus, "2.5")
+        XCTAssertNil(viewModel.activeNotice)
+
+        viewModel.enteredCarbString = "300.6"
+        XCTAssertEqual(viewModel.activeNotice, .carbohydrateEntryTooLarge)
+        XCTAssertFalse(viewModel.bolusRecommended)
+        let saved = await viewModel.saveAndDeliver()
+        XCTAssertFalse(saved)
+        XCTAssertNil(addedCarbEntry)
+        XCTAssertNil(enactedBolus)
+    }
     
     func testMaxBolusWarnings() {
         let viewModel = SimpleBolusViewModel(delegate: self, displayMealEntry: false, displayGlucosePreference: displayGlucosePreference)
