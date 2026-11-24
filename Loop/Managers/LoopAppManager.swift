@@ -68,6 +68,7 @@ class LoopAppManager: NSObject {
     }
 
     private weak var windowProvider: WindowProvider?
+    private lazy var overlayAlertPresenter = OverlayAlertPresenter { [weak self] in self?.windowProvider?.window }
     private var launchOptions: [UIApplication.LaunchOptionsKey: Any]?
 
     private var pluginManager: PluginManager!
@@ -214,6 +215,7 @@ class LoopAppManager: NSObject {
 
         bluetoothStateManager = BluetoothStateManager()
         alertManager = AlertManager(alertPresenter: self,
+                                    modalAlertPresenter: overlayAlertPresenter,
                                     userNotificationAlertScheduler: UserNotificationAlertScheduler(userNotificationCenter: UNUserNotificationCenter.current()),
                                     expireAfter: Bundle.main.localCacheDuration,
                                     bluetoothProvider: bluetoothStateManager,
@@ -908,6 +910,110 @@ extension LoopAppManager: AlertPresenter {
 
     func dismissAlert(_ alertToDismiss: UIAlertController, animated: Bool) async {
         await alertToDismiss.dismiss(animated: animated)
+    }
+}
+
+// Alerts from the alert manager get their own window, so they never occupy the
+// presentation slot of the app's screens and block those screens' own alerts.
+@MainActor
+final class OverlayAlertPresenter: AlertPresenter {
+    private let appWindow: () -> UIWindow?
+    private var window: PassthroughWindow?
+
+    init(appWindow: @escaping () -> UIWindow?) {
+        self.appWindow = appWindow
+    }
+
+    func present(_ viewControllerToPresent: UIViewController, animated: Bool) async {
+        guard let root = rootViewController() else {
+            return
+        }
+        await withCheckedContinuation { continuation in
+            root.topmostViewController.present(viewControllerToPresent, animated: animated) {
+                continuation.resume()
+            }
+        }
+    }
+
+    func dismissTopMost(animated: Bool) async {
+        guard let root = window?.rootViewController, root.presentedViewController != nil else {
+            return
+        }
+        await root.topmostViewController.dismiss(animated: animated)
+        hideIfIdle()
+    }
+
+    func dismissAlert(_ alertToDismiss: UIAlertController, animated: Bool) async {
+        await alertToDismiss.dismiss(animated: animated)
+        hideIfIdle()
+    }
+
+    private func rootViewController() -> UIViewController? {
+        if let window {
+            window.isHidden = false
+            return window.rootViewController
+        }
+        guard let scene = appWindow()?.windowScene else {
+            return nil
+        }
+        let window = PassthroughWindow(windowScene: scene)
+        window.windowLevel = .alert
+        window.rootViewController = OverlayRootViewController(appWindow: appWindow) { [weak self] in
+            self?.hideIfIdle()
+        }
+        window.isHidden = false
+        self.window = window
+        return window.rootViewController
+    }
+
+    private func hideIfIdle() {
+        if window?.rootViewController?.presentedViewController == nil {
+            window?.isHidden = true
+        }
+    }
+}
+
+private final class PassthroughWindow: UIWindow {
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard rootViewController?.presentedViewController != nil else {
+            return nil
+        }
+        return super.hitTest(point, with: event)
+    }
+}
+
+private final class OverlayRootViewController: UIViewController {
+    private let appWindow: () -> UIWindow?
+    private let didDismiss: () -> Void
+
+    init(appWindow: @escaping () -> UIWindow?, didDismiss: @escaping () -> Void) {
+        self.appWindow = appWindow
+        self.didDismiss = didDismiss
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func loadView() {
+        view = UIView()
+        view.backgroundColor = .clear
+    }
+
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        appWindow()?.rootViewController?.supportedInterfaceOrientations ?? super.supportedInterfaceOrientations
+    }
+
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        appWindow()?.rootViewController?.topmostViewController.preferredStatusBarStyle ?? super.preferredStatusBarStyle
+    }
+
+    override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
+        super.dismiss(animated: flag) { [didDismiss] in
+            completion?()
+            didDismiss()
+        }
     }
 }
 

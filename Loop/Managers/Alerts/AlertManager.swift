@@ -71,6 +71,7 @@ public final class AlertManager {
     var getCurrentDate = { return Date() }
     
     init(alertPresenter: AlertPresenter,
+         modalAlertPresenter: AlertPresenter? = nil,
          modalAlertScheduler: InAppModalAlertScheduler? = nil,
          userNotificationAlertScheduler: UserNotificationAlertScheduler,
          fileManager: FileManager = FileManager.default,
@@ -97,7 +98,7 @@ public final class AlertManager {
         self.alertPresenter = alertPresenter
         self.alertMuter = AlertMuter(configuration: UserDefaults.standard.alertMuterConfiguration)
         self.userNotificationAlertScheduler = userNotificationAlertScheduler
-        self.modalAlertScheduler = modalAlertScheduler ?? InAppModalAlertScheduler(alertPresenter: alertPresenter, alertManagerResponder: self)
+        self.modalAlertScheduler = modalAlertScheduler ?? InAppModalAlertScheduler(alertPresenter: modalAlertPresenter ?? alertPresenter, alertManagerResponder: self)
 
         bluetoothProvider.addBluetoothObserver(self, queue: .main)
 
