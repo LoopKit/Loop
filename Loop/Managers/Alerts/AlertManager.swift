@@ -855,21 +855,24 @@ extension AlertManager: AlertPermissionsCheckerDelegate {
     }
 
     private func presentUnsafeNotificationPermissionsInAppAlert(_ alert: AlertPermissionsChecker.UnsafeNotificationPermissionAlert) {
-        Task { @MainActor in
-            let alertController = AlertPermissionsChecker.constructUnsafeNotificationPermissionsInAppAlert(alert: alert) { [weak self] alert in
-                UserDefaults.standard.hasIssuedNotificationPermissionsAlert = false
-                Task {
-                    do {
-                        try await self?.acknowledgeAlert(identifier: alert.alertIdentifier)
-                    } catch {
-                        self?.log.error("Error acknowledging alert: %{public}@", String(describing: error))
-                    }
+        // Issue and launch playback can both present it; show one copy.
+        guard unsafeNotificationPermissionsAlertController == nil else {
+            return
+        }
+        let alertController = AlertPermissionsChecker.constructUnsafeNotificationPermissionsInAppAlert(alert: alert) { [weak self] alert in
+            UserDefaults.standard.hasIssuedNotificationPermissionsAlert = false
+            self?.unsafeNotificationPermissionsAlertController = nil
+            Task {
+                do {
+                    try await self?.acknowledgeAlert(identifier: alert.alertIdentifier)
+                } catch {
+                    self?.log.error("Error acknowledging alert: %{public}@", String(describing: error))
                 }
             }
-
+        }
+        unsafeNotificationPermissionsAlertController = alertController
+        Task {
             await self.alertPresenter.present(alertController, animated: true)
-            // this is called after the alert is presented
-            unsafeNotificationPermissionsAlertController = alertController
         }
     }
 
