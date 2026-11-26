@@ -322,6 +322,7 @@ class LoopAppManager: NSObject {
             trustedTimeOffset: { self.trustedTimeChecker.detectedSystemTimeOffset },
             analyticsServicesManager: analyticsServicesManager,
             carbAbsorptionModel: .piecewiseLinear,
+            glucoseUnit: { [displayGlucosePreference] in displayGlucosePreference.unit },
             dosingStrategySelectionEnabled: FeatureFlags.dosingStrategySelectionEnabled
         )
 

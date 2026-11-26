@@ -20,7 +20,7 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
         public let glucoseRanges: [GlucoseRangeValue]
         
         // Dynamic island data
-        public let currentGlucose: Double
+        public let currentGlucose: Double?
         public let eventualGlucose: Double?
         public let trendType: GlucoseTrend?
         public let delta: String
