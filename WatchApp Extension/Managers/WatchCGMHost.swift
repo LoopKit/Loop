@@ -14,6 +14,7 @@ import LoopKit
 import LoopCore
 import os.log
 import WatchKit
+import UserNotifications
 
 @MainActor
 @Observable
@@ -38,6 +39,8 @@ final class WatchCGMHost {
     private(set) var sensorName: String?
     private(set) var statusNote: String?
     private(set) var lastConnection: Date?
+    /// What the CGM still needs before the watch can read the sensor by itself; nil when nothing.
+    private(set) var directReadNeed: CGMDirectReadNeed?
 
     private init() {
         if let raw = rawManager, let manager = watchCGMManager(rawValue: raw) {
@@ -51,6 +54,14 @@ final class WatchCGMHost {
         sensorName = watchCGMSensorName(cgmManager)
         statusNote = watchCGMStatusNote(cgmManager)
         lastConnection = watchCGMLastConnection(cgmManager)
+        let need = cgmManager?.directReadNeed
+        if need != directReadNeed {
+            let wasAwaitingPairing = directReadNeed == .pairingAcceptance
+            directReadNeed = need
+            if (need == .pairingAcceptance) != wasAwaitingPairing {
+                SensorPairingNotice.update(needed: need == .pairingAcceptance)
+            }
+        }
     }
 
     /// The phone's context arrived. Builds a manager when its export names a different sensor or code,
@@ -167,4 +178,42 @@ extension WatchCGMHost: CGMManagerDelegate {
     nonisolated func lookupAllUnacknowledgedUnretracted(managerIdentifier: String) async throws -> [PersistedAlert] { [] }
 
     nonisolated func recordRetractedAlert(_ alert: Alert, at date: Date) async throws {}
+}
+
+/// Brings the person to the watch when the sensor asks to pair with it.
+///
+/// The watch always reads the sensor directly, with its own key and Bluetooth bond, whether the phone runs
+/// alongside the Dexcom app or connects directly, so each new sensor asks the watch for its own pairing.
+/// watchOS shows that pairing request only with Loop on screen. The CGM keeps the sensor's link meanwhile
+/// and sends the request when Loop comes on screen, however it gets there; this notice is the usual way.
+/// The sensor's connection is what gives the app the run time to post it: nothing is timed.
+enum SensorPairingNotice {
+    static let identifier = "com.loopkit.Loop.sensorPairingRequest"
+    private static let log = OSLog(category: "SensorPairingNotice")
+
+    @MainActor
+    static func update(needed: Bool) {
+        let center = UNUserNotificationCenter.current()
+        guard needed else {
+            center.removeDeliveredNotifications(withIdentifiers: [identifier])
+            return
+        }
+        // With Loop on screen the system's request shows by itself.
+        guard WKApplication.shared().applicationState != .active else {
+            log.default("The sensor asks to pair with Loop on screen; no notice")
+            return
+        }
+        let content = UNMutableNotificationContent()
+        content.title = NSLocalizedString("Sensor ready to pair", comment: "Watch notification title: a new sensor is waiting for its Bluetooth pairing request to be accepted on the watch")
+        content.body = NSLocalizedString("Tap to open Loop, then tap Pair.", comment: "Watch notification body: how to accept a new sensor's Bluetooth pairing request")
+        content.sound = .default
+        content.interruptionLevel = .timeSensitive
+        center.add(UNNotificationRequest(identifier: identifier, content: content, trigger: nil)) { error in
+            if let error {
+                log.error("The pairing notice could not be posted: %{public}@", error.localizedDescription)
+            } else {
+                log.default("The sensor asks to pair and Loop is not on screen; notice posted")
+            }
+        }
+    }
 }
