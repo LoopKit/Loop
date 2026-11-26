@@ -9,6 +9,7 @@
 //
 
 import LoopKit
+import LoopCore
 
 /// By the manager's `pluginIdentifier`, which is what its export carries.
 private func watchCGMManagerType(_ identifier: String) -> (CGMManager & DeviceConfigurationSharing).Type? {
@@ -36,6 +37,35 @@ func watchCGMStatusNote(_ manager: CGMManager?) -> String? {
 /// Whether the watch's CGM is searching for its sensor, which on the watch needs the app kept open.
 func watchCGMIsSearching(_ manager: CGMManager?) -> Bool {
     manager?.isSearchingForSensor == true
+}
+
+/// What the watch's CGM still needs before the watch can read it by itself: nil once it has authenticated
+/// with its sensor, and when the watch has no CGM. The kit reports; `LoanControl` decides what it stops.
+func watchCGMSensorNeed(_ manager: CGMManager?) -> LoanControl.WatchSensorNeed? {
+    switch manager?.directReadNeed {
+    case .pairingCode?: return .pairingCode
+    case .pairingCodeRejected?: return .pairingCodeRejected
+    case .firstConnection?, .checkingCode?, .pairingAcceptance?: return .firstContact
+    case nil: return nil
+    }
+}
+
+/// The watch has a link to its sensor and the sensor is checking the code: the first contact is under way.
+func watchCGMIsCheckingCode(_ manager: CGMManager?) -> Bool {
+    manager?.directReadNeed == .checkingCode
+}
+
+/// The sensor accepted the code and keeps its link for the system's Bluetooth pairing request, which shows only
+/// with the app on screen and has to be accepted on this watch.
+func watchCGMNeedsPairingAcceptance(_ manager: CGMManager?) -> Bool {
+    manager?.directReadNeed == .pairingAcceptance
+}
+
+/// Whether the phone's reading, by its sync identifier, is known to come from a sensor other than the one the
+/// watch's CGM reads: after the phone moves to a new sensor, its latest reading is still the old sensor's.
+func watchCGMReadingIsFromAnotherSensor(_ manager: CGMManager?, syncIdentifier: String?) -> Bool {
+    guard let manager, let syncIdentifier else { return false }
+    return manager.readIsFromThisSensor(syncIdentifier: syncIdentifier) == false
 }
 
 func watchCGMSensorName(_ manager: CGMManager?) -> String? {
