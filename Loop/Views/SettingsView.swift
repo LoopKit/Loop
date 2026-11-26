@@ -442,7 +442,8 @@ extension SettingsView {
             viewModel: TherapySettingsViewModel(
                 therapySettings: viewModel.therapySettings(),
                 delegate: viewModel.therapySettingsViewModelDelegate
-            )
+            ),
+            helpView: viewModel.availableSupports.lazy.compactMap { $0.therapySettingsHelpView() }.first
         )
         .environmentObject(displayGlucosePreference)
         .environment(\.dismissAction, self.dismiss)
