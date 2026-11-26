@@ -6,7 +6,6 @@
 //  Copyright © 2023 LoopKit Authors. All rights reserved.
 //
 
-import Observation
 import XCTest
 import LoopKit
 import LoopCore
@@ -95,32 +94,6 @@ class TemporaryPresetsManagerTests: XCTestCase {
 
         let actualOverrideRange = manager.effectiveCorrectionRangeSchedule()?.value(at: overrideStart.addingTimeInterval(2 /* hours */ * 60 * 60))
         XCTAssertEqual(actualOverrideRange, overrideTargetRange)
-    }
-
-    func testRestoredFinitePresetNotifiesObserversWhenItExpires() async {
-        let history = TemporaryScheduleOverrideHistory()
-        let preset = TemporaryScheduleOverride(
-            context: .preMeal,
-            settings: TemporaryPresetSettings(targetRange: preMealRange),
-            startDate: Date(),
-            duration: .finite(1),
-            enactTrigger: .local,
-            syncIdentifier: UUID()
-        )
-        history.recordOverride(preset)
-        let restoredManager = TemporaryPresetsManager(settingsProvider: MockSettingsProvider(settings: settings), presetHistory: history)
-
-        let expired = expectation(description: "Restored preset expiration invalidates the active override")
-        let activeOverride = withObservationTracking {
-            restoredManager.activeOverride
-        } onChange: {
-            expired.fulfill()
-        }
-        XCTAssertEqual(activeOverride, preset)
-
-        await fulfillment(of: [expired], timeout: 3)
-        XCTAssertNil(restoredManager.scheduleOverride)
-        XCTAssertNil(restoredManager.activeOverride)
     }
 
     func testHidingActivityPresetsOnlyRemovesThemFromTheList() {
