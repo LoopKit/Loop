@@ -159,8 +159,6 @@ public final class WatchContext: RawRepresentable {
         iob = rawValue["iob"] as? Double
         if let data = rawValue["rl"] as? Data {
             reservoirLevel = try? JSONDecoder().decode(ReservoirLevel.self, from: data)
-        } else if let units = rawValue["r"] as? Double {
-            reservoirLevel = .measured(units: units)
         }
         reservoirPercentage = rawValue["rp"] as? Double
         batteryPercentage = rawValue["bp"] as? Double
@@ -226,10 +224,6 @@ public final class WatchContext: RawRepresentable {
         raw["gs"] = glucoseSyncIdentifier
         raw["iob"] = iob
         raw["ld"] = loopLastRunDate
-        // The legacy numeric field represents a measured amount, so omit it for measurement limits.
-        if case .measured(let units) = reservoirLevel {
-            raw["r"] = units
-        }
         raw["rl"] = reservoirLevel.flatMap { try? JSONEncoder().encode($0) }
 
         raw["ids"] = insulinDeliveryState?.rawValue
