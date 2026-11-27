@@ -150,7 +150,8 @@ extension PodLoanPhoneController {
                 NSLocalizedString("Watch Probably Looping", comment: "Phone notice title: the pod shows the watch ran it, and the watch does not answer"),
                 NSLocalizedString("Sport Mode was started on your watch without this iPhone, and the watch isn't answering. If you're not using it, open Loop and tap the Sport Mode banner to take the pod back.", comment: "Phone notice body: the phone stays off the pod; the looper can take it back"))
         case .phoneAwayCannotHandBack, .noResponseFromPhone, .noResponseFromPhoneAndNoCGM, .notHearingFromPhone,
-             .podDeactivatedPhoneAway, .phoneMayHaveTakenPod:
+             .podDeactivatedPhoneAway, .phoneMayHaveTakenPod, .sensorPairingCodeNeeded, .sensorPairingCodeRejected,
+             .sensorFirstContactNeeded:
             break
         }
     }

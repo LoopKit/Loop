@@ -247,6 +247,8 @@ final class PodLoanWatchController {
     var takeoverNudges = 0
     /// The standing copy's pump export, read once from disk and replaced with each refresh.
     lazy var standingPumpConfiguration: SharedDeviceConfiguration? = storedDormantGrant()?.grant.sharedPumpConfiguration
+    /// Seam: what the watch's own CGM still needs before the watch can read it (called on main).
+    var watchSensorNeed: () -> LoanControl.WatchSensorNeed? = { nil }
     /// Seams: is the app on screen right now, and the tap itself.
     var isWatchAppActive: () -> Bool = { WKExtension.shared().applicationState == .active }
     var playTakeoverNudge: () -> Void = { WKInterfaceDevice.current().play(.notification) }

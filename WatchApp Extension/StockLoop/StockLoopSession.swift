@@ -25,6 +25,7 @@ final class StockLoopSession {
 
         loanController.isPhoneReachable = { WCSession.default.isReachable }
         loanController.isLinkActivated = { WCSession.default.activationState == .activated }
+        loanController.watchSensorNeed = { MainActor.assumeIsolated { watchCGMSensorNeed(WatchCGMHost.shared.cgmManager) } }
 
         // The per-cycle renewal is the phone's liveness signal.
         stack.loopManager.onCycleLanded = { [weak loanController] in
