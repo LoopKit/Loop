@@ -15,7 +15,7 @@ import LoopCore
 
 extension WatchDataManager {
     func makePodLoanController() -> PodLoanPhoneController {
-        return PodLoanPhoneController(dependencies: .init(
+        let controller = PodLoanPhoneController(dependencies: .init(
             pumpManager: { [weak self] in self?.deviceManager.pumpManager },
             settings: { [weak self] in self?.settingsManager.loopSettings ?? LoopSettings() },
             // A phone that has released the pump does not warn that it is not looping.
@@ -378,6 +378,10 @@ extension WatchDataManager {
             isBluetoothPoweredOff: { [weak self] in self?.deviceManager.bluetoothProvider.bluetoothState == .poweredOff },
             latestGlucoseDate: { [weak self] in self?.deviceManager.glucoseStore.latestGlucose?.startDate }
         ))
+        if #available(iOS 16.2, *) {
+            LiveActivityManager.watchLoop = { [weak controller] in controller?.watchLoopForLiveActivity ?? (false, nil) }
+        }
+        return controller
     }
 }
 

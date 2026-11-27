@@ -104,6 +104,12 @@ extension PodLoanPhoneController {
 
     var isLoanedOutForUI: Bool { return uiState.isLoanedOut }
 
+    /// The Live Activity: the watch loops once it has taken the pod, or while this phone stands aside for it.
+    var watchLoopForLiveActivity: (looping: Bool, since: Date?) {
+        let looping = state == .loaned || (state == .owner && yieldingToInferredLoan)
+        return (looping, looping ? loanStartedAt : nil)
+    }
+
     /// True across the reach and the settle, so the tile does not flicker between them.
     var isReclaimActivityForUI: Bool {
         let s = uiState
