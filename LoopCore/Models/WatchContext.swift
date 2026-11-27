@@ -226,7 +226,7 @@ public final class WatchContext: RawRepresentable {
         raw["gs"] = glucoseSyncIdentifier
         raw["iob"] = iob
         raw["ld"] = loopLastRunDate
-        // Older watches can display measured values, but cannot represent a measurement limit.
+        // The legacy numeric field represents a measured amount, so omit it for measurement limits.
         if case .measured(let units) = reservoirLevel {
             raw["r"] = units
         }
