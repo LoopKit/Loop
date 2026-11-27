@@ -1251,6 +1251,9 @@
     "Cancel" : {
       "comment" : "Glance confirmation: keep the faulted pod for now\nGlance top-right: abort a pending hand-back"
     },
+    "Check the sensor's 4-digit code in Loop's CGM settings on your phone." : {
+      "comment" : "Glance, in the place of Start: where the sensor's pairing code is corrected"
+    },
     "Checking with your iPhone…" : {
       "comment" : "Glance: a watch back from off asks the phone before resuming Sport Mode"
     },
@@ -1259,6 +1262,9 @@
     },
     "Clear Chimes" : {
       "comment" : "Name of a glucose alarm sound"
+    },
+    "Connecting to the new sensor" : {
+      "comment" : "Glance, in the place of Start: the watch has the code and has not connected to the new sensor yet"
     },
     "Continue" : {
       "comment" : "Button text to continue from carb entry to bolus entry on Apple Watch",
@@ -1682,6 +1688,9 @@
     },
     "ending…" : {
       "comment" : "Glance status during hand-back\nGlance status while a hand-back drains in the background"
+    },
+    "Enter the sensor's 4-digit code in Loop's CGM settings on your phone." : {
+      "comment" : "Glance, in the place of Start: where the sensor's pairing code is entered"
     },
     "eventually " : {
 
@@ -2532,6 +2541,9 @@
     "no direct G7 reading yet" : {
       "comment" : "Glance line before the first direct reading"
     },
+    "No Start yet" : {
+      "comment" : "Glance, in the place of Start: Sport Mode cannot start until the sensor's code is entered"
+    },
     "Not hearing from iPhone" : {
       "comment" : "Glance: no loan, and no word from the phone for the warning's interval"
     },
@@ -2776,6 +2788,9 @@
           }
         }
       }
+    },
+    "Old sensor" : {
+      "comment" : "Glance: label of the phone's glucose while it is still the previous sensor's"
     },
     "On" : {
       "comment" : "Label for on button",
@@ -3061,6 +3076,12 @@
           }
         }
       }
+    },
+    "Pairing code didn't match" : {
+      "comment" : "Glance, in the place of Start: the sensor did not accept the watch's pairing code"
+    },
+    "Pairing code needed" : {
+      "comment" : "Glance, in the place of Start: the watch has no pairing code for the sensor"
     },
     "Please complete onboarding to use the %1$@ Watch app" : {
       "comment" : "Watch app onboarding prompt (1: app name)"
@@ -4298,6 +4319,12 @@
     "Sensor" : {
       "comment" : "Title of the watch's sensor page when the sensor has no name yet"
     },
+    "Sensor connected" : {
+      "comment" : "Glance: the watch has just connected to the sensor for the first time"
+    },
+    "Sensor ready to pair" : {
+      "comment" : "Glance, in the place of Start: the new sensor is waiting for its Bluetooth pairing request to be accepted on the watch"
+    },
     "Start Preset" : {
       "comment" : "Button text to confirm starting preset before using digital crown"
     },
@@ -4309,6 +4336,9 @@
     },
     "Suspended" : {
       "comment" : "Title for increased insulin delivery state state"
+    },
+    "Tap Pair when your watch asks." : {
+      "comment" : "Glance, in the place of Start: accept the system's Bluetooth pairing request for the new sensor"
     },
     "Total Carbs" : {
 
@@ -4980,6 +5010,9 @@
     },
     "Your iPhone is probably not looping (off or out of range). Sport Mode on the watch is available to take over." : {
       "comment" : "Watch alert body: no word from the phone and no loan running"
+    },
+    "Your watch will ask you to pair it, within about 5 minutes. Tap the notification, then tap Pair." : {
+      "comment" : "Glance, in the place of Start: what the looper will be asked to do when the new sensor connects to the watch"
     }
   },
   "version" : "1.0"

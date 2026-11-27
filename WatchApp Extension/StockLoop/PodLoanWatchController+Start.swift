@@ -149,6 +149,13 @@ extension PodLoanWatchController {
                 SportLog.event("loan", "ignored a Start in phase \(self.phase.rawValue)")
                 return
             }
+            // The Start page offers no Start while this holds; a tap that still arrives is refused here.
+            if let refusal = self.startRefusal() {
+                SportLog.event("loan", "Start refused: \(refusal)")
+                self.playRefusal()
+                self.notifyUI()
+                return
+            }
             // Allowed over a parked drain: its records keep resending under their own epoch.
             if self.phase == .recoveredDrain {
                 SportLog.event("loan", "starting with \(self.journal.unackedEvents().count) record(s) of an earlier loan still going to the phone")
@@ -230,6 +237,15 @@ extension PodLoanWatchController {
         guard seizeOffer != nil else { return }
         seizeOffer = nil
         SportLog.event("seize", "offline start offer withdrawn: \(reason)")
+    }
+
+    /// Resting: what `LoanControl` refuses a Start for as things stand, or nil when a Start goes ahead.
+    /// Asked by the Start page, which then offers no Start, and again at the tap. On main.
+    func startRefusal() -> LoanControl.Tell? {
+        guard phase == .idle || phase == .recoveredDrain else { return nil }
+        let situation = LoanControl.Situation(device: .watch, trigger: .startTapped, watchSensorNeed: watchSensorNeed())
+        guard case .refuse(let tell) = LoanControl.decide(situation) else { return nil }
+        return tell
     }
 
     /// Resting, with a standing copy of a pump this watch would have to search for: Start needs the screen on.
@@ -636,6 +652,39 @@ extension PodLoanWatchController {
                     self.schedule(after: 8, label: "takeover-read", execute: backstop)
                 }
             }
+        }
+    }
+}
+
+/// The Start page while a Start is refused for the sensor (control rows 1 and 2): what the looper is
+/// shown in the place of the Start button. The watch connects to a new sensor from behind the clock, so
+/// the page asks nothing of the looper until the sensor asks to pair.
+enum SensorWait: Equatable {
+    /// The watch has no pairing code: it is entered on the phone.
+    case pairingCodeNeeded
+    /// The sensor did not accept the watch's code: it is corrected on the phone.
+    case pairingCodeRejected
+    /// The code is here and the watch has not connected to the sensor yet.
+    case waiting
+    /// The watch has a link to the sensor and the sensor is checking the code: a few seconds, ending in a
+    /// reading, a request to pair, or a refused code.
+    case connecting
+    /// The sensor accepted the code and asks to pair: the system's request shows with Loop on screen, and
+    /// the looper accepts it.
+    case acceptPairing
+    /// The watch authenticated with the sensor while this page was waiting for it.
+    case connected
+
+    /// How long "Sensor connected" stays above the Start button.
+    static let connectedNoteDuration: TimeInterval = 5 * 60
+
+    /// The page for a refused Start; nil when the refusal is not about the sensor.
+    static func state(refusal: LoanControl.Tell?, checkingCode: Bool, awaitingPairing: Bool = false) -> SensorWait? {
+        switch refusal {
+        case .sensorPairingCodeNeeded?: return .pairingCodeNeeded
+        case .sensorPairingCodeRejected?: return .pairingCodeRejected
+        case .sensorFirstContactNeeded?: return awaitingPairing ? .acceptPairing : checkingCode ? .connecting : .waiting
+        default: return nil
         }
     }
 }

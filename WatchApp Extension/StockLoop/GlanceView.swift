@@ -179,6 +179,74 @@ struct GlanceView: View {
         }
     }
 
+
+    /// In the place of Start while the watch has not yet authenticated with the sensor.
+    @ViewBuilder
+    private func sensorWaitCenter(_ wait: SensorWait) -> some View {
+        switch wait {
+        case .pairingCodeNeeded:
+            VStack(spacing: 6) {
+                Text(NSLocalizedString("Pairing code needed", comment: "Glance, in the place of Start: the watch has no pairing code for the sensor"))
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.glanceAttention)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(NSLocalizedString("Enter the sensor's 4-digit code in Loop's CGM settings on your phone.", comment: "Glance, in the place of Start: where the sensor's pairing code is entered"))
+                    .font(.system(size: 12))
+                    .foregroundColor(.glanceInk)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(NSLocalizedString("No Start yet", comment: "Glance, in the place of Start: Sport Mode cannot start until the sensor's code is entered"))
+                    .font(.system(size: 11))
+                    .foregroundColor(.glanceDim)
+            }
+            .multilineTextAlignment(.center)
+        case .pairingCodeRejected:
+            VStack(spacing: 6) {
+                Text(NSLocalizedString("Pairing code didn't match", comment: "Glance, in the place of Start: the sensor did not accept the watch's pairing code"))
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.glanceAttention)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(NSLocalizedString("Check the sensor's 4-digit code in Loop's CGM settings on your phone.", comment: "Glance, in the place of Start: where the sensor's pairing code is corrected"))
+                    .font(.system(size: 12))
+                    .foregroundColor(.glanceInk)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(NSLocalizedString("No Start yet", comment: "Glance, in the place of Start: Sport Mode cannot start until the sensor's code is entered"))
+                    .font(.system(size: 11))
+                    .foregroundColor(.glanceDim)
+            }
+            .multilineTextAlignment(.center)
+        case .acceptPairing:
+            // The sensor keeps its link for the pairing request, which the system shows with Loop on screen.
+            VStack(spacing: 6) {
+                Text(NSLocalizedString("Sensor ready to pair", comment: "Glance, in the place of Start: the new sensor is waiting for its Bluetooth pairing request to be accepted on the watch"))
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.glanceAttention)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(NSLocalizedString("Tap Pair when your watch asks.", comment: "Glance, in the place of Start: accept the system's Bluetooth pairing request for the new sensor"))
+                    .font(.system(size: 12))
+                    .foregroundColor(.glanceInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .multilineTextAlignment(.center)
+        case .waiting, .connecting:
+            // A real sensor asks each new watch to pair, and the system shows its request only with Loop on
+            // screen (devices, 11-24): the watch notifies when the sensor asks. The code check lasts seconds:
+            // no screen of its own.
+            VStack(spacing: 6) {
+                Text(NSLocalizedString("Connecting to the new sensor", comment: "Glance, in the place of Start: the watch has the code and has not connected to the new sensor yet"))
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.glanceAttention)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(NSLocalizedString("Your watch will ask you to pair it, within about 5 minutes. Tap the notification, then tap Pair.", comment: "Glance, in the place of Start: what the looper will be asked to do when the new sensor connects to the watch"))
+                    .font(.system(size: 12))
+                    .foregroundColor(.glanceInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .multilineTextAlignment(.center)
+        case .connected:
+            EmptyView()
+        }
+    }
+
     /// A watch back from off with a saved loan asks the phone before looping; nothing to act on meanwhile.
     private var resumeCheckCenter: some View {
         VStack(spacing: 6) {
@@ -197,12 +265,16 @@ struct GlanceView: View {
         VStack(spacing: 12) {
             if model.state.bgText != "—" {
                 HStack(spacing: 5) {
-                    Text("iPhone").font(.system(size: 11, weight: .medium)).foregroundColor(.glanceDim)
+                    Text(model.state.bgFromOldSensor   // the previous sensor's reading, labelled
+                         ? NSLocalizedString("Old sensor", comment: "Glance: label of the phone's glucose while it is still the previous sensor's")
+                         : "iPhone")
+                        .font(.system(size: 11, weight: .medium)).foregroundColor(.glanceDim)
                     Text(model.state.bgText).font(.system(size: 22, weight: .semibold)).foregroundColor(.glanceDim)
-                    if let arrow = model.state.trendSymbol {
+                    if let arrow = model.state.trendSymbol, !model.state.bgFromOldSensor {
                         Text(arrow).font(.system(size: 16)).foregroundColor(.glanceDim)
                     }
                 }
+                .opacity(model.state.bgFromOldSensor ? 0.5 : 1)
             }
             if let age = model.state.seizeOfferAgeText {
                 VStack(spacing: 6) {
@@ -227,7 +299,17 @@ struct GlanceView: View {
                     .buttonStyle(.plain)
                     .foregroundColor(.glanceDim)
                 }
+            } else if let wait = model.state.sensorWait, wait != .connected {
+                sensorWaitCenter(wait)
             } else {
+            if model.state.sensorWait == .connected {
+                VStack(spacing: 2) {
+                    Text(NSLocalizedString("Sensor connected", comment: "Glance: the watch has just connected to the sensor for the first time"))
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.glanceInk)
+                }
+                .multilineTextAlignment(.center)
+            }
             // First contact needs the screen on: say so above Start, in the attention colour.
             if let note = model.state.firstContactNote {
                 Text(note)
@@ -261,12 +343,16 @@ struct GlanceView: View {
         VStack(spacing: 10) {
             if model.state.bgText != "—" {
                 HStack(spacing: 5) {
-                    Text("iPhone").font(.system(size: 11, weight: .medium)).foregroundColor(.glanceDim)
+                    Text(model.state.bgFromOldSensor
+                         ? NSLocalizedString("Old sensor", comment: "Glance: label of the phone's glucose while it is still the previous sensor's")
+                         : "iPhone")
+                        .font(.system(size: 11, weight: .medium)).foregroundColor(.glanceDim)
                     Text(model.state.bgText).font(.system(size: 22, weight: .semibold)).foregroundColor(.glanceDim)
-                    if let arrow = model.state.trendSymbol {
+                    if let arrow = model.state.trendSymbol, !model.state.bgFromOldSensor {
                         Text(arrow).font(.system(size: 16)).foregroundColor(.glanceDim)
                     }
                 }
+                .opacity(model.state.bgFromOldSensor ? 0.5 : 1)
             }
             startingBlock
         }
@@ -710,6 +796,38 @@ private final class PreviewBolusProgress: DoseProgressReporter {
     GlanceView(model: GlanceViewModel(preview: previewState { s in
         s.phase = .idle; s.bgText = "138"; s.trendSymbol = "→"; s.bgColor = .dim
         s.viaPhone = true; s.loopStatusText = "phone loop active"
+    }))
+}
+
+#Preview("Idle · sensor code needed") {
+    GlanceView(model: GlanceViewModel(preview: previewState { s in
+        s.phase = .idle; s.bgText = "112"; s.bgColor = .dim
+        s.viaPhone = true; s.loopStatusText = "phone loop active"
+        s.sensorWait = .pairingCodeNeeded
+    }))
+}
+
+#Preview("Idle · sensor code rejected") {
+    GlanceView(model: GlanceViewModel(preview: previewState { s in
+        s.phase = .idle; s.bgText = "112"; s.bgColor = .dim
+        s.viaPhone = true; s.loopStatusText = "phone loop active"
+        s.sensorWait = .pairingCodeRejected
+    }))
+}
+
+#Preview("Idle · sensor wait") {
+    GlanceView(model: GlanceViewModel(preview: previewState { s in
+        s.phase = .idle; s.bgText = "112"; s.bgColor = .dim
+        s.viaPhone = true; s.loopStatusText = "phone loop active"
+        s.sensorWait = .waiting
+    }))
+}
+
+#Preview("Idle · sensor connected") {
+    GlanceView(model: GlanceViewModel(preview: previewState { s in
+        s.phase = .idle; s.bgText = "114"; s.bgColor = .dim
+        s.viaPhone = true; s.loopStatusText = "phone loop active"
+        s.sensorWait = .connected
     }))
 }
 

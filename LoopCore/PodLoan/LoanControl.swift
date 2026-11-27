@@ -102,6 +102,17 @@ public enum LoanControl {
         case otherControllerSeen
     }
 
+    /// What the watch's own CGM still needs before the watch can read it by itself. The CGM plugin
+    /// reports its state; whether that stops a Start is decided here.
+    public enum WatchSensorNeed: Equatable {
+        /// No pairing code for the sensor the phone is using.
+        case pairingCode
+        /// The sensor did not accept the pairing code the watch has.
+        case pairingCodeRejected
+        /// A code, but the watch has never authenticated with this sensor.
+        case firstContact
+    }
+
     public struct Situation: Equatable {
         public var device: Device
         public var trigger: Trigger
@@ -117,10 +128,13 @@ public enum LoanControl {
         public var watchHasStoredCopy: Bool
         /// The watch reads the CGM itself (the phone's Read on Apple Watch setting).
         public var watchReadsCGM: Bool
+        /// What that CGM still needs before the watch can read it; nil when it has authenticated with
+        /// the sensor, and when the watch does not read the CGM itself.
+        public var watchSensorNeed: WatchSensorNeed?
 
         public init(device: Device, trigger: Trigger, phoneRole: PhoneRole = .holdsPod, tookOverOnSilenceAt: Date? = nil,
                     sensorFresh: Bool = true, offlineCopyOut: Bool = false, watchHasStoredCopy: Bool = false,
-                    watchReadsCGM: Bool = true) {
+                    watchReadsCGM: Bool = true, watchSensorNeed: WatchSensorNeed? = nil) {
             self.device = device
             self.trigger = trigger
             self.phoneRole = phoneRole
@@ -129,6 +143,7 @@ public enum LoanControl {
             self.offlineCopyOut = offlineCopyOut
             self.watchHasStoredCopy = watchHasStoredCopy
             self.watchReadsCGM = watchReadsCGM
+            self.watchSensorNeed = watchSensorNeed
         }
     }
 
@@ -178,6 +193,13 @@ public enum LoanControl {
         /// The pod shows the phone ran it, and the phone does not answer: probably a take-back whose stop
         /// has not arrived.
         case phoneMayHaveTakenPod
+        /// The watch has no pairing code for the sensor: it is entered on the phone.
+        case sensorPairingCodeNeeded
+        /// The sensor did not accept the watch's pairing code: it is corrected on the phone.
+        case sensorPairingCodeRejected
+        /// The watch has the code but has not yet authenticated with the sensor: it needs the app on
+        /// screen across the sensor's next reading.
+        case sensorFirstContactNeeded
     }
 
     public enum Prompt: Equatable {
@@ -267,7 +289,20 @@ public enum LoanControl {
         // stored copy is entering Sport Mode, which needs the looper's tap, so it is offered, as the
         // nearest thing to the refused Start. The watch doses from its own CGM reading, so without one
         // there is nothing to offer.
+        //
+        // A watch set to read the CGM itself that has never authenticated with the current sensor does
+        // not ask: it would take the pod with nothing of its own to loop on, and nothing tells the looper
+        // for 20 minutes. First contact needs the looper anyway (the code on the phone, or the app on
+        // screen across one reading), so the Start is refused with what to do, before the pod moves.
+        // "Has authenticated with this sensor", not "has a recent reading": a known sensor reconnects
+        // in the background, and a gap in readings is the 20-minute warning's business.
         case (.watch, .startTapped):
+            switch s.watchSensorNeed {
+            case .pairingCode?: return .refuse(.sensorPairingCodeNeeded)
+            case .pairingCodeRejected?: return .refuse(.sensorPairingCodeRejected)
+            case .firstContact?: return .refuse(.sensorFirstContactNeeded)
+            case nil: break
+            }
             guard s.watchReadsCGM else { return .query(.startRequest, onSilence: .tell(.noResponseFromPhoneAndNoCGM)) }
             return .query(.startRequest, onSilence: s.watchHasStoredCopy ? .prompt(.startWithoutPhone) : .tell(.noResponseFromPhone))
 
