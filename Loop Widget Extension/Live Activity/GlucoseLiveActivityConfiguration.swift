@@ -133,6 +133,15 @@ struct GlucoseLiveActivityConfiguration: Widget {
                     }
                 }
                 
+                if context.state.watchLooping == true {
+                    HStack {
+                        Text(watchLoopingText(context))
+                            .font(.subheadline)
+                            .foregroundStyle(Color(white: 0.85))
+                        Spacer()
+                    }
+                }
+
                 HStack {
                     bottomSpacer(border: false)
                     
@@ -160,8 +169,8 @@ struct GlucoseLiveActivityConfiguration: Widget {
                             
                         case .currentBg:
                             bottomItemCurrentBG(
-                                value: item.value,
-                                trend: item.trend,
+                                value: readingGone(context) ? Self.noGlucose : item.value,
+                                trend: readingGone(context) ? nil : item.trend,
                                 context: context
                             )
                         }
@@ -213,18 +222,19 @@ struct GlucoseLiveActivityConfiguration: Widget {
             : LoopUnit.milligramsPerDeciliter.localizedShortUnitString
         
         let glucoseColor = !context.attributes.useLimits ? .primary : getGlucoseColor(context: context)
-        let currentBG = (glucoseFormatter.string(from: context.state.currentGlucose) ?? "??") + getArrowImage(context.state.trendType)
+        let currentBG = readingGone(context) ? Self.noGlucose : (glucoseFormatter.string(from: context.state.currentGlucose) ?? "??") + getArrowImage(context.state.trendType)
         let eventualBG = formatEventualBG(value: context.state.eventualGlucose, formatter: glucoseFormatter)
         
         HStack(spacing: 10) {
             loopIcon(context, size: 24)
             
+            let watchLooping = context.state.watchLooping == true
             HStack(alignment: .top) {
                 VStack(alignment: .leading) {
                     Text(currentBG)
                         .font(.headline)
                         .foregroundStyle(glucoseColor)
-                    Text(context.state.delta + " " + unit)
+                    Text(watchLooping ? NSLocalizedString("Watch looping", comment: "Live Activity line while the watch loops the pod") : context.state.delta + " " + unit)
                         .font(.caption2)
                         .foregroundStyle(Color(white: 0.7))
                 }
@@ -232,11 +242,11 @@ struct GlucoseLiveActivityConfiguration: Widget {
                 Spacer()
                 
                 VStack(alignment: .trailing) {
-                    Text(eventualBG)
+                    Text(watchLooping ? " " : eventualBG)
                         .font(.headline)
                         .foregroundStyle(.primary)
                     
-                    Text(unit)
+                    Text(watchLooping ? watchSinceText(context) : unit)
                         .font(.caption2)
                         .foregroundStyle(Color(white: 0.7))
                 }
@@ -248,6 +258,12 @@ struct GlucoseLiveActivityConfiguration: Widget {
         .background(Color.clear)
     }
     
+    private func watchSinceText(_ context: ActivityViewContext<GlucoseActivityAttributes>) -> String {
+        guard let since = context.state.watchLoopingSince else { return "" }
+        let time = DateFormatter.localizedString(from: since, dateStyle: .none, timeStyle: .short)
+        return String(format: NSLocalizedString("since %@", comment: "Live Activity: the time the watch started looping"), time)
+    }
+
     private func formatEventualBG(value: Double?, formatter: NumberFormatter) -> String {
         guard let value = value else {
             return "??"
@@ -273,7 +289,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                         .frame(width: 40, height: 40, alignment: .trailing)
                     Spacer()
                     Text(
-                        "\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))"
+                        readingGone(context) ? Self.noGlucose : "\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))"
                     )
                     .foregroundStyle(getGlucoseColor(context: context))
                     .font(.headline)
@@ -282,7 +298,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
             }
             DynamicIslandExpandedRegion(.trailing) {
                 HStack {
-                    Text(context.state.delta)
+                    Text(readingGone(context) ? "" : context.state.delta)
                         .foregroundStyle(Color(white: 0.9))
                         .font(.headline)
                     Text(
@@ -333,19 +349,19 @@ struct GlucoseLiveActivityConfiguration: Widget {
             }
         } compactLeading: {
             Text(
-                "\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))"
+                readingGone(context) ? Self.noGlucose : "\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))"
             )
             .foregroundStyle(
                 getGlucoseColor(context: context)
             )
             .minimumScaleFactor(0.1)
         } compactTrailing: {
-            Text(context.state.delta)
+            Text(readingGone(context) ? "" : context.state.delta)
                 .foregroundStyle(Color(white: 0.9))
                 .minimumScaleFactor(0.1)
         } minimal: {
             Text(
-                glucoseFormatter.string(from: context.state.currentGlucose)
+                readingGone(context) ? Self.noGlucose : glucoseFormatter.string(from: context.state.currentGlucose)
                     ?? "??"
             )
             .foregroundStyle(
@@ -360,11 +376,37 @@ struct GlucoseLiveActivityConfiguration: Widget {
         _ context: ActivityViewContext<GlucoseActivityAttributes>,
         size: CGFloat = 36
     ) -> some View {
-        Circle()
-            .trim(from: context.state.isCloseLoop ? 0 : 0.2, to: 1)
-            .stroke(getLoopColor(context.state.isCloseLoop ? context.state.lastCompleted : context.state.date), lineWidth: size/4.5)
-            .rotationEffect(Angle(degrees: -126))
-            .frame(width: size, height: size)
+        // PODLOAN: while the watch loops, a grey watch in place of the ring: the phone knows who loops,
+        // not how the loop is going.
+        if context.state.watchLooping == true {
+            Image(systemName: "applewatch")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .foregroundStyle(Color(white: 0.6))
+                .frame(width: size, height: size)
+        } else {
+            Circle()
+                .trim(from: context.state.isCloseLoop ? 0 : 0.2, to: 1)
+                .stroke(getLoopColor(context.state.isCloseLoop ? context.state.lastCompleted : context.state.date), lineWidth: size/4.5)
+                .rotationEffect(Angle(degrees: -126))
+                .frame(width: size, height: size)
+        }
+    }
+
+    /// PODLOAN: while the watch loops, a reading 15 minutes old shows as dashes, as on the phone's status
+    /// screen. The phone sets the stale date to that moment and iOS redraws then, without the phone running.
+    private func readingGone(_ context: ActivityViewContext<GlucoseActivityAttributes>) -> Bool {
+        context.state.watchLooping == true && context.isStale
+    }
+
+    private static let noGlucose = NSLocalizedString("– – –", comment: "No glucose value representation (3 dashes for mg/dL)")
+
+    private func watchLoopingText(_ context: ActivityViewContext<GlucoseActivityAttributes>) -> String {
+        guard let since = context.state.watchLoopingSince else {
+            return NSLocalizedString("Watch looping", comment: "Live Activity line while the watch loops the pod")
+        }
+        let time = DateFormatter.localizedString(from: since, dateStyle: .none, timeStyle: .short)
+        return String(format: NSLocalizedString("Watch looping since %@", comment: "Live Activity line while the watch loops the pod; the time the loan started"), time)
     }
 
     @ViewBuilder

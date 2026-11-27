@@ -39,6 +39,10 @@ public struct GlucoseActivityAttributes: ActivityAttributes {
         public let predicatedStartDate: Date?
         public let predicatedInterval: TimeInterval?
         public let yAxisMarks: [Double]
+
+        // PODLOAN: during a loan the watch loops, so the ring gives way to who loops and from when.
+        public var watchLooping: Bool? = nil
+        public var watchLoopingSince: Date? = nil
     }
     
     public let mode: LiveActivityMode
