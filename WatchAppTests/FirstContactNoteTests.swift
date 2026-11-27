@@ -154,4 +154,57 @@ final class FirstContactNoteTests: XCTestCase {
         let firstContact10 = await firstContactExpected(controller)
         XCTAssertTrue(firstContact10, "the next adopt searches")
     }
+
+    // MARK: - The sensor's first contact (control rows 1 and 2)
+
+    /// A watch set to read the CGM that has never authenticated with the sensor offers no Start, and a
+    /// Start that still arrives does not reach the phone.
+    func testAStartIsRefusedUntilTheWatchHasAuthenticatedWithTheSensor() async throws {
+        let controller = await makeController()
+        var need: LoanControl.WatchSensorNeed? = .pairingCode
+        var refusalsFelt = 0
+        await controller.onMain {
+            controller.watchSensorNeed = { need }
+            controller.playRefusal = { refusalsFelt += 1 }
+        }
+        let codeNeeded = await controller.fencedSnapshot().startRefusal
+        XCTAssertEqual(codeNeeded, .sensorPairingCodeNeeded)
+
+        need = .firstContact
+        let firstContact = await controller.fencedSnapshot().startRefusal
+        XCTAssertEqual(firstContact, .sensorFirstContactNeeded)
+
+        controller.requestLoan(watchBuild: "test")
+        let refused = await controller.fencedSnapshot()
+        XCTAssertEqual(refused.phase, .idle, "the request never went out")
+        XCTAssertEqual(refusalsFelt, 1)
+
+        need = nil
+        let ready = await controller.fencedSnapshot().startRefusal
+        XCTAssertNil(ready, "authenticated: Start is offered")
+        controller.requestLoan(watchBuild: "test")
+        let requested = await controller.fencedSnapshot()
+        XCTAssertEqual(requested.phase, .requested)
+        XCTAssertNil(requested.startRefusal, "the refusal is a resting-state answer only")
+    }
+
+    /// The sensor keeps its link for the system's pairing request: the page asks for Pair.
+    func testTheSensorWaitAsksForPairWhileTheSensorKeepsItsLink() {
+        XCTAssertEqual(SensorWait.state(refusal: .sensorFirstContactNeeded, checkingCode: false, awaitingPairing: true), .acceptPairing)
+        XCTAssertEqual(SensorWait.state(refusal: .sensorFirstContactNeeded, checkingCode: true, awaitingPairing: true), .acceptPairing)
+        XCTAssertEqual(SensorWait.state(refusal: .sensorPairingCodeNeeded, checkingCode: false, awaitingPairing: true), .pairingCodeNeeded)
+        XCTAssertNil(SensorWait.state(refusal: nil, checkingCode: false, awaitingPairing: true))
+    }
+
+    /// The page in the place of Start: the code, the wait for the sensor, or its code check.
+    func testTheSensorWaitPage() {
+        XCTAssertNil(SensorWait.state(refusal: nil, checkingCode: false))
+        XCTAssertNil(SensorWait.state(refusal: .noResponseFromPhone, checkingCode: false), "only the sensor's refusals have a page")
+        XCTAssertEqual(SensorWait.state(refusal: .sensorPairingCodeNeeded, checkingCode: false), .pairingCodeNeeded)
+        XCTAssertEqual(SensorWait.state(refusal: .sensorPairingCodeRejected, checkingCode: false), .pairingCodeRejected)
+        XCTAssertEqual(SensorWait.state(refusal: .sensorFirstContactNeeded, checkingCode: false), .waiting)
+        // A link up while the sensor checks the code; a refused code still says so.
+        XCTAssertEqual(SensorWait.state(refusal: .sensorFirstContactNeeded, checkingCode: true), .connecting)
+        XCTAssertEqual(SensorWait.state(refusal: .sensorPairingCodeRejected, checkingCode: true), .pairingCodeRejected)
+    }
 }

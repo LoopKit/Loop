@@ -76,6 +76,11 @@ struct GlanceUIState {
 
     var startingStageText: String? = nil
 
+    /// Resting, with a Start refused for the sensor: shown in the place of the Start button.
+    var sensorWait: SensorWait? = nil
+    /// The phone's glucose is still the previous sensor's (a new one warming up): shown greyed and labelled.
+    var bgFromOldSensor: Bool = false
+
     /// First contact with a new pod needs the screen on: the Start note, then the takeover hint.
     var firstContactNote: String? = nil
     var takeoverHint: String? = nil
@@ -135,6 +140,12 @@ final class GlanceViewModel: ObservableObject {
 
     /// COB is async: the last value read.
     private var latestCOB: Double?
+
+    /// The sensor wait last shown, and when the sensor connected under it.
+    private var lastSensorWait: SensorWait?
+    /// The phone's latest reading came from a sensor other than the watch's: it is labelled as the old sensor's.
+    private var phoneReadingFromAnotherSensor = false
+    private var sensorConnectedAt: Date?
 
     private var appStateObservers: [NSObjectProtocol] = []
 
@@ -245,6 +256,62 @@ final class GlanceViewModel: ObservableObject {
         timer = nil
     }
 
+    /// The sensor wait for the resting page, with its taps and log lines. The watch connecting ends the
+    /// wait; "Sensor connected" then stays above Start for a few minutes.
+    private func sensorWait(refusal: LoanControl.Tell?, now: Date) -> SensorWait? {
+        let cgm = WatchCGMHost.shared.cgmManager
+        let context = ExtensionDelegate.sharedIfAvailable()?.loopManager.activeContext
+        // A reading from the sensor the phone just left says nothing about when the new one reads.
+        let fromAnotherSensor = watchCGMReadingIsFromAnotherSensor(cgm, syncIdentifier: context?.glucoseSyncIdentifier)
+        if fromAnotherSensor != phoneReadingFromAnotherSensor {
+            phoneReadingFromAnotherSensor = fromAnotherSensor
+            SportLog.event("sensor", fromAnotherSensor
+                ? "wait: the phone's last reading is from its previous sensor"
+                : "wait: the phone has a reading from this sensor")
+        }
+        let checkingCode = watchCGMIsCheckingCode(cgm)
+        let awaitingPairing = watchCGMNeedsPairingAcceptance(cgm)
+        if let wait = SensorWait.state(refusal: refusal, checkingCode: checkingCode, awaitingPairing: awaitingPairing) {
+            switch (lastSensorWait, wait) {
+            case (nil, _):
+                SportLog.event("sensor", "wait: Start is held for the sensor (\(wait))")
+            case (.acceptPairing?, .acceptPairing):
+                break
+            case (_, .acceptPairing):
+                SportLog.event("sensor", "wait: the sensor accepted the code and asks to pair")
+            case (.acceptPairing?, _):
+                SportLog.event("sensor", "wait: the sensor's link closed before the pairing was accepted (\(wait))")
+            case (.connecting?, .connecting):
+                break
+            case (_, .connecting):
+                SportLog.event("sensor", "wait: linked to the sensor; it is checking the code")
+            case (.connecting?, .pairingCodeRejected):
+                SportLog.event("sensor", "wait: the sensor refused the code")
+            case (.connecting?, _):
+                SportLog.event("sensor", "wait: the link closed before a reading (\(wait))")
+            default:
+                break
+            }
+            lastSensorWait = wait
+            sensorConnectedAt = nil
+            return wait
+        }
+        if lastSensorWait != nil {
+            lastSensorWait = nil
+            // No refusal because the sensor connected, not because the phone stopped sharing its CGM.
+            if WatchCGMHost.shared.isReadingDirectly {
+                sensorConnectedAt = now
+                WKInterfaceDevice.current().play(.success)
+                SportLog.event("sensor", "wait: the watch connected to the sensor; Start is offered")
+            }
+        }
+        guard let connectedAt = sensorConnectedAt, now.timeIntervalSince(connectedAt) < SensorWait.connectedNoteDuration else {
+            sensorConnectedAt = nil
+            return nil
+        }
+        return .connected
+    }
+
     init(preview: GlanceUIState) {
         isPreview = true
         state = preview
@@ -293,6 +360,7 @@ final class GlanceViewModel: ObservableObject {
             return
         }
 
+        sensorConnectedAt = nil
         session.loanController.requestLoan(watchBuild: build)
         refresh()
     }
@@ -357,8 +425,12 @@ final class GlanceViewModel: ObservableObject {
 
             // The note slot has one occupant. The controller's own note wins over the sensor-code
             // prompt: whatever just happened to a session matters more than a standing setup task.
+            // A sensor wait says what the sensor needs in the place of Start, so the sensor's note is not repeated.
+            let wait = sensorWait(refusal: snap.startRefusal, now: Date())
             var idle = Self.idleState(context: ExtensionDelegate.sharedIfAvailable()?.loopManager.activeContext,
-                                      note: snap.lastIdleNote ?? sensorNote, phoneHeardAt: snap.lastHeardFromPhoneAt)
+                                      note: snap.lastIdleNote ?? (wait == nil ? sensorNote : nil), phoneHeardAt: snap.lastHeardFromPhoneAt)
+            idle.sensorWait = wait
+            idle.bgFromOldSensor = phoneReadingFromAnotherSensor
 
             if let issued = snap.seizeOfferIssuedAt {
                 let f = DateComponentsFormatter()
@@ -394,9 +466,10 @@ final class GlanceViewModel: ObservableObject {
         // A parked drain is startable: the idle page plus a note.
         case .recoveredDrain:
 
+            let wait = sensorWait(refusal: snap.startRefusal, now: Date())
             var restIdle = Self.idleState(context: ExtensionDelegate.sharedIfAvailable()?.loopManager.activeContext,
                                           note: snap.lastIdleNote
-                                            ?? sensorNote
+                                            ?? (wait == nil ? sensorNote : nil)
                                             ?? NSLocalizedString("Records from the last session are waiting for your iPhone. You can still start.",
                                                                  comment: "Glance note while resting on a parked drain"))
             if let issued = snap.seizeOfferIssuedAt {
@@ -406,6 +479,8 @@ final class GlanceViewModel: ObservableObject {
                 f.unitsStyle = .abbreviated
                 restIdle.seizeOfferAgeText = f.string(from: Date().timeIntervalSince(issued)) ?? "?"
             }
+            restIdle.sensorWait = wait
+            restIdle.bgFromOldSensor = phoneReadingFromAnotherSensor
             if snap.pumpFirstContactExpected { restIdle.firstContactNote = PodLoanWatchController.firstContactStartNote }
             state = restIdle
         // The phone took the pod back. Nothing is left to offer the user and nothing is

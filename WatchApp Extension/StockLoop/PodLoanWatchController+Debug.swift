@@ -52,6 +52,8 @@ extension PodLoanWatchController {
         let deactivatingPod: Bool
         let podDeactivationError: String?
         let podDeactivated: Bool
+        /// Resting: what a Start would be refused for (the sensor's code or first contact), or nil.
+        let startRefusal: LoanControl.Tell?
     }
 
     var isLoanActive: Bool {
@@ -91,7 +93,8 @@ extension PodLoanWatchController {
                 failedPodDeactivationTitle: failedPodDeactivationTitle,
                 deactivatingPod: deactivatingPod,
                 podDeactivationError: podDeactivationError,
-                podDeactivated: podDeactivatedHere)
+                podDeactivated: podDeactivatedHere,
+                startRefusal: startRefusal())
     }
 
     /// nil: no pump manager, as opposed to a failed read.
