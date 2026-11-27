@@ -1801,6 +1801,9 @@
         }
       }
     },
+    "since %@" : {
+      "comment" : "Live Activity: the time the watch started looping"
+    },
     "Start" : {
       "localizations" : {
         "de" : {
@@ -1966,6 +1969,15 @@
           }
         }
       }
+    },
+    "Watch looping" : {
+      "comment" : "Live Activity line while the watch loops the pod"
+    },
+    "Watch looping since %@" : {
+      "comment" : "Live Activity line while the watch loops the pod; the time the loan started"
+    },
+    "– – –" : {
+      "comment" : "No glucose value representation (3 dashes for mg/dL)"
     }
   },
   "version" : "1.1"

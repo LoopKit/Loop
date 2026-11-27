@@ -168,6 +168,7 @@ extension PodLoanPhoneController {
         if let atTakeover = complete.firstPodStatus.deliveredUnits {
             noteTakeoverReading(units: atTakeover, at: complete.firstPodStatus.timestamp)
         }
+        loanStartedAt = complete.firstPodStatus.timestamp
         state = .loaned
 
     }
