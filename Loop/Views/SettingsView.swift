@@ -103,11 +103,12 @@ struct SettingsView: View {
                         servicesSection
                     }
 
-                    // Catch-all for menu items without a dedicated section (e.g. .custom).
-                    // .configuration items render in the configuration section and
-                    // .support items in the Support section, so exclude both to avoid
-                    // showing them twice.
-                    ForEach(pluginMenuItems.filter({ $0.section != .support && $0.section != .configuration })) { item in
+                    // Render custom menu items here. Built-in sections render at their destinations.
+                    ForEach(pluginMenuItems.filter {
+                        $0.section != .support &&
+                        $0.section != .configuration &&
+                        $0.section != .therapySettingsSupport
+                    }) { item in
                         item.view
                     }
 
@@ -443,7 +444,7 @@ extension SettingsView {
                 therapySettings: viewModel.therapySettings(),
                 delegate: viewModel.therapySettingsViewModelDelegate
             ),
-            helpView: viewModel.availableSupports.lazy.compactMap { $0.therapySettingsHelpView() }.first
+            supportMenuItems: pluginMenuItems.filter { $0.section == .therapySettingsSupport }.map(\.view)
         )
         .environmentObject(displayGlucosePreference)
         .environment(\.dismissAction, self.dismiss)
@@ -488,7 +489,7 @@ extension SettingsView {
         }
     }
 
-    private var pluginMenuItems: [PluginMenuItem<some View>] {
+    private var pluginMenuItems: [PluginMenuItem<AnyView>] {
         self.viewModel.availableSupports.flatMap { plugin in
             plugin.configurationMenuItems().enumerated().map { index, item in
                 PluginMenuItem(section: item.section, view: item.view, pluginIdentifier: plugin.pluginIdentifier, offset: index)
