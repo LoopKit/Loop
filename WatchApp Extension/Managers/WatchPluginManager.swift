@@ -5,7 +5,7 @@
 //  The device kits the watch app carries but does not link, loaded at run time as the phone's
 //  PluginManager loads its plugins: found by the identifier in each bundle's Info.plist, and loaded
 //  when that identifier is first asked for. The watch has no LoopKitUI, so a kit's own framework is
-//  its plugin; its principal class is a LoopKit `CGMManagerPlugin`.
+//  its plugin; its principal class is a LoopKit `PumpManagerPlugin` or `CGMManagerPlugin`.
 //
 //  Copyright © 2026 LoopKit Authors. All rights reserved.
 //
@@ -27,8 +27,13 @@ final class WatchPluginManager {
     init(pluginsURL: URL? = Bundle.main.privateFrameworksURL) {
         let urls = pluginsURL.flatMap { try? FileManager.default.contentsOfDirectory(at: $0, includingPropertiesForKeys: nil) } ?? []
         pluginBundles = urls.filter { $0.pathExtension == "framework" }.compactMap(Bundle.init(url:)).filter {
+            $0.object(forInfoDictionaryKey: LoopPluginBundleKey.pumpManagerIdentifier.rawValue) is String ||
             $0.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerIdentifier.rawValue) is String
         }
+    }
+
+    func pumpManagerType(withIdentifier identifier: String) -> PumpManager.Type? {
+        (plugin(forKey: .pumpManagerIdentifier, identifier) as? PumpManagerPlugin)?.pumpManagerType
     }
 
     func cgmManagerType(withIdentifier identifier: String) -> CGMManager.Type? {
