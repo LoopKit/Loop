@@ -31,6 +31,9 @@ class LiveActivityManager : LiveActivityManagerProxy {
     private var activeInsulin: InsulinValue?
     
     private var startDate: Date = Date.now
+
+    /// PODLOAN: whether the watch loops the pod, and since when; set by the pod-loan wiring.
+    @MainActor static var watchLoop: (@MainActor () -> (looping: Bool, since: Date?))?
     private var settings: LiveActivitySettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
     
     private let cobFormatter: NumberFormatter =  {
@@ -70,6 +73,8 @@ class LiveActivityManager : LiveActivityManagerProxy {
         let nc = NotificationCenter.default
         nc.addObserver(self, selector: #selector(self.appMovedToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
         nc.addObserver(self, selector: #selector(self.settingsChanged), name: .LiveActivitySettingsChanged, object: nil)
+        // PODLOAN: a loan's start and end change the Live Activity at once, while the phone runs.
+        nc.addObserver(self, selector: #selector(self.pumpManagerChanged), name: .PumpManagerChanged, object: nil)
         guard self.settings.enabled else {
             return
         }
@@ -129,15 +134,22 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 delta = "\(deltaValue < 0 ? "-" : "+")\(glucoseFormatter.string(from: abs(deltaValue)) ?? "??")"
             }
             
+            // PODLOAN: while the watch loops, the Live Activity follows the phone's status screen: the
+            // reading with its time, dashes once it is 15 minutes old, no prediction, no insulin or carbs.
+            let watchLoop = await MainActor.run { Self.watchLoop?() }
+            let watchLooping = watchLoop?.looping == true
+
             let bottomRow = self.getBottomRow(
                 currentGlucose: current,
                 delta: delta,
                 statusContext: statusContext,
-                glucoseFormatter: glucoseFormatter
+                glucoseFormatter: glucoseFormatter,
+                watchLooping: watchLooping,
+                readingDate: currentGlucose.startDate
             )
 
             var predicatedGlucose: [Double] = []
-            if let samples = statusContext?.predictedGlucose?.values, settings.addPredictiveLine {
+            if !watchLooping, let samples = statusContext?.predictedGlucose?.values, settings.addPredictiveLine {
                 predicatedGlucose = samples
             }
             
@@ -191,13 +203,13 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 isMmol: unit == LoopUnit.millimolesPerLiter
             )
 
-            let state = GlucoseActivityAttributes.ContentState(
+            var state = GlucoseActivityAttributes.ContentState(
                 date: currentGlucose.startDate,
                 ended: false,
                 preset: presetContext,
                 glucoseRanges: glucoseRanges,
                 currentGlucose: current,
-                eventualGlucose: statusContext?.predictedGlucose?.values.last,
+                eventualGlucose: watchLooping ? nil : statusContext?.predictedGlucose?.values.last,
                 trendType: statusContext?.glucoseDisplay?.trendType,
                 delta: delta,
                 isMmol: isMmol,
@@ -214,11 +226,23 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 yAxisMarks: chartYAxis
             )
             
+            var staleDate = Date.now.addingTimeInterval(.hours(1))
+            if watchLooping {
+                state.watchLooping = true
+                state.watchLoopingSince = watchLoop?.since
+                staleDate = currentGlucose.startDate.addingTimeInterval(LoopCoreConstants.inputDataRecencyInterval)
+            }
+
             await self.activity?.update(ActivityContent(
                 state: state,
-                staleDate: Date.now.addingTimeInterval(.hours(1))
+                staleDate: staleDate
             ))
         }
+    }
+
+    @objc private func pumpManagerChanged() {
+        guard self.settings.enabled else { return }
+        update()
     }
     
     @objc private func settingsChanged() {
@@ -487,8 +511,16 @@ class LiveActivityManager : LiveActivityManagerProxy {
         return glucoseRanges
     }
     
-    private func getBottomRow(currentGlucose: Double, delta: String, statusContext: StatusExtensionContext?, glucoseFormatter: NumberFormatter) -> [BottomRowItem] {
-        return self.settings.bottomRowConfiguration.map { type in
+    private func getBottomRow(currentGlucose: Double, delta: String, statusContext: StatusExtensionContext?, glucoseFormatter: NumberFormatter, watchLooping: Bool = false, readingDate: Date? = nil) -> [BottomRowItem] {
+        // PODLOAN: the watch's loop decides insulin, carbs, basal and the prediction; the phone shows none of
+        // them, nor a delta that would outlive its reading.
+        let types = watchLooping ? self.settings.bottomRowConfiguration.filter { type in
+            switch type {
+            case .iob, .cob, .basal, .eventualBg, .deltaBg: return false
+            default: return true
+            }
+        } : self.settings.bottomRowConfiguration
+        return types.map { type in
             switch(type) {
             case .iob:
                 return BottomRowItem.generic(label: type.name(), value: getInsulinOnBoard(), unit: "U")
@@ -521,7 +553,8 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 return BottomRowItem.generic(label: type.name(), value: delta, unit: "")
                 
             case .updatedAt:
-                return BottomRowItem.generic(label: type.name(), value: timeFormatter.string(from: Date.now), unit: "")
+                // PODLOAN: while the watch loops, the reading's time, as under the phone's glucose figure.
+                return BottomRowItem.generic(label: type.name(), value: timeFormatter.string(from: watchLooping ? (readingDate ?? Date.now) : Date.now), unit: "")
             }
        }
     }
