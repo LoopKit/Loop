@@ -22,8 +22,10 @@ final class LoanControlTests: XCTestCase {
                              sensorFresh: sensorFresh, offlineCopyOut: offlineCopyOut))
     }
 
-    private func watch(_ trigger: C.Trigger, storedCopy: Bool = false, readsCGM: Bool = true) -> C.Decision {
-        C.decide(C.Situation(device: .watch, trigger: trigger, watchHasStoredCopy: storedCopy, watchReadsCGM: readsCGM))
+    private func watch(_ trigger: C.Trigger, storedCopy: Bool = false, readsCGM: Bool = true,
+                       sensorNeed: C.WatchSensorNeed? = nil) -> C.Decision {
+        C.decide(C.Situation(device: .watch, trigger: trigger, watchHasStoredCopy: storedCopy, watchReadsCGM: readsCGM,
+                             watchSensorNeed: sensorNeed))
     }
 
     // Rows 1 and 2 · Start tapped on the watch. The request is the query; with no answer, the offline
@@ -33,6 +35,18 @@ final class LoanControlTests: XCTestCase {
         XCTAssertEqual(watch(.startTapped, storedCopy: false), .query(.startRequest, onSilence: .tell(.noResponseFromPhone)))
         XCTAssertEqual(watch(.startTapped, storedCopy: true, readsCGM: false), .query(.startRequest, onSilence: .tell(.noResponseFromPhoneAndNoCGM)),
                        "a watch not reading the CGM has nothing to dose from, so no offline start is offered")
+    }
+
+    // Rows 1 and 2, before the request · A watch that reads the CGM itself but has never authenticated
+    // with the current sensor does not ask the phone: the Start is refused with what the sensor needs.
+    func testRows1And2_StartIsRefusedUntilTheWatchHasAuthenticatedWithTheSensor() {
+        XCTAssertEqual(watch(.startTapped, storedCopy: true, sensorNeed: .pairingCode), .refuse(.sensorPairingCodeNeeded))
+        XCTAssertEqual(watch(.startTapped, storedCopy: true, sensorNeed: .pairingCodeRejected), .refuse(.sensorPairingCodeRejected))
+        XCTAssertEqual(watch(.startTapped, storedCopy: true, sensorNeed: .firstContact), .refuse(.sensorFirstContactNeeded))
+        XCTAssertEqual(watch(.startTapped, storedCopy: false, readsCGM: false), .query(.startRequest, onSilence: .tell(.noResponseFromPhoneAndNoCGM)),
+                       "a watch not set to read the CGM has no sensor need: the Start asks the phone as before")
+        XCTAssertEqual(watch(.endTapped, sensorNeed: .firstContact), .query(.onScreen, onSilence: .refuse(.phoneAwayCannotHandBack)),
+                       "only a Start is refused: an End is never held for the sensor")
     }
 
     // Row 3 · Phone dead or away, no loan: the watch takes nothing (deliberate exception); each word from
