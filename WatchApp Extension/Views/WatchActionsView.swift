@@ -64,6 +64,7 @@ struct WatchActionsView: View {
                     .frame(maxWidth: .infinity)
             }
         }
+        .usingUnusedTopSafeArea()
         .font(.system(size: 14, weight: .light))
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $isShowingPresets) {
