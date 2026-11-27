@@ -1164,6 +1164,8 @@ extension LoopAppManager: DiagnosticReportGenerator {
             "",
             remoteDataServicesManager.generateDiagnosticReport(),
             "",
+            servicesManager.generateDiagnosticReport(),
+            "",
             String(reflecting: self.watchManager!),
             "",
             String(reflecting: self.statusExtensionManager!),

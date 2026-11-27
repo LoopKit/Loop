@@ -414,6 +414,14 @@ extension ServicesManager {
     var availableSupports: [SupportUI] {
         activeServices.compactMap { ($0 as? SupportUI) ?? ($0 as? SupportProviding)?.createSupport() }
     }
+
+    func generateDiagnosticReport() -> String {
+        var report = ["## ServicesManager"]
+        for service in activeServices {
+            report += ["", String(reflecting: service)]
+        }
+        return report.joined(separator: "\n")
+    }
 }
 
 // Service extension for rawValue
