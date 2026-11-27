@@ -1,38 +1,40 @@
 //
-//  LiveActivityManaer.swift
+//  LiveActivityManager.swift
 //  Loop
 //
-//  Created by Bastiaan Verhaar on 24/06/2024.
 //  Copyright © 2024 LoopKit Authors. All rights reserved.
 //
 
-import LoopKitUI
+import Foundation
 import LoopKit
 import LoopCore
-import Foundation
-import HealthKit
-import ActivityKit
+import UIKit
 
 extension Notification.Name {
     static let LiveActivitySettingsChanged = Notification.Name(rawValue: "com.loopKit.notification.LiveActivitySettingsChanged")
 }
 
 @available(iOS 16.2, *)
-class LiveActivityManager : LiveActivityManagerProxy {
-    private let activityInfo = ActivityAuthorizationInfo()
-    private var activity: Activity<GlucoseActivityAttributes>?
-    private let healthStore = HKHealthStore()
-    
+@MainActor
+final class LiveActivityManager: LiveActivityManagerProxy {
     private let glucoseStore: GlucoseStoreProtocol
-    private let doseStore: DoseStoreProtocol
+    private let glucoseUnit: @MainActor () -> LoopUnit
+    private let client: LiveActivityClient
+    private let notificationCenter: NotificationCenter
+    private let loadSettings: () -> LiveActivitySettings
+    private let statusContext: () -> StatusExtensionContext?
+    private let now: () -> Date
+    private var observers: [NSObjectProtocol] = []
+
     private var scheduleOverride: TemporaryScheduleOverride?
     private var preMealOverride: TemporaryScheduleOverride?
     private var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
     private var activeInsulin: InsulinValue?
-    
-    private var startDate: Date = Date.now
-    private var settings: LiveActivitySettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
-    
+
+    private var refreshTask: Task<Void, Never>?
+    private var revision: UInt = 0
+    private var needsInitialCleanup = true
+
     private let cobFormatter: NumberFormatter =  {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .none
@@ -53,36 +55,49 @@ class LiveActivityManager : LiveActivityManagerProxy {
         return dateFormatter
     }()
     
-    init?(glucoseStore: GlucoseStoreProtocol, doseStore: DoseStoreProtocol) {
-        guard self.activityInfo.areActivitiesEnabled else {
-            print("ERROR: Live Activities are not enabled...")
-            return nil
-        }
-        
+    init?(
+        glucoseStore: GlucoseStoreProtocol,
+        glucoseUnit: @escaping @MainActor () -> LoopUnit,
+        client: LiveActivityClient? = nil,
+        notificationCenter: NotificationCenter = .default,
+        settings: @escaping () -> LiveActivitySettings = { UserDefaults.standard.liveActivity ?? LiveActivitySettings() },
+        statusContext: @escaping () -> StatusExtensionContext? = { UserDefaults.appGroup?.statusExtensionContext },
+        now: @escaping () -> Date = Date.init
+    ) {
+        let client = client ?? ActivityKitLiveActivityClient()
+        guard client.activitiesEnabled else { return nil }
         self.glucoseStore = glucoseStore
-        self.doseStore = doseStore
-        
-        // Ensure settings exist
-        if UserDefaults.standard.liveActivity == nil {
-            self.settings = LiveActivitySettings()
+        self.glucoseUnit = glucoseUnit
+        self.client = client
+        self.notificationCenter = notificationCenter
+        self.loadSettings = settings
+        self.statusContext = statusContext
+        self.now = now
+
+        // Glucose must keep updating with no pump or suspended delivery, even when
+        // dosing calculations and the last completed loop stop advancing.
+        for (name, object) in [
+            (GlucoseStore.glucoseSamplesDidChange, glucoseStore as AnyObject?),
+            (.LiveActivitySettingsChanged, nil),
+            (UIApplication.didBecomeActiveNotification, nil)
+        ] {
+            observers.append(notificationCenter.addObserver(forName: name, object: object, queue: nil) { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    self?.requestRefresh()
+                }
+            })
         }
-        
-        let nc = NotificationCenter.default
-        nc.addObserver(self, selector: #selector(self.appMovedToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
-        nc.addObserver(self, selector: #selector(self.settingsChanged), name: .LiveActivitySettingsChanged, object: nil)
-        guard self.settings.enabled else {
-            return
-        }
-        
-        initEmptyActivity(settings: self.settings)
-        update()
-        
-        Task {
-            await self.endUnknownActivities()
-        }
+        requestRefresh()
     }
-    
-    public func update(
+
+    deinit {
+        for observer in observers {
+            notificationCenter.removeObserver(observer)
+        }
+        refreshTask?.cancel()
+    }
+
+    func update(
         scheduleOverride: TemporaryScheduleOverride?,
         preMealOverride: TemporaryScheduleOverride?,
         glucoseTargetRangeSchedule: GlucoseRangeSchedule?,
@@ -92,258 +107,171 @@ class LiveActivityManager : LiveActivityManagerProxy {
         self.preMealOverride = preMealOverride
         self.glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
         self.activeInsulin = activeInsulin
-        update()
+        requestRefresh()
     }
-    
-    private func update() {
-        Task {
-            if self.needsRecreation(), await UIApplication.shared.applicationState == .active {
-                // activity is no longer visible or old. End it and try to push the update again
-                await endActivity()
-            }
-            
-            guard let hkUnit = await self.healthStore.cachedPreferredUnits(for: .bloodGlucose) else {
-                print("ERROR: No unit found...")
-                return
-            }
-            let unit = LoopUnit(from: hkUnit)
-            
-            let isMmol = unit == LoopUnit.millimolesPerLiter
-            await self.endUnknownActivities()
 
-            let statusContext = UserDefaults.appGroup?.statusExtensionContext
-            let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
-            
-            let glucoseSamples = await self.getGlucoseSample(unit: unit)
-            guard let currentGlucose = glucoseSamples.last else {
-                print("ERROR: No glucose sample found...")
-                return
-            }
+    /// Request a refresh and wait until all requests received during it have been handled.
+    func refresh() async {
+        requestRefresh()
+        await refreshTask?.value
+    }
 
-            let current = currentGlucose.quantity.doubleValue(for: unit)
-            
-            var delta: String = "+\(glucoseFormatter.string(from: Double(0)) ?? "")"
-            if glucoseSamples.count > 1 {
-                let prevSample = glucoseSamples[glucoseSamples.count - 2]
-                let deltaValue = current - (prevSample.quantity.doubleValue(for: unit))
-                delta = "\(deltaValue < 0 ? "-" : "+")\(glucoseFormatter.string(from: abs(deltaValue)) ?? "??")"
-            }
-            
-            let bottomRow = self.getBottomRow(
-                currentGlucose: current,
-                delta: delta,
-                statusContext: statusContext,
-                glucoseFormatter: glucoseFormatter
-            )
+    private func requestRefresh() {
+        revision &+= 1
+        guard refreshTask == nil else { return }
+        refreshTask = Task { [weak self] in
+            await self?.drainRefreshes()
+        }
+    }
 
-            var predicatedGlucose: [Double] = []
-            if let samples = statusContext?.predictedGlucose?.values, settings.addPredictiveLine {
-                predicatedGlucose = samples
-            }
-            
-            var endDateChart: Date? = nil
-            if predicatedGlucose.count == 0 {
-                endDateChart = glucoseSamples.last?.startDate
-            } else if let predictedGlucose = statusContext?.predictedGlucose {
-                endDateChart = predictedGlucose.startDate.addingTimeInterval(.hours(4))
-            }
-            
-            guard let endDateChart = endDateChart else {
-                return
-            }
-            
-            var presetContext: Preset? = nil
-            if let override = self.preMealOverride ?? self.scheduleOverride, let start = glucoseSamples.first?.startDate {
-                let presetStart = max(override.startDate, start)
-                let presetEnd = override.duration.isInfinite ? endDateChart : min(override.actualEndDate, endDateChart)
-                // Only create a preset if it overlaps the chart window. If the override ended
-                // before the chart window starts (e.g. spacious mode only shows 2h of history),
-                // presetEnd < presetStart and drawing a RectangleMark with those backwards dates
-                // forces SwiftUI Charts to expand the x-axis far into the past.
-                if presetStart <= presetEnd {
-                    let (title, iconSymbol) = override.liveActivityTitleAndSymbol()
-                    presetContext = Preset(
-                        title: title,
-                        iconSystemSymbolName: iconSymbol,
-                        startDate: presetStart,
-                        endDate: presetEnd,
-                        minValue: override.settings.targetRange?.lowerBound.doubleValue(for: unit) ?? 0,
-                        maxValue: override.settings.targetRange?.upperBound.doubleValue(for: unit) ?? 0
+    private func drainRefreshes() async {
+        defer { refreshTask = nil }
+        while !Task.isCancelled {
+            let requestedRevision = revision
+            let settings = loadSettings()
+            if !settings.enabled {
+                await client.endActivities()
+                needsInitialCleanup = false
+            } else {
+                do {
+                    let date = now()
+                    let history: TimeInterval = settings.addPredictiveLine ? .hours(2) : .hours(6)
+                    // Suspend on the store; blocking an async executor here can deadlock Loop.
+                    let samples = try await glucoseStore.getGlucoseSamples(
+                        start: adjustedChartStart(date.addingTimeInterval(-history)),
+                        end: date
                     )
+                    guard !Task.isCancelled else { return }
+                    // New input invalidates an in-flight fetch. Only the newest snapshot is published.
+                    guard requestedRevision == revision else { continue }
+                    let state = makeContentState(glucoseSamples: samples, unit: glucoseUnit(), settings: settings, now: date)
+                    if needsInitialCleanup || (client.canCreateActivity && client.needsRecreation(settings: settings)) {
+                        needsInitialCleanup = false
+                        await client.endActivities()
+                        guard !Task.isCancelled else { return }
+                        guard requestedRevision == revision else { continue }
+                    }
+                    try await client.publish(state, settings: settings)
+                } catch {
+                    // Keep the last published snapshot if a store query or ActivityKit operation fails.
+                    print("ERROR: Error refreshing live activity: \(error.localizedDescription)")
                 }
             }
-            
-            var glucoseRanges: [GlucoseRangeValue] = []
-            if let glucoseRangeSchedule = self.glucoseTargetRangeSchedule, let start = glucoseSamples.first?.startDate {
-                glucoseRanges = getGlucoseRanges(
-                    glucoseRangeSchedule: glucoseRangeSchedule,
-                    presetContext: presetContext,
-                    start: adjustedChartStart(start),
-                    end: adjustedChartEnd(endDateChart),
-                    unit: unit
-                )
-            }
-            
-            let chartSamples = Self.thinned(glucoseSamples)
-            let yAxisPoints = chartSamples.map{ item in item.quantity.doubleValue(for: unit) } + predicatedGlucose
-            let chartYAxis = ChartAxisGenerator.getYAxis(
-                points: yAxisPoints,
-                isMmol: unit == LoopUnit.millimolesPerLiter
-            )
+            if requestedRevision == revision { return }
+        }
+    }
 
-            let state = GlucoseActivityAttributes.ContentState(
-                date: currentGlucose.startDate,
-                ended: false,
-                preset: presetContext,
-                glucoseRanges: glucoseRanges,
-                currentGlucose: current,
-                eventualGlucose: statusContext?.predictedGlucose?.values.last,
-                trendType: statusContext?.glucoseDisplay?.trendType,
-                delta: delta,
-                isMmol: isMmol,
-                isCloseLoop: statusContext?.isClosedLoop ?? false,
-                lastCompleted: statusContext?.lastLoopCompleted,
-                bottomRow: bottomRow,
-                // ActivityKit silently drops updates over 4 KB
-                glucoseSamples: chartSamples.suffix(100).map { item in
-                    return GlucoseSampleAttributes(x: item.startDate, y: item.quantity.doubleValue(for: unit))
-                },
-                predicatedGlucose: predicatedGlucose,
-                predicatedStartDate: statusContext?.predictedGlucose?.startDate,
-                predicatedInterval: statusContext?.predictedGlucose?.interval,
-                yAxisMarks: chartYAxis
-            )
-            
-            await self.activity?.update(ActivityContent(
-                state: state,
-                staleDate: Date.now.addingTimeInterval(.hours(1))
-            ))
+    private func makeContentState(
+        glucoseSamples: [StoredGlucoseSample],
+        unit: LoopUnit,
+        settings: LiveActivitySettings,
+        now: Date
+    ) -> GlucoseActivityAttributes.ContentState {
+        let isMmol = unit == .millimolesPerLiter
+        let statusContext = statusContext()
+        let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
+
+        let currentGlucose = glucoseSamples.last
+        let current = currentGlucose?.quantity.doubleValue(for: unit)
+        let trend = currentGlucose?.trend ?? (currentGlucose == nil ? nil : statusContext?.glucoseDisplay?.trendType)
+
+        var delta = "??"
+        if let current, glucoseSamples.count > 1 {
+            let prevSample = glucoseSamples[glucoseSamples.count - 2]
+            let deltaValue = current - prevSample.quantity.doubleValue(for: unit)
+            delta = "\(deltaValue < 0 ? "-" : "+")\(glucoseFormatter.string(from: abs(deltaValue)) ?? "??")"
         }
-    }
-    
-    @objc private func settingsChanged() {
-        Task {
-            let newSettings = UserDefaults.standard.liveActivity ?? LiveActivitySettings()
-            
-            // Update live activity if needed
-            if !newSettings.enabled, let activity = self.activity {
-                await activity.end(nil, dismissalPolicy: .immediate)
-                self.activity = nil
-                
-                return
-            } else if newSettings.enabled && self.activity == nil {
-                initEmptyActivity(settings: newSettings)
-                
-            } else if newSettings != self.settings {
-                await self.activity?.end(nil, dismissalPolicy: .immediate)
-                self.activity = nil
-                
-                initEmptyActivity(settings: newSettings)
-            }
-            
-            self.settings = newSettings
-            update()
+
+        let bottomRow = self.getBottomRow(
+            currentGlucose: current,
+            trend: trend,
+            settings: settings,
+            now: now,
+            delta: delta,
+            statusContext: statusContext,
+            glucoseFormatter: glucoseFormatter
+        )
+        var predicatedGlucose: [Double] = []
+        if let samples = statusContext?.predictedGlucose?.values, settings.addPredictiveLine {
+            predicatedGlucose = samples
         }
-    }
-    
-    @objc private func appMovedToForeground() {
-        guard self.settings.enabled else {
-            return
+
+        let endDateChart: Date
+        if !predicatedGlucose.isEmpty, let predicted = statusContext?.predictedGlucose {
+            endDateChart = predicted.startDate.addingTimeInterval(.hours(4))
+        } else {
+            endDateChart = currentGlucose?.startDate ?? now
         }
-        
-        guard let activity = self.activity else {
-            initEmptyActivity(settings: self.settings)
-            update()
-            return
-        }
-        
-        Task {
-            await activity.end(nil, dismissalPolicy: .immediate)
-            await self.endUnknownActivities()
-            self.activity = nil
-            
-            initEmptyActivity(settings: self.settings)
-            update()
-        }
-    }
-    
-    private func endUnknownActivities() async {
-        for unknownActivity in Activity<GlucoseActivityAttributes>.activities
-            .filter({ self.activity?.id != $0.id })
-        {
-            await unknownActivity.end(nil, dismissalPolicy: .immediate)
-        }
-    }
-    
-    private func endActivity() async {
-        let dynamicState = self.activity?.content.state
-        await self.activity?.end(nil, dismissalPolicy: .immediate)
-        for unknownActivity in Activity<GlucoseActivityAttributes>.activities {
-            await unknownActivity.end(nil, dismissalPolicy: .immediate)
-        }
-        
-        do {
-            if let dynamicState = dynamicState {
-                self.activity = try Activity.request(
-                    attributes: GlucoseActivityAttributes(
-                        mode: self.settings.mode,
-                        addPredictiveLine: self.settings.addPredictiveLine,
-                        useLimits: self.settings.useLimits,
-                        upperLimitChartMmol: self.settings.upperLimitChartMmol,
-                        lowerLimitChartMmol: self.settings.lowerLimitChartMmol,
-                        upperLimitChartMg: self.settings.upperLimitChartMg,
-                        lowerLimitChartMg: self.settings.lowerLimitChartMg
-                    ),
-                    content: .init(state: dynamicState, staleDate: nil),
-                    pushType: .token
+
+        var presetContext: Preset? = nil
+        if let override = self.preMealOverride ?? self.scheduleOverride, let start = glucoseSamples.first?.startDate {
+            let presetStart = max(override.startDate, start)
+            let presetEnd = override.duration.isInfinite ? endDateChart : min(override.actualEndDate, endDateChart)
+            // Only create a preset if it overlaps the chart window. If the override ended
+            // before the chart window starts (e.g. spacious mode only shows 2h of history),
+            // presetEnd < presetStart and drawing a RectangleMark with those backwards dates
+            // forces SwiftUI Charts to expand the x-axis far into the past.
+            if presetStart <= presetEnd {
+                let (title, iconSymbol) = override.liveActivityTitleAndSymbol()
+                presetContext = Preset(
+                    title: title,
+                    iconSystemSymbolName: iconSymbol,
+                    startDate: presetStart,
+                    endDate: presetEnd,
+                    minValue: override.settings.targetRange?.lowerBound.doubleValue(for: unit) ?? 0,
+                    maxValue: override.settings.targetRange?.upperBound.doubleValue(for: unit) ?? 0
                 )
             }
-            self.startDate = Date.now
-        } catch {
-            print("ERROR: Error while ending live activity: \(error.localizedDescription)")
         }
+
+        var glucoseRanges: [GlucoseRangeValue] = []
+        if let glucoseRangeSchedule = self.glucoseTargetRangeSchedule, let start = glucoseSamples.first?.startDate {
+            glucoseRanges = getGlucoseRanges(
+                glucoseRangeSchedule: glucoseRangeSchedule,
+                presetContext: presetContext,
+                start: adjustedChartStart(start),
+                end: adjustedChartEnd(endDateChart),
+                unit: unit
+            )
+        }
+
+        let chartSamples = Self.thinned(glucoseSamples)
+        let yAxisPoints = chartSamples.map{ item in item.quantity.doubleValue(for: unit) } + predicatedGlucose
+        let chartYAxis = ChartAxisGenerator.getYAxis(
+            points: yAxisPoints,
+            isMmol: unit == LoopUnit.millimolesPerLiter
+        )
+
+        return GlucoseActivityAttributes.ContentState(
+            date: currentGlucose?.startDate ?? now,
+            ended: false,
+            preset: presetContext,
+            glucoseRanges: glucoseRanges,
+            currentGlucose: current,
+            eventualGlucose: statusContext?.predictedGlucose?.values.last,
+            trendType: trend,
+            delta: delta,
+            isMmol: isMmol,
+            isCloseLoop: statusContext?.isClosedLoop ?? false,
+            lastCompleted: statusContext?.lastLoopCompleted,
+            bottomRow: bottomRow,
+            // ActivityKit silently drops updates over 4 KB
+            glucoseSamples: chartSamples.suffix(100).map { item in
+                return GlucoseSampleAttributes(x: item.startDate, y: item.quantity.doubleValue(for: unit))
+            },
+            predicatedGlucose: predicatedGlucose,
+            predicatedStartDate: statusContext?.predictedGlucose?.startDate,
+            predicatedInterval: statusContext?.predictedGlucose?.interval,
+            yAxisMarks: chartYAxis
+        )
+
     }
-    
-    private func needsRecreation() -> Bool {
-        if !self.settings.enabled {
-            return false
-        }
-        
-        switch activity?.activityState {
-        case .dismissed,
-             .ended,
-             .stale:
-            return true
-        case .active:
-            return -startDate.timeIntervalSinceNow > .hours(1)
-        default:
-            return true
-        }
-    }
-    
+
     private func getInsulinOnBoard() -> String {
         guard let iob = activeInsulin?.value else { return "??" }
         return iobFormatter.string(from: iob) ?? "??"
     }
     
-    private func getGlucoseSample(unit: LoopUnit) async -> [StoredGlucoseSample] {
-        // When in spacious mode, we want to show the predictive line
-        // In compact mode, we only want to show the history
-        let timeInterval: TimeInterval = self.settings.addPredictiveLine ? .hours(-2) : .hours(-6)
-
-        // NOTE: Do NOT bridge async→sync with DispatchGroup.wait(.distantFuture) here.
-        // update() runs on a Swift Concurrency cooperative-pool thread; blocking that
-        // thread starves the (core-count-sized) pool and can deadlock the whole
-        // concurrency runtime under repeated Live Activity updates (Loop stops looping).
-        // Suspend on the already-async store call instead. (LoopKit/Loop#2465)
-        return (try? await self.glucoseStore.getGlucoseSamples(
-            start: adjustedChartStart(Date.now.addingTimeInterval(timeInterval)),
-            end: Date.now
-        )) ?? []
-    }
-    
-    // If the chart start falls past the half-hour mark (HH:31–HH:59), pull it back to HH:30
-    // so that the nearest hour label is never truncated at the left edge.
     /// At most one sample per ~5 minutes, keeping the latest, so one-minute CGMs fit the update size limit.
     static func thinned(_ samples: [StoredGlucoseSample], minimumSpacing: TimeInterval = .minutes(4.5)) -> [StoredGlucoseSample] {
         var kept: [StoredGlucoseSample] = []
@@ -356,6 +284,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
         return kept.reversed()
     }
 
+    // Pull the start back to HH:30 when needed to keep the nearest hour label visible.
     private func adjustedChartStart(_ date: Date) -> Date {
         let calendar = Calendar.current
         let minute = calendar.component(.minute, from: date)
@@ -487,8 +416,8 @@ class LiveActivityManager : LiveActivityManagerProxy {
         return glucoseRanges
     }
     
-    private func getBottomRow(currentGlucose: Double, delta: String, statusContext: StatusExtensionContext?, glucoseFormatter: NumberFormatter) -> [BottomRowItem] {
-        return self.settings.bottomRowConfiguration.map { type in
+    private func getBottomRow(currentGlucose: Double?, trend: GlucoseTrend?, settings: LiveActivitySettings, now: Date, delta: String, statusContext: StatusExtensionContext?, glucoseFormatter: NumberFormatter) -> [BottomRowItem] {
+        return settings.bottomRowConfiguration.map { type in
             switch(type) {
             case .iob:
                 return BottomRowItem.generic(label: type.name(), value: getInsulinOnBoard(), unit: "U")
@@ -508,7 +437,7 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 return BottomRowItem.basal(rate: netBasalContext.rate, percentage: netBasalContext.percentage)
                 
             case .currentBg:
-                return BottomRowItem.currentBg(label: type.name(), value: "\(glucoseFormatter.string(from: currentGlucose) ?? "??")", trend: statusContext?.glucoseDisplay?.trendType)
+                return BottomRowItem.currentBg(label: type.name(), value: currentGlucose.flatMap { glucoseFormatter.string(from: $0) } ?? "??", trend: trend)
                 
             case .eventualBg:
                 guard let eventual = statusContext?.predictedGlucose?.values.last else {
@@ -521,50 +450,11 @@ class LiveActivityManager : LiveActivityManagerProxy {
                 return BottomRowItem.generic(label: type.name(), value: delta, unit: "")
                 
             case .updatedAt:
-                return BottomRowItem.generic(label: type.name(), value: timeFormatter.string(from: Date.now), unit: "")
+                return BottomRowItem.generic(label: type.name(), value: timeFormatter.string(from: now), unit: "")
             }
        }
     }
     
-    private func initEmptyActivity(settings: LiveActivitySettings) {
-        do {
-            let dynamicState = GlucoseActivityAttributes.ContentState(
-                date: Date.now,
-                ended: true,
-                preset: nil,
-                glucoseRanges: [],
-                currentGlucose: 0,
-                eventualGlucose: nil,
-                trendType: nil,
-                delta: "",
-                isMmol: true,
-                isCloseLoop: false,
-                lastCompleted: nil,
-                bottomRow: [],
-                glucoseSamples: [],
-                predicatedGlucose: [],
-                predicatedStartDate: nil,
-                predicatedInterval: nil,
-                yAxisMarks: []
-            )
-            
-            self.activity = try Activity.request(
-                attributes: GlucoseActivityAttributes(
-                    mode: settings.mode,
-                    addPredictiveLine: settings.addPredictiveLine,
-                    useLimits: settings.useLimits,
-                    upperLimitChartMmol: settings.upperLimitChartMmol,
-                    lowerLimitChartMmol: settings.lowerLimitChartMmol,
-                    upperLimitChartMg: settings.upperLimitChartMg,
-                    lowerLimitChartMg: settings.lowerLimitChartMg
-                ),
-                content: .init(state: dynamicState, staleDate: nil),
-                pushType: .token
-            )
-        } catch {
-            print("ERROR: Error while creating empty live activity: \(error.localizedDescription)")
-        }
-    }
 }
 
 extension TemporaryScheduleOverride {

@@ -174,6 +174,7 @@
 		3ED3198C2EB659E600820BCF /* BasalViewActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319862EB659E600820BCF /* BasalViewActivity.swift */; };
 		3ED319912EB65A2D00820BCF /* GlucoseActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED3198E2EB65A2D00820BCF /* GlucoseActivityAttributes.swift */; };
 		3ED319922EB65A2D00820BCF /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED3198F2EB65A2D00820BCF /* LiveActivityManager.swift */; };
+		A1B2C3D40000000000000032 /* LiveActivityClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000031 /* LiveActivityClient.swift */; };
 		3ED319932EB65A2D00820BCF /* ChartAxisGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED3198D2EB65A2D00820BCF /* ChartAxisGenerator.swift */; };
 		3ED319942EB65A3E00820BCF /* GlucoseActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED3198E2EB65A2D00820BCF /* GlucoseActivityAttributes.swift */; };
 		3ED319962EB65A5C00820BCF /* LiveActivityManagementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED319952EB65A5C00820BCF /* LiveActivityManagementViewModel.swift */; };
@@ -419,6 +420,7 @@
 		9960C6964DD51D81093FAD5D /* Loop/Resources/Sounds/chime.caf in Resources */ = {isa = PBXBuildFile; fileRef = 3F7A1D72697082DC3A14587E /* Loop/Resources/Sounds/chime.caf */; };
 		9B8FCBDD6E3A9E603C4AABAD /* Loop/Resources/Sounds/bright_alarm.caf in Resources */ = {isa = PBXBuildFile; fileRef = 270F994CD56D566028B3CB25 /* Loop/Resources/Sounds/bright_alarm.caf */; };
 		A1B2C3D40000000000000002 /* GlucoseAlertManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */; };
+		A1B2C3D40000000000000022 /* LiveActivityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000021 /* LiveActivityTests.swift */; };
 		A1B2C3D40000000000000012 /* AlarmSoundCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000011 /* AlarmSoundCatalogTests.swift */; };
 		A2779286E117BD3627DA0618 /* Loop/Resources/Sounds/simple.caf in Resources */ = {isa = PBXBuildFile; fileRef = 5181B60CBF3CB2DA537F0475 /* Loop/Resources/Sounds/simple.caf */; };
 		A413B305CB4C4009DA09BE57 /* Loop/Resources/Sounds/bloom.caf in Resources */ = {isa = PBXBuildFile; fileRef = 8FB2394478FF679F436E8EF1 /* Loop/Resources/Sounds/bloom.caf */; };
@@ -966,6 +968,7 @@
 		3ED3198D2EB65A2D00820BCF /* ChartAxisGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisGenerator.swift; sourceTree = "<group>"; };
 		3ED3198E2EB65A2D00820BCF /* GlucoseActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseActivityAttributes.swift; sourceTree = "<group>"; };
 		3ED3198F2EB65A2D00820BCF /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
+		A1B2C3D40000000000000031 /* LiveActivityClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityClient.swift; sourceTree = "<group>"; };
 		3ED319952EB65A5C00820BCF /* LiveActivityManagementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManagementViewModel.swift; sourceTree = "<group>"; };
 		3ED319972EB65A6900820BCF /* LiveActivityBottomRowManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityBottomRowManagerView.swift; sourceTree = "<group>"; };
 		3ED319982EB65A6900820BCF /* LiveActivityManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManagementView.swift; sourceTree = "<group>"; };
@@ -1257,6 +1260,7 @@
 		8FB2394478FF679F436E8EF1 /* Loop/Resources/Sounds/bloom.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/bloom.caf; sourceTree = SOURCE_ROOT; };
 		9471E156FC10D6D0FF219C77 /* Loop/Resources/Sounds/spring.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop/Resources/Sounds/spring.caf; sourceTree = SOURCE_ROOT; };
 		A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseAlertManagerTests.swift; sourceTree = "<group>"; };
+		A1B2C3D40000000000000021 /* LiveActivityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityTests.swift; sourceTree = "<group>"; };
 		A1B2C3D40000000000000011 /* AlarmSoundCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSoundCatalogTests.swift; sourceTree = "<group>"; };
 		A900531A28D60862000BC15B /* Loop.shortcut */ = {isa = PBXFileReference; lastKnownFileType = file; path = Loop.shortcut; sourceTree = "<group>"; };
 		A900531B28D608CA000BC15B /* Cancel Override.shortcut */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Cancel Override.shortcut"; sourceTree = "<group>"; };
@@ -1829,6 +1833,7 @@
 				C16B983F26B4898800256B05 /* DoseEnactorTests.swift */,
 				E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */,
 				A1B2C3D40000000000000001 /* GlucoseAlertManagerTests.swift */,
+				A1B2C3D40000000000000021 /* LiveActivityTests.swift */,
 				A1B2C3D40000000000000011 /* AlarmSoundCatalogTests.swift */,
 				E9B3552C293592B40076AB04 /* MealDetectionManagerTests.swift */,
 				C1DA43562B1A70BE00CBD33F /* SettingsManagerTests.swift */,
@@ -1870,6 +1875,7 @@
 				3ED3198D2EB65A2D00820BCF /* ChartAxisGenerator.swift */,
 				3ED3198E2EB65A2D00820BCF /* GlucoseActivityAttributes.swift */,
 				3ED3198F2EB65A2D00820BCF /* LiveActivityManager.swift */,
+				A1B2C3D40000000000000031 /* LiveActivityClient.swift */,
 			);
 			path = "Live Activity";
 			sourceTree = "<group>";
@@ -3957,6 +3963,7 @@
 				14D906F42A846510006EB79A /* FavoriteFoodsViewModel.swift in Sources */,
 				3ED319912EB65A2D00820BCF /* GlucoseActivityAttributes.swift in Sources */,
 				3ED319922EB65A2D00820BCF /* LiveActivityManager.swift in Sources */,
+				A1B2C3D40000000000000032 /* LiveActivityClient.swift in Sources */,
 				3ED319932EB65A2D00820BCF /* ChartAxisGenerator.swift in Sources */,
 				DDC389FE2A2C4C830066E2E8 /* GlucoseBasedApplicationFactorSelectionView.swift in Sources */,
 				A9C62D842331700E00535612 /* DiagnosticLog+Subsystem.swift in Sources */,
@@ -4234,6 +4241,7 @@
 				C18859A42AF165330010F21F /* MockCGMManager.swift in Sources */,
 				E9C58A7324DB4A2700487A17 /* LoopDataManagerTests.swift in Sources */,
 				A1B2C3D40000000000000002 /* GlucoseAlertManagerTests.swift in Sources */,
+				A1B2C3D40000000000000022 /* LiveActivityTests.swift in Sources */,
 				A1B2C3D40000000000000012 /* AlarmSoundCatalogTests.swift in Sources */,
 				C18859A22AF165130010F21F /* MockPumpManager.swift in Sources */,
 				E98A55F324EDD9530008715D /* MockSettingsStore.swift in Sources */,

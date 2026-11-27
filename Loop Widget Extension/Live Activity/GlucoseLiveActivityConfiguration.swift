@@ -213,7 +213,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
             : LoopUnit.milligramsPerDeciliter.localizedShortUnitString
         
         let glucoseColor = !context.attributes.useLimits ? .primary : getGlucoseColor(context: context)
-        let currentBG = (glucoseFormatter.string(from: context.state.currentGlucose) ?? "??") + getArrowImage(context.state.trendType)
+        let currentBG = context.state.formattedCurrentGlucose + getArrowImage(context.state.trendType)
         let eventualBG = formatEventualBG(value: context.state.eventualGlucose, formatter: glucoseFormatter)
         
         HStack(spacing: 10) {
@@ -261,11 +261,6 @@ struct GlucoseLiveActivityConfiguration: Widget {
     private func dynamicIslandView(
         context: ActivityViewContext<GlucoseActivityAttributes>
     ) -> DynamicIsland {
-        let glucoseFormatter = NumberFormatter.glucoseFormatter(
-            for: context.state.isMmol
-                ? LoopUnit.millimolesPerLiter : LoopUnit.milligramsPerDeciliter
-        )
-
         return DynamicIsland {
             DynamicIslandExpandedRegion(.leading) {
                 HStack(alignment: .center) {
@@ -273,7 +268,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                         .frame(width: 40, height: 40, alignment: .trailing)
                     Spacer()
                     Text(
-                        "\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))"
+                        "\(context.state.formattedCurrentGlucose)\(getArrowImage(context.state.trendType))"
                     )
                     .foregroundStyle(getGlucoseColor(context: context))
                     .font(.headline)
@@ -333,7 +328,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
             }
         } compactLeading: {
             Text(
-                "\(glucoseFormatter.string(from: context.state.currentGlucose) ?? "??")\(getArrowImage(context.state.trendType))"
+                "\(context.state.formattedCurrentGlucose)\(getArrowImage(context.state.trendType))"
             )
             .foregroundStyle(
                 getGlucoseColor(context: context)
@@ -345,8 +340,7 @@ struct GlucoseLiveActivityConfiguration: Widget {
                 .minimumScaleFactor(0.1)
         } minimal: {
             Text(
-                glucoseFormatter.string(from: context.state.currentGlucose)
-                    ?? "??"
+                context.state.formattedCurrentGlucose
             )
             .foregroundStyle(
                 getGlucoseColor(context: context)
@@ -463,11 +457,10 @@ struct GlucoseLiveActivityConfiguration: Widget {
     }
 
     private func getGlucoseColor(context: ActivityViewContext<GlucoseActivityAttributes>) -> Color {
-        guard context.attributes.useLimits else {
+        guard context.attributes.useLimits, let value = context.state.currentGlucose else {
             return .primary
         }
         
-        let value = context.state.currentGlucose
         if context.state.isMmol
             && value < context.attributes.lowerLimitChartMmol
             || !context.state.isMmol
@@ -487,4 +480,14 @@ struct GlucoseLiveActivityConfiguration: Widget {
         return .green
     }
 
+}
+
+// Presentation belongs to the widget; ContentState remains a data-only ActivityKit payload.
+@available(iOS 16.2, *)
+private extension GlucoseActivityAttributes.ContentState {
+    var formattedCurrentGlucose: String {
+        guard let currentGlucose else { return "??" }
+        let unit: LoopUnit = isMmol ? .millimolesPerLiter : .milligramsPerDeciliter
+        return NumberFormatter.glucoseFormatter(for: unit).string(from: currentGlucose) ?? "??"
+    }
 }

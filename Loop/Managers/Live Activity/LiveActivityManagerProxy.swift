@@ -8,6 +8,7 @@
 
 import LoopKit
 
+@MainActor
 protocol LiveActivityManagerProxy {
     /// Update the live activity with current override and glucose target information.
     /// Call this whenever overrides or glucose targets change, or after every loop cycle.

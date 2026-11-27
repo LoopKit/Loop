@@ -140,6 +140,7 @@ final class LoopDataManager: ObservableObject {
         trustedTimeOffset: @escaping () async -> TimeInterval,
         analyticsServicesManager: AnalyticsServicesManager?,
         carbAbsorptionModel: CarbAbsorptionModel,
+        glucoseUnit: @escaping @MainActor () -> LoopUnit = { .milligramsPerDeciliter },
         usePositiveMomentumAndRCForManualBoluses: Bool = true,
         dosingStrategySelectionEnabled: Bool = true,
     ) {
@@ -164,7 +165,7 @@ final class LoopDataManager: ObservableObject {
         if #available(iOS 16.2, *) {
             self.liveActivityManager = LiveActivityManager(
                 glucoseStore: self.glucoseStore,
-                doseStore: self.doseStore
+                glucoseUnit: glucoseUnit
             )
         }
 
