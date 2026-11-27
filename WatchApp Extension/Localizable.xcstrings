@@ -3981,6 +3981,9 @@
     "Sensor" : {
       "comment" : "Title of the watch's sensor page when the sensor has no name yet"
     },
+    "Sensor ready to pair" : {
+      "comment" : "Watch notification title: a new sensor is waiting for its Bluetooth pairing request to be accepted on the watch"
+    },
     "Start Preset" : {
       "comment" : "Button text to confirm starting preset before using digital crown"
     },
@@ -3992,6 +3995,9 @@
     },
     "Suspended" : {
       "comment" : "Title for increased insulin delivery state state"
+    },
+    "Tap to open Loop, then tap Pair." : {
+      "comment" : "Watch notification body: how to accept a new sensor's Bluetooth pairing request"
     },
     "Total Carbs" : {
 
