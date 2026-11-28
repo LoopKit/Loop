@@ -14,6 +14,8 @@ class LiveActivityManagementViewModel : ObservableObject {
     @Published var mode: LiveActivityMode
     @Published var isEditingMode: Bool = false
     @Published var addPredictiveLine: Bool
+    @Published var showLoopIcon: Bool
+    @Published var showChartBackground: Bool
     @Published var useLimits: Bool
     @Published var upperLimitChartMmol: Double
     @Published var lowerLimitChartMmol: Double
@@ -26,6 +28,8 @@ class LiveActivityManagementViewModel : ObservableObject {
         self.enabled = liveActivitySettings.enabled
         self.mode = liveActivitySettings.mode
         self.addPredictiveLine = liveActivitySettings.addPredictiveLine
+        self.showLoopIcon = liveActivitySettings.showLoopIcon
+        self.showChartBackground = liveActivitySettings.showChartBackground
         self.useLimits = liveActivitySettings.useLimits
         self.upperLimitChartMmol = liveActivitySettings.upperLimitChartMmol
         self.lowerLimitChartMmol = liveActivitySettings.lowerLimitChartMmol
