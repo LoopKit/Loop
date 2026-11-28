@@ -20,7 +20,7 @@ normally within the pod's reach; one in another room is not.
 **What follows from that.** "Near" for either device means within Bluetooth reach of the body, so of the pod and the
 sensor together. A device that can see the sensor can see the pod, and vice versa, except as a testing artifact. A
 watch on the wrist is woken by the sensor every five minutes, so it always comes back within a cycle even if watchOS
-stops its app; a watch silent for longer than a cycle is off the wrist, dead, or in a test.
+stops its app; a watch silent for longer than a cycle is off the wrist, dead, or in a test. Important to note: when connected to WiFi, for example at home, it is possible for the watch to be able to reach the phone (over WiFi) even though the phone cannot reach the Pod (over Bluetooth).  
 
 **Highly abnormal:** a pod on the body that answers neither device (a dead or faulted pod). Rows 24 and 25 cover it;
 in tests it is the pod emulator unplugged. A pod that faults during a loan still answers, and alarms until it is
