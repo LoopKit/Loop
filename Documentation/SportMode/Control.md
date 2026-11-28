@@ -20,7 +20,12 @@ normally within the pod's reach; one in another room is not.
 **What follows from that.** "Near" for either device means within Bluetooth reach of the body, so of the pod and the
 sensor together. A device that can see the sensor can see the pod, and vice versa, except as a testing artifact. A
 watch on the wrist is woken by the sensor every five minutes, so it always comes back within a cycle even if watchOS
-stops its app; a watch silent for longer than a cycle is off the wrist, dead, or in a test.
+stops its app; a watch silent for longer than a cycle is off the wrist, dead, or in a test. Important to note: when connected to WiFi, for example at home, it is possible for the watch to be able to reach the phone (over WiFi) even though the phone cannot reach the Pod (over Bluetooth).  
+
+**A fourth place for the phone: answering, not near.** The phone exchanges messages with the watch within seconds,
+and is out of the pod's and the sensor's reach: at home on Wi-Fi it can be rooms away. So the phone's answer says
+nothing about whether the phone can reach the pod. No step takes one as proof of the other, and no answer of the
+phone's waits on the pod.
 
 **Highly abnormal:** a pod on the body that answers neither device (a dead or faulted pod). Rows 24 and 25 cover it;
 in tests it is the pod emulator unplugged. A pod that faults during a loan still answers, and alarms until it is
@@ -32,7 +37,8 @@ believe they control the pod do not share it: the phone's open connection blocks
 session makes both fail its handshake.
 
 **Values used in the table.** For each device: *near* (within reach of the body; for the watch this includes a
-charger within reach), *away*, *dead*. The watch's place is *on wrist*, *off wrist within reach*, or *off wrist out of
+charger within reach), *away*, *dead*. For the phone also *answering, not near*: in the watch's reach, out of the
+pod's. The watch's place is *on wrist*, *off wrist within reach*, or *off wrist out of
 reach*.
 
 ---
@@ -71,6 +77,13 @@ rule 4 says how.
    dead phone from one left at home, and in either case it would be starting a mode nobody chose.
 7. **Err on the side of telling the looper what is happening.** Whatever a device inferred, it says so. A refusal
    always names the nearest thing that can be done.
+
+**A tap is honored unless it would break rule 1 or dose where the looper cannot see or stop it.** A Start is not
+refused while the pod is on the body and the watch can loop it: with the phone it starts by grant, without it from
+the stored copy. An End goes through whenever the phone answers with its Bluetooth on, wherever the phone is. What
+follows from the tap is the looper's to know (rule 7), not the system's to prevent. The refusals that remain have
+nothing behind them: the watch is not reading the sensor, the therapy settings are incomplete, a bolus is still
+being given, a command of the watch's own is unconfirmed at an End, the phone's Bluetooth is off at an End.
 
 **Control changes on evidence, never on a clock.** Evidence is a tap, the other device's word, or an observation
 (a pod reading, an answer, silence after a query). Clocks may only decide *when to query* (a report is overdue) and
@@ -166,7 +179,7 @@ Each situation lists:
 
 | # | Situation | Held by afterwards | Status |
 |---|---|---|---|
-| 1 | [Start, phone near](#1-start-phone-near) | watch, by grant | built |
+| 1 | [Start, phone answers](#1-start-phone-answers) | watch, by grant | built |
 | 2 | [Start, phone away or dead](#2-start-phone-away-or-dead) | watch, started without the phone | built |
 | 3 | [Phone dies, no loan](#3-phone-dies-no-loan) | nobody; the pod runs its schedule within 30 min | deliberate exception for control |
 | 4 | [Phone back, no loan](#4-phone-back-no-loan) | phone | built |
@@ -189,27 +202,31 @@ Each situation lists:
 | 21 | [End, phone away, watch started alone](#21-end-phone-away-watch-started-alone) | watch | built |
 | 22 | [Watch started alone dies, phone away](#22-watch-started-alone-dies-phone-away) | nobody | accepted |
 | 23 | [Both dead](#23-both-dead) | nobody | accepted |
-| 24 | [Start, phone near, pod silent (highly abnormal)](#24-start-phone-near-pod-silent-highly-abnormal) | phone | not built |
+| 24 | [Start, phone near, pod silent (highly abnormal)](#24-start-phone-near-pod-silent-highly-abnormal) | phone, in name only: nobody loops | built |
 | 25 | [Start without the phone, pod silent (highly abnormal)](#25-start-without-the-phone-pod-silent-highly-abnormal) | phone, in name only: nobody loops | built |
 | 26 | [Pod faults, deactivated on the watch, phone near](#26-pod-faults-deactivated-on-the-watch-phone-near) | phone, with no pod | built |
 | 27 | [Pod faults, deactivated on the watch, phone away](#27-pod-faults-deactivated-on-the-watch-phone-away) | phone, with no pod, once it hears | built |
 | 28 | [The pod shows another controller, phone holding it](#28-the-pod-shows-another-controller-phone-holding-it) | the watch, or nobody until the looper takes it back on the phone | built |
 | 29 | [The pod shows another controller, watch holding a loan](#29-the-pod-shows-another-controller-watch-holding-a-loan) | the phone, or nobody until a tap | built |
 | 30 | [Start, watch has not yet connected to the sensor](#30-start-watch-has-not-yet-connected-to-the-sensor) | phone | built |
+| 31 | [End, phone answering, not near](#31-end-phone-answering-not-near) | phone, in name only: nobody loops until it reaches the pod | built |
 
-### 1. Start, phone near
+### 1. Start, phone answers
 
 - **Control state:** pod held by phone (resting state) · loan: none · took over on silence at: none · looper's latest tap: Start on the watch, now
-- **Where:** phone near, alive · watch on wrist, alive
+- **Where:** phone near, or answering and not near, alive · watch on wrist, alive
 - **What changed:** Start tapped on the watch
-- **Phone sees:** believes it holds the pod · sensor: fresh · pod: holding, reads · heard from the watch: the Start request
+- **Phone sees:** believes it holds the pod · sensor: fresh, or none · pod: holding, reads, or out of reach · heard from the watch: the Start request
 - **Watch sees:** believes the phone holds the pod · sensor: fresh · pod: not touched · heard from the phone: nothing yet
-- **Result:** query: the request is the query (watch → phone) → answer: a grant → action: phone releases the pod and holds its dosing; watch takes over (transfer G)
+- **Result:** query: the request is the query (watch → phone) → answer: a grant, from what the phone knows, with no exchange with the pod → action: phone holds its dosing and lets the pod go, its temp basal still running; watch takes over and cancels it (transfer G)
 - **Afterwards:** pod held by watch, by grant · time without looping: seconds · looper sees: watch: Sport Mode page; phone: banner "Sport Mode Active"
 - **Status:** built · **Code:** phone `+Grant`, watch `+Start`
 - **Why:** The looper chose the watch and the phone is there to hand over: the ordinary case. The watch doses from
   its own reading of the sensor, which stock gives it only with the CGM's Read on Apple Watch setting on; with it
-  off, the phone refuses the Start and names the setting, rather than turning it on for the looper.
+  off, the phone refuses the Start and names the setting, rather than turning it on for the looper. The phone
+  answers without touching the pod: the watch can reach it where it cannot reach the pod (section 1), and an answer
+  that waited on the pod was silence to the watch. The watch, on the body, is the one to find out whether the pod
+  answers.
 
 ### 2. Start, phone away or dead
 
@@ -222,7 +239,7 @@ Each situation lists:
 - **Afterwards:** pod held by watch, started without the phone · time without looping: 10 s plus the tap · looper sees: watch: on screen, the offer
 - **Status:** built · **Code:** watch `+Start`, `+Seize`
 - **Why:** The looper asked for Sport Mode and the phone cannot grant it. Starting from the stored copy is entering a mode, which needs the looper's tap (rule 6), so the system offers it as the alternative to the refused Start (rule 7). The query's silence decides when to offer, not the reachability flag, which says only whether the phone's app can take a live message this second. A watch not reading the sensor
-itself has nothing to dose from, so it offers nothing and says so.
+itself has nothing to dose from, so it offers nothing and says so. The offer answers the phone's silence, so it lasts only as long as the silence: the phone's next word of any kind (a refusal, a grant, a fresh copy, its status) withdraws it, the Start page asks the phone again, and a refusal is shown in the offer's place.
 
 ### 3. Phone dies, no loan
 
@@ -402,7 +419,7 @@ itself has nothing to dose from, so it offers nothing and says so.
 - **Result:** query: phone → watch, on seeing the insulin; or none, if the watch's word came first → answer: "I hold loan n" → action: stand aside, adopt the loan; from here rows 7–16 apply
 - **Afterwards:** pod held by watch · time without looping: none · looper sees: phone: banner "Sport Mode Active" (no prompt, no notification)
 - **Status:** built · **Code:** phone `+Mirror`, `+Ledger`
-- **Why:** The latest decision was the looper's Start on the watch, made without the phone; the phone's return is not a decision, so it raises no prompt.
+- **Why:** The latest decision was the looper's Start on the watch, made without the phone; the phone's return is not a decision, so it raises no prompt. Adopting the loan opens its books empty on the phone, as lending one does (the watch numbers each loan's records from 1), and only once the last loan's records are saved.
 
 ### 18. Phone returns, watch started alone and dead
 
@@ -483,10 +500,10 @@ itself has nothing to dose from, so it offers nothing and says so.
 - **What changed:** Start tapped on the watch
 - **Phone sees:** believes it holds the pod · sensor: fresh · pod: holding, no answer · heard from the watch: the Start request
 - **Watch sees:** believes the phone holds the pod · sensor: fresh · pod: not touched · heard from the phone: nothing yet
-- **Result:** query: the request is the query (watch → phone) → answer: a refusal, within the watch's 10 s wait → action: phone keeps the pod; watch shows "The iPhone couldn't reach the pod and kept it. Try again."
-- **Afterwards:** pod held by phone · time without looping: as long as the pod is silent, as in Loop without Sport Mode · looper sees: watch: the refusal on screen; phone: Loop's own pod-communication warnings
-- **Status:** not built: the phone waits on the pod past the 10 s, so the watch reads silence and offers row 2's start without the phone · **Code:** phone `+Grant`
-- **Why:** **Highly abnormal.** A device near the body reaches the pod unless the pod itself fails (a dead or faulted pod; in tests, the emulator unplugged). The phone is there, so its answer must arrive inside the wait: its silence would say it is away, and starting without it cannot help when the pod is the problem.
+- **Result:** query: the request is the query (watch → phone) → answer: a grant, as in row 1: the phone does not ask the pod → action: the watch's takeover gets no answer from the pod within the grant's 60 s and returns to rest; the phone takes the pod back (transfer G)
+- **Afterwards:** pod held by phone, in name only: nobody loops · time without looping: as long as the pod is silent, as in Loop without Sport Mode · looper sees: watch: on screen "The pod didn't answer in time. Your iPhone still has the pod. Tap Start to try again."; phone: "The Watch Didn't Take the Pod", then Loop's own pod-communication warnings
+- **Status:** built · **Code:** phone `+Grant`, `+Mirror`, watch `+Start`
+- **Why:** **Highly abnormal.** A device near the body reaches the pod unless the pod itself fails (a dead or faulted pod; in tests, the emulator unplugged). The phone cannot tell a failed pod from a pod it is only out of reach of (section 1), so it does not judge: it lends, and the watch, on the body, finds out.
 
 ### 25. Start without the phone, pod silent (highly abnormal)
 
@@ -560,6 +577,18 @@ itself has nothing to dose from, so it offers nothing and says so.
 - **Status:** built · **Code:** watch `+Start`
 - **Why:** A watch that has never authenticated with the current sensor would take the pod with nothing of its own to loop on, and nothing would tell the looper for 20 minutes. First contact needs the looper anyway (the code is entered on the phone; the sensor asks each new watch for its own Bluetooth pairing, and watchOS shows that request only with Loop on screen), so the Start is held, with what to do, before the pod moves. The test is "has authenticated with this sensor", not "has a recent reading": a known sensor reconnects in the background, and a gap in its readings during a loan is the not-looping warning's business. A watch not set to read the sensor is rows 1 and 2, unchanged.
 
+### 31. End, phone answering, not near
+
+- **Control state:** pod held by watch (grant) · loan: n · took over on silence at: none · looper's latest tap: End on the watch, now
+- **Where:** phone answering, not near, alive · watch on wrist, alive
+- **What changed:** End tapped on the watch
+- **Phone sees:** believes the watch holds loan n · sensor: none · pod: released, out of reach · heard from the watch: the hand-back offer
+- **Watch sees:** believes it holds loan n · sensor: fresh · pod: holding · heard from the phone: an acknowledgement
+- **Result:** query: the offer is the query (watch → phone) → answer: acknowledged → action: hand back (transfer H). The phone cannot read the pod; five minutes after it has the pod again, still unread, it tells the looper
+- **Afterwards:** pod held by phone, in name only: nobody loops until the phone reaches the pod or the looper starts Sport Mode again · time without looping: until then · looper sees: watch: the phone's page; after five minutes a notice from the phone, shown on the watch as the phone's notifications are: "iPhone can't reach the pod. Nobody is looping. Start Sport Mode again to resume looping."
+- **Status:** built · **Code:** phone `+Settle`
+- **Why:** End is the looper's tap (rule 2) and returns to the resting state (rule 6); a phone away from the pod is the state of a phone left in another room without Sport Mode. Refusing would override the tap on a guess about where the phone is. The system's part is to say so (rule 7). The notice is scheduled when the pod comes back to the phone and withdrawn when the phone reads the pod or a new loan starts, so it needs no run time on a suspended phone; the same notice follows any other return of the pod that the phone cannot read. The loan's insulin check stays owed and is made when the phone next reads the pod, or on the watch's last reading if a new loan starts first.
+
 **Physically impossible (no behaviour, at most a log line):** the sensor away from the body; a device that can see
 the sensor but not the pod, or the pod but not the sensor.
 
@@ -587,13 +616,18 @@ it reports. The pod has one connection, so the device reading it cannot be raced
 cannot ask the phone and takes the pod whatever it is giving: the phone's records are trued up from the pod's
 delivered total when it is back with the pod.
 
-**No program crosses a transfer.** The device that takes the pod cancels any temp basal still running on it, then doses at its next loop cycle, which the next glucose reading starts. The phone does this when it takes the pod back; the watch does it at a Start. At an ordinary Start the phone has already cancelled its own temp before handing over, so the watch's cancel finds nothing; at an offline Start the phone's temp is still running, and the cancel is what stops it. Neither device doses on a reading the other has already acted on: with automatic boluses, a second cycle on the same reading gives an additional automatic bolus sooner than it would otherwise come. The cost is that if the phone was running a low temp, it is lost until the first cycle (up to one reading, about 5 minutes) and the pod runs the scheduled basal meanwhile, as at a hand-back. On balance, avoiding the extra automatic bolus is better.
+**No program crosses a transfer.** The device that takes the pod cancels any temp basal still running on it, then doses at its next loop cycle, which the next glucose reading starts. The phone does this when it takes the pod back; the watch does it at a Start. At every Start the phone's temp is still running when the watch takes the pod, and the watch's cancel is what stops it: the phone lends without an exchange with the pod (row 1). Neither device doses on a reading the other has already acted on: with automatic boluses, a second cycle on the same reading gives an additional automatic bolus sooner than it would otherwise come. The cost is that if the phone was running a low temp, it is lost until the first cycle (up to one reading, about 5 minutes) and the pod runs the scheduled basal meanwhile, as at a hand-back. On balance, avoiding the extra automatic bolus is better.
 
 **Nor while a command to it is unconfirmed.** A command the pod has not confirmed (its answer lost, or still being
 sent) can be settled only by the device that sent it, and the copy of the pump's state handed over leaves it out.
-The pod driver keeps the pod while one is open: a Start or an End is refused with "The pod hasn't confirmed the last
-command yet. Try again in a minute.", and the device keeps looping, which settles the command at its next exchange
-with the pod. Where the driver is not asked, §8 says what happens.
+The pod driver keeps the pod while one is open. At an End the watch is asked: the End is refused with "The pod
+hasn't confirmed the last command yet. Try again in a minute.", and the watch keeps looping, which settles the
+command at its next exchange with the pod. A Start is not refused for it: the loan starts, the phone reads the pod
+to settle its command and then lets go, and §8 says what becomes of the command's record.
+
+**The watch's stored copy is refreshed when the pod comes home.** The phone sends a fresh copy as soon as it holds
+the pod again after a loan, with that loan's records in it. A start without the phone from a copy made before the
+loan would count the watch's own last doses as insulin it has no record of.
 
 | Transfer | Step that fails | Who notices | What it sees | What it does | Pod held by | Looper sees | Status |
 |---|---|---|---|---|---|---|---|
@@ -601,7 +635,7 @@ with the pod. Where the driver is not asked, §8 says what happens.
 | G | the grant is lost or the takeover stalls | phone | no confirmation by its first cycle after the grant's 60 s lease | take back without asking: past the lease the watch refuses the grant | nobody until then (the phone has released; the watch has not taken) | phone: notification "The watch didn't take the pod. This phone kept it." | built |
 | G | ″ | phone | the watch says "I know no such grant" | take back at once | phone | ″ | built |
 | G | the phone's own bolus is still being given at the Start | phone | its pump's bolus state | deny the Start: "A bolus is still being given. Try again in N seconds." | phone | watch: on screen, the reason, with a haptic | built |
-| G | a command to the pod is unconfirmed at the Start | phone | its pod driver keeps the pod when asked to let it go | deny the Start: "The pod hasn't confirmed the last command yet. Try again in a minute."; the phone loops again | phone | watch: on screen, the reason, with a haptic | built |
+| G | a command to the pod is unconfirmed at the Start | watch | its takeover reading of the pod | the loan starts; what the pod delivered beyond the records is counted as a bolus (§8); the phone reads the pod to settle its command, then lets go | watch | — | built |
 | G | the takeover fails on the watch | watch, then phone | the watch reports failure | the phone takes back at once | phone | watch: on screen, the reason | built |
 | G | the looper cancels at the offline offer, and the grant arrives after that | watch | a grant for a Start no longer wanted | answer "takeover failed": Sport Mode is entered only by a tap, and the cancel withdrew it; a new Start asks afresh | phone | phone: takes the pod back at once, as above | built |
 | G | the grant is numbered at or below a loan the watch already knows | watch | a stale grant | answer "takeover failed" | phone | — | built |
@@ -610,6 +644,7 @@ with the pod. Where the driver is not asked, §8 says what happens.
 | **H** hand-back (watch → phone) | the watch's bolus is still being given at End | watch | its pump's bolus state | refuse the End: "A bolus is still being given. Try again in N seconds."; the loan continues | watch | watch: on screen over the bolus progress, with a haptic | built |
 | H | a command to the pod is unconfirmed once dosing has stopped at End | watch | its pod driver keeps the pod when asked to let it go | refuse the End: "The pod hasn't confirmed the last command yet. Try again in a minute."; the watch loops again | watch | watch: on screen, with a haptic | built |
 | H | the phone is away at End | watch | silence 10 s after the offer | refuse (row 8) | watch | row 8 | built |
+| H | the phone answers and cannot reach the pod | phone | no reading of the pod five minutes after it has it again | tell the looper (row 31); the loan's insulin check stays owed until the pod answers or a new loan starts | phone, in name only | notice: "iPhone can't reach the pod. Nobody is looping. Start Sport Mode again to resume looping." | built |
 | H | the phone acknowledged the first offer, later offers go unanswered | watch | no acknowledgement; resends every 15 s | keep resending, by every path, for the 2-min budget | watch, still looping | watch: "ending…" | built |
 | H | the final offer (sent after dosing stopped) is not acknowledged within the budget | watch | no acknowledgement | let the pod go and keep sending records; the phone takes the pod when they land, or when its overdue query is answered "I hold nothing" (counted as silence) | nobody until the phone takes it (seconds, or 6–11 min if every message was lost) | watch: notification "End Not Confirmed: the watch has stopped dosing… open Loop on the iPhone and tap the pod tile" | built. The transfer rule's second half: the watch cannot tell whether its final offer arrived, and resuming would dose beside a phone that may already be taking the pod, so the resting state it is |
 | **T** take-back (phone ← watch's pod) | the pod does not answer within 5 s | phone | no link | refuse; the loan is unchanged | watch | phone: "Couldn't Reach the Pod" | built |
@@ -641,9 +676,11 @@ Failures only a test can produce. They are logged when recognised; no warning is
   Dexcom's watch app together are expected to collide, so they are not supported together (untested). The Dexcom
   app on the phone is unaffected.
 
-- **An unconfirmed command where the pod driver is not asked.** The driver refuses to let the pod go at a Start or
-  an End (§6), but two cases never ask it. In both the command's own record is lost, and the insulin check counts
-  what the pod delivered beyond the records as a bolus, so dosing errs low.
+- **An unconfirmed command where the pod driver is not asked.** The driver refuses to let the pod go at an End
+  (§6), but three cases go ahead with a command still open. In each the command's own record is lost, and the
+  insulin check counts what the pod delivered beyond the records as a bolus, so dosing errs low.
+  - *A Start by grant.* The phone lends with its command still open; the grant's copy of the pump leaves the command
+    out, as the stored copy does. The phone reads the pod to settle the command and then lets go.
   - *The stored copy for a Start without the phone.* The phone refreshes the watch's copy of the pump while it loops;
     a refresh made while a command is unconfirmed leaves the command out, and a Start from that copy does not know
     it. The watch's takeover check books the difference.

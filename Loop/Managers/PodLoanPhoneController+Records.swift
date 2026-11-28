@@ -33,6 +33,7 @@ extension PodLoanPhoneController {
             // Standing aside for a loan this phone's credential started: adopt it, and its records come in now.
             guard state == .owner, yieldingToInferredLoan, batch.epoch > epoch,
                   let token = batch.seizeToken, token == persisted.seizeToken else { return }
+            guard !lastLoanStillBeingSaved(adopting: batch.epoch) else { return }
             adoptWatchStartedLoan(epoch: batch.epoch, earliestRecord: batch.events.map(\.record.startDate).min(),
                                   sentAt: batch.sentAt ?? deps.now(), odometer: batch.odometer, watchHoldsPod: true)
             handleBatch(batch)
@@ -76,6 +77,46 @@ extension PodLoanPhoneController {
         return held.contains { !open.contains($0.id) }
     }
 
+    /// A loan number is taken here and nowhere else: for a loan this phone lends, and for one the watch
+    /// started without it. The loan's books open empty: no record acknowledged, none saved, none waiting.
+    /// The watch numbers each loan's records from 1 and reads this phone's acknowledgement as covering
+    /// every record up to its number, so a number kept from the loan before covers records never sent.
+    /// The last loan's records are saved before this: a Start is refused until then, an adoption waits.
+    func openLoanBooks(epoch newEpoch: Int, _ anchors: (inout PodLoanPhoneState) -> Void) {
+        updateState {
+            $0.epoch = newEpoch
+            $0.committedCursor = 0
+            $0.committedIDs = []
+            anchors(&$0)
+        }
+        // What waited on the loan before goes with it: its offers are unacknowledged, so the watch
+        // sends them again.
+        pendingForceReclaimReason = nil
+        coalescedOffers.removeAll()
+        staged = [:]
+        stagedTombstones = []
+        persistStaged()
+    }
+
+    /// This phone still holds records of the last loan unsaved, or is writing them: a loan the watch
+    /// started is not adopted over them. The save is started where it can be. The loan is adopted when
+    /// the write lands (a hand-back waits for it) or when the watch sends again what is not acknowledged.
+    private func lastLoanStillBeingSaved(adopting newEpoch: Int) -> Bool {
+        guard commitInFlight || stagingHoldsUnsavedRecords else { return false }
+        handbackDiag(newEpoch, "not adopted yet: this phone is still saving the records of e\(epoch)")
+        saveUnsavedRecords()
+        return true
+    }
+
+    /// An offer that arrives during a write is taken up when the write lands (`drainAfterCommit`): one
+    /// per loan, and an interim never replaces a waiting final.
+    private func holdForTheWriteInProgress(_ offer: HandbackOffer) {
+        let storedIsFinal = coalescedOffers[offer.epoch]?.released == true
+        if !(storedIsFinal && offer.released != true) {
+            coalescedOffers[offer.epoch] = offer
+        }
+    }
+
     /// Takes on a loan the watch started without this phone, proven by this phone's offline-start
     /// credential: from here its records come in as a lent loan's do (control row 17).
     func adoptWatchStartedLoan(epoch newEpoch: Int, earliestRecord: Date?, sentAt: Date,
@@ -83,13 +124,15 @@ extension PodLoanPhoneController {
         handbackDiag(newEpoch, "adopting the loan the watch started without this phone, after e\(epoch)")
 
         let wasStandingAside = yieldingToInferredLoan
+        // The last loan's check, if this phone never read the pod for it: the watch's loan is the next
+        // to read the pod, as at a grant.
+        closeLastLoansCheckBeforeANewLoan()
         clearInferredLoanYield(reason: "its loan e\(newEpoch) is adopted")
         // Anchor the adopted loan at its earliest record, at most six hours back.
         let anchor = max(earliestRecord ?? sentAt, deps.now().addingTimeInterval(-.hours(6)))
         let lastPodReading = deps.pumpManager()?.lastSync
         let previous = state
-        updateState {
-            $0.epoch = newEpoch
+        openLoanBooks(epoch: newEpoch) {
             $0.phase = .loaned
             $0.holdRenewedAt = sentAt
             $0.loanStartedAt = anchor
@@ -133,6 +176,10 @@ extension PodLoanPhoneController {
         // and never over a grant in flight or a live loan.
         if let token = offer.seizeToken, state == .owner || state == .reclaimPending, offer.epoch > epoch,
            token == persisted.seizeToken {
+            if lastLoanStillBeingSaved(adopting: offer.epoch) {
+                holdForTheWriteInProgress(offer)
+                return
+            }
             if state == .reclaimPending {
                 cancelTakeBackAttempt()
                 handbackDiag(offer.epoch, "take-back stopped: the watch is handing back")
@@ -156,10 +203,7 @@ extension PodLoanPhoneController {
 
         // One commit at a time; coalesce by epoch, and never let an interim replace a waiting final.
         if commitInFlight {
-            let storedIsFinal = coalescedOffers[offer.epoch]?.released == true
-            if !(storedIsFinal && offer.released != true) {
-                coalescedOffers[offer.epoch] = offer
-            }
+            holdForTheWriteInProgress(offer)
             handbackDiag(offer.epoch, "hand-back waits for the write in progress, \(coalescedOffers.count) waiting")
             return
         }

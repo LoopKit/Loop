@@ -322,19 +322,28 @@ final class PodLoanWatchController {
     nonisolated func handleIncoming(userInfo: [String: Any]) {
         DispatchQueue.main.async {
             self.handleIncomingMessage(userInfo: userInfo)
-            self.notePhoneHeard()
+            self.phoneHeard()
         }
     }
 
-    /// Any word from the phone (its loan messages, or its status for the stock pages). With no loan
-    /// running, `LoanControl` row 3: the warning for a silent phone is pushed out.
+    /// Any word from the phone (its loan messages, or its status for the stock pages).
     func notePhoneHeard() {
-        DispatchQueue.main.async {
-            self.lastHeardFromPhoneAt = self.now()
-            guard self.phase == .idle || self.phase == .recoveredDrain else { return }
-            if case .tellIfSilent(.notHearingFromPhone, let after) = LoanControl.decide(LoanControl.Situation(device: .watch, trigger: .phoneHeardWithNoLoan)) {
-                NotHearingFromPhoneAlert.arm(after: after)
-            }
+        DispatchQueue.main.async { self.phoneHeard() }
+    }
+
+    /// On main. The offer to start without the phone answers the phone's silence, so its next word ends
+    /// the offer: the Start page asks the phone again, and shows the refusal if that is what it said
+    /// (control row 2). With no loan running, `LoanControl` row 3: the warning for a silent phone is
+    /// pushed out.
+    private func phoneHeard() {
+        lastHeardFromPhoneAt = now()
+        if seizeOffer != nil {
+            withdrawSeizeOffer(reason: "the phone was heard from")
+            notifyUI()
+        }
+        guard phase == .idle || phase == .recoveredDrain else { return }
+        if case .tellIfSilent(.notHearingFromPhone, let after) = LoanControl.decide(LoanControl.Situation(device: .watch, trigger: .phoneHeardWithNoLoan)) {
+            NotHearingFromPhoneAlert.arm(after: after)
         }
     }
 

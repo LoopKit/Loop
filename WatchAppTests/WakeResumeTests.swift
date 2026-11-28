@@ -278,6 +278,32 @@ final class WakeResumeTests: XCTestCase {
                       "on screen: why, and how to stop dosing instead")
     }
 
+    /// An End the phone refuses is over. Its ten-second wait must not judge the End tapped after it, or
+    /// that End is refused as unanswered a moment after its tap.
+    func testARefusedEndsWaitDoesNotJudgeTheNextEnd() async throws {
+        let c = await relaunch(phase: .active, savedState: readablePumpState)
+        var waits: [DispatchWorkItem] = []
+        c.scheduler = { _, label, work in if label == "handback-answer" { waits.append(work) } }
+        c.send = { _ in }
+
+        c.beginHandback()
+        await c.onMain { }
+        c.handleIncoming(userInfo: try LoanMessage.denied(LoanDenied(reason: "The watch is still looping. To end, turn on iPhone Bluetooth and tap End again.")).transportDictionary())
+        let refused = await c.fencedSnapshot()
+        XCTAssertFalse(refused.handbackPending, "precondition: the phone refused the first End")
+
+        c.beginHandback()
+        await c.onMain { }
+        let second = await c.fencedSnapshot()
+        XCTAssertTrue(second.handbackPending, "precondition: the second End is waiting for the phone")
+        XCTAssertEqual(waits.count, 2)
+
+        await c.onMain { waits.first?.perform() }          // the first End's wait runs out now
+        let after = await c.fencedSnapshot()
+        XCTAssertTrue(after.handbackPending, "the second End still waits for its own answer")
+        XCTAssertNil(after.handbackFailureText, "and nothing is refused on the first End's clock")
+    }
+
     func testEndAnsweredWithinTheWaitIsNotRefused() async throws {
         let c = await relaunch(phase: .active, savedState: readablePumpState)
         var answerWait: DispatchWorkItem?
