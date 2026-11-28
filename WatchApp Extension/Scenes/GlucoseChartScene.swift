@@ -115,6 +115,11 @@ class GlucoseChartScene: SKScene {
     private var needsUpdate = true
     private var shouldAnimatePredictionPath = false
 
+    /// Called with true when the scene has something to draw and false when it has finished, so the
+    /// view hosting it can stop its frame loop: pausing the scene alone leaves the view drawing frames
+    /// many times a second for as long as the app runs.
+    var onDrawingChange: ((Bool) -> Void)?
+
     private lazy var dateFormatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour]
@@ -192,6 +197,7 @@ class GlucoseChartScene: SKScene {
         if !needsUpdate && !isPaused && !childNodesHaveActions {
             logger.log("didFinishUpdate() pausing")
             self.isPaused = true
+            onDrawingChange?(false)
         }
     }
 
@@ -215,6 +221,7 @@ class GlucoseChartScene: SKScene {
             logger.log("setNeedsUpdate() unpausing")
             isPaused = false
         }
+        onDrawingChange?(true)
     }
 
     private func performUpdate(animated: Bool) {
