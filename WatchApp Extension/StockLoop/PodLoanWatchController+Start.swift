@@ -232,8 +232,9 @@ extension PodLoanWatchController {
         schedule(after: timeout, label: "request-timeout", execute: work)
     }
 
-    /// The offer answers one unanswered request; a later grant or Start makes it stale. On `queue`.
-    private func withdrawSeizeOffer(reason: String) {
+    /// The offer answers one unanswered request: a new Start, a grant, or any later word from the phone
+    /// ends it. On main.
+    func withdrawSeizeOffer(reason: String) {
         guard seizeOffer != nil else { return }
         seizeOffer = nil
         SportLog.event("seize", "offline start offer withdrawn: \(reason)")

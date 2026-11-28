@@ -60,34 +60,40 @@ extension PodLoanPhoneController {
     /// reaches for it, must not let go of a pod the phone holds.
     func letGoAgainIfKept() {
         guard let control = deps.pumpManager() as? ExclusiveDeviceControl, !control.isControlReleased else { return }
-        guard controlRole.isWithoutThePod else {
+        guard meansToBeWithoutThePod else {
             PhoneLog.event("mirror", "the pod driver keeps the pod: this phone holds it again or is taking it back (\(state.rawValue))")
             return
         }
         control.releaseControl()
         guard control.isControlReleased else {
-            PhoneLog.event("mirror", "standing aside: the pod driver still keeps the pod; dosing stays paused")
+            PhoneLog.event("mirror", "the pod driver still keeps the pod; this phone's dosing stays paused")
             return
         }
         deps.pumpControlChanged(true)
-        PhoneLog.event("mirror", "standing aside: the pod driver has let go of the pod")
+        PhoneLog.event("mirror", "the pod driver has let go of the pod")
     }
 
-    /// The pod driver kept the pod when this phone stood aside. Only an exchange with the pod settles the
+    /// This phone lends the pod, has just granted it, or stands aside for the watch: it means to be
+    /// without it. Not while it takes the pod back: a read that ends late must not let go of it then.
+    var meansToBeWithoutThePod: Bool {
+        controlRole.isWithoutThePod || state == .grantOffered
+    }
+
+    /// The pod driver kept the pod when this phone stood aside or lent it. Only an exchange with the pod settles the
     /// unconfirmed command, and a phone standing aside runs no loop cycle to make one: its cycles start
     /// from its own new readings, which the watch's relayed copies usually reach the store before. So
     /// read the pod, then ask the driver again. A failed read waits for the next time the phone stands
     /// aside or the next pump report.
     func readThePodIfKept() {
-        guard controlRole.isWithoutThePod, let control = deps.pumpManager() as? ExclusiveDeviceControl, !control.isControlReleased,
+        guard meansToBeWithoutThePod, let control = deps.pumpManager() as? ExclusiveDeviceControl, !control.isControlReleased,
               let odometer = control as? PumpDeliveryOdometer else { return }
-        PhoneLog.event("mirror", "standing aside: the pod driver keeps the pod until its last command is confirmed; reading the pod to settle it")
+        PhoneLog.event("mirror", "the pod driver keeps the pod until its last command is confirmed; reading the pod to settle it")
         Task { [weak self] in
             let read = await odometer.refreshDeliveredUnits()
             guard let self else { return }
             DispatchQueue.main.async {
                 if !read {
-                    PhoneLog.event("mirror", "standing aside: the pod read failed; the pod driver still keeps the pod")
+                    PhoneLog.event("mirror", "the pod read failed; the pod driver still keeps the pod")
                 }
                 self.letGoAgainIfKept()
             }

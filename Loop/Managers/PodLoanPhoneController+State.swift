@@ -164,6 +164,11 @@ extension PodLoanPhoneController {
             // The return has forgotten or taken the pod; a mark never outlives its loan.
             if persisted.podDeactivatedOnWatch != nil { updateState { $0.podDeactivatedOnWatch = nil } }
             beginReclaimSettleWindow()
+            // The watch's standing copy is from before the loan: it lacks the loan's own doses. A fresh
+            // one goes now, with the records just saved, not at the next cycle. A watch that starts
+            // without the phone from the old copy books its own last boluses as insulin it has no
+            // record of.
+            considerDormantRefresh(bookChanged: true)
         }
         deps.ownershipDidChange()
     }
