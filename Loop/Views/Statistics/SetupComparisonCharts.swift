@@ -82,7 +82,7 @@ struct MedianComparisonChartView: View {
                 var path = Path()
                 if let first = points.first {
                     path.move(to: first)
-                    AGPChartView.addSmoothCurve(through: points, to: &path)
+                    addSmoothCurve(through: points, to: &path)
                 }
                 return path
             }
@@ -99,7 +99,7 @@ struct MedianComparisonChartView: View {
                 var band = curve(afterSorted, \.p75)
                 let lower = afterSorted.reversed().map { CGPoint(x: x($0), y: y($0.p25)) }
                 band.addLine(to: lower[0])
-                AGPChartView.addSmoothCurve(through: lower, to: &band)
+                addSmoothCurve(through: lower, to: &band)
                 band.closeSubpath()
                 ctx.fill(band, with: .color(Color.accentColor.opacity(0.15)))
             }
@@ -116,5 +116,20 @@ struct MedianComparisonChartView: View {
             }
         }
         .accessibilityLabel(Text(NSLocalizedString("Median glucose by time of day, before and since the change", comment: "Accessibility label for the setup comparison chart")))
+    }
+}
+
+/// Append a smooth (Catmull-Rom) curve through `points` to a path already
+/// positioned at `points[0]`.
+private func addSmoothCurve(through points: [CGPoint], to path: inout Path) {
+    guard points.count > 1 else { return }
+    for i in 0..<(points.count - 1) {
+        let p0 = points[max(0, i - 1)]
+        let p1 = points[i]
+        let p2 = points[i + 1]
+        let p3 = points[min(points.count - 1, i + 2)]
+        let c1 = CGPoint(x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6)
+        let c2 = CGPoint(x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6)
+        path.addCurve(to: p2, control1: c1, control2: c2)
     }
 }
