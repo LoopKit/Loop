@@ -1344,6 +1344,29 @@ final class PodLoanPhoneControllerTests: XCTestCase {
                         "the last loan's check is made, not dropped")
     }
 
+    /// When the pod comes home, the watch gets a fresh standing copy at once, with the loan's own doses in
+    /// it. The copy it holds is from before the loan; a start without the phone from that one books the
+    /// watch's own last boluses as insulin it has no record of.
+    func testTheWatchGetsAFreshStandingCopyWhenThePodComesHome() throws {
+        let controller = makeController()
+        let grant = establishLoan(controller)
+        MockPumpManager.testOdometer = 12.0
+        func copies() -> [DormantGrant] {
+            lock.lock(); defer { lock.unlock() }
+            return sent.compactMap { if case .dormantGrant(let copy) = $0 { return copy }; return nil }
+        }
+        let before = copies().count
+
+        let offer = HandbackOffer(epoch: grant.epoch, handedBackAt: Date(), finalStatus: nil,
+                                  odometer: LoanOdometerSnapshot(deliveredAtStart: 10, deliveredLatest: 11),
+                                  events: [], tombstones: [], recovered: false, released: true)
+        controller.handleIncoming(userInfo: try LoanMessage.handbackOffer(offer).transportDictionary())
+        waitForState(controller, .owner)
+
+        waitUntil(timeout: 5, "a fresh standing copy") { copies().count > before }
+        XCTAssertEqual(copies().last?.grant.epoch, grant.epoch + 1, "for the loan that would come next")
+    }
+
     /// A hand-back that comes without a pod reading (the watch let the pod go before the phone's
     /// ack) has nothing to audit, but the watch's temp still ends on the verified round-trip.
     func testInheritedTempIsCancelledWhenTheHandbackCarriesNoReading() throws {
@@ -2189,7 +2212,11 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         // Bluetooth back on: the very same offer is accepted.
         lock.lock(); off = false; lock.unlock()
         controller.handleIncoming(userInfo: offer)
-        waitUntil(timeout: 5, "ack once Bluetooth is on") { if case .handbackAck? = self.lastSent() { return true }; return false }
+        // Among the messages, not the last one: the watch's fresh standing copy follows the ack at once.
+        waitUntil(timeout: 5, "ack once Bluetooth is on") {
+            self.lock.lock(); defer { self.lock.unlock() }
+            return self.sent.contains { if case .handbackAck = $0 { return true }; return false }
+        }
         waitForState(controller, .owner)
     }
 
