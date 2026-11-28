@@ -36,19 +36,22 @@ extension PodLoanWatchController {
             self.urgentSendWedged = false
 
             // One budget for the give-up deadline and the pre-scheduled stuck alert.
-            self.handbackDeadline = self.now().addingTimeInterval(HandbackStuckAlert.interval)
-            self.handbackStartedAt = self.now()
+            let tappedAt = self.now()
+            self.handbackDeadline = tappedAt.addingTimeInterval(HandbackStuckAlert.interval)
+            self.handbackStartedAt = tappedAt
             HandbackStuckAlert.arm()
             SportLog.event("loan", "hand-back requested with \(self.journal.unackedEvents().count) record(s) to send; the watch doses until the phone answers")
             // Rows 7, 8, 21, 26 and 27: the offer is the query; `LoanControl` decides what silence means.
-            let tappedAt = self.now()
             self.handbackAckedAt = nil
             self.sendHandbackOffer(recovered: false)
             guard case .query(let wait, let onSilence, _) = LoanControl.decide(LoanControl.Situation(device: .watch, trigger: trigger)) else { return }
             // A timer is safe here: it starts at the looper's End tap, with Loop in front, and a late
-            // firing re-checks whether the phone answered since the tap before refusing the End.
+            // firing re-checks whether the phone answered since the tap before refusing the End. It
+            // speaks only for its own End: one that was refused or answered meanwhile is over, and its
+            // wait must not judge the End tapped after it.
             self.schedule(after: wait.seconds, label: "handback-answer") { [weak self] in
                 guard let self = self, self.phase == .active, self.handbackRequested,
+                      self.handbackStartedAt == tappedAt,
                       self.handbackAckedAt.map({ $0 >= tappedAt }) != true else { return }
                 switch LoanControl.afterQuery(.silence, onSilence: onSilence) {
                 case .refuse:
@@ -346,6 +349,9 @@ extension PodLoanWatchController {
         // The phone answered the offer: the End is not refused.
         handbackAckedAt = now()
         // An empty backlog is the finalize gate.
+        if ack.committedCursor > journal.lastEventSeq {
+            SportLog.event("loan", "the phone acknowledged up to \(ack.committedCursor), but this loan has \(journal.lastEventSeq) record(s): counted as \(journal.lastEventSeq)")
+        }
         journal.applyAck(committedCursor: ack.committedCursor)
         guard journal.unackedEvents().isEmpty else { return }
 

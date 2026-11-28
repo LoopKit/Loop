@@ -158,8 +158,10 @@ public enum LoanControl {
         /// delivery seen was 15 s and a round trip took 15.5 s. A late answer here moves control wrongly,
         /// so the wait covers twice the slowest delivery.
         case inBackground
-        /// A Start waits for the phone to say it has the request. On the bench that took
-        /// 0.1 to 2.9 s over 11 Starts (2026-11-11); the wait is twice the slowest.
+        /// A Start waits for the phone to say it has the request. With the phone in Bluetooth reach that
+        /// took 0.1 to 2.9 s over 11 Starts (2026-11-11). With the phone reachable only over Wi-Fi it took
+        /// 2.7, 4.9 and 8.0 s over three Starts (2026-11-28), and at 6 s the slowest was read as silence.
+        /// The wait covers the slowest seen. The phone ignores a request older than this (`requestTTL`).
         case startRequest
         /// The phone has said it has the Start request. What remains is the phone's own
         /// work (its pod read, building the grant) and the grant's delivery: 3 to 10 s over 16 Starts
@@ -170,7 +172,7 @@ public enum LoanControl {
             switch self {
             case .onScreen: return 10
             case .inBackground: return 30
-            case .startRequest: return 6
+            case .startRequest: return 10
             case .requestReceived: return 20
             }
         }

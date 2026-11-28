@@ -44,14 +44,13 @@ extension PodLoanPhoneController {
         Self.reclaimProgress(from: uiSnapshot(), now: deps.now())
     }
 
-    /// The phone loop's dosing gate: a grant is under way, the pod is lent out, a take-back is
+    /// The phone loop's dosing gate: the pod is lent out, a take-back is
     /// reaching for it, a take-back's audit has not ruled, this phone holds watch records it has not
     /// saved, it is asking the watch about insulin it cannot explain, or it has taken the pod again
     /// after another controller and has not yet read it.
     var holdsAutomaticDosing: Bool {
         let saved = persisted
-        return grantInFlight
-            || (deps.pumpManager() as? ExclusiveDeviceControl)?.isControlReleased == true
+        return (deps.pumpManager() as? ExclusiveDeviceControl)?.isControlReleased == true
             || saved.phase == .reclaimPending || saved.pendingForceAudit != nil
             || Self.watchLoopsThePod(saved)
             || holdsUnsavedWatchRecords
@@ -62,7 +61,12 @@ extension PodLoanPhoneController {
     /// With the pod back, this phone still holds watch records its dose history does not: a take-back's
     /// save has not landed, or records came after it. Insulin on board is short by them until it does.
     var holdsUnsavedWatchRecords: Bool {
-        state == .owner && staged.values.contains { !stagedTombstones.contains($0.id) && !committedIDs.contains($0.id) }
+        state == .owner && stagingHoldsUnsavedRecords
+    }
+
+    /// Records from the watch that this phone holds and has not written to its stores, in any state.
+    var stagingHoldsUnsavedRecords: Bool {
+        staged.values.contains { !stagedTombstones.contains($0.id) && !committedIDs.contains($0.id) }
     }
 
     /// Holding the pod, this phone asks the watch only after a reading shows insulin its records cannot

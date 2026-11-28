@@ -29,6 +29,8 @@ extension PodLoanPhoneController {
 
     enum NotificationID {
         static let paused = "podloan.paused1h"
+        /// This phone has the pod again and has not read it.
+        static let podUnreached = "podloan.podUnreached"
 
 
         /// One identifier per rung.

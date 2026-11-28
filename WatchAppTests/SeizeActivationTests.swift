@@ -531,6 +531,98 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertNil(snap.seizeOfferIssuedAt, "the accepted grant withdrew the offline offer")
     }
 
+    /// The phone's refusal answers the request, however late it comes: the offer goes, and the looper reads
+    /// why the phone kept the pod. An offer left standing takes the Start button's place, and a later tap on
+    /// it starts without a phone that is in reach.
+    func testThePhonesLateRefusalWithdrawsTheOfflineOffer() async throws {
+        let controller = await makeController()
+        controller.isPhoneReachable = { true }
+        controller.send = { _ in }
+        var waits: [DispatchWorkItem] = []
+        controller.scheduler = { _, label, work in
+            if label == "request-timeout" { waits.append(work) }
+        }
+
+        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-120), epoch: 3))
+        controller.requestLoan(watchBuild: "late-refusal")
+        _ = await controller.fencedSnapshot()
+        // The phone has the request; then nothing comes for the whole of the watch's second wait.
+        controller.handleIncoming(userInfo: try LoanMessage.requestReceived(RequestReceived(requestID: nil)).transportDictionary())
+        _ = await controller.fencedSnapshot()
+        waits.last?.perform()
+        var snap = await controller.fencedSnapshot()
+        XCTAssertNotNil(snap.seizeOfferIssuedAt, "precondition: the wait ended and the offer is up")
+
+        let reason = "The iPhone couldn't reach the pod and kept it. Try again."
+        controller.handleIncoming(userInfo: try LoanMessage.denied(LoanDenied(reason: reason)).transportDictionary())
+        snap = await controller.fencedSnapshot()
+
+        XCTAssertEqual(snap.phase, .idle)
+        XCTAssertNil(snap.seizeOfferIssuedAt, "the phone answered: nothing is left to start without it")
+        XCTAssertEqual(snap.lastIdleNote, reason, "and the looper reads why the phone kept the pod")
+    }
+
+    /// The offer stands for a phone that did not answer. A fresh copy from the phone shows it is back, so
+    /// the Start page asks it again rather than offering to start without it.
+    func testAFreshCopyFromThePhoneWithdrawsTheOfflineOffer() async throws {
+        let controller = await makeController()
+        controller.isPhoneReachable = { false }
+        controller.send = { _ in }
+        var timeoutsFired = 0
+        controller.scheduler = { _, label, work in
+            if label == "request-timeout" && timeoutsFired == 0 { timeoutsFired += 1; work.perform() }
+        }
+
+        let token = UUID()
+        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-300), epoch: 3, token: token))
+        controller.requestLoan(watchBuild: "fresh-copy")
+        var snap = await controller.fencedSnapshot()
+        XCTAssertNotNil(snap.seizeOfferIssuedAt, "precondition: the timeout put the offer up")
+
+        // The phone's next five-minute copy: same credential, new contents.
+        controller.handleIncoming(userInfo: try LoanMessage.dormantGrant(
+            fixtureDormant(issuedAt: Date(), epoch: 3, token: token)).transportDictionary())
+        snap = await controller.fencedSnapshot()
+
+        XCTAssertNil(snap.seizeOfferIssuedAt, "the phone is heard from again: Start asks it, nothing is offered without it")
+    }
+
+    /// The phone's status for the watch's stock pages is its word too: the offer ends with it.
+    func testThePhonesStatusWithdrawsTheOfflineOffer() async throws {
+        let controller = await makeController()
+        controller.isPhoneReachable = { false }
+        controller.send = { _ in }
+        var timeoutsFired = 0
+        controller.scheduler = { _, label, work in
+            if label == "request-timeout" && timeoutsFired == 0 { timeoutsFired += 1; work.perform() }
+        }
+        controller.handleDormantGrant(fixtureDormant(issuedAt: Date().addingTimeInterval(-300), epoch: 3))
+        controller.requestLoan(watchBuild: "status")
+        var snap = await controller.fencedSnapshot()
+        XCTAssertNotNil(snap.seizeOfferIssuedAt, "precondition: the timeout put the offer up")
+
+        controller.notePhoneHeard()
+        snap = await controller.fencedSnapshot()
+
+        XCTAssertNil(snap.seizeOfferIssuedAt)
+    }
+
+    /// An acknowledgement can only cover records that exist. One that names a higher number than the loan
+    /// has reached (a phone answering with its last loan's count) must not
+    /// mark the records the watch makes next as saved, or they are never sent.
+    func testAnAcknowledgementBeyondTheLoansRecordsCoversNoLaterRecord() throws {
+        let journal = LoanEventJournal(directory: journalDir)
+        try journal.begin(epoch: 27)
+        let takeover = Date()
+        _ = try journal.mintEvent(record: LoanDoseRecord(kind: .tempBasal, startDate: takeover.addingTimeInterval(-900), endDate: takeover, unitsPerHour: 0), provenance: .confirmed)
+        _ = try journal.mintEvent(record: LoanDoseRecord(kind: .tempBasal, startDate: takeover, endDate: takeover, unitsPerHour: 0), provenance: .confirmed)
+        journal.applyAck(committedCursor: 9)                      // the phone's number from its last loan
+
+        let next = try journal.mintEvent(record: LoanDoseRecord(kind: .tempBasal, startDate: takeover.addingTimeInterval(300), endDate: takeover.addingTimeInterval(2100), unitsPerHour: 0.5), provenance: .confirmed)
+
+        XCTAssertEqual(journal.unackedEvents().map(\.id), [next.id], "the loan's third record is still to send")
+    }
+
     /// A grant for a Start the looper cancelled at the offline offer starts nothing: the phone is told
     /// and takes the pod back (control row 2, transfer G). A fresh Start asks afresh.
     func testAGrantAfterTheOfferIsDismissedIsRefused() async throws {

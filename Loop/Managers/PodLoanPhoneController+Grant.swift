@@ -45,11 +45,6 @@ extension PodLoanPhoneController {
             updateState { $0.watchUsesSportMode = true }
         }
         watchKnownEpoch = request.knownEpoch
-        // A grant is mid-flight: the phone has already paused dosing and is waiting on the pod. A second
-        // Start (the same one by its second route, or a second tap) is answered by that grant.
-        guard !grantInFlight else {
-            return
-        }
         guard state == .owner else {
             switch state {
             // A previous attempt never finished: recover to owner and grant afresh.
@@ -75,7 +70,10 @@ extension PodLoanPhoneController {
     }
 
     /// Every refusal is delivered, cheapest first. Not gated on isWatchAppInstalled, which lags.
-    /// The first irreversible step is cancelling the phone's temp, in `continueGrant`.
+    /// The phone answers from what it knows, with no exchange with the pod (control row 1): it answers the
+    /// watch over links that reach further than its pod radio, so its answer must not wait on that radio.
+    /// A Start is refused only where nothing stands behind it: no pump, no sensor on the watch, a bolus
+    /// still being given, incomplete settings, the last loan's records unsaved.
     func beginGrant() {
         guard let pump = deps.pumpManager() else {
             deny("No pump is set up on the phone.")
@@ -111,15 +109,6 @@ extension PodLoanPhoneController {
             return
         }
 
-        // Refuse until the last reclaim's pod round-trip has verified.
-        if let started = reclaimStartedAt,
-           deps.now().timeIntervalSince(started) < Self.reclaimSettleTimeout,
-           reclaimVerifiedAt == nil {
-            deny("The iPhone is still reconnecting to the pod. Try again in a few seconds.")
-            attemptReclaimVerificationNow(started: started)
-            return
-        }
-
         let settings = deps.settings()
 
         let loanSettings = settings
@@ -134,62 +123,53 @@ extension PodLoanPhoneController {
             return
         }
 
-        // Cancel the phone's temp and wait for the pod to acknowledge it before releasing. From here the
-        // phone's own loop doses nothing: a temp set between the cancel and the release went
-        // unacknowledged, and the driver's recovery then dialed the lent pod.
-        grantInFlight = true
-        deps.cancelTempBasalForGrant { [weak self] error in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                self.grantInFlight = false
-                if let error = error {
-                    self.log.error("could not cancel this phone's temp before lending the pod: %{public}@", String(describing: error))
-                    self.deny("The iPhone couldn't reach the pod and kept it. Try again.")
-                    return
-                }
-                self.continueGrant(settings: settings, loanSettings: loanSettings, pump: pump, control: control)
-            }
-        }
+        // The phone's temp basal is left running: the watch cancels whatever runs on the pod when it
+        // takes it, and its first records say when (no program crosses a transfer). Nothing here waits.
+        continueGrant(settings: settings, loanSettings: loanSettings, pump: pump, control: control)
     }
 
-    /// One-way once the driver lets the link go: odometer origin, link released, epoch advanced.
+    /// One-way: link let go, epoch advanced, grant sent, in one pass with nothing between that the
+    /// phone's own loop could dose in.
     private func continueGrant(settings: LoopSettings, loanSettings: LoopSettings,
                                pump: PumpManager, control: ExclusiveDeviceControl) {
-                let handedOverAt = deps.now()
+        let handedOverAt = deps.now()
 
-        // This loan's origin; the previous loan's takeover reading is cleared with it.
-        let deliveredAtGrant = (pump as? PumpDeliveryOdometer)?.deliveredUnits?.units
+        // This phone's last reading of the pod, at its own time: its window runs from there to the
+        // watch's takeover reading, which then starts the watch's.
+        let lastReading = (pump as? PumpDeliveryOdometer)?.deliveredUnits
 
         // Above anything the watch knows: a loan it started alone may have run past this phone's count.
         let releaseEpoch = max(epoch, watchKnownEpoch ?? 0) + 1
         handbackDiag(releaseEpoch, "lending the pod to the watch")
+        // A Start that comes before this phone has read the pod after the last loan: that loan's check
+        // is closed first, since the next reading of the pod will be the watch's.
+        closeLastLoansCheckBeforeANewLoan()
+
         control.releaseControl()
-        // The pod driver keeps the pod while a command to it is unconfirmed: the Start is refused.
-        guard control.isControlReleased else {
-            deny(LoanControl.unconfirmedCommandRefusal)
-            return
-        }
+        // The pod driver keeps the pod while a command to it is unconfirmed. The loan starts all the
+        // same, as one started without the phone does (control section 8): the watch's takeover reading
+        // books what the pod gave beyond the records, and this phone reads the pod to settle its
+        // command and then lets go.
+        let keptForAnOpenCommand = !control.isControlReleased
         deps.pumpControlChanged(true)
 
-        // New epoch, empty dedup state, this loan's anchors: one save, before the grant goes out.
+        // The new loan's number, its empty books and its anchors: one save, before the grant goes out.
         let previous = state
-        updateState {
-            $0.epoch = releaseEpoch
+        openLoanBooks(epoch: releaseEpoch) {
             $0.phase = .grantOffered
-            $0.committedCursor = 0
-            $0.committedIDs = []
             $0.loanStartedAt = handedOverAt
-            if let deliveredAtGrant { $0.ledger.last = .init(units: deliveredAtGrant, at: handedOverAt) }
+            if let lastReading, lastReading.at > ($0.ledger.last?.at ?? .distantPast) {
+                $0.ledger.last = .init(units: lastReading.units, at: lastReading.at)
+            }
             $0.holdRenewedAt = handedOverAt
             $0.recordsCurrentAt = handedOverAt
         }
         stateDidChange(from: previous)
 
-        pendingForceReclaimReason = nil
-        coalescedOffers.removeAll()
-        staged = [:]
-        stagedTombstones = []
-        persistStaged()
+        if keptForAnOpenCommand {
+            handbackDiag(releaseEpoch, "the pod has not confirmed this phone's last command; lending all the same")
+            readThePodIfKept()
+        }
 
         let grantEpoch = epoch
 
