@@ -13,6 +13,744 @@
     " -" : {
 
     },
+    "%1$@ above range" : {
+      "comment" : "Time in range High row: the consensus target for all time above range, high and very high together. (1: target, e.g. < 25%)"
+    },
+    "%1$@ ago" : {
+      "comment" : "Carb entry time choice: eaten this long before now. (1: duration, e.g. 15m or 1h)"
+    },
+    "%1$@ below range" : {
+      "comment" : "Time in range Low row: the consensus target for all time below range, low and very low together. (1: target, e.g. < 4%)"
+    },
+    "%1$@ d" : {
+      "comment" : "Trends period picker, short label for a period of several days, e.g. 7 d. (1: number of days)"
+    },
+    "%1$@ entries" : {
+      "comment" : "Trends Carbs per day tile detail: average number of carb entries per day, a fractional value such as 2.5, so not pluralised. (1: number with one decimal)"
+    },
+    "%1$@ for %2$@" : {
+      "comment" : "A temp basal: its rate and how long it ran. (1: rate, e.g. 0.50 U/h; 2: duration, e.g. 30m)"
+    },
+    "%1$@ for %2$@ (scheduled %3$@)" : {
+      "comment" : "A temp basal: its rate, how long it ran and the scheduled rate it replaced. (1: rate, e.g. 0.50 U/h; 2: duration, e.g. 30m; 3: scheduled rate number, e.g. 0.80)"
+    },
+    "%1$@ g" : {
+      "comment" : "Format string for an amount of carbohydrate in grams. (1: grams)"
+    },
+    "%1$@ h" : {
+      "comment" : "Time in range row: average hours a day spent in the band, abbreviated. (1: hours with one decimal)"
+    },
+    "%1$@ manual, %2$@ automatic" : {
+      "comment" : "VoiceOver: how the bolus divides. (1: manual units, 2: automatic units)"
+    },
+    "%1$@ mmol/mol" : {
+      "comment" : "Trends GMI tile detail: the GMI in IFCC units. (1: value)"
+    },
+    "%1$@ of %2$@" : {
+      "comment" : "Trends Loop active tile detail: time in closed loop out of the time Loop status is known. (1: duration in closed loop, e.g. 6d 4h, 2: duration covered, e.g. 7d)    Trends: how many days of the period are averaged. (1: days averaged, a number; 2: days in the period, e.g. 14 days)"
+    },
+    "%1$@ of unknown kind\n+ %2$@ automatic" : {
+      "comment" : "Trends Boluses per day tile detail when some boluses don't say whether they were manual or automatic, such as some in Apple Health, on two lines: how many of the figure above are of unknown kind, then the automatic boluses on top. (1: boluses of unknown kind per day; 2: automatic boluses per day; both fractional, such as 4.2)"
+    },
+    "%1$@ U/h" : {
+      "comment" : "Format string for an insulin rate in units per hour. (1: rate)"
+    },
+    "%1$@ unknown" : {
+      "comment" : "Basal and bolus: bolus whose record doesn't say whether it was manual or automatic, such as some in Apple Health, after the manual and automatic amounts. (1: units, e.g. 3.2 U)"
+    },
+    "%1$@ vs plan" : {
+      "comment" : "Basal tile on the Now screen: how the current basal rate differs from the scheduled rate. (1: signed difference in U/h, e.g. +0.25)"
+    },
+    "%1$@ · %2$@ in 5 min" : {
+      "comment" : "Under the glucose value on the Now screen: the glucose unit and how much glucose changed over 5 minutes. (1: glucose unit, e.g. mmol/L; 2: signed change, e.g. +0.3)"
+    },
+    "%1$@ · ending soon" : {
+      "comment" : "Status pill on the Now screen when a pump pod or CGM sensor is near the end of its life. (1: device name from the pump or CGM plugin, e.g. Omnipod 5)"
+    },
+    "%1$@%%" : {
+      "comment" : "A percentage. (1: number)"
+    },
+    "%1$@%% CGM active" : {
+      "comment" : "Trends Time in range card: share of the period with CGM readings. (1: percentage number)"
+    },
+    "%1$@, %2$@ %3$@: %4$@ percent, %5$@ hours a day" : {
+      "comment" : "VoiceOver label for a Time in range row. (1: band name, e.g. In range, 2: glucose thresholds, e.g. 3.9–10.0, 3: glucose unit, 4: percentage number, 5: average hours a day with one decimal)"
+    },
+    "%1$lld of %2$lld runs completed" : {
+      "comment" : "Loop status sheet: how many five-minute slots in the last two hours had a completed Loop run. (1: completed; 2: slots, 24)"
+    },
+    "%lld days" : {
+      "comment" : "A number of days, e.g. a Trends period or how many days are averaged. (1: number of days)    Trends period picker, VoiceOver name for a period of several days. (1: number of days)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld day"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld days"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld doses" : {
+      "comment" : "Logbook folded automatic boluses row: how many automatic boluses it holds. (1: number)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld dose"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld doses"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld entries" : {
+      "comment" : "Trends Carbs tile detail for a one-day period: how many carb entries were made that day. (1: number)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld entry"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld entries"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld shorter gaps" : {
+      "comment" : "Chart note: how many other, shorter gaps in glucose readings there were; follows the longest gap. (1: number of gaps)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld shorter gap"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld shorter gaps"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "+ %1$@ automatic" : {
+      "comment" : "Trends Boluses per day tile detail: average number of automatic boluses per day on top of the manual ones, a fractional value such as 4.2. (1: number with one decimal)"
+    },
+    "25–75%" : {
+      "comment" : "Trends Daily pattern legend: band between the 25th and 75th percentiles of glucose"
+    },
+    "5–95%" : {
+      "comment" : "Trends Daily pattern legend: band between the 5th and 95th percentiles of glucose"
+    },
+    "Absorbed by %1$@" : {
+      "comment" : "Under the end of the carb absorption curve: when the carbs will have absorbed (1: time)"
+    },
+    "absorbs over %1$@ h" : {
+      "comment" : "Logbook carb row detail: carb absorption time in hours. (1: hours, e.g. 3 or 2.5)"
+    },
+    "Add carbs" : {
+      "comment" : "Button on the Now screen that opens carb entry"
+    },
+    "Add pump" : {
+      "comment" : "Status pill on the Now screen when no pump is set up; tapping it starts pump setup"
+    },
+    "aim %1$@" : {
+      "comment" : "Trends: the consensus target under a figure, in lower case. (1: target, e.g. < 7%)"
+    },
+    "aim %1$@, CV %2$@" : {
+      "comment" : "Trends Average tile: the consensus targets for average glucose and its coefficient of variation, in lower case. (1: glucose target, e.g. < 8.6; 2: CV target, e.g. ≤ 36%)"
+    },
+    "All" : {
+      "comment" : "Logbook filter chip: show every entry"
+    },
+    "App Icon" : {
+      "comment" : "Header for the app icon choice"
+    },
+    "Appearance" : {
+      "comment" : "Title of the light or dark appearance choice"
+    },
+    "Appearance and App Icon" : {
+      "comment" : "Title of the row that opens the appearance and app icon settings"
+    },
+    "Automatic" : {
+      "comment" : "Chart legend: hatched bars are automatic boluses given by Loop"
+    },
+    "Automatic %1$@" : {
+      "comment" : "Basal and bolus: bolus Loop gave automatically. (1: units, e.g. 5.4 U)"
+    },
+    "Automatic bolus" : {
+      "comment" : "Chart callout label for a bolus Loop delivered automatically near the touched time    Logbook row title: a bolus Loop delivered automatically"
+    },
+    "Automatic boluses" : {
+      "comment" : "Logbook row title: several automatic boluses in a row, folded into one row that lists them"
+    },
+    "average of %1$@" : {
+      "comment" : "Trends Insulin per day card subtitle when only some days of the period are averaged, such as a day still in progress. (1: days averaged, e.g. 13 of 14 days)"
+    },
+    "average per day" : {
+      "comment" : "Trends Basal and bolus card subtitle when the figures are averaged per day over the period"
+    },
+    "Basal" : {
+      "comment" : "Chart callout label for the basal rate at the touched time    Label of a tile showing the current basal rate (Now screen) or the day's basal insulin total (Today so far totals)    Logbook filter chip: show only basal changes"
+    },
+    "Basal %1$@, %2$@ percent" : {
+      "comment" : "VoiceOver: basal units and share. (1: units, 2: percentage number)"
+    },
+    "Basal adjustments" : {
+      "comment" : "Logbook row title summarising the temp basals Loop set in a day"
+    },
+    "Basal and bolus" : {
+      "comment" : "Trends card title: insulin split into basal and bolus"
+    },
+    "Basal given" : {
+      "comment" : "Chart legend: filled area is basal insulin actually delivered"
+    },
+    "Basal resumed" : {
+      "comment" : "Logbook row title: insulin delivery resumed after a suspend"
+    },
+    "Basal suspended" : {
+      "comment" : "Logbook row title: insulin delivery was suspended"
+    },
+    "Best over 14 days with %1$@ CGM data" : {
+      "comment" : "Trends GMI tile caption when the period is shorter than 14 days or CGM readings cover less than 70% of it: the consensus for when GMI is representative. (1: share of CGM data, e.g. 70%)"
+    },
+    "Bolus %1$@, %2$@ percent" : {
+      "comment" : "VoiceOver: bolus units and share. (1: units, 2: percentage number)"
+    },
+    "Boluses" : {
+      "comment" : "Trends summary tile for a one-day period: how many boluses were given that day, other than Loop's automatic ones"
+    },
+    "Boluses per day" : {
+      "comment" : "Trends summary tile: average number of boluses per day, other than Loop's automatic ones"
+    },
+    "Boluses, basal changes, carbs and pump events from the last 7 days" : {
+      "comment" : "Logbook settings descriptive text"
+    },
+    "Carbs" : {
+      "comment" : "Label of a tile showing the day's total carbohydrate    Logbook filter chip: show only carb entries    Logbook row title: a carb entry"
+    },
+    "Carbs per day" : {
+      "comment" : "Trends summary tile: average grams of carbohydrate entered per day"
+    },
+    "CGM data covers %1$@." : {
+      "comment" : "Trends Summary note when glucose readings start partway through the period. (1: days covered, e.g. 5 of 14 days)"
+    },
+    "Changes with the home screen's light or dark appearance" : {
+      "comment" : "Description of the app icon that follows the home screen appearance"
+    },
+    "Classic" : {
+      "comment" : "Name of Loop's original app icon"
+    },
+    "Closed loop" : {
+      "comment" : "Trends Loop status: time Loop was running in closed loop"
+    },
+    "Closed loop paused · %1$@" : {
+      "comment" : "Status pill on the Now screen: closed loop is switched on but paused (e.g. no CGM data), and Loop last ran this long ago. (1: duration, e.g. 3m)"
+    },
+    "Closed loop paused · not run yet" : {
+      "comment" : "Status pill on the Now screen: closed loop is switched on but paused (e.g. no CGM data), and Loop has never completed"
+    },
+    "Closed loop · %1$@" : {
+      "comment" : "Status pill on the Now screen: closed loop is on and Loop last ran this long ago. (1: duration, e.g. 3m)"
+    },
+    "Closed loop · not run yet" : {
+      "comment" : "Status pill on the Now screen: closed loop is on but Loop has never completed"
+    },
+    "COB" : {
+      "comment" : "Abbreviation for carbs on board; label of a tile on the Now screen"
+    },
+    "Couldn't delete" : {
+      "comment" : "Alert title when deleting a Logbook entry fails"
+    },
+    "Couldn't load Logbook: %1$@" : {
+      "comment" : "Logbook error when its history can't be read. (1: system error description)"
+    },
+    "Couldn't load recent CGM readings" : {
+      "comment" : "Prediction chart on the Now screen when recent glucose couldn't be read"
+    },
+    "Couldn't load this day: %1$@" : {
+      "comment" : "Day page error when the day's history can't be read. (1: system error description)"
+    },
+    "Couldn't load today's history: %1$@" : {
+      "comment" : "Shown on the Now screen's Today so far card when history couldn't be read. (1: system error description)"
+    },
+    "Couldn't load Trends: %1$@" : {
+      "comment" : "Trends error message when the history can't be read. (1: error description)"
+    },
+    "Covers %1$@, from the start of Loop's records, which it keeps for %2$@." : {
+      "comment" : "Trends Loop status footnote when Loop's records of its runs and settings start partway through the period. (1: date range covered; 2: how long Loop keeps them, e.g. 90 days)"
+    },
+    "Custom" : {
+      "comment" : "Carb entry absorption choice Other, before it is chosen: you set the food and absorption time yourself"
+    },
+    "Daily pattern" : {
+      "comment" : "Trends card title: the ambulatory glucose profile, glucose by time of day across the period"
+    },
+    "Daily pattern over %1$@. Median highest %2$@ at %3$@, lowest %4$@ at %5$@" : {
+      "comment" : "VoiceOver label for the Trends Daily pattern chart. (1: days with readings, e.g. 14 days; 2: highest median glucose; 3: time of day; 4: lowest median glucose; 5: time of day)"
+    },
+    "Daily pattern: not enough days" : {
+      "comment" : "VoiceOver label for the Trends Daily pattern chart when fewer than 5 days have readings"
+    },
+    "Day" : {
+      "comment" : "Appearance option and app icon name: the light (daytime) version"
+    },
+    "Day (Trends period)" : {
+      "comment" : "Trends period picker: a period of one calendar day (not daytime)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day"
+          }
+        }
+      }
+    },
+    "Day and Night" : {
+      "comment" : "Name of the app icon that follows the home screen's light or dark appearance"
+    },
+    "Eaten" : {
+      "comment" : "Carb entry section title: when the food was eaten"
+    },
+    "Eaten at %1$@, absorbed by %2$@" : {
+      "comment" : "Accessibility summary of the carb entry preview chart (1: time eaten, 2: time absorbed)"
+    },
+    "Edit" : {
+      "comment" : "Swipe action to edit a Logbook carb entry"
+    },
+    "Edit Carb Entry" : {
+      "comment" : "Title of the screen for editing a carb entry from the Logbook"
+    },
+    "Enter an amount" : {
+      "comment" : "Carb entry Continue button while no amount has been typed"
+    },
+    "Fast" : {
+      "comment" : "Carb entry absorption choice: food that absorbs quickly, such as sweets"
+    },
+    "From Apple Health: Loop keeps 7 days, so this day has no temp basal or schedule detail." : {
+      "comment" : "Day page note when the day is older than Loop's 7-day history and was read from Apple Health"
+    },
+    "Gaps" : {
+      "comment" : "Trends Loop status button and screen title: list of times Loop wasn't in closed loop"
+    },
+    "glucose %1$@" : {
+      "comment" : "Logbook row detail: glucose when the dose was given. (1: glucose value, e.g. 7.5)"
+    },
+    "glucose %1$@ falling" : {
+      "comment" : "Logbook row detail: glucose when the dose was given, and falling. (1: glucose value, e.g. 11.0)"
+    },
+    "glucose %1$@ rising" : {
+      "comment" : "Logbook row detail: glucose when the dose was given, and rising. (1: glucose value, e.g. 11.0)"
+    },
+    "Glucose prediction unavailable" : {
+      "comment" : "VoiceOver label for the prediction chart when Loop has no prediction"
+    },
+    "Health" : {
+      "comment" : "Logbook carb row detail: the entry came from Apple Health"
+    },
+    "How fast it absorbs" : {
+      "comment" : "Carb entry section title: choose how quickly the food's carbs absorb"
+    },
+    "In range" : {
+      "comment" : "Time in range band: glucose 70–180 mg/dL (3.9–10.0 mmol/L)    Time-in-range band name: glucose 70–180 mg/dL (3.9–10.0 mmol/L)"
+    },
+    "Infusion set changed" : {
+      "comment" : "Pump event in the history: the infusion set was replaced"
+    },
+    "Insulin isn't being adjusted. Tap for details." : {
+      "comment" : "Notice detail on the Now screen when Loop hasn't completed recently"
+    },
+    "Insulin per day" : {
+      "comment" : "Trends tile and card title: average total insulin per day"
+    },
+    "Insulin per day, average %1$@" : {
+      "comment" : "VoiceOver label for the Trends Insulin per day chart. (1: average insulin per day, e.g. 32.1 U)"
+    },
+    "Insulin per day, weekly average, average %1$@" : {
+      "comment" : "VoiceOver label for the Trends Insulin per day chart when bars are weekly averages. (1: average insulin per day, e.g. 32.1 U)"
+    },
+    "Insulin timeline, %1$@, bolus %2$@, basal %3$@, carbs %4$@" : {
+      "comment" : "VoiceOver summary of the day's insulin timeline chart with no glucose readings. (1: weekday and date; 2: bolus total, e.g. 12.5 U; 3: basal total; 4: carbs total, e.g. 140 g)"
+    },
+    "Insulin timeline, %1$@, bolus %2$@, basal %3$@, carbs %4$@, latest glucose %5$@ %6$@" : {
+      "comment" : "VoiceOver summary of the day's insulin timeline chart. (1: weekday and date; 2: bolus total, e.g. 12.5 U; 3: basal total; 4: carbs total, e.g. 140 g; 5: latest glucose value; 6: glucose unit, mmol/L or mg/dL)"
+    },
+    "IOB" : {
+      "comment" : "Abbreviation for insulin on board; label of a tile on the Now screen"
+    },
+    "Last 2 hours" : {
+      "comment" : "Loop status sheet: title over the strip of Loop's runs in the last two hours"
+    },
+    "Last ran at %1$@" : {
+      "comment" : "Loop status sheet: when Loop last completed a run, under a minute ago. (1: time of day)"
+    },
+    "Last ran at %1$@, %2$@" : {
+      "comment" : "Loop status sheet: when Loop last completed a run. (1: time of day; 2: how long ago, e.g. 3 min ago)"
+    },
+    "Last reading %1$@ ago" : {
+      "comment" : "Shown on the Now screen under No reading when the latest CGM reading is too old. (1: duration, e.g. 25m)"
+    },
+    "Limited" : {
+      "comment" : "Trends Loop status: time closed loop was on but Loop wasn't completing runs"
+    },
+    "Logbook" : {
+      "comment" : "Title of the Logbook"
+    },
+    "logged" : {
+      "comment" : "Logbook bolus row detail: the dose was logged by hand rather than delivered by the pump"
+    },
+    "Loop" : {
+      "comment" : "Logbook filter chip: show only what Loop did automatically (Loop is the app's name)"
+    },
+    "Loop can't adjust insulin without readings." : {
+      "comment" : "Notice detail on the Now screen under a CGM problem when there is no recent glucose reading"
+    },
+    "Loop failed · %1$@" : {
+      "comment" : "Status pill on the Now screen: Loop hasn't completed for over 15 minutes. (1: duration since Loop last ran, e.g. 16m)"
+    },
+    "Loop hasn't run for %1$@" : {
+      "comment" : "Notice title on the Now screen when Loop hasn't completed recently. (1: duration since Loop last ran, e.g. 16m)"
+    },
+    "Loop keeps the last 7 days on this phone. Older doses and carbs are in Apple Health and on Trends." : {
+      "comment" : "Logbook footer explaining why only 7 days are listed"
+    },
+    "Loop may not be giving insulin." : {
+      "comment" : "Notice detail on the Now screen under a critical pump problem reported by the pump"
+    },
+    "Loop predicts %1$@ %2$@ by %3$@" : {
+      "comment" : "VoiceOver summary of the prediction chart. (1: predicted glucose value; 2: glucose unit, mmol/L or mg/dL; 3: time of the prediction)"
+    },
+    "Loop status" : {
+      "comment" : "Trends card title: how long Loop spent in closed loop, limited or open loop"
+    },
+    "Loop · %1$@ · tap to list" : {
+      "comment" : "Logbook folded automatic boluses row subtitle: Loop gave them, the time span they cover, and tapping lists them. (1: time range, e.g. 15:08 – 16:14)"
+    },
+    "Loop · %lld changes · tap to list" : {
+      "comment" : "Logbook basal adjustments row subtitle: how many temp basals Loop set in the day; tapping lists them. (1: number of changes)",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Loop · %lld change · tap to list"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Loop · %lld changes · tap to list"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Manual %1$@" : {
+      "comment" : "Basal and bolus: bolus the person gave. (1: units, e.g. 16.2 U)"
+    },
+    "Manual · %1$@" : {
+      "comment" : "Logbook temp basal row subtitle: set by hand, then the rate and how long. (1: description, e.g. 0.50 U/h for 30m (scheduled 0.80))"
+    },
+    "Median" : {
+      "comment" : "Trends Daily pattern legend: the median glucose line"
+    },
+    "Medium" : {
+      "comment" : "Carb entry absorption choice: a typical mixed meal"
+    },
+    "New Interface" : {
+      "comment" : "Title of the toggle for the redesigned interface"
+    },
+    "Next day" : {
+      "comment" : "Accessibility label for the day page button that steps forward a day"
+    },
+    "Next period" : {
+      "comment" : "VoiceOver label for the Trends button that moves forward one period"
+    },
+    "Night" : {
+      "comment" : "Appearance option that always uses dark mode"
+    },
+    "No CGM data" : {
+      "comment" : "Trends Average tile detail when the period has no glucose readings"
+    },
+    "No CGM data %1$@ – %2$@" : {
+      "comment" : "Chart note: a gap in glucose readings. (1: start time; 2: end time)"
+    },
+    "No CGM data %1$@ – %2$@ and %3$@" : {
+      "comment" : "Chart note: the longest gap in glucose readings, plus the shorter ones. (1: start time; 2: end time; 3: number of shorter gaps, e.g. 2 shorter gaps)"
+    },
+    "No CGM data in the last 3 hours" : {
+      "comment" : "Empty prediction chart on the Now screen"
+    },
+    "No CGM data in this period" : {
+      "comment" : "Trends chart placeholder when the period has no glucose readings"
+    },
+    "No CGM data on this day" : {
+      "comment" : "Chart note: there are no glucose readings for the whole day"
+    },
+    "No CGM data yet today" : {
+      "comment" : "Chart note: there are no glucose readings so far today"
+    },
+    "No gaps: Loop ran closed loop all through this period." : {
+      "comment" : "Trends Gaps list when Loop was in closed loop for the whole period"
+    },
+    "No insulin recorded in this period" : {
+      "comment" : "Trends Insulin per day chart placeholder when no insulin was delivered in the period"
+    },
+    "No loop runs recorded in this period" : {
+      "comment" : "Trends Loop status placeholder when there is no Loop run history for the period"
+    },
+    "No reading" : {
+      "comment" : "Shown on the Now screen in place of the glucose value when there is no recent CGM reading"
+    },
+    "Not enough days for a pattern: %1$@ of 5" : {
+      "comment" : "Trends Daily pattern footnote when fewer than 5 days have readings; the chart shows raw readings instead. (1: days with readings)"
+    },
+    "Nothing logged" : {
+      "comment" : "Logbook day with no entries"
+    },
+    "Nothing logged in the last 7 days." : {
+      "comment" : "Logbook empty state when there are no entries at all"
+    },
+    "Nothing to show for this filter" : {
+      "comment" : "Logbook day with no entries matching the selected filter"
+    },
+    "Now" : {
+      "comment" : "Title at the top of the Now screen, showing current glucose and Loop status    Title of the Now tab in the redesigned interface, showing current glucose and Loop status"
+    },
+    "now" : {
+      "comment" : "Prediction chart x-axis label marking the current time"
+    },
+    "Older days come from Apple Health, which doesn't record the basal schedule, and some boluses there don't say whether they were manual or automatic." : {
+      "comment" : "Trends Insulin per day footnote when the period reaches back past Loop's own records into Apple Health, so scheduled basal can't be shown, or some boluses there have no record of whether they were manual or automatic"
+    },
+    "Open loop / manual" : {
+      "comment" : "Trends Loop status: time closed loop was switched off"
+    },
+    "Open loop · %1$@" : {
+      "comment" : "Status pill on the Now screen: closed loop is off (Loop recommends only) and Loop last ran this long ago. (1: duration, e.g. 3m)"
+    },
+    "Open loop · not run yet" : {
+      "comment" : "Status pill on the Now screen: closed loop is off and Loop has never completed"
+    },
+    "Open Settings" : {
+      "comment" : "Loop status sheet button that opens Loop's settings"
+    },
+    "Opens carb absorption" : {
+      "comment" : "VoiceOver hint for the COB tile on the Now screen"
+    },
+    "Opens CGM settings" : {
+      "comment" : "VoiceOver hint for the CGM status pill and CGM notice on the Now screen"
+    },
+    "Opens insulin delivery history" : {
+      "comment" : "VoiceOver hint for the IOB tile on the Now screen"
+    },
+    "Opens Loop's prediction breakdown" : {
+      "comment" : "VoiceOver hint for the prediction card on the Now screen"
+    },
+    "Opens pump settings" : {
+      "comment" : "VoiceOver hint for the pump status pill and pump notice on the Now screen"
+    },
+    "Opens the full day" : {
+      "comment" : "VoiceOver hint for the Today so far card on the Now screen"
+    },
+    "per day, weekly average" : {
+      "comment" : "Trends Insulin per day card subtitle when each bar is a week's average daily total"
+    },
+    "per day, weekly average · %1$@" : {
+      "comment" : "Trends Insulin per day card subtitle when each bar is a week's average daily total and only some days of the period are averaged. (1: days averaged, e.g. 4 of 90 days)"
+    },
+    "Period" : {
+      "comment" : "Trends: VoiceOver label of the picker that chooses how many days the screen covers"
+    },
+    "Pod changed" : {
+      "comment" : "Pump event in the history: the pump or pod was replaced"
+    },
+    "Pre-meal on" : {
+      "comment" : "Presets button title on the Now screen while the pre-meal target is on"
+    },
+    "Predicted" : {
+      "comment" : "Prediction chart callout label for Loop's predicted glucose at the touched time"
+    },
+    "Previous day" : {
+      "comment" : "Accessibility label for the day page button that steps back a day"
+    },
+    "Previous period" : {
+      "comment" : "VoiceOver label for the Trends button that moves back one period"
+    },
+    "Primed" : {
+      "comment" : "Pump event in the history: the pump primed the tubing or cannula"
+    },
+    "Pump alarm" : {
+      "comment" : "Pump event in the history: an alarm whose pump gave no title"
+    },
+    "Recent readings unavailable: %1$@" : {
+      "comment" : "Error under the prediction chart on the Now screen. (1: system error description)"
+    },
+    "Reservoir changed" : {
+      "comment" : "Pump event in the history: the insulin reservoir was replaced"
+    },
+    "Reservoir rewound" : {
+      "comment" : "Pump event in the history: the pump rewound its reservoir"
+    },
+    "Scheduled %1$@" : {
+      "comment" : "Basal and bolus: what the basal schedule delivers over the same time, under the basal row. (1: units, e.g. 18.0 U)"
+    },
+    "Scheduled basal only" : {
+      "comment" : "Logbook day where only the scheduled basal ran, with nothing else logged"
+    },
+    "SD %1$@ · CV %2$@%%" : {
+      "comment" : "Trends Average tile detail: standard deviation and coefficient of variation of glucose. (1: standard deviation in the glucose unit, 2: coefficient of variation as a percentage number)"
+    },
+    "Sets up a CGM" : {
+      "comment" : "VoiceOver hint for the Add CGM status pill on the Now screen"
+    },
+    "Sets up a pump" : {
+      "comment" : "VoiceOver hint for the Add pump status pill on the Now screen"
+    },
+    "Shows when Loop last ran" : {
+      "comment" : "VoiceOver hint for the Loop status pill and the Loop notice on the Now screen"
+    },
+    "Slow" : {
+      "comment" : "Carb entry absorption choice: food that absorbs slowly, such as pizza"
+    },
+    "Summary" : {
+      "comment" : "Trends card title: the summary statistics tiles"
+    },
+    "Suspended" : {
+      "comment" : "Chart callout value: insulin delivery was suspended at the touched time    Shown in the Basal tile on the Now screen when insulin delivery is suspended"
+    },
+    "System" : {
+      "comment" : "Appearance option that follows the iPhone's light or dark setting"
+    },
+    "System follows your iPhone's light or dark setting." : {
+      "comment" : "Footer for the appearance choice"
+    },
+    "Target %1$@" : {
+      "comment" : "Glucose target on the Now screen hero card when the target range is a single value. (1: glucose value)"
+    },
+    "Target %1$@–%2$@" : {
+      "comment" : "Glucose target range on the Now screen hero card. (1: lower bound; 2: upper bound)"
+    },
+    "Temp basal" : {
+      "comment" : "Logbook row title: a temporary basal rate"
+    },
+    "The icon couldn't be changed: %@" : {
+      "comment" : "Error shown when iOS refuses an app icon change"
+    },
+    "The new interface adds Trends and Logbook tabs. Turn it off to go back to the classic status screen; Settings closes to switch." : {
+      "comment" : "Footer for the interface choice in settings"
+    },
+    "this day" : {
+      "comment" : "Trends Basal and bolus card subtitle when the period is one complete day"
+    },
+    "Time" : {
+      "comment" : "Carb entry row label: the exact time the food was eaten"
+    },
+    "Time in range" : {
+      "comment" : "Trends card title: share of time in each glucose range"
+    },
+    "Time in range, daily pattern, insulin per day and Loop status" : {
+      "comment" : "Trends settings descriptive text"
+    },
+    "Today" : {
+      "comment" : "Day page title when showing today"
+    },
+    "today so far" : {
+      "comment" : "Trends Basal and bolus card subtitle when the figures are today's total so far"
+    },
+    "Today so far" : {
+      "comment" : "Title of the card on the Now screen showing today's insulin and carbs"
+    },
+    "Today so far %1$@, usually %2$@ by %3$@." : {
+      "comment" : "Trends Insulin per day footnote: today's insulin so far against the median by this time of day over the last 14 days. (1: today's units, 2: usual units, 3: time of day)"
+    },
+    "Today · %1$@" : {
+      "comment" : "Logbook day header for today. (1: weekday and date, e.g. Sun 25 Oct)"
+    },
+    "Total" : {
+      "comment" : "Basal and bolus total row: basal plus bolus"
+    },
+    "Total %1$@" : {
+      "comment" : "VoiceOver: total insulin. (1: units)"
+    },
+    "Total so far" : {
+      "comment" : "Basal and bolus total row for today, which isn't over yet"
+    },
+    "Total so far %1$@" : {
+      "comment" : "VoiceOver: today's total insulin so far. (1: units)"
+    },
+    "Touch and hold a chart to see exact values." : {
+      "comment" : "Hint under the day page charts explaining how to scrub them"
+    },
+    "Trends" : {
+      "comment" : "Title of the Trends tab    Title of the Trends tab in the redesigned interface"
+    },
+    "Type an amount to see when it'll be absorbed" : {
+      "comment" : "Carb entry preview before an amount is typed"
+    },
+    "U/h" : {
+      "comment" : "Abbreviation for insulin units per hour"
+    },
+    "Urgent low" : {
+      "comment" : "Pill under the glucose value on the Now screen when glucose is below 54 mg/dL (3.0 mmol/L)"
+    },
+    "Usually %1$@ by %2$@" : {
+      "comment" : "Trends: the median insulin delivered by this time of day over the last 14 days. (1: units, e.g. 28.4 U, 2: time of day)"
+    },
+    "Very high" : {
+      "comment" : "Time in range band: glucose above 250 mg/dL (13.9 mmol/L)    Time-in-range band name: glucose above 250 mg/dL (13.9 mmol/L)"
+    },
+    "Very low" : {
+      "comment" : "Time in range band: glucose below 54 mg/dL (3.0 mmol/L)    Time-in-range band name: glucose below 54 mg/dL (3.0 mmol/L)"
+    },
+    "vs plan" : {
+      "comment" : "Logbook basal adjustments row: the insulin amount is the difference from the scheduled basal"
+    },
+    "Yesterday · %1$@" : {
+      "comment" : "Logbook day header for yesterday. (1: weekday and date, e.g. Sat 24 Oct)"
+    },
     " - " : {
 
     },
@@ -11577,9 +12315,6 @@
     "CAUTION - Investigational device. Limited by Federal (or United States) law to investigational use." : {
 
     },
-    "CGM Active" : {
-      "comment" : "Percent of time CGM data present metric title"
-    },
     "Change the pump battery immediately" : {
       "comment" : "The notification alert describing a low pump battery",
       "extractionState" : "manual",
@@ -14827,12 +15562,6 @@
         }
       }
     },
-    "Daily glucose pattern" : {
-      "comment" : "Accessibility label for the daily glucose pattern (AGP) chart"
-    },
-    "Daily Glucose Pattern" : {
-      "comment" : "Daily glucose pattern (AGP) section header"
-    },
     "Date" : {
       "comment" : "Date picker label",
       "localizations" : {
@@ -17341,12 +18070,6 @@
     },
     "During this kind of hard exercise, your body may release hormones that raise glucose. This is more common in the morning before eating." : {
 
-    },
-    "Each 1% time in range ≈ 15 minutes." : {
-      "comment" : "TIR helper"
-    },
-    "Each 5% increase in range is clinically beneficial." : {
-      "comment" : "TIR suggestion"
     },
     "Easy breath. Can carry on a conversation." : {
 
@@ -21049,9 +21772,6 @@
         }
       }
     },
-    "Glucose Metrics" : {
-      "comment" : "Glucose metrics section header"
-    },
     "Glucose Momentum" : {
       "comment" : "Title of the prediction input effect for glucose momentum",
       "localizations" : {
@@ -21185,24 +21905,6 @@
     },
     "Go to Settings > Focus." : {
       "comment" : "Focus modes step 1"
-    },
-    "Goal: <%@" : {
-      "comment" : "Average glucose goal"
-    },
-    "Goal: <1%" : {
-      "comment" : "TIR goal for very low"
-    },
-    "Goal: <5%" : {
-      "comment" : "TIR goal for very high"
-    },
-    "Goal: <7%" : {
-      "comment" : "GMI goal"
-    },
-    "Goal: >70%" : {
-      "comment" : "CGM active goal\nTIR goal for target range"
-    },
-    "Goal: ≤36%" : {
-      "comment" : "Glucose variability goal"
     },
     "grams" : {
 
@@ -21946,9 +22648,6 @@
           }
         }
       }
-    },
-    "In Range" : {
-      "comment" : "Time-in-range band label (70–180 mg/dL)"
     },
     "Includes basal and automated boluses" : {
 
@@ -26394,9 +27093,6 @@
     "Meal Timing" : {
 
     },
-    "Median (line) with 25–75% and 5–95% bands, by time of day." : {
-      "comment" : "AGP chart explanation"
-    },
     "Medium Intensity (Aerobic)" : {
 
     },
@@ -27808,9 +28504,6 @@
     "No Delivery" : {
 
     },
-    "No glucose data for this period." : {
-      "comment" : "Statistics empty state"
-    },
     "No Maximum Bolus Configured" : {
       "comment" : "Alert title for a missing maximum bolus setting error",
       "localizations" : {
@@ -28506,9 +29199,6 @@
     },
     "None in last 24 hours" : {
 
-    },
-    "Not enough data to plot a profile." : {
-      "comment" : "AGP empty state"
     },
     "Not Set" : {
       "comment" : "Health sharing status: not determined"
@@ -34145,9 +34835,6 @@
     "She can do this by raising her **Overall Insulin** setting. This tells %@ to deliver more than her usual amount, making her insulin settings stronger." : {
 
     },
-    "Showing %1$d days of data — not enough for the full %2$d-day period yet." : {
-      "comment" : "Notice when the selected statistics range has incomplete data"
-    },
     "Shows last loop error" : {
       "comment" : "Loop Completion HUD accessibility hint",
       "localizations" : {
@@ -35195,9 +35882,6 @@
     },
     "Starting your exercise with high active insulin" : {
 
-    },
-    "Statistics" : {
-      "comment" : "Statistics screen title\nStatistics settings button text"
     },
     "Stay hydrated" : {
 
@@ -37409,9 +38093,6 @@
     },
     "These recommendations should be used as a starting point. Checking your glucose during exercise will help you find the settings that work best for you." : {
 
-    },
-    "This device keeps %d days of glucose. Increase the cache duration and rebuild to review the full period." : {
-      "comment" : "Notice when the local cache limits the statistics history"
     },
     "This dose still has active insulin. Deleting it may cause Loop to make up for the reduced active insulin by dosing more." : {
       "comment" : "Warning when deleting a Loop-recorded dose that still has active insulin"
@@ -40057,9 +40738,6 @@
           }
         }
       }
-    },
-    "Variability" : {
-      "comment" : "Coefficient of variation metric title"
     },
     "Version" : {
       "comment" : "Label for the app version row in the Support section"
