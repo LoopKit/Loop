@@ -38,6 +38,11 @@ final class WatchCGMHost {
     private(set) var sensorName: String?
     private(set) var statusNote: String?
     private(set) var lastConnection: Date?
+    private(set) var isSearchingForSensor = false
+
+    /// Told when the CGM starts or stops searching for its sensor.
+    @ObservationIgnored
+    var searchDidChange: ((Bool) -> Void)?
 
     private init() {
         if let raw = rawManager, let manager = watchCGMManager(rawValue: raw) {
@@ -51,6 +56,11 @@ final class WatchCGMHost {
         sensorName = watchCGMSensorName(cgmManager)
         statusNote = watchCGMStatusNote(cgmManager)
         lastConnection = watchCGMLastConnection(cgmManager)
+        let searching = watchCGMIsSearching(cgmManager)
+        if searching != isSearchingForSensor {
+            isSearchingForSensor = searching
+            searchDidChange?(searching)
+        }
     }
 
     /// The phone's context arrived. Builds a manager when its export names a different sensor or code,
@@ -119,7 +129,9 @@ extension WatchCGMHost: CGMManagerDelegate {
             LoopDataManager.shared.addDirectGlucose(samples)
         case .error(let error):
             log.error("CGM reading error: %{public}@", String(describing: error))
-        case .noData, .unreliableData:
+        case .unreliableData:
+            LoopDataManager.shared.directGlucoseUnreliable()
+        case .noData:
             break
         }
     }
