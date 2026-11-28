@@ -54,7 +54,7 @@ public final class WatchContext: RawRepresentable {
 
     public var cob: Double?
     public var iob: Double?
-    public var reservoir: Double?
+    public var reservoirLevel: ReservoirLevel?
     public var reservoirPercentage: Double?
     public var batteryPercentage: Double?
 
@@ -86,7 +86,7 @@ public final class WatchContext: RawRepresentable {
         potentialCarbEntry: NewCarbEntry? = nil,
         cob: Double? = nil,
         iob: Double? = nil,
-        reservoir: Double? = nil,
+        reservoirLevel: ReservoirLevel? = nil,
         reservoirPercentage: Double? = nil,
         batteryPercentage: Double? = nil,
         cgmManagerState: CGMManager.RawStateValue? = nil,
@@ -114,7 +114,7 @@ public final class WatchContext: RawRepresentable {
         self.potentialCarbEntry = potentialCarbEntry
         self.cob = cob
         self.iob = iob
-        self.reservoir = reservoir
+        self.reservoirLevel = reservoirLevel
         self.reservoirPercentage = reservoirPercentage
         self.batteryPercentage = batteryPercentage
         self.cgmManagerState = cgmManagerState
@@ -157,7 +157,9 @@ public final class WatchContext: RawRepresentable {
         glucoseWasUserEntered = rawValue["gue"] as? Bool
         glucoseSyncIdentifier = rawValue["gs"] as? String
         iob = rawValue["iob"] as? Double
-        reservoir = rawValue["r"] as? Double
+        if let data = rawValue["rl"] as? Data {
+            reservoirLevel = try? JSONDecoder().decode(ReservoirLevel.self, from: data)
+        }
         reservoirPercentage = rawValue["rp"] as? Double
         batteryPercentage = rawValue["bp"] as? Double
 
@@ -222,7 +224,7 @@ public final class WatchContext: RawRepresentable {
         raw["gs"] = glucoseSyncIdentifier
         raw["iob"] = iob
         raw["ld"] = loopLastRunDate
-        raw["r"] = reservoir
+        raw["rl"] = reservoirLevel.flatMap { try? JSONEncoder().encode($0) }
 
         raw["ids"] = insulinDeliveryState?.rawValue
         raw["lmb"] = lastManualBolus?.rawValue

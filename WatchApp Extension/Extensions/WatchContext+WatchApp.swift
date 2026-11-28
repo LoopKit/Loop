@@ -27,11 +27,4 @@ extension WatchContext {
         return LoopQuantity(unit: .gram, doubleValue: value)
     }
 
-    var reservoirVolume: LoopQuantity? {
-        guard let value = reservoir else {
-            return nil
-        }
-
-        return LoopQuantity(unit: .internationalUnit, doubleValue: value)
-    }
 }

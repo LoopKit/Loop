@@ -150,22 +150,7 @@ struct ChartPageView: View {
     }
 
     var reservoirVolume: String? {
-        guard let activeContext = loopManager.activeContext,
-            let reservoirVolume = activeContext.reservoirVolume
-        else {
-            return nil
-        }
-
-        let insulinFormatter: QuantityFormatter = {
-            let insulinFormatter = QuantityFormatter(for: .internationalUnit)
-            insulinFormatter.unitStyle = .long
-            insulinFormatter.numberFormatter.minimumFractionDigits = 0
-            insulinFormatter.numberFormatter.maximumFractionDigits = 0
-
-            return insulinFormatter
-        }()
-
-        return insulinFormatter.string(from: reservoirVolume)
+        loopManager.activeContext?.reservoirLevel?.formatted()
     }
 
     var body: some View {

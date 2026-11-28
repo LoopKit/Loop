@@ -56,10 +56,12 @@ final class WatchDataManager: NSObject {
         super.init()
 
         NotificationCenter.default.addObserver(self, selector: #selector(updateWatch(_:)), name: .LoopDataUpdated, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(sendSupportedBolusVolumesIfNeeded), name: .PumpManagerChanged, object: deviceManager)
+        NotificationCenter.default.addObserver(self, selector: #selector(pumpManagerChanged), name: .PumpManagerChanged, object: deviceManager)
 
         watchSession?.delegate = self
         watchSession?.activate()
+
+        pumpManagerChanged()
     }
 
     let log = DiagnosticLog(category: "WatchDataManager")
@@ -74,6 +76,7 @@ final class WatchDataManager: NSObject {
 
     private var lastSentUserInfo: LoopSettingsUserInfo?
     private var lastSentBolusVolumes: [Double]?
+    private weak var observedPumpManager: PumpManager?
 
     private var contextDosingDecisions: [Date: BolusDosingDecision] {
         get { lockedContextDosingDecisions.value }
@@ -216,6 +219,14 @@ final class WatchDataManager: NSObject {
         session.transferUserInfo(SupportedBolusVolumesUserInfo(supportedBolusVolumes: volumes).rawValue)
     }
 
+    @objc private func pumpManagerChanged() {
+        observedPumpManager?.removeStatusObserver(self)
+        observedPumpManager = deviceManager.pumpManager
+        observedPumpManager?.addStatusObserver(self, queue: .main)
+        sendSupportedBolusVolumesIfNeeded()
+        sendWatchContextIfNeeded()
+    }
+
     private func sendWatchContextIfNeeded() {
         guard let session = watchSession, session.isPaired, session.isWatchAppInstalled else {
             return
@@ -274,8 +285,8 @@ final class WatchDataManager: NSObject {
     @MainActor
     private func createWatchContext(recommendingBolusFor potentialCarbEntry: NewCarbEntry? = nil, reason: String = "update") async -> WatchContext {
         let glucose = loopDataManager.latestGlucose
-        let reservoir = loopDataManager.lastReservoirValue
-        let basalDeliveryState = deviceManager.pumpManager?.status.basalDeliveryState
+        let pumpStatus = deviceManager.pumpManager?.status
+        let basalDeliveryState = pumpStatus?.basalDeliveryState
 
         let displayState = loopDataManager.displayState
         let (_, algoOutput) = displayState.asTuple
@@ -283,7 +294,7 @@ final class WatchDataManager: NSObject {
         let carbsOnBoard = loopDataManager.activeCarbs
 
         let context = WatchContext(glucose: glucose, glucoseUnit: self.deviceManager.displayGlucosePreference.unit)
-        context.reservoir = reservoir?.unitVolume
+        context.reservoirLevel = pumpStatus?.reservoirLevel
         context.loopLastRunDate = loopDataManager.lastLoopCompleted
         context.cob = carbsOnBoard?.quantity.doubleValue(for: .gram)
 
@@ -534,6 +545,16 @@ final class WatchDataManager: NSObject {
     }
 }
 
+
+extension WatchDataManager: PumpManagerStatusObserver {
+    nonisolated func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus, oldStatus: PumpManagerStatus) {
+        guard status.reservoirLevel != oldStatus.reservoirLevel else { return }
+        Task { @MainActor [weak self] in
+            guard let self, self.deviceManager.pumpManager === pumpManager else { return }
+            self.sendWatchContextIfNeeded()
+        }
+    }
+}
 
 extension WatchDataManager: WCSessionDelegate {
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
