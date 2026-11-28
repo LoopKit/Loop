@@ -200,7 +200,7 @@ final class LoanControlTests: XCTestCase {
 
     func testTheWaits() {
         XCTAssertEqual(C.Wait.onScreen.seconds, 10)
-        XCTAssertEqual(C.Wait.startRequest.seconds, 6)
+        XCTAssertEqual(C.Wait.startRequest.seconds, 10)
         XCTAssertEqual(C.Wait.requestReceived.seconds, 20)
         XCTAssertEqual(C.Wait.inBackground.seconds, 30)
         XCTAssertEqual(C.watchReportOverdue, 6 * 60)
