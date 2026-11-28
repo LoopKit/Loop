@@ -93,7 +93,11 @@ struct SystemStatusWidget: Widget {
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: StatusWidgetTimelineProvider()) { entry in
-            SystemStatusWidgetEntryView(entry: entry)
+            if WidgetDesign.useRedesign {
+                RedesignStatusWidgetView(entry: entry)
+            } else {
+                SystemStatusWidgetEntryView(entry: entry)
+            }
         }
         .configurationDisplayName("Loop Status Widget")
         .description("See your current blood glucose and insulin delivery.")
