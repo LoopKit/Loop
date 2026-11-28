@@ -171,25 +171,16 @@ extension PodLoanPhoneController {
         }
         deps.pumpControlChanged(true)
 
-        // New epoch, empty dedup state, this loan's anchors: one save, before the grant goes out.
+        // The new loan's number, its empty books and its anchors: one save, before the grant goes out.
         let previous = state
-        updateState {
-            $0.epoch = releaseEpoch
+        openLoanBooks(epoch: releaseEpoch) {
             $0.phase = .grantOffered
-            $0.committedCursor = 0
-            $0.committedIDs = []
             $0.loanStartedAt = handedOverAt
             if let deliveredAtGrant { $0.ledger.last = .init(units: deliveredAtGrant, at: handedOverAt) }
             $0.holdRenewedAt = handedOverAt
             $0.recordsCurrentAt = handedOverAt
         }
         stateDidChange(from: previous)
-
-        pendingForceReclaimReason = nil
-        coalescedOffers.removeAll()
-        staged = [:]
-        stagedTombstones = []
-        persistStaged()
 
         let grantEpoch = epoch
 

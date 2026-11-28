@@ -346,6 +346,9 @@ extension PodLoanWatchController {
         // The phone answered the offer: the End is not refused.
         handbackAckedAt = now()
         // An empty backlog is the finalize gate.
+        if ack.committedCursor > journal.lastEventSeq {
+            SportLog.event("loan", "the phone acknowledged up to \(ack.committedCursor), but this loan has \(journal.lastEventSeq) record(s): counted as \(journal.lastEventSeq)")
+        }
         journal.applyAck(committedCursor: ack.committedCursor)
         guard journal.unackedEvents().isEmpty else { return }
 

@@ -1827,6 +1827,101 @@ final class PodLoanPhoneControllerTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(controller.lastRecordsAtForUI).timeIntervalSince(sentAt), 0, accuracy: 1)
     }
 
+    /// The watch numbers each loan's records from 1, and reads an acknowledgement as covering every record
+    /// at or below its number. A phone adopting a loan the watch started alone must therefore acknowledge by
+    /// that loan's own numbers. Answering with the last loan's number tells the watch that records it has
+    /// yet to make are saved, and it never sends them.
+    func testAnAdoptedLoanIsAcknowledgedByItsOwnRecordNumbers() throws {
+        let token = seizeCredentialOutstanding()
+        // The last loan, started the normal way, ended with nine records saved.
+        saveState {
+            $0.epoch = 4
+            $0.committedCursor = 9
+            $0.committedIDs = Set((0..<9).map { _ in UUID() })
+        }
+        let controller = makeController(now: { self.clock })
+        pump.lastSync = clock.addingTimeInterval(-.minutes(5))
+
+        controller.handleIncoming(userInfo: try LoanMessage.statusReport(StatusReport(
+            epoch: 5, lastDirectGlucoseAge: nil, lastEventSeq: 0, podFault: nil, holdsPod: true, knowsGrant: false)).transportDictionary())
+        waitUntil(timeout: 5, "standing aside") { controller.yieldingToInferredLoan }
+
+        // The new loan's first two records: the phone's own temp basal as the watch found it, ended at the
+        // takeover, and the takeover's cancel.
+        clock = clock.addingTimeInterval(.minutes(1))
+        let takeover = clock.addingTimeInterval(-10)
+        let phonesTemp = tempEvent(seq: 1, rate: 0, start: takeover.addingTimeInterval(-.minutes(15)), durationMinutes: 15)
+        let cancel = tempEvent(seq: 2, rate: 0, start: takeover, durationMinutes: 0)
+        controller.handleIncoming(userInfo: try LoanMessage.doseRecordBatch(DoseRecordBatch(
+            epoch: 5, events: [phonesTemp, cancel], tombstones: [], sentAt: clock, seizeToken: token)).transportDictionary())
+
+        func acks() -> [HandbackAck] {
+            lock.lock(); defer { lock.unlock() }
+            return sent.compactMap { if case .handbackAck(let ack) = $0 { return ack }; return nil }
+        }
+        waitUntil(timeout: 5, "the records are saved and acknowledged") { !acks().isEmpty }
+        let ack = try XCTUnwrap(acks().last)
+
+        XCTAssertEqual(controller.state, .loaned, "precondition: the watch's loan is adopted")
+        XCTAssertEqual(ack.epoch, 5)
+        XCTAssertEqual(ack.committedCursor, 2, "two records of this loan are saved: the acknowledgement says 2, not the last loan's 9")
+        XCTAssertEqual(controller.committedCursor, 2, "and the phone's own count is this loan's")
+    }
+
+    /// A new loan's books open empty, so the last loan's records are saved first. A phone still holding a
+    /// record of the loan before does not adopt the watch's loan over it: it saves the record under its own
+    /// loan, and adopts when the watch sends again.
+    func testALoanTheWatchStartedIsAdoptedOnlyOnceTheLastLoansRecordsAreSaved() throws {
+        let token = seizeCredentialOutstanding()
+        saveState {
+            $0.epoch = 4
+            $0.committedCursor = 3
+        }
+        let controller = makeController(now: { self.clock })
+        pump.lastSync = clock.addingTimeInterval(-.minutes(5))
+        // A record of loan 4 whose save has not landed.
+        let leftover = tempEvent(seq: 4, rate: 0.3, start: clock.addingTimeInterval(-.minutes(40)), durationMinutes: 30)
+        controller.stage(events: [leftover], tombstones: [])
+        XCTAssertTrue(controller.holdsUnsavedWatchRecords, "precondition: a record of the last loan is unsaved")
+
+        controller.handleIncoming(userInfo: try LoanMessage.statusReport(StatusReport(
+            epoch: 5, lastDirectGlucoseAge: nil, lastEventSeq: 0, podFault: nil, holdsPod: true, knowsGrant: false)).transportDictionary())
+        waitUntil(timeout: 5, "standing aside") { controller.yieldingToInferredLoan }
+
+        clock = clock.addingTimeInterval(.minutes(1))
+        let cancel = tempEvent(seq: 1, rate: 0, start: clock.addingTimeInterval(-10), durationMinutes: 0)
+        let batch = try LoanMessage.doseRecordBatch(DoseRecordBatch(
+            epoch: 5, events: [cancel], tombstones: [], sentAt: clock, seizeToken: token)).transportDictionary()
+        func acks() -> [HandbackAck] {
+            lock.lock(); defer { lock.unlock() }
+            return sent.compactMap { if case .handbackAck(let ack) = $0 { return ack }; return nil }
+        }
+
+        lock.lock(); holdPumpEventWrites = true; lock.unlock()
+        controller.handleIncoming(userInfo: batch)
+        waitUntil(timeout: 5, "the last loan's record is being saved") { self.lock.lock(); defer { self.lock.unlock() }; return self.heldPumpEventWrite != nil }
+        XCTAssertEqual(controller.epoch, 4, "not adopted while the last loan's record is unsaved")
+        XCTAssertEqual(controller.state, .owner)
+        XCTAssertTrue(controller.yieldingToInferredLoan, "still standing aside for the watch's loan")
+
+        lock.lock(); holdPumpEventWrites = false; lock.unlock()
+        releaseHeldPumpEventWrite()
+        waitUntil(timeout: 5, "the last loan's record is saved") { !controller.holdsUnsavedWatchRecords && !acks().isEmpty }
+        XCTAssertEqual(acks().last?.epoch, 4, "saved and acknowledged under its own loan")
+        XCTAssertEqual(acks().last?.committedCursor, 4)
+
+        // The watch sends again what is not acknowledged.
+        controller.handleIncoming(userInfo: batch)
+        waitUntil(timeout: 5, "the watch's loan is adopted and its record acknowledged") { acks().last?.epoch == 5 }
+
+        XCTAssertEqual(controller.state, .loaned)
+        XCTAssertEqual(controller.epoch, 5)
+        XCTAssertEqual(acks().last?.committedCursor, 1, "by the new loan's own numbers")
+        lock.lock(); let saved = addedDoses.flatMap { $0 }; lock.unlock()
+        XCTAssertTrue(saved.contains { $0.type == .tempBasal && abs($0.unitsPerHour - 0.3) < 0.001 },
+                      "the last loan's record is in the phone's stores")
+    }
+
     /// Without this phone's credential the records adopt nothing: the phone stands aside and takes none in.
     func testRecordsWithoutThisPhonesCredentialAreNotAdopted() throws {
         _ = seizeCredentialOutstanding()

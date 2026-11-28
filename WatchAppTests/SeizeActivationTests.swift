@@ -531,6 +531,22 @@ final class SeizeActivationTests: XCTestCase {
         XCTAssertNil(snap.seizeOfferIssuedAt, "the accepted grant withdrew the offline offer")
     }
 
+    /// An acknowledgement can only cover records that exist. One that names a higher number than the loan
+    /// has reached (a phone answering with its last loan's count) must not
+    /// mark the records the watch makes next as saved, or they are never sent.
+    func testAnAcknowledgementBeyondTheLoansRecordsCoversNoLaterRecord() throws {
+        let journal = LoanEventJournal(directory: journalDir)
+        try journal.begin(epoch: 27)
+        let takeover = Date()
+        _ = try journal.mintEvent(record: LoanDoseRecord(kind: .tempBasal, startDate: takeover.addingTimeInterval(-900), endDate: takeover, unitsPerHour: 0), provenance: .confirmed)
+        _ = try journal.mintEvent(record: LoanDoseRecord(kind: .tempBasal, startDate: takeover, endDate: takeover, unitsPerHour: 0), provenance: .confirmed)
+        journal.applyAck(committedCursor: 9)                      // the phone's number from its last loan
+
+        let next = try journal.mintEvent(record: LoanDoseRecord(kind: .tempBasal, startDate: takeover.addingTimeInterval(300), endDate: takeover.addingTimeInterval(2100), unitsPerHour: 0.5), provenance: .confirmed)
+
+        XCTAssertEqual(journal.unackedEvents().map(\.id), [next.id], "the loan's third record is still to send")
+    }
+
     /// A grant for a Start the looper cancelled at the offline offer starts nothing: the phone is told
     /// and takes the pod back (control row 2, transfer G). A fresh Start asks afresh.
     func testAGrantAfterTheOfferIsDismissedIsRefused() async throws {

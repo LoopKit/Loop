@@ -134,10 +134,11 @@ final class LoanEventJournal {
         return s.nextSeq - 1
     }
 
-    /// Monotonic, so a replayed ack never moves the cursor back.
+    /// Monotonic, so a replayed ack never moves the cursor back; and never past this loan's last record:
+    /// a number beyond it speaks of records this loan has not made, and would cover the next ones unsent.
     func applyAck(committedCursor: Int) {
         mutate { s in
-            let cursor = committedCursor
+            let cursor = min(committedCursor, s.nextSeq - 1)
             s.ackedCursor = max(s.ackedCursor, cursor)
             s.tombstones.removeAll()
         }
