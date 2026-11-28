@@ -28,13 +28,20 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
 
     // MARK: - Other state
     let interactionStartDate = Date()
-    private var carbEntryUnderConsideration: NewCarbEntry?
+    var carbEntryUnderConsideration: NewCarbEntry? {   // CarbAndBolusFlowViewModel+PodLoan.swift reads it
+        didSet { if oldValue != carbEntryUnderConsideration { loanRecommendationIsForEntry = false } }
+    }
+    // During a loan (CarbAndBolusFlowViewModel+PodLoan.swift): one recommendation asked of the watch at a time,
+    // whether another was asked for meanwhile, and whether the number shown was computed for the entry considered.
+    var loanRecommendationInFlight = false
+    var loanRecommendationStale = false
+    var loanRecommendationIsForEntry = false
     private var contextUpdateObservation: AnyObject?
     private var contextDate: Date?
 
     // MARK: - Constants
     private static let defaultSupportedBolusVolumes = (0...600).map { 0.05 * Double($0) } // U
-    private static let defaultMaxBolus: Double = 10 // U
+    static let defaultMaxBolus: Double = 10 // U
 
     // MARK: - Initialization
     let configuration: CarbAndBolusFlow.Configuration
@@ -48,7 +55,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
         self._bolusPickerValues = Published(
             initialValue: BolusPickerValues(
                 supportedVolumes: loopManager.supportedBolusVolumes ?? Self.defaultSupportedBolusVolumes,
-                maxBolus: loopManager.watchInfo.loopSettings.maximumBolus ?? Self.defaultMaxBolus
+                maxBolus: Self.activeMaxBolus(loopManager)
             )
         )
 
@@ -61,6 +68,8 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
                 await recommendBolus()
             }
         }
+
+        observeLoanDecisions()
 
         contextUpdateObservation = NotificationCenter.default.addObserver(
             forName: LoopDataManager.didUpdateContextNotification,
@@ -77,21 +86,24 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
 
         self.bolusPickerValues = BolusPickerValues(
             supportedVolumes: loopManager.supportedBolusVolumes ?? Self.defaultSupportedBolusVolumes,
-            maxBolus: loopManager.watchInfo.loopSettings.maximumBolus ?? Self.defaultMaxBolus
+            maxBolus: Self.activeMaxBolus(loopManager)
         )
 
         switch self.configuration {
         case .carbEntry:
             // If this new context wasn't generated in response to a potential carb entry message,
             // recompute the recommended bolus for the carb entry under consideration.
-            let wasContextGeneratedFromPotentialCarbEntryMessage = loopManager.activeContext?.potentialCarbEntry != nil
+            let wasContextGeneratedFromPotentialCarbEntryMessage = loopManager.displayContext?.potentialCarbEntry != nil
             if !wasContextGeneratedFromPotentialCarbEntryMessage, let entry = self.carbEntryUnderConsideration {
                 Task { @MainActor in
                     await self.recommendBolus(with: entry)
                 }
             }
         case .manualBolus:
-            let activeContext = loopManager.activeContext
+            // During a loan the watch's context carries no recommendation: the screen asks the watch's
+            // loop for its own, again at each change of what it displays.
+            if let session = loanSessionIfActive { return recommendLoanBolus(with: nil, session: session) }
+            let activeContext = loopManager.displayContext
             self.contextDate = activeContext?.creationDate
             if self.recommendedBolusAmount != activeContext?.recommendedBolusDose {
                 self.recommendedBolusAmount = activeContext?.recommendedBolusDose
@@ -129,6 +141,8 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func recommendBolus(with entry: NewCarbEntry? = nil) async {
+        if let session = loanSessionIfActive { return recommendLoanBolus(with: entry, session: session) }
+
         do {
             isComputingRecommendedBolus = true
             let context = try await WCSession.default.fetchBolusRecommendation(entry)
@@ -184,6 +198,14 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func sendSetBolusUserInfo(carbEntry: NewCarbEntry?, bolus: Double) async throws {
+        if let session = podLoanSession {
+            switch session.loanController.bolusRoute(units: bolus) {
+            case .watchPump: return podLoanDeliverOnWrist(carbEntry: carbEntry, bolus: bolus, session: session)
+            case .refused(let reason): return podLoanRefuseBolus(bolus, reason: reason)
+            case .stockRouteToPhone: break
+            }
+        }
+
         let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), contextDate: self.contextDate, carbEntry: carbEntry, activationType: .activationTypeFor(recommendedAmount: recommendedBolusAmount, bolusAmount: bolus))
         // The phone saves the entry and pushes a context with it in COB before
         // it replies, so stop treating it as pending before sending.

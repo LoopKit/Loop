@@ -14,25 +14,42 @@ struct ContentView: View {
     static let sensorPage = 10
 
     @Environment(LoopDataManager.self) var loopManager
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var presetToConfirm: SelectablePreset? = nil
-    @State private var selectedPage = UserDefaults.standard.startOnChartPage ? 1 : 0
+    @State var selectedPage = UserDefaults.standard.startOnChartPage ? 1 : 0
+    @StateObject var glanceModel = GlanceViewModel()   // ContentView+PodLoan.swift reads it
+
+    /// Mirrored so the root view does not subscribe to the timer-driven glance model.
+    @State var loanIsLive = false   // ContentView+PodLoan.swift maintains it
+    @State var wasInBackground = false   // ContentView+PodLoan.swift maintains it
 
     var body: some View {
         VStack {
             // TabView for swipeable pages
             TabView(selection: $selectedPage) {
-                WatchActionsView()
+                // Gated pages keep their slots; the indices are load-bearing (see sportPage).
+                Group {
+                    if isOnboarded { WatchActionsView() } else { CompleteOnboardingView() }
+                }
                     .tag(0)
                     .task {
                         loopManager.requestContextUpdate {}
                     }
 
-                ChartPageView()
+                Group {
+                    if isOnboarded { ChartPageView() } else { CompleteOnboardingView() }
+                }
                     .tag(1)
                     .task {
                         loopManager.requestContextUpdate {}
                     }
+
+                // Sport Mode: always present, and the only way to start a session.
+                if FeatureFlags.sportModeEnabled {
+                    GlanceView(model: glanceModel)
+                        .tag(Self.sportPage)
+                }
 
                 // While the watch reads the CGM itself.
                 if WatchCGMHost.shared.isReadingDirectly {
@@ -51,10 +68,28 @@ struct ContentView: View {
         .sheet(item: $presetToConfirm) { preset in
             PresetConfirmationView(preset: preset)
         }
+        .onChange(of: scenePhase) { _, newValue in
+            podLoanScenePhaseDidChange(newValue)
+        }
         .onChange(of: selectedPage, { oldValue, newValue in
-            UserDefaults.standard.startOnChartPage = selectedPage == 1
-            ExtensionDelegate.shared().usageRecorder.didDisplayScreen(newValue == 0 ? "actions" : newValue == 1 ? "chart" : "sensor")
+            podLoanRememberPage(newValue)
+            ExtensionDelegate.shared().usageRecorder.didDisplayScreen(newValue == 0 ? "actions" : newValue == 1 ? "chart" : newValue == Self.sportPage ? "sportMode" : "sensor")
         })
+        // A loan activating shows the glance; handled once the phase change has finished.
+        .onReceive(NotificationCenter.default.publisher(for: .podLoanPhaseDidChange).receive(on: RunLoop.main)) { _ in
+            podLoanPhaseDidChange()
+        }
+        // During a loan, finishing a carb or bolus flow returns to the glance, which shows the dose landing;
+        // so does Deactivate Pod on a failed pod's alarm, for its confirmation.
+        .onReceive(NotificationCenter.default.publisher(for: .carbAndBolusFlowDidComplete).receive(on: RunLoop.main)) { _ in
+            podLoanReturnToGlanceAfterFlow()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .podLoanDeactivateRequested).receive(on: RunLoop.main)) { _ in
+            podLoanReturnToGlanceAfterFlow()
+        }
+        .task {
+            podLoanSyncGateOnLaunch()
+        }
     }
 }
 
