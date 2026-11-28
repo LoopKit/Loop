@@ -92,6 +92,7 @@ struct ShareOutcomesView: View {
                 Button(NSLocalizedString("Send", comment: "Button to send an outcomes share")) {
                     Task { await viewModel.send() }
                 }
+                copyLink
             case .sending(let package):
                 summaryRows(package)
                 HStack {
@@ -104,6 +105,7 @@ struct ShareOutcomesView: View {
                     .foregroundColor(.accentColor)
                 LabeledContent(NSLocalizedString("Receipt", comment: "Label for an outcomes share's receipt ID"), value: receipt.id)
                     .textSelection(.enabled)
+                copyLink
             case .deleted:
                 Text(NSLocalizedString("The share was deleted.", comment: "Shown after the outcomes share just sent is deleted"))
             case .failed(let message, let package):
@@ -113,13 +115,26 @@ struct ShareOutcomesView: View {
                     Button(NSLocalizedString("Try Again", comment: "Button to retry sending an outcomes share")) {
                         Task { await viewModel.send() }
                     }
+                    copyLink
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var copyLink: some View {
+        if let url = viewModel.copyURL {
+            ShareLink(item: url) {
+                Text(NSLocalizedString("Save or Send a Copy…", comment: "Button that opens the share sheet with a copy of the outcomes share"))
             }
         }
     }
 
     private var sendFooter: some View {
         var text = NSLocalizedString("Shares are stored on a LoopKit server that only Loop developers can access. You can delete a share from this screen at any time.", comment: "Footer explaining how outcomes shares are stored")
+        if viewModel.copyURL != nil {
+            text += " " + NSLocalizedString("A copy you save or send yourself goes only where you choose, and doesn't include your note.", comment: "Footer explaining that a saved copy of an outcomes share isn't sent to the developers")
+        }
         if case .ready = viewModel.state, let previous = viewModel.previousShare {
             text = String(format: NSLocalizedString("You shared this setup on %@.", comment: "Note that the current setup was already shared (1: date)"), previous.sent.formatted(date: .abbreviated, time: .shortened)) + " " + text
         }
