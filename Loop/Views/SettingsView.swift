@@ -55,6 +55,8 @@ struct SettingsView: View {
             
             case favoriteFoods
             case presets
+            case trends
+            case logbook
         }
     }
     
@@ -85,6 +87,7 @@ struct SettingsView: View {
                     }
                     alertManagementSection
                     statisticsSection
+                    interfaceSection
                     if viewModel.pumpManagerSettingsViewModel.isSetUp() {
                         therapySection
                     }
@@ -156,6 +159,15 @@ struct SettingsView: View {
                         }
                     case .favoriteFoods:
                         FavoriteFoodsView(insightsDelegate: viewModel.favoriteFoodInsightsDelegate)
+                    case .trends:
+                        if let historyProvider = viewModel.historyProvider {
+                            // Trends brings its own navigation stack, so it is a sheet rather than a push. Done closes only Trends.
+                            TrendsView(provider: historyProvider, done: { self.sheet = nil })
+                        }
+                    case .logbook:
+                        if let historyProvider = viewModel.historyProvider, let deviceManager = viewModel.deviceManager {
+                            LogbookView(provider: historyProvider, deviceManager: deviceManager, done: { self.sheet = nil })
+                        }
                     }
                 }
                 .environmentObject(displayGlucosePreference)
@@ -341,22 +353,31 @@ extension SettingsView {
     private var statisticsSection: some View {
         if let glucoseStore = viewModel.deviceManager?.glucoseStore {
             Section {
-                NavigationLink(destination: StatisticsView(
-                    glucoseStore: glucoseStore,
-                    insulinDeliveryHistory: viewModel.insulinDeliveryHistory,
-                    scheduledBasalTotal: viewModel.therapySettings().basalRateSchedule?.total()
-                )) {
+                // The new interface's Trends and Logbook tabs cover these.
+                if viewModel.historyProvider != nil && !LoopInterfacePreference.useRedesign {
                     LargeButton(
-                        action: {},
-                        includeArrow: false,
-                        imageView: Image(systemName: "chart.xyaxis.line")
+                        action: { sheet = .trends },
+                        // Opens a sheet, but sits among navigation rows, so it shows their chevron.
+                        arrowLikeNavigationLink: true,
+                        imageView: Image(systemName: "chart.bar.doc.horizontal")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 30),
-                        label: NSLocalizedString("Statistics", comment: "Statistics settings button text"),
-                        descriptiveText: NSLocalizedString("Glucose overview, ambulatory glucose profile and daily insulin", comment: "Statistics settings descriptive text")
+                        label: NSLocalizedString("Trends", comment: "Trends settings button text"),
+                        descriptiveText: NSLocalizedString("Time in range, daily pattern, insulin per day and Loop status", comment: "Trends settings descriptive text")
                     )
-                    .accessibilityIdentifier("settingsViewStatistics")
+                    .accessibilityIdentifier("settingsViewTrends")
+                    LargeButton(
+                        action: { sheet = .logbook },
+                        arrowLikeNavigationLink: true,
+                        imageView: Image(systemName: "list.bullet.rectangle")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 30),
+                        label: NSLocalizedString("Logbook", comment: "Logbook settings button text"),
+                        descriptiveText: NSLocalizedString("Boluses, basal changes, carbs and pump events from the last 7 days", comment: "Logbook settings descriptive text")
+                    )
+                    .accessibilityIdentifier("settingsViewLogbook")
                 }
                 NavigationLink(destination: CurrentSetupView(viewModel: CurrentSetupViewModel(
                     selected: setupChange,
@@ -452,6 +473,15 @@ extension SettingsView {
         .environment(\.glucoseTintColor, self.glucoseTintColor)
         .environment(\.guidanceColors, self.guidanceColors)
         .environment(\.insulinTintColor, self.insulinTintColor)
+    }
+
+    private var interfaceSection: some View {
+        Section(footer: Text(NSLocalizedString("The new interface adds Trends and Logbook tabs. Turn it off to go back to the classic status screen; Settings closes to switch.", comment: "Footer for the interface choice in settings"))) {
+            Toggle(NSLocalizedString("New Interface", comment: "Title of the toggle for the redesigned interface"), isOn: Binding(
+                get: { LoopInterfacePreference.useRedesign },
+                set: { LoopInterfacePreference.useRedesign = $0 }
+            ))
+        }
     }
 
     private var therapySection: some View {
@@ -790,6 +820,7 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
     
     let action: () -> Void
     var includeArrow: Bool
+    var arrowLikeNavigationLink: Bool
     let imageView: Content
     let secondaryImageView: SecondaryContent
     let label: String
@@ -798,6 +829,7 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
     init(
         action: @escaping () -> Void,
         includeArrow: Bool = true,
+        arrowLikeNavigationLink: Bool = false,
         imageView: Content,
         secondaryImageView: SecondaryContent = EmptyView(),
         label: String,
@@ -805,6 +837,7 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
     ) {
         self.action = action
         self.includeArrow = includeArrow
+        self.arrowLikeNavigationLink = arrowLikeNavigationLink
         self.imageView = imageView
         self.secondaryImageView = secondaryImageView
         self.label = label
@@ -841,7 +874,14 @@ fileprivate struct LargeButton<Content: View, SecondaryContent: View>: View {
                 
                 if includeArrow {
                     // TODO: Ick. I can't use a NavigationLink because we're not Navigating, but this seems worse somehow.
-                    Image(systemName: "chevron.right").foregroundColor(.gray).font(.footnote)
+                    if arrowLikeNavigationLink {
+                        Image(systemName: "chevron.forward")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Color(uiColor: .tertiaryLabel))
+                            .padding(.trailing, 1)
+                    } else {
+                        Image(systemName: "chevron.right").foregroundColor(.gray).font(.footnote)
+                    }
                 }
             }
             .padding(EdgeInsets(top: topBottomPadding, leading: 0, bottom: topBottomPadding, trailing: 0))

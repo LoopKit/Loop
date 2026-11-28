@@ -57,11 +57,15 @@ struct GlucoseStatistics: Equatable {
     let averageGlucose: Double?
     /// Glucose Management Indicator (estimated A1C), percent. Nil if no samples.
     let gmi: Double?
+    /// Sample standard deviation in mg/dL. Nil if < 2 samples.
+    let standardDeviation: Double?
     /// Coefficient of variation (sample SD / mean × 100), percent. Nil if < 2 samples.
     let coefficientOfVariation: Double?
     /// Fraction of time (0…1) spent in each band. Time-weighted, gap-capped.
     let timeInRange: [GlucoseBand: Double]
-    /// Fraction (0…1) of the window for which CGM data is present.
+    /// Fraction (0…1) of the window for which CGM data is present: each reading
+    /// covers the time until the next, up to one `assumedCadence` slot, so a
+    /// sensor that reports every minute doesn't count its gaps as covered.
     let percentActive: Double
     /// Per-time-of-day percentile bands for the AGP chart, ordered by time of day.
     let agpProfile: [AGPBand]
@@ -76,19 +80,32 @@ struct GlucoseStatistics: Equatable {
         bucketDuration: TimeInterval = .minutes(30),
         calendar: Calendar = .current
     ) {
+        self.init(readings: samples.map { (date: $0.startDate, mgdl: $0.quantity.doubleValue(for: .milligramsPerDeciliter)) },
+                  start: start, end: end, bucketDuration: bucketDuration, calendar: calendar)
+    }
+
+    /// Statistics from readings given as a date and a value in mg/dL.
+    init(
+        readings: [(date: Date, mgdl: Double)],
+        start: Date,
+        end: Date,
+        bucketDuration: TimeInterval = .minutes(30),
+        calendar: Calendar = .current
+    ) {
         self.start = start
         self.end = end
 
-        let sorted = samples
-            .filter { $0.startDate >= start && $0.startDate < end }
-            .sorted { $0.startDate < $1.startDate }
-        let values = sorted.map { $0.quantity.doubleValue(for: .milligramsPerDeciliter) }
+        let sorted = readings
+            .filter { $0.date >= start && $0.date < end }
+            .sorted { $0.date < $1.date }
+        let values = sorted.map(\.mgdl)
         self.sampleCount = values.count
 
-        // Mean, GMI, CV
+        // Mean, GMI, SD, CV
         if values.isEmpty {
             averageGlucose = nil
             gmi = nil
+            standardDeviation = nil
             coefficientOfVariation = nil
         } else {
             let mean = values.reduce(0, +) / Double(values.count)
@@ -97,22 +114,26 @@ struct GlucoseStatistics: Equatable {
             gmi = 3.31 + 0.02392 * mean
             if values.count >= 2, mean > 0 {
                 let variance = values.reduce(0) { $0 + ($1 - mean) * ($1 - mean) } / Double(values.count - 1)
+                standardDeviation = variance.squareRoot()
                 coefficientOfVariation = variance.squareRoot() / mean * 100
             } else {
+                standardDeviation = nil
                 coefficientOfVariation = nil
             }
         }
 
         // Time-in-range: weight each reading by the time until the next reading,
         // capping each interval so an offline gap can't dominate the breakdown.
+        // Percent active counts the same intervals, each capped at one reading's slot.
         let maxInterval = Self.assumedCadence * 2
         var durations: [GlucoseBand: TimeInterval] = [:]
-        for (index, sample) in sorted.enumerated() {
-            let nextDate = index + 1 < sorted.count ? sorted[index + 1].startDate : end
-            let duration = min(nextDate.timeIntervalSince(sample.startDate), maxInterval)
-            guard duration > 0 else { continue }
-            let band = GlucoseBand.classify(mgdl: values[index])
-            durations[band, default: 0] += duration
+        var covered: TimeInterval = 0
+        for (index, reading) in sorted.enumerated() {
+            let nextDate = index + 1 < sorted.count ? sorted[index + 1].date : end
+            let interval = nextDate.timeIntervalSince(reading.date)
+            guard interval > 0 else { continue }
+            durations[GlucoseBand.classify(mgdl: values[index]), default: 0] += min(interval, maxInterval)
+            covered += min(interval, Self.assumedCadence)
         }
         let totalDuration = durations.values.reduce(0, +)
         if totalDuration > 0 {
@@ -121,21 +142,15 @@ struct GlucoseStatistics: Equatable {
             timeInRange = [:]
         }
 
-        // Percent active: covered time (gap-capped) over the window length.
         let windowDuration = end.timeIntervalSince(start)
-        if windowDuration > 0 {
-            let covered = Double(values.count) * Self.assumedCadence
-            percentActive = min(1, covered / windowDuration)
-        } else {
-            percentActive = 0
-        }
+        percentActive = windowDuration > 0 ? min(1, covered / windowDuration) : 0
 
         // AGP: pool readings into time-of-day buckets across all days, then take
         // percentiles per bucket. Skip buckets with too few readings to be useful.
         let bucketCount = max(1, Int((TimeInterval.hours(24) / bucketDuration).rounded()))
         var buckets: [[Double]] = Array(repeating: [], count: bucketCount)
-        for (index, sample) in sorted.enumerated() {
-            let secondsOfDay = sample.startDate.timeIntervalSince(calendar.startOfDay(for: sample.startDate))
+        for (index, reading) in sorted.enumerated() {
+            let secondsOfDay = reading.date.timeIntervalSince(calendar.startOfDay(for: reading.date))
             let bucket = min(bucketCount - 1, max(0, Int(secondsOfDay / bucketDuration)))
             buckets[bucket].append(values[index])
         }
