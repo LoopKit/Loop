@@ -15,8 +15,20 @@ import UserNotifications
 
 extension PodLoanPhoneController {
 
-    /// Ceiling on the settle; also bounds how long a grant can be refused as not-yet-ready.
+    /// Ceiling on the settle, and when the looper is told the pod has not answered.
     static let reclaimSettleTimeout: TimeInterval = .minutes(5)
+
+    static let podUnreachedTitle = NSLocalizedString("iPhone Can't Reach the Pod", comment: "Phone notice title: the phone has the pod again after Sport Mode and has not reached it for five minutes")
+    static let podUnreachedBody = NSLocalizedString("Nobody is looping. Start Sport Mode again to resume looping.", comment: "Phone notice body: the phone has the pod again after Sport Mode and has not reached it for five minutes")
+
+    /// The phone has the pod again, by the looper's End or any other route, and may be out of its reach
+    /// (control row 31): the watch reaches this phone over Wi-Fi where the pod's radio does not. Nobody
+    /// loops then, and the looper is told when the settle gives up. Scheduled now and withdrawn at the
+    /// pod's answer, so it needs no run time on a phone iOS has suspended.
+    func schedulePodUnreachedNotice() {
+        scheduleNotification(id: NotificationID.podUnreached, title: Self.podUnreachedTitle, body: Self.podUnreachedBody,
+                             delay: Self.reclaimSettleTimeout, repeats: false, interruptionLevel: .timeSensitive)
+    }
 
     /// A typical settle; the progress bar is drawn against it.
     static let reclaimSettleExpectation: TimeInterval = 10
@@ -42,6 +54,8 @@ extension PodLoanPhoneController {
             reclaimDisplayAnchor = started
         }
 
+        schedulePodUnreachedNotice()
+
         // Background time for the whole settle, so pocketing the phone cannot orphan the pod.
         deps.beginReclaimBackgroundTask()
         reclaimSettleWork?.cancel()
@@ -54,7 +68,7 @@ extension PodLoanPhoneController {
             self.reclaimDisplayAnchor = nil
             self.deps.endReclaimBackgroundTask()
 
-            self.noteForceReclaimAuditStillOwed(why: "the pod did not answer while reconnecting")
+            self.noteAuditStillOwed(why: "the pod did not answer while reconnecting")
             self.deps.ownershipDidChange()
         }
         reclaimSettleWork = work
@@ -66,6 +80,8 @@ extension PodLoanPhoneController {
 
     /// Ends the window early, for a phone that has stopped trying to hold the pod.
     func closeReclaimSettleWindow(reason: String) {
+        // Pending or already shown: this phone no longer means to hold the pod.
+        cancelNotification(id: NotificationID.podUnreached)
         guard reclaimStartedAt != nil else { return }
         handbackDiag(epoch, "stopped reconnecting to the pod: \(reason)")
 
@@ -76,24 +92,37 @@ extension PodLoanPhoneController {
         reclaimVerifyInFlight = false
         deps.endReclaimBackgroundTask()
 
-        noteForceReclaimAuditStillOwed(why: reason)
+        noteAuditStillOwed(why: reason)
     }
 
-    /// The window closed without the pod answering, its link lost after the take-back. The check
-    /// stays owed and dosing stays held: a phone that cannot reach the pod cannot dose it.
-    /// `considerOwedForceReclaimAudit` runs it later.
-    func noteForceReclaimAuditStillOwed(why: String) {
-        guard let pending = pendingHandbackAudit, pending.flavor == .forceReclaim else { return }
-        handbackDiag(pending.epoch, "take-back check still owed: \(why); dosing stays paused until the pod answers")
+    /// The window closed without the pod answering. The loan's insulin check stays owed, after a
+    /// hand-back as after a take-back, and `considerOwedAudit` runs it once the pod is reachable. A
+    /// take-back's also holds dosing: the watch's records may be incomplete. A hand-back brought them all.
+    func noteAuditStillOwed(why: String) {
+        guard let pending = pendingHandbackAudit else { return }
+        handbackDiag(pending.epoch, pending.flavor == .forceReclaim
+            ? "take-back check still owed: \(why); dosing stays paused until the pod answers"
+            : "hand-back check still owed: \(why); it is made when the pod answers")
     }
 
     /// Called every phone cycle. Reopens the settle for a check still owed once the pod is reachable.
-    func considerOwedForceReclaimAudit() {
-        guard let pending = self.pendingHandbackAudit, pending.flavor == .forceReclaim,
+    func considerOwedAudit() {
+        guard let pending = self.pendingHandbackAudit,
               self.reclaimStartedAt == nil, self.state == .owner, !self.yieldingToInferredLoan,
               self.deps.isConnectionReady() else { return }
-        self.handbackDiag(pending.epoch, "take-back check owed and the pod is reachable: reading it now")
+        self.handbackDiag(pending.epoch, "\(pending.flavor == .forceReclaim ? "take-back" : "hand-back") check owed and the pod is reachable: reading it now")
         self.beginReclaimSettleWindow()
+    }
+
+    /// A new loan starts before this phone has read the pod after the last one, so the next reading of
+    /// the pod is the watch's: by this phone's grant, or by adopting a loan the watch started without it.
+    /// An open settle ends. A hand-back's check still owed is made on the watch's own last reading, which
+    /// came with the hand-back; a take-back's stays owed, as when its window closes.
+    func closeLastLoansCheckBeforeANewLoan() {
+        if let pending = pendingHandbackAudit, pending.flavor == .handback {
+            ruleOnWatchReading(pending, because: "a new loan starts before this phone read the pod")
+        }
+        closeReclaimSettleWindow(reason: "a new loan starts")
     }
 
     /// Polls every 2 s until the round-trip lands or the ceiling fires; `started` names the window.
@@ -164,6 +193,7 @@ extension PodLoanPhoneController {
     private func noteReclaimVerified(started: Date, how: String) {
         let elapsed = deps.now().timeIntervalSince(started)
         reclaimVerifiedAt = deps.now()
+        cancelNotification(id: NotificationID.podUnreached)
         reclaimSettleWork?.cancel()
         reclaimStartedAt = nil
         reclaimDisplayAnchor = nil
@@ -224,22 +254,23 @@ extension PodLoanPhoneController {
         cancelWatchTemp(epoch: pending.epoch)
     }
 
-    /// The pod was deactivated on the watch, so the phone cannot read it: the watch's last reading,
-    /// which came with the hand-back, stands in. A take-back has none, and nothing is ruled.
-    func ruleOnWatchReading(_ pending: PendingHandbackAudit) {
+    /// The phone will not read the pod for this loan (it was deactivated on the watch, or a new loan
+    /// starts first): the watch's last reading, which came with the hand-back, stands in. A take-back has
+    /// none, and nothing is ruled.
+    func ruleOnWatchReading(_ pending: PendingHandbackAudit, because why: String = "the pod was deactivated on the watch") {
         defer {
             pendingHandbackAudit = nil
             loanStartedAt = nil
         }
         guard pending.flavor == .handback, let latest = pending.watchLatest else {
-            handbackDiag(pending.epoch, "no insulin check: the pod was deactivated on the watch and no reading of it came home")
+            handbackDiag(pending.epoch, "no insulin check: \(why), and no reading of the pod came home")
             return
         }
         let delivered = latest - pending.deliveredAtStart
         let residual = ((delivered - pending.expected) * 1000).rounded() / 1000
         handbackDiag(pending.epoch, String(format:
-            "hand-back check on the watch's last reading, the pod being deactivated: delivered %.3f U, expected %.3f U, residual %+.3f U over %.0f min",
-            delivered, pending.expected, residual, pending.loanMinutes))
+            "hand-back check on the watch's last reading (%@): delivered %.3f U, expected %.3f U, residual %+.3f U over %.0f min",
+            why, delivered, pending.expected, residual, pending.loanMinutes))
         applyReconciliationVerdict(residual: residual, epoch: pending.epoch)
     }
 

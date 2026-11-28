@@ -86,7 +86,7 @@ extension WatchDataManager {
         podLoanController.considerOwedTakeBack()
         podLoanController.considerStuckHandback()
         podLoanController.considerHoldLapse()
-        podLoanController.considerOwedForceReclaimAudit()
+        podLoanController.considerOwedAudit()
         podLoanController.saveUnsavedRecords()
     }
 

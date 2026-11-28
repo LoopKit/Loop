@@ -108,8 +108,6 @@ final class PodLoanPhoneController {
 
         var cancelTempBasalAfterPodReturn: (@escaping (Error?) -> Void) -> Void = { $0(nil) }
 
-        var cancelTempBasalForGrant: (@escaping (Error?) -> Void) -> Void = { $0(nil) }
-
         /// Time-sensitive, so a Focus mode cannot swallow a recording failure.
         var issueUrgentNotice: (_ title: String, _ body: String) -> Void = { _, _ in }
 
@@ -329,7 +327,6 @@ final class PodLoanPhoneController {
     /// Offers that arrived mid-write, at most one per epoch.
     var coalescedOffers: [Int: HandbackOffer] = [:]
 
-    var grantInFlight = false
     /// A force reclaim that is waiting for the in-flight write to land.
     var pendingForceReclaimReason: String?
 

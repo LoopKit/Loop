@@ -246,19 +246,6 @@ extension WatchDataManager {
                     }
                 }
             },
-            // Start of a loan: the pod must acknowledge the cancel before the link is released.
-            cancelTempBasalForGrant: { [weak self] completion in
-
-                guard let self = self else { return completion(nil) }
-                Task {
-                    do {
-                        try await self.loopDataManager.cancelTempBasalForPodLoan(reason: .pumpControlReleased)
-                        completion(nil)
-                    } catch {
-                        completion(error)
-                    }
-                }
-            },
             issueUrgentNotice: { [weak self] title, body in
 
                 self?.log.default("posted time-sensitive notice %{public}@: %{public}@", title, body)

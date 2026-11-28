@@ -124,6 +124,9 @@ extension PodLoanPhoneController {
         handbackDiag(newEpoch, "adopting the loan the watch started without this phone, after e\(epoch)")
 
         let wasStandingAside = yieldingToInferredLoan
+        // The last loan's check, if this phone never read the pod for it: the watch's loan is the next
+        // to read the pod, as at a grant.
+        closeLastLoansCheckBeforeANewLoan()
         clearInferredLoanYield(reason: "its loan e\(newEpoch) is adopted")
         // Anchor the adopted loan at its earliest record, at most six hours back.
         let anchor = max(earliestRecord ?? sentAt, deps.now().addingTimeInterval(-.hours(6)))
