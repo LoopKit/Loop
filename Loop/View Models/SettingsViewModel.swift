@@ -120,6 +120,8 @@ class SettingsViewModel {
 
     @ObservationIgnored var insulinDeliveryHistory: ((Int) async throws -> InsulinDeliveryHistory)?
 
+    @ObservationIgnored var historyProvider: LoopHistoryProvider?
+
     @ObservationIgnored var setupHistory: (() async throws -> SetupHistory)?
 
     @ObservationIgnored var outcomesPackageBuilder: OutcomesPackageBuilder?
